@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "module": "es6",
+    "target": "es6",
+    "lib": ["ES2020", "DOM"],
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "noImplicitThis": true,
+    "declaration": true,
+    "declarationDir": "./types",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@web3auth/*": ["packages/*/src"]
+    }
+  }
+}
