@@ -1,7 +1,8 @@
-import { Web3AuthProvider, Web3AuthProviderConnection } from "./provider";
+import { Web3AuthOAuthProvider, Web3AuthProvider, Web3AuthProviderConnection } from "./provider";
 
 export interface Web3AuthOptions {
   network: string;
+  oauthProvider: Web3AuthOAuthProvider;
   providers: Record<string, Web3AuthProvider>;
 }
 
@@ -9,6 +10,9 @@ export type Web3AuthEventType = "connect" | "disconnect" | "accountsChanged";
 
 export class Web3Auth {
   readonly network: string;
+
+  // Special (Torus-specific) provider for OAuth logins (Google, Facebook, Passwordless, etc)
+  readonly oauthProvider: Web3AuthOAuthProvider;
 
   readonly providers: Record<string, Web3AuthProvider>;
 
@@ -21,8 +25,9 @@ export class Web3Auth {
    * `providers` is a map of provider keys to provider objects, keys are used to identify the provider in other functions.
    * @param params - Web3Auth options
    */
-  constructor({ network, providers }: Web3AuthOptions) {
+  constructor({ network, oauthProvider, providers }: Web3AuthOptions) {
     this.network = network;
+    this.oauthProvider = oauthProvider;
     this.providers = providers;
   }
 
@@ -36,9 +41,10 @@ export class Web3Auth {
   /**
    * Connect to a specific provider, throw if the provider is not configured.
    * @param providerKey - Key of the provider to use.
+   * @param params - Extra params to pass to provider, useful for OAuth provider to provide login params.
    */
-  async connectTo(providerKey: string): Promise<Web3AuthProviderConnection> {
-    throw new Error(`Method not implemented: ${JSON.stringify({ providerKey })}.`);
+  async connectTo(providerKey: string, params?: object): Promise<Web3AuthProviderConnection> {
+    throw new Error(`Method not implemented: ${JSON.stringify({ providerKey, params })}.`);
   }
 
   /**
