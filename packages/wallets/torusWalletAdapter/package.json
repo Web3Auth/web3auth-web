@@ -1,0 +1,59 @@
+{
+  "name": "@web3auth/torus-wallet-adapter",
+  "version": "0.0.0",
+  "description": "torus wallet adapter for web3auth",
+  "keywords": [
+    "web3Auth/core",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "solana"
+  ],
+  "main": "dist/core.cjs.js",
+  "module": "dist/core.esm.js",
+  "unpkg": "dist/core.umd.min.js",
+  "jsdelivr": "dist/core.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../.mocharc.json test/**/*test.ts",
+    "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/*.test.ts",
+    "dev": "rimraf dist/ && cross-env NODE_ENV=development rollup -c && parallel-webpack --no-stats",
+    "build": "rimraf dist/ && cross-env NODE_ENV=production rollup -c && parallel-webpack --no-stats",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "yarn run build",
+    "pre-commit": "lint-staged"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "devDependencies": {
+    "@types/lodash": "^4.14.176",
+    "@types/pify": "^5.0.1",
+    "lint-staged": "^11.2.6"
+  },
+  "dependencies": {
+    "@web3auth/base": "0.0.0",
+    "@toruslabs/openlogin-jrpc": "^1.0.2"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  }
+}

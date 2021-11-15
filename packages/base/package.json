@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "1.0.2",
+  "version": "0.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -18,7 +18,9 @@
     "prepack": "yarn run build",
     "pre-commit": "lint-staged"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@toruslabs/openlogin-jrpc": "^1.0.2"
+  },
   "devDependencies": {
     "@types/node": "^14.17.20",
     "lint-staged": "^11.2.6"

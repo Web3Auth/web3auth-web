@@ -1,2 +1,3 @@
-export * from "./core";
-export * from "./provider";
+export * from "./adapter/IWalletAdapter";
+export * from "./provider/IProvider";
+export * from "./wallet";

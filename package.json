@@ -6,7 +6,7 @@
     "bootstrap": "lerna bootstrap",
     "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
     "just:publish:lerna": "lerna publish",
-    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json yarn.lock dist/ .rollup.cache/ tsconfig.build.tsbuildinfo .rts2_cache_{cjs,esm}/ web3auth-*.tgz openlogin-*tgz .eslintcache",
+    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3Auth-*.tgz .eslintcache",
     "build": "lerna run build",
     "dev": "lerna run dev",
     "test": "lerna run test --parallel",
