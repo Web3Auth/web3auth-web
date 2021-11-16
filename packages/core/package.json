@@ -10,19 +10,19 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/core.cjs.js",
-  "module": "dist/core.esm.js",
-  "unpkg": "dist/core.umd.min.js",
-  "jsdelivr": "dist/core.umd.min.js",
+  "main": "dist/Core.cjs.js",
+  "module": "dist/Core.esm.js",
+  "unpkg": "dist/Core.umd.min.js",
+  "jsdelivr": "dist/Core.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
   "license": "ISC",
   "scripts": {
-    "test": "mocha --config ../../.mocharc.json test/**/*test.ts",
-    "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/*.test.ts",
-    "dev": "rimraf dist/ && cross-env NODE_ENV=development rollup -c && parallel-webpack --no-stats",
-    "build": "rimraf dist/ && cross-env NODE_ENV=production rollup -c && parallel-webpack --no-stats",
+    "test": "mocha --config ../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "cross-env NODE_ENV=development torus-scripts build",
+    "build": "cross-env NODE_ENV=production torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged"
@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
+    "@web3auth/torus-wallet-adapter": "0.0.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2"
   },
   "lint-staged": {

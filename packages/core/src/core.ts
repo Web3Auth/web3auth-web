@@ -25,8 +25,8 @@ export class Web3Auth extends SafeEventEmitter {
     });
   }
 
-  public addWallet(wallet: Wallet): void {
-    this.walletAdapters[wallet.name] = wallet.adapter();
+  public async addWallet(wallet: Wallet): Promise<void> {
+    this.walletAdapters[wallet.name] = await wallet.adapter();
   }
 
   /**
