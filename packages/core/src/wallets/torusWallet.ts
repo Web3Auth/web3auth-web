@@ -4,9 +4,8 @@ import { TorusCtorArgs, TorusParams, TorusWalletAdapter } from "@web3auth/torus-
 const getTorusWallet = (params: { widgetOptions: TorusCtorArgs; initParams: TorusParams }): Wallet => {
   return {
     name: "torus-wallet",
-    adapter: async () => {
-      const torusAdapter = new TorusWalletAdapter(params.widgetOptions);
-      await torusAdapter.init(params.initParams);
+    adapter: () => {
+      const torusAdapter = new TorusWalletAdapter({ ...params });
       return torusAdapter;
     },
   };

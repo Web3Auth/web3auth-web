@@ -1,0 +1,23 @@
+{
+  "version": "v1",
+  "packages": {
+    "@web3Auth/base": {
+      "signature": "f430976b0b464de389bd4ca8f83dc49c"
+    },
+    "@web3Auth/core": {
+      "signature": "c2390223e9db29b5d77c9e7f7cd6edb6"
+    },
+    "@web3Auth/torus-wallet-adapter": {
+      "signature": "1c90536bc1f389468455064f09d11e4c"
+    },
+    "@web3auth/torus-wallet-adapter": {
+      "signature": "a7a7ab56cdad0d463b89eba93ab8ec5e"
+    },
+    "@web3auth/core": {
+      "signature": "38a5f5058631188a6faca6c36c9a1418"
+    },
+    "@web3auth/base": {
+      "signature": "bfafd05033fa995a9067f95c56a018a7"
+    }
+  }
+}

@@ -1,14 +1,23 @@
 {
-  "name": "@web3auth/base",
+  "name": "@web3auth/core",
   "version": "0.0.0",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
-  "license": "ISC",
-  "main": "dist/base.cjs.js",
-  "module": "dist/base.esm.js",
-  "unpkg": "dist/base.umd.min.js",
-  "jsdelivr": "dist/base.umd.min.js",
+  "description": "Multi chain wallet aggregator core for web3Auth",
+  "keywords": [
+    "web3Auth/core",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "solana"
+  ],
+  "main": "dist/core.cjs.js",
+  "module": "dist/core.esm.js",
+  "unpkg": "dist/core.umd.min.js",
+  "jsdelivr": "dist/core.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "license": "ISC",
   "scripts": {
     "local-publish": "yalc publish",
     "test": "mocha --config ../../.mocharc.json test/**.ts",
@@ -19,25 +28,23 @@
     "prepack": "yarn run build",
     "pre-commit": "lint-staged"
   },
-  "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.0.2"
-  },
-  "devDependencies": {
-    "@types/node": "^14.17.20",
-    "lint-staged": "^11.2.6"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "7.x"
-  },
   "files": [
     "dist",
     "types"
   ],
+  "dependencies": {
+    "@toruslabs/openlogin-jrpc": "^1.0.2",
+    "@web3auth/base": "0.0.0",
+    "@web3auth/torus-wallet-adapter": "0.0.0"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",
       "prettier --write"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -46,8 +53,5 @@
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "keywords": [],
-  "publishConfig": {
-    "access": "public"
-  }
+  "yalcSig": "38a5f5058631188a6faca6c36c9a1418"
 }

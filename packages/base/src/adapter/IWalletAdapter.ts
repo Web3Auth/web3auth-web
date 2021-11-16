@@ -4,7 +4,8 @@ import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_WALLET_EVENTS = {
   CONNECTED: "connected",
-  DISCONNECTED: "connected",
+  DISCONNECTED: "disconnected",
+  CONNECTING: "connecting",
   ERRORED: "errored",
 };
 
@@ -42,7 +43,7 @@ export interface IWalletAdapter extends SafeEventEmitter {
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
-  init<T>(params: T): Promise<void>;
+  init<T>(params?: T): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;

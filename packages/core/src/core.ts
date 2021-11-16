@@ -10,23 +10,22 @@ export class Web3Auth extends SafeEventEmitter {
 
   public provider: SafeEventEmitterProvider;
 
-  private walletAdapters: Record<string, IWalletAdapter>;
+  public cachedWallet: string;
+
+  private walletAdapters: Record<string, IWalletAdapter> = {};
 
   constructor() {
     super();
-    this.connectedAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (data) => {
-      this.connected = true;
-      this.connecting = false;
-      this.emit(BASE_WALLET_EVENTS.CONNECTED, data);
-    });
-    this.connectedAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
-      this.connected = false;
-      this.emit(BASE_WALLET_EVENTS.DISCONNECTED, data);
-    });
+    this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
   }
 
-  public async addWallet(wallet: Wallet): Promise<void> {
-    this.walletAdapters[wallet.name] = await wallet.adapter();
+  public addWallet(wallet: Wallet): void {
+    this.walletAdapters[wallet.name] = wallet.adapter();
+  }
+
+  public clearCache() {
+    window.localStorage.removeItem("Web3Auth-CachedWallet");
+    this.cachedWallet = undefined;
   }
 
   /**
@@ -35,8 +34,10 @@ export class Web3Auth extends SafeEventEmitter {
    */
   async connectTo(walletName: string): Promise<void> {
     if (!this.walletAdapters[walletName]) throw new Error(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    this.connecting = true;
+    this.subscribeToEvents(this.walletAdapters[walletName]);
+    await this.walletAdapters[walletName].init();
     await this.walletAdapters[walletName].connect();
+    this.cacheWallet(walletName);
   }
 
   async logout(): Promise<void> {
@@ -47,5 +48,32 @@ export class Web3Auth extends SafeEventEmitter {
   async getUserInfo(): Promise<void> {
     if (!this.connected) throw new Error(`No wallet is connected`);
     await this.connectedAdapter.getUserInfo();
+  }
+
+  private subscribeToEvents(walletAdapter: IWalletAdapter): void {
+    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (data) => {
+      this.connected = true;
+      this.connecting = false;
+      this.emit(BASE_WALLET_EVENTS.CONNECTED, data);
+    });
+    walletAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
+      this.connected = false;
+      this.connecting = false;
+      this.clearCache();
+      this.emit(BASE_WALLET_EVENTS.DISCONNECTED, data);
+    });
+    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
+      this.connecting = true;
+      this.emit(BASE_WALLET_EVENTS.CONNECTING, data);
+    });
+    walletAdapter.on(BASE_WALLET_EVENTS.ERRORED, (data) => {
+      this.connecting = false;
+      this.emit(BASE_WALLET_EVENTS.ERRORED, data);
+    });
+  }
+
+  private cacheWallet(walletName: string) {
+    window.localStorage.setItem("Web3Auth-CachedWallet", walletName);
+    this.cachedWallet = walletName;
   }
 }

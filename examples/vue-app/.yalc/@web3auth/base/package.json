@@ -22,10 +22,6 @@
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^1.0.2"
   },
-  "devDependencies": {
-    "@types/node": "^14.17.20",
-    "lint-staged": "^11.2.6"
-  },
   "peerDependencies": {
     "@babel/runtime": "7.x"
   },
@@ -49,5 +45,6 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "yalcSig": "bfafd05033fa995a9067f95c56a018a7"
 }

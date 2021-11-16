@@ -1,35 +1,43 @@
-import type { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
+import Torus, { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { BASE_WALLET_EVENTS, BaseWalletAdapter, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
-
-import type { Torus } from "./interfaces";
 
 class TorusWalletAdapter extends BaseWalletAdapter {
   public torusInstance: Torus;
 
   private torusWalletOptions: TorusCtorArgs;
 
-  constructor(torusWalletOptions: TorusCtorArgs) {
+  private initParams: TorusParams;
+
+  constructor(params: { widgetOptions: TorusCtorArgs; initParams: TorusParams }) {
     super();
-    this.torusWalletOptions = torusWalletOptions;
+    this.torusWalletOptions = params.widgetOptions;
+    this.initParams = params.initParams;
   }
 
-  async init(params: TorusParams): Promise<void> {
+  async init(params?: TorusParams): Promise<void> {
     if (this.ready) return;
-    const { default: Torus } = await import("@toruslabs/torus-embed");
     this.torusInstance = new Torus(this.torusWalletOptions);
-    await this.torusInstance.init(params);
+    await this.torusInstance.init({ showTorusButton: false, ...this.initParams, ...params });
     this.ready = true;
   }
 
   async connect(): Promise<void> {
     if (!this.ready) throw new Error("Torus wallet adapter is not ready, please init first");
     this.connecting = true;
-    await this.torusInstance.login();
-    // TODO: make torus embed provider type compatatible with this
-    this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
-    this.connected = true;
-    this.connecting = false;
-    this.emit(BASE_WALLET_EVENTS.CONNECTED);
+    this.emit(BASE_WALLET_EVENTS.CONNECTING);
+    try {
+      await this.torusInstance.login();
+      // TODO: make torus embed provider type compatible with this
+      this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
+      this.connected = true;
+      this.torusInstance.showTorusButton();
+      this.emit(BASE_WALLET_EVENTS.CONNECTED);
+    } catch (error) {
+      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+      throw error;
+    } finally {
+      this.connecting = false;
+    }
   }
 
   async disconnect(): Promise<void> {
