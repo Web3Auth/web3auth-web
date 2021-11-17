@@ -19,6 +19,14 @@ export class Web3Auth extends SafeEventEmitter {
     this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
   }
 
+  public async init(): Promise<void> {
+    const preAddedAdapters = Object.keys(this.walletAdapters);
+    // TODO: add default adapters logic here
+    if (preAddedAdapters.length > 0) {
+      await Promise.all(preAddedAdapters.map((walletName) => this.walletAdapters[walletName].init()));
+    }
+  }
+
   public addWallet(wallet: Wallet): void {
     this.walletAdapters[wallet.name] = wallet.adapter();
   }
@@ -35,7 +43,6 @@ export class Web3Auth extends SafeEventEmitter {
   async connectTo(walletName: string): Promise<void> {
     if (!this.walletAdapters[walletName]) throw new Error(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     this.subscribeToEvents(this.walletAdapters[walletName]);
-    await this.walletAdapters[walletName].init();
     await this.walletAdapters[walletName].connect();
     this.cacheWallet(walletName);
   }

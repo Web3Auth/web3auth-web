@@ -34,6 +34,7 @@ export default Vue.extend({
      // if will connect to any already logged in wallet
     const torusWalletAdapter = getTorusWallet({ widgetOptions: {}, initParams: {}})
     web3auth.addWallet(torusWalletAdapter);
+    await web3auth.init();
     if (web3auth.cachedWallet) {
       await web3auth.connectTo(web3auth.cachedWallet)
     }

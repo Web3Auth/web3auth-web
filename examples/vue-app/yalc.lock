@@ -11,10 +11,10 @@
       "signature": "1c90536bc1f389468455064f09d11e4c"
     },
     "@web3auth/torus-wallet-adapter": {
-      "signature": "a7a7ab56cdad0d463b89eba93ab8ec5e"
+      "signature": "5c6e7ce7aa1125cd206ac7bb83a7d42d"
     },
     "@web3auth/core": {
-      "signature": "38a5f5058631188a6faca6c36c9a1418"
+      "signature": "2a0ddab0005c039fbc61cae5432394a4"
     },
     "@web3auth/base": {
       "signature": "bfafd05033fa995a9067f95c56a018a7"

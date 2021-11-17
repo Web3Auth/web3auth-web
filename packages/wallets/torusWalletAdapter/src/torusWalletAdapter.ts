@@ -1,5 +1,7 @@
-import Torus, { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
+import type { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { BASE_WALLET_EVENTS, BaseWalletAdapter, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
+
+import type { Torus } from "./interface";
 
 class TorusWalletAdapter extends BaseWalletAdapter {
   public torusInstance: Torus;
@@ -16,7 +18,8 @@ class TorusWalletAdapter extends BaseWalletAdapter {
 
   async init(params?: TorusParams): Promise<void> {
     if (this.ready) return;
-    this.torusInstance = new Torus(this.torusWalletOptions);
+    const { default: TorusSdk } = await import("@toruslabs/torus-embed");
+    this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, ...params });
     this.ready = true;
   }
