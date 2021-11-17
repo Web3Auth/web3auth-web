@@ -4,6 +4,8 @@ import {
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
   BaseWalletAdapter,
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
   SafeEventEmitterProvider,
   TorusSolanaWalletChainConfig,
   UserInfo,
@@ -13,6 +15,8 @@ import type { Torus } from "./interface";
 
 class SolanaWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
 
   public connecting: boolean;
 
@@ -44,11 +48,11 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     this.chainConfig = params.chainConfig;
   }
 
-  async init(params?: TorusParams): Promise<void> {
+  async init(): Promise<void> {
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
-    await this.torusInstance.init({ showTorusButton: false, ...this.initParams, ...params });
+    await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
     this.ready = true;
   }
 

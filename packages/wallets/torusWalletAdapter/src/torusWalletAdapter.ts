@@ -4,6 +4,8 @@ import {
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
   BaseWalletAdapter,
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
   SafeEventEmitterProvider,
   TorusEthWalletChainConfig,
   UserInfo,
@@ -13,6 +15,8 @@ import type { Torus } from "./interface";
 
 class TorusWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   public connecting: boolean;
 
@@ -37,11 +41,11 @@ class TorusWalletAdapter extends BaseWalletAdapter {
     this.chainConfig = params.chainConfig;
   }
 
-  async init(params?: TorusParams): Promise<void> {
+  async init(): Promise<void> {
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/torus-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
-    await this.torusInstance.init({ showTorusButton: false, ...this.initParams, ...params });
+    await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
     this.ready = true;
   }
 

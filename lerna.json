@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/base", "packages/core", "packages/wallets/*"],
+  "packages": ["packages/base", "packages/core", "packages/wallets/*", "packages/providers/*"],
   "version": "0.0.0",
   "npmClient": "yarn"
 }

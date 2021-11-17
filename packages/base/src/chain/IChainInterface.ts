@@ -65,10 +65,13 @@ export type TorusSolanaWalletChainConfig = {
   displayName: string;
 };
 
-export type CustomAuthChainConfig = {
+export type CustomChainConfig = {
+  chainNamespace: ChainNamespaceType;
   chainId?: number;
-
-  host: string;
+  /**
+   * RPC target Url for the chain
+   */
+  rpcTarget: string;
 
   networkName?: string;
   /**
@@ -84,5 +87,3 @@ export type CustomAuthChainConfig = {
    */
   tickerName?: string;
 };
-
-export type OpenloginChainConfig = CustomAuthChainConfig;

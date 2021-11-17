@@ -37,6 +37,10 @@ export class Web3Auth extends SafeEventEmitter {
       throw new Error(
         `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
+    if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace)
+      throw new Error(
+        `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+      );
     this.walletAdapters[wallet.name] = wallet.adapter();
   }
 

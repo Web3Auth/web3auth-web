@@ -1,6 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { AdapterNamespaceType } from "../chain/IChainInterface";
+import { AdapterNamespaceType, ChainNamespaceType } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_WALLET_EVENTS = {
@@ -41,11 +41,12 @@ export type UserInfo = {
 
 export interface IWalletAdapter extends SafeEventEmitter {
   namespace: AdapterNamespaceType;
+  currentChainNamespace: ChainNamespaceType;
   ready: boolean;
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
-  init<T>(params?: T): Promise<void>;
+  init(): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
@@ -53,6 +54,8 @@ export interface IWalletAdapter extends SafeEventEmitter {
 
 export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWalletAdapter {
   public abstract namespace: AdapterNamespaceType;
+
+  public abstract currentChainNamespace: ChainNamespaceType;
 
   public abstract connecting: boolean;
 
@@ -62,7 +65,7 @@ export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWal
 
   public abstract provider: SafeEventEmitterProvider;
 
-  abstract init<T>(params: T): Promise<void>;
+  abstract init(): Promise<void>;
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;

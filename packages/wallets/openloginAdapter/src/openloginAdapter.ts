@@ -1,10 +1,22 @@
 import type openlogin from "@toruslabs/openlogin";
-import { AdapterNamespaceType, BASE_WALLET_EVENTS, BaseWalletAdapter, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
+import {
+  AdapterNamespaceType,
+  BASE_WALLET_EVENTS,
+  BaseWalletAdapter,
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CustomChainConfig,
+  SafeEventEmitterProvider,
+  UserInfo,
+} from "@web3auth/base";
+import { SolanaProvider } from "@web3auth/solana-provider";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
 
 class OpenloginAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType;
+
+  readonly currentChainNamespace: ChainNamespaceType;
 
   public openloginInstance: openlogin;
 
@@ -20,10 +32,15 @@ class OpenloginAdapter extends BaseWalletAdapter {
 
   private loginSettings: LoginSettings = {};
 
-  constructor(params: { openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }) {
+  private chainConfig: CustomChainConfig;
+
+  private solanaProviderFactory: SolanaProvider;
+
+  constructor(params: { chainConfig: CustomChainConfig; openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }) {
     super();
     this.openloginOptions = params.openLoginOptions;
     this.loginSettings = params.loginSettings;
+    this.currentChainNamespace = this.chainConfig.chainNamespace;
   }
 
   async init(): Promise<void> {
@@ -31,6 +48,10 @@ class OpenloginAdapter extends BaseWalletAdapter {
     const { default: OpenloginSdk } = await import("@toruslabs/openlogin");
     this.openloginInstance = new OpenloginSdk(this.openloginOptions);
     await this.openloginInstance.init();
+    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      this.solanaProviderFactory = new SolanaProvider(this.chainConfig);
+      await this.solanaProviderFactory.init();
+    }
     this.ready = true;
   }
 
@@ -43,8 +64,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
       if (!privateKey) {
         await this.openloginInstance.login(this.loginSettings);
       }
-      // TODO: create a provider from priv key and return it.
-      this.provider = undefined;
+      this.provider = this.solanaProviderFactory.setupProvider(privateKey);
       this.connected = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTED);
     } catch (error) {

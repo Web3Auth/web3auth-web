@@ -10,10 +10,10 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/torusWalletAdapter.cjs.js",
-  "module": "dist/torusWalletAdapter.esm.js",
-  "unpkg": "dist/torusWalletAdapter.umd.min.js",
-  "jsdelivr": "dist/torusWalletAdapter.umd.min.js",
+  "main": "dist/openloginAdapter.cjs.js",
+  "module": "dist/openloginAdapter.esm.js",
+  "unpkg": "dist/openloginAdapter.umd.min.js",
+  "jsdelivr": "dist/openloginAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
+    "@web3auth/solana-provider": "0.0.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@toruslabs/openlogin": "^1.1.0"
   },
