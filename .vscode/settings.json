@@ -1,4 +1,7 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
     "eslint.workingDirectories": [
         {
           "directory": "packages/*",

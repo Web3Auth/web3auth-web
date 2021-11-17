@@ -1,5 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
+import { AdapterNamespaceType } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_WALLET_EVENTS = {
@@ -39,6 +40,7 @@ export type UserInfo = {
 };
 
 export interface IWalletAdapter extends SafeEventEmitter {
+  namespace: AdapterNamespaceType;
   ready: boolean;
   connecting: boolean;
   connected: boolean;
@@ -50,13 +52,15 @@ export interface IWalletAdapter extends SafeEventEmitter {
 }
 
 export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWalletAdapter {
-  public connecting: boolean;
+  public abstract namespace: AdapterNamespaceType;
 
-  public ready: boolean;
+  public abstract connecting: boolean;
 
-  public connected: boolean;
+  public abstract ready: boolean;
 
-  public provider: SafeEventEmitterProvider;
+  public abstract connected: boolean;
+
+  public abstract provider: SafeEventEmitterProvider;
 
   abstract init<T>(params: T): Promise<void>;
   abstract connect(): Promise<void>;

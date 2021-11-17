@@ -1,17 +1,17 @@
-import type { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
+import type { TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
   BaseWalletAdapter,
   SafeEventEmitterProvider,
-  TorusEthWalletChainConfig,
+  TorusSolanaWalletChainConfig,
   UserInfo,
 } from "@web3auth/base";
 
 import type { Torus } from "./interface";
 
-class TorusWalletAdapter extends BaseWalletAdapter {
+class SolanaWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   public connecting: boolean;
@@ -24,22 +24,29 @@ class TorusWalletAdapter extends BaseWalletAdapter {
 
   public torusInstance: Torus;
 
-  readonly chainConfig: TorusEthWalletChainConfig;
+  readonly chainConfig: TorusSolanaWalletChainConfig;
 
   private torusWalletOptions: TorusCtorArgs;
 
   private initParams: TorusParams;
 
-  constructor(params: { chainConfig: TorusEthWalletChainConfig; widgetOptions: TorusCtorArgs; initParams: TorusParams }) {
+  constructor(params: {
+    chainConfig: TorusSolanaWalletChainConfig;
+    widgetOptions: TorusCtorArgs;
+    initParams: TorusParams & Omit<TorusParams, "network">;
+  }) {
     super();
     this.torusWalletOptions = params.widgetOptions;
-    this.initParams = params.initParams;
+    this.initParams = {
+      ...params.initParams,
+      network: params.chainConfig,
+    };
     this.chainConfig = params.chainConfig;
   }
 
   async init(params?: TorusParams): Promise<void> {
     if (this.ready) return;
-    const { default: TorusSdk } = await import("@toruslabs/torus-embed");
+    const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, ...params });
     this.ready = true;
@@ -73,9 +80,9 @@ class TorusWalletAdapter extends BaseWalletAdapter {
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw new Error("Not connected with wallet, Please login/connect first");
-    const userInfo = await this.torusInstance.getUserInfo("");
+    const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
   }
 }
 
-export { TorusCtorArgs, TorusParams, TorusWalletAdapter };
+export { SolanaWalletAdapter, TorusCtorArgs, TorusParams };

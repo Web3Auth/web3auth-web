@@ -1,7 +1,8 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_WALLET_EVENTS, IWalletAdapter, SafeEventEmitterProvider, Wallet } from "@web3auth/base";
-
+import { ADAPTER_NAMESPACES, BASE_WALLET_EVENTS, ChainNamespaceType, IWalletAdapter, SafeEventEmitterProvider, Wallet } from "@web3auth/base";
 export class Web3Auth extends SafeEventEmitter {
+  readonly chainNamespace: ChainNamespaceType;
+
   public connectedAdapter: IWalletAdapter | undefined;
 
   public connected: boolean;
@@ -14,9 +15,10 @@ export class Web3Auth extends SafeEventEmitter {
 
   private walletAdapters: Record<string, IWalletAdapter> = {};
 
-  constructor() {
+  constructor(chainNamespace: ChainNamespaceType) {
     super();
     this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
+    this.chainNamespace = chainNamespace;
   }
 
   public async init(): Promise<void> {
@@ -28,6 +30,13 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   public addWallet(wallet: Wallet): void {
+    const adapterAlreadyExists = this.walletAdapters[wallet.name];
+    if (adapterAlreadyExists) throw new Error(`Wallet adapter for ${wallet.name} already exists`);
+    const adapter = wallet.adapter();
+    if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace)
+      throw new Error(
+        `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+      );
     this.walletAdapters[wallet.name] = wallet.adapter();
   }
 
