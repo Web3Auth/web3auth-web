@@ -10,20 +10,13 @@ import {
   mergeMiddleware,
 } from "@toruslabs/openlogin-jrpc";
 
-export interface Ihandler<T> extends JRPCRequest<T> {
-  origin?: string;
-  windowId?: string;
-}
-
 export interface IProviderHandlers {
   version: string;
   requestAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
-
-  signMessage?: (req: Ihandler<{ data: Uint8Array; display: string }>) => Promise<unknown>;
-  sendTransaction?: (req: Ihandler<{ message: string }>) => Promise<unknown>;
-  signTransaction?: (req: Ihandler<{ message: string }>) => Promise<unknown>;
-  signAllTransactions?: (req: Ihandler<{ message: string[] }>) => Promise<unknown>;
+  signMessage?: (req: JRPCRequest<{ data: string; display: string }>) => Promise<string>;
+  signTransaction?: (req: JRPCRequest<{ serializedTransaction: string }>) => Promise<string>;
+  signAllTransactions?: (req: JRPCRequest<{ serializedTransactions: string[] }>) => Promise<string[]>;
   getProviderState: (
     req: JRPCRequest<[]>,
     res: JRPCResponse<InPageWalletProviderState>,
@@ -62,9 +55,9 @@ export function createRequestAccountsMiddleware({
   });
 }
 
-export function createGenericJRPCMiddleware<T>(
+export function createGenericJRPCMiddleware<T, U>(
   targetMethod: string,
-  handler: (req: Ihandler<T>) => Promise<unknown>
+  handler: (req: JRPCRequest<T>) => Promise<U>
 ): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware<T, unknown>(async (request, response, next) => {
     const { method } = request;
@@ -82,8 +75,7 @@ export function createGenericJRPCMiddleware<T>(
 }
 
 export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, requestAccounts, sendTransaction, signTransaction, signAllTransactions, signMessage, getProviderState, version } =
-    providerHandlers;
+  const { getAccounts, requestAccounts, signTransaction, signAllTransactions, signMessage, getProviderState, version } = providerHandlers;
 
   return mergeMiddleware([
     createScaffoldMiddleware({
@@ -92,9 +84,8 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     }),
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ message: string }>("send_transaction", sendTransaction),
-    createGenericJRPCMiddleware<{ message: string }>("sign_transaction", signTransaction),
-    createGenericJRPCMiddleware<{ message: string[] }>("sign_all_transactions", signAllTransactions),
-    createGenericJRPCMiddleware<{ data: Uint8Array; display: string }>("sign_message", signMessage),
+    createGenericJRPCMiddleware<{ serializedTransaction: string }, string>("sign_transaction", signTransaction),
+    createGenericJRPCMiddleware<{ serializedTransactions: string[] }, unknown>("sign_all_transactions", signAllTransactions),
+    createGenericJRPCMiddleware<{ data: string; display: string }, unknown>("sign_message", signMessage),
   ]);
 }

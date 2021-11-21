@@ -67,13 +67,13 @@ export type TorusSolanaWalletChainConfig = {
 
 export type CustomChainConfig = {
   chainNamespace: ChainNamespaceType;
-  chainId?: number;
+  chainId: string;
   /**
    * RPC target Url for the chain
    */
   rpcTarget: string;
 
-  networkName?: string;
+  networkName: string;
   /**
    * Url of the block explorer
    */
@@ -81,9 +81,9 @@ export type CustomChainConfig = {
   /**
    * Default currency ticker of the network (e.g: ETH)
    */
-  ticker?: string;
+  ticker: string;
   /**
    * Name for currency ticker (e.g: `Ethereum`)
    */
-  tickerName?: string;
+  tickerName: string;
 };

@@ -6,9 +6,11 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
+  PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
 } from "@web3auth/base";
+import { EthereumProvider } from "@web3auth/ethereum-provider";
 import { SolanaProvider } from "@web3auth/solana-provider";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
@@ -36,6 +38,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
 
   private solanaProviderFactory: SolanaProvider;
 
+  private ethereumProviderFactory: EthereumProvider;
+
   constructor(params: { chainConfig: CustomChainConfig; openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }) {
     super();
     this.openloginOptions = params.openLoginOptions;
@@ -51,11 +55,16 @@ class OpenloginAdapter extends BaseWalletAdapter {
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       this.solanaProviderFactory = new SolanaProvider(this.chainConfig);
       await this.solanaProviderFactory.init();
+    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      this.ethereumProviderFactory = new EthereumProvider(this.chainConfig);
+      await this.ethereumProviderFactory.init();
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
     this.ready = true;
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider> {
     if (!this.ready) throw new Error("Openlogin wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
@@ -64,9 +73,26 @@ class OpenloginAdapter extends BaseWalletAdapter {
       if (!privateKey) {
         await this.openloginInstance.login(this.loginSettings);
       }
-      this.provider = this.solanaProviderFactory.setupProvider(privateKey);
-      this.connected = true;
-      this.emit(BASE_WALLET_EVENTS.CONNECTED);
+      const providerResolver = async (providerFactory: SolanaProvider | EthereumProvider): Promise<SafeEventEmitterProvider> => {
+        return new Promise((resolve, reject) => {
+          providerFactory.on(PROVIDER_EVENTS.INITIALIZED, () => {
+            const provider = providerFactory.setupProvider(privateKey);
+            this.connected = true;
+            this.emit(BASE_WALLET_EVENTS.CONNECTED);
+            resolve(provider);
+          });
+          providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
+            this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+            reject(error);
+          });
+        });
+      };
+      if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+        return await providerResolver(this.solanaProviderFactory);
+      } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        return await providerResolver(this.ethereumProviderFactory);
+      }
+      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
       throw error;

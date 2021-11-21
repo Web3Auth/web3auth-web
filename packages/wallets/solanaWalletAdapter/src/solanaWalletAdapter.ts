@@ -56,7 +56,7 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     this.ready = true;
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider> {
     if (!this.ready) throw new Error("Torus wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
@@ -67,6 +67,7 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
       this.connected = true;
       this.torusInstance.showTorusButton();
       this.emit(BASE_WALLET_EVENTS.CONNECTED);
+      return this.provider;
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
       throw error;

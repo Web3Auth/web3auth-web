@@ -14,7 +14,10 @@
   },
   "resolutions": {
     "@web3auth/base": "file:../../packages/base/web3auth-base-v0.0.0.tgz",
-    "@web3auth/torus-wallet-adapter": "file:../../packages/wallets/torusWalletAdapter/web3auth-torus-wallet-adapter-v0.0.0.tgz"
+    "@web3auth/torus-wallet-adapter": "file:../../packages/wallets/torusWalletAdapter/web3auth-torus-wallet-adapter-v0.0.0.tgz",
+    "@web3auth/openlogin-adapter": "file:../../packages/wallets/openloginAdapter/web3auth-openlogin-adapter-v0.0.0.tgz",
+    "@web3auth/solana-wallet-adapter": "file:../../packages/wallets/solanaWalletAdapter/web3auth-solana-wallet-adapter-v0.0.0.tgz"
+
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.28.4",

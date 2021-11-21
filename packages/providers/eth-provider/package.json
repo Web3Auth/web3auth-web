@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/solana-provider",
+  "name": "@web3auth/ethereum-provider",
   "version": "0.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/solanaProvider.cjs.js",
-  "module": "dist/solanaProvider.esm.js",
-  "unpkg": "dist/solanaProvider.umd.min.js",
-  "jsdelivr": "dist/solanaProvider.umd.min.js",
+  "main": "dist/ethereumProvider.cjs.js",
+  "module": "dist/ethereumProvider.esm.js",
+  "unpkg": "dist/ethereumProvider.umd.min.js",
+  "jsdelivr": "dist/ethereumProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
@@ -23,8 +23,10 @@
     "@toruslabs/base-controllers": "^1.2.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@web3auth/base": "0.0.0",
-    "@solana/web3.js": "^1.30.2",
-    "json-rpc-random-id": "^1.0.1"
+    "web3": "^1.6.1",
+    "web3-core": "1.6.1",
+    "json-rpc-random-id": "^1.0.1",
+    "eth-json-rpc-middleware": "^8.0.0"
   },
   "devDependencies": {
     "@types/node": "^14.17.20",
