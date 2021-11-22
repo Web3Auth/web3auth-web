@@ -1,5 +1,7 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ADAPTER_NAMESPACES, BASE_WALLET_EVENTS, ChainNamespaceType, IWalletAdapter, SafeEventEmitterProvider, Wallet } from "@web3auth/base";
+
+import { WALLET_ADAPTER_TYPE } from "./constants";
 export class Web3Auth extends SafeEventEmitter {
   readonly chainNamespace: ChainNamespaceType;
 
@@ -53,11 +55,10 @@ export class Web3Auth extends SafeEventEmitter {
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo(walletName: string): Promise<void> {
+  async connectTo(walletName: WALLET_ADAPTER_TYPE): Promise<void> {
     if (!this.walletAdapters[walletName]) throw new Error(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     this.subscribeToEvents(this.walletAdapters[walletName]);
     await this.walletAdapters[walletName].connect();
-    this.cacheWallet(walletName);
   }
 
   async logout(): Promise<void> {
@@ -71,10 +72,12 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   private subscribeToEvents(walletAdapter: IWalletAdapter): void {
-    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (data) => {
+    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapter: WALLET_ADAPTER_TYPE) => {
       this.connected = true;
       this.connecting = false;
-      this.emit(BASE_WALLET_EVENTS.CONNECTED, data);
+      this.connectedAdapter = this.walletAdapters[connectedAdapter];
+      this.cacheWallet(connectedAdapter);
+      this.emit(BASE_WALLET_EVENTS.CONNECTED, connectedAdapter);
     });
     walletAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
       this.connected = false;

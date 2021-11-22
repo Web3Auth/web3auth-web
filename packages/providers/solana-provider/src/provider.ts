@@ -1,26 +1,48 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { Connection, Keypair, Transaction, TransactionCtorFields } from "@solana/web3.js";
-import { createSwappableProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { JRPCEngine, JRPCRequest, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import type { Keypair, Transaction } from "@solana/web3.js";
+import {
+  BaseConfig,
+  BaseController,
+  BaseState,
+  createSwappableProxy,
+  providerFromEngine,
+  SafeEventEmitterProvider,
+} from "@toruslabs/base-controllers";
+import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
 
 import { createJsonRpcClient } from "./JrpcClient";
 import { createSolanaMiddleware, IProviderHandlers } from "./solanaRpcMiddlewares";
 import { sendRpcRequest } from "./utils";
-export class SolanaProvider extends SafeEventEmitter {
+
+interface SolanaProviderState extends BaseState {
+  _initialized: boolean;
+  _errored: boolean;
+  error: Error;
+}
+
+interface SolanaProviderConfig extends BaseConfig {
+  chainConfig: CustomChainConfig;
+}
+export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
   public _providerProxy: SafeEventEmitterProvider;
 
   readonly chainConfig: CustomChainConfig;
-
-  private _initialized: boolean;
 
   private transactionGenerator: (serializedTx: string) => Transaction;
 
   private keyPairGenerator: (privKey: string) => Keypair;
 
-  constructor(chainConfig: CustomChainConfig) {
-    super();
-    this.chainConfig = chainConfig;
+  constructor({ config, state }: { config: SolanaProviderConfig & Pick<SolanaProviderConfig, "chainConfig">; state?: SolanaProviderState }) {
+    if (!config.chainConfig) throw new Error("Please provide chainconfig");
+    super({ config, state });
+    this.defaultState = {
+      _initialized: false,
+      _errored: false,
+      error: null,
+    };
+    this.chainConfig = config.chainConfig;
+    this.init();
   }
 
   public async init(): Promise<void> {
@@ -35,19 +57,27 @@ export class SolanaProvider extends SafeEventEmitter {
     };
     this.lookupNetwork()
       .then(() => {
-        this._initialized = true;
+        this.update({
+          _initialized: true,
+          _errored: false,
+          error: null,
+        });
         this.emit(PROVIDER_EVENTS.INITIALIZED);
         return true;
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.log("error", error);
+        this.update({
+          _errored: true,
+          error,
+        });
         this.emit(PROVIDER_EVENTS.ERRORED, { error });
       });
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this._initialized) throw new Error("Provider not initialized");
+    if (!this.state._initialized) throw new Error("Provider not initialized");
     const keyPair = this.keyPairGenerator(privKey);
 
     const providerHandlers: IProviderHandlers = {
@@ -77,7 +107,7 @@ export class SolanaProvider extends SafeEventEmitter {
         res.result = {
           accounts: [keyPair.publicKey.toBase58()],
           chainId: this.chainConfig.chainId,
-          isUnlocked: this._initialized,
+          isUnlocked: this.state._initialized,
         };
         end();
       },

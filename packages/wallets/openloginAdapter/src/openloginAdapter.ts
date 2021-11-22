@@ -1,5 +1,7 @@
 import type openlogin from "@toruslabs/openlogin";
+import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
+  ADAPTER_NAMESPACES,
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
   BaseWalletAdapter,
@@ -9,14 +11,17 @@ import {
   PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
+  WALLET_ADAPTERS,
+  WalletWindowBlockedError,
+  WalletWindowClosedError,
 } from "@web3auth/base";
-import { EthereumProvider } from "@web3auth/ethereum-provider";
-import { SolanaProvider } from "@web3auth/solana-provider";
+import type { EthereumProvider } from "@web3auth/ethereum-provider";
+import type { SolanaProvider } from "@web3auth/solana-provider";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
 
 class OpenloginAdapter extends BaseWalletAdapter {
-  readonly namespace: AdapterNamespaceType;
+  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly currentChainNamespace: ChainNamespaceType;
 
@@ -44,7 +49,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
     super();
     this.openloginOptions = params.openLoginOptions;
     this.loginSettings = params.loginSettings;
-    this.currentChainNamespace = this.chainConfig.chainNamespace;
+    this.currentChainNamespace = params.chainConfig.chainNamespace;
+    this.chainConfig = params.chainConfig;
   }
 
   async init(): Promise<void> {
@@ -53,10 +59,12 @@ class OpenloginAdapter extends BaseWalletAdapter {
     this.openloginInstance = new OpenloginSdk(this.openloginOptions);
     await this.openloginInstance.init();
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      this.solanaProviderFactory = new SolanaProvider(this.chainConfig);
+      const { SolanaProvider } = await import("@web3auth/solana-provider");
+      this.solanaProviderFactory = new SolanaProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      this.ethereumProviderFactory = new EthereumProvider(this.chainConfig);
+      const { EthereumProvider } = await import("@web3auth/ethereum-provider");
+      this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
@@ -64,35 +72,84 @@ class OpenloginAdapter extends BaseWalletAdapter {
     this.ready = true;
   }
 
-  async connect(): Promise<SafeEventEmitterProvider> {
+  async subscribeToProviderEvents(): Promise<SafeEventEmitterProvider | null> {
+    let providerFactory: SolanaProvider | EthereumProvider;
+    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      providerFactory = this.solanaProviderFactory;
+    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      providerFactory = this.ethereumProviderFactory;
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+    }
+
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      if (providerFactory.state._errored) {
+        this.emit(BASE_WALLET_EVENTS.ERRORED, providerFactory.state.error);
+        reject(providerFactory.state.error);
+        return;
+      }
+      const getProvider = async (): Promise<SafeEventEmitterProvider | null> => {
+        const listener = ({ reason }) => {
+          switch (reason?.message?.toLowerCase()) {
+            case "user closed popup":
+              reason = new WalletWindowClosedError(reason.message, reason);
+              break;
+            case "unable to open window":
+              reason = new WalletWindowBlockedError(reason.message, reason);
+              break;
+          }
+          reject(reason);
+        };
+
+        window.addEventListener("unhandledrejection", listener);
+        try {
+          const privateKey = this.openloginInstance.privKey;
+          if (!privateKey) {
+            await this.openloginInstance.login(this.loginSettings);
+          }
+          let finalPrivKey = this.openloginInstance.privKey;
+          if (finalPrivKey) {
+            if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(privateKey).sk.toString("hex");
+            return providerFactory.setupProvider(finalPrivKey);
+          }
+          return null;
+        } catch (err: unknown) {
+          listener({ reason: err });
+          throw err;
+        } finally {
+          window.removeEventListener("unhandledrejection", listener);
+        }
+      };
+      if (providerFactory.state._initialized) {
+        const provider = await getProvider();
+        this.connected = true;
+        this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
+        resolve(provider);
+        return;
+      }
+      providerFactory.on(PROVIDER_EVENTS.INITIALIZED, async () => {
+        const provider = await getProvider();
+        if (provider) {
+          this.connected = true;
+          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
+        }
+        // provider can be null in redirect mode
+        resolve(provider);
+      });
+      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
+        this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+        reject(error);
+      });
+    });
+  }
+
+  async connect(): Promise<SafeEventEmitterProvider | null> {
     if (!this.ready) throw new Error("Openlogin wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
-      const privateKey = this.openloginInstance.privKey;
-      if (!privateKey) {
-        await this.openloginInstance.login(this.loginSettings);
-      }
-      const providerResolver = async (providerFactory: SolanaProvider | EthereumProvider): Promise<SafeEventEmitterProvider> => {
-        return new Promise((resolve, reject) => {
-          providerFactory.on(PROVIDER_EVENTS.INITIALIZED, () => {
-            const provider = providerFactory.setupProvider(privateKey);
-            this.connected = true;
-            this.emit(BASE_WALLET_EVENTS.CONNECTED);
-            resolve(provider);
-          });
-          providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-            this.emit(BASE_WALLET_EVENTS.ERRORED, error);
-            reject(error);
-          });
-        });
-      };
-      if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        return await providerResolver(this.solanaProviderFactory);
-      } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-        return await providerResolver(this.ethereumProviderFactory);
-      }
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+      return await this.subscribeToProviderEvents();
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
       throw error;
@@ -104,7 +161,6 @@ class OpenloginAdapter extends BaseWalletAdapter {
   async disconnect(): Promise<void> {
     if (!this.connected) throw new Error("Not connected with wallet");
     await this.openloginInstance.logout();
-    await this.openloginInstance._cleanup();
     this.connected = false;
     this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
   }

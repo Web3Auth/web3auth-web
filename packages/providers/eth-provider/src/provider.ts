@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createSwappableProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import {
+  BaseConfig,
+  BaseController,
+  BaseState,
+  createSwappableProxy,
+  providerFromEngine,
+  SafeEventEmitterProvider,
+} from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
 import type web3 from "web3";
@@ -8,18 +15,32 @@ import type { TransactionConfig } from "web3-core";
 import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
 import { createJsonRpcClient } from "./JrpcClient";
 import { sendRpcRequest } from "./utils";
-export class EthereumProvider extends SafeEventEmitter {
+interface EthereumProviderState extends BaseState {
+  _initialized: boolean;
+  _errored: boolean;
+  error: Error;
+}
+
+interface EthereumProviderConfig extends BaseConfig {
+  chainConfig: CustomChainConfig;
+}
+export class EthereumProvider extends BaseController<EthereumProviderConfig, EthereumProviderState> {
   public _providerProxy: SafeEventEmitterProvider;
 
   readonly chainConfig: CustomChainConfig;
 
-  private _initialized: boolean;
-
   private web3Connection: () => web3;
 
-  constructor(chainConfig: CustomChainConfig) {
-    super();
-    this.chainConfig = chainConfig;
+  constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
+    if (!config.chainConfig) throw new Error("Please provide chainconfig");
+    super({ config, state });
+    this.defaultState = {
+      _initialized: false,
+      _errored: false,
+      error: null,
+    };
+    this.chainConfig = config.chainConfig;
+    this.init();
   }
 
   public async init(): Promise<void> {
@@ -29,19 +50,27 @@ export class EthereumProvider extends SafeEventEmitter {
     };
     this.lookupNetwork()
       .then(() => {
-        this._initialized = true;
+        this.update({
+          _initialized: true,
+          _errored: false,
+          error: null,
+        });
         this.emit(PROVIDER_EVENTS.INITIALIZED);
         return true;
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.log("error", error);
+        this.update({
+          _errored: true,
+          error,
+        });
         this.emit(PROVIDER_EVENTS.ERRORED, { error });
       });
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this._initialized) throw new Error("Provider not initialized");
+    if (!this.state._initialized) throw new Error("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       version: "1", // TODO: get this from the provider
       getAccounts: async () => [],
@@ -74,6 +103,6 @@ export class EthereumProvider extends SafeEventEmitter {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const chainConfig = { ...this.chainConfig };
     const network = await sendRpcRequest<[], string>(fetchOnlyProvider, "net_version", []);
-    if (chainConfig.chainId !== network) throw new Error(`Invalid network, net_version is: ${network}`);
+    if (parseInt(chainConfig.chainId, 16) !== parseInt(network)) throw new Error(`Invalid network, net_version is: ${network}`);
   }
 }

@@ -3,9 +3,11 @@ import { LoginSettings, OpenloginAdapter, OpenLoginOptions } from "@web3auth/ope
 import { SolanaWalletAdapter, TorusCtorArgs as SolanaCtorOptions, TorusParams as SolanaParams } from "@web3auth/solana-wallet-adapter";
 import { TorusCtorArgs, TorusParams, TorusWalletAdapter } from "@web3auth/torus-wallet-adapter";
 
+import { WALLET_ADAPTERS } from "../constants";
+
 const getTorusEvmWallet = (params: { chainConfig: TorusEthWalletChainConfig; widgetOptions: TorusCtorArgs; initParams: TorusParams }): Wallet => {
   return {
-    name: "torus-evm-wallet",
+    name: WALLET_ADAPTERS.TORUS_EVM_WALLET,
     adapter: () => {
       const torusAdapter = new TorusWalletAdapter({ ...params });
       return torusAdapter;
@@ -19,7 +21,7 @@ const getTorusSolanaWallet = (params: {
   initParams: SolanaParams;
 }): Wallet => {
   return {
-    name: "torus-solana-wallet",
+    name: WALLET_ADAPTERS.TORUS_SOLANA_WALLET,
     adapter: () => {
       const torusAdapter = new SolanaWalletAdapter({ ...params });
       return torusAdapter;
@@ -27,9 +29,9 @@ const getTorusSolanaWallet = (params: {
   };
 };
 
-const getOpenloginWallet = (params: { chainConfig: CustomChainConfig; openloginOptions: OpenLoginOptions; loginSettings: LoginSettings }): Wallet => {
+const getOpenloginWallet = (params: { chainConfig: CustomChainConfig; openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }): Wallet => {
   return {
-    name: "openlogin-wallet",
+    name: WALLET_ADAPTERS.OPENLOGIN_WALLET,
     adapter: () => {
       const torusAdapter = new OpenloginAdapter({ ...params });
       return torusAdapter;

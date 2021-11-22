@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/base",
+  "name": "@web3auth/solana-provider",
   "version": "0.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/base.cjs.js",
-  "module": "dist/base.esm.js",
-  "unpkg": "dist/base.umd.min.js",
-  "jsdelivr": "dist/base.umd.min.js",
+  "main": "dist/solanaProvider.cjs.js",
+  "module": "dist/solanaProvider.esm.js",
+  "unpkg": "dist/solanaProvider.umd.min.js",
+  "jsdelivr": "dist/solanaProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
@@ -20,7 +20,11 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.0.2"
+    "@solana/web3.js": "^1.30.2",
+    "@toruslabs/base-controllers": "^1.2.0",
+    "@toruslabs/openlogin-jrpc": "^1.0.2",
+    "@web3auth/base": "0.0.0",
+    "json-rpc-random-id": "^1.0.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
@@ -46,5 +50,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "yalcSig": "e5d7cd764718a18387ec81466a4d487e"
+  "yalcSig": "00b928c8e83f7fa703f8fa17dfb9447a"
 }

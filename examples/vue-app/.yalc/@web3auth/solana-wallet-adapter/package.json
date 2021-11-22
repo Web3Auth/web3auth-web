@@ -1,7 +1,7 @@
 {
-  "name": "@web3auth/openlogin-adapter",
+  "name": "@web3auth/solana-wallet-adapter",
   "version": "0.0.0",
-  "description": "openlogin adapter for web3auth",
+  "description": "torus solana wallet adapter for web3auth",
   "keywords": [
     "web3Auth/core",
     "web3Auth",
@@ -10,10 +10,10 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/openloginAdapter.cjs.js",
-  "module": "dist/openloginAdapter.esm.js",
-  "unpkg": "dist/openloginAdapter.umd.min.js",
-  "jsdelivr": "dist/openloginAdapter.umd.min.js",
+  "main": "dist/solanaWalletAdapter.cjs.js",
+  "module": "dist/solanaWalletAdapter.esm.js",
+  "unpkg": "dist/solanaWalletAdapter.umd.min.js",
+  "jsdelivr": "dist/solanaWalletAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
@@ -32,18 +32,10 @@
     "dist",
     "types"
   ],
-  "devDependencies": {
-    "@types/lodash": "^4.14.176",
-    "@types/pify": "^5.0.1",
-    "lint-staged": "^11.2.6"
-  },
   "dependencies": {
-    "@web3auth/base": "0.0.0",
-    "@web3auth/solana-provider": "0.0.0",
-    "@web3auth/ethereum-provider": "0.0.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2",
-    "@toruslabs/openlogin": "^1.2.0",
-    "@toruslabs/openlogin-ed25519": "^1.2.0"
+    "@toruslabs/solana-embed": "^0.0.3",
+    "@web3auth/base": "0.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [
@@ -60,5 +52,6 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
-  }
+  },
+  "yalcSig": "a26f57b1956eac6c81cbd1f19ad08684"
 }

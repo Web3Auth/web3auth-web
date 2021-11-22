@@ -35,6 +35,8 @@
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@web3auth/base": "0.0.0",
+    "@web3auth/openlogin-adapter": "0.0.0",
+    "@web3auth/solana-wallet-adapter": "0.0.0",
     "@web3auth/torus-wallet-adapter": "0.0.0"
   },
   "lint-staged": {
@@ -53,5 +55,5 @@
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "yalcSig": "2a0ddab0005c039fbc61cae5432394a4"
+  "yalcSig": "6c7f4f7eff04adf3f4b709503603d81a"
 }

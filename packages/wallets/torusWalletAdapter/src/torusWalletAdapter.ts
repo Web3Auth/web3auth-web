@@ -9,6 +9,7 @@ import {
   SafeEventEmitterProvider,
   TorusEthWalletChainConfig,
   UserInfo,
+  WALLET_ADAPTERS,
 } from "@web3auth/base";
 
 import type { Torus } from "./interface";
@@ -59,7 +60,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.connected = true;
       this.torusInstance.showTorusButton();
-      this.emit(BASE_WALLET_EVENTS.CONNECTED);
+      this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM_WALLET);
       return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
