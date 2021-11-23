@@ -9,7 +9,7 @@ import {
   SafeEventEmitterProvider,
 } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
+import { CustomChainConfig, InvalidProviderConfigError, PROVIDER_EVENTS, ProviderNotReadyError, RpcConnectionFailedError } from "@web3auth/base";
 
 import { createJsonRpcClient } from "./JrpcClient";
 import { createSolanaMiddleware, IProviderHandlers } from "./solanaRpcMiddlewares";
@@ -34,7 +34,7 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
   private keyPairGenerator: (privKey: string) => Keypair;
 
   constructor({ config, state }: { config: SolanaProviderConfig & Pick<SolanaProviderConfig, "chainConfig">; state?: SolanaProviderState }) {
-    if (!config.chainConfig) throw new Error("Please provide chainconfig");
+    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainconfig");
     super({ config, state });
     this.defaultState = {
       _initialized: false,
@@ -77,7 +77,7 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw new Error("Provider not initialized");
+    if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const keyPair = this.keyPairGenerator(privKey);
 
     const providerHandlers: IProviderHandlers = {
@@ -133,6 +133,9 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
   private async lookupNetwork(): Promise<void> {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const res = await sendRpcRequest<[], string>(fetchOnlyProvider, "getHealth", []);
-    if (res !== "ok") throw new Error(`Failed to lookup network for following rpc target: ${this.chainConfig.rpcTarget}, lookup status is: ${res}`);
+    if (res !== "ok")
+      throw new RpcConnectionFailedError(
+        `Failed to lookup network for following rpc target: ${this.chainConfig.rpcTarget}, lookup status is: ${res}`
+      );
   }
 }

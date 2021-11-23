@@ -1,5 +1,16 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { ADAPTER_NAMESPACES, BASE_WALLET_EVENTS, ChainNamespaceType, IWalletAdapter, SafeEventEmitterProvider, Wallet } from "@web3auth/base";
+import {
+  ADAPTER_NAMESPACES,
+  BASE_WALLET_EVENTS,
+  ChainNamespaceType,
+  DuplicateWalletAdapterError,
+  IncompatibleChainNamespaceError,
+  IWalletAdapter,
+  SafeEventEmitterProvider,
+  Wallet,
+  WalletNotConnectedError,
+  WalletNotFoundError,
+} from "@web3auth/base";
 
 import { WALLET_ADAPTER_TYPE } from "./constants";
 export class Web3Auth extends SafeEventEmitter {
@@ -33,14 +44,14 @@ export class Web3Auth extends SafeEventEmitter {
 
   public addWallet(wallet: Wallet): void {
     const adapterAlreadyExists = this.walletAdapters[wallet.name];
-    if (adapterAlreadyExists) throw new Error(`Wallet adapter for ${wallet.name} already exists`);
+    if (adapterAlreadyExists) throw new DuplicateWalletAdapterError(`Wallet adapter for ${wallet.name} already exists`);
     const adapter = wallet.adapter();
     if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace)
-      throw new Error(
+      throw new IncompatibleChainNamespaceError(
         `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace)
-      throw new Error(
+      throw new IncompatibleChainNamespaceError(
         `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     this.walletAdapters[wallet.name] = wallet.adapter();
@@ -56,18 +67,18 @@ export class Web3Auth extends SafeEventEmitter {
    * @param walletName - Key of the walletAdapter to use.
    */
   async connectTo(walletName: WALLET_ADAPTER_TYPE): Promise<void> {
-    if (!this.walletAdapters[walletName]) throw new Error(`Please add wallet adapter for ${walletName} wallet, before connecting`);
+    if (!this.walletAdapters[walletName]) throw new WalletNotFoundError(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     this.subscribeToEvents(this.walletAdapters[walletName]);
     await this.walletAdapters[walletName].connect();
   }
 
   async logout(): Promise<void> {
-    if (!this.connected) throw new Error(`No wallet is connected`);
+    if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
     await this.connectedAdapter.disconnect();
   }
 
   async getUserInfo(): Promise<void> {
-    if (!this.connected) throw new Error(`No wallet is connected`);
+    if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
     await this.connectedAdapter.getUserInfo();
   }
 

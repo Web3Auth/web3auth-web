@@ -11,7 +11,7 @@ import {
   signMessage,
 } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
+import { CustomChainConfig, InvalidProviderConfigError, PROVIDER_EVENTS, ProviderNotReadyError, RpcConnectionFailedError } from "@web3auth/base";
 import {
   getEncryptionPublicKey,
   personalSign,
@@ -61,7 +61,7 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
   private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
   constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
-    if (!config.chainConfig) throw new Error("Please provide chainconfig");
+    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainconfig");
     super({ config, state });
     this.defaultState = {
       _initialized: false,
@@ -97,7 +97,7 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw new Error("Provider not initialized");
+    if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       version: "1", // TODO: get this from the provider
       getAccounts: async () => [],
@@ -168,7 +168,7 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const chainConfig = { ...this.chainConfig };
     const network = await sendRpcRequest<[], string>(fetchOnlyProvider, "net_version", []);
-    if (parseInt(chainConfig.chainId, 16) !== parseInt(network)) throw new Error(`Invalid network, net_version is: ${network}`);
+    if (parseInt(chainConfig.chainId, 16) !== parseInt(network)) throw new RpcConnectionFailedError(`Invalid network, net_version is: ${network}`);
     return network;
   }
 

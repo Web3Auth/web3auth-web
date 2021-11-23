@@ -70,3 +70,22 @@ export class WalletWindowBlockedError extends WalletError {
 export class WalletWindowClosedError extends WalletError {
   name = "WalletWindowClosedError";
 }
+export class RpcConnectionFailedError extends WalletError {
+  name = "RpcConnectionFailedError";
+}
+
+export class InvalidProviderConfigError extends WalletError {
+  name = "InvalidProviderConfigError";
+}
+
+export class ProviderNotReadyError extends WalletError {
+  name = "ProviderNotReadyError";
+}
+
+export class IncompatibleChainNamespaceError extends WalletError {
+  name = "IncompatibleChainNamespaceError";
+}
+
+export class DuplicateWalletAdapterError extends WalletError {
+  name = "DuplicateWalletAdapterError";
+}

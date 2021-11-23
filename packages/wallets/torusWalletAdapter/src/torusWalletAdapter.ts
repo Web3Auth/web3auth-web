@@ -10,6 +10,9 @@ import {
   TorusEthWalletChainConfig,
   UserInfo,
   WALLET_ADAPTERS,
+  WalletConnectionError,
+  WalletNotConnectedError,
+  WalletNotReadyError,
 } from "@web3auth/base";
 
 import type { Torus } from "./interface";
@@ -51,7 +54,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {
-    if (!this.ready) throw new Error("Torus wallet adapter is not ready, please init first");
+    if (!this.ready) throw new WalletNotReadyError("Torus wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
@@ -64,14 +67,14 @@ class TorusWalletAdapter extends BaseWalletAdapter {
       return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
-      throw error;
+      throw new WalletConnectionError("Failed to login with torus wallet", error);
     } finally {
       this.connecting = false;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw new Error("Not connected with wallet");
+    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet, Please login/connect first");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     this.connected = false;
@@ -79,7 +82,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw new Error("Not connected with wallet, Please login/connect first");
+    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
