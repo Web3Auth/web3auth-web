@@ -8,18 +8,39 @@ import {
   createSwappableProxy,
   providerFromEngine,
   SafeEventEmitterProvider,
+  signMessage,
 } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
+import {
+  getEncryptionPublicKey,
+  personalSign,
+  signTypedData,
+  signTypedData_v4 as signTypedDataV4,
+  signTypedDataLegacy,
+  TypedData,
+} from "eth-sig-util";
 
 import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
 import { createJsonRpcClient } from "./JrpcClient";
 import { sendRpcRequest } from "./utils";
-import { TransactionParams } from "./walletMidddleware";
-
+import { MessageParams, TransactionParams } from "./walletMidddleware";
 export const HARDFORKS = {
   BERLIN: "berlin",
   LONDON: "london",
+};
+
+const signTypeData = async (privKey: Buffer, typedData: TypedData, version = "V1") => {
+  switch (version) {
+    case "V1":
+      return signTypedDataLegacy(privKey, { data: typedData });
+    case "V4":
+      return signTypedDataV4(privKey, { data: typedData });
+    case "V3":
+      return signTypedData(privKey, { data: typedData });
+    default:
+      return signTypedDataLegacy(privKey, { data: typedData });
+  }
 };
 
 interface EthereumProviderState extends BaseState {
@@ -87,6 +108,40 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
         const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
         const txHash = await sendRpcRequest<string[], string>(rpcProvider, "eth_sendRawTransaction", [signedTx.toString("hex")]);
         return txHash;
+      },
+      processSignTransaction: async (txParams: TransactionParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const rpcProvider = this.getFetchOnlyProvider();
+        const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
+        const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
+        const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+        return signedTx.toString("hex");
+      },
+      processEthSignMessage: async (msgParams: MessageParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const rawMessageSig = signMessage(privKey, msgParams.data);
+        return rawMessageSig;
+      },
+      processPersonalMessage: async (msgParams: MessageParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const privKeyBuffer = Buffer.from(privKey, "hex");
+        const sig = personalSign(privKeyBuffer, { data: msgParams.data });
+        return sig;
+      },
+      processTypedMessage: async (msgParams: MessageParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const privKeyBuffer = Buffer.from(privKey, "hex");
+        const sig = await signTypeData(privKeyBuffer, msgParams.data, "V1");
+        return sig;
+      },
+      processTypedMessageV3: async (msgParams: MessageParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const privKeyBuffer = Buffer.from(privKey, "hex");
+        const sig = await signTypeData(privKeyBuffer, msgParams.data, "V3");
+        return sig;
+      },
+      processTypedMessageV4: async (msgParams: MessageParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const privKeyBuffer = Buffer.from(privKey, "hex");
+        const sig = await signTypeData(privKeyBuffer, msgParams.data, "V4");
+        return sig;
+      },
+      processEncryptionPublicKey: async (address: string, req: JRPCRequest<unknown>): Promise<string> => {
+        return getEncryptionPublicKey(privKey);
       },
     };
     const ethMiddleware = createEthMiddleware(providerHandlers);

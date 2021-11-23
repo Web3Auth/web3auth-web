@@ -31,15 +31,15 @@ function resemblesAddress(str: string): boolean {
 
 export interface WalletMiddlewareOptions {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  processDecryptMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<Record<string, unknown>>;
-  processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<Record<string, unknown>>;
-  processEthSignMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<Record<string, unknown>>;
-  processPersonalMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<Record<string, unknown>>;
+  processDecryptMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
+  processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<string>;
+  processEthSignMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
+  processPersonalMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
-  processSignTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<Record<string, unknown>>;
-  processTypedMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>, version: string) => Promise<Record<string, unknown>>;
-  processTypedMessageV3?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<Record<string, unknown>>;
-  processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<Record<string, unknown>>;
+  processSignTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
+  processTypedMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessageV3?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
 }
 
 export function createWalletMiddleware({
