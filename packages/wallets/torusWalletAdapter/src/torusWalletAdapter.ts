@@ -73,6 +73,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
   async disconnect(): Promise<void> {
     if (!this.connected) throw new Error("Not connected with wallet");
     await this.torusInstance.logout();
+    this.torusInstance.hideTorusButton();
     this.connected = false;
     this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
   }
