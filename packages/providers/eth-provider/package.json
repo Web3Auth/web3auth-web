@@ -23,13 +23,16 @@
     "@toruslabs/base-controllers": "^1.2.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@web3auth/base": "0.0.0",
-    "web3": "^1.6.1",
-    "web3-core": "1.6.1",
+    "@ethereumjs/tx": "^3.4.0",
+    "@ethereumjs/common": "^2.6.0",
+    "eth-sig-util": "~3.0.1",
     "json-rpc-random-id": "^1.0.1",
-    "eth-json-rpc-middleware": "^8.0.0"
+    "eth-rpc-errors": "^4.0.3",
+    "eth-query": "^2.1.2"
   },
   "devDependencies": {
     "@types/node": "^14.17.20",
+    "@types/web3": "^1.2.2",
     "lint-staged": "^11.2.6"
   },
   "peerDependencies": {

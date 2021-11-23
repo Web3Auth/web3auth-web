@@ -1,6 +1,7 @@
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
 import type { TransactionConfig } from "web3-core";
 
+import { createWalletMiddleware, WalletMiddlewareOptions } from "./walletMidddleware";
 interface EthSignMessageParams {
   address: string;
   message: string;
@@ -10,15 +11,8 @@ interface PersonalSignMessageParams {
   message: string;
 }
 
-export interface IProviderHandlers {
+export interface IProviderHandlers extends WalletMiddlewareOptions {
   version: string;
-  getAccounts: () => Promise<string[]>;
-  processTransaction?: (txParams: TransactionConfig) => Promise<string>;
-  processEthSignMessage?: (msgParams: EthSignMessageParams) => Promise<string>;
-  processPersonalMessage?: (msgParams: PersonalSignMessageParams) => Promise<string>;
-  // processTypedMessage?: (msgParams: TypedDataV1, req: JRPCRequest<unknown>, version: string) => Promise<string>;
-  // processTypedMessageV3?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<Record<string, unknown>>;
-  // processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<Record<string, unknown>>;
 }
 
 export function createRequestAccountsMiddleware({ getAccounts }) {
@@ -32,7 +26,11 @@ export function createRequestAccountsMiddleware({ getAccounts }) {
   });
 }
 
-export function createProcessTransactionMiddleware(processTransaction: (tx: TransactionConfig) => Promise<string>): JRPCMiddleware<unknown, unknown> {
+export function createProcessTransactionMiddleware({
+  processTransaction,
+}: {
+  processTransaction: (tx: TransactionConfig) => Promise<string>;
+}): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware<unknown, unknown>(async (request: JRPCRequest<unknown[]>, response, next) => {
     const { method } = request;
     if (method !== "eth_sendTransaction") return next();
@@ -44,38 +42,76 @@ export function createProcessTransactionMiddleware(processTransaction: (tx: Tran
     response.result = result;
   });
 }
+
+export function createEthSignMiddleware({
+  processEthSignMessage,
+}: {
+  processEthSignMessage: (msgParams: EthSignMessageParams) => Promise<string>;
+}): JRPCMiddleware<unknown, unknown> {
+  return createAsyncMiddleware<unknown, unknown>(async (request: JRPCRequest<unknown[]>, response, next) => {
+    const { method } = request;
+    if (method !== "eth_sign") return next();
+
+    if (!processEthSignMessage) throw new Error(`WalletMiddleware - processEthSignMessage not provided`);
+
+    if (request.params.length !== 2) throw new Error(`WalletMiddleware - eth_sign requires address and message params`);
+    const result = await processEthSignMessage({
+      address: request.params[0],
+      message: request.params[1],
+    } as EthSignMessageParams);
+
+    response.result = result;
+  });
+}
+
+export function createPersonalSignMiddleware({
+  processPersonalMessage,
+}: {
+  processPersonalMessage: (msgParams: PersonalSignMessageParams) => Promise<string>;
+}): JRPCMiddleware<unknown, unknown> {
+  return createAsyncMiddleware<unknown, unknown>(async (request: JRPCRequest<unknown[]>, response, next) => {
+    const { method } = request;
+    if (method !== "eth_personal_sign") return next();
+
+    if (!processPersonalMessage) throw new Error(`WalletMiddleware - processPersonalMessage not provided`);
+    if (request.params.length !== 2) throw new Error(`WalletMiddleware - eth_personal_sign requires address and message params`);
+
+    const result = await processPersonalMessage({
+      address: request.params[0],
+      message: request.params[1],
+    } as PersonalSignMessageParams);
+    response.result = result;
+  });
+}
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
     version,
     getAccounts,
     processTransaction,
-    // processEthSignMessage,
-    // processTypedMessage,
-    // processTypedMessageV3,
-    // processTypedMessageV4,
-    // processPersonalMessage,
-    // processEncryptionPublicKey,
-    // processDecryptMessage,
+    processEthSignMessage,
+    processTypedMessage,
+    processTypedMessageV3,
+    processTypedMessageV4,
+    processPersonalMessage,
+    processEncryptionPublicKey,
+    processDecryptMessage,
   } = providerHandlers;
   const metamaskMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
-      // staticSubprovider
       eth_syncing: false,
       web3_clientVersion: `Torus/v${version}`,
     }),
-    createProcessTransactionMiddleware(processTransaction),
-    // createWalletMiddleware({
-    //   getAccounts,
-    //   processTransaction,
-    //   processEthSignMessage,
-    //   processTypedMessage,
-    //   processTypedMessageV3,
-    //   processTypedMessageV4,
-    //   processPersonalMessage,
-    //   processEncryptionPublicKey,
-    //   processDecryptMessage,
-    // }),
-    createRequestAccountsMiddleware({ getAccounts }),
+    createWalletMiddleware({
+      getAccounts,
+      processTransaction,
+      processEthSignMessage,
+      processTypedMessage,
+      processTypedMessageV3,
+      processTypedMessageV4,
+      processPersonalMessage,
+      processEncryptionPublicKey,
+      processDecryptMessage,
+    }),
   ]);
   return metamaskMiddleware;
 }

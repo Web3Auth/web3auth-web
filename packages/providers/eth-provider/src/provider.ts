@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import Common from "@ethereumjs/common";
+import { TransactionFactory } from "@ethereumjs/tx";
 import {
   BaseConfig,
   BaseController,
@@ -7,18 +9,24 @@ import {
   providerFromEngine,
   SafeEventEmitterProvider,
 } from "@toruslabs/base-controllers";
-import { JRPCEngine, JRPCRequest, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
-import type web3 from "web3";
-import type { TransactionConfig } from "web3-core";
 
 import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
 import { createJsonRpcClient } from "./JrpcClient";
 import { sendRpcRequest } from "./utils";
+import { TransactionParams } from "./walletMidddleware";
+
+export const HARDFORKS = {
+  BERLIN: "berlin",
+  LONDON: "london",
+};
+
 interface EthereumProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
   error: Error;
+  network: string;
 }
 
 interface EthereumProviderConfig extends BaseConfig {
@@ -29,7 +37,7 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
 
   readonly chainConfig: CustomChainConfig;
 
-  private web3Connection: () => web3;
+  private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
   constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
     if (!config.chainConfig) throw new Error("Please provide chainconfig");
@@ -38,22 +46,20 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
       _initialized: false,
       _errored: false,
       error: null,
+      network: "loading",
     };
     this.chainConfig = config.chainConfig;
     this.init();
   }
 
   public async init(): Promise<void> {
-    const { default: Web3 } = await import("web3");
-    this.web3Connection = () => {
-      return new Web3(new Web3.providers.HttpProvider(this.chainConfig.rpcTarget));
-    };
     this.lookupNetwork()
-      .then(() => {
+      .then((network) => {
         this.update({
           _initialized: true,
           _errored: false,
           error: null,
+          network,
         });
         this.emit(PROVIDER_EVENTS.INITIALIZED);
         return true;
@@ -74,11 +80,13 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
     const providerHandlers: IProviderHandlers = {
       version: "1", // TODO: get this from the provider
       getAccounts: async () => [],
-      processTransaction: async (tx: TransactionConfig): Promise<string> => {
-        const web3Instance = this.web3Connection();
-        const signedTx = await web3Instance.eth.signTransaction(tx, privKey);
-        const txReceipt = await web3Instance.eth.sendSignedTransaction(signedTx.raw);
-        return txReceipt.transactionHash;
+      processTransaction: async (txParams: TransactionParams, req: JRPCRequest<unknown>): Promise<string> => {
+        const rpcProvider = this.getFetchOnlyProvider();
+        const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
+        const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
+        const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+        const txHash = await sendRpcRequest<string[], string>(rpcProvider, "eth_sendRawTransaction", [signedTx.toString("hex")]);
+        return txHash;
       },
     };
     const ethMiddleware = createEthMiddleware(providerHandlers);
@@ -92,17 +100,34 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
   }
 
   private getFetchOnlyProvider(): SafeEventEmitterProvider {
+    if (this.rpcProvider) return this.rpcProvider;
     const engine = new JRPCEngine();
     const { networkMiddleware } = createJsonRpcClient(this.chainConfig);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
+    this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(provider);
     return provider;
   }
 
-  private async lookupNetwork(): Promise<void> {
+  private async lookupNetwork(): Promise<string> {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const chainConfig = { ...this.chainConfig };
     const network = await sendRpcRequest<[], string>(fetchOnlyProvider, "net_version", []);
     if (parseInt(chainConfig.chainId, 16) !== parseInt(network)) throw new Error(`Invalid network, net_version is: ${network}`);
+    return network;
+  }
+
+  private async getCommonConfiguration(supportsEIP1559: boolean) {
+    const { networkName: name, chainId } = this.chainConfig;
+    const hardfork = supportsEIP1559 ? HARDFORKS.LONDON : HARDFORKS.BERLIN;
+    const networkId = this.state.network;
+
+    const customChainParams = {
+      name,
+      chainId: parseInt(chainId, 16),
+      networkId: networkId === "loading" ? 0 : Number.parseInt(networkId, 10),
+    };
+
+    return Common.forCustomChain("mainnet", customChainParams, hardfork);
   }
 }
