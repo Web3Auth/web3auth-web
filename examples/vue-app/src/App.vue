@@ -21,7 +21,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Web3Auth, getTorusEvmWallet, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
-import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
 
 const web3auth = new Web3Auth(CHAIN_NAMESPACES.EIP155)
 export default Vue.extend({
@@ -39,6 +39,7 @@ export default Vue.extend({
       host: "rinkeby",
       chainId: 4
     }, widgetOptions: {}, initParams: {}})
+    
     const openloginAdapter = getOpenloginWallet({ chainConfig: {
       rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
       chainId: "0x1",
@@ -53,8 +54,7 @@ export default Vue.extend({
     }, loginSettings: {
       loginProvider: "google"
     }})
-    web3auth.addWallet(torusWalletAdapter);
-    web3auth.addWallet(openloginAdapter);
+    web3auth.addWallet(torusWalletAdapter).addWallet(openloginAdapter);
     await web3auth.init();
     (window as any).web3Auth = web3auth
     if (web3auth.cachedWallet) {
@@ -73,7 +73,7 @@ export default Vue.extend({
       await web3auth.logout();
     },
     subscribeAuthEvents() {
-      web3auth.on(BASE_WALLET_EVENTS.CONNECTED, ()=>{
+      web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (provider: SafeEventEmitterProvider)=>{
        console.log("connected to wallet")
        this.loginButtonStatus = "Logged in"
        this.connected = true

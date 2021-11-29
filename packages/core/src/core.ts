@@ -42,7 +42,7 @@ export class Web3Auth extends SafeEventEmitter {
     }
   }
 
-  public addWallet(wallet: Wallet): void {
+  public addWallet(wallet: Wallet): Web3Auth {
     const adapterAlreadyExists = this.walletAdapters[wallet.name];
     if (adapterAlreadyExists) throw new DuplicateWalletAdapterError(`Wallet adapter for ${wallet.name} already exists`);
     const adapter = wallet.adapter();
@@ -55,6 +55,7 @@ export class Web3Auth extends SafeEventEmitter {
         `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     this.walletAdapters[wallet.name] = wallet.adapter();
+    return this;
   }
 
   public clearCache() {
