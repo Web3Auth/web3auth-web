@@ -19,7 +19,8 @@
       "@web3auth/solana-provider": ["packages/providers/solana-provider/src"],
       "@web3auth/torus-wallet-adapter": ["packages/wallets/torusWalletAdapter/src"],
       "@web3auth/solana-wallet-adapter": ["packages/wallets/solanaWalletAdapter/src"],
-      "@web3auth/openlogin-adapter": ["packages/wallets/openloginAdapter/src"]
+      "@web3auth/openlogin-adapter": ["packages/wallets/openloginAdapter/src"],
+      "@web3auth/metamask-wallet-adapter": ["packages/wallets/metamaskAdapter/src"]
     }
   }
 }

@@ -16,5 +16,10 @@ export const getModule = async (name: WALLET_ADAPTER_TYPE, options: unknown): Pr
     const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
     const torusAdapter = new OpenloginAdapter({ ...(options as OpenloginAdapterOptions) });
     return torusAdapter;
+  } else if (name === WALLET_ADAPTERS.METAMASK_WALLET) {
+    const { MetamaskAdapter } = await import("@web3auth/metamask-wallet-adapter");
+    const torusAdapter = new MetamaskAdapter();
+    return torusAdapter;
   }
+  throw new Error("Invalid wallet adapter name");
 };

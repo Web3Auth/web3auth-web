@@ -3,6 +3,11 @@ import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import type { SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
 import type { TorusWalletOptions } from "@web3auth/torus-wallet-adapter";
 
+interface LoginMethodConfig {
+  visible?: boolean;
+  showOnMobile?: boolean;
+  showOnDesktop?: boolean;
+}
 interface BaseAdapterConfig {
   visible?: boolean;
   showOnMobile?: boolean;
@@ -19,6 +24,7 @@ interface TorusSolanaWalletAdapterConfig extends BaseAdapterConfig {
 
 interface OpenloginAdapterConfig extends BaseAdapterConfig {
   options?: OpenloginAdapterOptions;
+  loginMethods?: Record<string, LoginMethodConfig>;
 }
 
 interface BaseAggregatorConfig {

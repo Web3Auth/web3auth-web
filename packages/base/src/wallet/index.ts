@@ -12,6 +12,7 @@ export const SOLANA_WALLET_ADAPTERS = {
 
 export const EVM_WALLET_ADAPTERS = {
   TORUS_EVM_WALLET: "torus-evm-wallet",
+  METAMASK_WALLET: "metamask-wallet",
   OPENLOGIN_WALLET: "openlogin-wallet",
 };
 

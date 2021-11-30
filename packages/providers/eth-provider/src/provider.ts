@@ -110,7 +110,6 @@ export class EthereumProvider extends BaseController<EthereumProviderConfig, Eth
         return txHash;
       },
       processSignTransaction: async (txParams: TransactionParams, req: JRPCRequest<unknown>): Promise<string> => {
-        const rpcProvider = this.getFetchOnlyProvider();
         const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
         const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
         const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();

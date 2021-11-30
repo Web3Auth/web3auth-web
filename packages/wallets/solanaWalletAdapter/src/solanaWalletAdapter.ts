@@ -28,7 +28,7 @@ interface SolanaWalletOptions {
   initParams?: TorusParams;
 }
 class SolanaWalletAdapter extends BaseWalletAdapter {
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
 

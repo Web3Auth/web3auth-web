@@ -136,7 +136,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
         resolve(provider);
         return;
       }
-      providerFactory.on(PROVIDER_EVENTS.INITIALIZED, async () => {
+      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
         const provider = await getProvider();
         if (provider) {
           this.connected = true;
