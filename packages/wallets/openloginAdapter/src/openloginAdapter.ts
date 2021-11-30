@@ -23,6 +23,11 @@ import type { SolanaProvider } from "@web3auth/solana-provider";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
 
+interface OpenloginAdapterOptions {
+  chainConfig?: CustomChainConfig;
+  adapterSettings?: OpenLoginOptions;
+  loginSettings?: LoginSettings;
+}
 class OpenloginAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
@@ -48,9 +53,9 @@ class OpenloginAdapter extends BaseWalletAdapter {
 
   private ethereumProviderFactory: EthereumProvider;
 
-  constructor(params: { chainConfig: CustomChainConfig; openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }) {
+  constructor(params: OpenloginAdapterOptions) {
     super();
-    this.openloginOptions = params.openLoginOptions;
+    this.openloginOptions = params.adapterSettings;
     this.loginSettings = params.loginSettings;
     this.currentChainNamespace = params.chainConfig.chainNamespace;
     this.chainConfig = params.chainConfig;
@@ -175,4 +180,4 @@ class OpenloginAdapter extends BaseWalletAdapter {
   }
 }
 
-export { LoginSettings, OpenloginAdapter, OpenLoginOptions };
+export { OpenloginAdapter, OpenloginAdapterOptions };

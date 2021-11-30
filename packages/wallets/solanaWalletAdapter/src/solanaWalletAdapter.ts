@@ -1,4 +1,4 @@
-import type { TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import type { LOGIN_PROVIDER_TYPE, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
@@ -17,6 +17,16 @@ import {
 
 import type { Torus } from "./interface";
 
+type LoginParams = {
+  loginProvider?: LOGIN_PROVIDER_TYPE;
+  login_hint?: string;
+};
+interface SolanaWalletOptions {
+  chainConfig?: TorusSolanaWalletChainConfig;
+  adapterSettings?: TorusCtorArgs;
+  loginSettings?: LoginParams;
+  initParams?: TorusParams;
+}
 class SolanaWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
@@ -38,18 +48,17 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
 
   private initParams: TorusParams;
 
-  constructor(params: {
-    chainConfig: TorusSolanaWalletChainConfig;
-    widgetOptions: TorusCtorArgs;
-    initParams: TorusParams & Omit<TorusParams, "network">;
-  }) {
+  private loginSettings: LoginParams = {};
+
+  constructor(params: SolanaWalletOptions) {
     super();
-    this.torusWalletOptions = params.widgetOptions;
+    this.torusWalletOptions = params.adapterSettings;
     this.initParams = {
       ...params.initParams,
       network: params.chainConfig,
     };
     this.chainConfig = params.chainConfig;
+    this.loginSettings = params.loginSettings;
   }
 
   async init(): Promise<void> {
@@ -65,7 +74,7 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
-      await this.torusInstance.login();
+      await this.torusInstance.login(this.loginSettings);
       // TODO: make torus embed provider type compatible with this
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.connected = true;
@@ -94,4 +103,4 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
   }
 }
 
-export { SolanaWalletAdapter, TorusCtorArgs, TorusParams };
+export { SolanaWalletAdapter, SolanaWalletOptions };

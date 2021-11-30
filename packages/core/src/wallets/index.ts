@@ -1,11 +1,12 @@
-import { CustomChainConfig, TorusEthWalletChainConfig, TorusSolanaWalletChainConfig, Wallet } from "@web3auth/base";
-import { LoginSettings, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
-import { SolanaWalletAdapter, TorusCtorArgs as SolanaCtorOptions, TorusParams as SolanaParams } from "@web3auth/solana-wallet-adapter";
-import { TorusCtorArgs, TorusParams, TorusWalletAdapter } from "@web3auth/torus-wallet-adapter";
+import { Wallet } from "@web3auth/base";
+import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
+import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
+import { TorusWalletAdapter } from "@web3auth/torus-wallet-adapter";
 
 import { WALLET_ADAPTERS } from "../constants";
+import { TorusWalletOptions } from "../interface";
 
-const getTorusEvmWallet = (params: { chainConfig: TorusEthWalletChainConfig; widgetOptions: TorusCtorArgs; initParams: TorusParams }): Wallet => {
+const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
   return {
     name: WALLET_ADAPTERS.TORUS_EVM_WALLET,
     adapter: () => {
@@ -15,11 +16,7 @@ const getTorusEvmWallet = (params: { chainConfig: TorusEthWalletChainConfig; wid
   };
 };
 
-const getTorusSolanaWallet = (params: {
-  chainConfig: TorusSolanaWalletChainConfig;
-  widgetOptions: SolanaCtorOptions;
-  initParams: SolanaParams;
-}): Wallet => {
+const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet => {
   return {
     name: WALLET_ADAPTERS.TORUS_SOLANA_WALLET,
     adapter: () => {
@@ -29,7 +26,7 @@ const getTorusSolanaWallet = (params: {
   };
 };
 
-const getOpenloginWallet = (params: { chainConfig: CustomChainConfig; openLoginOptions: OpenLoginOptions; loginSettings: LoginSettings }): Wallet => {
+const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet => {
   return {
     name: WALLET_ADAPTERS.OPENLOGIN_WALLET,
     adapter: () => {

@@ -2,6 +2,7 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_NAMESPACES,
   BASE_WALLET_EVENTS,
+  CHAIN_NAMESPACES,
   ChainNamespaceType,
   DuplicateWalletAdapterError,
   IncompatibleChainNamespaceError,
@@ -12,7 +13,10 @@ import {
   WalletNotFoundError,
 } from "@web3auth/base";
 
+import { defaultEvmAggregatorConfig, defaultSolanaAggregatorConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
+import { AggregatorModalConfig } from "./interface";
+import { getModule } from "./utils";
 export class Web3Auth extends SafeEventEmitter {
   readonly chainNamespace: ChainNamespaceType;
 
@@ -22,27 +26,95 @@ export class Web3Auth extends SafeEventEmitter {
 
   public connecting: boolean;
 
+  public initialized: boolean;
+
   public provider: SafeEventEmitterProvider;
 
   public cachedWallet: string;
 
   private walletAdapters: Record<string, IWalletAdapter> = {};
 
-  constructor(chainNamespace: ChainNamespaceType) {
+  private aggregatorModalConfig: AggregatorModalConfig;
+
+  constructor(modalConfig: AggregatorModalConfig) {
     super();
     this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
-    this.chainNamespace = chainNamespace;
+    this.chainNamespace = modalConfig.chainNamespace;
+    let defaultConfig = {};
+    if (this.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      defaultConfig = defaultSolanaAggregatorConfig;
+    } else if (this.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      defaultConfig = defaultEvmAggregatorConfig;
+    } else {
+      throw new Error(`Invalid chainspace provided: ${this.chainNamespace}`);
+    }
+    this.aggregatorModalConfig.chainNamespace = modalConfig.chainNamespace;
+    this.aggregatorModalConfig.adapters = {};
+    const defaultAdapterKeys = Object.keys(defaultConfig);
+    defaultAdapterKeys.forEach((adapterKey) => {
+      if (modalConfig.adapters[adapterKey]) {
+        this.aggregatorModalConfig.adapters[adapterKey] = { ...defaultConfig[adapterKey], ...modalConfig.adapters[adapterKey] };
+      } else {
+        this.aggregatorModalConfig.adapters[adapterKey] = defaultConfig[adapterKey];
+      }
+    });
   }
 
   public async init(): Promise<void> {
-    const preAddedAdapters = Object.keys(this.walletAdapters);
-    // TODO: add default adapters logic here
-    if (preAddedAdapters.length > 0) {
-      await Promise.all(preAddedAdapters.map((walletName) => this.walletAdapters[walletName].init()));
+    if (this.initialized) throw new Error("Already initialized");
+    const customAddedAdapters = Object.keys(this.walletAdapters);
+    if (customAddedAdapters.length > 0) {
+      // custom ui adapters
+      await Promise.all(customAddedAdapters.map((walletName) => this.walletAdapters[walletName].init()));
+    } else {
+      // default modal adapters
+      const defaultAdaptersKeys = Object.keys(this.aggregatorModalConfig.adapters);
+      const adapterPromises = [];
+      // todo: check if any supported injected provider is available then add it in adapter list
+      defaultAdaptersKeys.forEach(async (walletName) => {
+        const adapterPromise = new Promise((resolve, reject) => {
+          const currentAdapterConfig = this.aggregatorModalConfig.adapters[walletName];
+          if (!currentAdapterConfig.visible) return;
+          // TODO: add mobile and desktop visibility check
+          getModule(walletName, currentAdapterConfig.options)
+            .then(async (adapter: IWalletAdapter) => {
+              const adapterAlreadyExists = this.walletAdapters[walletName];
+              if (adapterAlreadyExists) resolve(true);
+              if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace) {
+                reject(
+                  new IncompatibleChainNamespaceError(
+                    `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+                  )
+                );
+                return;
+              }
+              if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace) {
+                reject(
+                  new IncompatibleChainNamespaceError(
+                    `${walletName} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+                  )
+                );
+                return;
+              }
+              await adapter.init();
+              this.walletAdapters[walletName] = adapter;
+              resolve(true);
+              return true;
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        });
+        adapterPromises.push(adapterPromise);
+      });
+      await Promise.all(adapterPromises);
     }
+    this.initialized = true;
   }
 
   public addWallet(wallet: Wallet): Web3Auth {
+    if (this.initialized) throw new Error("Wallets cannot be added after initialization");
+
     const adapterAlreadyExists = this.walletAdapters[wallet.name];
     if (adapterAlreadyExists) throw new DuplicateWalletAdapterError(`Wallet adapter for ${wallet.name} already exists`);
     const adapter = wallet.adapter();
@@ -54,7 +126,7 @@ export class Web3Auth extends SafeEventEmitter {
       throw new IncompatibleChainNamespaceError(
         `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
-    this.walletAdapters[wallet.name] = wallet.adapter();
+    this.walletAdapters[wallet.name] = adapter;
     return this;
   }
 

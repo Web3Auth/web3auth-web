@@ -1,4 +1,4 @@
-import type { TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
+import type { LoginParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import {
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
@@ -17,6 +17,12 @@ import {
 
 import type { Torus } from "./interface";
 
+interface TorusWalletOptions {
+  chainConfig?: TorusEthWalletChainConfig;
+  adapterSettings?: TorusCtorArgs;
+  loginSettings?: LoginParams;
+  initParams?: TorusParams;
+}
 class TorusWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
@@ -38,11 +44,14 @@ class TorusWalletAdapter extends BaseWalletAdapter {
 
   private initParams: TorusParams;
 
-  constructor(params: { chainConfig: TorusEthWalletChainConfig; widgetOptions: TorusCtorArgs; initParams: TorusParams }) {
+  private loginSettings: LoginParams = {};
+
+  constructor(params: TorusWalletOptions) {
     super();
-    this.torusWalletOptions = params.widgetOptions;
+    this.torusWalletOptions = params.adapterSettings;
     this.initParams = params.initParams;
     this.chainConfig = params.chainConfig;
+    this.loginSettings = params.loginSettings;
   }
 
   async init(): Promise<void> {
@@ -58,7 +67,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
-      await this.torusInstance.login();
+      await this.torusInstance.login(this.loginSettings);
       // TODO: make torus embed provider type compatible with this
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.connected = true;
@@ -88,4 +97,4 @@ class TorusWalletAdapter extends BaseWalletAdapter {
   }
 }
 
-export { TorusCtorArgs, TorusParams, TorusWalletAdapter };
+export { TorusWalletAdapter, TorusWalletOptions };

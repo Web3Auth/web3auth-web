@@ -1,0 +1,38 @@
+import type { ChainNamespaceType, EVM_ADAPTER_TYPE, SOLANA_ADAPTER_TYPE } from "@web3auth/base";
+import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
+import type { SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
+import type { TorusWalletOptions } from "@web3auth/torus-wallet-adapter";
+
+interface BaseAdapterConfig {
+  visible?: boolean;
+  showOnMobile?: boolean;
+  showOnDesktop?: boolean;
+}
+
+interface TorusEvmWalletAdapterConfig extends BaseAdapterConfig {
+  options?: TorusWalletOptions;
+}
+
+interface TorusSolanaWalletAdapterConfig extends BaseAdapterConfig {
+  options?: SolanaWalletOptions;
+}
+
+interface OpenloginAdapterConfig extends BaseAdapterConfig {
+  options?: OpenloginAdapterOptions;
+}
+
+interface BaseAggregatorConfig {
+  chainNamespace: ChainNamespaceType;
+}
+
+interface EvmAggregatorConfig extends BaseAggregatorConfig {
+  adapters?: Record<EVM_ADAPTER_TYPE, TorusEvmWalletAdapterConfig | OpenloginAdapterConfig>;
+}
+
+interface SolanaAggregatorConfig extends BaseAggregatorConfig {
+  adapters?: Record<SOLANA_ADAPTER_TYPE, TorusSolanaWalletAdapterConfig | OpenloginAdapterConfig>;
+}
+
+type AggregatorModalConfig = EvmAggregatorConfig | SolanaAggregatorConfig;
+
+export { AggregatorModalConfig, EvmAggregatorConfig, SolanaAggregatorConfig, TorusWalletOptions };
