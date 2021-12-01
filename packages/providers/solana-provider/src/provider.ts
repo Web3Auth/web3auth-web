@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Keypair, Transaction } from "@solana/web3.js";
-import {
-  BaseConfig,
-  BaseController,
-  BaseState,
-  createSwappableProxy,
-  providerFromEngine,
-  SafeEventEmitterProvider,
-} from "@toruslabs/base-controllers";
+import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, InvalidProviderConfigError, PROVIDER_EVENTS, ProviderNotReadyError, RpcConnectionFailedError } from "@web3auth/base";
+import {
+  CustomChainConfig,
+  InvalidProviderConfigError,
+  PROVIDER_EVENTS,
+  ProviderNotReadyError,
+  RpcConnectionFailedError,
+  SafeEventEmitterProvider,
+} from "@web3auth/base";
 
 import { createJsonRpcClient } from "./JrpcClient";
 import { createSolanaMiddleware, IProviderHandlers } from "./solanaRpcMiddlewares";
@@ -46,7 +45,7 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
   }
 
   public async init(): Promise<void> {
-    const { Transaction: SolTx, Connection: SolConnection, Keypair: SolKeyPair, Message } = await import("@solana/web3.js");
+    const { Transaction: SolTx, Keypair: SolKeyPair, Message } = await import("@solana/web3.js");
     this.transactionGenerator = (serializedTx: string) => {
       const data = Buffer.from(serializedTx, "hex");
       const tx = SolTx.populate(Message.from(data));
@@ -86,21 +85,19 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
         return [keyPair.publicKey.toBase58()];
       },
       getAccounts: async () => [keyPair.publicKey.toBase58()],
-      signTransaction: async (req: JRPCRequest<{ serializedTransaction: string }>): Promise<string> => {
-        const transaction = this.transactionGenerator(req.params?.serializedTransaction);
+      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+        const transaction = this.transactionGenerator(req.params?.message);
         transaction.partialSign(keyPair);
-        const serializedSignedTx = transaction.serialize({ requireAllSignatures: false }).toString("hex");
-        return serializedSignedTx;
+        return transaction;
       },
-      signAllTransactions: async (req: JRPCRequest<{ serializedTransactions: string[] }>): Promise<string[]> => {
-        const serializedSignedTransactions = [];
-        for (const tx of req.params?.serializedTransactions || []) {
+      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+        const signedTransactions: Transaction[] = [];
+        for (const tx of req.params?.message || []) {
           const transaction = this.transactionGenerator(tx);
           transaction.partialSign(keyPair);
-          const serializedSignedTx = transaction.serialize({ requireAllSignatures: false }).toString("hex");
-          serializedSignedTransactions.push(serializedSignedTx);
+          signedTransactions.push(transaction);
         }
-        return serializedSignedTransactions;
+        return signedTransactions;
       },
 
       getProviderState: (req, res, _, end) => {

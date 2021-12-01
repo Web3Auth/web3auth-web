@@ -1,3 +1,4 @@
+import type { Transaction } from "@solana/web3.js";
 import { InPageWalletProviderState, PROVIDER_JRPC_METHODS } from "@toruslabs/base-controllers";
 import {
   createAsyncMiddleware,
@@ -14,9 +15,9 @@ export interface IProviderHandlers {
   version: string;
   requestAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  signMessage?: (req: JRPCRequest<{ data: string; display: string }>) => Promise<string>;
-  signTransaction?: (req: JRPCRequest<{ serializedTransaction: string }>) => Promise<string>;
-  signAllTransactions?: (req: JRPCRequest<{ serializedTransactions: string[] }>) => Promise<string[]>;
+  signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
+  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
+  signMessage?: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<{ signature: Uint8Array }>;
   getProviderState: (
     req: JRPCRequest<[]>,
     res: JRPCResponse<InPageWalletProviderState>,
@@ -84,8 +85,8 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     }),
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ serializedTransaction: string }, string>("sign_transaction", signTransaction),
-    createGenericJRPCMiddleware<{ serializedTransactions: string[] }, unknown>("sign_all_transactions", signAllTransactions),
-    createGenericJRPCMiddleware<{ data: string; display: string }, unknown>("sign_message", signMessage),
+    createGenericJRPCMiddleware<{ message: string }, Transaction>("sign_transaction", signTransaction),
+    createGenericJRPCMiddleware<{ message: string[] }, Transaction[]>("sign_all_transactions", signAllTransactions),
+    createGenericJRPCMiddleware<{ message: Uint8Array }, { signature: Uint8Array }>("sign_message", signMessage),
   ]);
 }

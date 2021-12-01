@@ -8,6 +8,7 @@ export interface Wallet {
 export const SOLANA_WALLET_ADAPTERS = {
   TORUS_SOLANA_WALLET: "torus-solana-wallet",
   OPENLOGIN_WALLET: "openlogin-wallet",
+  PHANTOM_WALLET: "phantom-wallet",
 };
 
 export const EVM_WALLET_ADAPTERS = {

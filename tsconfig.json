@@ -20,7 +20,8 @@
       "@web3auth/torus-wallet-adapter": ["packages/wallets/torusWalletAdapter/src"],
       "@web3auth/solana-wallet-adapter": ["packages/wallets/solanaWalletAdapter/src"],
       "@web3auth/openlogin-adapter": ["packages/wallets/openloginAdapter/src"],
-      "@web3auth/metamask-wallet-adapter": ["packages/wallets/metamaskAdapter/src"]
+      "@web3auth/metamask-wallet-adapter": ["packages/wallets/metamaskAdapter/src"],
+      "@web3auth/phantom-wallet-adapter": ["packages/wallets/phantomWalletAdapter/src"]
     }
   }
 }

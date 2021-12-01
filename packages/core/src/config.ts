@@ -7,6 +7,7 @@ export const defaultSolanaAggregatorConfig: SolanaAggregatorConfig = {
   adapters: {
     [SOLANA_WALLET_ADAPTERS.TORUS_SOLANA_WALLET]: {},
     [SOLANA_WALLET_ADAPTERS.OPENLOGIN_WALLET]: {},
+    [SOLANA_WALLET_ADAPTERS.PHANTOM_WALLET]: {},
   },
 };
 
