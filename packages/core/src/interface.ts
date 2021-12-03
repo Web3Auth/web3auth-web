@@ -41,4 +41,4 @@ interface SolanaAggregatorConfig extends BaseAggregatorConfig {
 
 type AggregatorModalConfig = EvmAggregatorConfig | SolanaAggregatorConfig;
 
-export { AggregatorModalConfig, EvmAggregatorConfig, SolanaAggregatorConfig, TorusWalletOptions };
+export { AggregatorModalConfig, EvmAggregatorConfig, LoginMethodConfig, SolanaAggregatorConfig, TorusWalletOptions };

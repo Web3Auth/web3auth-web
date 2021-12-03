@@ -1,0 +1,251 @@
+/* Reset */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    font-family: DM Sans, Helvetica, sans-serif;
+    background: lightblue;
+}
+body {
+    line-height: 1;
+}
+p,
+h1,
+h6 {
+    margin: 0;
+    padding: 0;
+}
+
+/* Modal */
+.w3a-modal {
+    --text-color1: #d3d3d4;
+    --text-color2: #ffffff;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 15px;
+    background: rgba(33, 33, 33, 0.46);
+    color: var(--text-color1);
+}
+
+.w3a-modal__inner {
+    background: white;
+    width: 100%;
+    max-width: 375px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.w3a-modal__header {
+    padding: 25px 34px;
+    background: #242529;
+    box-shadow: 0px 4px 28px rgba(3, 100, 255, 0.05);
+    position: relative;
+}
+.w3a-modal__content {
+    padding: 30px 34px;
+    background: #24262e;
+}
+.w3a-modal__footer {
+    padding: 16px 34px 24px;
+    background: #2f3136;
+}
+
+/* Header */
+.w3a-header {
+    display: flex;
+    color: var(--text-color2);
+}
+.w3a-header__logo {
+    height: auto;
+    width: 40px;
+    margin-right: 16px;
+}
+.w3a-header__title {
+    font-family: Poppins, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.5em;
+}
+.w3a-header__subtitle {
+    font-size: 14px;
+    line-height: 1.5em;
+}
+.w3a-header__button {
+    cursor: pointer;
+    position: absolute;
+    background: none;
+    padding: 0;
+    border: 0;
+    top: 20px;
+    right: 26px;
+}
+
+/* BODY */
+.w3a-group {
+    margin-bottom: 16px;
+}
+.w3a-group:not(:last-child) {
+    border-bottom: 0.5px solid #5c6c7f;
+    padding-bottom: 24px;
+}
+
+.w3a-group.w3a-group--hidden {
+    display: none;
+}
+
+.w3a-group__title {
+    font-family: Poppins, Helvetica, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5em;
+    margin-bottom: 8px;
+}
+
+/* Adapter List */
+.w3a-adapter-list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    margin: 0;
+}
+
+.w3a-adapter-item {
+    list-style: none;
+}
+
+.w3a-adapter-item__label {
+    font-size: 12px;
+    color: #5c6c7f;
+    text-align: center;
+    margin-top: 8px;
+    text-transform: capitalize;
+}
+
+/* Buttons */
+.w3a-button {
+    background-color: #2f3136;
+    border: 1px solid #404145;
+    box-sizing: border-box;
+    box-shadow: 2px 2px 12px rgba(3, 100, 255, 0.05);
+    border-radius: 24px;
+    height: 48px;
+    width: 100%;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--text-color2);
+    cursor: pointer;
+}
+
+.w3a-button--icon {
+    width: 48px;
+}
+
+.w3a-button__image {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.w3a-button__image--left {
+    margin-right: 12px;
+}
+
+.w3a-external-toggle {
+    display: block;
+}
+
+.w3a-external-toggle.w3a-external-toggle--hidden{
+    display: none;
+}
+
+.w3a-external-container {
+    display: block;
+}
+
+.w3a-external-container.w3a-external-container--hidden{
+    display: none;
+}
+
+.w3a-external-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.w3a-external-group__left {
+    flex-grow: 1;
+}
+
+.w3a-external-back {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 30px;
+    cursor: pointer;
+    color: var(--text-color1);
+}
+
+.w3a-external-back .w3a-group__title {
+    margin-bottom: 0;
+    margin-left: 5px;
+}
+
+/* Text Field */
+.w3a-text-field {
+    background: #2f3136;
+    border: 1px solid #404145;
+    box-sizing: border-box;
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    padding: 0 28px;
+    height: 48px;
+    width: 100%;
+    font-size: 16px;
+    color: var(--text-color2);
+    margin-bottom: 16px;
+}
+
+/* Footer Components */
+.w3a-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    line-height: 150%;
+    color: var(--text-color2);
+}
+
+.w3a-footer__links {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.w3a-footer__links-item {
+    list-style: none;
+}
+
+.w3a-footer__links-item a {
+    color: var(--text-color2);
+    text-decoration: none;
+}
