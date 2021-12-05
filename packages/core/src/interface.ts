@@ -1,18 +1,7 @@
-import type { ChainNamespaceType, EVM_ADAPTER_TYPE, SOLANA_ADAPTER_TYPE } from "@web3auth/base";
+import type { BaseAdapterConfig, ChainNamespaceType, EVM_ADAPTER_TYPE, LoginMethodConfig, SOLANA_ADAPTER_TYPE } from "@web3auth/base";
 import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import type { SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
 import type { TorusWalletOptions } from "@web3auth/torus-wallet-adapter";
-
-interface LoginMethodConfig {
-  visible?: boolean;
-  showOnMobile?: boolean;
-  showOnDesktop?: boolean;
-}
-interface BaseAdapterConfig {
-  visible?: boolean;
-  showOnMobile?: boolean;
-  showOnDesktop?: boolean;
-}
 
 interface TorusEvmWalletAdapterConfig extends BaseAdapterConfig {
   options?: TorusWalletOptions;

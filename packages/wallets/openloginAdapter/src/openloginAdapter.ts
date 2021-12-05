@@ -1,12 +1,15 @@
 import type openlogin from "@toruslabs/openlogin";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
+  ADAPTER_CATEGORY,
+  ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
   BaseWalletAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CommonLoginOptions,
   CustomChainConfig,
   PROVIDER_EVENTS,
   SafeEventEmitterProvider,
@@ -32,6 +35,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly currentChainNamespace: ChainNamespaceType;
+
+  readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
   public openloginInstance: openlogin;
 
@@ -80,7 +85,34 @@ class OpenloginAdapter extends BaseWalletAdapter {
     this.ready = true;
   }
 
-  async subscribeToProviderEvents(): Promise<SafeEventEmitterProvider | null> {
+  async connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
+    if (!this.ready) throw new WalletNotReadyError("Openlogin wallet adapter is not ready, please init first");
+    this.connecting = true;
+    this.emit(BASE_WALLET_EVENTS.CONNECTING);
+    try {
+      return await this._login(params);
+    } catch (error) {
+      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+      throw new WalletConnectionError("Failed to login with openlogin", error);
+    } finally {
+      this.connecting = false;
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
+    await this.openloginInstance.logout();
+    this.connected = false;
+    this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
+  }
+
+  async getUserInfo(): Promise<Partial<UserInfo>> {
+    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet, Please login/connect first");
+    const userInfo = await this.openloginInstance.getUserInfo();
+    return userInfo;
+  }
+
+  private async _login(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: SolanaProvider | EthereumProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
@@ -114,7 +146,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
         try {
           const privateKey = this.openloginInstance.privKey;
           if (!privateKey) {
-            await this.openloginInstance.login(this.loginSettings);
+            await this.openloginInstance.login({ ...this.loginSettings, ...params, extraLoginOptions: { login_hint: params?.loginHint } });
           }
           let finalPrivKey = this.openloginInstance.privKey;
           if (finalPrivKey) {
@@ -150,33 +182,6 @@ class OpenloginAdapter extends BaseWalletAdapter {
         reject(error);
       });
     });
-  }
-
-  async connect(): Promise<SafeEventEmitterProvider | null> {
-    if (!this.ready) throw new WalletNotReadyError("Openlogin wallet adapter is not ready, please init first");
-    this.connecting = true;
-    this.emit(BASE_WALLET_EVENTS.CONNECTING);
-    try {
-      return await this.subscribeToProviderEvents();
-    } catch (error) {
-      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
-      throw new WalletConnectionError("Failed to login with openlogin", error);
-    } finally {
-      this.connecting = false;
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
-    await this.openloginInstance.logout();
-    this.connected = false;
-    this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
-  }
-
-  async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet, Please login/connect first");
-    const userInfo = await this.openloginInstance.getUserInfo();
-    return userInfo;
   }
 }
 

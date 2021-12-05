@@ -52,7 +52,7 @@ export default Vue.extend({
       clientId: "localhost-id",
       uxMode: "popup"
     }, loginSettings: {
-      loginProvider: "google"
+      // loginProvider: "google"
     }})
     web3auth.addWallet(torusWalletAdapter).addWallet(openloginAdapter);
     await web3auth.init();

@@ -1,25 +1,46 @@
-import { TypedEmitter } from "tiny-typed-emitter";
+import "../css/web3auth.css";
 
-import { LoginMethodConfig } from "../../core/src/interface";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { BASE_WALLET_EVENTS, CommonLoginOptions, LoginMethodConfig } from "@web3auth/base";
 
-interface UIEvents {
-  login: (provider: string, login_hint?: string) => void;
+import { icons, images } from "../assets";
+interface UIConfig {
+  appLogo: string;
+  version: string;
+  adapterListener: SafeEventEmitter;
 }
-
-export class UI extends TypedEmitter<UIEvents> {
+export const LOGIN_MODAL_EVENTS = {
+  INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",
+  LOGIN: "LOGIN",
+};
+export class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
 
   private appLogo: string;
 
   private version: string;
 
-  constructor({ appLogo, version }: { appLogo: string; version: string }) {
+  private state = {
+    initialized: false,
+    connected: false,
+    connecting: false,
+    errored: false,
+  };
+
+  constructor({ appLogo, version, adapterListener }: UIConfig) {
     super();
     this.appLogo = appLogo;
     this.version = version;
+    this.subscribeCoreEvents(adapterListener);
+  }
+
+  get initialized() {
+    return this.state.initialized;
   }
 
   init() {
+    const web3authIcon = images[`web3auth.svg`];
+    const closeIcon = icons["close.svg"];
     this.$modal = this.htmlToElement(`
         <div class="w3a-modal">
             <div class="w3a-modal__inner">
@@ -32,7 +53,7 @@ export class UI extends TypedEmitter<UIEvents> {
                         </div>
                     </div>
                     <button class="w3a-header__button">
-                        <img src="./icons/close.svg" alt="">
+                        <img src="${closeIcon}" alt="">
                     </button>
                 </div>
                 <div class="w3a-modal__content w3ajs-content"></div>
@@ -45,7 +66,7 @@ export class UI extends TypedEmitter<UIEvents> {
                             </ul>
                             <p>${this.version}</p>
                         </div>
-                        <img height="24" src="./images/web3auth.svg" alt="">
+                        <img height="24" src="${web3authIcon}" alt="">
                     </div>
                 </div>
             </div>
@@ -80,23 +101,27 @@ export class UI extends TypedEmitter<UIEvents> {
     $content?.appendChild($externalWallet);
 
     document.body.appendChild(this.$modal);
+    this.state.initialized = true;
   }
+
+  showModal() {}
 
   addSocialLogins = (providers: Record<string, LoginMethodConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
     Object.keys(providers)
       .reverse()
       .forEach((provider: string) => {
+        const providerIcon = images[`login-${provider}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
-                    <img class="w3a-button__image" src="./images/login-${provider}.svg" alt="">
+                    <img class="w3a-button__image" src="${providerIcon}" alt="">
                 </button>
             </li>          
         `);
 
         adapterButton.addEventListener("click", () => {
-          this.emit("login", provider);
+          this.emit(LOGIN_MODAL_EVENTS.LOGIN, { loginProvider: provider } as CommonLoginOptions);
         });
 
         adapterList.prepend(adapterButton);
@@ -106,17 +131,18 @@ export class UI extends TypedEmitter<UIEvents> {
   addWalletLogins = (providers: Record<string, LoginMethodConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
     Object.keys(providers).forEach((provider) => {
+      const providerIcon = images[`login-${provider}.svg`];
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
-                    <img class="w3a-button__image" src="./images/login-${provider}.png" alt="">
+                    <img class="w3a-button__image" src="${providerIcon}" alt="">
                 </button>
                 <p class="w3a-adapter-item__label">${provider}</p>
             </li>   
         `);
 
       adapterButton.addEventListener("click", () => {
-        this.emit("login", provider);
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { loginProvider: provider } as CommonLoginOptions);
       });
 
       adapterList.appendChild(adapterButton);
@@ -124,13 +150,14 @@ export class UI extends TypedEmitter<UIEvents> {
   };
 
   private getTorusWallet(): HTMLDivElement {
+    const expandIcon = icons["expand.svg"];
     return this.htmlToElement(`
         <div class="w3a-group">
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
             <ul class="w3a-adapter-list w3ajs-socials-adapters">
               <li class="w3a-adapter-item">
                   <button class="w3a-button w3a-button--icon">
-                      <img class="w3a-button__image" src="./icons/expand.svg" alt="">
+                      <img class="w3a-button__image" src="${expandIcon}" alt="">
                   </button>
               </li>   
             </ul>
@@ -151,6 +178,10 @@ export class UI extends TypedEmitter<UIEvents> {
   };
 
   private getExternalWallet = (): HTMLDivElement => {
+    const torusImage = images[`login-torus.svg`];
+    const arrowLeftIcon = icons["circle-arrow-left.svg"];
+    const expandIcon = icons["expand.svg"];
+
     return this.htmlToElement(`
         <div class="w3a-group">
             <div class="w3a-external-toggle w3ajs-external-toggle">
@@ -159,7 +190,7 @@ export class UI extends TypedEmitter<UIEvents> {
             </div>
             <div class="w3a-external-container w3a-external-container--hidden w3ajs-external-container">
                 <button class="w3a-external-back w3ajs-external-back">
-                    <img src="./icons/circle-arrow-left.svg" alt="">
+                    <img src="${arrowLeftIcon}" alt="">
                     <h6 class="w3a-group__title">Back</h6>
                 </button>
 
@@ -168,13 +199,13 @@ export class UI extends TypedEmitter<UIEvents> {
                     <div class="w3a-external-group__left">
                         <button class="w3a-button">
                             <img class="w3a-button__image w3a-button__image--left"
-                                src="./images/login-torus.svg" alt="">
+                                src="${torusImage}" alt="">
                             Sign in with Torus
                         </button>
                     </div>
                     <div>
                         <button class="w3a-button w3a-button--icon">
-                            <img src="./icons/expand.svg" alt="">
+                            <img src="${expandIcon}" alt="">
                         </button>
                     </div>
                 </div>
@@ -191,4 +222,22 @@ export class UI extends TypedEmitter<UIEvents> {
     template.innerHTML = trimmedHtml;
     return template.content.firstChild as T;
   };
+
+  private subscribeCoreEvents(listener: SafeEventEmitter) {
+    listener.on(BASE_WALLET_EVENTS.CONNECTING, () => {
+      this.state.connecting = true;
+      this.state.connected = false;
+    });
+    listener.on(BASE_WALLET_EVENTS.CONNECTED, () => {
+      this.state.connecting = false;
+      this.state.connected = true;
+    });
+    listener.on(BASE_WALLET_EVENTS.ERRORED, () => {
+      this.state.errored = true;
+    });
+    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
+      this.state.connecting = false;
+      this.state.connected = false;
+    });
+  }
 }

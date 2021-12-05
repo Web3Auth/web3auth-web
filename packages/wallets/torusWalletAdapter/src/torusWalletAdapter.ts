@@ -1,5 +1,7 @@
 import type { LoginParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import {
+  ADAPTER_CATEGORY,
+  ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
@@ -27,6 +29,8 @@ class TorusWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+
+  readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
   public connecting: boolean;
 

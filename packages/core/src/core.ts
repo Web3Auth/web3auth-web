@@ -1,17 +1,21 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
+  ADAPTER_CATEGORY,
   ADAPTER_NAMESPACES,
   BASE_WALLET_EVENTS,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CommonLoginOptions,
   DuplicateWalletAdapterError,
   IncompatibleChainNamespaceError,
   IWalletAdapter,
+  LoginMethodConfig,
   SafeEventEmitterProvider,
   Wallet,
   WalletNotConnectedError,
   WalletNotFoundError,
 } from "@web3auth/base";
+import { LOGIN_MODAL_EVENTS, LoginModal } from "@web3auth/ui";
 
 import { defaultEvmAggregatorConfig, defaultSolanaAggregatorConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
@@ -36,7 +40,9 @@ export class Web3Auth extends SafeEventEmitter {
 
   private aggregatorModalConfig: AggregatorModalConfig;
 
-  constructor(modalConfig: AggregatorModalConfig) {
+  private loginModal: LoginModal;
+
+  constructor(modalConfig?: AggregatorModalConfig) {
     super();
     this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
     this.chainNamespace = modalConfig.chainNamespace;
@@ -58,6 +64,7 @@ export class Web3Auth extends SafeEventEmitter {
         this.aggregatorModalConfig.adapters[adapterKey] = defaultConfig[adapterKey];
       }
     });
+    this.loginModal = new LoginModal({ appLogo: "", version: "", adapterListener: this.on.bind(this) });
   }
 
   public async init(): Promise<void> {
@@ -96,7 +103,11 @@ export class Web3Auth extends SafeEventEmitter {
                 );
                 return;
               }
-              await adapter.init();
+              // only intialize default login modals to use in app wallets here.
+              if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
+                await adapter.init();
+              }
+
               this.walletAdapters[walletName] = adapter;
               resolve(true);
               return true;
@@ -108,6 +119,9 @@ export class Web3Auth extends SafeEventEmitter {
         adapterPromises.push(adapterPromise);
       });
       await Promise.all(adapterPromises);
+      this.loginModal.init();
+      // todo: add social logins to modal
+      this.subsribeToLoginModalEvents(this.loginModal);
     }
     this.initialized = true;
   }
@@ -135,19 +149,25 @@ export class Web3Auth extends SafeEventEmitter {
     this.cachedWallet = undefined;
   }
 
+  public connect() {
+    if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    this.loginModal.showModal();
+  }
+
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo(walletName: WALLET_ADAPTER_TYPE): Promise<void> {
+  async connectTo(walletName: WALLET_ADAPTER_TYPE, loginParams?: CommonLoginOptions): Promise<void> {
     if (!this.walletAdapters[walletName]) throw new WalletNotFoundError(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    this.subscribeToEvents(this.walletAdapters[walletName]);
-    await this.walletAdapters[walletName].connect();
+    this.subscribeToAdapterEvents(this.walletAdapters[walletName]);
+    await this.walletAdapters[walletName].connect(loginParams);
   }
 
   async logout(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
     await this.connectedAdapter.disconnect();
+    this.connectedAdapter.removeAllListeners();
   }
 
   async getUserInfo(): Promise<void> {
@@ -155,7 +175,7 @@ export class Web3Auth extends SafeEventEmitter {
     await this.connectedAdapter.getUserInfo();
   }
 
-  private subscribeToEvents(walletAdapter: IWalletAdapter): void {
+  private subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
     walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapter: WALLET_ADAPTER_TYPE) => {
       this.connected = true;
       this.connecting = false;
@@ -176,6 +196,29 @@ export class Web3Auth extends SafeEventEmitter {
     walletAdapter.on(BASE_WALLET_EVENTS.ERRORED, (data) => {
       this.connecting = false;
       this.emit(BASE_WALLET_EVENTS.ERRORED, data);
+    });
+  }
+
+  private async initExternalWalletAdapters(): Promise<void> {
+    const adapterPromises = [];
+    const adaptersConfig: Record<string, LoginMethodConfig> = {};
+    Object.keys(this.walletAdapters).forEach(async (walletName) => {
+      const adapter = this.walletAdapters[walletName];
+      if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
+        adaptersConfig[walletName] = this.aggregatorModalConfig[walletName]?.options?.loginSettings;
+        adapterPromises.push(adapter.init());
+      }
+    });
+    if (adapterPromises.length > 0) await Promise.all(adapterPromises);
+    this.loginModal.addWalletLogins(adaptersConfig);
+  }
+
+  private subsribeToLoginModalEvents(loginModal: LoginModal): void {
+    loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (adapter: WALLET_ADAPTER_TYPE, loginParams: CommonLoginOptions) => {
+      await this.connectTo(adapter, loginParams);
+    });
+    loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async () => {
+      await this.initExternalWalletAdapters();
     });
   }
 

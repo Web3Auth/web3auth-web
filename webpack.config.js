@@ -2,7 +2,7 @@
 const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
-function generateWebpackConfig({ pkg, currentPath, alias }) {
+function generateWebpackConfig({ pkg, currentPath, alias, module = {} }) {
   const depsList = Object.keys(pkg.dependencies);
   const baseConfig = {
     resolve: {
@@ -12,6 +12,7 @@ function generateWebpackConfig({ pkg, currentPath, alias }) {
         ...alias,
       },
     },
+    module,
   };
 
   return { baseConfig };

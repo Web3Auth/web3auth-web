@@ -1,5 +1,7 @@
 import type { LOGIN_PROVIDER_TYPE, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
+  ADAPTER_CATEGORY,
+  ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
   AdapterNamespaceType,
   BASE_WALLET_EVENTS,
@@ -31,6 +33,8 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
+
+  readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
   public connecting: boolean;
 
