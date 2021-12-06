@@ -32,8 +32,8 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   init() {
-    const { default: web3authIcon } = images[`web3auth.svg`];
-    const { default: closeIcon } = icons["close.svg"];
+    const web3authIcon = images[`web3auth.svg`];
+    const closeIcon = icons["close.svg"];
     this.$modal = this.htmlToElement(`
         <div class="w3a-modal">
             <div class="w3a-modal__inner">
@@ -104,7 +104,7 @@ export default class LoginModal extends SafeEventEmitter {
     Object.keys(providers)
       .reverse()
       .forEach((provider: string) => {
-        const { default: providerIcon } = images[`login-${provider}.svg`];
+        const providerIcon = images[`login-${provider}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -124,7 +124,7 @@ export default class LoginModal extends SafeEventEmitter {
   addWalletLogins = (providers: Record<string, LoginMethodConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
     Object.keys(providers).forEach((provider) => {
-      const { default: providerIcon } = images[`login-${provider}.svg`];
+      const providerIcon = images[`login-${provider}.svg`];
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -143,7 +143,7 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private getTorusWallet(): HTMLDivElement {
-    const { default: expandIcon } = icons["expand.svg"];
+    const expandIcon = icons["expand.svg"];
     return this.htmlToElement(`
         <div class="w3a-group">
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
@@ -171,9 +171,9 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private getExternalWallet = (): HTMLDivElement => {
-    const { default: torusImage } = images[`login-torus.svg`];
-    const { default: arrowLeftIcon } = icons["circle-arrow-left.svg"];
-    const { default: expandIcon } = icons["expand.svg"];
+    const torusImage = images[`login-torus.svg`];
+    const arrowLeftIcon = icons["circle-arrow-left.svg"];
+    const expandIcon = icons["expand.svg"];
     return this.htmlToElement(`
         <div class="w3a-group">
             <div class="w3a-external-toggle w3ajs-external-toggle">

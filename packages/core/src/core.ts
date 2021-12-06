@@ -15,7 +15,7 @@ import {
   WalletNotConnectedError,
   WalletNotFoundError,
 } from "@web3auth/base";
-import { LOGIN_MODAL_EVENTS, LoginModal } from "@web3auth/ui";
+import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 
 import { defaultEvmAggregatorConfig, defaultSolanaAggregatorConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
@@ -25,6 +25,9 @@ export class Web3Auth extends SafeEventEmitter {
   readonly chainNamespace: ChainNamespaceType;
 
   public connectedAdapter: IWalletAdapter | undefined;
+
+  // public for testing purpose
+  public loginModal: LoginModal;
 
   public connected: boolean;
 
@@ -38,9 +41,10 @@ export class Web3Auth extends SafeEventEmitter {
 
   private walletAdapters: Record<string, IWalletAdapter> = {};
 
-  private aggregatorModalConfig: AggregatorModalConfig;
-
-  private loginModal: LoginModal;
+  private aggregatorModalConfig: AggregatorModalConfig = {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    adapters: {},
+  };
 
   constructor(modalConfig?: AggregatorModalConfig) {
     super();
@@ -55,16 +59,15 @@ export class Web3Auth extends SafeEventEmitter {
       throw new Error(`Invalid chainspace provided: ${this.chainNamespace}`);
     }
     this.aggregatorModalConfig.chainNamespace = modalConfig.chainNamespace;
-    this.aggregatorModalConfig.adapters = {};
     const defaultAdapterKeys = Object.keys(defaultConfig);
     defaultAdapterKeys.forEach((adapterKey) => {
-      if (modalConfig.adapters[adapterKey]) {
+      if (modalConfig.adapters?.[adapterKey]) {
         this.aggregatorModalConfig.adapters[adapterKey] = { ...defaultConfig[adapterKey], ...modalConfig.adapters[adapterKey] };
       } else {
         this.aggregatorModalConfig.adapters[adapterKey] = defaultConfig[adapterKey];
       }
     });
-    this.loginModal = new LoginModal({ appLogo: "", version: "", adapterListener: this.on.bind(this) });
+    this.loginModal = new LoginModal({ appLogo: "", version: "", adapterListener: this });
   }
 
   public async init(): Promise<void> {

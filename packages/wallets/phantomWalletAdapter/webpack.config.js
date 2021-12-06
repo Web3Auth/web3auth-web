@@ -9,7 +9,6 @@ const currentPath = path.resolve(".");
 const config = generateWebpackConfig({
   currentPath,
   pkg,
-  alias: {},
 });
 
 module.exports = config;

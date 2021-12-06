@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "phantom wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/phantom-wallet-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -17,7 +17,7 @@
   "jsdelivr": "dist/phantomWalletAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/phantomWalletAdapter#readme",
   "license": "ISC",
   "scripts": {
     "local-publish": "yalc publish",
@@ -39,7 +39,8 @@
     "lint-staged": "^11.2.6"
   },
   "dependencies": {
-    "@web3auth/base": "0.0.0"
+    "@web3auth/base": "0.0.0",
+    "@web3auth/solana-provider": "0.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [

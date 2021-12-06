@@ -23,7 +23,7 @@ import Vue from "vue";
 import { Web3Auth, getTorusEvmWallet, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
 import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
 
-const web3auth = new Web3Auth(CHAIN_NAMESPACES.EIP155)
+const web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, adapters: {} })
 export default Vue.extend({
   name: "app",
   data() {
@@ -38,7 +38,7 @@ export default Vue.extend({
     const torusWalletAdapter = getTorusEvmWallet({ chainConfig: {
       host: "rinkeby",
       chainId: 4
-    }, widgetOptions: {}, initParams: {}})
+    }, adapterSettings: {}, initParams: {}})
     
     const openloginAdapter = getOpenloginWallet({ chainConfig: {
       rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
@@ -47,7 +47,7 @@ export default Vue.extend({
       networkName: "mainnet",
       ticker: "eth",
       tickerName: "ethereum",
-    }, openLoginOptions: {
+    }, adapterSettings: {
       network: "testnet",
       clientId: "localhost-id",
       uxMode: "popup"
@@ -60,6 +60,32 @@ export default Vue.extend({
     if (web3auth.cachedWallet) {
       await web3auth.connectTo(web3auth.cachedWallet)
     }
+    web3auth.loginModal.init()
+      web3auth.loginModal.addSocialLogins({
+        google: {
+          visible: true,
+          showOnMobile: true,
+          showOnDesktop: true,
+        },
+      });
+
+      web3auth.loginModal.addSocialLogins({
+        facebook: {
+          visible: true,
+          showOnMobile: true,
+          showOnDesktop: true,
+        },
+      });
+
+       web3auth.loginModal.on("LOGIN", (params) => {
+          // eslint-disable-next-line no-console
+          console.log("LOGIN", params);
+        });
+        web3auth.loginModal.on("INIT_EXTERNAL_WALLETS", (params) => {
+          // eslint-disable-next-line no-console
+          console.log("INIT_EXTERNAL_WALLETS", params);
+        });
+
     this.connected = web3auth.connected
   },
   methods: {

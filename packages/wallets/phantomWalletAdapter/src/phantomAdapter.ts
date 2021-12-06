@@ -19,16 +19,16 @@ import {
   WalletNotInstalledError,
   WalletWindowClosedError,
 } from "@web3auth/base";
-import type { ISolanaWallet, SolanaInjectedProviderProxy } from "@web3auth/solana-provider";
+// import type { SolanaInjectedProviderProxy } from "@web3auth/solana-provider";
 
-interface PhantomWallet extends ISolanaWallet {
-  isPhantom?: boolean;
-  publicKey?: { toBytes(): Uint8Array };
-  isConnected: boolean;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  _handleDisconnect(...args: unknown[]): unknown;
-}
+// interface PhantomWallet extends ISolanaWallet {
+//   isPhantom?: boolean;
+//   publicKey?: { toBytes(): Uint8Array };
+//   isConnected: boolean;
+//   connect(): Promise<void>;
+//   disconnect(): Promise<void>;
+//   _handleDisconnect(...args: unknown[]): unknown;
+// }
 
 class PhantomAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -43,9 +43,9 @@ class PhantomAdapter extends BaseWalletAdapter {
 
   public provider: SafeEventEmitterProvider;
 
-  public _wallet: PhantomWallet;
+  public _wallet: any;
 
-  private solanaProviderFactory: SolanaInjectedProviderProxy;
+  private solanaProviderFactory: any;
 
   get connected() {
     return this._wallet?.isConnected && this.solanaProviderFactory?.state._initialized;
@@ -62,7 +62,7 @@ class PhantomAdapter extends BaseWalletAdapter {
     this.ready = true;
   }
 
-  async subscribeToProviderEvents(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
+  async subscribeToProviderEvents(injectedProvider: any): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (this.solanaProviderFactory?.state._errored) {

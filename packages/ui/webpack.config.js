@@ -50,8 +50,12 @@ const config = generateWebpackConfig({
         use: { loader: "css-loader", options: {} },
       },
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        use: { loader: "file-loader" },
+        test: /\.svg$/,
+        use: [
+          {
+            loader: "svg-url-loader",
+          },
+        ],
       },
     ],
   },
