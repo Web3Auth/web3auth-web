@@ -121,6 +121,7 @@ export class Web3Auth extends SafeEventEmitter {
       await Promise.all(adapterPromises);
       this.loginModal.init();
       // todo: add social logins to modal
+      // this.loginModal.addSocialLogins()
       this.subsribeToLoginModalEvents(this.loginModal);
     }
     this.initialized = true;

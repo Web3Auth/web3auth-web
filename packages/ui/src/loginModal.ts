@@ -4,16 +4,9 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BASE_WALLET_EVENTS, CommonLoginOptions, LoginMethodConfig } from "@web3auth/base";
 
 import { icons, images } from "../assets";
-interface UIConfig {
-  appLogo: string;
-  version: string;
-  adapterListener: SafeEventEmitter;
-}
-export const LOGIN_MODAL_EVENTS = {
-  INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",
-  LOGIN: "LOGIN",
-};
-export class LoginModal extends SafeEventEmitter {
+import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
+
+export default class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
 
   private appLogo: string;
@@ -39,8 +32,8 @@ export class LoginModal extends SafeEventEmitter {
   }
 
   init() {
-    const web3authIcon = images[`web3auth.svg`];
-    const closeIcon = icons["close.svg"];
+    const { default: web3authIcon } = images[`web3auth.svg`];
+    const { default: closeIcon } = icons["close.svg"];
     this.$modal = this.htmlToElement(`
         <div class="w3a-modal">
             <div class="w3a-modal__inner">
@@ -111,7 +104,7 @@ export class LoginModal extends SafeEventEmitter {
     Object.keys(providers)
       .reverse()
       .forEach((provider: string) => {
-        const providerIcon = images[`login-${provider}.svg`];
+        const { default: providerIcon } = images[`login-${provider}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -131,7 +124,7 @@ export class LoginModal extends SafeEventEmitter {
   addWalletLogins = (providers: Record<string, LoginMethodConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
     Object.keys(providers).forEach((provider) => {
-      const providerIcon = images[`login-${provider}.svg`];
+      const { default: providerIcon } = images[`login-${provider}.svg`];
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -150,7 +143,7 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private getTorusWallet(): HTMLDivElement {
-    const expandIcon = icons["expand.svg"];
+    const { default: expandIcon } = icons["expand.svg"];
     return this.htmlToElement(`
         <div class="w3a-group">
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
@@ -178,10 +171,9 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private getExternalWallet = (): HTMLDivElement => {
-    const torusImage = images[`login-torus.svg`];
-    const arrowLeftIcon = icons["circle-arrow-left.svg"];
-    const expandIcon = icons["expand.svg"];
-
+    const { default: torusImage } = images[`login-torus.svg`];
+    const { default: arrowLeftIcon } = icons["circle-arrow-left.svg"];
+    const { default: expandIcon } = icons["expand.svg"];
     return this.htmlToElement(`
         <div class="w3a-group">
             <div class="w3a-external-toggle w3ajs-external-toggle">
