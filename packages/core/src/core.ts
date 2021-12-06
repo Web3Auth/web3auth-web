@@ -3,23 +3,23 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_NAMESPACES,
   BASE_WALLET_EVENTS,
+  BaseAdapterConfig,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CommonLoginOptions,
   DuplicateWalletAdapterError,
   IncompatibleChainNamespaceError,
   IWalletAdapter,
-  LoginMethodConfig,
   SafeEventEmitterProvider,
   Wallet,
   WalletNotConnectedError,
   WalletNotFoundError,
 } from "@web3auth/base";
-import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
+import LoginModal from "@web3auth/ui";
 
 import { defaultEvmAggregatorConfig, defaultSolanaAggregatorConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
-import { AggregatorModalConfig } from "./interface";
+import { AggregatorModalConfig, SocialLoginAdapterConfig } from "./interface";
 import { getModule } from "./utils";
 export class Web3Auth extends SafeEventEmitter {
   readonly chainNamespace: ChainNamespaceType;
@@ -75,20 +75,20 @@ export class Web3Auth extends SafeEventEmitter {
     const customAddedAdapters = Object.keys(this.walletAdapters);
     if (customAddedAdapters.length > 0) {
       // custom ui adapters
-      await Promise.all(customAddedAdapters.map((walletName) => this.walletAdapters[walletName].init()));
+      await Promise.all(customAddedAdapters.map((adapterName) => this.walletAdapters[adapterName].init()));
     } else {
       // default modal adapters
       const defaultAdaptersKeys = Object.keys(this.aggregatorModalConfig.adapters);
       const adapterPromises = [];
       // todo: check if any supported injected provider is available then add it in adapter list
-      defaultAdaptersKeys.forEach(async (walletName) => {
+      defaultAdaptersKeys.forEach(async (adapterName) => {
+        const currentAdapterConfig = this.aggregatorModalConfig.adapters[adapterName];
+        if (!currentAdapterConfig.visible) return;
         const adapterPromise = new Promise((resolve, reject) => {
-          const currentAdapterConfig = this.aggregatorModalConfig.adapters[walletName];
-          if (!currentAdapterConfig.visible) return;
           // TODO: add mobile and desktop visibility check
-          getModule(walletName, currentAdapterConfig.options)
+          getModule(adapterName, currentAdapterConfig.options)
             .then(async (adapter: IWalletAdapter) => {
-              const adapterAlreadyExists = this.walletAdapters[walletName];
+              const adapterAlreadyExists = this.walletAdapters[adapterName];
               if (adapterAlreadyExists) resolve(true);
               if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace) {
                 reject(
@@ -101,7 +101,7 @@ export class Web3Auth extends SafeEventEmitter {
               if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace) {
                 reject(
                   new IncompatibleChainNamespaceError(
-                    `${walletName} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+                    `${adapterName} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
                   )
                 );
                 return;
@@ -109,9 +109,10 @@ export class Web3Auth extends SafeEventEmitter {
               // only intialize default login modals to use in app wallets here.
               if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
                 await adapter.init();
+                this.loginModal.addSocialLogins(adapterName, currentAdapterConfig, (currentAdapterConfig as SocialLoginAdapterConfig).loginMethods);
               }
 
-              this.walletAdapters[walletName] = adapter;
+              this.walletAdapters[adapterName] = adapter;
               resolve(true);
               return true;
             })
@@ -205,7 +206,7 @@ export class Web3Auth extends SafeEventEmitter {
 
   private async initExternalWalletAdapters(): Promise<void> {
     const adapterPromises = [];
-    const adaptersConfig: Record<string, LoginMethodConfig> = {};
+    const adaptersConfig: Record<string, BaseAdapterConfig> = {};
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
       const adapter = this.walletAdapters[walletName];
       if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
@@ -218,10 +219,10 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   private subsribeToLoginModalEvents(loginModal: LoginModal): void {
-    loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (adapter: WALLET_ADAPTER_TYPE, loginParams: CommonLoginOptions) => {
+    loginModal.on("LOGIN", async (adapter: WALLET_ADAPTER_TYPE, loginParams: CommonLoginOptions) => {
       await this.connectTo(adapter, loginParams);
     });
-    loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async () => {
+    loginModal.on("INIT_EXTERNAL_WALLETS", async () => {
       await this.initExternalWalletAdapters();
     });
   }

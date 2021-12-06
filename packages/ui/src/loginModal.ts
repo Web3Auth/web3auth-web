@@ -1,7 +1,7 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_WALLET_EVENTS, CommonLoginOptions, LoginMethodConfig } from "@web3auth/base";
+import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 import { icons, images } from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
@@ -99,12 +99,12 @@ export default class LoginModal extends SafeEventEmitter {
 
   showModal() {}
 
-  addSocialLogins = (providers: Record<string, LoginMethodConfig>): void => {
+  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: Record<string, LoginMethodConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
-    Object.keys(providers)
+    Object.keys(loginMethods)
       .reverse()
-      .forEach((provider: string) => {
-        const providerIcon = images[`login-${provider}.svg`];
+      .forEach((method: string) => {
+        const providerIcon = images[`login-${method}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -114,28 +114,28 @@ export default class LoginModal extends SafeEventEmitter {
         `);
 
         adapterButton.addEventListener("click", () => {
-          this.emit(LOGIN_MODAL_EVENTS.LOGIN, { loginProvider: provider } as CommonLoginOptions);
+          this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } as CommonLoginOptions });
         });
 
         adapterList.prepend(adapterButton);
       });
   };
 
-  addWalletLogins = (providers: Record<string, LoginMethodConfig>): void => {
+  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>): void => {
     const adapterList = this.$modal.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
-    Object.keys(providers).forEach((provider) => {
-      const providerIcon = images[`login-${provider}.svg`];
+    Object.keys(adaptersConfig).forEach((adapter) => {
+      const providerIcon = images[`login-${adapter}.svg`];
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
                     <img class="w3a-button__image" src="${providerIcon}" alt="">
                 </button>
-                <p class="w3a-adapter-item__label">${provider}</p>
+                <p class="w3a-adapter-item__label">${adapter}</p>
             </li>   
         `);
 
       adapterButton.addEventListener("click", () => {
-        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { loginProvider: provider } as CommonLoginOptions);
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter });
       });
 
       adapterList.appendChild(adapterButton);

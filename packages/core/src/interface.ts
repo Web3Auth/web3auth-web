@@ -16,6 +16,8 @@ interface OpenloginAdapterConfig extends BaseAdapterConfig {
   loginMethods?: Record<string, LoginMethodConfig>;
 }
 
+type SocialLoginAdapterConfig = OpenloginAdapterConfig;
+
 interface BaseAggregatorConfig {
   chainNamespace: ChainNamespaceType;
 }
@@ -30,4 +32,4 @@ interface SolanaAggregatorConfig extends BaseAggregatorConfig {
 
 type AggregatorModalConfig = EvmAggregatorConfig | SolanaAggregatorConfig;
 
-export { AggregatorModalConfig, EvmAggregatorConfig, LoginMethodConfig, SolanaAggregatorConfig, TorusWalletOptions };
+export { AggregatorModalConfig, EvmAggregatorConfig, LoginMethodConfig, SocialLoginAdapterConfig, SolanaAggregatorConfig, TorusWalletOptions };
