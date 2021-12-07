@@ -20,7 +20,7 @@ import {
 import type { Torus } from "./interface";
 
 interface TorusWalletOptions {
-  chainConfig?: TorusEthWalletChainConfig;
+  chainConfig: TorusEthWalletChainConfig;
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: TorusParams;

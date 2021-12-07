@@ -27,8 +27,8 @@ import type { SolanaProvider } from "@web3auth/solana-provider";
 import type { LoginSettings, OpenLoginOptions } from "./interface";
 
 interface OpenloginAdapterOptions {
-  chainConfig?: CustomChainConfig;
-  adapterSettings?: OpenLoginOptions;
+  chainConfig: CustomChainConfig;
+  adapterSettings: OpenLoginOptions;
   loginSettings?: LoginSettings;
 }
 class OpenloginAdapter extends BaseWalletAdapter {
