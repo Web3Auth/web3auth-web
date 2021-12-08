@@ -24,7 +24,7 @@ import Vue from "vue";
 import { Web3Auth, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
 import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WALLET_ADAPTERS } from "@web3auth/base";
 
-const web3auth = new Web3Auth(CHAIN_NAMESPACES.EIP155)
+const web3auth = new Web3Auth(CHAIN_NAMESPACES.SOLANA)
 export default Vue.extend({
   name: "app",
   data() {
@@ -37,28 +37,13 @@ export default Vue.extend({
     try {
     this.subscribeAuthEvents()
   
-    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
-    //   rpcTarget: "https://api.devnet.solana.com",
-    //   chainId: "0x3",
-    //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-    //   networkName: "devnet",
-    //   ticker: "sol",
-    //   tickerName: "Solana",
-    // }, adapterSettings: {
-    //   network: "testnet",
-    //   clientId: "localhost-id",
-    //   uxMode: "popup"
-    // }, loginSettings: {
-    //   // loginProvider: "google"
-    // }})
-    
     const openloginAdapter = getOpenloginWallet({ chainConfig: {
-      rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
-      chainId: "0x1",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      networkName: "mainnet",
-      ticker: "eth",
-      tickerName: "ethereum",
+      rpcTarget: "https://api.devnet.solana.com",
+      chainId: "0x3",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      networkName: "devnet",
+      ticker: "sol",
+      tickerName: "Solana",
     }, adapterSettings: {
       network: "testnet",
       clientId: "localhost-id",
@@ -66,6 +51,21 @@ export default Vue.extend({
     }, loginSettings: {
       // loginProvider: "google"
     }})
+    
+    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
+    //   rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
+    //   chainId: "0x1",
+    //   chainNamespace: CHAIN_NAMESPACES.EIP155,
+    //   networkName: "mainnet",
+    //   ticker: "eth",
+    //   tickerName: "ethereum",
+    // }, adapterSettings: {
+    //   network: "testnet",
+    //   clientId: "localhost-id",
+    //   uxMode: "popup"
+    // }, loginSettings: {
+    //   // loginProvider: "google"
+    // }})
     web3auth.configureWallet(openloginAdapter);
     await web3auth.init({ intializeDefaultModal: true });
     // (window as any).web3Auth = web3auth

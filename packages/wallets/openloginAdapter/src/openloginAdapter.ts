@@ -146,7 +146,11 @@ class OpenloginAdapter extends BaseWalletAdapter {
         try {
           const privateKey = this.openloginInstance.privKey;
           if (!privateKey) {
-            await this.openloginInstance.login({ ...this.loginSettings, ...params, extraLoginOptions: { login_hint: params?.loginHint } });
+            await this.openloginInstance.login({
+              ...this.loginSettings,
+              loginProvider: params.loginProvider,
+              extraLoginOptions: { login_hint: params?.loginHint },
+            });
           }
           let finalPrivKey = this.openloginInstance.privKey;
           if (finalPrivKey) {

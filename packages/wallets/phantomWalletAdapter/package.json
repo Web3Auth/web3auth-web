@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
-    "@web3auth/solana-provider": "0.0.0"
+    "@web3auth/solana-provider": "0.0.0",
+    "bn.js": "^4.11.8"
   },
   "lint-staged": {
     "!(*d).ts": [

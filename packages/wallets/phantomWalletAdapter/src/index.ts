@@ -1,1 +1,1 @@
-// export * from "./phantomAdapter";
+export * from "./phantomAdapter";

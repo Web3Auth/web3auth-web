@@ -134,7 +134,8 @@ export default class LoginModal extends SafeEventEmitter {
             event.preventDefault();
             const data = new FormData(event.target as HTMLFormElement);
             const email = data.get("email");
-            if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginProvider: method, loginHint: email } as CommonLoginOptions);
+            if (email)
+              this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } } as CommonLoginOptions);
           });
           return;
         }
@@ -188,10 +189,10 @@ export default class LoginModal extends SafeEventEmitter {
     const firstAdapterIcon = images[`login-${firstAdapter}.svg`];
 
     // Add main adapter
-    const mainAdapterButton = this.htmlToElement(`
+    const mainAdapterSection = this.htmlToElement(`
       <div class="w3a-external-group">
         <div class="w3a-external-group__left">
-            <button class="w3a-button ${showMore ? `w3a-button--left` : `w3a-button--left-alone`}">
+            <button class="w3ajs-${firstAdapter} w3a-button ${showMore ? `w3a-button--left` : `w3a-button--left-alone`}">
                 <img class="w3a-button__image"
                     src="${firstAdapterIcon}" alt="">
                 <div>Sign in with ${firstAdapter}</div>
@@ -208,15 +209,20 @@ export default class LoginModal extends SafeEventEmitter {
         }
       </div>
     `);
+    const $mainAdapterButton = mainAdapterSection.querySelector(`.w3ajs-${firstAdapter}`) as HTMLDivElement;
+    $mainAdapterButton.addEventListener("click", () => {
+      this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter: firstAdapter });
+    });
+
     if (showMore) {
-      const $adapterExpandBtn = mainAdapterButton.querySelector(".w3ajs-button-expand") as HTMLDivElement;
+      const $adapterExpandBtn = mainAdapterSection.querySelector(".w3ajs-button-expand") as HTMLDivElement;
 
       $adapterExpandBtn.addEventListener("click", () => {
         $adapterExpandBtn.classList.toggle("w3a-button--rotate");
         $adapterList.classList.toggle("w3a-adapter-list--hidden");
       });
     }
-    $adapterList.before(mainAdapterButton);
+    $adapterList.before(mainAdapterSection);
 
     adapterKeys.forEach((adapter) => {
       $externalWallet.classList.remove("w3a-group--ext-wallet-hidden");
