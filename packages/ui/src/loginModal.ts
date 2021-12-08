@@ -20,6 +20,7 @@ export default class LoginModal extends SafeEventEmitter {
     initialized: false,
     connected: false,
     connecting: false,
+    externalWalletsInitialized: false,
     errored: false,
   };
 
@@ -118,6 +119,18 @@ export default class LoginModal extends SafeEventEmitter {
     Object.keys(loginMethods)
       .reverse()
       .forEach((method: string) => {
+        if (method === "email_passwordless") {
+          const $emailPasswordlessSection = this.$modal.querySelector(".w3ajs-email-passwordless") as HTMLDivElement;
+          $emailPasswordlessSection.classList.remove("w3a-modal--hidden");
+          const $emailPasswordlessForm = $emailPasswordlessSection.querySelector(".w3ajs-email-passwordless-form") as HTMLDivElement;
+          $emailPasswordlessForm.addEventListener("submit", (event: Event) => {
+            event.preventDefault();
+            const data = new FormData(event.target as HTMLFormElement);
+            const email = data.get("email");
+            if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginProvider: method, loginHint: email } as CommonLoginOptions);
+          });
+          return;
+        }
         const providerIcon = images[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
@@ -163,6 +176,10 @@ export default class LoginModal extends SafeEventEmitter {
 
       adapterList.appendChild(adapterButton);
     });
+    this.state = {
+      ...this.state,
+      externalWalletsInitialized: true,
+    };
   };
 
   private getSocialLogins(): HTMLDivElement {
@@ -192,25 +209,15 @@ export default class LoginModal extends SafeEventEmitter {
 
   private getSocialLoginsEmail = (): HTMLDivElement => {
     const $socialEmail = this.htmlToElement(`
-        <div class="w3a-group">
+        <div class="w3ajs-email-passwordless w3a-group w3a-group--hidden">
             <h6 class="w3a-group__title">EMAIL</h6>
+          <form class="w3ajs-email-passwordless-form">
+            <input class="w3a-text-field" type="email" name="email" required placeholder="Email">
+            <button class="w3a-button" type="submit">Continue with Email</button>
+        </form>
         </div>
     `) as HTMLDivElement;
 
-    const $emailForm = this.htmlToElement(`
-      <form>
-          <input class="w3a-text-field" type="email" name="email" required placeholder="Email">
-          <button class="w3a-button" type="submit">Continue with Email</button>
-      </form>
-    `) as HTMLFormElement;
-
-    $emailForm.addEventListener("submit", (event: Event) => {
-      event.preventDefault();
-      const data = new FormData(event.target as HTMLFormElement);
-      const email = data.get("email");
-      if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { loginProvider: "email_passwordless", loginHint: email } as CommonLoginOptions);
-    });
-    $socialEmail.appendChild($emailForm);
     return $socialEmail;
   };
 
@@ -251,12 +258,16 @@ export default class LoginModal extends SafeEventEmitter {
         </div>
     `) as HTMLDivElement;
 
+    const $externalWalletButton = $externalWallet.querySelector(".w3ajs-external-toggle__button") as HTMLDivElement;
     const $adapterExpandBtn = $externalWallet.querySelector(".w3ajs-button-expand") as HTMLDivElement;
     const $adapterList = $externalWallet.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
 
     $adapterExpandBtn.addEventListener("click", () => {
       $adapterExpandBtn.classList.toggle("w3a-button--rotate");
       $adapterList.classList.toggle("w3a-adapter-list--hidden");
+    });
+    $externalWalletButton.addEventListener("click", () => {
+      this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
     });
     return $externalWallet;
   };

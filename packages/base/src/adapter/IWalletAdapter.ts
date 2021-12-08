@@ -109,6 +109,7 @@ export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWal
 }
 
 export interface LoginMethodConfig {
+  // label: string;
   visible?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;

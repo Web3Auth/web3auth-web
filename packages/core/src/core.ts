@@ -62,11 +62,13 @@ export class Web3Auth extends SafeEventEmitter {
       throw new Error(`Invalid chainspace provided: ${this.chainNamespace}`);
     }
     this.loginModal = new LoginModal({ appLogo: "", version: "", adapterListener: this });
+    this.subsribeToLoginModalEvents();
   }
 
   public async init(params: { intializeDefaultModal?: boolean; modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     if (this.initialized) throw new Error("Already initialized");
     if (params.intializeDefaultModal) {
+      this.loginModal.init();
       if (!this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && !this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
         throw new Error(
           `Please configure either ${WALLET_ADAPTERS.CUSTOM_AUTH} or ${WALLET_ADAPTERS.OPENLOGIN_WALLET} adapter using configureAdapter function as it is required in login modal`
@@ -90,9 +92,9 @@ export class Web3Auth extends SafeEventEmitter {
             if (!adapter) {
               getModule(adapterName, adapterConfig.options)
                 .then(async (ad: IWalletAdapter) => {
-                  this.walletAdapters[adapterName] = adapter;
+                  this.walletAdapters[adapterName] = ad;
                   if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
-                    await adapter.init();
+                    await ad.init();
                     this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as SocialLoginAdapterConfig).loginMethods);
                   }
                   this.aggregatorModalConfig[adapterName] = adapterConfig;
@@ -100,12 +102,16 @@ export class Web3Auth extends SafeEventEmitter {
                   return true;
                 })
                 .catch((err) => reject(err));
-            } else {
-              if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
-                this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as SocialLoginAdapterConfig).loginMethods);
-              }
-              this.aggregatorModalConfig[adapterName] = adapterConfig;
-              resolve(true);
+            } else if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
+              adapter
+                .init()
+                .then(() => {
+                  this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as SocialLoginAdapterConfig).loginMethods);
+                  this.aggregatorModalConfig[adapterName] = adapterConfig;
+                  resolve(true);
+                  return true;
+                })
+                .catch((err) => reject(err));
             }
           }
         });
@@ -118,14 +124,14 @@ export class Web3Auth extends SafeEventEmitter {
     this.initialized = true;
   }
 
-  public addWallet(wallet: Wallet): Web3Auth {
+  public configureWallet(wallet: Wallet): Web3Auth {
     if (this.initialized) throw new Error("Wallets cannot be added after initialization");
-    if (!this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && wallet.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
+    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && wallet.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN_WALLET} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN_WALLET} adapter already exists.`
       );
     }
-    if (!this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && wallet.name === WALLET_ADAPTERS.OPENLOGIN_WALLET) {
+    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && wallet.name === WALLET_ADAPTERS.OPENLOGIN_WALLET) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN_WALLET} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.CUSTOM_AUTH} adapter already exists.`
       );
@@ -150,7 +156,7 @@ export class Web3Auth extends SafeEventEmitter {
 
   public connect() {
     if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
-    this.loginModal.showModal();
+    this.loginModal.toggleModal();
   }
 
   public clearCache() {
@@ -203,26 +209,31 @@ export class Web3Auth extends SafeEventEmitter {
     });
   }
 
-  private async initExternalWalletAdapters(): Promise<void> {
+  private async initExternalWalletAdapters(externalWalletsInitialized: boolean): Promise<void> {
+    if (externalWalletsInitialized) return;
     const adapterPromises = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
+    // eslint-disable-next-line no-console
+    console.log("this.walletAdapters) ", this.walletAdapters);
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
       const adapter = this.walletAdapters[walletName];
       if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
-        adaptersConfig[walletName] = this.aggregatorModalConfig[walletName]?.options?.loginSettings;
+        adaptersConfig[walletName] = this.aggregatorModalConfig[walletName]?.options;
         adapterPromises.push(adapter.init());
       }
     });
+    // eslint-disable-next-line no-console
+    console.log("this.promises) ", adapterPromises);
     if (adapterPromises.length > 0) await Promise.all(adapterPromises);
     this.loginModal.addWalletLogins(adaptersConfig);
   }
 
-  private subsribeToLoginModalEvents(loginModal: LoginModal): void {
-    loginModal.on("LOGIN", async (adapter: WALLET_ADAPTER_TYPE, loginParams: CommonLoginOptions) => {
-      await this.connectTo(adapter, loginParams);
+  private subsribeToLoginModalEvents(): void {
+    this.loginModal.on("LOGIN", async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: CommonLoginOptions }) => {
+      await this.connectTo(params.adapter, params.loginParams);
     });
-    loginModal.on("INIT_EXTERNAL_WALLETS", async () => {
-      await this.initExternalWalletAdapters();
+    this.loginModal.on("INIT_EXTERNAL_WALLETS", async (params: { externalWalletsInitialized: boolean }) => {
+      await this.initExternalWalletAdapters(params.externalWalletsInitialized);
     });
   }
 

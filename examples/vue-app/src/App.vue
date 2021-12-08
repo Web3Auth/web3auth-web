@@ -7,6 +7,7 @@
         fontSize: '12px',
       }"
     >
+      <button v-if="!connected" @click="connect" style="cursor: pointer;">{{ loginButtonStatus }} Connect</button>
       <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
       <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button>
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
@@ -20,10 +21,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Web3Auth, getTorusEvmWallet, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
-import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
+import { Web3Auth, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
+import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WALLET_ADAPTERS } from "@web3auth/base";
 
-const web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, adapters: {} })
+const web3auth = new Web3Auth(CHAIN_NAMESPACES.EIP155)
 export default Vue.extend({
   name: "app",
   data() {
@@ -33,12 +34,23 @@ export default Vue.extend({
     };
   },
   async mounted() {
+    try {
     this.subscribeAuthEvents()
-     // if will connect to any already logged in wallet
-    const torusWalletAdapter = getTorusEvmWallet({ chainConfig: {
-      host: "rinkeby",
-      chainId: 4
-    }, adapterSettings: {}, initParams: {}})
+  
+    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
+    //   rpcTarget: "https://api.devnet.solana.com",
+    //   chainId: "0x3",
+    //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
+    //   networkName: "devnet",
+    //   ticker: "sol",
+    //   tickerName: "Solana",
+    // }, adapterSettings: {
+    //   network: "testnet",
+    //   clientId: "localhost-id",
+    //   uxMode: "popup"
+    // }, loginSettings: {
+    //   // loginProvider: "google"
+    // }})
     
     const openloginAdapter = getOpenloginWallet({ chainConfig: {
       rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
@@ -54,41 +66,31 @@ export default Vue.extend({
     }, loginSettings: {
       // loginProvider: "google"
     }})
-    web3auth.addWallet(torusWalletAdapter).addWallet(openloginAdapter);
-    await web3auth.init();
-    (window as any).web3Auth = web3auth
-    if (web3auth.cachedWallet) {
-      await web3auth.connectTo(web3auth.cachedWallet)
-    }
-    web3auth.loginModal.init()
-      web3auth.loginModal.addSocialLogins({
-        google: {
-          visible: true,
-          showOnMobile: true,
-          showOnDesktop: true,
-        },
-      });
+    web3auth.configureWallet(openloginAdapter);
+    await web3auth.init({ intializeDefaultModal: true });
+    // (window as any).web3Auth = web3auth
+    // if (web3auth.cachedWallet) {
+    //   await web3auth.connectTo(web3auth.cachedWallet)
+    // }
 
-      web3auth.loginModal.addSocialLogins({
-        facebook: {
-          visible: true,
-          showOnMobile: true,
-          showOnDesktop: true,
-        },
-      });
-
-       web3auth.loginModal.on("LOGIN", (params) => {
-          // eslint-disable-next-line no-console
-          console.log("LOGIN", params);
-        });
-        web3auth.loginModal.on("INIT_EXTERNAL_WALLETS", (params) => {
-          // eslint-disable-next-line no-console
-          console.log("INIT_EXTERNAL_WALLETS", params);
-        });
+    web3auth.loginModal.on("LOGIN", (params) => {
+      // eslint-disable-next-line no-console
+      console.log("LOGIN", params);
+    });
+    web3auth.loginModal.on("INIT_EXTERNAL_WALLETS", ({ externalWalletsInitialized }) => {
+      // eslint-disable-next-line no-console
+      console.log("INIT_EXTERNAL_WALLETS", externalWalletsInitialized);
+    });
 
     this.connected = web3auth.connected
+    } catch (error) {
+      console.log("error", error)
+    }
   },
   methods: {
+    connect() {
+      web3auth.connect()
+    },
     async loginWithOpenlogin(){
       await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
     },
@@ -114,8 +116,8 @@ export default Vue.extend({
         this.loginButtonStatus = ""
         this.connected = false
       })
-      web3auth.on(BASE_WALLET_EVENTS.ERRORED, ()=>{
-        console.log("errored")
+      web3auth.on(BASE_WALLET_EVENTS.ERRORED, (error)=>{
+        console.log("errored", error)
         this.loginButtonStatus = ""
       })
     },

@@ -33,29 +33,43 @@ class MetamaskAdapter extends BaseWalletAdapter {
   async init(): Promise<void> {
     if (this.ready) return;
     const provider = (window as any).ethereum;
-    if (provider && provider.isMetamask) {
+    if (provider && provider.isMetaMask) {
       this.ready = true;
     }
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (!this.ready) throw new WalletNotReadyError("Metamask extention is not installed");
       this.connecting = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTING);
       try {
         const provider = (window as any).ethereum;
-        if (!provider || !provider?.isMetamask) {
+        if (!provider || !provider?.isMetaMask) {
           throw new WalletNotReadyError("Metamask extention is not installed");
         }
-        provider.once("connect", () => {
+        const onConnectHandler = () => {
+          if (this.connected && this.provider) resolve(this.provider);
           this.provider = provider;
           this.connected = true;
-          this.addEventListeners();
+          this.addEventListeners(provider);
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
           resolve(this.provider);
+        };
+        provider.on("connect", () => {
+          onConnectHandler();
         });
-        provider.request({ method: "eth_requestAccounts" });
+        provider
+          .request({ method: "eth_requestAccounts" })
+          .then(() => {
+            if (provider.isConnected()) {
+              onConnectHandler();
+            }
+            return true;
+          })
+          .catch((err) => {
+            reject(err);
+          });
       } catch (error) {
         this.emit(BASE_WALLET_EVENTS.ERRORED, error);
         throw new WalletConnectionError("Failed to login with metamask wallet", error);
@@ -77,10 +91,14 @@ class MetamaskAdapter extends BaseWalletAdapter {
     return {};
   }
 
-  private addEventListeners(): void {
-    this.provider?.on("disconnect", () => {
+  private addEventListeners(provider: SafeEventEmitterProvider): void {
+    provider.on("disconnect", () => {
       this.connected = false;
       this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
+    });
+    provider.on("connect", () => {
+      this.connected = true;
+      this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
     });
   }
 }

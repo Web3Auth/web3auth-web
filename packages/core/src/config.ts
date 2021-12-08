@@ -17,8 +17,29 @@ export const defaultSolanaModalConfig: DefaultAdaptersModalConfig = {
       visible: true,
       showOnMobile: true,
       showOnDesktop: true,
-      loginMethods: {},
       configurationRequired: true,
+      loginMethods: {
+        google: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        twitter: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        facebook: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        email_passwordless: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+      },
     },
     [SOLANA_WALLET_ADAPTERS.PHANTOM_WALLET]: {
       visible: true,
@@ -34,6 +55,7 @@ export const defaultEvmModalConfig: DefaultAdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   adapters: {
     [EVM_WALLET_ADAPTERS.METAMASK_WALLET]: {
+      // label: "metaMask",
       visible: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -63,6 +85,11 @@ export const defaultEvmModalConfig: DefaultAdaptersModalConfig = {
           visible: true,
         },
         facebook: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        email_passwordless: {
           showOnDesktop: true,
           showOnMobile: true,
           visible: true,
