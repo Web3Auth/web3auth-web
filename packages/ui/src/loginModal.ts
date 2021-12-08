@@ -6,6 +6,7 @@ import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodC
 import { icons, images } from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
 
+const hasLightIcons = ["apple", "github"];
 export default class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
 
@@ -56,10 +57,11 @@ export default class LoginModal extends SafeEventEmitter {
                 <div class="w3a-modal__footer">
                     <div class="w3a-footer">
                         <div>
-                            <ul class="w3a-footer__links">
-                                <li class="w3a-footer__links-item"><a href="">Terms of use</a></li>
-                                <li class="w3a-footer__links-item"><a href="">Privacy policy</a></li>
-                            </ul>
+                            <div class="w3a-footer__links">
+                              <a href="">Terms of use</a>
+                              <span>|</span>
+                              <a href="">Privacy policy</a>
+                            </div>
                             <p>${this.version}</p>
                         </div>
                         <img height="24" src="${web3authIcon}" alt="">
@@ -116,7 +118,7 @@ export default class LoginModal extends SafeEventEmitter {
     Object.keys(loginMethods)
       .reverse()
       .forEach((method: string) => {
-        const providerIcon = images[`login-${method}.svg`];
+        const providerIcon = images[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}.svg`];
         const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
@@ -231,8 +233,8 @@ export default class LoginModal extends SafeEventEmitter {
                 <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
                 <div class="w3a-external-group">
                     <div class="w3a-external-group__left">
-                        <button class="w3a-button">
-                            <img class="w3a-button__image w3a-button__image--left"
+                        <button class="w3a-button w3a-button--left">
+                            <img class="w3a-button__image"
                                 src="${torusImage}" alt="">
                             Sign in with Torus
                         </button>

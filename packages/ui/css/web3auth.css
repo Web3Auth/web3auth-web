@@ -178,21 +178,38 @@ h6 {
     cursor: pointer;
 }
 
+.w3a-button:hover {
+    background: #595857;
+}
+
+.w3a-button:active {
+    background: #6f717a;
+}
+
+.w3a-button:focus-visible {
+    outline: 1px solid #daf0ff;
+    outline-offset: -1px;
+}
+
 .w3a-button--icon {
     width: 48px;
+}
+
+.w3a-button--left {
+    justify-content: start;
 }
 
 .w3a-button__image {
     max-width: 100%;
     max-height: 100%;
-    transition: .3s cubic-bezier(.25,.8,.5,1),visibility 0s;
+    transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1), visibility 0s;
 }
 
 .w3a-button.w3a-button--rotate .w3a-button__image {
     transform: rotate(180deg);
 }
 
-.w3a-button__image--left {
+.w3a-button--left .w3a-button__image {
     margin-right: 12px;
 }
 
@@ -234,6 +251,10 @@ h6 {
     color: var(--text-color1);
 }
 
+.w3a-external-back:focus-visible {
+    outline: 1px solid #daf0ff;
+}
+
 .w3a-external-back .w3a-group__title {
     margin-bottom: 0;
     margin-left: 5px;
@@ -255,6 +276,15 @@ h6 {
     margin-bottom: 16px;
 }
 
+.w3a-text-field:active {
+    background: #0f1222;
+}
+
+.w3a-text-field:focus-visible {
+    outline: 1px solid #daf0ff;
+    outline-offset: -1px;
+}
+
 /* Footer Components */
 .w3a-footer {
     display: flex;
@@ -266,25 +296,21 @@ h6 {
 }
 
 .w3a-footer__links {
-    display: flex;
-    align-items: center;
     padding: 0;
     margin: 0;
-    gap: 4px;
 }
 
-.w3a-footer__links-item {
-    list-style: none;
-}
-
-.w3a-footer__links-item:not(:last-child) {
-    border-right: 0.5px solid var(--text-color2);
-    padding-right: 4px;
-}
-
-.w3a-footer__links-item a {
+.w3a-footer__links a {
     color: var(--text-color2);
     text-decoration: none;
+}
+
+.w3a-footer__links a:focus-visible {
+    outline: 1px solid #daf0ff;
+}
+
+.w3a-footer__links span {
+    margin: 0 2px;
 }
 
 /* LIGHT MODE */
@@ -306,9 +332,31 @@ h6 {
     color: #595857;
 }
 
-.w3a-text-field {
+.w3a-modal.w3a-modal--light .w3a-button:focus-visible {
+    outline: 1px solid #0f1222;
+}
+
+.w3a-modal.w3a-modal--light .w3a-text-field {
     background: #ffffff;
     border: 1px solid #ffffff;
     box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.1);
     color: #b7b8bd;
+}
+
+.w3a-modal.w3a-modal--light .w3a-text-field:active {
+    color: #0f1222;
+    outline: 1px solid #0f1222;
+}
+
+.w3a-modal.w3a-modal--light .w3a-text-field:focus-visible {
+    color: #0f1222;
+    outline: 1px solid #0f1222;
+}
+
+.w3a-modal.w3a-modal--light .w3a-footer__links a:focus-visible {
+    outline: 1px solid #0f1222;
+}
+
+.w3a-modal.w3a-modal--light .w3a-external-back:focus-visible {
+    outline: 1px solid #0f1222;
 }
