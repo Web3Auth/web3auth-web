@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
-    "@web3auth/ui": "0.0.0",
     "@web3auth/torus-wallet-adapter": "0.0.0",
     "@web3auth/solana-wallet-adapter": "0.0.0",
     "@web3auth/openlogin-adapter": "0.0.0",

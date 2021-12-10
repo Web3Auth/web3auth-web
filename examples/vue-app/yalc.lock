@@ -11,34 +11,34 @@
       "signature": "1c90536bc1f389468455064f09d11e4c"
     },
     "@web3auth/torus-wallet-adapter": {
-      "signature": "a449fa2c821d3a0b001fdd3f52e83748"
+      "signature": "151b1d719487d9dff3ccef394b42f780"
     },
     "@web3auth/core": {
-      "signature": "5d676882cc248265779968bc6978c3b6"
+      "signature": "d70d58e68b78125b50bf7b0204646f2e"
     },
     "@web3auth/base": {
-      "signature": "7b1b2ec8254d034ec75e0b618c71e07e"
+      "signature": "50e67537594decd59c4c7cc53c84410d"
     },
     "@web3auth/solana-wallet-adapter": {
-      "signature": "112bd222a7b025eef3b0e18704f821c8"
+      "signature": "ec07b4d413c6c45baeb01bf74996159d"
     },
     "@web3auth/openlogin-adapter": {
-      "signature": "d5e0f93f2bc12490cc69b17cfb7625ff"
+      "signature": "a91c33eefe175a19f91532b9baee9478"
     },
     "@web3auth/ethereum-provider": {
-      "signature": "07ecdbf6c1a1cf9ca46086c9f0f6050a"
+      "signature": "c55e31058238eac43bff88b8aadae158"
     },
     "@web3auth/solana-provider": {
-      "signature": "bab9303bac6fede10131fb5e9120d9f3"
+      "signature": "1730d225ad54b2ed0191242083733996"
     },
     "@web3auth/metamask-wallet-adapter": {
-      "signature": "fb6d8ade3937509119fbeee8e110ac5c"
+      "signature": "9558802c38c09760ed4e832cfe04b921"
     },
     "@web3auth/phantom-wallet-adapter": {
-      "signature": "b7fcab8de66429482d71f21a7258d7de"
+      "signature": "a4a0154e9bcabac6aa8c9c30cf2eef6f"
     },
     "@web3auth/ui": {
-      "signature": "50adad1e3fadeb2a80f5d60324627a02"
+      "signature": "cfeea657ffa4ccafa3ee2181387a3016"
     }
   }
 }

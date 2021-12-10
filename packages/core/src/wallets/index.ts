@@ -4,10 +4,9 @@ import { MetamaskAdapter } from "@web3auth/metamask-wallet-adapter";
 import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import { PhantomAdapter } from "@web3auth/phantom-wallet-adapter";
 import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
-import { TorusWalletAdapter } from "@web3auth/torus-wallet-adapter";
+import { TorusWalletAdapter, TorusWalletOptions } from "@web3auth/torus-wallet-adapter";
 
 import { WALLET_ADAPTERS } from "../constants";
-import { TorusWalletOptions } from "../interface";
 
 const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
   return {
