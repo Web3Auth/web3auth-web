@@ -79,16 +79,16 @@
     tweetnacl "^1.0.0"
 
 "@toruslabs/base-controllers@^1.0.1":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.3.0.tgz#29adc55ac85c0d6c00f389f263d71106e83d024c"
-  integrity sha512-SQmxjRNL8aoZfEJl/qWxnzXoZ2b2nnsREY7YWWH6DCxWgaBn/DeX5bPzzbvm9DJ0+z6XCihbRaoyRyzkVW/LGg==
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.3.1.tgz#99e5ca8dc4582dea70f89877705f49e5c840e289"
+  integrity sha512-bkfASzCueUlhKRAbTfcUc7duaIh1ynuZNiSPMcfgmTfDSoPF3A9PovuKUpIvPCUYn2J8iFF1n6pTULTvx4ixQA==
   dependencies:
-    "@toruslabs/http-helpers" "^1.4.0"
-    "@toruslabs/openlogin-jrpc" "^1.3.0"
+    "@toruslabs/http-helpers" "^2.1.2"
+    "@toruslabs/openlogin-jrpc" "^1.3.3"
     async-mutex "^0.3.2"
     bignumber.js "^9.0.1"
     bowser "^2.11.0"
-    broadcast-channel "^4.5.0"
+    broadcast-channel "^4.7.0"
     eth-rpc-errors "^4.0.3"
     ethereumjs-util "^7.1.3"
     lodash "^4.17.21"
@@ -101,7 +101,14 @@
   dependencies:
     deepmerge "^4.2.2"
 
-"@toruslabs/openlogin-jrpc@^1.0.0", "@toruslabs/openlogin-jrpc@^1.0.2", "@toruslabs/openlogin-jrpc@^1.3.0":
+"@toruslabs/http-helpers@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.1.2.tgz#6bf93916c0be595de71bb7f61a3cab436273a7bb"
+  integrity sha512-usT/MeuNWXtTaqxhzjJdj15fT2pLdseMXNd2YVMlOxb6aW9eN/S+Y7kWTgO1VrcvEjbjScSXTEPOxPwR6MMKGg==
+  dependencies:
+    lodash.merge "^4.6.2"
+
+"@toruslabs/openlogin-jrpc@^1.0.0", "@toruslabs/openlogin-jrpc@^1.0.2", "@toruslabs/openlogin-jrpc@^1.3.3":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.3.3.tgz#cd5671b2a491281148565b9a965799bbe50a9c39"
   integrity sha512-N8UqTdc26K0jIXXuh8mlxGog5qgLmm7ts9qwItC9sfGVIEKYu/9XonnMjxYZ2fTzJP4H+bARO377gGuMJDnLzg==
@@ -178,14 +185,14 @@
     "@types/range-parser" "*"
 
 "@types/lodash@^4.14.159", "@types/lodash@^4.14.176":
-  version "4.14.177"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.177.tgz#f70c0d19c30fab101cad46b52be60363c43c4578"
-  integrity sha512-0fDwydE2clKe9MNfvXHBHF9WEahRuj+msTuQqOmAApNORFvhMYZKNGGJdCzuhheVjMps/ti0Ak/iJPACMaevvw==
+  version "4.14.178"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
+  integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
 "@types/node@*":
-  version "16.11.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.11.tgz#6ea7342dfb379ea1210835bada87b3c512120234"
-  integrity sha512-KB0sixD67CeecHC33MYn+eYARkqTheIRNuu97y2XMjR7Wu3XibO1vaY6VBV6O/a89SPI81cEUIYT87UqUWlZNw==
+  version "16.11.12"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.12.tgz#ac7fb693ac587ee182c3780c26eb65546a1a3c10"
+  integrity sha512-+2Iggwg7PxoO5Kyhvsq9VarmPbIelXP070HMImEpbtGCoyWNINQj4wzjbQCXzdHTRXnqufutJb5KAURZANNBAw==
 
 "@types/node@^12.12.54":
   version "12.20.37"
@@ -369,7 +376,7 @@ braces@^3.0.1:
   dependencies:
     fill-range "^7.0.1"
 
-broadcast-channel@^4.5.0:
+broadcast-channel@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.7.0.tgz#4f5c31982f627eae4ffe463623ba36a9e7da1992"
   integrity sha512-1C7wDPqeiKkwpScqFP044MsPAtxxDNKZzOnJmkHaTuOlUdaMLo11op56NrCOMiRh8dzktstcNsiHELGeTMKnNQ==
@@ -1004,6 +1011,11 @@ lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
+lodash.merge@^4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
+  integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
 lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"

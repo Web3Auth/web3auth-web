@@ -1,4 +1,5 @@
 import { Wallet } from "@web3auth/base";
+import { CustomauthAdapter, CustomauthAdapterOptions } from "@web3auth/customauth-adapter";
 import { MetamaskAdapter } from "@web3auth/metamask-wallet-adapter";
 import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import { PhantomAdapter } from "@web3auth/phantom-wallet-adapter";
@@ -38,6 +39,16 @@ const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet => {
   };
 };
 
+const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet => {
+  return {
+    name: WALLET_ADAPTERS.CUSTOM_AUTH,
+    adapter: () => {
+      const torusAdapter = new CustomauthAdapter({ ...params });
+      return torusAdapter;
+    },
+  };
+};
+
 const getMetamaskWallet = (): Wallet => {
   return {
     name: WALLET_ADAPTERS.METAMASK_WALLET,
@@ -58,4 +69,4 @@ const getPhantomWallet = (): Wallet => {
   };
 };
 
-export { getMetamaskWallet, getOpenloginWallet, getPhantomWallet, getTorusEvmWallet, getTorusSolanaWallet };
+export { getCustomauthWallet, getMetamaskWallet, getOpenloginWallet, getPhantomWallet, getTorusEvmWallet, getTorusSolanaWallet };

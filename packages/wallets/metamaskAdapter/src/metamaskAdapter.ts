@@ -48,13 +48,13 @@ class MetamaskAdapter extends BaseWalletAdapter {
         if (!provider || !provider?.isMetaMask) {
           throw new WalletNotReadyError("Metamask extention is not installed");
         }
+        this.addEventListeners(provider);
         const onConnectHandler = () => {
-          if (this.connected && this.provider) resolve(this.provider);
-          this.provider = provider;
-          this.connected = true;
-          this.addEventListeners(provider);
-          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
-          resolve(this.provider);
+          if (this.connected) {
+            this.connected = true;
+            this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
+            resolve(this.provider);
+          }
         };
         provider.on("connect", () => {
           onConnectHandler();

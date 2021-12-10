@@ -24,6 +24,7 @@
       "@web3auth/openlogin-adapter": ["packages/wallets/openloginAdapter/src"],
       "@web3auth/metamask-wallet-adapter": ["packages/wallets/metamaskAdapter/src"],
       "@web3auth/phantom-wallet-adapter": ["packages/wallets/phantomWalletAdapter/src"],
+      "@web3auth/customauth-adapter": ["packages/wallets/customauthAdapter/src"],
     }
   }
 }

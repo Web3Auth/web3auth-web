@@ -94,6 +94,7 @@ export class Web3Auth extends SafeEventEmitter {
                 .then(async (ad: IWalletAdapter) => {
                   this.walletAdapters[adapterName] = ad;
                   if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
+                    this.subscribeToAdapterEvents(ad);
                     await ad.init();
                     this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as SocialLoginAdapterConfig).loginMethods);
                   }
@@ -103,6 +104,7 @@ export class Web3Auth extends SafeEventEmitter {
                 })
                 .catch((err) => reject(err));
             } else if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
+              this.subscribeToAdapterEvents(adapter);
               adapter
                 .init()
                 .then(() => {
@@ -119,7 +121,13 @@ export class Web3Auth extends SafeEventEmitter {
       });
       await Promise.all(adapterPromises);
     } else {
-      await Promise.all(Object.keys(this.walletAdapters).map((adapterName) => this.walletAdapters[adapterName].init()));
+      await Promise.all(
+        Object.keys(this.walletAdapters).map((adapterName) => {
+          this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
+          this.walletAdapters[adapterName].init();
+          return true;
+        })
+      );
     }
     this.initialized = true;
   }
@@ -170,7 +178,6 @@ export class Web3Auth extends SafeEventEmitter {
    */
   async connectTo(walletName: WALLET_ADAPTER_TYPE, loginParams?: CommonLoginOptions): Promise<void> {
     if (!this.walletAdapters[walletName]) throw new WalletNotFoundError(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    this.subscribeToAdapterEvents(this.walletAdapters[walletName]);
     await this.walletAdapters[walletName].connect(loginParams);
   }
 

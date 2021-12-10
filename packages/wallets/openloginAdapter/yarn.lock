@@ -36,9 +36,9 @@
     secp256k1 "^3.8.0"
 
 "@toruslabs/http-helpers@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.1.1.tgz#420c09156a5e175b940c1f3d38f4ed86229fb407"
-  integrity sha512-i6zf+EsyRzTM14ML5w0qqPug9LTK3F3AY3MAtGR1+Ownfex7IfwiNFiqL5ovM4J8YbWkUZGdseJ5z14FB5YdaA==
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.1.2.tgz#6bf93916c0be595de71bb7f61a3cab436273a7bb"
+  integrity sha512-usT/MeuNWXtTaqxhzjJdj15fT2pLdseMXNd2YVMlOxb6aW9eN/S+Y7kWTgO1VrcvEjbjScSXTEPOxPwR6MMKGg==
   dependencies:
     lodash.merge "^4.6.2"
 
@@ -89,9 +89,9 @@
   integrity sha512-WQJYMTR/bkqvpk3DWOqRt5e24RhwJp9PXUoSj4zSthd3+fDhKYCI56YVMPNDKah1fCffOe9F3m8iZ5SgDZ+Csw==
 
 "@types/lodash@^4.14.176":
-  version "4.14.177"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.177.tgz#f70c0d19c30fab101cad46b52be60363c43c4578"
-  integrity sha512-0fDwydE2clKe9MNfvXHBHF9WEahRuj+msTuQqOmAApNORFvhMYZKNGGJdCzuhheVjMps/ti0Ak/iJPACMaevvw==
+  version "4.14.178"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
+  integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"

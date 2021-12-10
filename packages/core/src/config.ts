@@ -41,6 +41,34 @@ export const defaultSolanaModalConfig: DefaultAdaptersModalConfig = {
         },
       },
     },
+    [EVM_WALLET_ADAPTERS.CUSTOM_AUTH]: {
+      visible: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+      configurationRequired: true,
+      loginMethods: {
+        google: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        twitter: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        facebook: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        email_passwordless: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+      },
+    },
     [SOLANA_WALLET_ADAPTERS.PHANTOM_WALLET]: {
       visible: true,
       showOnMobile: true,
@@ -69,6 +97,34 @@ export const defaultEvmModalConfig: DefaultAdaptersModalConfig = {
       configurationRequired: false,
     },
     [EVM_WALLET_ADAPTERS.OPENLOGIN_WALLET]: {
+      visible: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+      configurationRequired: true,
+      loginMethods: {
+        google: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        twitter: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        facebook: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+        email_passwordless: {
+          showOnDesktop: true,
+          showOnMobile: true,
+          visible: true,
+        },
+      },
+    },
+    [EVM_WALLET_ADAPTERS.CUSTOM_AUTH]: {
       visible: true,
       showOnMobile: true,
       showOnDesktop: true,
