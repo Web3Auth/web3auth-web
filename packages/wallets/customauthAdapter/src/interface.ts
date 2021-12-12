@@ -33,7 +33,7 @@ export type TorusDirectAuthResult = {
 
 interface LoginSettings {
   loginProviderConfig: Record<
-    LOGIN_TYPE,
+    string,
     {
       verifier: string;
       clientId: string;

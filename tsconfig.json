@@ -17,7 +17,7 @@
       "@web3auth/base": ["packages/base/src"],
       "@web3auth/core": ["packages/core/src"],
       "@web3auth/ui": ["packages/ui/src"],
-      "@web3auth/modal": ["packages/default/src"],
+      "@web3auth/modal": ["packages/modal/src"],
       "@web3auth/ethereum-provider": ["packages/providers/eth-provider/src"],
       "@web3auth/solana-provider": ["packages/providers/solana-provider/src"],
       "@web3auth/torus-wallet-adapter": ["packages/wallets/torusWalletAdapter/src"],

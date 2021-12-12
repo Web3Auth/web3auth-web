@@ -45,23 +45,23 @@ export const ADAPTER_CATEGORY = {
 } as const;
 export type ADAPTER_CATEGORY_TYPE = typeof ADAPTER_CATEGORY[keyof typeof ADAPTER_CATEGORY];
 
-export declare const LOGIN_PROVIDER: {
-  readonly GOOGLE: "google";
-  readonly FACEBOOK: "facebook";
-  readonly REDDIT: "reddit";
-  readonly DISCORD: "discord";
-  readonly TWITCH: "twitch";
-  readonly APPLE: "apple";
-  readonly LINE: "line";
-  readonly GITHUB: "github";
-  readonly KAKAO: "kakao";
-  readonly LINKEDIN: "linkedin";
-  readonly TWITTER: "twitter";
-  readonly WEIBO: "weibo";
-  readonly WECHAT: "wechat";
-  readonly EMAIL_PASSWORDLESS: "email_passwordless";
-  readonly WEBAUTHN: "webauthn";
-  readonly JWT: "jwt";
+export const LOGIN_PROVIDER = {
+  GOOGLE: "google",
+  FACEBOOK: "facebook",
+  REDDIT: "reddit",
+  DISCORD: "discord",
+  TWITCH: "twitch",
+  APPLE: "apple",
+  LINE: "line",
+  GITHUB: "github",
+  KAKAO: "kakao",
+  LINKEDIN: "linkedin",
+  TWITTER: "twitter",
+  WEIBO: "weibo",
+  WECHAT: "wechat",
+  EMAIL_PASSWORDLESS: "email_passwordless",
+  WEBAUTHN: "webauthn",
+  JWT: "jwt",
 };
 /**
  * {@label loginProviderType}

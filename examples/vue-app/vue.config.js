@@ -3,7 +3,7 @@
 module.exports = {
   lintOnSave: false,
   devServer: {
-    port: 8080, // CHANGE YOUR PORT HERE!
+    port: 3000, // CHANGE YOUR PORT HERE!
     headers: {
       "Access-Control-Allow-Origin": "*",
     },

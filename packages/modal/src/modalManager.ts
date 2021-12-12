@@ -17,6 +17,7 @@ import LoginModal from "@web3auth/ui";
 import { defaultEvmModalConfig, defaultSolanaModalConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
 import { DefaultAdaptersModalConfig, ModalConfig } from "./interface";
+import { getAdapterSocialLogins } from "./utils";
 
 export class Web3AuthModal extends Web3Auth {
   // public for testing purpose
@@ -53,43 +54,52 @@ export class Web3AuthModal extends Web3Auth {
     Object.keys(this.aggregatorModalConfig.adapters).forEach(async (adapterName) => {
       const adPromise = new Promise((resolve, reject) => {
         let adapterConfig = this.aggregatorModalConfig.adapters[adapterName];
+        const defaultAdapterConfig = { ...adapterConfig };
         const adapter = this.walletAdapters[adapterName];
-        if (adapterConfig.configurationRequired && !adapter && params.modalConfig?.[adapterName] !== false) {
-          throw new Error(`${adapterName} adapter is required to be configured,
-          please use "configureWallet" function to configure it or set "visible" to false 
-          if you don't want to use in modal for this adapter in modal config`);
-        }
+        // if (adapterConfig.configurationRequired && !adapter && params.modalConfig?.[adapterName]?.visible !== false) {
+        //   throw new Error(`${adapterName} adapter is required to be configured,
+        //   please use "configureWallet" function to configure it or set "visible" to false
+        //   if you don't want to use in modal for this adapter in modal config`);
+        // }
 
         if (params.modalConfig?.[adapterName]) {
           adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
         }
-        if (adapterConfig.visible) {
-          if (!adapter) {
-            getModule(adapterName, adapterConfig.options)
-              .then(async (ad: IWalletAdapter) => {
-                this.walletAdapters[adapterName] = ad;
-                if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
-                  this.subscribeToAdapterEvents(ad);
-                  await ad.init();
-                  this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as ModalConfig).loginMethods);
-                }
-                this.aggregatorModalConfig[adapterName] = adapterConfig;
-                resolve(true);
-                return true;
-              })
-              .catch((err) => reject(err));
-          } else if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
-            this.subscribeToAdapterEvents(adapter);
-            adapter
-              .init()
-              .then(() => {
-                this.loginModal.addSocialLogins(adapterName, adapterConfig, (adapterConfig as ModalConfig).loginMethods);
-                this.aggregatorModalConfig[adapterName] = adapterConfig;
-                resolve(true);
-                return true;
-              })
-              .catch((err) => reject(err));
+        // eslint-disable-next-line no-console
+        console.log("adapterConfig", adapterConfig, adapter);
+        if (!adapter) {
+          if (defaultAdapterConfig.configurationRequired) {
+            // TODO: add warning
+            // eslint-disable-next-line no-console
+            console.log(`${adapterName} adapter is required to be configured,
+            please use "configureWallet" function to configure it or set "visible" to false
+             if you don't want to use in modal for this adapter in modal config`);
+            return;
           }
+          getModule(adapterName, adapterConfig.options)
+            .then(async (ad: IWalletAdapter) => {
+              this.walletAdapters[adapterName] = ad;
+              if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
+                this.subscribeToAdapterEvents(ad);
+                await ad.init();
+                this.loginModal.addSocialLogins(adapterName, adapterConfig, getAdapterSocialLogins(adapterName, ad, adapterConfig.loginMethods));
+              }
+              this.aggregatorModalConfig[adapterName] = adapterConfig;
+              resolve(true);
+              return true;
+            })
+            .catch((err) => reject(err));
+        } else if (adapter?.walletType === ADAPTER_CATEGORY.IN_APP) {
+          this.subscribeToAdapterEvents(adapter);
+          adapter
+            .init()
+            .then(() => {
+              this.loginModal.addSocialLogins(adapterName, adapterConfig, getAdapterSocialLogins(adapterName, adapter, adapterConfig.loginMethods));
+              this.aggregatorModalConfig[adapterName] = adapterConfig;
+              resolve(true);
+              return true;
+            })
+            .catch((err) => reject(err));
         }
       });
       adapterPromises.push(adPromise);

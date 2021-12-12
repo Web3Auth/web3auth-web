@@ -33,7 +33,7 @@ interface CustomauthAdapterOptions {
   chainConfig: CustomChainConfig;
   adapterSettings: CustomAuthArgs;
   initSettings: InitParams;
-  loginSettings?: LoginSettings;
+  loginSettings: LoginSettings;
 }
 class CustomauthAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
@@ -52,13 +52,13 @@ class CustomauthAdapter extends BaseWalletAdapter {
 
   public provider: SafeEventEmitterProvider;
 
+  public readonly loginSettings: LoginSettings;
+
   private adapterSettings: CustomAuthArgs;
 
   private privKey: string;
 
   private userInfo: UserInfo;
-
-  private loginSettings: LoginSettings;
 
   private initSettings: InitParams;
 
@@ -112,6 +112,16 @@ class CustomauthAdapter extends BaseWalletAdapter {
       this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
       if (!this.customAuthResult.privateKey) {
+        const url = new URL(window.location.href);
+        const hash = url.hash.substr(1);
+        const queryParams = {};
+        url.searchParams.forEach((value, key) => {
+          queryParams[key] = value;
+        });
+        if (!hash && Object.keys(queryParams).length === 0) {
+          this.ready = true;
+          return;
+        }
         const redirectResult = await this.customauthInstance.getRedirectResult({
           replaceUrl: true,
           clearLoginDetails: true,
@@ -119,6 +129,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
         if (redirectResult.error) {
           console.log("Failed to parse direct auth result", redirectResult.error);
           if (redirectResult.error !== "Unsupported method type") {
+            this.ready = true;
             return;
           }
           this.emit("ERRORED", redirectResult.error);
@@ -195,11 +206,11 @@ class CustomauthAdapter extends BaseWalletAdapter {
         let finalPrivKey = this.customAuthResult.privateKey;
         try {
           if (!finalPrivKey && params) {
-            if (!this.loginSettings[params.loginProvider]) {
+            if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
               throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
             }
             const result = await this.customauthInstance.triggerLogin({
-              ...this.loginSettings[params.loginProvider],
+              ...this.loginSettings?.loginProviderConfig?.[params.loginProvider],
               typeOfLogin: params.loginProvider as LOGIN_TYPE,
             });
             if (this.adapterSettings.uxMode === "popup") {
