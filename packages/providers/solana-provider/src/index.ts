@@ -1,4 +1,4 @@
 export * from "./interface";
-export * from "./provider";
-export * from "./providerFromInjectedProvider";
+export * from "./providers";
+export * from "./solanaProviderWrapper";
 export * from "./utils";

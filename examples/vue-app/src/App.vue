@@ -98,7 +98,7 @@ export default Vue.extend({
     }, loginSettings: {
       // loginProvider: "google"
     }})
-    web3auth.configureWallet(customAuthAdapter);
+    web3auth.configureWallet(openloginAdapter);
 
     await web3auth.initModal({
       modalConfig: {

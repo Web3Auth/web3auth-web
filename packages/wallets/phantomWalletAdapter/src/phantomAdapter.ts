@@ -19,16 +19,16 @@ import {
   WalletNotInstalledError,
   WalletWindowClosedError,
 } from "@web3auth/base";
-// import type { SolanaInjectedProviderProxy } from "@web3auth/solana-provider";
+import type { SolanaInjectedProviderProxy, SolanaWallet } from "@web3auth/solana-provider";
 
-// interface PhantomWallet extends ISolanaWallet {
-//   isPhantom?: boolean;
-//   publicKey?: { toBytes(): Uint8Array };
-//   isConnected: boolean;
-//   connect(): Promise<void>;
-//   disconnect(): Promise<void>;
-//   _handleDisconnect(...args: unknown[]): unknown;
-// }
+interface PhantomWallet extends SolanaWallet {
+  isPhantom?: boolean;
+  publicKey?: { toBytes(): Uint8Array };
+  isConnected: boolean;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  _handleDisconnect(...args: unknown[]): unknown;
+}
 
 class PhantomAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -43,9 +43,9 @@ class PhantomAdapter extends BaseWalletAdapter {
 
   public provider: SafeEventEmitterProvider;
 
-  public _wallet: any;
+  public _wallet: PhantomWallet;
 
-  private solanaProviderFactory: any;
+  private solanaProviderFactory: SolanaInjectedProviderProxy;
 
   get connected() {
     return this._wallet?.isConnected && this.solanaProviderFactory?.state._initialized;

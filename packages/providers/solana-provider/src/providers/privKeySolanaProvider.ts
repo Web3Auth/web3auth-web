@@ -10,9 +10,9 @@ import {
   SafeEventEmitterProvider,
 } from "@web3auth/base";
 
-import { createJsonRpcClient } from "./JrpcClient";
-import { createSolanaMiddleware, IProviderHandlers } from "./solanaRpcMiddlewares";
-import { sendRpcRequest } from "./utils";
+import { createJsonRpcClient } from "../JrpcClient";
+import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
+import { sendRpcRequest } from "../utils";
 
 interface SolanaProviderState extends BaseState {
   _initialized: boolean;
@@ -23,7 +23,7 @@ interface SolanaProviderState extends BaseState {
 interface SolanaProviderConfig extends BaseConfig {
   chainConfig: CustomChainConfig;
 }
-export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
+export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
   public _providerProxy: SafeEventEmitterProvider;
 
   readonly chainConfig: CustomChainConfig;
@@ -90,6 +90,13 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
         transaction.partialSign(keyPair);
         return transaction;
       },
+      signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+        const transaction = this.transactionGenerator(req.params?.message);
+        transaction.partialSign(keyPair);
+        const fetchOnlyProvider = this.getFetchOnlyProvider();
+        await sendRpcRequest<string[], string>(fetchOnlyProvider, "sendTransaction", [transaction.serialize().toString("hex")]);
+        return { signature: Buffer.from(transaction.serialize()).toString("hex") };
+      },
       signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
         const signedTransactions: Transaction[] = [];
         for (const tx of req.params?.message || []) {
@@ -99,7 +106,6 @@ export class SolanaProvider extends BaseController<SolanaProviderConfig, SolanaP
         }
         return signedTransactions;
       },
-
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: [keyPair.publicKey.toBase58()],

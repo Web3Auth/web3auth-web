@@ -17,7 +17,8 @@ export interface IProviderHandlers {
   getAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
   signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
   signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
-  signMessage?: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<{ signature: Uint8Array }>;
+  signAndSendTransaction: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
+  signMessage?: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
   getProviderState: (
     req: JRPCRequest<[]>,
     res: JRPCResponse<InPageWalletProviderState>,
@@ -76,7 +77,8 @@ export function createGenericJRPCMiddleware<T, U>(
 }
 
 export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, requestAccounts, signTransaction, signAllTransactions, signMessage, getProviderState, version } = providerHandlers;
+  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getProviderState, version } =
+    providerHandlers;
 
   return mergeMiddleware([
     createScaffoldMiddleware({
@@ -85,8 +87,9 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     }),
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ message: string }, Transaction>("sign_transaction", signTransaction),
-    createGenericJRPCMiddleware<{ message: string[] }, Transaction[]>("sign_all_transactions", signAllTransactions),
-    createGenericJRPCMiddleware<{ message: Uint8Array }, { signature: Uint8Array }>("sign_message", signMessage),
+    createGenericJRPCMiddleware<{ message: string }, Transaction>("signTransaction", signTransaction),
+    createGenericJRPCMiddleware<{ message: string }, { signature: string }>("signAndSendTransaction", signAndSendTransaction),
+    createGenericJRPCMiddleware<{ message: string[] }, Transaction[]>("signAllTransactions", signAllTransactions),
+    createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
   ]);
 }

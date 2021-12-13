@@ -393,6 +393,7 @@ export default class LoginModal extends SafeEventEmitter {
     });
     listener.on(BASE_WALLET_EVENTS.ERRORED, () => {
       this.state.errored = true;
+      this.toggleLoader();
     });
     listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
