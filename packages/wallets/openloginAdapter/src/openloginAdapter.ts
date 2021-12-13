@@ -96,7 +96,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
   async connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
     if (!this.ready) throw new WalletNotReadyError("Openlogin wallet adapter is not ready, please init first");
     this.connecting = true;
-    this.emit(BASE_WALLET_EVENTS.CONNECTING);
+    this.emit(BASE_WALLET_EVENTS.CONNECTING, { ...params });
     try {
       return await this._login(params);
     } catch (error) {

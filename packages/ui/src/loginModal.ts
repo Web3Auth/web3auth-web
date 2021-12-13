@@ -179,6 +179,8 @@ export default class LoginModal extends SafeEventEmitter {
               this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } } as CommonLoginOptions);
           });
           return;
+        } else if (method === "webauthn" || method === "jwt") {
+          return;
         }
         this.hasSocialWallet = true;
         $socialLogins.classList.remove("w3a-group--social-hidden");
@@ -418,8 +420,7 @@ export default class LoginModal extends SafeEventEmitter {
     listener.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
       // eslint-disable-next-line no-console
       console.log(BASE_WALLET_EVENTS.CONNECTING, data);
-      // TODO: Get provider from the data
-      const provider = "Google";
+      const provider = (data as CommonLoginOptions)?.loginProvider || "";
       this.state.connecting = true;
       this.state.connected = false;
       this.toggleLoader(provider);
@@ -434,15 +435,21 @@ export default class LoginModal extends SafeEventEmitter {
       }
     });
     listener.on(BASE_WALLET_EVENTS.ERRORED, (data: WalletError) => {
-      // TODO: Check error code to display error
-      this.state.errored = true;
-      this.toggleMessage(`Error: ${data.message}`, BASE_WALLET_EVENTS.ERRORED);
+      this.state.connecting = false;
+      this.state.connected = false;
+      if (data?.code && data.code >= 1000 && data.code < 2000) {
+        this.state.errored = true;
+        this.toggleMessage(`Error: ${data.message}`, BASE_WALLET_EVENTS.ERRORED);
+      } else {
+        this.toggleLoader();
+      }
     });
     listener.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
       // eslint-disable-next-line no-console
       console.log(BASE_WALLET_EVENTS.DISCONNECTED, data);
       this.state.connecting = false;
       this.state.connected = false;
+      this.toggleMessage("");
     });
   }
 }
