@@ -56,11 +56,6 @@ export class Web3AuthModal extends Web3Auth {
         let adapterConfig = this.aggregatorModalConfig.adapters[adapterName];
         const defaultAdapterConfig = { ...adapterConfig };
         const adapter = this.walletAdapters[adapterName];
-        // if (adapterConfig.configurationRequired && !adapter && params.modalConfig?.[adapterName]?.visible !== false) {
-        //   throw new Error(`${adapterName} adapter is required to be configured,
-        //   please use "configureWallet" function to configure it or set "visible" to false
-        //   if you don't want to use in modal for this adapter in modal config`);
-        // }
 
         if (params.modalConfig?.[adapterName]) {
           adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };

@@ -24,11 +24,11 @@ export class Web3Auth extends SafeEventEmitter {
 
   public connecting: boolean;
 
-  public initialized: boolean;
-
   public provider: SafeEventEmitterProvider;
 
   public cachedWallet: string;
+
+  protected initialized: boolean;
 
   protected walletAdapters: Record<string, IWalletAdapter> = {};
 

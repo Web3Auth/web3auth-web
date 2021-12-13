@@ -11,6 +11,7 @@
       <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
       <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button>
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
+      <button v-if="connected && provider" @click="connect" style="cursor: pointer;">Sign Transaction</button>
 
     </section>
     <div id="console" style="white-space: pre-line">
@@ -24,14 +25,17 @@ import Vue from "vue";
 import { getCustomauthWallet, getOpenloginWallet, WALLET_ADAPTERS } from "@web3auth/core";
 import { Web3AuthModal } from "@web3auth/modal";
 import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WALLET_ADAPTERS, LOGIN_PROVIDER } from "@web3auth/base";
+import { SolanaProviderWrapper } from "@web3auth/solana-provider"
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
-const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
 export default Vue.extend({
   name: "app",
   data() {
     return {
       loginButtonStatus: "",
-      connected: false
+      connected: false,
+      provider: undefined,
     };
   },
   async mounted() {
@@ -60,12 +64,12 @@ export default Vue.extend({
         skipPrefetch: true
       },
       chainConfig: {
-      rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
-      chainId: "0x1",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://api.testnet.solana.com",
+      chainId: "0x2",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
       networkName: "mainnet",
-      ticker: "eth",
-      tickerName: "ethereum",
+      ticker: "sol",
+      tickerName: "solana",
     }, adapterSettings: {
       baseUrl: window.location.origin,
       redirectPathName:"",
@@ -85,12 +89,12 @@ export default Vue.extend({
     })
     
     const openloginAdapter = getOpenloginWallet({ chainConfig: {
-      rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
-      chainId: "0x1",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://api.testnet.solana.com",
+      chainId: "0x2",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
       networkName: "mainnet",
-      ticker: "eth",
-      tickerName: "ethereum",
+      ticker: "sol",
+      tickerName: "solans",
     }, adapterSettings: {
       network: "testnet",
       clientId: "localhost-id",
@@ -128,6 +132,19 @@ export default Vue.extend({
     connect() {
       web3auth.connect()
     },
+    async signTransaction() {
+    const conn = new Connection("https://api.testnet.solana.com")
+    const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
+    const TransactionInstruction = SystemProgram.transfer({
+      fromPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+      toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+      lamports: 0.01 * LAMPORTS_PER_SOL
+    });
+    let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu") }).add(TransactionInstruction);
+
+      const solWeb3 = new SolanaProviderWrapper(this.provider)
+      await solWeb3.signTransaction(transaction)
+    },
     async loginWithOpenlogin(){
       await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
     },
@@ -136,10 +153,12 @@ export default Vue.extend({
     },
      async logout(){
       await web3auth.logout();
+      this.provider = undefined
     },
     subscribeAuthEvents() {
       web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (provider: SafeEventEmitterProvider)=>{
        console.log("connected to wallet")
+       this.provider = provider;
        this.loginButtonStatus = "Logged in"
        this.connected = true
       })
