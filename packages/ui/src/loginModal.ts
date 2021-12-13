@@ -1,7 +1,7 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
 
 import { icons, images } from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
@@ -75,13 +75,18 @@ export default class LoginModal extends SafeEventEmitter {
                 </div>
                 <div class="w3ajs-modal-loader w3a-modal__loader w3a-modal__loader--hidden">
                     <div class="w3a-modal__loader-content">
-                        <div class="w3ajs-modal-loader__spinner w3a-spinner">
-                            <div class="w3a-spinner__body"></div>
-                            <div class="w3a-spinner__cover"></div>
-                            <div class="w3a-spinner__head"></div>
+                        <div class="w3a-modal__loader-info">
+                          <div class="w3ajs-modal-loader__spinner w3a-spinner">
+                              <div class="w3a-spinner__body"></div>
+                              <div class="w3a-spinner__cover"></div>
+                              <div class="w3a-spinner__head"></div>
+                          </div>
+                          <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
+                          <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
+                          <button class="w3a-logout w3ajs-logout" style="display: none">
+                              <h6 class="w3a-group__title">Logout</h6>
+                          </button>
                         </div>
-                        <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
-                        <div class="w3ajs-modal-loader__error w3a-spinner-error" style="display: none"></div>
                         <div class="w3a-spinner-power">
                             <img src="${torusPower}" alt="">
                         </div>
@@ -107,8 +112,7 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalToggleButton = $externalToggle?.querySelector(".w3ajs-external-toggle__button");
     const $externalBackButton = $externalWallet.querySelector(".w3ajs-external-back");
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
-
-    $closeBtn.addEventListener("click", this.toggleModal);
+    const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
 
     $externalToggleButton?.addEventListener("click", () => {
       $externalToggle?.classList.toggle("w3a-external-toggle--hidden");
@@ -124,8 +128,21 @@ export default class LoginModal extends SafeEventEmitter {
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
     });
 
+    $closeBtn.addEventListener("click", this.toggleModal);
+
     $loaderCloseBtn?.addEventListener("click", () => {
-      this.toggleError("");
+      if (this.state.connected) {
+        this.toggleModal();
+      } else {
+        this.toggleMessage("");
+      }
+    });
+
+    $loaderLogout?.addEventListener("click", () => {
+      // eslint-disable-next-line no-console
+      console.log("Logout");
+      this.toggleMessage("");
+      // Todo: Emit Logout
     });
 
     $content?.appendChild($torusWallet);
@@ -340,36 +357,53 @@ export default class LoginModal extends SafeEventEmitter {
     return $externalWallet;
   };
 
-  private toggleLoader() {
+  private toggleLoader(provider = "") {
     const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
+    const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
     if (this.state.connecting) {
       $loader.classList.remove("w3a-modal__loader--hidden");
+      $loaderLabel.style.display = "block";
+      $loaderLabel.innerText = provider;
     } else {
       $loader.classList.add("w3a-modal__loader--hidden");
+      $loaderLabel.style.display = "none";
+      $loaderLabel.innerText = "";
     }
   }
 
-  private toggleError(message: string) {
+  private toggleMessage(message: string, type = "") {
     const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
     const $loaderSpinner = this.$modal.querySelector(".w3ajs-modal-loader__spinner") as HTMLDivElement;
     const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
-    const $loaderError = this.$modal.querySelector(".w3ajs-modal-loader__error") as HTMLDivElement;
+    const $loaderMessage = this.$modal.querySelector(".w3ajs-modal-loader__message") as HTMLDivElement;
     const $loaderClose = this.$modal.querySelector(".w3ajs-loader-close-btn") as HTMLDivElement;
+    const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
 
+    $loaderLabel.style.display = "none";
     if (message) {
       $loader.classList.remove("w3a-modal__loader--hidden");
       $loaderSpinner.style.display = "none";
-      $loaderLabel.style.display = "none";
-      $loaderError.style.display = "block";
+      $loaderMessage.style.display = "block";
       $loaderClose.style.display = "block";
-      $loaderError.innerText = message;
+      $loaderMessage.innerText = message;
     } else {
       $loader.classList.add("w3a-modal__loader--hidden");
       $loaderSpinner.style.display = "block";
-      $loaderLabel.style.display = "block";
-      $loaderError.style.display = "none";
+      $loaderMessage.style.display = "none";
       $loaderClose.style.display = "none";
-      $loaderError.innerText = "";
+      $loaderMessage.innerText = "";
+    }
+
+    if (type === BASE_WALLET_EVENTS.ERRORED) {
+      $loaderMessage.classList.add("w3a-spinner-message--error");
+    } else {
+      $loaderMessage.classList.remove("w3a-spinner-message--error");
+    }
+
+    if (type === BASE_WALLET_EVENTS.CONNECTED) {
+      $loaderLogout.style.display = "block";
+    } else {
+      $loaderLogout.style.display = "none";
     }
   }
 
@@ -381,24 +415,34 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
-    listener.on(BASE_WALLET_EVENTS.CONNECTING, () => {
+    listener.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
+      // eslint-disable-next-line no-console
+      console.log(BASE_WALLET_EVENTS.CONNECTING, data);
+      // TODO: Get provider from the data
+      const provider = "Google";
       this.state.connecting = true;
       this.state.connected = false;
-      this.toggleLoader();
+      this.toggleLoader(provider);
     });
     listener.on(BASE_WALLET_EVENTS.CONNECTED, () => {
+      // eslint-disable-next-line no-console
+      console.log(BASE_WALLET_EVENTS.CONNECTED);
       this.state.connecting = false;
-      this.state.connected = true;
-      this.toggleLoader();
+      if (!this.state.connected) {
+        this.state.connected = true;
+        this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_WALLET_EVENTS.CONNECTED);
+      }
     });
-    listener.on(BASE_WALLET_EVENTS.ERRORED, () => {
+    listener.on(BASE_WALLET_EVENTS.ERRORED, (data: WalletError) => {
+      // TODO: Check error code to display error
       this.state.errored = true;
-      this.toggleLoader();
+      this.toggleMessage(`Error: ${data.message}`, BASE_WALLET_EVENTS.ERRORED);
     });
-    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
+    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
+      // eslint-disable-next-line no-console
+      console.log(BASE_WALLET_EVENTS.DISCONNECTED, data);
       this.state.connecting = false;
       this.state.connected = false;
-      this.toggleLoader();
     });
   }
 }
