@@ -43,6 +43,7 @@ export default class LoginModal extends SafeEventEmitter {
   init() {
     const web3authIcon = images[`web3auth${this.isDark ? "-light" : ""}.svg`];
     const closeIcon = icons["close.svg"];
+    const torusPower = images["torus-power.svg"];
     this.$modal = this.htmlToElement(`
         <div id="w3a-modal" class="w3a-modal w3a-modal--hidden${this.isDark ? "" : " w3a-modal--light"}">
             <div class="w3a-modal__inner">
@@ -72,12 +73,31 @@ export default class LoginModal extends SafeEventEmitter {
                         <img height="24" src="${web3authIcon}" alt="">
                     </div>
                 </div>
+                <div class="w3ajs-modal-loader w3a-modal__loader w3a-modal__loader--hidden">
+                    <div class="w3a-modal__loader-content">
+                        <div class="w3ajs-modal-loader__spinner w3a-spinner">
+                            <div class="w3a-spinner__body"></div>
+                            <div class="w3a-spinner__cover"></div>
+                            <div class="w3a-spinner__head"></div>
+                        </div>
+                        <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
+                        <div class="w3ajs-modal-loader__error w3a-spinner-error" style="display: none"></div>
+                        <div class="w3a-spinner-power">
+                            <img src="${torusPower}" alt="">
+                        </div>
+                    </div>
+                    <button class="w3a-header__button w3ajs-loader-close-btn">
+                        <img src="${closeIcon}" alt="">
+                    </button>
+                </div>
             </div>
         </div>
     `);
     const $content = this.$modal.querySelector(".w3ajs-content");
 
     const $closeBtn = this.$modal.querySelector(".w3ajs-close-btn");
+
+    const $loaderCloseBtn = this.$modal.querySelector(".w3ajs-loader-close-btn");
 
     const $torusWallet = this.getSocialLogins();
     const $torusWalletEmail = this.getSocialLoginsEmail();
@@ -102,6 +122,10 @@ export default class LoginModal extends SafeEventEmitter {
       $externalContainer?.classList.toggle("w3a-external-container--hidden");
       $torusWallet.classList.toggle("w3a-group--hidden");
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
+    });
+
+    $loaderCloseBtn?.addEventListener("click", () => {
+      this.toggleError("");
     });
 
     $content?.appendChild($torusWallet);
@@ -316,6 +340,39 @@ export default class LoginModal extends SafeEventEmitter {
     return $externalWallet;
   };
 
+  private toggleLoader() {
+    const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
+    if (this.state.connecting) {
+      $loader.classList.remove("w3a-modal__loader--hidden");
+    } else {
+      $loader.classList.add("w3a-modal__loader--hidden");
+    }
+  }
+
+  private toggleError(message: string) {
+    const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
+    const $loaderSpinner = this.$modal.querySelector(".w3ajs-modal-loader__spinner") as HTMLDivElement;
+    const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
+    const $loaderError = this.$modal.querySelector(".w3ajs-modal-loader__error") as HTMLDivElement;
+    const $loaderClose = this.$modal.querySelector(".w3ajs-loader-close-btn") as HTMLDivElement;
+
+    if (message) {
+      $loader.classList.remove("w3a-modal__loader--hidden");
+      $loaderSpinner.style.display = "none";
+      $loaderLabel.style.display = "none";
+      $loaderError.style.display = "block";
+      $loaderClose.style.display = "block";
+      $loaderError.innerText = message;
+    } else {
+      $loader.classList.add("w3a-modal__loader--hidden");
+      $loaderSpinner.style.display = "block";
+      $loaderLabel.style.display = "block";
+      $loaderError.style.display = "none";
+      $loaderClose.style.display = "none";
+      $loaderError.innerText = "";
+    }
+  }
+
   private htmlToElement = <T extends Element>(html: string): T => {
     const template = window.document.createElement("template");
     const trimmedHtml = html.trim(); // Never return a text node of whitespace as the result
@@ -327,10 +384,12 @@ export default class LoginModal extends SafeEventEmitter {
     listener.on(BASE_WALLET_EVENTS.CONNECTING, () => {
       this.state.connecting = true;
       this.state.connected = false;
+      this.toggleLoader();
     });
     listener.on(BASE_WALLET_EVENTS.CONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = true;
+      this.toggleLoader();
     });
     listener.on(BASE_WALLET_EVENTS.ERRORED, () => {
       this.state.errored = true;
@@ -338,6 +397,7 @@ export default class LoginModal extends SafeEventEmitter {
     listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = false;
+      this.toggleLoader();
     });
   }
 }

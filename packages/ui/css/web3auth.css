@@ -41,6 +41,7 @@
     max-width: 375px;
     overflow: hidden;
     border-radius: 6px;
+    position: relative;
 }
 
 #w3a-modal .w3a-modal__header {
@@ -93,16 +94,20 @@
 #w3a-modal .w3a-group {
     margin-bottom: 24px;
 }
-#w3a-modal .w3a-group:not(style*="display:none"):not(:last-child) {
-    border-bottom: 0.5px solid #5c6c7f;
-    padding-bottom: 24px;
-}
 
 #w3a-modal .w3a-group.w3a-group--hidden,
 #w3a-modal .w3a-group.w3a-group--social-hidden,
 #w3a-modal .w3a-group.w3a-group--email-hidden,
 #w3a-modal .w3a-group.w3a-group--ext-wallet-hidden {
     display: none;
+}
+
+#w3a-modal .w3a-group:not(.w3a-group--hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--social-hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--email-hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--ext-wallet-hidden):not(:last-child){
+    border-bottom: 0.5px solid #5c6c7f;
+    padding-bottom: 24px;
 }
 
 #w3a-modal h6.w3a-group__title {
@@ -323,6 +328,104 @@
     margin: 0 2px;
 }
 
+/* SPINNER */
+/* Loader */
+#w3a-modal .w3a-modal__loader {
+    background: var(--bg1);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
+    display: none;
+}
+
+#w3a-modal .w3a-modal__loader-content {
+    margin-top: 25%;
+    text-align: center;
+    margin-bottom: 25%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+#w3a-modal .w3a-spinner-label {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0364ff;
+}
+
+#w3a-modal .w3a-spinner-error {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #FB4A61;
+}
+
+#w3a-modal .w3a-spinner-power {
+    margin-top: auto;
+}
+#w3a-modal .w3a-spinner-power img {
+    height: 30px;
+}
+
+#w3a-modal .w3a-spinner {
+    animation: rotate 1s linear infinite;
+    border-radius: 50%;
+    height: 68px;
+    width: 68px;
+    position: relative;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__body,
+#w3a-modal .w3a-spinner .w3a-spinner__head,
+#w3a-modal .w3a-spinner .w3a-spinner__cover {
+    position: absolute;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__body {
+    border-radius: 50%;
+    background: linear-gradient(150deg, #0364ff00 50%, #0364ff4e 150%) 100% 0%,
+        linear-gradient(200deg, #0364ff20 0%, #0364ff99 100%) 100% 100%,
+        linear-gradient(320deg, #0364ff20 -50%, #0364ffff 60%) 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 50% 50%;
+    top: -1px;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__head {
+    border-radius: 50%;
+    background: #0364ff;
+    width: 12px;
+    height: 12px;
+    top: 50%;
+    left: -2px;
+    transform: translateY(-50%);
+}
+#w3a-modal .w3a-spinner .w3a-spinner__cover {
+    background: var(--bg1);
+    border-radius: 50%;
+    top: 8px;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* LIGHT MODE */
 #w3a-modal.w3a-modal--light {
     --bg1: #ffffff;
@@ -331,8 +434,12 @@
     --text-color2: #0f1222;
 }
 
-#w3a-modal.w3a-modal--light .w3a-group:not(:last-child) {
+#w3a-modal .w3a-group:not(.w3a-group--hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--social-hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--email-hidden):not(:last-child),
+#w3a-modal .w3a-group:not(.w3a-group--ext-wallet-hidden):not(:last-child){
     border-bottom: 0.5px solid #b7b8bd;
+    padding-bottom: 24px;
 }
 
 #w3a-modal.w3a-modal--light button.w3a-button {
