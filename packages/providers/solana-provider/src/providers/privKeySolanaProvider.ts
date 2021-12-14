@@ -6,6 +6,7 @@ import {
   InvalidProviderConfigError,
   PROVIDER_EVENTS,
   ProviderNotReadyError,
+  RequestArguments,
   RpcConnectionFailedError,
   SafeEventEmitterProvider,
 } from "@web3auth/base";
@@ -121,7 +122,13 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
     engine.push(solanaMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(provider);
+    const providerWithRequest = {
+      ...provider,
+      request: async (args: RequestArguments) => {
+        return provider.sendAsync(args);
+      },
+    } as SafeEventEmitterProvider;
+    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
     return this._providerProxy;
   }
 

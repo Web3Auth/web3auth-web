@@ -109,24 +109,30 @@ export class Web3Auth extends SafeEventEmitter {
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
     walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapter: WALLET_ADAPTER_TYPE) => {
+      // eslint-disable-next-line no-console
+      console.log("Connected to", connectedAdapter, this.walletAdapters);
       this.connected = true;
       this.connecting = false;
       this.connectedAdapter = this.walletAdapters[connectedAdapter];
+      this.provider = this.connectedAdapter.provider;
       this.cacheWallet(connectedAdapter);
       this.emit(BASE_WALLET_EVENTS.CONNECTED, connectedAdapter);
     });
     walletAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
       this.connected = false;
       this.connecting = false;
+      this.provider = undefined;
       this.clearCache();
       this.emit(BASE_WALLET_EVENTS.DISCONNECTED, data);
     });
     walletAdapter.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
       this.connecting = true;
+      this.provider = undefined;
       this.emit(BASE_WALLET_EVENTS.CONNECTING, data);
     });
     walletAdapter.on(BASE_WALLET_EVENTS.ERRORED, (data) => {
       this.connecting = false;
+      this.provider = undefined;
       this.emit(BASE_WALLET_EVENTS.ERRORED, data);
     });
   }

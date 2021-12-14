@@ -1,7 +1,7 @@
 import type { Transaction } from "@solana/web3.js";
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, PROVIDER_EVENTS, ProviderNotReadyError, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, PROVIDER_EVENTS, ProviderNotReadyError, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { createInjectedProviderProxyMiddleware, InjectedProviderOptions } from "../injectedProviderProxy";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
@@ -95,7 +95,14 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
     engine.push(solanaMiddleware);
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(provider);
+
+    const providerWithRequest = {
+      ...provider,
+      request: async (args: RequestArguments) => {
+        return provider.sendAsync(args);
+      },
+    } as SafeEventEmitterProvider;
+    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
     return this._providerProxy;
   }
 }

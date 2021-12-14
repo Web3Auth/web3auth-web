@@ -11,7 +11,7 @@
       <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
       <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button>
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
-      <button v-if="connected && provider" @click="connect" style="cursor: pointer;">Sign Transaction</button>
+      <button v-if="connected && provider" @click="signTransaction" style="cursor: pointer;">Sign Transaction</button>
 
     </section>
     <div id="console" style="white-space: pre-line">
@@ -133,15 +133,15 @@ export default Vue.extend({
       web3auth.connect()
     },
     async signTransaction() {
-    const conn = new Connection("https://api.testnet.solana.com")
-    const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-    const TransactionInstruction = SystemProgram.transfer({
-      fromPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
-      toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
-      lamports: 0.01 * LAMPORTS_PER_SOL
-    });
-    let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu") }).add(TransactionInstruction);
-
+      const conn = new Connection("https://api.testnet.solana.com")
+      const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
+      const TransactionInstruction = SystemProgram.transfer({
+        fromPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+        toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+        lamports: 0.01 * LAMPORTS_PER_SOL
+      });
+      let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu") }).add(TransactionInstruction);
+      console.log("provider", this.provider)
       const solWeb3 = new SolanaProviderWrapper(this.provider)
       await solWeb3.signTransaction(transaction)
     },
@@ -156,9 +156,9 @@ export default Vue.extend({
       this.provider = undefined
     },
     subscribeAuthEvents() {
-      web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (provider: SafeEventEmitterProvider)=>{
-       console.log("connected to wallet")
-       this.provider = provider;
+      web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
+       console.log("connected to wallet", adapterName)
+       this.provider = web3auth.provider;
        this.loginButtonStatus = "Logged in"
        this.connected = true
       })

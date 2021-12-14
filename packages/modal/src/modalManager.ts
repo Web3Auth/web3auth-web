@@ -148,8 +148,18 @@ export class Web3AuthModal extends Web3Auth {
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
       const adapter = this.walletAdapters[walletName];
       if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
-        adaptersConfig[walletName] = this.aggregatorModalConfig[walletName]?.options;
-        adapterPromises.push(adapter.init());
+        const adPromise = new Promise((resolve, reject) => {
+          adapter
+            .init()
+            .then(() => {
+              this.subscribeToAdapterEvents(adapter);
+              adaptersConfig[walletName] = this.aggregatorModalConfig.adapters[walletName];
+              resolve(true);
+              return true;
+            })
+            .catch((err) => reject(err));
+        });
+        adapterPromises.push(adPromise);
       }
     });
     // eslint-disable-next-line no-console
