@@ -42,6 +42,8 @@
     overflow: hidden;
     border-radius: 6px;
     position: relative;
+    max-height: 90%;
+    overflow-y: auto;
 }
 
 #w3a-modal .w3a-modal__header {
@@ -226,6 +228,25 @@
 #w3a-modal .w3a-button--left .w3a-button__image,
 #w3a-modal .w3a-button--left-alone .w3a-button__image {
     margin-right: 12px;
+}
+
+#w3a-modal button.w3a-button-expand {
+    height: unset;
+    width: auto;
+    margin-left: auto;
+    font-size: 12px;
+    margin-top: 16px;
+    display: flex;
+    border: 0;
+    color: var(--text-color2);
+    align-items: center;
+    cursor: pointer;
+}
+
+#w3a-modal button.w3a-button-expand .w3a-button__image {
+    width: 12px;
+    height: auto;
+    margin-right: 4px;
 }
 
 #w3a-modal .w3a-external-toggle {

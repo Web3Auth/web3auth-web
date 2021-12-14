@@ -161,7 +161,7 @@ export default class LoginModal extends SafeEventEmitter {
   addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: Record<string, LoginMethodConfig>): void => {
     const $socialLogins = this.$modal.querySelector(".w3ajs-social-logins") as HTMLDivElement;
     const $adapterList = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
-    const $adapterExpand = $socialLogins.querySelector(".w3ajs-socials-adapters__expand") as HTMLDivElement;
+    // const $adapterExpand = $socialLogins.querySelector(".w3ajs-socials-adapters__expand") as HTMLDivElement;
 
     Object.keys(loginMethods)
       .reverse()
@@ -197,16 +197,17 @@ export default class LoginModal extends SafeEventEmitter {
           this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } as CommonLoginOptions });
         });
 
-        if ($adapterList.children.length < 5) {
-          $adapterExpand.before(adapterButton);
-          $adapterExpand.classList.add("w3a-adapter-item--hide");
-        } else if ($adapterList.children.length === 5) {
-          $adapterExpand.after(adapterButton);
-          $adapterExpand.classList.add("w3a-adapter-item--hide");
-        } else {
-          $adapterExpand.after(adapterButton);
-          $adapterExpand.classList.remove("w3a-adapter-item--hide");
-        }
+        // if ($adapterList.children.length < 5) {
+        //   $adapterExpand.before(adapterButton);
+        //   $adapterExpand.classList.add("w3a-adapter-item--hide");
+        // } else if ($adapterList.children.length === 5) {
+        //   $adapterExpand.after(adapterButton);
+        //   $adapterExpand.classList.add("w3a-adapter-item--hide");
+        // } else {
+        //   $adapterExpand.after(adapterButton);
+        //   $adapterExpand.classList.remove("w3a-adapter-item--hide");
+        // }
+        $adapterList.append(adapterButton);
       });
   };
 
@@ -296,21 +297,25 @@ export default class LoginModal extends SafeEventEmitter {
     const $socialLogins = this.htmlToElement(`
         <div class="w3ajs-social-logins w3a-group w3a-group--social-hidden">
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
-            <ul class="w3a-adapter-list w3a-adapter-list--shrink w3ajs-socials-adapters">
-              <li class="w3a-adapter-item w3a-adapter-item--hide w3ajs-socials-adapters__expand">
-                  <button class="w3a-button w3ajs-button-expand w3a-button--icon">
-                      <img class="w3a-button__image" src="${expandIcon}" alt="">
-                  </button>
-              </li>   
-            </ul>
+            <ul class="w3a-adapter-list w3a-adapter-list--shrink w3ajs-socials-adapters"></ul>
+            <button class="w3a-button-expand w3ajs-button-expand">
+              <img class="w3a-button__image" src="${expandIcon}" alt="">
+              <span class="w3ajs-button-expand-text">View more options</span>
+            </button>
         </div>
     `) as HTMLDivElement;
 
     const $adapterList = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
-    const $adapterExpandBtn = $adapterList.querySelector(".w3ajs-button-expand") as HTMLDivElement;
+    const $adapterExpandBtn = $socialLogins.querySelector(".w3ajs-button-expand") as HTMLButtonElement;
+    const $adapterExpandText = $adapterExpandBtn.querySelector(".w3ajs-button-expand-text") as HTMLSpanElement;
     $adapterExpandBtn.addEventListener("click", () => {
       $adapterList.classList.toggle("w3a-adapter-list--shrink");
       $adapterExpandBtn.classList.toggle("w3a-button--rotate");
+      if ($adapterExpandBtn.classList.contains("w3a-button--rotate")) {
+        $adapterExpandText.innerText = "View less options";
+      } else {
+        $adapterExpandText.innerText = "View more options";
+      }
     });
 
     return $socialLogins;
