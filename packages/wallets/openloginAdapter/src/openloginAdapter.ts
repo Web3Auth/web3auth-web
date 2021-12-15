@@ -67,29 +67,32 @@ class OpenloginAdapter extends BaseWalletAdapter {
     this.chainConfig = params.chainConfig;
   }
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
-    const { default: OpenloginSdk } = await import("@toruslabs/openlogin");
+    const { default: OpenloginSdk, getHashQueryParams } = await import("@toruslabs/openlogin");
     this.openloginInstance = new OpenloginSdk(this.openloginOptions);
+    const redirectResult = getHashQueryParams();
+    let isRedirectResult = true;
+    if (Object.keys(redirectResult).length > 0) {
+      isRedirectResult = true;
+    }
     await this.openloginInstance.init();
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { PrivKeySolanaProvider } = await import("@web3auth/solana-provider");
       this.solanaProviderFactory = new PrivKeySolanaProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
-      if (this.openloginInstance.privKey) {
-        await this.setupProvider(this.solanaProviderFactory);
-      }
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumProvider } = await import("@web3auth/ethereum-provider");
       this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
-      if (this.openloginInstance.privKey) {
-        await this.setupProvider(this.ethereumProviderFactory);
-      }
     } else {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
 
+    // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
+    if (this.openloginInstance.privKey && (options.connect || isRedirectResult)) {
+      await this.connectWithProvider();
+    }
     this.ready = true;
   }
 
@@ -98,7 +101,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
     this.connecting = true;
     this.emit(BASE_WALLET_EVENTS.CONNECTING, { ...params });
     try {
-      return await this._login(params);
+      return await this.connectWithProvider(params);
     } catch (error) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
       throw new WalletConnectionError("Failed to login with openlogin", error);
@@ -196,7 +199,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
     });
   }
 
-  private async _login(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: PrivKeySolanaProvider | EthereumProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;

@@ -76,7 +76,7 @@ export class Web3AuthModal extends Web3Auth {
               this.walletAdapters[adapterName] = ad;
               if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
                 this.subscribeToAdapterEvents(ad);
-                await ad.init();
+                await ad.init({ connect: this.cachedWallet === adapterName });
                 this.loginModal.addSocialLogins(adapterName, adapterConfig, getAdapterSocialLogins(adapterName, ad, adapterConfig.loginMethods));
               }
               this.aggregatorModalConfig[adapterName] = adapterConfig;
@@ -87,7 +87,7 @@ export class Web3AuthModal extends Web3Auth {
         } else if (adapter?.walletType === ADAPTER_CATEGORY.IN_APP) {
           this.subscribeToAdapterEvents(adapter);
           adapter
-            .init()
+            .init({ connect: this.cachedWallet === adapterName })
             .then(() => {
               this.loginModal.addSocialLogins(adapterName, adapterConfig, getAdapterSocialLogins(adapterName, adapter, adapterConfig.loginMethods));
               this.aggregatorModalConfig[adapterName] = adapterConfig;
@@ -150,7 +150,7 @@ export class Web3AuthModal extends Web3Auth {
       if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
         const adPromise = new Promise((resolve, reject) => {
           adapter
-            .init()
+            .init({ connect: this.cachedWallet === walletName })
             .then(() => {
               this.subscribeToAdapterEvents(adapter);
               adaptersConfig[walletName] = this.aggregatorModalConfig.adapters[walletName];

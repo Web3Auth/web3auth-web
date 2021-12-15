@@ -133,14 +133,14 @@ export default Vue.extend({
       web3auth.connect()
     },
     async signTransaction() {
-      const conn = new Connection("https://api.testnet.solana.com")
+      const conn = new Connection("https://api.mainnet.solana.com")
       const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
       const TransactionInstruction = SystemProgram.transfer({
-        fromPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+        fromPubkey: new PublicKey("6tgVBQHXU3232683f8ZVMcpT71n8CQnqP6DLA24VQx7e"),
         toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
         lamports: 0.01 * LAMPORTS_PER_SOL
       });
-      let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu") }).add(TransactionInstruction);
+      let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey("6tgVBQHXU3232683f8ZVMcpT71n8CQnqP6DLA24VQx7e") }).add(TransactionInstruction);
       console.log("provider", this.provider)
       const solWeb3 = new SolanaProviderWrapper(this.provider)
       await solWeb3.signTransaction(transaction)

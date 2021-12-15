@@ -81,7 +81,7 @@ export interface IWalletAdapter extends SafeEventEmitter {
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
-  init(): Promise<void>;
+  init(options?: { connect?: boolean }): Promise<void>;
   connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
   disconnect(): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
@@ -102,7 +102,7 @@ export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWal
 
   public abstract provider: SafeEventEmitterProvider;
 
-  abstract init(): Promise<void>;
+  abstract init(options?: { connect?: boolean }): Promise<void>;
   abstract connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;

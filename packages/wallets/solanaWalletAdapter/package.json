@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
+    "@web3auth/solana-provider": "0.0.0",
     "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@toruslabs/solana-embed": "^0.0.3"
   },

@@ -93,60 +93,64 @@ class CustomauthAdapter extends BaseWalletAdapter {
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
     this.customauthInstance = new Customauth(this.adapterSettings);
+    let providerFactory: EthereumProvider | PrivKeySolanaProvider;
     await this.customauthInstance.init(this.initSettings);
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { PrivKeySolanaProvider } = await import("@web3auth/solana-provider");
       this.solanaProviderFactory = new PrivKeySolanaProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
-      if (this.privKey) {
-        await this.setupProvider(this.solanaProviderFactory);
-      }
+      providerFactory = this.solanaProviderFactory;
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumProvider } = await import("@web3auth/ethereum-provider");
       this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
-      if (!this.customAuthResult.privateKey) {
-        const url = new URL(window.location.href);
-        const hash = url.hash.substr(1);
-        const queryParams = {};
-        url.searchParams.forEach((value, key) => {
-          queryParams[key] = value;
-        });
-        if (!hash && Object.keys(queryParams).length === 0) {
+      providerFactory = this.ethereumProviderFactory;
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+    }
+    // if adapter is already connected and cached then we can proceed to setup the provider
+    if (this.customAuthResult.privateKey && options.connect) {
+      await this.setupProvider(providerFactory);
+    }
+    // if adapter is not connected then we should check if url contains redirect login result
+    if (!this.customAuthResult.privateKey) {
+      const url = new URL(window.location.href);
+      const hash = url.hash.substr(1);
+      const queryParams = {};
+      url.searchParams.forEach((value, key) => {
+        queryParams[key] = value;
+      });
+      if (!hash && Object.keys(queryParams).length === 0) {
+        this.ready = true;
+        return;
+      }
+      const redirectResult = await this.customauthInstance.getRedirectResult({
+        replaceUrl: true,
+        clearLoginDetails: true,
+      });
+      if (redirectResult.error) {
+        console.log("Failed to parse direct auth result", redirectResult.error);
+        if (redirectResult.error !== "Unsupported method type") {
           this.ready = true;
           return;
         }
-        const redirectResult = await this.customauthInstance.getRedirectResult({
-          replaceUrl: true,
-          clearLoginDetails: true,
-        });
-        if (redirectResult.error) {
-          console.log("Failed to parse direct auth result", redirectResult.error);
-          if (redirectResult.error !== "Unsupported method type") {
-            this.ready = true;
-            return;
-          }
-          this.emit("ERRORED", redirectResult.error);
-          return;
-        }
-        try {
-          this.customAuthResult = parseDirectAuthResult(redirectResult);
-          this._syncCustomauthResult(this.customAuthResult);
-        } catch (error) {
-          console.log("Failed to parse direct auth result", error);
-          this.emit("ERRORED", error);
-        }
+        this.emit("ERRORED", redirectResult.error);
+        return;
       }
-
-      if (this.customAuthResult.privateKey) {
-        await this.setupProvider(this.ethereumProviderFactory);
+      try {
+        this.customAuthResult = parseDirectAuthResult(redirectResult);
+        this._syncCustomauthResult(this.customAuthResult);
+        if (this.customAuthResult.privateKey) {
+          await this.setupProvider(providerFactory);
+        }
+      } catch (error) {
+        console.log("Failed to parse direct auth result", error);
+        this.emit("ERRORED", error);
       }
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
     this.ready = true;
   }

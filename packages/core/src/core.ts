@@ -44,7 +44,7 @@ export class Web3Auth extends SafeEventEmitter {
     await Promise.all(
       Object.keys(this.walletAdapters).map((adapterName) => {
         this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-        this.walletAdapters[adapterName].init();
+        this.walletAdapters[adapterName].init({ connect: this.cachedWallet === adapterName });
         return true;
       })
     );
@@ -83,7 +83,7 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   public clearCache() {
-    window.localStorage.removeItem("Web3Auth-CachedWallet");
+    window.sessionStorage.removeItem("Web3Auth-CachedWallet");
     this.cachedWallet = undefined;
   }
 
@@ -138,7 +138,7 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   private cacheWallet(walletName: string) {
-    window.localStorage.setItem("Web3Auth-CachedWallet", walletName);
+    window.sessionStorage.setItem("Web3Auth-CachedWallet", walletName);
     this.cachedWallet = walletName;
   }
 }

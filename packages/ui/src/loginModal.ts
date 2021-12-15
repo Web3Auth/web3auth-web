@@ -286,6 +286,8 @@ export default class LoginModal extends SafeEventEmitter {
 
       $adapterList.appendChild(adapterButton);
     });
+    // TODO: @lionell stop the loading spinner on external wallet screen
+
     this.state = {
       ...this.state,
       externalWalletsInitialized: true,
@@ -359,6 +361,7 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalWalletButton = $externalWallet.querySelector(".w3ajs-external-toggle__button") as HTMLDivElement;
 
     $externalWalletButton.addEventListener("click", () => {
+      // TODO:  @lionell: Add a loading spinner on external wallet screen
       this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
     });
     return $externalWallet;

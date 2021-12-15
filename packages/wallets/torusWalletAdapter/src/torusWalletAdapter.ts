@@ -58,12 +58,13 @@ class TorusWalletAdapter extends BaseWalletAdapter {
     this.loginSettings = params.loginSettings;
   }
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/torus-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
     this.ready = true;
+    if (options.connect) await this.connect();
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {

@@ -22,7 +22,7 @@ export class SolanaProviderWrapper implements ISolanaWallet {
 
   public async signTransaction(transaction: Transaction): Promise<Transaction> {
     const signedTransaction = (await this.provider.request({
-      method: "signAllTransactions",
+      method: "signTransaction",
       params: {
         message: bs58.encode(transaction.serializeMessage()),
       },

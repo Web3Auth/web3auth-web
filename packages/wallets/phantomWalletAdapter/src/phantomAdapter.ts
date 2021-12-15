@@ -52,7 +52,7 @@ class PhantomAdapter extends BaseWalletAdapter {
     return this._wallet?.isConnected && this.solanaProviderFactory?.state._initialized;
   }
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     // eslint-disable-next-line no-console
     console.log("Initializing Phantom Wallet Adapter");
     if (this.ready) return;
@@ -62,6 +62,9 @@ class PhantomAdapter extends BaseWalletAdapter {
     const { SolanaInjectedProviderProxy } = await import("@web3auth/solana-provider");
     this.solanaProviderFactory = new SolanaInjectedProviderProxy({});
     await this.solanaProviderFactory.init();
+    if (options.connect && wallet.isConnected) {
+      await this.subscribeToProviderEvents(wallet);
+    }
     this.ready = true;
     // eslint-disable-next-line no-console
     console.log("initialized Phantom Wallet Adapter");

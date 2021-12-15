@@ -16,6 +16,7 @@ import {
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@web3auth/base";
+import type { TorusInjectedProviderProxy } from "@web3auth/solana-provider";
 
 import type { Torus } from "./interface";
 
@@ -54,6 +55,8 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
 
   private loginSettings: LoginParams = {};
 
+  private solanaProviderProxy: TorusInjectedProviderProxy;
+
   constructor(params: SolanaWalletOptions) {
     super();
     this.torusWalletOptions = params.adapterSettings;
@@ -65,12 +68,18 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     this.loginSettings = params.loginSettings;
   }
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
+    const { TorusInjectedProviderProxy: SolanaProviderProxy } = await import("@web3auth/solana-provider");
+    this.solanaProviderProxy = new SolanaProviderProxy({
+      config: {},
+    });
+    await this.solanaProviderProxy.init();
     this.ready = true;
+    if (options.connect) await this.connect();
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {
@@ -80,7 +89,9 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     try {
       await this.torusInstance.login(this.loginSettings);
       // TODO: make torus embed provider type compatible with this
-      this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
+      this.provider = this.solanaProviderProxy.setupProviderFromInjectedProvider({
+        provider: this.torusInstance.provider,
+      });
       this.connected = true;
       this.torusInstance.showTorusButton();
       this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA_WALLET);
