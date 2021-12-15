@@ -215,6 +215,7 @@ export default class LoginModal extends SafeEventEmitter {
     const expandIcon = icons["expand.svg"];
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;
     const $adapterList = $externalWallet.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
+    const $loader = $externalWallet.querySelector(".w3ajs-external-loader") as HTMLDivElement;
 
     if (!this.hasSocialEmailWallet && !this.hasSocialWallet) {
       const $externalToggle = this.$modal.querySelector(".w3ajs-external-toggle") as HTMLDivElement;
@@ -286,7 +287,7 @@ export default class LoginModal extends SafeEventEmitter {
 
       $adapterList.appendChild(adapterButton);
     });
-    // TODO: @lionell stop the loading spinner on external wallet screen
+    $loader.style.display = "none";
 
     this.state = {
       ...this.state,
@@ -353,6 +354,13 @@ export default class LoginModal extends SafeEventEmitter {
 
                 <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
                 <!-- Other Wallet -->
+                <div class="w3a-external-loader w3ajs-external-loader">
+                  <div class="w3a-spinner w3a-spinner--small">
+                    <div class="w3a-spinner__body"></div>
+                    <div class="w3a-spinner__cover"></div>
+                    <div class="w3a-spinner__head"></div>
+                  </div>
+                </div>
                 <ul class="w3a-adapter-list w3a-adapter-list--hidden w3ajs-wallet-adapters"></ul>
             </div>
         </div>
@@ -361,7 +369,6 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalWalletButton = $externalWallet.querySelector(".w3ajs-external-toggle__button") as HTMLDivElement;
 
     $externalWalletButton.addEventListener("click", () => {
-      // TODO:  @lionell: Add a loading spinner on external wallet screen
       this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
     });
     return $externalWallet;
