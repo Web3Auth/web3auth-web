@@ -61,6 +61,148 @@
     background: var(--bg1);
 }
 
+
+/* SPINNER */
+/* Loader */
+#w3a-modal .w3a-modal__loader {
+    background: var(--bg1);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
+    display: none;
+}
+
+#w3a-modal .w3a-modal__loader-content {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.w3a-modal__loader-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 30px;
+}
+
+#w3a-modal .w3a-spinner-label {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0364ff;
+}
+
+#w3a-modal .w3a-spinner-message {
+    margin-top: 10px;
+    font-size: 16px;
+}
+#w3a-modal .w3a-spinner-message:first-letter {
+    text-transform: capitalize;
+}
+#w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
+    color: #fb4a61;
+}
+
+#w3a-modal button.w3a-logout {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 30px;
+    cursor: pointer;
+    margin-top: 20px;
+    color: #0364ff;
+}
+
+#w3a-modal .w3a-spinner-power {
+    margin-top: auto;
+}
+#w3a-modal .w3a-spinner-power img {
+    height: 30px;
+}
+
+#w3a-modal .w3a-spinner {
+    animation: rotate 1s linear infinite;
+    border-radius: 50%;
+    height: 68px;
+    width: 68px;
+    position: relative;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__body,
+#w3a-modal .w3a-spinner .w3a-spinner__head,
+#w3a-modal .w3a-spinner .w3a-spinner__cover {
+    position: absolute;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__body {
+    border-radius: 50%;
+    background: linear-gradient(150deg, #0364ff00 50%, #0364ff4e 150%) 100% 0%,
+        linear-gradient(200deg, #0364ff20 0%, #0364ff99 100%) 100% 100%,
+        linear-gradient(320deg, #0364ff20 -50%, #0364ffff 60%) 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 50% 50%;
+    top: -1px;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+}
+#w3a-modal .w3a-spinner .w3a-spinner__head {
+    border-radius: 50%;
+    background: #0364ff;
+    width: 12px;
+    height: 12px;
+    top: 50%;
+    left: -2px;
+    transform: translateY(-50%);
+}
+#w3a-modal .w3a-spinner .w3a-spinner__cover {
+    background: var(--bg1);
+    border-radius: 50%;
+    top: 8px;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Spinner small */
+#w3a-modal .w3a-spinner.w3a-spinner--small {
+    width: 40px;
+    height: 40px;
+}
+
+#w3a-modal .w3a-spinner.w3a-spinner--small .w3a-spinner__head {
+    width: 8px;
+    height: 8px;
+}
+#w3a-modal .w3a-spinner.w3a-spinner--small .w3a-spinner__cover {
+    background: var(--bg2);
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+}
+
 /* Header */
 #w3a-modal .w3a-header {
     display: flex;
@@ -296,6 +438,11 @@
     margin-left: 5px;
 }
 
+#w3a-modal .w3a-external-loader {
+    display: flex;
+    justify-content: center;
+}
+
 /* Text Field */
 #w3a-modal .w3a-text-field {
     background: #393938;
@@ -347,129 +494,6 @@
 
 #w3a-modal .w3a-footer__links span {
     margin: 0 2px;
-}
-
-/* SPINNER */
-/* Loader */
-#w3a-modal .w3a-modal__loader {
-    background: var(--bg1);
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-}
-
-#w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
-    display: none;
-}
-
-#w3a-modal .w3a-modal__loader-content {
-    text-align: center;
-    margin-bottom: 80px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-.w3a-modal__loader-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 30px;
-}
-
-#w3a-modal .w3a-spinner-label {
-    margin-top: 10px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #0364ff;
-}
-
-#w3a-modal .w3a-spinner-message {
-    margin-top: 10px;
-    font-size: 16px;
-}
-#w3a-modal .w3a-spinner-message:first-letter {
-    text-transform: capitalize;
-}
-#w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
-    color: #fb4a61;
-}
-
-#w3a-modal button.w3a-logout {
-    background: none;
-    border: 0;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 30px;
-    cursor: pointer;
-    margin-top: 20px;
-    color: #0364ff;
-}
-
-#w3a-modal .w3a-spinner-power {
-    margin-top: auto;
-}
-#w3a-modal .w3a-spinner-power img {
-    height: 30px;
-}
-
-#w3a-modal .w3a-spinner {
-    animation: rotate 1s linear infinite;
-    border-radius: 50%;
-    height: 68px;
-    width: 68px;
-    position: relative;
-}
-#w3a-modal .w3a-spinner .w3a-spinner__body,
-#w3a-modal .w3a-spinner .w3a-spinner__head,
-#w3a-modal .w3a-spinner .w3a-spinner__cover {
-    position: absolute;
-}
-#w3a-modal .w3a-spinner .w3a-spinner__body {
-    border-radius: 50%;
-    background: linear-gradient(150deg, #0364ff00 50%, #0364ff4e 150%) 100% 0%,
-        linear-gradient(200deg, #0364ff20 0%, #0364ff99 100%) 100% 100%,
-        linear-gradient(320deg, #0364ff20 -50%, #0364ffff 60%) 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 50% 50%;
-    top: -1px;
-    bottom: -1px;
-    left: -1px;
-    right: -1px;
-}
-#w3a-modal .w3a-spinner .w3a-spinner__head {
-    border-radius: 50%;
-    background: #0364ff;
-    width: 12px;
-    height: 12px;
-    top: 50%;
-    left: -2px;
-    transform: translateY(-50%);
-}
-#w3a-modal .w3a-spinner .w3a-spinner__cover {
-    background: var(--bg1);
-    border-radius: 50%;
-    top: 8px;
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 /* LIGHT MODE */
