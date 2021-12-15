@@ -34,7 +34,7 @@ export class Web3Auth extends SafeEventEmitter {
 
   constructor(chainNamespace: ChainNamespaceType) {
     super();
-    this.cachedWallet = window.localStorage.getItem("Web3Auth-CachedWallet");
+    this.cachedWallet = window.sessionStorage.getItem("Web3Auth-CachedWallet");
     this.chainNamespace = chainNamespace;
   }
 
@@ -44,8 +44,7 @@ export class Web3Auth extends SafeEventEmitter {
     await Promise.all(
       Object.keys(this.walletAdapters).map((adapterName) => {
         this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-        this.walletAdapters[adapterName].init({ connect: this.cachedWallet === adapterName });
-        return true;
+        return this.walletAdapters[adapterName].init({ connect: this.cachedWallet === adapterName }).catch((e) => e);
       })
     );
 
@@ -108,6 +107,8 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
+    // eslint-disable-next-line no-console
+    console.log("subscribed walletAdapter", walletAdapter);
     walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapter: WALLET_ADAPTER_TYPE) => {
       // eslint-disable-next-line no-console
       console.log("Connected to", connectedAdapter, this.walletAdapters);

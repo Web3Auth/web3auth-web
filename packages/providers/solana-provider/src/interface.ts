@@ -4,8 +4,8 @@ import { RequestArguments } from "@web3auth/base";
 interface ISolanaWallet {
   publicKey?: { toBytes(): Uint8Array };
   signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;
-  signTransaction(transaction: Transaction): Promise<Transaction>;
-  signAllTransactions(transactions: string[]): Promise<Transaction[]>;
+  signTransaction?(transaction: Transaction): Promise<Transaction>;
+  signAllTransactions?(transactions: string[]): Promise<Transaction[]>;
   signMessage(message: Uint8Array): Promise<Uint8Array>;
   request(args: RequestArguments): Promise<unknown>;
 }

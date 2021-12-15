@@ -1,7 +1,7 @@
-import { Transaction } from "@solana/web3.js";
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS, ProviderNotReadyError, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import bs58 from "bs58";
 
 import { createInjectedProviderProxyMiddleware, InjectedProviderOptions } from "../injectedProviderProxy";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
@@ -42,49 +42,53 @@ export class TorusInjectedProviderProxy extends BaseController<TorusInjectedProv
     const providerHandlers: IProviderHandlers = {
       version: "1", // TODO: get this from the provider
       requestAccounts: async () => {
-        return [""];
+        const accounts = (await injectedProvider.provider.request({
+          method: "solana_requestAccounts",
+          params: {},
+        })) as string[];
+        return accounts;
       },
-      getAccounts: async () => [""],
-      signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-        const response = (await injectedProvider.provider.request({
-          method: "sign_message",
-          params: {
-            data: req.params.message,
-          },
-        })) as Uint8Array;
-        return response;
+      getAccounts: async () => {
+        const accounts = (await injectedProvider.provider.request({
+          method: "solana_accounts",
+          params: {},
+        })) as string[];
+        return accounts;
       },
-      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-        const response = (await injectedProvider.provider.request({
-          method: "sign_transaction",
-          params: { message: req.params?.message },
-        })) as string;
+      // signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+      //   const message = bs58.decode(req.params.message).toString("hex");
+      //   const response = (await injectedProvider.provider.request({
+      //     method: "sign_transaction",
+      //     params: { message },
+      //   })) as string;
 
-        const buf = Buffer.from(response, "hex");
-        const sendTx = Transaction.from(buf);
-        return sendTx;
-      },
+      //   const buf = Buffer.from(response, "hex");
+      //   const sendTx = Transaction.from(buf);
+      //   return sendTx;
+      // },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+        const message = bs58.decode(req.params.message).toString("hex");
         const response = (await injectedProvider.provider.request({
           method: "send_transaction",
-          params: { message: req.params?.message },
+          params: { message },
         })) as string;
         return { signature: response };
       },
-      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-        const signedTransactions: Transaction[] = [];
-        for (const transaction of req.params.message) {
-          const response = (await injectedProvider.provider.request({
-            method: "sign_transaction",
-            params: { message: transaction },
-          })) as string;
-          const buf = Buffer.from(response, "hex");
-          const sendTx = Transaction.from(buf);
+      // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+      //   const signedTransactions: Transaction[] = [];
+      //   for (const transaction of req.params.message) {
+      //     const message = bs58.decode(transaction).toString("hex");
+      //     const response = (await injectedProvider.provider.request({
+      //       method: "sign_transaction",
+      //       params: { message },
+      //     })) as string;
+      //     const buf = Buffer.from(response, "hex");
+      //     const sendTx = Transaction.from(buf);
 
-          signedTransactions.push(sendTx);
-        }
-        return signedTransactions;
-      },
+      //     signedTransactions.push(sendTx);
+      //   }
+      //   return signedTransactions;
+      // },
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: [""],

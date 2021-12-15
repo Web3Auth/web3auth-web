@@ -12,6 +12,8 @@ import {
   WALLET_ADAPTERS,
   WalletConnectionError,
   WalletNotConnectedError,
+  WalletNotFoundError,
+  WalletNotInstalledError,
   WalletNotReadyError,
 } from "@web3auth/base";
 
@@ -30,11 +32,21 @@ class MetamaskAdapter extends BaseWalletAdapter {
 
   public provider: SafeEventEmitterProvider;
 
-  async init(): Promise<void> {
+  async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
-    const provider = (window as any).ethereum;
-    if (provider && provider.isMetaMask) {
-      this.ready = true;
+    const wallet = typeof window !== "undefined" && (window as any).ethereum;
+    if (!wallet) throw new WalletNotFoundError();
+    if (!wallet.isMetaMask) throw new WalletNotInstalledError();
+    this.ready = true;
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.METAMASK_WALLET);
+    try {
+      if (options.connect) {
+        await this.connect();
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("Failed to connect with cached metamask provider", error);
+      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
     }
   }
 
@@ -44,10 +56,7 @@ class MetamaskAdapter extends BaseWalletAdapter {
       this.connecting = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTING);
       try {
-        const provider = (window as any).ethereum;
-        if (!provider || !provider?.isMetaMask) {
-          throw new WalletNotReadyError("Metamask extention is not installed");
-        }
+        const provider = typeof window !== "undefined" && (window as any).ethereum;
         this.addEventListeners(provider);
         const onConnectHandler = () => {
           if (this.connected) {

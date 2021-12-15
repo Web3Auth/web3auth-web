@@ -1,10 +1,19 @@
-import type { Transaction } from "@solana/web3.js";
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, PROVIDER_EVENTS, ProviderNotReadyError, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import bs58 from "bs58";
 
-import { createInjectedProviderProxyMiddleware, InjectedProviderOptions } from "../injectedProviderProxy";
+import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
+import { SolanaWallet } from "../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
+export interface PhantomWallet extends SolanaWallet {
+  isPhantom?: boolean;
+  publicKey?: { toBytes(): Uint8Array };
+  isConnected: boolean;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  _handleDisconnect(...args: unknown[]): unknown;
+}
 interface SolanaInjectedProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
@@ -36,25 +45,25 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
     this.emit(PROVIDER_EVENTS.INITIALIZED);
   }
 
-  public setupProviderFromInjectedProvider(injectedProvider: InjectedProviderOptions): SafeEventEmitterProvider {
+  public setupProviderFromInjectedProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
     if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       version: "1", // TODO: get this from the provider
       requestAccounts: async () => {
-        return [""];
+        return [bs58.encode(injectedProvider.publicKey.toBytes())];
       },
-      getAccounts: async () => [""],
-      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-        const transaction = (await injectedProvider.provider.request({
-          method: "signTransaction",
-          params: {
-            message: req.params?.message,
-          },
-        })) as Transaction;
-        return transaction;
-      },
+      getAccounts: async () => [bs58.encode(injectedProvider.publicKey)],
+      // signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+      //   const transaction = (await injectedProvider.request({
+      //     method: "signTransaction",
+      //     params: {
+      //       message: req.params?.message,
+      //     },
+      //   })) as Transaction;
+      //   return transaction;
+      // },
       signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-        const message = (await injectedProvider.provider.request({
+        const message = (await injectedProvider.request({
           method: "signMessage",
           params: {
             message: req.params?.message,
@@ -63,7 +72,7 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
         return message;
       },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        const { signature } = (await injectedProvider.provider.request({
+        const { signature } = (await injectedProvider.request({
           method: "signAndSendTransaction",
           params: {
             message: req.params?.message,
@@ -71,15 +80,15 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
         })) as { signature: string };
         return { signature };
       },
-      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-        const transaction = (await injectedProvider.provider.request({
-          method: "signAllTransactions",
-          params: {
-            message: req.params?.message,
-          },
-        })) as Transaction[];
-        return transaction;
-      },
+      // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+      //   const transaction = (await injectedProvider.request({
+      //     method: "signAllTransactions",
+      //     params: {
+      //       message: req.params?.message,
+      //     },
+      //   })) as Transaction[];
+      //   return transaction;
+      // },
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: [""],
@@ -90,7 +99,7 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
       },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
-    const injectedProviderProxy = createInjectedProviderProxyMiddleware({ provider: injectedProvider.provider });
+    const injectedProviderProxy = createInjectedProviderProxyMiddleware({ provider: injectedProvider });
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);
     engine.push(injectedProviderProxy);

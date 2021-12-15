@@ -10,11 +10,11 @@ import {
   RpcConnectionFailedError,
   SafeEventEmitterProvider,
 } from "@web3auth/base";
+import bs58 from "bs58";
 
 import { createJsonRpcClient } from "../JrpcClient";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
 import { sendRpcRequest } from "../utils";
-
 interface SolanaProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
@@ -48,7 +48,8 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
   public async init(): Promise<void> {
     const { Transaction: SolTx, Keypair: SolKeyPair, Message } = await import("@solana/web3.js");
     this.transactionGenerator = (serializedTx: string) => {
-      const data = Buffer.from(serializedTx, "hex");
+      const decodedTx = bs58.decode(serializedTx);
+      const data = Buffer.from(decodedTx, "hex");
       const tx = SolTx.populate(Message.from(data));
       return tx;
     };
@@ -86,11 +87,11 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
         return [keyPair.publicKey.toBase58()];
       },
       getAccounts: async () => [keyPair.publicKey.toBase58()],
-      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-        const transaction = this.transactionGenerator(req.params?.message);
-        transaction.partialSign(keyPair);
-        return transaction;
-      },
+      // signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+      //   const transaction = this.transactionGenerator(req.params?.message);
+      //   transaction.partialSign(keyPair);
+      //   return transaction;
+      // },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
         const transaction = this.transactionGenerator(req.params?.message);
         transaction.partialSign(keyPair);
@@ -98,15 +99,15 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
         await sendRpcRequest<string[], string>(fetchOnlyProvider, "sendTransaction", [transaction.serialize().toString("hex")]);
         return { signature: Buffer.from(transaction.serialize()).toString("hex") };
       },
-      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-        const signedTransactions: Transaction[] = [];
-        for (const tx of req.params?.message || []) {
-          const transaction = this.transactionGenerator(tx);
-          transaction.partialSign(keyPair);
-          signedTransactions.push(transaction);
-        }
-        return signedTransactions;
-      },
+      // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+      //   const signedTransactions: Transaction[] = [];
+      //   for (const tx of req.params?.message || []) {
+      //     const transaction = this.transactionGenerator(tx);
+      //     transaction.partialSign(keyPair);
+      //     signedTransactions.push(transaction);
+      //   }
+      //   return signedTransactions;
+      // },
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: [keyPair.publicKey.toBase58()],

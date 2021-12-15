@@ -4,6 +4,7 @@ import { AdapterNamespaceType, ChainNamespaceType } from "../chain/IChainInterfa
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_WALLET_EVENTS = {
+  READY: "ready",
   CONNECTED: "connected",
   DISCONNECTED: "disconnected",
   CONNECTING: "connecting",

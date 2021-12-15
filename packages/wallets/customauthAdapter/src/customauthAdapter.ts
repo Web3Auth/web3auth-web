@@ -112,47 +112,22 @@ class CustomauthAdapter extends BaseWalletAdapter {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
-    // if adapter is already connected and cached then we can proceed to setup the provider
-    if (this.customAuthResult.privateKey && options.connect) {
-      await this.setupProvider(providerFactory);
-    }
-    // if adapter is not connected then we should check if url contains redirect login result
-    if (!this.customAuthResult.privateKey) {
-      const url = new URL(window.location.href);
-      const hash = url.hash.substr(1);
-      const queryParams = {};
-      url.searchParams.forEach((value, key) => {
-        queryParams[key] = value;
-      });
-      if (!hash && Object.keys(queryParams).length === 0) {
-        this.ready = true;
-        return;
-      }
-      const redirectResult = await this.customauthInstance.getRedirectResult({
-        replaceUrl: true,
-        clearLoginDetails: true,
-      });
-      if (redirectResult.error) {
-        console.log("Failed to parse direct auth result", redirectResult.error);
-        if (redirectResult.error !== "Unsupported method type") {
-          this.ready = true;
-          return;
-        }
-        this.emit("ERRORED", redirectResult.error);
-        return;
-      }
-      try {
-        this.customAuthResult = parseDirectAuthResult(redirectResult);
-        this._syncCustomauthResult(this.customAuthResult);
-        if (this.customAuthResult.privateKey) {
-          await this.setupProvider(providerFactory);
-        }
-      } catch (error) {
-        console.log("Failed to parse direct auth result", error);
-        this.emit("ERRORED", error);
-      }
-    }
     this.ready = true;
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
+
+    try {
+      // if adapter is already connected and cached then we can proceed to setup the provider
+      if (this.customAuthResult.privateKey && options.connect) {
+        await this.setupProvider(providerFactory);
+      }
+      // if adapter is not connected then we should check if url contains redirect login result
+      if (!this.customAuthResult.privateKey) {
+        await this.setupProviderWithRedirectResult(providerFactory);
+      }
+    } catch (error) {
+      console.log("Failed to parse direct auth result", error);
+      this.emit("ERRORED", error);
+    }
   }
 
   async connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
@@ -172,7 +147,9 @@ class CustomauthAdapter extends BaseWalletAdapter {
   async disconnect(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
     // TODO: cleanup here
+    this.store.resetStore();
     this.connected = false;
+    this.provider = undefined;
     this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
   }
 
@@ -185,6 +162,37 @@ class CustomauthAdapter extends BaseWalletAdapter {
       verifier: this.customAuthResult.verifier,
       verifierId: this.customAuthResult.verifierId,
     };
+  }
+
+  private async setupProviderWithRedirectResult(providerFactory: PrivKeySolanaProvider | EthereumProvider): Promise<void> {
+    const url = new URL(window.location.href);
+    const hash = url.hash.substr(1);
+    const queryParams = {};
+    url.searchParams.forEach((value, key) => {
+      queryParams[key] = value;
+    });
+    if (!hash && Object.keys(queryParams).length === 0) {
+      this.ready = true;
+      return;
+    }
+    const redirectResult = await this.customauthInstance.getRedirectResult({
+      replaceUrl: true,
+      clearLoginDetails: true,
+    });
+    if (redirectResult.error) {
+      console.log("Failed to parse direct auth result", redirectResult.error);
+      if (redirectResult.error !== "Unsupported method type") {
+        this.ready = true;
+        return;
+      }
+      this.emit("ERRORED", redirectResult.error);
+      return;
+    }
+    this.customAuthResult = parseDirectAuthResult(redirectResult);
+    this._syncCustomauthResult(this.customAuthResult);
+    if (this.customAuthResult.privateKey) {
+      await this.setupProvider(providerFactory);
+    }
   }
 
   private async setupProvider(
@@ -244,24 +252,24 @@ class CustomauthAdapter extends BaseWalletAdapter {
         }
       };
       if (providerFactory.state._initialized) {
-        const provider = await getProvider();
-        console.log("setting up provider res", provider);
-        if (provider) {
+        this.provider = await getProvider();
+        console.log("setting up provider res", this.provider);
+        if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
         }
-        resolve(provider);
+        resolve(this.provider);
         return;
       }
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        const provider = await getProvider();
-        console.log("setting up provider event received", provider);
-        if (provider) {
+        this.provider = await getProvider();
+        console.log("setting up provider event received", this.provider);
+        if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
         }
         // provider can be null in redirect mode
-        resolve(provider);
+        resolve(this.provider);
       });
       providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
         this.emit(BASE_WALLET_EVENTS.ERRORED, error);

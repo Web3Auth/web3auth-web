@@ -89,11 +89,18 @@ class OpenloginAdapter extends BaseWalletAdapter {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
 
-    // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
-    if (this.openloginInstance.privKey && (options.connect || isRedirectResult)) {
-      await this.connectWithProvider();
-    }
     this.ready = true;
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN_WALLET);
+
+    try {
+      // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
+      if (this.openloginInstance.privKey && (options.connect || isRedirectResult)) {
+        await this.connectWithProvider();
+      }
+    } catch (error) {
+      console.log("Failed to connect with cached openlogin provider", error);
+      this.emit("ERRORED", error);
+    }
   }
 
   async connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
@@ -114,6 +121,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
     if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
     await this.openloginInstance.logout();
     this.connected = false;
+    this.provider = undefined;
     this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
   }
 
@@ -173,24 +181,24 @@ class OpenloginAdapter extends BaseWalletAdapter {
         }
       };
       if (providerFactory.state._initialized) {
-        const provider = await getProvider();
-        console.log("setting up provider res", provider);
-        if (provider) {
+        this.provider = await getProvider();
+        console.log("setting up provider res", this.provider);
+        if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
         }
-        resolve(provider);
+        resolve(this.provider);
         return;
       }
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        const provider = await getProvider();
-        console.log("setting up provider event received", provider);
-        if (provider) {
+        this.provider = await getProvider();
+        console.log("setting up provider event received", this.provider);
+        if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
         }
         // provider can be null in redirect mode
-        resolve(provider);
+        resolve(this.provider);
       });
       providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
         this.emit(BASE_WALLET_EVENTS.ERRORED, error);

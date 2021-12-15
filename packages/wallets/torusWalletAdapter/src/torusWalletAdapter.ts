@@ -64,7 +64,17 @@ class TorusWalletAdapter extends BaseWalletAdapter {
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
     this.ready = true;
-    if (options.connect) await this.connect();
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.TORUS_EVM_WALLET);
+
+    try {
+      if (options.connect) {
+        await this.connect();
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("Failed to connect with torus evm provider", error);
+      this.emit("ERRORED", error);
+    }
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {

@@ -79,7 +79,17 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     });
     await this.solanaProviderProxy.init();
     this.ready = true;
-    if (options.connect) await this.connect();
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA_WALLET);
+
+    try {
+      if (options.connect) {
+        await this.connect();
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("Failed to connect with cached torus solana provider", error);
+      this.emit("ERRORED", error);
+    }
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {

@@ -13,10 +13,10 @@ import {
 
 export interface IProviderHandlers {
   version: string;
-  requestAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  getAccounts?: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
-  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
+  requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
+  getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
+  signTransaction?: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
+  signAllTransactions?: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
   signAndSendTransaction: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
   signMessage?: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
   getProviderState: (

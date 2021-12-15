@@ -20,16 +20,7 @@ import {
   WalletNotReadyError,
   WalletWindowClosedError,
 } from "@web3auth/base";
-import type { SolanaInjectedProviderProxy, SolanaWallet } from "@web3auth/solana-provider";
-
-interface PhantomWallet extends SolanaWallet {
-  isPhantom?: boolean;
-  publicKey?: { toBytes(): Uint8Array };
-  isConnected: boolean;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  _handleDisconnect(...args: unknown[]): unknown;
-}
+import type { PhantomWallet, SolanaInjectedProviderProxy } from "@web3auth/solana-provider";
 
 class PhantomAdapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -56,16 +47,26 @@ class PhantomAdapter extends BaseWalletAdapter {
     // eslint-disable-next-line no-console
     console.log("Initializing Phantom Wallet Adapter");
     if (this.ready) return;
-    const wallet = typeof window !== "undefined" && (window as any).solana;
+    const wallet = (window as any).solana;
+    // eslint-disable-next-line no-console
+    console.log("phantom Wallet", wallet);
     if (!wallet) throw new WalletNotFoundError();
     if (!wallet.isPhantom) throw new WalletNotInstalledError();
     const { SolanaInjectedProviderProxy } = await import("@web3auth/solana-provider");
     this.solanaProviderFactory = new SolanaInjectedProviderProxy({});
     await this.solanaProviderFactory.init();
-    if (options.connect && wallet.isConnected) {
-      await this.subscribeToProviderEvents(wallet);
-    }
     this.ready = true;
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.PHANTOM_WALLET);
+
+    try {
+      if (options.connect) {
+        await this.connect();
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("Failed to connect with cached phantom provider", error);
+      this.emit("ERRORED", error);
+    }
     // eslint-disable-next-line no-console
     console.log("initialized Phantom Wallet Adapter");
   }
@@ -79,7 +80,7 @@ class PhantomAdapter extends BaseWalletAdapter {
         return;
       }
       const getProvider = async (): Promise<SafeEventEmitterProvider | null> => {
-        return this.solanaProviderFactory.setupProviderFromInjectedProvider({ provider: injectedProvider });
+        return this.solanaProviderFactory.setupProviderFromInjectedProvider(injectedProvider);
       };
       if (this.solanaProviderFactory.state._initialized) {
         this.provider = await getProvider();
@@ -156,9 +157,9 @@ class PhantomAdapter extends BaseWalletAdapter {
 
   async disconnect(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
-    this.provider?.removeAllListeners();
     try {
       await this._wallet?.disconnect();
+      this.provider = undefined;
       this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
     } catch (error: any) {
       this.emit(BASE_WALLET_EVENTS.ERRORED, new WalletDisconnectionError(error?.message, error));

@@ -10,6 +10,14 @@ export class SolanaProviderWrapper implements ISolanaWallet {
     this.provider = provider;
   }
 
+  public async requestAccounts(): Promise<string[]> {
+    const accounts = (await this.provider.request({
+      method: "solana_requestAccounts",
+      params: {},
+    })) as string[];
+    return accounts;
+  }
+
   public async signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }> {
     const { signature } = (await this.provider.request({
       method: "signAndSendTransaction",
@@ -20,25 +28,25 @@ export class SolanaProviderWrapper implements ISolanaWallet {
     return { signature };
   }
 
-  public async signTransaction(transaction: Transaction): Promise<Transaction> {
-    const signedTransaction = (await this.provider.request({
-      method: "signTransaction",
-      params: {
-        message: bs58.encode(transaction.serializeMessage()),
-      },
-    })) as Transaction;
-    return signedTransaction;
-  }
+  // public async signTransaction(transaction: Transaction): Promise<Transaction> {
+  //   const signedTransaction = (await this.provider.request({
+  //     method: "signTransaction",
+  //     params: {
+  //       message: bs58.encode(transaction.serializeMessage()),
+  //     },
+  //   })) as Transaction;
+  //   return signedTransaction;
+  // }
 
-  public async signAllTransactions(transactions: string[]): Promise<Transaction[]> {
-    const signedTransaction = (await this.provider.request({
-      method: "signAllTransactions",
-      params: {
-        message: transactions,
-      },
-    })) as Transaction[];
-    return signedTransaction;
-  }
+  // public async signAllTransactions(transactions: string[]): Promise<Transaction[]> {
+  //   const signedTransaction = (await this.provider.request({
+  //     method: "signAllTransactions",
+  //     params: {
+  //       message: transactions,
+  //     },
+  //   })) as Transaction[];
+  //   return signedTransaction;
+  // }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {
     const response = (await this.provider.request({
