@@ -163,29 +163,26 @@ export default class LoginModal extends SafeEventEmitter {
     const $adapterList = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
     // const $adapterExpand = $socialLogins.querySelector(".w3ajs-socials-adapters__expand") as HTMLDivElement;
 
-    Object.keys(loginMethods)
-      .reverse()
-      .forEach((method: string) => {
-        if (method === "email_passwordless") {
-          this.hasSocialEmailWallet = true;
-          const $emailPasswordlessSection = this.$modal.querySelector(".w3ajs-email-passwordless") as HTMLDivElement;
-          $emailPasswordlessSection.classList.remove("w3a-group--email-hidden");
-          const $emailPasswordlessForm = $emailPasswordlessSection.querySelector(".w3ajs-email-passwordless-form") as HTMLDivElement;
-          $emailPasswordlessForm.addEventListener("submit", (event: Event) => {
-            event.preventDefault();
-            const data = new FormData(event.target as HTMLFormElement);
-            const email = data.get("email");
-            if (email)
-              this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } } as CommonLoginOptions);
-          });
-          return;
-        } else if (method === "webauthn" || method === "jwt") {
-          return;
-        }
-        this.hasSocialWallet = true;
-        $socialLogins.classList.remove("w3a-group--social-hidden");
-        const providerIcon = images[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}.svg`];
-        const adapterButton = this.htmlToElement(`
+    Object.keys(loginMethods).forEach((method: string) => {
+      if (method === "email_passwordless") {
+        this.hasSocialEmailWallet = true;
+        const $emailPasswordlessSection = this.$modal.querySelector(".w3ajs-email-passwordless") as HTMLDivElement;
+        $emailPasswordlessSection.classList.remove("w3a-group--email-hidden");
+        const $emailPasswordlessForm = $emailPasswordlessSection.querySelector(".w3ajs-email-passwordless-form") as HTMLDivElement;
+        $emailPasswordlessForm.addEventListener("submit", (event: Event) => {
+          event.preventDefault();
+          const data = new FormData(event.target as HTMLFormElement);
+          const email = data.get("email");
+          if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } } as CommonLoginOptions);
+        });
+        return;
+      } else if (method === "webauthn" || method === "jwt") {
+        return;
+      }
+      this.hasSocialWallet = true;
+      $socialLogins.classList.remove("w3a-group--social-hidden");
+      const providerIcon = images[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}.svg`];
+      const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
                     <img class="w3a-button__image" src="${providerIcon}" alt="">
@@ -193,22 +190,22 @@ export default class LoginModal extends SafeEventEmitter {
             </li>          
         `);
 
-        adapterButton.addEventListener("click", () => {
-          this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } as CommonLoginOptions });
-        });
-
-        // if ($adapterList.children.length < 5) {
-        //   $adapterExpand.before(adapterButton);
-        //   $adapterExpand.classList.add("w3a-adapter-item--hide");
-        // } else if ($adapterList.children.length === 5) {
-        //   $adapterExpand.after(adapterButton);
-        //   $adapterExpand.classList.add("w3a-adapter-item--hide");
-        // } else {
-        //   $adapterExpand.after(adapterButton);
-        //   $adapterExpand.classList.remove("w3a-adapter-item--hide");
-        // }
-        $adapterList.append(adapterButton);
+      adapterButton.addEventListener("click", () => {
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } as CommonLoginOptions });
       });
+
+      // if ($adapterList.children.length < 5) {
+      //   $adapterExpand.before(adapterButton);
+      //   $adapterExpand.classList.add("w3a-adapter-item--hide");
+      // } else if ($adapterList.children.length === 5) {
+      //   $adapterExpand.after(adapterButton);
+      //   $adapterExpand.classList.add("w3a-adapter-item--hide");
+      // } else {
+      //   $adapterExpand.after(adapterButton);
+      //   $adapterExpand.classList.remove("w3a-adapter-item--hide");
+      // }
+      $adapterList.append(adapterButton);
+    });
   };
 
   addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>): void => {

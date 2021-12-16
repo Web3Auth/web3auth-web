@@ -1,15 +1,23 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth</h3>
-    
+    <h3>Connect with {{ namespace === 'solana' ? `${namespace} web3auth` : 'ethereum web3auth' }} </h3>
+
+    <section
+      :style="{
+        fontSize: '12px',
+      }"
+    >
+      <button v-if="!connected" @click="switchChain" style="cursor: pointer;">Switch Chain</button>
+    </section>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer;">{{ loginButtonStatus }} Connect</button>
-      <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
-      <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button>
+      <!-- <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
+      <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button> -->
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
       <button v-if="connected && provider && namespace === 'solana'" @click="signAndSendTransaction" style="cursor: pointer;">Sign and send Transaction</button>
       <button v-if="connected && provider && namespace === 'eip155'" @click="sendEth" style="cursor: pointer;">Send Eth</button>
@@ -31,7 +39,7 @@ import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import bs58 from "bs58";
 import Web3 from "web3"
-const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+
 export default Vue.extend({
   name: "app",
   data() {
@@ -39,112 +47,156 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      namespace: undefined
+      namespace: undefined,
+      web3auth: new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
     };
   },
   async mounted() {
-    try {
-    this.subscribeAuthEvents()
+    await this.initSolanaAuth();
+  },
+  methods: {
+    async initSolanaAuth() {
+      this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
+      this.subscribeAuthEvents(this.web3auth)
 
-    this.namespace = web3auth.chainNamespace
-  
-    const openloginAdapter = getOpenloginWallet({ chainConfig: {
-      rpcTarget: "https://polygon-rpc.com",
-      chainId: "0x89",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      networkName: "matic",
-      ticker: "matic",
-      tickerName: "matic",
-    }, adapterSettings: {
-      network: "testnet",
-      clientId: "localhost-id",
-      uxMode: "redirect"
-    }, loginSettings: {
-      // loginProvider: "google"
-    }})
-
-
-    const customAuthAdapter = getCustomauthWallet({
-      initSettings: {
-        skipInit: true,
-        skipSw: true,
-        skipPrefetch: true
-      },
-      chainConfig: {
-      rpcTarget: "https://api.testnet.solana.com",
-      chainId: "0x2",
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      networkName: "mainnet",
-      ticker: "sol",
-      tickerName: "solana",
-    }, adapterSettings: {
-      baseUrl: window.location.origin,
-      redirectPathName:"",
-      uxMode: "redirect",
-      enableLogging: true,
-      network: "testnet", // details for test net
-      popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-    }, loginSettings: {
-      // loginProvider: "google"
-      "loginProviderConfig": {
-        "google": {
-          "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-          "verifier": "google-lrc",
-        }
-      }
-    }
-    })
+      this.namespace = this.web3auth.chainNamespace
     
-    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
-    //   rpcTarget: "https://api.devnet.solana.com",
-    //   chainId: "0x3",
+    //  const customAuthAdapter = getCustomauthWallet({
+    //   initSettings: {
+    //     skipInit: true,
+    //     skipSw: true,
+    //     skipPrefetch: true
+    //   },
+    //   chainConfig: {
+    //   rpcTarget: "https://api.testnet.solana.com",
+    //   chainId: "0x2",
     //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-    //   networkName: "devnet",
+    //   networkName: "mainnet",
     //   ticker: "sol",
     //   tickerName: "solana",
     // }, adapterSettings: {
-    //   network: "testnet",
-    //   clientId: "localhost-id",
-    //   uxMode: "popup"
+    //   baseUrl: window.location.origin,
+    //   redirectPathName:"",
+    //   uxMode: "redirect",
+    //   enableLogging: true,
+    //   network: "testnet", // details for test net
+    //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
     // }, loginSettings: {
     //   // loginProvider: "google"
-    // }})
-
-    // const torusWalletAdapter = getTorusSolanaWallet({
-    //   initParams: {
-    //     buildEnv: "development"
+    //   "loginProviderConfig": {
+    //     "google": {
+    //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+    //       "verifier": "google-lrc",
+    //     }
     //   }
-    // })
-    web3auth.configureWallet(openloginAdapter);
-    // web3auth.configureWallet(torusWalletAdapter);
-
-    await web3auth.initModal({
-      modalConfig: {
-        // [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
-      }
-    });
-    // (window as any).web3Auth = web3auth
-    // if (web3auth.cachedWallet) {
-    //   await web3auth.connectTo(web3auth.cachedWallet)
     // }
+    // })
 
-    web3auth.loginModal.on("LOGIN", (params) => {
-      // eslint-disable-next-line no-console
-      console.log("LOGIN", params);
-    });
-    web3auth.loginModal.on("INIT_EXTERNAL_WALLETS", ({ externalWalletsInitialized }) => {
-      // eslint-disable-next-line no-console
-      console.log("INIT_EXTERNAL_WALLETS", externalWalletsInitialized);
-    });
+      
+      const openloginAdapter = getOpenloginWallet({ chainConfig: {
+        rpcTarget: "https://api.devnet.solana.com",
+        chainId: "0x3",
+        chainNamespace: CHAIN_NAMESPACES.SOLANA,
+        networkName: "devnet",
+        ticker: "sol",
+        tickerName: "solana",
+      }, adapterSettings: {
+        network: "testnet",
+        clientId: "localhost-id",
+        uxMode: "popup"
+      }, loginSettings: {
+        // loginProvider: "google"
+      }})
 
-    this.connected = web3auth.connected
-    } catch (error) {
-      console.log("error", error)
-    }
-  },
-  methods: {
+      const torusWalletAdapter = getTorusSolanaWallet({
+        initParams: {
+          buildEnv: "testing"
+        }
+      })
+      this.web3auth.configureWallet(openloginAdapter);
+      this.web3auth.configureWallet(torusWalletAdapter);
+
+      await this.web3auth.initModal({
+        modalConfig: {
+          // [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+        }
+      });
+    },
+    async initEthAuth() {
+      this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+      this.subscribeAuthEvents(this.web3auth)
+
+      this.namespace = this.web3auth.chainNamespace
+    
+      const openloginAdapter = getOpenloginWallet({ chainConfig: {
+        rpcTarget: "https://polygon-rpc.com",
+        chainId: "0x89",
+        chainNamespace: CHAIN_NAMESPACES.EIP155,
+        networkName: "matic",
+        ticker: "matic",
+        tickerName: "matic",
+      }, adapterSettings: {
+        network: "testnet",
+        clientId: "localhost-id",
+        uxMode: "redirect"
+      }, loginSettings: {
+        // loginProvider: "google"
+      }})
+
+
+      // const ethCustomAuthAdapter = getCustomauthWallet({
+      //   initSettings: {
+      //     skipInit: true,
+      //     skipSw: true,
+      //     skipPrefetch: true
+      //   },
+      //   chainConfig: {
+      //   rpcTarget: "https://polygon-rpc.com",
+      //   chainId: "0x89",
+      //   chainNamespace: CHAIN_NAMESPACES.EIP155,
+      //   networkName: "matic",
+      //   ticker: "matic",
+      //   tickerName: "matic",
+      // }, adapterSettings: {
+      //   baseUrl: "http://localhost:3000/",
+      //   redirectPathName:"",
+      //   uxMode: "redirect",
+      //   enableLogging: true,
+      //   network: "testnet", // details for test net
+      //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
+      // }, loginSettings: {
+      //   // loginProvider: "google"
+      //   "loginProviderConfig": {
+      //     "google": {
+      //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+      //       "verifier": "google-lrc",
+      //     },
+      //     "facebook": {
+      //       "clientId": "617201755556395", 
+      //       "verifier": "facebook-lrc" 
+      //     }
+      //   }
+      // }
+      // })
+
+      this.web3auth.configureWallet(openloginAdapter);
+
+      await this.web3auth.initModal({
+        modalConfig: {
+          // [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+        }
+      });
+    
+    },
+    async switchChain() {
+      if (this.namespace === 'solana') {
+        await this.initEthAuth();
+      } else if (this.namespace === 'eip155') {
+        await this.initSolanaAuth();
+      }
+    },
     connect() {
-      web3auth.connect()
+      this.web3auth.connect()
     },
     async signAndSendTransaction() {
       const conn = new Connection("https://api.devnet.solana.com")
@@ -197,16 +249,16 @@ export default Vue.extend({
       );
     },
     async loginWithOpenlogin(){
-      await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
+      await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
     },
     async loginWithTorusWallet(){
-      await web3auth.connectTo(WALLET_ADAPTERS.TORUS_EVM_WALLET)
+      await this.web3auth.connectTo(WALLET_ADAPTERS.TORUS_EVM_WALLET)
     },
      async logout(){
-      await web3auth.logout();
+      await this.web3auth.logout();
       this.provider = undefined
     },
-    subscribeAuthEvents() {
+    subscribeAuthEvents(web3auth: Web3AuthModal) {
       web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
        console.log("connected to wallet", adapterName, web3auth.provider)
        this.provider = web3auth.provider;
