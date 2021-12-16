@@ -26,7 +26,7 @@ import { getCustomauthWallet, getOpenloginWallet, getTorusSolanaWallet, WALLET_A
 import { Web3AuthModal } from "@web3auth/modal";
 import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WALLET_ADAPTERS, LOGIN_PROVIDER } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import bs58 from "bs58";
 
 const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
@@ -154,6 +154,8 @@ export default Vue.extend({
       let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
       console.log("provider", this.provider)
       console.log("transaction", transaction, pubKey)
+      // const decodedTx = bs58.decode(bs58.encode(transaction.serializeMessage()));
+      // const tx = Transaction.populate(Message.from(decodedTx));
       const signature = await solWeb3.signAndSendTransaction(transaction)
       console.log("signature", signature);
     },

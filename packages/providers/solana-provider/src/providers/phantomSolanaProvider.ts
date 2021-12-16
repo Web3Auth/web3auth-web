@@ -72,13 +72,13 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
         return message;
       },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        const { signature } = (await injectedProvider.request({
+        const txRes = (await injectedProvider.request({
           method: "signAndSendTransaction",
           params: {
             message: req.params?.message,
           },
         })) as { signature: string };
-        return { signature };
+        return { signature: txRes.signature };
       },
       // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
       //   const transaction = (await injectedProvider.request({

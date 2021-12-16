@@ -7,7 +7,7 @@
     "local-publish": "lerna run local-publish",
     "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
     "just:publish:lerna": "lerna publish",
-    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3Auth-*.tgz .eslintcache",
+    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
     "build": "lerna run build",
     "dev": "lerna run dev",
     "test": "lerna run test --parallel",
@@ -18,8 +18,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@toruslabs/eslint-config-typescript": "^0.0.11",
-    "@toruslabs/torus-scripts": "^0.0.13",
+    "@toruslabs/eslint-config-typescript": "^0.1.1",
+    "@toruslabs/torus-scripts": "^0.1.2",
     "@types/node": "14",
     "@typescript-eslint/eslint-plugin": "^5.3.0",
     "cross-env": "^7.0.3",

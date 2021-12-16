@@ -15,8 +15,6 @@ function generateWebpackConfig({ pkg, currentPath, alias, module = {}, pkgBaseCo
     },
     module,
   };
-  // eslint-disable-next-line no-console
-  console.log("base config", baseConfig);
 
   return { baseConfig };
 }
