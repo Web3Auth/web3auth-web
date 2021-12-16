@@ -30,7 +30,7 @@ class MetamaskAdapter extends BaseWalletAdapter {
 
   public connected: boolean;
 
-  public provider: SafeEventEmitterProvider;
+  public provider: SafeEventEmitterProvider | any;
 
   async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
@@ -56,22 +56,20 @@ class MetamaskAdapter extends BaseWalletAdapter {
       this.connecting = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTING);
       try {
-        const provider = typeof window !== "undefined" && (window as any).ethereum;
-        this.addEventListeners(provider);
+        this.provider = typeof window !== "undefined" && (window as any).ethereum;
+        this.addEventListeners(this.provider);
         const onConnectHandler = () => {
-          if (this.connected) {
-            this.connected = true;
-            this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
-            resolve(this.provider);
-          }
+          this.connected = true;
+          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
+          resolve(this.provider);
         };
-        provider.on("connect", () => {
+        this.provider.on("connect", () => {
           onConnectHandler();
         });
-        provider
+        this.provider
           .request({ method: "eth_requestAccounts" })
           .then(() => {
-            if (provider.isConnected()) {
+            if (this.provider.isConnected()) {
               onConnectHandler();
             }
             return true;
