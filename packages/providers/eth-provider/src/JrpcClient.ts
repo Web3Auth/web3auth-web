@@ -3,7 +3,7 @@ import { JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequ
 import { CustomChainConfig } from "@web3auth/base";
 export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, unknown> {
   return (req: JRPCRequest<unknown>, res: JRPCResponse<string>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
-    if (req.method === "solana_chainId") {
+    if (req.method === "eth_chainId") {
       res.result = chainId;
       return end();
     }
@@ -13,7 +13,7 @@ export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown
 
 export function createProviderConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, unknown> {
   return (req: JRPCRequest<unknown>, res: JRPCResponse<CustomChainConfig>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
-    if (req.method === "solana_provider_config") {
+    if (req.method === "eth_provider_config") {
       res.result = providerConfig;
       return end();
     }

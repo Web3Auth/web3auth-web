@@ -25,6 +25,7 @@
     "@web3auth/base": "0.0.0",
     "@ethereumjs/tx": "^3.4.0",
     "@ethereumjs/common": "^2.6.0",
+    "ethereumjs-util": "^2.6.0",
     "eth-sig-util": "~3.0.1",
     "json-rpc-random-id": "^1.0.1",
     "eth-rpc-errors": "^4.0.3",

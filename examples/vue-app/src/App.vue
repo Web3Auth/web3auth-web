@@ -11,7 +11,9 @@
       <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
       <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button>
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
-      <button v-if="connected && provider" @click="signAndSendTransaction" style="cursor: pointer;">Sign and send Transaction</button>
+      <button v-if="connected && provider && namespace === 'solana'" @click="signAndSendTransaction" style="cursor: pointer;">Sign and send Transaction</button>
+      <button v-if="connected && provider && namespace === 'eip155'" @click="sendEth" style="cursor: pointer;">Send Eth</button>
+      <button v-if="connected && provider && namespace === 'eip155'" @click="signEthMessage" style="cursor: pointer;">Sign eth message</button>
 
     </section>
     <div id="console" style="white-space: pre-line">
@@ -28,8 +30,8 @@ import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WAL
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import bs58 from "bs58";
-
-const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
+import Web3 from "web3"
+const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
 export default Vue.extend({
   name: "app",
   data() {
@@ -37,26 +39,30 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
+      namespace: undefined
     };
   },
   async mounted() {
     try {
     this.subscribeAuthEvents()
+
+    this.namespace = web3auth.chainNamespace
   
-    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
-    //   rpcTarget: "https://api.devnet.solana.com",
-    //   chainId: "0x3",
-    //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-    //   networkName: "devnet",
-    //   ticker: "sol",
-    //   tickerName: "Solana",
-    // }, adapterSettings: {
-    //   network: "testnet",
-    //   clientId: "localhost-id",
-    //   uxMode: "redirect"
-    // }, loginSettings: {
-    //   // loginProvider: "google"
-    // }})
+    const openloginAdapter = getOpenloginWallet({ chainConfig: {
+      rpcTarget: "https://polygon-rpc.com",
+      chainId: "0x89",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      networkName: "matic",
+      ticker: "matic",
+      tickerName: "matic",
+    }, adapterSettings: {
+      network: "testnet",
+      clientId: "localhost-id",
+      uxMode: "redirect"
+    }, loginSettings: {
+      // loginProvider: "google"
+    }})
+
 
     const customAuthAdapter = getCustomauthWallet({
       initSettings: {
@@ -89,28 +95,28 @@ export default Vue.extend({
     }
     })
     
-    const openloginAdapter = getOpenloginWallet({ chainConfig: {
-      rpcTarget: "https://api.devnet.solana.com",
-      chainId: "0x3",
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      networkName: "devnet",
-      ticker: "sol",
-      tickerName: "solana",
-    }, adapterSettings: {
-      network: "testnet",
-      clientId: "localhost-id",
-      uxMode: "popup"
-    }, loginSettings: {
-      // loginProvider: "google"
-    }})
+    // const openloginAdapter = getOpenloginWallet({ chainConfig: {
+    //   rpcTarget: "https://api.devnet.solana.com",
+    //   chainId: "0x3",
+    //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
+    //   networkName: "devnet",
+    //   ticker: "sol",
+    //   tickerName: "solana",
+    // }, adapterSettings: {
+    //   network: "testnet",
+    //   clientId: "localhost-id",
+    //   uxMode: "popup"
+    // }, loginSettings: {
+    //   // loginProvider: "google"
+    // }})
 
-    const torusWalletAdapter = getTorusSolanaWallet({
-      initParams: {
-        buildEnv: "development"
-      }
-    })
+    // const torusWalletAdapter = getTorusSolanaWallet({
+    //   initParams: {
+    //     buildEnv: "development"
+    //   }
+    // })
     web3auth.configureWallet(openloginAdapter);
-    web3auth.configureWallet(torusWalletAdapter);
+    // web3auth.configureWallet(torusWalletAdapter);
 
     await web3auth.initModal({
       modalConfig: {
@@ -158,6 +164,37 @@ export default Vue.extend({
       // const tx = Transaction.populate(Message.from(decodedTx));
       const signature = await solWeb3.signAndSendTransaction(transaction)
       console.log("signature", signature);
+    },
+    async sendEth() {
+      const pubKey = await this.provider.request({ method: "eth_accounts" })
+      console.log("pubKey", pubKey)
+      const web3 = new Web3(this.provider);
+      const blockNumber = await this.provider.request({ method: "eth_getBlockByNumber", params: ["latest", false] })
+      console.log("eth_getBlockByNumber", blockNumber)
+      await web3.eth.sendTransaction({ from: pubKey[0], to: pubKey[0], value: web3.utils.toWei("0.01") })
+        // .then((resp) => this.console(resp))
+        // .catch(console.error);
+    },
+    async signEthMessage() {
+      const pubKey = await this.provider.request({ method: "eth_accounts" })
+      console.log("pubKey", pubKey)
+      const web3 = new Web3();
+      web3.setProvider(this.provider)
+      // hex message
+      const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+      (web3.currentProvider as any)?.send(
+        {
+          method: "eth_sign",
+          params: [pubKey[0], message],
+          from: pubKey[0],
+        },
+        (err: Error, result: any) => {
+          if (err) {
+            return console.error(err);
+          }
+          console.log("sign message => true", result);
+        }
+      );
     },
     async loginWithOpenlogin(){
       await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)

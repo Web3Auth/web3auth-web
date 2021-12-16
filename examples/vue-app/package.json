@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "serve:local": "yarn run link-local && yarn && yarn run serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "link-local": "yalc link @web3auth/modal @web3auth/core @web3auth/base @web3auth/torus-wallet-adapter @web3auth/solana-wallet-adapter @web3auth/openlogin-adapter  @web3auth/metamask-wallet-adapter @web3auth/phantom-wallet-adapter   @web3auth/customauth-adapter @web3auth/ui @web3auth/solana-provider @web3auth/ethereum-provider"
