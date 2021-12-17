@@ -132,6 +132,7 @@ export default class LoginModal extends SafeEventEmitter {
 
     $loaderCloseBtn?.addEventListener("click", () => {
       if (this.state.connected) {
+        this.toggleMessage("");
         this.toggleModal();
       } else {
         this.toggleMessage("");
@@ -155,7 +156,27 @@ export default class LoginModal extends SafeEventEmitter {
 
   toggleModal = (): void => {
     const hideClass = "w3a-modal--hidden";
+
     this.$modal.classList.toggle(hideClass);
+
+    // Go to modal main
+    const $externalContainer = this.$modal.querySelector(".w3ajs-external-container") as HTMLButtonElement;
+    const $externalToggle = this.$modal.querySelector(".w3ajs-external-toggle");
+    const $socialLogins = this.$modal.querySelector(".w3ajs-social-logins");
+    const $socialEmailPasswordless = this.$modal.querySelector(".w3ajs-email-passwordless");
+
+    if (!$externalContainer.classList.contains("w3a-external-container--hidden")) {
+      $externalContainer?.classList.add("w3a-external-container--hidden");
+      $externalToggle?.classList.remove("w3a-external-toggle--hidden");
+      $socialLogins.classList.remove("w3a-group--hidden");
+      $socialEmailPasswordless.classList.remove("w3a-group--hidden");
+    }
+
+    // Hide other social logins
+    const $socialAdapters = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLUListElement;
+    const $socialAdapterExpandText = $socialLogins.querySelector(".w3ajs-button-expand-text") as HTMLSpanElement;
+    $socialAdapterExpandText.innerText = "View more options";
+    $socialAdapters.classList.add("w3a-adapter-list--shrink");
   };
 
   addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: Record<string, LoginMethodConfig>): void => {
