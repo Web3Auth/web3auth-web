@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/base",
+  "name": "@web3auth/ethereum-provider",
   "version": "0.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/base.cjs.js",
-  "module": "dist/base.esm.js",
-  "unpkg": "dist/base.umd.min.js",
-  "jsdelivr": "dist/base.umd.min.js",
+  "main": "dist/ethereumProvider.cjs.js",
+  "module": "dist/ethereumProvider.esm.js",
+  "unpkg": "dist/ethereumProvider.umd.min.js",
+  "jsdelivr": "dist/ethereumProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
@@ -20,10 +20,20 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.0.2"
+    "@toruslabs/base-controllers": "^1.2.0",
+    "@toruslabs/openlogin-jrpc": "^1.0.2",
+    "@web3auth/base": "0.0.0",
+    "@ethereumjs/tx": "^3.4.0",
+    "@ethereumjs/common": "^2.6.0",
+    "ethereumjs-util": "^2.6.0",
+    "@metamask/eth-sig-util": "~4.0.0",
+    "json-rpc-random-id": "^1.0.1",
+    "eth-rpc-errors": "^4.0.3",
+    "loglevel": "^1.8.0"
   },
   "devDependencies": {
     "@types/node": "^14.17.20",
+    "@types/web3": "^1.2.2",
     "lint-staged": "^11.2.6"
   },
   "peerDependencies": {
