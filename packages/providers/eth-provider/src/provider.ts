@@ -1,6 +1,14 @@
 import Common from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
-import { getEncryptionPublicKey, personalSign, signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
+import {
+  getEncryptionPublicKey,
+  MessageTypes,
+  personalSign,
+  signTypedData,
+  SignTypedDataVersion,
+  TypedDataV1,
+  TypedMessage,
+} from "@metamask/eth-sig-util";
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine, signMessage } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import {
@@ -20,7 +28,7 @@ import { createRandomId } from ".";
 import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
 import { createJsonRpcClient } from "./JrpcClient";
 import { sendRpcRequest } from "./utils";
-import { MessageParams, TransactionParams } from "./walletMidddleware";
+import { MessageParams, TransactionParams, TypedMessageParams } from "./walletMidddleware";
 export const HARDFORKS = {
   BERLIN: "berlin",
   LONDON: "london",
@@ -100,28 +108,31 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
         const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
         return `0x${signedTx.toString("hex")}`;
       },
-      processEthSignMessage: async (msgParams: MessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
         const rawMessageSig = signMessage(privKey, msgParams.data);
         return rawMessageSig;
       },
-      processPersonalMessage: async (msgParams: MessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
         const privKeyBuffer = Buffer.from(privKey, "hex");
         const sig = personalSign({ privateKey: privKeyBuffer, data: msgParams.data });
         return sig;
       },
-      processTypedMessage: async (msgParams: MessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
+        log.debug("processTypedMessage", msgParams);
         const privKeyBuffer = Buffer.from(privKey, "hex");
-        const sig = signTypedData({ privateKey: privKeyBuffer, data: JSON.parse(msgParams.data), version: SignTypedDataVersion.V1 });
+        const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V1 });
         return sig;
       },
-      processTypedMessageV3: async (msgParams: MessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+        log.debug("processTypedMessageV3", msgParams);
         const privKeyBuffer = Buffer.from(privKey, "hex");
-        const sig = signTypedData({ privateKey: privKeyBuffer, data: JSON.parse(msgParams.data), version: SignTypedDataVersion.V3 });
+        const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V3 });
         return sig;
       },
-      processTypedMessageV4: async (msgParams: MessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+        log.debug("processTypedMessageV4", msgParams);
         const privKeyBuffer = Buffer.from(privKey, "hex");
-        const sig = signTypedData({ privateKey: privKeyBuffer, data: JSON.parse(msgParams.data), version: SignTypedDataVersion.V4 });
+        const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V4 });
         return sig;
       },
       processEncryptionPublicKey: async (address: string, _: JRPCRequest<unknown>): Promise<string> => {

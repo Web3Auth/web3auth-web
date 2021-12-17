@@ -1,3 +1,3 @@
-import { CustomChainConfig, PROVIDER_EVENTS } from "@web3auth/base";
+import { CustomChainConfig, PROVIDER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
 
-export { CustomChainConfig, PROVIDER_EVENTS };
+export { CustomChainConfig, PROVIDER_EVENTS, SafeEventEmitterProvider };
