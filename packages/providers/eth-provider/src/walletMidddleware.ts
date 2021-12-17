@@ -34,7 +34,7 @@ function resemblesAddress(str: string): boolean {
 
 export interface WalletMiddlewareOptions {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  processDecryptMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
+  processDecryptMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => string;
   processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<string>;
   processEthSignMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
   processPersonalMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
@@ -272,7 +272,7 @@ export function createWalletMiddleware({
       data: ciphertext,
     };
 
-    res.result = await processDecryptMessage(msgParams, req);
+    res.result = processDecryptMessage(msgParams, req);
   }
 
   return createScaffoldMiddleware({

@@ -1,6 +1,8 @@
 import Common from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import {
+  decrypt,
+  EthEncryptedData,
   getEncryptionPublicKey,
   MessageTypes,
   personalSign,
@@ -21,7 +23,7 @@ import {
   RpcConnectionFailedError,
   SafeEventEmitterProvider,
 } from "@web3auth/base";
-import { privateToAddress } from "ethereumjs-util";
+import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
 
 import { createRandomId } from ".";
@@ -138,6 +140,13 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
       processEncryptionPublicKey: async (address: string, _: JRPCRequest<unknown>): Promise<string> => {
         log.info("processEncryptionPublicKey", address);
         return getEncryptionPublicKey(privKey);
+      },
+      processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
+        log.info("processDecryptMessage", msgParams);
+        const stripped = stripHexPrefix(msgParams.data);
+        const buff = Buffer.from(stripped, "hex");
+        const decrypted = decrypt({ encryptedData: JSON.parse(buff.toString("utf8")) as EthEncryptedData, privateKey: privKey });
+        return decrypted;
       },
     };
     const ethMiddleware = createEthMiddleware(providerHandlers);
