@@ -1,4 +1,5 @@
 import type { AccessListEIP2930TxData, FeeMarketEIP1559TxData, TxData } from "@ethereumjs/tx";
+import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 export interface ExtendedAccessListEIP2930TxData extends AccessListEIP2930TxData {
@@ -15,13 +16,15 @@ export interface ExtendedTxData extends TxData {
 
 export type TransactionParams = ExtendedFeeMarketEIP1559Transaction & ExtendedAccessListEIP2930TxData & ExtendedTxData;
 
-export interface MessageParams {
+export interface MessageParams<T> {
   from: string;
-  data: string;
+  data: T;
 }
 
-export interface TypedMessageParams extends MessageParams {
+export interface TypedMessageParams<T> {
+  from: string;
   version: string;
+  data: T;
 }
 
 function resemblesAddress(str: string): boolean {
@@ -31,15 +34,15 @@ function resemblesAddress(str: string): boolean {
 
 export interface WalletMiddlewareOptions {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  processDecryptMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
+  processDecryptMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => string;
   processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<string>;
-  processEthSignMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
-  processPersonalMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>) => Promise<string>;
+  processEthSignMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
+  processPersonalMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
   processSignTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
-  processTypedMessage?: (msgParams: MessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
-  processTypedMessageV3?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
-  processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessage?: (msgParams: MessageParams<TypedDataV1>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessageV3?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessageV4?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
 }
 
 export function createWalletMiddleware({
@@ -140,7 +143,7 @@ export function createWalletMiddleware({
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
     const message: string = (req.params as string[])[1];
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams = {
+    const msgParams: MessageParams<string> = {
       ...extraParams,
       from: address,
       data: message,
@@ -154,11 +157,11 @@ export function createWalletMiddleware({
       throw ethErrors.rpc.methodNotSupported();
     }
 
-    const message: string = (req.params as string[])[0];
+    const message: TypedDataV1 = (req.params as TypedDataV1[])[0];
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[1], req);
     const version = "V1";
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams = {
+    const msgParams: MessageParams<TypedDataV1> = {
       ...extraParams,
       from: address,
       data: message,
@@ -173,9 +176,9 @@ export function createWalletMiddleware({
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: string = (req.params as string[])[1];
+    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
     const version = "V3";
-    const msgParams: TypedMessageParams = {
+    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
       data: message,
       from: address,
       version,
@@ -190,9 +193,9 @@ export function createWalletMiddleware({
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: string = (req.params as string)[1];
+    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
     const version = "V4";
-    const msgParams: TypedMessageParams = {
+    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
       data: message,
       from: address,
       version,
@@ -235,7 +238,7 @@ export function createWalletMiddleware({
     }
     address = await validateAndNormalizeKeyholder(address, req);
 
-    const msgParams: MessageParams = {
+    const msgParams: MessageParams<string> = {
       ...extraParams,
       from: address,
       data: message,
@@ -263,13 +266,13 @@ export function createWalletMiddleware({
     const ciphertext: string = (req.params as string)[0];
     const address: string = await validateAndNormalizeKeyholder((req.params as string)[1], req);
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams = {
+    const msgParams: MessageParams<string> = {
       ...extraParams,
       from: address,
       data: ciphertext,
     };
 
-    res.result = await processDecryptMessage(msgParams, req);
+    res.result = processDecryptMessage(msgParams, req);
   }
 
   return createScaffoldMiddleware({

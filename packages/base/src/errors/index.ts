@@ -1,9 +1,9 @@
 export class WalletError extends Error {
-  public error: any;
+  public error: Error;
 
   public code: number;
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message);
     this.error = error;
   }
@@ -15,7 +15,7 @@ export class WalletError extends Error {
 export class WalletNotFoundError extends WalletError {
   name = "WalletNotFoundError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2001;
   }
@@ -24,7 +24,7 @@ export class WalletNotFoundError extends WalletError {
 export class WalletNotInstalledError extends WalletError {
   name = "WalletNotInstalledError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2002;
   }
@@ -33,7 +33,7 @@ export class WalletNotInstalledError extends WalletError {
 export class WalletNotReadyError extends WalletError {
   name = "WalletNotReadyError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2003;
   }
@@ -42,7 +42,7 @@ export class WalletNotReadyError extends WalletError {
 export class WalletWindowBlockedError extends WalletError {
   name = "WalletWindowBlockedError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2004;
   }
@@ -51,7 +51,7 @@ export class WalletWindowBlockedError extends WalletError {
 export class WalletWindowClosedError extends WalletError {
   name = "WalletWindowClosedError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2005;
   }
@@ -60,7 +60,7 @@ export class WalletWindowClosedError extends WalletError {
 export class IncompatibleChainNamespaceError extends WalletError {
   name = "IncompatibleChainNamespaceError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2006;
   }
@@ -69,7 +69,7 @@ export class IncompatibleChainNamespaceError extends WalletError {
 export class DuplicateWalletAdapterError extends WalletError {
   name = "DuplicateWalletAdapterError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2007;
   }
@@ -81,7 +81,7 @@ export class DuplicateWalletAdapterError extends WalletError {
 export class WalletAccountError extends WalletError {
   name = "WalletAccountError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2101;
   }
@@ -90,7 +90,7 @@ export class WalletAccountError extends WalletError {
 export class WalletPublicKeyError extends WalletError {
   name = "WalletPublicKeyError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2102;
   }
@@ -99,7 +99,7 @@ export class WalletPublicKeyError extends WalletError {
 export class WalletKeypairError extends WalletError {
   name = "WalletKeypairError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2103;
   }
@@ -111,7 +111,7 @@ export class WalletKeypairError extends WalletError {
 export class WalletConnectionError extends WalletError {
   name = "WalletConnectionError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1001;
   }
@@ -120,7 +120,7 @@ export class WalletConnectionError extends WalletError {
 export class WalletDisconnectedError extends WalletError {
   name = "WalletDisconnectedError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1002;
   }
@@ -129,7 +129,7 @@ export class WalletDisconnectedError extends WalletError {
 export class WalletDisconnectionError extends WalletError {
   name = "WalletDisconnectionError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1003;
   }
@@ -138,7 +138,7 @@ export class WalletDisconnectionError extends WalletError {
 export class WalletNotConnectedError extends WalletError {
   name = "WalletNotConnectedError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1004;
   }
@@ -150,7 +150,7 @@ export class WalletNotConnectedError extends WalletError {
 export class WalletSendTransactionError extends WalletError {
   name = "WalletSendTransactionError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1101;
   }
@@ -159,7 +159,7 @@ export class WalletSendTransactionError extends WalletError {
 export class WalletSignMessageError extends WalletError {
   name = "WalletSignMessageError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1102;
   }
@@ -168,7 +168,7 @@ export class WalletSignMessageError extends WalletError {
 export class WalletSignTransactionError extends WalletError {
   name = "WalletSignTransactionError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 1103;
   }
@@ -180,7 +180,7 @@ export class WalletSignTransactionError extends WalletError {
 export class RpcConnectionFailedError extends WalletError {
   name = "RpcConnectionFailedError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2201;
   }
@@ -189,7 +189,7 @@ export class RpcConnectionFailedError extends WalletError {
 export class InvalidProviderConfigError extends WalletError {
   name = "InvalidProviderConfigError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2202;
   }
@@ -198,7 +198,7 @@ export class InvalidProviderConfigError extends WalletError {
 export class ProviderNotReadyError extends WalletError {
   name = "ProviderNotReadyError";
 
-  constructor(message?: string, error?: any) {
+  constructor(message?: string, error?: Error) {
     super(message, error);
     this.code = 2203;
   }
