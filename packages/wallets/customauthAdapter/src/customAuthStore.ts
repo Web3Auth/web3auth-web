@@ -4,6 +4,7 @@ import { MemoryStore } from "./memoryStore";
 import { sessionStorageAvailable } from "./utils";
 
 export default class CustomauthStore {
+  // eslint-disable-next-line no-use-before-define
   private static instance: CustomauthStore;
 
   public storage: IStore;
