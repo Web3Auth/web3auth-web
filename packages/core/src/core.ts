@@ -18,7 +18,7 @@ import { WALLET_ADAPTER_TYPE } from "./constants";
 export class Web3Auth extends SafeEventEmitter {
   readonly chainNamespace: ChainNamespaceType;
 
-  public connectedAdapter: IWalletAdapter | undefined;
+  public connectedAdapterName: string | undefined;
 
   public connected: boolean;
 
@@ -36,6 +36,7 @@ export class Web3Auth extends SafeEventEmitter {
     super();
     this.cachedWallet = window.sessionStorage.getItem("Web3Auth-CachedWallet");
     this.chainNamespace = chainNamespace;
+    this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
   public async init(): Promise<void> {
@@ -97,27 +98,29 @@ export class Web3Auth extends SafeEventEmitter {
 
   async logout(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
-    await this.connectedAdapter.disconnect();
-    this.connectedAdapter.removeAllListeners();
+    await this.walletAdapters[this.connectedAdapterName].disconnect();
+    this.walletAdapters[this.connectedAdapterName] = undefined;
   }
 
   async getUserInfo(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
-    await this.connectedAdapter.getUserInfo();
+    await this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
     // eslint-disable-next-line no-console
     console.log("subscribed walletAdapter", walletAdapter);
-    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapter: WALLET_ADAPTER_TYPE) => {
+    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
       // eslint-disable-next-line no-console
-      console.log("Connected to", connectedAdapter, this.walletAdapters);
+      console.log("Connected to", connectedAdapterName, this.walletAdapters[connectedAdapterName]);
       this.connected = true;
       this.connecting = false;
-      this.connectedAdapter = this.walletAdapters[connectedAdapter];
-      this.provider = this.connectedAdapter.provider;
-      this.cacheWallet(connectedAdapter);
-      this.emit(BASE_WALLET_EVENTS.CONNECTED, connectedAdapter);
+      const connectedAd = this.walletAdapters[connectedAdapterName];
+      this.provider = connectedAd.provider;
+      this.connectedAdapterName = connectedAdapterName;
+
+      this.cacheWallet(connectedAdapterName);
+      this.emit(BASE_WALLET_EVENTS.CONNECTED, connectedAdapterName);
     });
     walletAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
       this.connected = false;
