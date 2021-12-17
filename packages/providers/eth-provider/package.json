@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^1.4.1",
-    "@toruslabs/openlogin-jrpc": "^1.3.3",
+    "@toruslabs/openlogin-jrpc": "^1.0.2",
     "@web3auth/base": "0.0.0",
     "@ethereumjs/tx": "^3.4.0",
     "@ethereumjs/common": "^2.6.0",

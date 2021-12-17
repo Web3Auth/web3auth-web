@@ -223,7 +223,7 @@ export default Vue.extend({
       const web3 = new Web3(this.provider);
       const blockNumber = await this.provider.request({ method: "eth_getBlockByNumber", params: ["latest", false] })
       console.log("eth_getBlockByNumber", blockNumber)
-      await web3.eth.sendTransaction({ from: pubKey[0], to: pubKey[0], value: web3.utils.toWei("0.01") })
+      await web3.eth.sendTransaction({ from: "0x2c7536E3605D9C16a7a3D7b1898e529396a65c23", to: pubKey[0], value: web3.utils.toWei("0.01") })
         // .then((resp) => this.console(resp))
         // .catch(console.error);
     },

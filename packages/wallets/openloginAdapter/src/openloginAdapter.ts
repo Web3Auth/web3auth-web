@@ -22,7 +22,7 @@ import {
   WalletWindowBlockedError,
   WalletWindowClosedError,
 } from "@web3auth/base";
-import type { EthereumProvider } from "@web3auth/ethereum-provider";
+import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
@@ -57,7 +57,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
 
   private solanaProviderFactory: PrivKeySolanaProvider;
 
-  private ethereumProviderFactory: EthereumProvider;
+  private ethereumProviderFactory: EthereumPrivateKeyProvider;
 
   constructor(params: OpenloginAdapterOptions) {
     super();
@@ -82,8 +82,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
       this.solanaProviderFactory = new PrivKeySolanaProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumProvider } = await import("@web3auth/ethereum-provider");
-      this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
+      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
@@ -132,7 +132,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
   }
 
   private async setupProvider(
-    providerFactory: PrivKeySolanaProvider | EthereumProvider,
+    providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider,
     params?: CommonLoginOptions
   ): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
@@ -208,7 +208,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
   }
 
   private async connectWithProvider(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
-    let providerFactory: PrivKeySolanaProvider | EthereumProvider;
+    let providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {

@@ -23,7 +23,7 @@ import {
   WalletWindowBlockedError,
   WalletWindowClosedError,
 } from "@web3auth/base";
-import type { EthereumProvider } from "@web3auth/ethereum-provider";
+import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
 
 import CustomauthStore from "./customAuthStore";
@@ -64,7 +64,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
 
   private solanaProviderFactory: PrivKeySolanaProvider;
 
-  private ethereumProviderFactory: EthereumProvider;
+  private ethereumProviderFactory: EthereumPrivateKeyProvider;
 
   private store: CustomauthStore;
 
@@ -97,7 +97,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
     this.customauthInstance = new Customauth(this.adapterSettings);
-    let providerFactory: EthereumProvider | PrivKeySolanaProvider;
+    let providerFactory: EthereumPrivateKeyProvider | PrivKeySolanaProvider;
     await this.customauthInstance.init(this.initSettings);
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { PrivKeySolanaProvider } = await import("@web3auth/solana-provider");
@@ -105,8 +105,8 @@ class CustomauthAdapter extends BaseWalletAdapter {
       await this.solanaProviderFactory.init();
       providerFactory = this.solanaProviderFactory;
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumProvider } = await import("@web3auth/ethereum-provider");
-      this.ethereumProviderFactory = new EthereumProvider({ config: { chainConfig: this.chainConfig } });
+      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
       providerFactory = this.ethereumProviderFactory;
     } else {
@@ -164,7 +164,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
     };
   }
 
-  private async setupProviderWithRedirectResult(providerFactory: PrivKeySolanaProvider | EthereumProvider): Promise<void> {
+  private async setupProviderWithRedirectResult(providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider): Promise<void> {
     const url = new URL(window.location.href);
     const hash = url.hash.substr(1);
     const queryParams = {};
@@ -196,7 +196,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
   }
 
   private async setupProvider(
-    providerFactory: PrivKeySolanaProvider | EthereumProvider,
+    providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider,
     params?: CommonLoginOptions
   ): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
@@ -293,7 +293,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
   }
 
   private async _login(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
-    let providerFactory: PrivKeySolanaProvider | EthereumProvider;
+    let providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
