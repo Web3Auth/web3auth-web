@@ -3,6 +3,7 @@ const defaultConfig = {
   bundledDeps: [],
   analyzerMode: "disabled",
   umd: false,
+  esm: false,
 };
 
 module.exports = defaultConfig;
