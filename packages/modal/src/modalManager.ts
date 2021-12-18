@@ -140,7 +140,7 @@ export class Web3AuthModal extends Web3Auth {
         });
       } else {
         // if no in app wallet is available then initialize external wallets in modal
-        await this.initExternalWalletAdapters(false, { initializeExternalWallets: true });
+        await this.initExternalWalletAdapters(false, { showExternalWallets: true });
       }
     }
     this.initialized = true;
@@ -151,7 +151,7 @@ export class Web3AuthModal extends Web3Auth {
     this.loginModal.toggleModal();
   }
 
-  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { initializeExternalWallets: boolean }): Promise<void> {
+  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWallets: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adapterPromises = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};

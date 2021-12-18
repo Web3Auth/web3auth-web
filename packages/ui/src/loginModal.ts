@@ -20,7 +20,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private hasSocialEmailWallet = false;
 
-  private initExternalWallets: () => void;
+  private showExternalWallets: () => void;
 
   private state = {
     initialized: false,
@@ -116,16 +116,16 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
     const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
 
-    this.initExternalWallets = () => {
+    this.showExternalWallets = () => {
       $externalToggle?.classList.toggle("w3a-external-toggle--hidden");
       $externalContainer?.classList.toggle("w3a-external-container--hidden");
       $torusWallet.classList.toggle("w3a-group--hidden");
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
-      this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
     };
 
     $externalToggleButton?.addEventListener("click", () => {
-      this.initExternalWallets();
+      this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
+      this.showExternalWallets();
     });
 
     $externalBackButton?.addEventListener("click", () => {
@@ -181,6 +181,10 @@ export default class LoginModal extends SafeEventEmitter {
     const $socialAdapterExpandText = $socialLogins.querySelector(".w3ajs-button-expand-text") as HTMLSpanElement;
     $socialAdapterExpandText.innerText = "View more options";
     $socialAdapters.classList.add("w3a-adapter-list--shrink");
+
+    if (!this.hasSocialEmailWallet && !this.hasSocialWallet) {
+      this.showExternalWallets();
+    }
   };
 
   addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: Record<string, LoginMethodConfig>): void => {
@@ -233,9 +237,9 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>, options?: { initializeExternalWallets: boolean }): void => {
-    if (options.initializeExternalWallets) {
-      this.initExternalWallets();
+  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>, options?: { showExternalWallets: boolean }): void => {
+    if (options.showExternalWallets) {
+      this.showExternalWallets();
     }
     const expandIcon = icons["expand.svg"];
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;

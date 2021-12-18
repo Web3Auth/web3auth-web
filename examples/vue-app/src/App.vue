@@ -113,7 +113,7 @@ export default Vue.extend({
           buildEnv: "testing"
         }
       })
-      this.web3auth.configureWallet(openloginAdapter);
+      // this.web3auth.configureWallet(openloginAdapter);
       this.web3auth.configureWallet(torusWalletAdapter);
 
       await this.web3auth.initModal({
