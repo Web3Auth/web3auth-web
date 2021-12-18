@@ -20,6 +20,8 @@ export default class LoginModal extends SafeEventEmitter {
 
   private hasSocialEmailWallet = false;
 
+  private initExternalWallets: () => void;
+
   private state = {
     initialized: false,
     connected: false,
@@ -114,11 +116,16 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
     const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
 
-    $externalToggleButton?.addEventListener("click", () => {
+    this.initExternalWallets = () => {
       $externalToggle?.classList.toggle("w3a-external-toggle--hidden");
       $externalContainer?.classList.toggle("w3a-external-container--hidden");
       $torusWallet.classList.toggle("w3a-group--hidden");
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
+      this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
+    };
+
+    $externalToggleButton?.addEventListener("click", () => {
+      this.initExternalWallets();
     });
 
     $externalBackButton?.addEventListener("click", () => {
@@ -140,10 +147,7 @@ export default class LoginModal extends SafeEventEmitter {
     });
 
     $loaderLogout?.addEventListener("click", () => {
-      // eslint-disable-next-line no-console
-      console.log("Logout");
-      this.toggleMessage("");
-      // Todo: Emit Logout
+      this.emit("DISCONNECT");
     });
 
     $content?.appendChild($torusWallet);
@@ -229,7 +233,10 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>): void => {
+  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>, options?: { initializeExternalWallets: boolean }): void => {
+    if (options.initializeExternalWallets) {
+      this.initExternalWallets();
+    }
     const expandIcon = icons["expand.svg"];
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;
     const $adapterList = $externalWallet.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
@@ -384,11 +391,6 @@ export default class LoginModal extends SafeEventEmitter {
         </div>
     `) as HTMLDivElement;
 
-    const $externalWalletButton = $externalWallet.querySelector(".w3ajs-external-toggle__button") as HTMLDivElement;
-
-    $externalWalletButton.addEventListener("click", () => {
-      this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
-    });
     return $externalWallet;
   };
 
