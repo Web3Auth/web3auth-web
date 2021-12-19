@@ -40,6 +40,8 @@ import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, 
 import bs58 from "bs58";
 import Web3 from "web3"
 
+
+
 export default Vue.extend({
   name: "app",
   data() {
@@ -61,36 +63,43 @@ export default Vue.extend({
 
       this.namespace = this.web3auth.chainNamespace
     
-    //  const customAuthAdapter = getCustomauthWallet({
-    //   initSettings: {
-    //     skipInit: true,
-    //     skipSw: true,
-    //     skipPrefetch: true
-    //   },
-    //   chainConfig: {
-    //   rpcTarget: "https://api.testnet.solana.com",
-    //   chainId: "0x2",
-    //   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-    //   networkName: "mainnet",
-    //   ticker: "sol",
-    //   tickerName: "solana",
-    // }, adapterSettings: {
-    //   baseUrl: window.location.origin,
-    //   redirectPathName:"",
-    //   uxMode: "redirect",
-    //   enableLogging: true,
-    //   network: "testnet", // details for test net
-    //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-    // }, loginSettings: {
-    //   // loginProvider: "google"
-    //   "loginProviderConfig": {
-    //     "google": {
-    //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-    //       "verifier": "google-lrc",
-    //     }
-    //   }
-    // }
-    // })
+     const customAuthAdapter = getCustomauthWallet({
+      initSettings: {
+        skipInit: true,
+        skipSw: true,
+        skipPrefetch: true
+      },
+      chainConfig: {
+      rpcTarget: "https://api.devnet.solana.com",
+      chainId: "0x3",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      networkName: "devnet",
+      ticker: "sol",
+      tickerName: "solana",
+    }, adapterSettings: {
+      baseUrl: window.location.origin,
+      redirectPathName:"auth",
+      uxMode: "redirect",
+      enableLogging: true,
+      network: "testnet", // details for test net
+      // popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
+    }, loginSettings: {
+      // loginProvider: "google"
+      "loginProviderConfig": {
+        "google": {
+          "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+          "verifier": "google-lrc",
+        },
+        "twitter": {
+          "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
+          "verifier": "torus-auth0-twitter-lrc" ,
+          jwtParams: {
+            "domain": "https://torus-test.auth0.com"
+          }
+        }
+      }
+    }
+    })
 
       
       const openloginAdapter = getOpenloginWallet({ chainConfig: {
@@ -113,7 +122,7 @@ export default Vue.extend({
           buildEnv: "testing"
         }
       })
-      // this.web3auth.configureWallet(openloginAdapter);
+      this.web3auth.configureWallet(customAuthAdapter);
       this.web3auth.configureWallet(torusWalletAdapter);
 
       await this.web3auth.initModal({

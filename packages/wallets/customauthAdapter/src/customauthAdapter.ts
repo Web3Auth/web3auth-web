@@ -146,7 +146,6 @@ class CustomauthAdapter extends BaseWalletAdapter {
 
   async disconnect(): Promise<void> {
     if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
-    // TODO: cleanup here
     this.store.resetStore();
     this.connected = false;
     this.provider = undefined;
@@ -256,7 +255,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
         console.log("setting up provider res", this.provider);
         if (this.provider) {
           this.connected = true;
-          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
+          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
         resolve(this.provider);
         return;
@@ -266,7 +265,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
         console.log("setting up provider event received", this.provider);
         if (this.provider) {
           this.connected = true;
-          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
+          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
         // provider can be null in redirect mode
         resolve(this.provider);
