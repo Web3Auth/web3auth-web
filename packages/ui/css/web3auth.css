@@ -23,6 +23,10 @@
     font-family: var(--text-body);
 }
 
+#w3a-modal.w3a-modal--hidden {
+    display: none;
+}
+
 #w3a-modal p,
 #w3a-modal form,
 #w3a-modal h1,
@@ -30,10 +34,6 @@
 #w3a-modal button {
     margin: 0;
     padding: 0;
-}
-
-#w3a-modal.w3a-modal--hidden {
-    display: none;
 }
 
 #w3a-modal .w3a-modal__inner {
@@ -44,6 +44,15 @@
     position: relative;
     max-height: 90%;
     overflow-y: auto;
+    opacity: 0;
+    transition: 200ms cubic-bezier(.25,.8,.25,1);
+    transform-origin: center center;
+}
+
+#w3a-modal .w3a-modal__inner.w3a-modal__inner--active{
+    opacity: 1;
+    transition: 200ms cubic-bezier(.25,.8,.25,1);
+    transform-origin: center center;
 }
 
 #w3a-modal .w3a-modal__header {

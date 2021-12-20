@@ -48,7 +48,7 @@ export default class LoginModal extends SafeEventEmitter {
     const torusPower = images["torus-power.svg"];
     this.$modal = this.htmlToElement(`
         <div id="w3a-modal" class="w3a-modal w3a-modal--hidden${this.isDark ? "" : " w3a-modal--light"}">
-            <div class="w3a-modal__inner">
+            <div class="w3a-modal__inner w3ajs-inner">
                 <div class="w3a-modal__header">
                     <div class="w3a-header">
                         <img class="w3a-header__logo" src="${this.appLogo}" alt="">
@@ -160,8 +160,19 @@ export default class LoginModal extends SafeEventEmitter {
 
   toggleModal = (): void => {
     const hideClass = "w3a-modal--hidden";
+    const $inner = this.$modal.querySelector(".w3ajs-inner");
 
-    this.$modal.classList.toggle(hideClass);
+    if (this.$modal.classList.contains(hideClass)) {
+      this.$modal.classList.remove(hideClass);
+      setTimeout(() => {
+        $inner.classList.add("w3a-modal__inner--active");
+      }, 100);
+    } else {
+      $inner.classList.remove("w3a-modal__inner--active");
+      setTimeout(() => {
+        this.$modal.classList.add(hideClass);
+      }, 200);
+    }
 
     // Go to modal main
     const $externalContainer = this.$modal.querySelector(".w3ajs-external-container") as HTMLButtonElement;
