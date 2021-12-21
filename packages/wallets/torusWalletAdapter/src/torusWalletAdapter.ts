@@ -16,9 +16,9 @@ import {
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@web3auth/base";
+import log from "loglevel";
 
 import type { Torus } from "./interface";
-
 interface TorusWalletOptions {
   chainConfig: TorusEthWalletChainConfig;
   adapterSettings?: TorusCtorArgs;
@@ -71,8 +71,7 @@ class TorusWalletAdapter extends BaseWalletAdapter {
         await this.connect();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log("Failed to connect with torus evm provider", error);
+      log.error("Failed to connect with torus evm provider", error);
       this.emit("ERRORED", error);
     }
   }
@@ -83,7 +82,6 @@ class TorusWalletAdapter extends BaseWalletAdapter {
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
       await this.torusInstance.login(this.loginSettings);
-      // TODO: make torus embed provider type compatible with this
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.connected = true;
       this.torusInstance.showTorusButton();

@@ -1,4 +1,4 @@
-import { IWalletAdapter, LOGIN_PROVIDER, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { IWalletAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 import type { CustomauthAdapter } from "@web3auth/customauth-adapter";
 
 const OPENLOGIN_PROVIDERS = [
@@ -32,8 +32,6 @@ export const getAdapterSocialLogins = (
       finalLoginMethodsConfig[loginMethod] = { visible: true, showOnDesktop: true, showOnMobile: true, ...currentLoginMethodConfig };
     });
   } else if (adapterName === WALLET_ADAPTERS.OPENLOGIN_WALLET) {
-    // eslint-disable-next-line no-console
-    console.log("OPENLOGIN_WALLET", LOGIN_PROVIDER);
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
       finalLoginMethodsConfig[loginMethod] = { visible: true, showOnDesktop: true, showOnMobile: true, ...currentLoginMethodConfig };
@@ -41,7 +39,5 @@ export const getAdapterSocialLogins = (
   } else {
     throw new Error(`${adapterName} is not a valid adapter`);
   }
-  // eslint-disable-next-line no-console
-  console.log(finalLoginMethodsConfig, adapterName);
   return finalLoginMethodsConfig;
 };

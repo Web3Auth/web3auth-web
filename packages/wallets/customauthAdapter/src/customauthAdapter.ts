@@ -25,6 +25,7 @@ import {
 } from "@web3auth/base";
 import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
+import log from "loglevel";
 
 import CustomauthStore from "./customAuthStore";
 import type { CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
@@ -125,7 +126,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
         await this.setupProviderWithRedirectResult(providerFactory);
       }
     } catch (error) {
-      console.log("Failed to parse direct auth result", error);
+      log.error("Failed to parse direct auth result", error);
       this.emit("ERRORED", error);
     }
   }
@@ -179,7 +180,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
       clearLoginDetails: true,
     });
     if (redirectResult.error) {
-      console.log("Failed to parse direct auth result", redirectResult.error);
+      log.error("Failed to parse direct auth result", redirectResult.error);
       if (redirectResult.error !== "Unsupported method type") {
         this.ready = true;
         return;
@@ -236,10 +237,8 @@ class CustomauthAdapter extends BaseWalletAdapter {
               return;
             }
           }
-          console.log("setting up provider", finalPrivKey);
           if (finalPrivKey) {
             if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            console.log("setting up provider 2");
             return providerFactory.setupProvider(finalPrivKey);
           }
           return null;
@@ -252,7 +251,6 @@ class CustomauthAdapter extends BaseWalletAdapter {
       };
       if (providerFactory.state._initialized) {
         this.provider = await getProvider();
-        console.log("setting up provider res", this.provider);
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
@@ -262,7 +260,6 @@ class CustomauthAdapter extends BaseWalletAdapter {
       }
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
         this.provider = await getProvider();
-        console.log("setting up provider event received", this.provider);
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);

@@ -30,7 +30,8 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "src"
   ],
   "devDependencies": {
     "@types/lodash": "^4.14.176",
@@ -42,7 +43,8 @@
     "@web3auth/solana-provider": "0.0.0",
     "@web3auth/ethereum-provider": "0.0.0",
     "@toruslabs/openlogin-ed25519": "^1.2.0",
-    "@toruslabs/customauth": "^6.0.4"
+    "@toruslabs/customauth": "^6.0.4",
+    "loglevel": "^1.8.0"
   },
   "lint-staged": {
     "!(*d).ts": [

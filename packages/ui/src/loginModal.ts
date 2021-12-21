@@ -468,16 +468,12 @@ export default class LoginModal extends SafeEventEmitter {
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
     listener.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
-      // eslint-disable-next-line no-console
-      console.log(BASE_WALLET_EVENTS.CONNECTING, data);
       const provider = (data as CommonLoginOptions)?.loginProvider || "";
       this.state.connecting = true;
       this.state.connected = false;
       this.toggleLoader(provider);
     });
     listener.on(BASE_WALLET_EVENTS.CONNECTED, () => {
-      // eslint-disable-next-line no-console
-      console.log(BASE_WALLET_EVENTS.CONNECTED);
       this.state.connecting = false;
       if (!this.state.connected) {
         this.state.connected = true;
@@ -494,9 +490,7 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleLoader();
       }
     });
-    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
-      // eslint-disable-next-line no-console
-      console.log(BASE_WALLET_EVENTS.DISCONNECTED, data);
+    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = false;
       this.toggleMessage("");

@@ -44,8 +44,6 @@ class MetamaskAdapter extends BaseWalletAdapter {
         await this.connect();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log("Failed to connect with cached metamask provider", error);
       this.emit(BASE_WALLET_EVENTS.ERRORED, error);
     }
   }

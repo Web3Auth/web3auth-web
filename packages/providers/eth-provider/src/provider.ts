@@ -94,7 +94,6 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   public setupProvider(privKey: string): SafeEventEmitterProvider {
     if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
-      version: "1", // TODO: get this from the provider
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
       processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
         const rpcProvider = this.getFetchOnlyProvider();

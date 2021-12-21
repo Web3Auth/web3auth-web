@@ -41,7 +41,8 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "src"
   ],
   "lint-staged": {
     "!(*d).ts": [

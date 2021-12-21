@@ -67,7 +67,6 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
         return true;
       })
       .catch((error) => {
-        console.log("error", error);
         this.update({
           _errored: true,
           error,
@@ -81,7 +80,6 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
     const keyPair = this.keyPairGenerator(privKey);
 
     const providerHandlers: IProviderHandlers = {
-      version: "1", // TODO: get this from the provider
       requestAccounts: async () => {
         return [keyPair.publicKey.toBase58()];
       },
@@ -93,9 +91,7 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
       // },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
         const transaction = this.transactionGenerator(req.params?.message);
-        console.log("before transaction", transaction);
         transaction.partialSign(keyPair);
-        console.log("after transaction", transaction);
 
         const fetchOnlyProvider = this.getFetchOnlyProvider();
         const sig = await sendRpcRequest<string[], string>(fetchOnlyProvider, "sendTransaction", [bs58.encode(transaction.serialize())]);

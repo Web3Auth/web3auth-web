@@ -74,7 +74,6 @@ const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<any> 
     privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
   });
   const signedMessage = await signEthMessage(provider);
-  console.log("signedMessage", signedMessage);
 })();
 
 ```

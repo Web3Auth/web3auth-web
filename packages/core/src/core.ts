@@ -107,11 +107,7 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
-    // eslint-disable-next-line no-console
-    console.log("subscribed walletAdapter", walletAdapter);
     walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
-      // eslint-disable-next-line no-console
-      console.log("Connected to", connectedAdapterName, this.walletAdapters[connectedAdapterName]);
       this.connected = true;
       this.connecting = false;
       const connectedAd = this.walletAdapters[connectedAdapterName];

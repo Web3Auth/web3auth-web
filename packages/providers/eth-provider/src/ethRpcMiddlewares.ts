@@ -2,13 +2,10 @@ import { createScaffoldMiddleware, JRPCMiddleware, mergeMiddleware } from "@toru
 
 import { createWalletMiddleware, WalletMiddlewareOptions } from "./walletMidddleware";
 
-export interface IProviderHandlers extends WalletMiddlewareOptions {
-  version: string;
-}
+export type IProviderHandlers = WalletMiddlewareOptions;
 
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
-    version,
     getAccounts,
     processTransaction,
     processEthSignMessage,
@@ -22,7 +19,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
   const metamaskMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
       eth_syncing: false,
-      web3_clientVersion: `Torus/v${version}`,
     }),
     createWalletMiddleware({
       getAccounts,

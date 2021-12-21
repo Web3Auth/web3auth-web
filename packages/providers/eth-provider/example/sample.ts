@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { CustomChainConfig, EthereumPrivateKeyProvider, PROVIDER_EVENTS, SafeEventEmitterProvider } from "@web3auth/ethereum-provider";
 import Web3 from "web3";
 
@@ -61,5 +60,6 @@ const fetchLatestBlock = async (provider: SafeEventEmitterProvider): Promise<any
     privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
   });
   const signedMessage = await signEthMessage(provider);
-  console.log("signedMessage", signedMessage);
+
+  fetchLatestBlock(provider);
 })();

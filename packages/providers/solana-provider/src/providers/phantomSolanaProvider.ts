@@ -48,7 +48,6 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
   public setupProviderFromInjectedProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
     if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
-      version: "1", // TODO: get this from the provider
       requestAccounts: async () => {
         return [bs58.encode(injectedProvider.publicKey.toBytes())];
       },

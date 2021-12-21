@@ -9,12 +9,12 @@ import {
 } from "@web3auth/base";
 import { getModule, Web3Auth } from "@web3auth/core";
 import LoginModal from "@web3auth/ui";
+import log from "loglevel";
 
 import { defaultEvmModalConfig, defaultSolanaModalConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
 import { DefaultAdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
-
 export class Web3AuthModal extends Web3Auth {
   // public for testing purpose
   public loginModal: LoginModal;
@@ -57,8 +57,7 @@ export class Web3AuthModal extends Web3Auth {
         if (params.modalConfig?.[adapterName]) {
           adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
         }
-        // eslint-disable-next-line no-console
-        console.log("adapterConfig", adapterConfig, adapter);
+        log.info("adapterConfig", adapterConfig, adapter);
         if (!adapter) {
           if (defaultAdapterConfig.configurationRequired) {
             if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH && this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET]) {
@@ -69,9 +68,7 @@ export class Web3AuthModal extends Web3Auth {
               resolve(null);
               return;
             }
-            // TODO: add warning
-            // eslint-disable-next-line no-console
-            console.log(`${adapterName} adapter is required to be configured,
+            log.warn(`${adapterName} adapter is required to be configured,
             please use "configureWallet" function to configure it or set "visible" to false
              if you don't want to use in modal for this adapter in modal config`);
             resolve(null);
@@ -117,8 +114,7 @@ export class Web3AuthModal extends Web3Auth {
       const adapterInitResults = await Promise.all(
         adapterPromises.map((p) =>
           p.catch((e) => {
-            // eslint-disable-next-line no-console
-            console.log("error while intiiating adapter", e);
+            log.info("error while intiiating adapter", e);
             return e;
           })
         )
@@ -126,8 +122,7 @@ export class Web3AuthModal extends Web3Auth {
       // if any in app wallet is present thn only initialize in app wallet or cached wallet in modal
       if (hasInAppWallets) {
         adapterInitResults.forEach((result) => {
-          // eslint-disable-next-line no-console
-          console.log("adapterInitResults", result, this.walletAdapters[result]);
+          log.info("adapterInitResults", result, this.walletAdapters[result]);
           if (result && !(result instanceof Error)) {
             if (this.walletAdapters[result].walletType === ADAPTER_CATEGORY.IN_APP) {
               this.loginModal.addSocialLogins(
@@ -155,13 +150,12 @@ export class Web3AuthModal extends Web3Auth {
     if (externalWalletsInitialized) return;
     const adapterPromises = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
-    // eslint-disable-next-line no-console
-    console.log("this.walletAdapters) ", this.walletAdapters);
+
+    log.info("this.walletAdapters) ", this.walletAdapters);
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
       const adapter = this.walletAdapters[walletName];
       if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
-        // eslint-disable-next-line no-console
-        console.log("init external wallet", this.cachedWallet, walletName);
+        log.info("init external wallet", this.cachedWallet, walletName);
         const adPromise = new Promise((resolve, reject) => {
           this.subscribeToAdapterEvents(adapter);
           adapter
@@ -176,8 +170,8 @@ export class Web3AuthModal extends Web3Auth {
         adapterPromises.push(adPromise);
       }
     });
-    // eslint-disable-next-line no-console
-    console.log("this.promises) ", adapterPromises);
+
+    log.info("this.promises) ", adapterPromises);
     if (adapterPromises.length > 0) {
       const adapterInitResults = await Promise.all(adapterPromises.map((p) => p.catch((e) => e)));
       const finalAdaptersConfig = {};

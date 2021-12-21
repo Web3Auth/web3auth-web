@@ -20,6 +20,7 @@ import {
   WalletWindowClosedError,
 } from "@web3auth/base";
 import type { PhantomWallet, SolanaInjectedProviderProxy } from "@web3auth/solana-provider";
+import log from "loglevel";
 
 import { poll } from "./utils";
 
@@ -51,8 +52,6 @@ class PhantomAdapter extends BaseWalletAdapter {
   }
 
   async init(options: { connect: boolean }): Promise<void> {
-    // eslint-disable-next-line no-console
-    console.log("Initializing Phantom Wallet Adapter");
     if (this.ready) return;
     const isAvailable = this.isPhantomAvailable || (await poll(() => this.isPhantomAvailable, 1000, 3));
     if (!isAvailable) throw new WalletNotInstalledError();
@@ -67,12 +66,9 @@ class PhantomAdapter extends BaseWalletAdapter {
         await this.connect();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log("Failed to connect with cached phantom provider", error);
+      log.error("Failed to connect with cached phantom provider", error);
       this.emit("ERRORED", error);
     }
-    // eslint-disable-next-line no-console
-    console.log("initialized Phantom Wallet Adapter");
   }
 
   async subscribeToProviderEvents(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {

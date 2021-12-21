@@ -34,10 +34,9 @@
 import Vue from "vue";
 import { getCustomauthWallet, getOpenloginWallet, getTorusSolanaWallet, WALLET_ADAPTERS } from "@web3auth/core";
 import { Web3AuthModal } from "@web3auth/modal";
-import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider, EVM_WALLET_ADAPTERS, LOGIN_PROVIDER } from "@web3auth/base";
+import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
-import bs58 from "bs58";
+import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import Web3 from "web3"
 
 
@@ -127,7 +126,7 @@ export default Vue.extend({
 
       await this.web3auth.initModal({
         modalConfig: {
-          // [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+          [WALLET_ADAPTERS.CUSTOM_AUTH]: {}
         }
       });
     },
@@ -190,10 +189,10 @@ export default Vue.extend({
 
       this.web3auth.configureWallet(openloginAdapter);
 
-      await this.web3auth.initModal({
-        modalConfig: {
-          // [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
-        }
+      await (this.web3auth as Web3AuthModal).initModal({
+        // modalConfig: {
+        //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+        // }
       });
     
     },
@@ -214,7 +213,7 @@ export default Vue.extend({
 
       const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
       const TransactionInstruction = SystemProgram.transfer({
-      fromPubkey: new PublicKey(pubKey[0]),
+        fromPubkey: new PublicKey(pubKey[0]),
         toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
         lamports: 0.01 * LAMPORTS_PER_SOL
       });
@@ -268,7 +267,7 @@ export default Vue.extend({
       this.provider = undefined
     },
     subscribeAuthEvents(web3auth: Web3AuthModal) {
-      web3auth.on(BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
+      web3auth.on (BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
        console.log("connected to wallet", adapterName, web3auth.provider)
        this.provider = web3auth.provider;
        this.loginButtonStatus = "Logged in"

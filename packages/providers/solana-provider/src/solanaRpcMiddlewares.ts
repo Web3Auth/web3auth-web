@@ -12,7 +12,6 @@ import {
 } from "@toruslabs/openlogin-jrpc";
 
 export interface IProviderHandlers {
-  version: string;
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   signTransaction?: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
@@ -77,12 +76,11 @@ export function createGenericJRPCMiddleware<T, U>(
 }
 
 export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getProviderState, version } =
+  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getProviderState } =
     providerHandlers;
 
   return mergeMiddleware([
     createScaffoldMiddleware({
-      version,
       [PROVIDER_JRPC_METHODS.GET_PROVIDER_STATE]: getProviderState,
     }),
     createRequestAccountsMiddleware({ requestAccounts }),

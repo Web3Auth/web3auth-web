@@ -40,7 +40,6 @@ export class TorusInjectedProviderProxy extends BaseController<TorusInjectedProv
   public setupProviderFromInjectedProvider(injectedProvider: InjectedProviderOptions): SafeEventEmitterProvider {
     if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
-      version: "1", // TODO: get this from the provider
       requestAccounts: async () => {
         const accounts = (await injectedProvider.provider.request({
           method: "solana_requestAccounts",

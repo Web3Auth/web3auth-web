@@ -17,9 +17,9 @@ import {
   WalletNotReadyError,
 } from "@web3auth/base";
 import type { TorusInjectedProviderProxy } from "@web3auth/solana-provider";
+import log from "loglevel";
 
 import type { Torus } from "./interface";
-
 type LoginParams = {
   loginProvider?: LOGIN_PROVIDER_TYPE;
   login_hint?: string;
@@ -86,8 +86,7 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
         await this.connect();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log("Failed to connect with cached torus solana provider", error);
+      log.error("Failed to connect with cached torus solana provider", error);
       this.emit("ERRORED", error);
     }
   }
@@ -98,7 +97,6 @@ class SolanaWalletAdapter extends BaseWalletAdapter {
     this.emit(BASE_WALLET_EVENTS.CONNECTING);
     try {
       await this.torusInstance.login(this.loginSettings);
-      // TODO: make torus embed provider type compatible with this
       this.provider = this.solanaProviderProxy.setupProviderFromInjectedProvider({
         provider: this.torusInstance.provider,
       });

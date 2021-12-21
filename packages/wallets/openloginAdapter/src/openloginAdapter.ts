@@ -24,6 +24,7 @@ import {
 } from "@web3auth/base";
 import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
+import log from "loglevel";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
 
@@ -98,7 +99,7 @@ class OpenloginAdapter extends BaseWalletAdapter {
         await this.connectWithProvider();
       }
     } catch (error) {
-      console.log("Failed to connect with cached openlogin provider", error);
+      log.error("Failed to connect with cached openlogin provider", error);
       this.emit("ERRORED", error);
     }
   }
@@ -166,10 +167,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
           }
           let finalPrivKey = this.openloginInstance.privKey;
 
-          console.log("setting up provider", finalPrivKey);
           if (finalPrivKey) {
             if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            console.log("setting up provider 2");
             return providerFactory.setupProvider(finalPrivKey);
           }
           return null;
@@ -182,7 +181,6 @@ class OpenloginAdapter extends BaseWalletAdapter {
       };
       if (providerFactory.state._initialized) {
         this.provider = await getProvider();
-        console.log("setting up provider res", this.provider);
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
@@ -192,7 +190,6 @@ class OpenloginAdapter extends BaseWalletAdapter {
       }
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
         this.provider = await getProvider();
-        console.log("setting up provider event received", this.provider);
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN_WALLET);
