@@ -3,9 +3,12 @@ import "../css/web3auth.css";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
 
-import { icons, images } from "../assets";
+import AllAssets from "../assets";
+import LoginLightAppleSvg from "../assets/images/login-apple-light.svg";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
-
+import AllImages, { icons, images } from "./utils";
+// eslint-disable-next-line no-console
+console.log("images", images, AllImages, AllAssets);
 const hasLightIcons = ["apple", "github"];
 export default class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
@@ -43,9 +46,9 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   init() {
-    const web3authIcon = images[`web3auth${this.isDark ? "-light" : ""}.svg`];
-    const closeIcon = icons["close.svg"];
-    const torusPower = images["torus-power.svg"];
+    const web3authIcon = AllAssets["login-apple-light"].image;
+    const closeIcon = AllAssets["login-apple-light"].image;
+    const torusPower = AllAssets["login-apple-light"].image;
     this.$modal = this.htmlToElement(`
         <div id="w3a-modal" class="w3a-modal w3a-modal--hidden${this.isDark ? "" : " w3a-modal--light"}">
             <div class="w3a-modal__inner w3ajs-inner">
@@ -58,7 +61,7 @@ export default class LoginModal extends SafeEventEmitter {
                         </div>
                     </div>
                     <button class="w3a-header__button w3ajs-close-btn">
-                        <img src="${closeIcon}" alt="">
+                        <img src="${LoginLightAppleSvg}" alt="">
                     </button>
                 </div>
                 <div class="w3a-modal__content w3ajs-content"></div>

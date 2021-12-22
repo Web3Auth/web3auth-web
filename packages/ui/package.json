@@ -31,7 +31,9 @@
   "files": [
     "dist",
     "types",
-    "src"
+    "src",
+    "assets/images",
+    "assets/icons"
   ],
   "devDependencies": {
     "@types/lodash": "^4.14.176",
@@ -41,7 +43,10 @@
     "css-loader": "^2.1.1",
     "style-loader": "^2.0.0",
     "file-loader": "^6.2.0",
-    "@types/webpack-env": "1.16.3"
+    "@types/webpack-env": "1.16.3",
+    "postcss": "^8.4.5",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-svg":"^2.0.0"
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
