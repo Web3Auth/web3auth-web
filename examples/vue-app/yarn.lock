@@ -2083,6 +2083,7 @@
     "@web3auth/phantom-wallet-adapter" "0.0.0"
     "@web3auth/solana-wallet-adapter" "0.0.0"
     "@web3auth/torus-wallet-adapter" "0.0.0"
+    bn.js "^4.11.8"
 
 "@web3auth/customauth-adapter@0.0.0", "@web3auth/customauth-adapter@file:./.yalc/@web3auth/customauth-adapter":
   version "0.0.0"
@@ -2092,6 +2093,7 @@
     "@web3auth/base" "0.0.0"
     "@web3auth/ethereum-provider" "0.0.0"
     "@web3auth/solana-provider" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/ethereum-provider@0.0.0", "@web3auth/ethereum-provider@file:./.yalc/@web3auth/ethereum-provider":
   version "0.0.0"
@@ -2111,6 +2113,7 @@
   version "0.0.0"
   dependencies:
     "@web3auth/base" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/modal@file:./.yalc/@web3auth/modal":
   version "0.0.0"
@@ -2118,6 +2121,7 @@
     "@web3auth/base" "0.0.0"
     "@web3auth/core" "0.0.0"
     "@web3auth/ui" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/openlogin-adapter@0.0.0", "@web3auth/openlogin-adapter@file:./.yalc/@web3auth/openlogin-adapter":
   version "0.0.0"
@@ -2128,6 +2132,7 @@
     "@web3auth/base" "0.0.0"
     "@web3auth/ethereum-provider" "0.0.0"
     "@web3auth/solana-provider" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/phantom-wallet-adapter@0.0.0", "@web3auth/phantom-wallet-adapter@file:./.yalc/@web3auth/phantom-wallet-adapter":
   version "0.0.0"
@@ -2135,6 +2140,7 @@
     "@web3auth/base" "0.0.0"
     "@web3auth/solana-provider" "0.0.0"
     bn.js "^4.11.8"
+    loglevel "^1.8.0"
 
 "@web3auth/solana-provider@0.0.0", "@web3auth/solana-provider@file:./.yalc/@web3auth/solana-provider":
   version "0.0.0"
@@ -2146,6 +2152,7 @@
     bn.js "^4.11.8"
     bs58 "^4.0.1"
     json-rpc-random-id "^1.0.1"
+    loglevel "^1.8.0"
 
 "@web3auth/solana-wallet-adapter@0.0.0", "@web3auth/solana-wallet-adapter@file:./.yalc/@web3auth/solana-wallet-adapter":
   version "0.0.0"
@@ -2154,6 +2161,7 @@
     "@toruslabs/solana-embed" "^0.0.3"
     "@web3auth/base" "0.0.0"
     "@web3auth/solana-provider" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/torus-wallet-adapter@0.0.0", "@web3auth/torus-wallet-adapter@file:./.yalc/@web3auth/torus-wallet-adapter":
   version "0.0.0"
@@ -2161,12 +2169,14 @@
     "@toruslabs/openlogin-jrpc" "^1.3.3"
     "@toruslabs/torus-embed" "^1.18.6"
     "@web3auth/base" "0.0.0"
+    loglevel "^1.8.0"
 
 "@web3auth/ui@0.0.0", "@web3auth/ui@file:./.yalc/@web3auth/ui":
   version "0.0.0"
   dependencies:
     "@toruslabs/openlogin-jrpc" "^1.3.3"
     "@web3auth/base" "0.0.0"
+    loglevel "^1.8.0"
 
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
@@ -9746,7 +9756,7 @@ svg-tags@^1.0.0:
   resolved "https://registry.yarnpkg.com/svg-tags/-/svg-tags-1.0.0.tgz#58f71cee3bd519b59d4b2a843b6c7de64ac04764"
   integrity sha1-WPcc7jvVGbWdSyqEO2x95krAR2Q=
 
-svgo@^1.0.0:
+svgo@^1.0.0, svgo@^1.3.2:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/svgo/-/svgo-1.3.2.tgz#b6dc511c063346c9e415b81e43401145b96d4167"
   integrity sha512-yhy/sQYxR5BkC98CY7o31VGsg014AKLEPxdfhora76l36hD9Rdy5NZA/Ocn6yayNPgSamYdtX2rFJdcv07AYVw==
@@ -10488,6 +10498,15 @@ vue-style-loader@^4.1.0, vue-style-loader@^4.1.2:
   dependencies:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
+
+vue-svg-loader@^0.17.0-beta.2:
+  version "0.17.0-beta.2"
+  resolved "https://registry.yarnpkg.com/vue-svg-loader/-/vue-svg-loader-0.17.0-beta.2.tgz#954b2a08b5488998dd81ec371ab5fb5ea4182ef7"
+  integrity sha512-iMUGJTKEcuNAG8VXOchjA8443IqEmEi2Aw6EVIHWma2cC4TUQ7Oet5Yry9IFfqXQXXvyzXz5EyttVvfRGTNH4Q==
+  dependencies:
+    loader-utils "^2.0.0"
+    semver "^7.3.2"
+    svgo "^1.3.2"
 
 vue-template-compiler@^2.6.14:
   version "2.6.14"

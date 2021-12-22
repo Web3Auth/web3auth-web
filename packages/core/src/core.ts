@@ -8,6 +8,7 @@ import {
   IncompatibleChainNamespaceError,
   IWalletAdapter,
   SafeEventEmitterProvider,
+  UserInfo,
   Wallet,
   WALLET_ADAPTERS,
   WalletNotConnectedError,
@@ -101,9 +102,9 @@ export class Web3Auth extends SafeEventEmitter {
     await this.walletAdapters[this.connectedAdapterName].disconnect();
   }
 
-  async getUserInfo(): Promise<void> {
+  async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
-    await this.walletAdapters[this.connectedAdapterName].getUserInfo();
+    return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {

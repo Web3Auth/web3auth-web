@@ -2,7 +2,27 @@
   <div id="app">
     <h3>Login With Web3Auth</h3>
     <h3>Connect with {{ namespace === 'solana' ? `${namespace} web3auth` : 'ethereum web3auth' }} </h3>
-
+      <div id="w3a-modal" class="w3a-modal" v-if="loading">
+        <div class="w3ajs-modal-loader w3a-modal__loader">
+                  <div class="w3a-modal__loader-content">
+                      <div class="w3a-modal__loader-info">
+                        <div class="w3ajs-modal-loader__spinner w3a-spinner">
+                            <div class="w3a-spinner__body"></div>
+                            <div class="w3a-spinner__cover"></div>
+                            <div class="w3a-spinner__head"></div>
+                        </div>
+                        <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
+                        <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
+                      </div>
+                      <div class="w3a-spinner-power">
+                          <loaderSvg/>
+                      </div>
+                  </div>
+                  <button class="w3a-header__button w3ajs-loader-close-btn">
+                      <img src="${closeIcon}" alt="">
+                  </button>
+          </div>
+      </div>
     <section
       :style="{
         fontSize: '12px',
@@ -22,6 +42,7 @@
       <button v-if="connected && provider && namespace === 'solana'" @click="signAndSendTransaction" style="cursor: pointer;">Sign and send Transaction</button>
       <button v-if="connected && provider && namespace === 'eip155'" @click="sendEth" style="cursor: pointer;">Send Eth</button>
       <button v-if="connected && provider && namespace === 'eip155'" @click="signEthMessage" style="cursor: pointer;">Sign eth message</button>
+      <button v-if="connected" @click="getUserInfo" style="cursor: pointer;">Get User Info</button>
 
     </section>
     <div id="console" style="white-space: pre-line">
@@ -39,12 +60,13 @@ import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import Web3 from "web3"
 
-
+import loader from "./assets/torus-power.svg"
 
 export default Vue.extend({
   name: "app",
   data() {
     return {
+      loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
@@ -52,56 +74,37 @@ export default Vue.extend({
       web3auth: new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
     };
   },
+  components: {
+    loaderSvg: loader
+  },
   async mounted() {
-    await this.initSolanaAuth();
+    try {
+      this.loading=true
+      const namespace = localStorage.getItem("chainNamespace")
+      if (namespace === 'solana') {
+        await this.initSolanaAuth();
+      } else {
+        await this.initEthAuth();
+      }
+    } finally {
+      this.loading=false
+    }
   },
   methods: {
     async initSolanaAuth() {
-      this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
-      this.subscribeAuthEvents(this.web3auth)
+      try {
+        this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
+        this.subscribeAuthEvents(this.web3auth)
 
-      this.namespace = this.web3auth.chainNamespace
-    
-     const customAuthAdapter = getCustomauthWallet({
-      initSettings: {
-        skipInit: true,
-        skipSw: true,
-        skipPrefetch: true
-      },
-      chainConfig: {
-      rpcTarget: "https://api.devnet.solana.com",
-      chainId: "0x3",
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      networkName: "devnet",
-      ticker: "sol",
-      tickerName: "solana",
-    }, adapterSettings: {
-      baseUrl: window.location.origin,
-      redirectPathName:"auth",
-      uxMode: "redirect",
-      enableLogging: true,
-      network: "testnet", // details for test net
-      // popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-    }, loginSettings: {
-      // loginProvider: "google"
-      "loginProviderConfig": {
-        "google": {
-          "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-          "verifier": "google-lrc",
-        },
-        "twitter": {
-          "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
-          "verifier": "torus-auth0-twitter-lrc" ,
-          jwtParams: {
-            "domain": "https://torus-test.auth0.com"
-          }
-        }
-      }
-    }
-    })
-
+        this.namespace = this.web3auth.chainNamespace
       
-      const openloginAdapter = getOpenloginWallet({ chainConfig: {
+      const customAuthAdapter = getCustomauthWallet({
+        initSettings: {
+          skipInit: true,
+          skipSw: true,
+          skipPrefetch: true
+        },
+        chainConfig: {
         rpcTarget: "https://api.devnet.solana.com",
         chainId: "0x3",
         chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -109,186 +112,248 @@ export default Vue.extend({
         ticker: "sol",
         tickerName: "solana",
       }, adapterSettings: {
-        network: "testnet",
-        clientId: "localhost-id",
-        uxMode: "popup"
+        baseUrl: window.location.origin,
+        redirectPathName:"auth",
+        uxMode: "redirect",
+        enableLogging: true,
+        network: "testnet", // details for test net
+        // popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
       }, loginSettings: {
         // loginProvider: "google"
-      }})
-
-      const torusWalletAdapter = getTorusSolanaWallet({
-        initParams: {
-          buildEnv: "testing"
+        "loginProviderConfig": {
+          "google": {
+            "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+            "verifier": "google-lrc",
+          },
+          "twitter": {
+            "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
+            "verifier": "torus-auth0-twitter-lrc" ,
+            jwtParams: {
+              "domain": "https://torus-test.auth0.com"
+            }
+          }
         }
+      }
       })
-      this.web3auth.configureWallet(customAuthAdapter);
-      this.web3auth.configureWallet(torusWalletAdapter);
 
-      await this.web3auth.initModal({
-        modalConfig: {
-          [WALLET_ADAPTERS.CUSTOM_AUTH]: {}
-        }
-      });
+        
+        const openloginAdapter = getOpenloginWallet({ chainConfig: {
+          rpcTarget: "https://api.devnet.solana.com",
+          chainId: "0x3",
+          chainNamespace: CHAIN_NAMESPACES.SOLANA,
+          networkName: "devnet",
+          ticker: "sol",
+          tickerName: "solana",
+        }, adapterSettings: {
+          network: "testnet",
+          clientId: "localhost-id",
+          uxMode: "popup"
+        }, loginSettings: {
+          // loginProvider: "google"
+        }})
+
+        const torusWalletAdapter = getTorusSolanaWallet({
+          initParams: {
+            buildEnv: "testing"
+          }
+        })
+        this.web3auth.configureWallet(customAuthAdapter);
+        this.web3auth.configureWallet(torusWalletAdapter);
+
+        await this.web3auth.initModal({
+          modalConfig: {
+            [WALLET_ADAPTERS.CUSTOM_AUTH]: {}
+          }
+        });
+      } catch (error) {
+        this.console("error", error)
+      }
     },
     async initEthAuth() {
-      this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
-      this.subscribeAuthEvents(this.web3auth)
+      try {
+        this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+        this.subscribeAuthEvents(this.web3auth)
 
-      this.namespace = this.web3auth.chainNamespace
-    
-      const openloginAdapter = getOpenloginWallet({ chainConfig: {
-        rpcTarget: "https://polygon-rpc.com",
-        chainId: "0x89",
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
-        networkName: "matic",
-        ticker: "matic",
-        tickerName: "matic",
-      }, adapterSettings: {
-        network: "testnet",
-        clientId: "localhost-id",
-        uxMode: "redirect"
-      }, loginSettings: {
-        // loginProvider: "google"
-      }})
+        this.namespace = this.web3auth.chainNamespace
+      
+        const openloginAdapter = getOpenloginWallet({ chainConfig: {
+          rpcTarget: "https://polygon-rpc.com",
+          chainId: "0x89",
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+          networkName: "matic",
+          ticker: "matic",
+          tickerName: "matic",
+        }, adapterSettings: {
+          network: "testnet",
+          clientId: "localhost-id",
+          uxMode: "redirect"
+        }, loginSettings: {
+          // loginProvider: "google"
+        }})
 
 
-      // const ethCustomAuthAdapter = getCustomauthWallet({
-      //   initSettings: {
-      //     skipInit: true,
-      //     skipSw: true,
-      //     skipPrefetch: true
-      //   },
-      //   chainConfig: {
-      //   rpcTarget: "https://polygon-rpc.com",
-      //   chainId: "0x89",
-      //   chainNamespace: CHAIN_NAMESPACES.EIP155,
-      //   networkName: "matic",
-      //   ticker: "matic",
-      //   tickerName: "matic",
-      // }, adapterSettings: {
-      //   baseUrl: "http://localhost:3000/",
-      //   redirectPathName:"",
-      //   uxMode: "redirect",
-      //   enableLogging: true,
-      //   network: "testnet", // details for test net
-      //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-      // }, loginSettings: {
-      //   // loginProvider: "google"
-      //   "loginProviderConfig": {
-      //     "google": {
-      //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-      //       "verifier": "google-lrc",
-      //     },
-      //     "facebook": {
-      //       "clientId": "617201755556395", 
-      //       "verifier": "facebook-lrc" 
-      //     }
-      //   }
-      // }
-      // })
-
-      this.web3auth.configureWallet(openloginAdapter);
-
-      await (this.web3auth as Web3AuthModal).initModal({
-        // modalConfig: {
-        //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+        // const ethCustomAuthAdapter = getCustomauthWallet({
+        //   initSettings: {
+        //     skipInit: true,
+        //     skipSw: true,
+        //     skipPrefetch: true
+        //   },
+        //   chainConfig: {
+        //   rpcTarget: "https://polygon-rpc.com",
+        //   chainId: "0x89",
+        //   chainNamespace: CHAIN_NAMESPACES.EIP155,
+        //   networkName: "matic",
+        //   ticker: "matic",
+        //   tickerName: "matic",
+        // }, adapterSettings: {
+        //   baseUrl: "http://localhost:3000/",
+        //   redirectPathName:"",
+        //   uxMode: "redirect",
+        //   enableLogging: true,
+        //   network: "testnet", // details for test net
+        //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
+        // }, loginSettings: {
+        //   // loginProvider: "google"
+        //   "loginProviderConfig": {
+        //     "google": {
+        //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+        //       "verifier": "google-lrc",
+        //     },
+        //     "facebook": {
+        //       "clientId": "617201755556395", 
+        //       "verifier": "facebook-lrc" 
+        //     }
+        //   }
         // }
-      });
+        // })
+
+        this.web3auth.configureWallet(openloginAdapter);
+
+        await (this.web3auth as Web3AuthModal).initModal({
+          // modalConfig: {
+          //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+          // }
+        });
+      } catch (error) {
+        this.console("error", error)
+      }
     
     },
     async switchChain() {
       if (this.namespace === 'solana') {
         await this.initEthAuth();
+        localStorage.setItem("chainNamespace", this.namespace)
       } else if (this.namespace === 'eip155') {
         await this.initSolanaAuth();
+        localStorage.setItem("chainNamespace", this.namespace)
       }
     },
     connect() {
-      this.web3auth.connect()
+      try {
+        this.web3auth.connect()
+      } catch (error) {
+        this.console("error", error)
+      }
     },
     async signAndSendTransaction() {
-      const conn = new Connection("https://api.devnet.solana.com")
-      const solWeb3 = new SolanaProviderWrapper(this.provider)
-      const pubKey = await solWeb3.requestAccounts()
+      try {
+        const conn = new Connection("https://api.devnet.solana.com")
+        const solWeb3 = new SolanaProviderWrapper(this.provider)
+        const pubKey = await solWeb3.requestAccounts()
 
-      const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-      const TransactionInstruction = SystemProgram.transfer({
-        fromPubkey: new PublicKey(pubKey[0]),
-        toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
-        lamports: 0.01 * LAMPORTS_PER_SOL
-      });
-      let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
-      console.log("provider", this.provider)
-      console.log("transaction", transaction, pubKey)
-      // const decodedTx = bs58.decode(bs58.encode(transaction.serializeMessage()));
-      // const tx = Transaction.populate(Message.from(decodedTx));
-      const signature = await solWeb3.signAndSendTransaction(transaction)
-      console.log("signature", signature);
+        const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
+        const TransactionInstruction = SystemProgram.transfer({
+          fromPubkey: new PublicKey(pubKey[0]),
+          toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+          lamports: 0.01 * LAMPORTS_PER_SOL
+        });
+        let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
+        const signature = await solWeb3.signAndSendTransaction(transaction)
+        this.console("signature", signature)
+      } catch (error) {
+        this.console("error", error)
+      }
     },
     async sendEth() {
-      const pubKey = await this.provider.request({ method: "eth_accounts" })
-      console.log("pubKey", pubKey)
-      const web3 = new Web3(this.provider);
-      const blockNumber = await this.provider.request({ method: "eth_getBlockByNumber", params: ["latest", false] })
-      console.log("eth_getBlockByNumber", blockNumber)
-      await web3.eth.sendTransaction({ from: "0x2c7536E3605D9C16a7a3D7b1898e529396a65c23", to: pubKey[0], value: web3.utils.toWei("0.01") })
-        // .then((resp) => this.console(resp))
-        // .catch(console.error);
+      try {
+        const pubKey = await this.provider.request({ method: "eth_accounts" })
+        console.log("pubKey", pubKey)
+        const web3 = new Web3(this.provider);
+        const blockNumber = await this.provider.request({ method: "eth_getBlockByNumber", params: ["latest", false] })
+        const txRes = await web3.eth.sendTransaction({ from: "0x2c7536E3605D9C16a7a3D7b1898e529396a65c23", to: pubKey[0], value: web3.utils.toWei("0.01") })
+        this.console("txRes", txRes)
+      } catch (error) {
+        this.console("error", error)
+      }
     },
     async signEthMessage() {
-      const pubKey = await this.provider.request({ method: "eth_accounts" })
-      console.log("pubKey", pubKey)
-      const web3 = new Web3();
-      web3.setProvider(this.provider)
-      // hex message
-      const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-      (web3.currentProvider as any)?.send(
-        {
-          method: "eth_sign",
-          params: [pubKey[0], message],
-          from: pubKey[0],
-        },
-        (err: Error, result: any) => {
-          if (err) {
-            return console.error(err);
+      try {
+        const pubKey = await this.provider.request({ method: "eth_accounts" })
+        const web3 = new Web3();
+        web3.setProvider(this.provider)
+        // hex message
+        const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+        (web3.currentProvider as any)?.send(
+          {
+            method: "eth_sign",
+            params: [pubKey[0], message],
+            from: pubKey[0],
+          },
+          (err: Error, result: any) => {
+            if (err) {
+              return this.console(err);
+            }
+            this.console("sign message => true", result);
           }
-          console.log("sign message => true", result);
-        }
-      );
+        );
+      } catch (error) {
+        this.console("error", error)
+      }
     },
-    async loginWithOpenlogin(){
-      await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
-    },
-    async loginWithTorusWallet(){
-      await this.web3auth.connectTo(WALLET_ADAPTERS.TORUS_EVM_WALLET)
-    },
+    // async loginWithOpenlogin(){
+    //   await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
+    // },
+    // async loginWithTorusWallet(){
+    //   await this.web3auth.connectTo(WALLET_ADAPTERS.TORUS_EVM_WALLET)
+    // },
      async logout(){
       await this.web3auth.logout();
       this.provider = undefined
     },
+    async getUserInfo(){
+      const userInfo = await this.web3auth.getUserInfo();
+      this.console(userInfo)
+    },
     subscribeAuthEvents(web3auth: Web3AuthModal) {
       web3auth.on (BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
-       console.log("connected to wallet", adapterName, web3auth.provider)
+       this.console("connected to wallet", adapterName)
        this.provider = web3auth.provider;
        this.loginButtonStatus = "Logged in"
        this.connected = true
       })
       web3auth.on(BASE_WALLET_EVENTS.CONNECTING, ()=>{
-        console.log("connecting")
+        this.console("connecting")
         this.loginButtonStatus = "Connecting..."
 
       })
       web3auth.on(BASE_WALLET_EVENTS.DISCONNECTED, ()=>{
-        console.log("disconnected")
+        this.console("disconnected")
         this.loginButtonStatus = ""
         this.connected = false
       })
       web3auth.on(BASE_WALLET_EVENTS.ERRORED, (error)=>{
-        console.log("errored", error)
+        this.console("errored", error)
         this.loginButtonStatus = ""
       })
     },
+    console(...args: unknown[]): void {
+      const el = document.querySelector("#console>p");
+      if (el) {
+        el.innerHTML = JSON.stringify(args || {}, null, 2);
+      }
+    },
   },
+  
   
 });
 </script>
@@ -321,4 +386,74 @@ button {
   background: none;
   border-radius: 5px;
 }
+/* Modal */
+#w3a-modal {
+    --bg1: #0f1222;
+    --bg2: #24262e;
+    --text-color1: #d3d3d4;
+    --text-color2: #ffffff;
+
+    --text-header: Poppins, Helvetica, sans-serif;
+    --text-body: DM Sans, Helvetica, sans-serif;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 15px;
+    background: rgba(33, 33, 33, 0.46);
+    color: var(--text-color1);
+    font-family: var(--text-body);
+}
+
+#w3a-modal .w3a-modal__loader {
+    background: var(--bg1);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+#w3a-modal .w3a-modal__loader-content {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.w3a-modal__loader-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 30px;
+}
+
+#w3a-modal .w3a-spinner-label {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0364ff;
+}
+
+#w3a-modal .w3a-spinner-message {
+    margin-top: 10px;
+    font-size: 16px;
+}
+#w3a-modal .w3a-spinner-message:first-letter {
+    text-transform: capitalize;
+}
+#w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
+    color: #fb4a61;
+}
+
 </style>
