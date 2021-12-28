@@ -38,6 +38,8 @@ export type UserInfo = {
    * id for discord
    */
   verifierId: string;
+
+  accounts?: string[];
 };
 
 export const ADAPTER_CATEGORY = {
@@ -82,6 +84,7 @@ export interface IWalletAdapter extends SafeEventEmitter {
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
+  adapterData?: unknown;
   init(options?: { connect?: boolean }): Promise<void>;
   connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
   disconnect(): Promise<void>;
@@ -103,6 +106,8 @@ export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWal
 
   public abstract provider: SafeEventEmitterProvider;
 
+  public abstract adapterData?: unknown;
+
   abstract init(options?: { connect?: boolean }): Promise<void>;
   abstract connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
@@ -119,4 +124,8 @@ export interface BaseAdapterConfig {
   visible?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
+}
+
+export interface WalletConnectV1Data {
+  uri: string;
 }

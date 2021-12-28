@@ -41,11 +41,6 @@ export class Web3AuthModal extends Web3Auth {
   public async initModal(params: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     if (this.initialized) throw new Error("Already initialized");
     this.loginModal.init();
-    // if (!this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && !this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
-    //   throw new Error(
-    //     `Please configure either ${WALLET_ADAPTERS.CUSTOM_AUTH} or ${WALLET_ADAPTERS.OPENLOGIN_WALLET} adapter using configureAdapter function as it is required in login modal`
-    //   );
-    // }
     const adapterPromises = [];
     let hasInAppWallets = false;
     Object.keys(this.aggregatorModalConfig.adapters).forEach(async (adapterName) => {
@@ -60,10 +55,14 @@ export class Web3AuthModal extends Web3Auth {
         log.info("adapterConfig", adapterConfig, adapter);
         if (!adapter) {
           if (defaultAdapterConfig.configurationRequired) {
+            // if custom auth adapter is being added but openlogin is already present then ignore it.
+            // only one of them can be added.
             if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH && this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET]) {
               resolve(null);
               return;
             }
+            // if openlogin adapter is being added but custom auth is already present then ignore it.
+            // only one of them can be added.
             if (adapterName === WALLET_ADAPTERS.OPENLOGIN_WALLET && this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
               resolve(null);
               return;
@@ -134,7 +133,7 @@ export class Web3AuthModal extends Web3Auth {
           }
         });
       } else {
-        // if no in app wallet is available then initialize external wallets in modal
+        // if no in app wallet is available then initialize external wallets in modal directly.
         await this.initExternalWalletAdapters(false, { showExternalWallets: true });
       }
     }
@@ -150,6 +149,7 @@ export class Web3AuthModal extends Web3Auth {
     if (externalWalletsInitialized) return;
     const adapterPromises = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
+    const adaptersData: Record<string, unknown> = {};
 
     log.info("this.walletAdapters) ", this.walletAdapters);
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
@@ -162,6 +162,7 @@ export class Web3AuthModal extends Web3Auth {
             .init({ connect: this.cachedWallet === walletName })
             .then(() => {
               adaptersConfig[walletName] = this.aggregatorModalConfig.adapters[walletName];
+              adaptersData[walletName] = adapter?.adapterData || {};
               resolve(walletName);
               return true;
             })
@@ -180,7 +181,7 @@ export class Web3AuthModal extends Web3Auth {
           finalAdaptersConfig[result] = adaptersConfig[result];
         }
       });
-      this.loginModal.addWalletLogins(adaptersConfig, { ...options });
+      this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { ...options });
     }
   }
 

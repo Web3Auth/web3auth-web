@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import type openlogin from "@toruslabs/openlogin";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
@@ -39,6 +38,8 @@ class OpenloginAdapter extends BaseWalletAdapter {
   readonly currentChainNamespace: ChainNamespaceType;
 
   readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
+
+  public adapterData?: Record<string, string> = {};
 
   public openloginInstance: openlogin;
 

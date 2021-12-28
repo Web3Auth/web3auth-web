@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // /* eslint-disable no-console */
 import type CustomAuth from "@toruslabs/customauth";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
@@ -42,6 +41,8 @@ class CustomauthAdapter extends BaseWalletAdapter {
   readonly currentChainNamespace: ChainNamespaceType;
 
   readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
+
+  public adapterData?: Record<string, string> = {};
 
   public customauthInstance: CustomAuth;
 

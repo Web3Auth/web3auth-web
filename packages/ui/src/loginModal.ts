@@ -1,7 +1,17 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
+import {
+  BASE_WALLET_EVENTS,
+  BaseAdapterConfig,
+  CommonLoginOptions,
+  LoginMethodConfig,
+  WALLET_ADAPTER_TYPE,
+  WALLET_ADAPTERS,
+  WalletConnectV1Data,
+  WalletError,
+} from "@web3auth/base";
+import log from "loglevel";
 
 import AllAssets from "../assets";
 import LoginLightAppleSvg from "../assets/images/login-apple-light.svg";
@@ -251,7 +261,11 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>, options?: { showExternalWallets: boolean }): void => {
+  addWalletLogins = (
+    adaptersConfig: Record<string, BaseAdapterConfig>,
+    adaptersData: Record<string, unknown>,
+    options?: { showExternalWallets: boolean }
+  ): void => {
     if (options.showExternalWallets) {
       this.showExternalWallets();
     }
@@ -313,6 +327,12 @@ export default class LoginModal extends SafeEventEmitter {
     $adapterList.before(mainAdapterSection);
 
     adapterKeys.forEach((adapter) => {
+      // TODO: add wallet connect adapter in ui
+      if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+        const data = adaptersData[adapter] as WalletConnectV1Data;
+        log.info("uri for wallet connect qr code", data.uri);
+        return;
+      }
       $externalWallet.classList.remove("w3a-group--ext-wallet-hidden");
       const providerIcon = images[`login-${adapter}.svg`];
       const adapterButton = this.htmlToElement(`

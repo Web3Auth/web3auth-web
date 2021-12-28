@@ -26,6 +26,8 @@ class MetamaskAdapter extends BaseWalletAdapter {
 
   public connecting: boolean;
 
+  public adapterData?: Record<string, string> = {};
+
   public ready: boolean;
 
   public connected: boolean;
@@ -55,15 +57,14 @@ class MetamaskAdapter extends BaseWalletAdapter {
       this.emit(BASE_WALLET_EVENTS.CONNECTING);
       try {
         this.provider = typeof window !== "undefined" && (window as any).ethereum;
-        this.addEventListeners(this.provider);
         const onConnectHandler = () => {
           this.connected = true;
+          this.provider.removeListener("connect", onConnectHandler);
+          this.addEventListeners(this.provider);
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
           resolve(this.provider);
         };
-        this.provider.on("connect", () => {
-          onConnectHandler();
-        });
+        this.provider.on("connect", onConnectHandler);
         this.provider
           .request({ method: "eth_requestAccounts" })
           .then(() => {
@@ -102,6 +103,8 @@ class MetamaskAdapter extends BaseWalletAdapter {
       this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
     });
     provider.on("connect", () => {
+      // emit only if not already connected
+      if (this.connected) return;
       this.connected = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK_WALLET);
     });

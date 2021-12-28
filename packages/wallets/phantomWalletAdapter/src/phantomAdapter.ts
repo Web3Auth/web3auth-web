@@ -31,6 +31,8 @@ class PhantomAdapter extends BaseWalletAdapter {
 
   readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
+  public adapterData?: Record<string, string> = {};
+
   public connecting: boolean;
 
   public ready: boolean;
