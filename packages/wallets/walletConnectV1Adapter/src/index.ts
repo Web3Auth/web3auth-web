@@ -1,1 +1,1 @@
-export * from "./metamaskAdapter";
+export * from "./adapter";
