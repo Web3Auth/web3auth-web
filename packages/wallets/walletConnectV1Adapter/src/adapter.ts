@@ -18,12 +18,18 @@ import {
 } from "@web3auth/base";
 import log from "loglevel";
 
+interface WalletConnectV1AdapterOptions {
+  adapterSettings?: { infuraId: string };
+}
+
 class WalletConnectV1Adapter extends BaseWalletAdapter {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
+
+  readonly adapterOptions: WalletConnectV1AdapterOptions;
 
   public connecting: boolean;
 
@@ -39,38 +45,27 @@ class WalletConnectV1Adapter extends BaseWalletAdapter {
 
   private walletConnectProvider: WalletConnectProvider;
 
+  constructor(options: WalletConnectV1AdapterOptions) {
+    super();
+    this.adapterOptions = options;
+  }
+
   async init(options: { connect: boolean }): Promise<void> {
     if (this.ready) return;
-    return new Promise((resolve) => {
-      // Create a connector
-      this.walletConnectProvider = new WalletConnectProvider({
-        infuraId: "27e484dcd9e3efcfd25a83a78777cdf1",
-        qrcode: false,
-      });
-      this.walletConnectProvider.connector.on("display_uri", async (err, payload) => {
-        if (err) {
-          throw new WalletConnectionError("Failed to display wallet connect qr code", err);
-        }
-        const uri = payload.params[0];
-        this.adapterData = {
-          ...this.adapterData,
-          uri,
-        };
-
-        this.ready = true;
-        this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
-        try {
-          if (options.connect) {
-            await this.connect();
-          }
-        } catch (error) {
-          this.emit(BASE_WALLET_EVENTS.ERRORED, error);
-        } finally {
-          resolve();
-        }
-      });
-      this.walletConnectProvider.enable();
+    // Create a connector
+    this.walletConnectProvider = new WalletConnectProvider({
+      ...this.adapterOptions.adapterSettings,
+      qrcode: false,
     });
+    this.ready = true;
+    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
+    try {
+      if (options.connect) {
+        await this.connect();
+      }
+    } catch (error) {
+      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+    }
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {
@@ -79,10 +74,11 @@ class WalletConnectV1Adapter extends BaseWalletAdapter {
       this.connecting = true;
       this.emit(BASE_WALLET_EVENTS.CONNECTING);
       try {
+        this.walletConnectProvider.enable();
         const onConnectHandler = () => {
           this.walletConnectProvider.removeListener("connect", onConnectHandler);
+          this.subscribeEvents(this.walletConnectProvider);
           this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
-          this.subscribeEvents(this.provider);
           this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
           resolve(this.provider);
         };
@@ -109,11 +105,11 @@ class WalletConnectV1Adapter extends BaseWalletAdapter {
     return {};
   }
 
-  private subscribeEvents(provider: SafeEventEmitterProvider): void {
+  private subscribeEvents(provider: WalletConnectProvider): void {
     // Subscribe to session connection
     provider.on("connect", () => {
       this.connected = true;
-      this.provider = provider;
+      this.provider = provider as unknown as SafeEventEmitterProvider;
       this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     });
 
@@ -124,6 +120,19 @@ class WalletConnectV1Adapter extends BaseWalletAdapter {
       this.walletConnectProvider = undefined;
       this.connected = false;
       this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
+    });
+
+    provider.connector.on("display_uri", async (err, payload) => {
+      if (err) {
+        this.emit(BASE_WALLET_EVENTS.ERRORED, new WalletConnectionError("Failed to display wallet connect qr code", err));
+        return;
+      }
+      const uri = payload.params[0];
+      this.adapterData = {
+        ...this.adapterData,
+        uri,
+      };
+      this.emit(BASE_WALLET_EVENTS.DATA, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, payload: this.adapterData });
     });
   }
 }

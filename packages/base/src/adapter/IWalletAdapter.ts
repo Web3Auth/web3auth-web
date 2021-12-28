@@ -9,6 +9,7 @@ export const BASE_WALLET_EVENTS = {
   DISCONNECTED: "disconnected",
   CONNECTING: "connecting",
   ERRORED: "errored",
+  DATA: "data",
 };
 
 export type UserInfo = {
