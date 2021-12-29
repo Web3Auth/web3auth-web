@@ -1,23 +1,22 @@
 {
-  "name": "@web3auth/phantom-wallet-adapter",
+  "name": "@web3auth/torus-evm-adapter",
   "version": "0.0.0",
-  "description": "phantom wallet adapter for web3auth",
+  "description": "torus wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/phantom-wallet-adapter",
+    "web3Auth/core",
     "web3Auth",
     "multichainWallet",
     "blockchain",
     "ethereum",
-    "solana",
-    "phantom"
+    "solana"
   ],
-  "main": "dist/phantomWalletAdapter.cjs.js",
-  "module": "dist/phantomWalletAdapter.esm.js",
-  "unpkg": "dist/phantomWalletAdapter.umd.min.js",
-  "jsdelivr": "dist/phantomWalletAdapter.umd.min.js",
+  "main": "dist/torusWalletAdapter.cjs.js",
+  "module": "dist/torusWalletAdapter.esm.js",
+  "unpkg": "dist/torusWalletAdapter.umd.min.js",
+  "jsdelivr": "dist/torusWalletAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/phantomWalletAdapter#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
   "license": "ISC",
   "scripts": {
     "local-publish": "yalc publish",
@@ -41,8 +40,8 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
-    "@web3auth/solana-provider": "0.0.0",
-    "bn.js": "^4.11.8",
+    "@toruslabs/openlogin-jrpc": "^1.3.3",
+    "@toruslabs/torus-embed": "^1.18.6",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {

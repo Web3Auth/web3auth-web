@@ -1,4 +1,4 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { SafeEventEmitter } from "packages/adapters/torus-evm-adapter/node_modules/@toruslabs/openlogin-jrpc/dist/types";
 
 import { AdapterNamespaceType, ChainNamespaceType } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -92,4 +92,9 @@ export interface BaseAdapterConfig {
   visible?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
+}
+
+export interface Wallet<T> {
+  name: string;
+  adapter: () => IAdapter<T>;
 }

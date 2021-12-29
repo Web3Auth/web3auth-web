@@ -1,14 +1,14 @@
+import { PhantomAdapter } from "@web3auth/adapters/phantom-adapter";
 import { Wallet } from "@web3auth/base";
 import { CustomauthAdapter, CustomauthAdapterOptions } from "@web3auth/customauth-adapter";
-import { MetamaskAdapter } from "@web3auth/metamask-wallet-adapter";
+import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-wallet-adapter";
-import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/solana-wallet-adapter";
-import { TorusWalletAdapter, TorusWalletOptions } from "@web3auth/torus-wallet-adapter";
+import { TorusWalletAdapter, TorusWalletOptions } from "@web3auth/torus-evm-adapter";
+import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
 
 import { WALLET_ADAPTERS } from "../constants";
 
-const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
+const getTorusEvmWallet = (params: TorusWalletOptions): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.TORUS_EVM,
     adapter: () => {
@@ -18,7 +18,7 @@ const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
   };
 };
 
-const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet => {
+const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.TORUS_SOLANA,
     adapter: () => {
@@ -28,7 +28,7 @@ const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet => {
   };
 };
 
-const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet => {
+const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.OPENLOGIN,
     adapter: () => {
@@ -38,7 +38,7 @@ const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet => {
   };
 };
 
-const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet => {
+const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.CUSTOM_AUTH,
     adapter: () => {
@@ -48,7 +48,7 @@ const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet => {
   };
 };
 
-const getMetamaskWallet = (): Wallet => {
+const getMetamaskWallet = (): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.METAMASK,
     adapter: () => {
@@ -58,7 +58,7 @@ const getMetamaskWallet = (): Wallet => {
   };
 };
 
-const getPhantomWallet = (): Wallet => {
+const getPhantomWallet = (): Wallet<unknown> => {
   return {
     name: WALLET_ADAPTERS.PHANTOM,
     adapter: () => {

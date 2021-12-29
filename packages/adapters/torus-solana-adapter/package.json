@@ -1,7 +1,7 @@
 {
-  "name": "@web3auth/torus-wallet-adapter",
+  "name": "@web3auth/torus-solana-adapter",
   "version": "0.0.0",
-  "description": "torus wallet adapter for web3auth",
+  "description": "torus solana wallet adapter for web3auth",
   "keywords": [
     "web3Auth/core",
     "web3Auth",
@@ -10,10 +10,10 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/torusWalletAdapter.cjs.js",
-  "module": "dist/torusWalletAdapter.esm.js",
-  "unpkg": "dist/torusWalletAdapter.umd.min.js",
-  "jsdelivr": "dist/torusWalletAdapter.umd.min.js",
+  "main": "dist/solanaWalletAdapter.cjs.js",
+  "module": "dist/solanaWalletAdapter.esm.js",
+  "unpkg": "dist/solanaWalletAdapter.umd.min.js",
+  "jsdelivr": "dist/solanaWalletAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
@@ -40,8 +40,9 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.0",
+    "@web3auth/solana-provider": "0.0.0",
     "@toruslabs/openlogin-jrpc": "^1.3.3",
-    "@toruslabs/torus-embed": "^1.18.6",
+    "@toruslabs/solana-embed": "^0.0.3",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {

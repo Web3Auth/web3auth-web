@@ -1,0 +1,5 @@
+{
+    "extends": "../../../tsconfig.json",
+    "include": ["../torus-evm-adapter/src","../torus-evm-adapter/test"]
+}
+  

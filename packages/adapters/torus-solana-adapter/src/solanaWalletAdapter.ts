@@ -3,6 +3,7 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
+  AdapterInitOptions,
   AdapterNamespaceType,
   BASE_ADAPTER_EVENTS,
   BaseAdapter,
@@ -60,7 +61,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.loginSettings = params.loginSettings;
   }
 
-  async init(options: { connect: boolean }): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
@@ -74,7 +75,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
     try {
-      if (options.connect) {
+      if (options.autoConnect) {
         await this.connect();
       }
     } catch (error) {

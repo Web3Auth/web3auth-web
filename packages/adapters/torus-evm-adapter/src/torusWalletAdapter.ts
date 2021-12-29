@@ -23,7 +23,7 @@ interface TorusWalletOptions {
   loginSettings?: LoginParams;
   initParams?: TorusParams;
 }
-class TorusWalletAdapter extends BaseAdapter<void> {
+class TorusWalletAdapter extends BaseAdapter<never> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;

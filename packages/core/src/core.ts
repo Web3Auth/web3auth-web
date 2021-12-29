@@ -3,16 +3,13 @@ import {
   ADAPTER_NAMESPACES,
   BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
-  CommonLoginOptions,
-  DuplicateWalletAdapterError,
-  IncompatibleChainNamespaceError,
-  IWalletAdapter,
+  IAdapter,
   SafeEventEmitterProvider,
   UserInfo,
   Wallet,
   WALLET_ADAPTERS,
-  WalletNotConnectedError,
-  WalletNotFoundError,
+  WalletInitializationError,
+  WalletLoginError,
 } from "@web3auth/base";
 
 import { WALLET_ADAPTER_TYPE } from "./constants";
@@ -31,7 +28,7 @@ export class Web3Auth extends SafeEventEmitter {
 
   protected initialized: boolean;
 
-  protected walletAdapters: Record<string, IWalletAdapter> = {};
+  protected walletAdapters: Record<string, IAdapter<>> = {};
 
   constructor(chainNamespace: ChainNamespaceType) {
     super();
@@ -53,27 +50,27 @@ export class Web3Auth extends SafeEventEmitter {
     this.initialized = true;
   }
 
-  public configureWallet(wallet: Wallet): Web3Auth {
+  public configureWallet(wallet: Wallet<unknown>): Web3Auth {
     if (this.initialized) throw new Error("Wallets cannot be added after initialization");
-    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && wallet.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
+    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && wallet.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(
-        `Either ${WALLET_ADAPTERS.OPENLOGIN_WALLET} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN_WALLET} adapter already exists.`
+        `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN} adapter already exists.`
       );
     }
-    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && wallet.name === WALLET_ADAPTERS.OPENLOGIN_WALLET) {
+    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && wallet.name === WALLET_ADAPTERS.OPENLOGIN) {
       throw new Error(
-        `Either ${WALLET_ADAPTERS.OPENLOGIN_WALLET} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.CUSTOM_AUTH} adapter already exists.`
+        `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.CUSTOM_AUTH} adapter already exists.`
       );
     }
     const adapterAlreadyExists = this.walletAdapters[wallet.name];
-    if (adapterAlreadyExists) throw new DuplicateWalletAdapterError(`Wallet adapter for ${wallet.name} already exists`);
+    if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${wallet.name} already exists`);
     const adapter = wallet.adapter();
     if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace)
-      throw new IncompatibleChainNamespaceError(
+      throw WalletInitializationError.incompatibleChainNameSpace(
         `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace)
-      throw new IncompatibleChainNamespaceError(
+      throw WalletInitializationError.incompatibleChainNameSpace(
         `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     this.walletAdapters[wallet.name] = adapter;
@@ -93,21 +90,22 @@ export class Web3Auth extends SafeEventEmitter {
    * @param walletName - Key of the walletAdapter to use.
    */
   async connectTo(walletName: WALLET_ADAPTER_TYPE, loginParams?: CommonLoginOptions): Promise<void> {
-    if (!this.walletAdapters[walletName]) throw new WalletNotFoundError(`Please add wallet adapter for ${walletName} wallet, before connecting`);
+    if (!this.walletAdapters[walletName])
+      throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     await this.walletAdapters[walletName].connect(loginParams);
   }
 
   async logout(): Promise<void> {
-    if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
+    if (!this.connected) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.walletAdapters[this.connectedAdapterName].disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw new WalletNotConnectedError(`No wallet is connected`);
+    if (!this.connected) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
-  protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
+  protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
       this.connected = true;
       this.connecting = false;

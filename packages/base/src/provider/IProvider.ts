@@ -1,4 +1,4 @@
-import { JRPCRequest, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, SafeEventEmitter } from "packages/adapters/torus-evm-adapter/node_modules/@toruslabs/openlogin-jrpc/dist/types";
 
 export type SendCallBack<U> = (err: any, providerRes: U) => void;
 export interface RequestArguments {
