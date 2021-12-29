@@ -1,20 +1,19 @@
-##  ``@web3auth/ethereum-provider``
--------------
+## `@web3auth/ethereum-provider`
 
+---
 
 ## Introduction:-
 
-This package exposes a class `EthereumPrivateKeyProvider`, which accepts a `secp251k1` private key and returns  `EIP1193` compatible provider, which can be used with various wallet sdks. For ex: `CustomAuth` and `Openlogin` sdk by torus.
+This package exposes a class `EthereumPrivateKeyProvider`, which accepts a `secp251k1` private key and returns `EIP1193` compatible provider, which can be used with various wallet sdks. For ex: `CustomAuth` and `Openlogin` sdk by torus.
 
------------
+---
 
 ## Usage:-
 
 > Setting up provider
 
-```
+```ts
 import { CustomChainConfig, EthereumPrivateKeyProvider, PROVIDER_EVENTS } from "@web3auth/ethereum-provider";
-
 
 const setupProvider = async (params: {
   privKey: string;
@@ -44,8 +43,7 @@ const setupProvider = async (params: {
 
 > Using Provider
 
-```
-
+```ts
 const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<any> => {
   const web3 = new Web3(provider as any);
   const accounts = await (web3.currentProvider as any)?.sendAsync({
@@ -76,5 +74,4 @@ const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<any> 
   const signedMessage = await signEthMessage(provider);
   console.log("signedMessage", signedMessage);
 })();
-
 ```
