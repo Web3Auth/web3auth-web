@@ -6,10 +6,12 @@ export interface RequestArguments {
   params?: unknown[] | object;
 }
 
+export type Maybe<T> = Partial<T> | null | undefined;
+
 export interface SafeEventEmitterProvider extends SafeEventEmitter {
   sendAsync: <T, U>(req: JRPCRequest<T>) => Promise<U>;
   send: <T, U>(req: JRPCRequest<T>, callback: SendCallBack<U>) => void;
-  request?: (args: RequestArguments) => Promise<unknown>;
+  request?: <T>(args: RequestArguments) => Promise<Maybe<T>>;
 }
 
 export const PROVIDER_EVENTS = {

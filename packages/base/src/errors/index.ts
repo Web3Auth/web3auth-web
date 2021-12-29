@@ -1,84 +1,108 @@
-export class WalletError extends Error {
-  public error: Error;
+import { CustomError } from "ts-custom-error";
 
-  public code: number;
+// @flow
+export interface IWeb3AuthError extends CustomError {
+  name: string;
+  code: number;
+  message: string;
+  toString(): string;
+}
 
-  constructor(message?: string, error?: Error) {
+export type ErrorCodes = {
+  [key: number]: string;
+};
+
+export abstract class Web3AuthError extends CustomError implements IWeb3AuthError {
+  code: number;
+
+  message: string;
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
     super(message);
-    this.error = error;
+
+    this.code = code;
+    this.message = message || "";
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "TkeyError" });
+  }
+
+  toJSON(): IWeb3AuthError {
+    return {
+      name: this.name,
+      code: this.code,
+      message: this.message,
+    };
+  }
+
+  toString(): string {
+    return JSON.stringify(this.toJSON());
   }
 }
 
 /**
  * 20XX - wallet login errors
  */
-export class WalletNotFoundError extends WalletError {
-  name = "WalletNotFoundError";
 
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2001;
+export class WalletLoginError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    // Misc
+    5001: "Wallet is not found",
+    5002: "Wallet is not installed",
+    5003: "Wallet is not ready yet",
+    5004: "Wallet window is blocked",
+    5005: "Wallet window has been closed by the user",
+    5006: "Incompatible chain namespace provided",
+    5007: "Adapter has already been included",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletLoginError" });
   }
-}
 
-export class WalletNotInstalledError extends WalletError {
-  name = "WalletNotInstalledError";
-
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2002;
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletLoginError(code, `${WalletLoginError.messages[code]}${extraMessage}`);
   }
-}
 
-export class WalletNotReadyError extends WalletError {
-  name = "WalletNotReadyError";
-
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2003;
+  // Custom methods
+  public static notFound(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5001, extraMessage);
   }
-}
 
-export class WalletWindowBlockedError extends WalletError {
-  name = "WalletWindowBlockedError";
-
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2004;
+  public static notInstalled(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5002, extraMessage);
   }
-}
 
-export class WalletWindowClosedError extends WalletError {
-  name = "WalletWindowClosedError";
-
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2005;
+  public static notReady(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5003, extraMessage);
   }
-}
 
-export class IncompatibleChainNamespaceError extends WalletError {
-  name = "IncompatibleChainNamespaceError";
-
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2006;
+  public static windowBlocked(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5004, extraMessage);
   }
-}
 
-export class DuplicateWalletAdapterError extends WalletError {
-  name = "DuplicateWalletAdapterError";
+  public static windowClosed(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5005, extraMessage);
+  }
 
-  constructor(message?: string, error?: Error) {
-    super(message, error);
-    this.code = 2007;
+  public static incompatibleChainNameSpace(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5006, extraMessage);
+  }
+
+  public static duplicateAdapterError(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5007, extraMessage);
   }
 }
 
 /**
  * 20XX - wallet account/keys errors
  */
-export class WalletAccountError extends WalletError {
+export class WalletAccountError extends Web3AuthError {
   name = "WalletAccountError";
 
   constructor(message?: string, error?: Error) {
@@ -87,7 +111,7 @@ export class WalletAccountError extends WalletError {
   }
 }
 
-export class WalletPublicKeyError extends WalletError {
+export class WalletPublicKeyError extends Web3AuthError {
   name = "WalletPublicKeyError";
 
   constructor(message?: string, error?: Error) {
@@ -96,7 +120,7 @@ export class WalletPublicKeyError extends WalletError {
   }
 }
 
-export class WalletKeypairError extends WalletError {
+export class WalletKeypairError extends Web3AuthError {
   name = "WalletKeypairError";
 
   constructor(message?: string, error?: Error) {
@@ -108,7 +132,7 @@ export class WalletKeypairError extends WalletError {
 /**
  * 10XX - wallet adapter errors (can be displayed in UI)
  */
-export class WalletConnectionError extends WalletError {
+export class WalletConnectionError extends Web3AuthError {
   name = "WalletConnectionError";
 
   constructor(message?: string, error?: Error) {
@@ -117,7 +141,7 @@ export class WalletConnectionError extends WalletError {
   }
 }
 
-export class WalletDisconnectedError extends WalletError {
+export class WalletDisconnectedError extends Web3AuthError {
   name = "WalletDisconnectedError";
 
   constructor(message?: string, error?: Error) {
@@ -126,7 +150,7 @@ export class WalletDisconnectedError extends WalletError {
   }
 }
 
-export class WalletDisconnectionError extends WalletError {
+export class WalletDisconnectionError extends Web3AuthError {
   name = "WalletDisconnectionError";
 
   constructor(message?: string, error?: Error) {
@@ -135,7 +159,7 @@ export class WalletDisconnectionError extends WalletError {
   }
 }
 
-export class WalletNotConnectedError extends WalletError {
+export class WalletNotConnectedError extends Web3AuthError {
   name = "WalletNotConnectedError";
 
   constructor(message?: string, error?: Error) {
@@ -147,7 +171,7 @@ export class WalletNotConnectedError extends WalletError {
 /**
  * 11xx - Wallet transaction/signing/blockchain errors (can be displayed in UI)
  */
-export class WalletSendTransactionError extends WalletError {
+export class WalletSendTransactionError extends Web3AuthError {
   name = "WalletSendTransactionError";
 
   constructor(message?: string, error?: Error) {
@@ -156,7 +180,7 @@ export class WalletSendTransactionError extends WalletError {
   }
 }
 
-export class WalletSignMessageError extends WalletError {
+export class WalletSignMessageError extends Web3AuthError {
   name = "WalletSignMessageError";
 
   constructor(message?: string, error?: Error) {
@@ -165,7 +189,7 @@ export class WalletSignMessageError extends WalletError {
   }
 }
 
-export class WalletSignTransactionError extends WalletError {
+export class WalletSignTransactionError extends Web3AuthError {
   name = "WalletSignTransactionError";
 
   constructor(message?: string, error?: Error) {
@@ -177,7 +201,7 @@ export class WalletSignTransactionError extends WalletError {
 /**
  * 22xx - Wallet provider errors
  */
-export class RpcConnectionFailedError extends WalletError {
+export class RpcConnectionFailedError extends Web3AuthError {
   name = "RpcConnectionFailedError";
 
   constructor(message?: string, error?: Error) {
@@ -186,7 +210,7 @@ export class RpcConnectionFailedError extends WalletError {
   }
 }
 
-export class InvalidProviderConfigError extends WalletError {
+export class InvalidProviderConfigError extends Web3AuthError {
   name = "InvalidProviderConfigError";
 
   constructor(message?: string, error?: Error) {
@@ -195,7 +219,7 @@ export class InvalidProviderConfigError extends WalletError {
   }
 }
 
-export class ProviderNotReadyError extends WalletError {
+export class ProviderNotReadyError extends Web3AuthError {
   name = "ProviderNotReadyError";
 
   constructor(message?: string, error?: Error) {

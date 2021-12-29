@@ -1,4 +1,4 @@
-import Common from "@ethereumjs/common";
+import Common, { Hardfork } from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import {
   decrypt,
@@ -11,7 +11,15 @@ import {
   TypedDataV1,
   TypedMessage,
 } from "@metamask/eth-sig-util";
-import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine, signMessage } from "@toruslabs/base-controllers";
+import {
+  BaseConfig,
+  BaseController,
+  BaseState,
+  createFetchMiddleware,
+  createSwappableProxy,
+  providerFromEngine,
+  signMessage,
+} from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import {
   CHAIN_NAMESPACES,
@@ -26,15 +34,10 @@ import {
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
 
-import { createRandomId } from ".";
 import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
-import { createJsonRpcClient } from "./JrpcClient";
-import { sendRpcRequest } from "./utils";
+import { createJsonRpcClient } from "./jrpcClient";
+import { createRandomId } from "./utils";
 import { MessageParams, TransactionParams, TypedMessageParams } from "./walletMidddleware";
-export const HARDFORKS = {
-  BERLIN: "berlin",
-  LONDON: "london",
-};
 
 interface EthereumProviderState extends BaseState {
   _initialized: boolean;
@@ -46,6 +49,8 @@ interface EthereumProviderState extends BaseState {
 interface EthereumProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
+
+// TODO: Add support for changing chainId
 export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderConfig, EthereumProviderState> {
   public _providerProxy: SafeEventEmitterProvider;
 
@@ -54,7 +59,7 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
   constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
-    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainconfig");
+    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainConfig");
     super({ config, state });
     this.defaultState = {
       _initialized: false,
@@ -101,7 +106,12 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
         const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
         const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
         const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
-        const txHash = await sendRpcRequest<string[], string>(rpcProvider, "eth_sendRawTransaction", [`0x${signedTx.toString("hex")}`]);
+        const txHash = await rpcProvider.sendAsync<string[], string>({
+          method: "eth_sendRawTransaction",
+          params: [`0x${signedTx.toString("hex")}`],
+          id: createRandomId(),
+          jsonrpc: "2.0",
+        });
         return txHash;
       },
       processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
@@ -168,8 +178,8 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   private getFetchOnlyProvider(): SafeEventEmitterProvider {
     if (this.rpcProvider) return this.rpcProvider;
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createJsonRpcClient(this.chainConfig);
-    engine.push(networkMiddleware);
+    const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
+    engine.push(fetchMiddleware);
     const provider = providerFromEngine(engine);
     this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(provider);
     return provider;
@@ -178,23 +188,25 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   private async lookupNetwork(): Promise<string> {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const chainConfig = { ...this.chainConfig };
-    const network = await sendRpcRequest<[], string>(fetchOnlyProvider, "net_version", []);
+    const network = await fetchOnlyProvider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
 
-    if (parseInt(chainConfig.chainId, 16) !== parseInt(network)) throw new RpcConnectionFailedError(`Invalid network, net_version is: ${network}`);
+    if (parseInt(chainConfig.chainId, 16) !== parseInt(network, 10))
+      throw new RpcConnectionFailedError(`Invalid network, net_version is: ${network}`);
     return network;
   }
 
   private async getCommonConfiguration(supportsEIP1559: boolean) {
-    const { networkName: name, chainId } = this.chainConfig;
-    const hardfork = supportsEIP1559 ? HARDFORKS.LONDON : HARDFORKS.BERLIN;
+    const { displayName: name, chainId } = this.chainConfig;
+    const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
     const networkId = this.state.network;
 
     const customChainParams = {
       name,
       chainId: parseInt(chainId, 16),
       networkId: networkId === "loading" ? 0 : Number.parseInt(networkId, 10),
+      hardfork,
     };
 
-    return Common.forCustomChain("mainnet", customChainParams, hardfork);
+    return Common.custom(customChainParams);
   }
 }

@@ -19,10 +19,10 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     processEncryptionPublicKey,
     processDecryptMessage,
   } = providerHandlers;
-  const metamaskMiddleware = mergeMiddleware([
+  const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
       eth_syncing: false,
-      web3_clientVersion: `Torus/v${version}`,
+      web3_clientVersion: `Web3Auth/v${version}`,
     }),
     createWalletMiddleware({
       getAccounts,
@@ -36,5 +36,5 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processDecryptMessage,
     }),
   ]);
-  return metamaskMiddleware;
+  return ethMiddleware;
 }

@@ -69,9 +69,6 @@ export function createWalletMiddleware({
    * Validates the keyholder address, and returns a normalized (i.e. lowercase)
    * copy of it.
    *
-   * @param {string} address - The address to validate and normalize.
-   * @param {Object} req - The request object.
-   * @returns {string} - The normalized address, if valid. Otherwise, throws
    * an error
    */
   async function validateAndNormalizeKeyholder(address: string, req: JRPCRequest<unknown>): Promise<string> {
