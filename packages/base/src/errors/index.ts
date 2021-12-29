@@ -2,7 +2,6 @@ import { CustomError } from "ts-custom-error";
 
 // @flow
 export interface IWeb3AuthError extends CustomError {
-  name: string;
   code: number;
   message: string;
   toString(): string;
@@ -13,8 +12,6 @@ export type ErrorCodes = {
 };
 
 export abstract class Web3AuthError extends CustomError implements IWeb3AuthError {
-  name: string;
-
   code: number;
 
   message: string;
