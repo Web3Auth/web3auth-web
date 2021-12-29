@@ -10,58 +10,22 @@ This package exposes a class `EthereumPrivateKeyProvider`, which accepts a `secp
 
 ## Usage:-
 
-> Setting up provider
-
-```ts
-import { CustomChainConfig, EthereumPrivateKeyProvider, PROVIDER_EVENTS } from "@web3auth/ethereum-provider";
-
-const setupProvider = async (params: {
-  privKey: string;
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-}): Promise<SafeEventEmitterProvider> => {
-  const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
-  await providerFactory.init();
-  return new Promise((resolve, reject) => {
-    // check if provider is ready
-    if (providerFactory.state._initialized) {
-      const provider = providerFactory.setupProvider(params.privKey);
-      resolve(provider);
-      return;
-    }
-
-    // wait for provider to get ready
-    providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-      const provider = providerFactory.setupProvider(params.privKey);
-      resolve(provider);
-    });
-    providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-      reject(error);
-    });
-  });
-};
-```
-
 > Using Provider
 
 ```ts
-const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<any> => {
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import type { SafeEventEmitterProvider } from "@web3auth/base";
+const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
   const web3 = new Web3(provider as any);
-  const accounts = await (web3.currentProvider as any)?.sendAsync({
-    method: "eth_accounts",
-    params: [],
-  });
+  const accounts = await web3.eth.getAccounts();
   // hex message
   const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-  const jrpcResult = await (web3.currentProvider as any)?.sendAsync({
-    method: "eth_sign",
-    params: [accounts[0], message],
-    from: accounts[0],
-  });
-  return jrpcResult;
+  const signature = await web3.eth.sign(message, accounts[0]);
+  return signature;
 };
 
 (async () => {
-  const provider = await setupProvider({
+  const provider = await EthereumPrivateKeyProvider.getProviderInstance({
     chainConfig: {
       rpcTarget: "https://polygon-rpc.com",
       chainId: "0x89", // hex chain id
