@@ -69,10 +69,5 @@
   "engines": {
     "node": ">=14.17.0",
     "npm": ">=6.x"
-  },
-  "dependencies": {
-    "-": "^0.0.1",
-    "D": "^1.0.0",
-    "eslint-import-resolver-typescript": "^2.5.0"
   }
 }

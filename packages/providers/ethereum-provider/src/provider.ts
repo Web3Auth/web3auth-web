@@ -72,6 +72,24 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
     this.init();
   }
 
+  public static getProviderInstance = async (params: {
+    privKey: string;
+    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  }): Promise<SafeEventEmitterProvider> => {
+    const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
+    return new Promise((resolve, reject) => {
+      // wait for provider to get ready
+      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
+        const provider = providerFactory.setupProvider(params.privKey);
+        resolve(provider);
+      });
+      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
+        reject(error);
+      });
+      providerFactory.init();
+    });
+  };
+
   public async init(): Promise<void> {
     this.lookupNetwork()
       .then((network) => {

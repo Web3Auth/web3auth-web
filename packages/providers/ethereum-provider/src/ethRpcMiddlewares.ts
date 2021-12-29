@@ -3,7 +3,6 @@ import { createScaffoldMiddleware, JRPCMiddleware, mergeMiddleware } from "@toru
 import { createWalletMiddleware, WalletMiddlewareOptions } from "./walletMidddleware";
 
 export type IProviderHandlers = WalletMiddlewareOptions;
-
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
     getAccounts,
