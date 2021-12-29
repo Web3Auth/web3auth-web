@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // /* eslint-disable no-console */
 import type CustomAuth from "@toruslabs/customauth";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
@@ -6,22 +5,19 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
+  AdapterInitOptions,
   AdapterNamespaceType,
-  BASE_WALLET_EVENTS,
-  BaseWalletAdapter,
+  BASE_ADAPTER_EVENTS,
+  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CommonLoginOptions,
   CustomChainConfig,
   PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
-  WalletConnectionError,
-  WalletNotConnectedError,
-  WalletNotReadyError,
-  WalletWindowBlockedError,
-  WalletWindowClosedError,
+  WalletInitializationError,
+  WalletLoginError,
 } from "@web3auth/base";
 import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
@@ -36,12 +32,16 @@ interface CustomauthAdapterOptions {
   initSettings: InitParams;
   loginSettings: LoginSettings;
 }
-class CustomauthAdapter extends BaseWalletAdapter {
+interface LoginParams {
+  email: string;
+  loginProvider: string;
+}
+class CustomauthAdapter extends BaseAdapter<LoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly currentChainNamespace: ChainNamespaceType;
 
-  readonly walletType: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
+  readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
   public customauthInstance: CustomAuth;
 
@@ -94,7 +94,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
 
-  async init(options: { connect: boolean }): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
     this.customauthInstance = new Customauth(this.adapterSettings);
@@ -114,11 +114,11 @@ class CustomauthAdapter extends BaseWalletAdapter {
       throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
     }
     this.ready = true;
-    this.emit(BASE_WALLET_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
+    this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
 
     try {
       // if adapter is already connected and cached then we can proceed to setup the provider
-      if (this.customAuthResult.privateKey && options.connect) {
+      if (this.customAuthResult.privateKey && options.autoConnect) {
         await this.setupProvider(providerFactory);
       }
       // if adapter is not connected then we should check if url contains redirect login result
@@ -131,30 +131,31 @@ class CustomauthAdapter extends BaseWalletAdapter {
     }
   }
 
-  async connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
-    if (!this.ready) throw new WalletNotReadyError("Customauth wallet adapter is not ready, please init first");
+  async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
+    if (!this.ready) throw WalletInitializationError.notReady("Customauth wallet adapter is not ready, please init first");
     this.connecting = true;
-    this.emit(BASE_WALLET_EVENTS.CONNECTING, { ...params });
+    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params });
     try {
       return await this._login(params);
     } catch (error) {
-      this.emit(BASE_WALLET_EVENTS.ERRORED, error);
-      throw new WalletConnectionError("Failed to login with openlogin", error);
+      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      log.error("Error while connecting to custom auth", error);
+      throw WalletLoginError.connectionError("Failed to login with openlogin");
     } finally {
       this.connecting = false;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     this.store.resetStore();
     this.connected = false;
     this.provider = undefined;
-    this.emit(BASE_WALLET_EVENTS.DISCONNECTED);
+    this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw new WalletNotConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {
       email: this.customAuthResult.email,
       name: this.customAuthResult.name,
@@ -197,12 +198,12 @@ class CustomauthAdapter extends BaseWalletAdapter {
 
   private async setupProvider(
     providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider,
-    params?: CommonLoginOptions
+    params?: LoginParams
   ): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (providerFactory.state._errored) {
-        this.emit(BASE_WALLET_EVENTS.ERRORED, providerFactory.state.error);
+        this.emit(BASE_ADAPTER_EVENTS.ERRORED, providerFactory.state.error);
         reject(providerFactory.state.error);
         return;
       }
@@ -210,10 +211,10 @@ class CustomauthAdapter extends BaseWalletAdapter {
         const listener = ({ reason }) => {
           switch (reason?.message?.toLowerCase()) {
             case "user closed popup":
-              reason = new WalletWindowClosedError(reason.message, reason);
+              reason = WalletInitializationError.windowClosed(reason.message);
               break;
             case "unable to open window":
-              reason = new WalletWindowBlockedError(reason.message, reason);
+              reason = WalletInitializationError.windowBlocked(reason.message);
               break;
           }
           reject(reason);
@@ -253,7 +254,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
         this.provider = await getProvider();
         if (this.provider) {
           this.connected = true;
-          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
+          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
         resolve(this.provider);
         return;
@@ -262,13 +263,13 @@ class CustomauthAdapter extends BaseWalletAdapter {
         this.provider = await getProvider();
         if (this.provider) {
           this.connected = true;
-          this.emit(BASE_WALLET_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
+          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
         // provider can be null in redirect mode
         resolve(this.provider);
       });
       providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        this.emit(BASE_WALLET_EVENTS.ERRORED, error);
+        this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
         reject(error);
       });
     });
@@ -288,7 +289,7 @@ class CustomauthAdapter extends BaseWalletAdapter {
     this.customAuthResult = { ...this.customAuthResult, ...result };
   }
 
-  private async _login(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null> {
+  private async _login(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;

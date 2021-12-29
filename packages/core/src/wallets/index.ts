@@ -10,7 +10,7 @@ import { WALLET_ADAPTERS } from "../constants";
 
 const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
   return {
-    name: WALLET_ADAPTERS.TORUS_EVM_WALLET,
+    name: WALLET_ADAPTERS.TORUS_EVM,
     adapter: () => {
       const torusAdapter = new TorusWalletAdapter({ ...params });
       return torusAdapter;
@@ -20,7 +20,7 @@ const getTorusEvmWallet = (params: TorusWalletOptions): Wallet => {
 
 const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet => {
   return {
-    name: WALLET_ADAPTERS.TORUS_SOLANA_WALLET,
+    name: WALLET_ADAPTERS.TORUS_SOLANA,
     adapter: () => {
       const torusAdapter = new SolanaWalletAdapter({ ...params });
       return torusAdapter;
@@ -30,7 +30,7 @@ const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet => {
 
 const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet => {
   return {
-    name: WALLET_ADAPTERS.OPENLOGIN_WALLET,
+    name: WALLET_ADAPTERS.OPENLOGIN,
     adapter: () => {
       const torusAdapter = new OpenloginAdapter({ ...params });
       return torusAdapter;
@@ -50,7 +50,7 @@ const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet => {
 
 const getMetamaskWallet = (): Wallet => {
   return {
-    name: WALLET_ADAPTERS.METAMASK_WALLET,
+    name: WALLET_ADAPTERS.METAMASK,
     adapter: () => {
       const adapter = new MetamaskAdapter();
       return adapter;
@@ -60,7 +60,7 @@ const getMetamaskWallet = (): Wallet => {
 
 const getPhantomWallet = (): Wallet => {
   return {
-    name: WALLET_ADAPTERS.PHANTOM_WALLET,
+    name: WALLET_ADAPTERS.PHANTOM,
     adapter: () => {
       const adapter = new PhantomAdapter();
       return adapter;

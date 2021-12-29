@@ -1,7 +1,7 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_NAMESPACES,
-  BASE_WALLET_EVENTS,
+  BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
   CommonLoginOptions,
   DuplicateWalletAdapterError,
@@ -108,7 +108,7 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IWalletAdapter): void {
-    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
+    walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
       this.connected = true;
       this.connecting = false;
       const connectedAd = this.walletAdapters[connectedAdapterName];
@@ -116,24 +116,24 @@ export class Web3Auth extends SafeEventEmitter {
       this.connectedAdapterName = connectedAdapterName;
 
       this.cacheWallet(connectedAdapterName);
-      this.emit(BASE_WALLET_EVENTS.CONNECTED, connectedAdapterName);
+      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, connectedAdapterName);
     });
-    walletAdapter.on(BASE_WALLET_EVENTS.DISCONNECTED, (data) => {
+    walletAdapter.on(BASE_ADAPTER_EVENTS.DISCONNECTED, (data) => {
       this.connected = false;
       this.connecting = false;
       this.provider = undefined;
       this.clearCache();
-      this.emit(BASE_WALLET_EVENTS.DISCONNECTED, data);
+      this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED, data);
     });
-    walletAdapter.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
+    walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
       this.connecting = true;
       this.provider = undefined;
-      this.emit(BASE_WALLET_EVENTS.CONNECTING, data);
+      this.emit(BASE_ADAPTER_EVENTS.CONNECTING, data);
     });
-    walletAdapter.on(BASE_WALLET_EVENTS.ERRORED, (data) => {
+    walletAdapter.on(BASE_ADAPTER_EVENTS.ERRORED, (data) => {
       this.connecting = false;
       this.provider = undefined;
-      this.emit(BASE_WALLET_EVENTS.ERRORED, data);
+      this.emit(BASE_ADAPTER_EVENTS.ERRORED, data);
     });
   }
 

@@ -1,7 +1,7 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_WALLET_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
 
 import AllAssets from "../assets";
 import LoginLightAppleSvg from "../assets/images/login-apple-light.svg";
@@ -449,13 +449,13 @@ export default class LoginModal extends SafeEventEmitter {
       $loaderMessage.innerText = "";
     }
 
-    if (type === BASE_WALLET_EVENTS.ERRORED) {
+    if (type === BASE_ADAPTER_EVENTS.ERRORED) {
       $loaderMessage.classList.add("w3a-spinner-message--error");
     } else {
       $loaderMessage.classList.remove("w3a-spinner-message--error");
     }
 
-    if (type === BASE_WALLET_EVENTS.CONNECTED) {
+    if (type === BASE_ADAPTER_EVENTS.CONNECTED) {
       $loaderLogout.style.display = "block";
     } else {
       $loaderLogout.style.display = "none";
@@ -470,30 +470,30 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
-    listener.on(BASE_WALLET_EVENTS.CONNECTING, (data) => {
+    listener.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
       const provider = (data as CommonLoginOptions)?.loginProvider || "";
       this.state.connecting = true;
       this.state.connected = false;
       this.toggleLoader(provider);
     });
-    listener.on(BASE_WALLET_EVENTS.CONNECTED, () => {
+    listener.on(BASE_ADAPTER_EVENTS.CONNECTED, () => {
       this.state.connecting = false;
       if (!this.state.connected) {
         this.state.connected = true;
-        this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_WALLET_EVENTS.CONNECTED);
+        this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_ADAPTER_EVENTS.CONNECTED);
       }
     });
-    listener.on(BASE_WALLET_EVENTS.ERRORED, (data: WalletError) => {
+    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (data: WalletError) => {
       this.state.connecting = false;
       this.state.connected = false;
       if (data?.code && data.code >= 1000 && data.code < 2000) {
         this.state.errored = true;
-        this.toggleMessage(`Error: ${data.message}`, BASE_WALLET_EVENTS.ERRORED);
+        this.toggleMessage(`Error: ${data.message}`, BASE_ADAPTER_EVENTS.ERRORED);
       } else {
         this.toggleLoader();
       }
     });
-    listener.on(BASE_WALLET_EVENTS.DISCONNECTED, () => {
+    listener.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = false;
       this.toggleMessage("");

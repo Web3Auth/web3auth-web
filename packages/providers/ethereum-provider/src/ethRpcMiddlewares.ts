@@ -16,7 +16,7 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     processEncryptionPublicKey,
     processDecryptMessage,
   } = providerHandlers;
-  const metamaskMiddleware = mergeMiddleware([
+  const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
       eth_syncing: false,
     }),
@@ -32,5 +32,5 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processDecryptMessage,
     }),
   ]);
-  return metamaskMiddleware;
+  return ethMiddleware;
 }

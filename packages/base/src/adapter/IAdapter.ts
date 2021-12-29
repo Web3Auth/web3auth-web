@@ -46,54 +46,33 @@ export const ADAPTER_CATEGORY = {
 } as const;
 export type ADAPTER_CATEGORY_TYPE = typeof ADAPTER_CATEGORY[keyof typeof ADAPTER_CATEGORY];
 
-export const LOGIN_PROVIDER = {
-  GOOGLE: "google",
-  FACEBOOK: "facebook",
-  REDDIT: "reddit",
-  DISCORD: "discord",
-  TWITCH: "twitch",
-  APPLE: "apple",
-  LINE: "line",
-  GITHUB: "github",
-  KAKAO: "kakao",
-  LINKEDIN: "linkedin",
-  TWITTER: "twitter",
-  WEIBO: "weibo",
-  WECHAT: "wechat",
-  EMAIL_PASSWORDLESS: "email_passwordless",
-  WEBAUTHN: "webauthn",
-  JWT: "jwt",
-};
-/**
- * {@label loginProviderType}
- */
-export declare type LOGIN_PROVIDER_TYPE = typeof LOGIN_PROVIDER[keyof typeof LOGIN_PROVIDER];
-
-export interface CommonLoginOptions {
-  loginProvider?: LOGIN_PROVIDER_TYPE;
-  loginHint?: string;
+export interface AdapterInitOptions {
+  /**
+   * Whether to auto connect to the adapter based on redirect mode or saved adapters
+   */
+  autoConnect?: boolean;
 }
 
-export interface IWalletAdapter extends SafeEventEmitter {
+export interface IAdapter<T> extends SafeEventEmitter {
   namespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
-  walletType: ADAPTER_CATEGORY_TYPE;
+  type: ADAPTER_CATEGORY_TYPE;
   ready: boolean;
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
-  init(options?: { connect?: boolean }): Promise<void>;
-  connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
+  init(options?: AdapterInitOptions): Promise<void>;
+  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   disconnect(): Promise<void>;
-  getUserInfo(): Promise<Partial<UserInfo>>;
+  getUserInfo(): Promise<Partial<UserInfo> | null>;
 }
 
-export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWalletAdapter {
+export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public abstract namespace: AdapterNamespaceType;
 
   public abstract currentChainNamespace: ChainNamespaceType;
 
-  public abstract walletType: ADAPTER_CATEGORY_TYPE;
+  public abstract type: ADAPTER_CATEGORY_TYPE;
 
   public abstract connecting: boolean;
 
@@ -103,18 +82,12 @@ export abstract class BaseWalletAdapter extends SafeEventEmitter implements IWal
 
   public abstract provider: SafeEventEmitterProvider;
 
-  abstract init(options?: { connect?: boolean }): Promise<void>;
-  abstract connect(params?: CommonLoginOptions): Promise<SafeEventEmitterProvider | null>;
+  abstract init(options?: AdapterInitOptions): Promise<void>;
+  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
-  abstract getUserInfo(): Promise<Partial<UserInfo>>;
+  abstract getUserInfo(): Promise<Partial<UserInfo> | null>;
 }
 
-export interface LoginMethodConfig {
-  // label: string;
-  visible?: boolean;
-  showOnMobile?: boolean;
-  showOnDesktop?: boolean;
-}
 export interface BaseAdapterConfig {
   visible?: boolean;
   showOnMobile?: boolean;

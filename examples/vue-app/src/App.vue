@@ -55,7 +55,7 @@
 import Vue from "vue";
 import { getCustomauthWallet, getOpenloginWallet, getTorusSolanaWallet, WALLET_ADAPTERS } from "@web3auth/core";
 import { Web3AuthModal } from "@web3auth/modal";
-import { BASE_WALLET_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import Web3 from "web3"
@@ -325,23 +325,23 @@ export default Vue.extend({
       this.console(userInfo)
     },
     subscribeAuthEvents(web3auth: Web3AuthModal) {
-      web3auth.on (BASE_WALLET_EVENTS.CONNECTED, (adapterName: string)=>{
+      web3auth.on (BASE_ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
        this.console("connected to wallet", adapterName)
        this.provider = web3auth.provider;
        this.loginButtonStatus = "Logged in"
        this.connected = true
       })
-      web3auth.on(BASE_WALLET_EVENTS.CONNECTING, ()=>{
+      web3auth.on(BASE_ADAPTER_EVENTS.CONNECTING, ()=>{
         this.console("connecting")
         this.loginButtonStatus = "Connecting..."
 
       })
-      web3auth.on(BASE_WALLET_EVENTS.DISCONNECTED, ()=>{
+      web3auth.on(BASE_ADAPTER_EVENTS.DISCONNECTED, ()=>{
         this.console("disconnected")
         this.loginButtonStatus = ""
         this.connected = false
       })
-      web3auth.on(BASE_WALLET_EVENTS.ERRORED, (error)=>{
+      web3auth.on(BASE_ADAPTER_EVENTS.ERRORED, (error)=>{
         this.console("errored", error)
         this.loginButtonStatus = ""
       })
