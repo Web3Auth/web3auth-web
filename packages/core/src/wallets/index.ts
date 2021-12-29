@@ -1,8 +1,8 @@
-import { PhantomAdapter } from "@web3auth/adapters/phantom-adapter";
 import { Wallet } from "@web3auth/base";
 import { CustomauthAdapter, CustomauthAdapterOptions } from "@web3auth/customauth-adapter";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
+import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import { TorusWalletAdapter, TorusWalletOptions } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
 

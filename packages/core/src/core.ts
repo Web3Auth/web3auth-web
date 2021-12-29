@@ -28,7 +28,7 @@ export class Web3Auth extends SafeEventEmitter {
 
   protected initialized: boolean;
 
-  protected walletAdapters: Record<string, IAdapter<>> = {};
+  protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
   constructor(chainNamespace: ChainNamespaceType) {
     super();
@@ -43,7 +43,7 @@ export class Web3Auth extends SafeEventEmitter {
     await Promise.all(
       Object.keys(this.walletAdapters).map((adapterName) => {
         this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-        return this.walletAdapters[adapterName].init({ connect: this.cachedWallet === adapterName }).catch((e) => e);
+        return this.walletAdapters[adapterName].init({ autoConnect: this.cachedWallet === adapterName }).catch((e) => e);
       })
     );
 
@@ -74,9 +74,6 @@ export class Web3Auth extends SafeEventEmitter {
         `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
       );
     this.walletAdapters[wallet.name] = adapter;
-    // if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
-    //   this.inAppLoginAdapter = wallet.name;
-    // }
     return this;
   }
 
@@ -89,7 +86,7 @@ export class Web3Auth extends SafeEventEmitter {
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo(walletName: WALLET_ADAPTER_TYPE, loginParams?: CommonLoginOptions): Promise<void> {
+  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<void> {
     if (!this.walletAdapters[walletName])
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     await this.walletAdapters[walletName].connect(loginParams);

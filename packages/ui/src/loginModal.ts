@@ -1,14 +1,13 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, CommonLoginOptions, LoginMethodConfig, WALLET_ADAPTER_TYPE, WalletError } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, LoginMethodConfig, WALLET_ADAPTER_TYPE, Web3AuthError } from "@web3auth/base";
+import log from "loglevel";
 
 import AllAssets from "../assets";
 import LoginLightAppleSvg from "../assets/images/login-apple-light.svg";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
-import AllImages, { icons, images } from "./utils";
-// eslint-disable-next-line no-console
-console.log("images", images, AllImages, AllAssets);
+import { icons, images } from "./utils";
 const hasLightIcons = ["apple", "github"];
 export default class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
@@ -216,7 +215,7 @@ export default class LoginModal extends SafeEventEmitter {
           event.preventDefault();
           const data = new FormData(event.target as HTMLFormElement);
           const email = data.get("email");
-          if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } } as CommonLoginOptions);
+          if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } });
         });
         return;
       } else if (method === "webauthn" || method === "jwt") {
@@ -234,7 +233,7 @@ export default class LoginModal extends SafeEventEmitter {
         `);
 
       adapterButton.addEventListener("click", () => {
-        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } as CommonLoginOptions });
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } });
       });
 
       // if ($adapterList.children.length < 5) {
@@ -471,7 +470,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
     listener.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
-      const provider = (data as CommonLoginOptions)?.loginProvider || "";
+      const provider = (data as any)?.loginProvider || "";
       this.state.connecting = true;
       this.state.connected = false;
       this.toggleLoader(provider);
@@ -483,15 +482,11 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_ADAPTER_EVENTS.CONNECTED);
       }
     });
-    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (data: WalletError) => {
+    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (data: Web3AuthError) => {
+      log.debug("[Web3Auth] Error: ", data);
       this.state.connecting = false;
       this.state.connected = false;
-      if (data?.code && data.code >= 1000 && data.code < 2000) {
-        this.state.errored = true;
-        this.toggleMessage(`Error: ${data.message}`, BASE_ADAPTER_EVENTS.ERRORED);
-      } else {
-        this.toggleLoader();
-      }
+      this.toggleLoader();
     });
     listener.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;

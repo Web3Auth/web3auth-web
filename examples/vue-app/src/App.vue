@@ -108,7 +108,7 @@ export default Vue.extend({
         rpcTarget: "https://api.devnet.solana.com",
         chainId: "0x3",
         chainNamespace: CHAIN_NAMESPACES.SOLANA,
-        networkName: "devnet",
+        displayName: "devnet",
         ticker: "sol",
         tickerName: "solana",
       }, adapterSettings: {
@@ -141,7 +141,7 @@ export default Vue.extend({
           rpcTarget: "https://api.devnet.solana.com",
           chainId: "0x3",
           chainNamespace: CHAIN_NAMESPACES.SOLANA,
-          networkName: "devnet",
+          displayName: "devnet",
           ticker: "sol",
           tickerName: "solana",
         }, adapterSettings: {
@@ -180,7 +180,7 @@ export default Vue.extend({
           rpcTarget: "https://polygon-rpc.com",
           chainId: "0x89",
           chainNamespace: CHAIN_NAMESPACES.EIP155,
-          networkName: "matic",
+          displayName: "matic",
           ticker: "matic",
           tickerName: "matic",
         }, adapterSettings: {

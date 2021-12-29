@@ -1,9 +1,8 @@
 import type { BaseAdapterConfig, ChainNamespaceType, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
-
 type MetamaskAdapterConfig = BaseAdapterConfig;
 
 interface ModalConfig extends BaseAdapterConfig {
-  loginMethods?: Record<string, LoginMethodConfig>;
+  loginMethods?: LoginMethodConfig;
 }
 
 interface DefaultAdaptersModalConfig extends BaseAdapterConfig {

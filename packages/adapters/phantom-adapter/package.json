@@ -11,10 +11,10 @@
     "solana",
     "phantom"
   ],
-  "main": "dist/phantomWalletAdapter.cjs.js",
-  "module": "dist/phantomWalletAdapter.esm.js",
-  "unpkg": "dist/phantomWalletAdapter.umd.min.js",
-  "jsdelivr": "dist/phantomWalletAdapter.umd.min.js",
+  "main": "dist/phantomAdapter.cjs.js",
+  "module": "dist/phantomAdapter.esm.js",
+  "unpkg": "dist/phantomAdapter.umd.min.js",
+  "jsdelivr": "dist/phantomAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/phantomWalletAdapter#readme",
@@ -31,7 +31,6 @@
   },
   "files": [
     "dist",
-    "types",
     "src"
   ],
   "devDependencies": {
@@ -40,7 +39,7 @@
     "lint-staged": "^11.2.6"
   },
   "dependencies": {
-    "@web3auth/base": "0.0.0",
+    "@web3auth/base": "0.0.1",
     "@web3auth/solana-provider": "0.0.0",
     "bn.js": "^4.11.8",
     "loglevel": "^1.8.0"

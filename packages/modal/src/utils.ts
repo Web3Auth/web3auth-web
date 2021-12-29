@@ -1,4 +1,4 @@
-import { IWalletAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { IAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 import type { CustomauthAdapter } from "@web3auth/customauth-adapter";
 
 const OPENLOGIN_PROVIDERS = [
@@ -16,12 +16,10 @@ const OPENLOGIN_PROVIDERS = [
   "weibo",
   "wechat",
   "email_passwordless",
-  "webauthn",
-  "jwt",
 ];
 export const getAdapterSocialLogins = (
   adapterName: string,
-  adapter: IWalletAdapter,
+  adapter: IAdapter<unknown>,
   loginMethodsConfig: Record<string, LoginMethodConfig> = {}
 ): Record<string, LoginMethodConfig> => {
   const finalLoginMethodsConfig: Record<string, LoginMethodConfig> = {};
@@ -29,12 +27,12 @@ export const getAdapterSocialLogins = (
     const customAuthAdapter = adapter as CustomauthAdapter;
     Object.keys(customAuthAdapter.loginSettings?.loginProviderConfig).forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
-      finalLoginMethodsConfig[loginMethod] = { visible: true, showOnDesktop: true, showOnMobile: true, ...currentLoginMethodConfig };
+      finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
-  } else if (adapterName === WALLET_ADAPTERS.OPENLOGIN_WALLET) {
+  } else if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
-      finalLoginMethodsConfig[loginMethod] = { visible: true, showOnDesktop: true, showOnMobile: true, ...currentLoginMethodConfig };
+      finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
   } else {
     throw new Error(`${adapterName} is not a valid adapter`);

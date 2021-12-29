@@ -1,4 +1,4 @@
-import { SafeEventEmitter } from "packages/adapters/torus-evm-adapter/node_modules/@toruslabs/openlogin-jrpc/dist/types";
+import { LoginConfig, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { AdapterNamespaceType, ChainNamespaceType } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -98,3 +98,5 @@ export interface Wallet<T> {
   name: string;
   adapter: () => IAdapter<T>;
 }
+
+export type LoginMethodConfig = LoginConfig;

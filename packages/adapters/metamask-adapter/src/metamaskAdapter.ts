@@ -53,15 +53,14 @@ class MetamaskAdapter extends BaseAdapter<void> {
       this.emit(BASE_ADAPTER_EVENTS.CONNECTING);
       try {
         this.provider = typeof window !== "undefined" && (window as any).ethereum;
-        this.addEventListeners(this.provider);
         const onConnectHandler = () => {
           this.connected = true;
+          this.provider.removeListener("connect", onConnectHandler);
+          this.addEventListeners(this.provider);
           this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK);
           resolve(this.provider);
         };
-        this.provider.on("connect", () => {
-          onConnectHandler();
-        });
+        this.provider.on("connect", onConnectHandler);
         this.provider
           .request({ method: "eth_requestAccounts" })
           .then(() => {

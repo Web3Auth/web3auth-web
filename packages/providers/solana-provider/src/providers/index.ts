@@ -1,3 +1,3 @@
 export * from "./phantomSolanaProvider";
-export * from "./privKeySolanaProvider";
+export * from "./solanaPrivKeyProvider";
 export * from "./torusSolanaProvider";

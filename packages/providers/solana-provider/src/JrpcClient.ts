@@ -11,8 +11,13 @@ export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown
   };
 }
 
-export function createProviderConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, unknown> {
-  return (req: JRPCRequest<unknown>, res: JRPCResponse<CustomChainConfig>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
+export function createProviderConfigMiddleware(providerConfig: Omit<CustomChainConfig, "chainNamespace">): JRPCMiddleware<unknown, unknown> {
+  return (
+    req: JRPCRequest<unknown>,
+    res: JRPCResponse<Omit<CustomChainConfig, "chainNamespace">>,
+    next: JRPCEngineNextCallback,
+    end: JRPCEngineEndCallback
+  ) => {
     if (req.method === "solana_provider_config") {
       res.result = providerConfig;
       return end();
@@ -21,7 +26,7 @@ export function createProviderConfigMiddleware(providerConfig: CustomChainConfig
   };
 }
 
-export function createJsonRpcClient(providerConfig: CustomChainConfig): {
+export function createJsonRpcClient(providerConfig: Omit<CustomChainConfig, "chainNamespace">): {
   networkMiddleware: JRPCMiddleware<unknown, unknown>;
 } {
   const { chainId, rpcTarget } = providerConfig;

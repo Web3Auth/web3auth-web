@@ -1,16 +1,7 @@
-/* eslint-disable no-console */
 import type { Keypair, Transaction } from "@solana/web3.js";
-import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { BaseConfig, BaseController, BaseState, createFetchMiddleware, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import {
-  CustomChainConfig,
-  InvalidProviderConfigError,
-  PROVIDER_EVENTS,
-  ProviderNotReadyError,
-  RequestArguments,
-  RpcConnectionFailedError,
-  SafeEventEmitterProvider,
-} from "@web3auth/base";
+import { CustomChainConfig, PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import bs58 from "bs58";
 
 import { createJsonRpcClient } from "../JrpcClient";
@@ -23,19 +14,19 @@ interface SolanaProviderState extends BaseState {
 }
 
 interface SolanaProviderConfig extends BaseConfig {
-  chainConfig: CustomChainConfig;
+  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
-export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
+export class SolanaPrivKeyProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
   public _providerProxy: SafeEventEmitterProvider;
 
-  readonly chainConfig: CustomChainConfig;
+  readonly chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 
   private transactionGenerator: (serializedTx: string) => Transaction;
 
   private keyPairGenerator: (privKey: string) => Keypair;
 
   constructor({ config, state }: { config: SolanaProviderConfig & Pick<SolanaProviderConfig, "chainConfig">; state?: SolanaProviderState }) {
-    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainconfig");
+    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainconfig");
     super({ config, state });
     this.defaultState = {
       _initialized: false,
@@ -45,6 +36,24 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
     this.chainConfig = config.chainConfig;
     this.init();
   }
+
+  public static getProviderInstance = async (params: {
+    privKey: string;
+    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  }): Promise<SafeEventEmitterProvider> => {
+    const providerFactory = new SolanaPrivKeyProvider({ config: { chainConfig: params.chainConfig } });
+    return new Promise((resolve, reject) => {
+      // wait for provider to get ready
+      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
+        const provider = providerFactory.setupProvider(params.privKey);
+        resolve(provider);
+      });
+      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
+        reject(error);
+      });
+      providerFactory.init();
+    });
+  };
 
   public async init(): Promise<void> {
     const { Transaction: SolTx, Keypair: SolKeyPair, Message } = await import("@solana/web3.js");
@@ -76,7 +85,7 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
+    if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
     const keyPair = this.keyPairGenerator(privKey);
 
     const providerHandlers: IProviderHandlers = {
@@ -133,7 +142,7 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
 
   private getFetchOnlyProvider(): SafeEventEmitterProvider {
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createJsonRpcClient(this.chainConfig);
+    const networkMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     return provider;
@@ -143,7 +152,7 @@ export class PrivKeySolanaProvider extends BaseController<SolanaProviderConfig, 
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const res = await sendRpcRequest<[], string>(fetchOnlyProvider, "getHealth", []);
     if (res !== "ok")
-      throw new RpcConnectionFailedError(
+      throw WalletInitializationError.rpcConnectionError(
         `Failed to lookup network for following rpc target: ${this.chainConfig.rpcTarget}, lookup status is: ${res}`
       );
   }

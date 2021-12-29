@@ -7,11 +7,12 @@
     "serve:local": "yarn run link-local && yarn && yarn run serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "link-local": "yalc link @web3auth/modal @web3auth/core @web3auth/base @web3auth/torus-wallet-adapter @web3auth/solana-wallet-adapter @web3auth/openlogin-adapter  @web3auth/metamask-wallet-adapter @web3auth/phantom-wallet-adapter   @web3auth/customauth-adapter @web3auth/ui @web3auth/solana-provider @web3auth/ethereum-provider"
+    "link-local": "yalc link @web3auth/modal @web3auth/core @web3auth/base @web3auth/torus-evm-adapter @web3auth/torus-solana-adapter @web3auth/openlogin-adapter  @web3auth/metamask-adapter @web3auth/phantom-adapter   @web3auth/customauth-adapter @web3auth/ui @web3auth/solana-provider @web3auth/ethereum-provider"
   },
   "dependencies": {
     "@toruslabs/openlogin-ed25519": "^1.2.0",
     "@web3auth/modal": "file:./.yalc/@web3auth/modal",
+    "ts-custom-error": "^3.2.0",
     "vue": "^2.6.14",
     "web3": "^1.5.1"
   },
@@ -19,10 +20,10 @@
     "@web3auth/base": "file:./.yalc/@web3auth/base",
     "@web3auth/ui": "file:./.yalc/@web3auth/ui",
     "@web3auth/customauth-adapter": "file:./.yalc/@web3auth/customauth-adapter",
-    "@web3auth/phantom-wallet-adapter": "file:./.yalc/@web3auth/phantom-wallet-adapter",
-    "@web3auth/metamask-wallet-adapter": "file:./.yalc/@web3auth/metamask-wallet-adapter",
-    "@web3auth/torus-wallet-adapter": "file:./.yalc/@web3auth/torus-wallet-adapter",
-    "@web3auth/solana-wallet-adapter": "file:./.yalc/@web3auth/solana-wallet-adapter",
+    "@web3auth/phantom-adapter": "file:./.yalc/@web3auth/phantom-adapter",
+    "@web3auth/metamask-adapter": "file:./.yalc/@web3auth/metamask-adapter",
+    "@web3auth/torus-evm-adapter": "file:./.yalc/@web3auth/torus-evm-adapter",
+    "@web3auth/torus-solana-adapter": "file:./.yalc/@web3auth/torus-solana-adapter",
     "@web3auth/openlogin-adapter": "file:./.yalc/@web3auth/openlogin-adapter",
     "@web3auth/solana-provider": "file:./.yalc/@web3auth/solana-provider",
     "@web3auth/ethereum-provider": "file:./.yalc/@web3auth/ethereum-provider",

@@ -1,6 +1,6 @@
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, PROVIDER_EVENTS, ProviderNotReadyError, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import bs58 from "bs58";
 
 import { createInjectedProviderProxyMiddleware, InjectedProviderOptions } from "../injectedProviderProxy";
@@ -38,7 +38,7 @@ export class TorusInjectedProviderProxy extends BaseController<TorusInjectedProv
   }
 
   public setupProviderFromInjectedProvider(injectedProvider: InjectedProviderOptions): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
+    if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         const accounts = (await injectedProvider.provider.request({

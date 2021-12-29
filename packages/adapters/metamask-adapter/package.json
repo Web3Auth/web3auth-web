@@ -1,5 +1,5 @@
 {
-  "name": "@web3auth/metamask-wallet-adapter",
+  "name": "@web3auth/metamask-adapter",
   "version": "0.0.0",
   "description": "metamask wallet adapter for web3auth",
   "keywords": [
@@ -10,10 +10,10 @@
     "ethereum",
     "metamask"
   ],
-  "main": "dist/metamaskWalletAdapter.cjs.js",
-  "module": "dist/metamaskWalletAdapter.esm.js",
-  "unpkg": "dist/metamaskWalletAdapter.umd.min.js",
-  "jsdelivr": "dist/metamaskWalletAdapter.umd.min.js",
+  "main": "dist/metamaskAdapter.cjs.js",
+  "module": "dist/metamaskAdapter.esm.js",
+  "unpkg": "dist/metamaskAdapter.umd.min.js",
+  "jsdelivr": "dist/metamaskAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
@@ -30,7 +30,6 @@
   },
   "files": [
     "dist",
-    "types",
     "src"
   ],
   "devDependencies": {
@@ -39,7 +38,7 @@
     "lint-staged": "^11.2.6"
   },
   "dependencies": {
-    "@web3auth/base": "0.0.0",
+    "@web3auth/base": "0.0.1",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {

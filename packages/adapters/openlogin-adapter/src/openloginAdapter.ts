@@ -19,7 +19,7 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import type { PrivKeySolanaProvider } from "@web3auth/solana-provider";
+import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
 import type { LoginSettings, OpenLoginOptions } from "./interface";
@@ -57,7 +57,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
 
   private chainConfig: CustomChainConfig;
 
-  private solanaProviderFactory: PrivKeySolanaProvider;
+  private solanaProviderFactory: SolanaPrivKeyProvider;
 
   private ethereumProviderFactory: EthereumPrivateKeyProvider;
 
@@ -80,8 +80,8 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
     }
     await this.openloginInstance.init();
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { PrivKeySolanaProvider } = await import("@web3auth/solana-provider");
-      this.solanaProviderFactory = new PrivKeySolanaProvider({ config: { chainConfig: this.chainConfig } });
+      const { SolanaPrivKeyProvider } = await import("@web3auth/solana-provider");
+      this.solanaProviderFactory = new SolanaPrivKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
@@ -113,7 +113,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
       return await this.connectWithProvider(params);
     } catch (error) {
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
-      throw WalletLoginError.connectionError("Failed to login with openlogin", error);
+      throw WalletLoginError.connectionError("Failed to login with openlogin");
     } finally {
       this.connecting = false;
     }
@@ -134,7 +134,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
   }
 
   private async setupProvider(
-    providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider,
+    providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider,
     params?: LoginParams
   ): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
@@ -206,7 +206,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
   }
 
   private async connectWithProvider(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
-    let providerFactory: PrivKeySolanaProvider | EthereumPrivateKeyProvider;
+    let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
     if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
     } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {

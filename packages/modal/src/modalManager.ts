@@ -1,12 +1,4 @@
-import {
-  ADAPTER_CATEGORY,
-  BaseAdapterConfig,
-  CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  CommonLoginOptions,
-  IWalletAdapter,
-  WALLET_ADAPTERS,
-} from "@web3auth/base";
+import { ADAPTER_CATEGORY, BaseAdapterConfig, CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, WALLET_ADAPTERS } from "@web3auth/base";
 import { getModule, Web3Auth } from "@web3auth/core";
 import LoginModal from "@web3auth/ui";
 import log from "loglevel";
@@ -41,11 +33,6 @@ export class Web3AuthModal extends Web3Auth {
   public async initModal(params: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     if (this.initialized) throw new Error("Already initialized");
     this.loginModal.init();
-    // if (!this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET] && !this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
-    //   throw new Error(
-    //     `Please configure either ${WALLET_ADAPTERS.CUSTOM_AUTH} or ${WALLET_ADAPTERS.OPENLOGIN_WALLET} adapter using configureAdapter function as it is required in login modal`
-    //   );
-    // }
     const adapterPromises = [];
     let hasInAppWallets = false;
     Object.keys(this.aggregatorModalConfig.adapters).forEach(async (adapterName) => {
@@ -60,11 +47,11 @@ export class Web3AuthModal extends Web3Auth {
         log.info("adapterConfig", adapterConfig, adapter);
         if (!adapter) {
           if (defaultAdapterConfig.configurationRequired) {
-            if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH && this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN_WALLET]) {
+            if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH && this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN]) {
               resolve(null);
               return;
             }
-            if (adapterName === WALLET_ADAPTERS.OPENLOGIN_WALLET && this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
+            if (adapterName === WALLET_ADAPTERS.OPENLOGIN && this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH]) {
               resolve(null);
               return;
             }
@@ -75,27 +62,27 @@ export class Web3AuthModal extends Web3Auth {
             return;
           }
           getModule(adapterName, adapterConfig.options)
-            .then(async (ad: IWalletAdapter) => {
+            .then(async (ad: IAdapter<unknown>) => {
               this.walletAdapters[adapterName] = ad;
-              if (ad.walletType === ADAPTER_CATEGORY.IN_APP) {
+              if (ad.type === ADAPTER_CATEGORY.IN_APP) {
                 hasInAppWallets = true;
               }
-              if (ad.walletType === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedWallet) {
+              if (ad.type === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedWallet) {
                 this.subscribeToAdapterEvents(ad);
-                await ad.init({ connect: this.cachedWallet === adapterName });
+                await ad.init({ autoConnect: this.cachedWallet === adapterName });
               }
               this.aggregatorModalConfig[adapterName] = adapterConfig;
               resolve(adapterName);
               return true;
             })
             .catch((err) => reject(err));
-        } else if (adapter?.walletType === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedWallet) {
-          if (adapter.walletType === ADAPTER_CATEGORY.IN_APP) {
+        } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedWallet) {
+          if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
             hasInAppWallets = true;
           }
           this.subscribeToAdapterEvents(adapter);
           adapter
-            .init({ connect: this.cachedWallet === adapterName })
+            .init({ autoConnect: this.cachedWallet === adapterName })
             .then(() => {
               this.aggregatorModalConfig[adapterName] = adapterConfig;
               resolve(adapterName);
@@ -124,7 +111,7 @@ export class Web3AuthModal extends Web3Auth {
         adapterInitResults.forEach((result) => {
           log.info("adapterInitResults", result, this.walletAdapters[result]);
           if (result && !(result instanceof Error)) {
-            if (this.walletAdapters[result].walletType === ADAPTER_CATEGORY.IN_APP) {
+            if (this.walletAdapters[result].type === ADAPTER_CATEGORY.IN_APP) {
               this.loginModal.addSocialLogins(
                 result,
                 this.aggregatorModalConfig[result],
@@ -154,12 +141,12 @@ export class Web3AuthModal extends Web3Auth {
     log.info("this.walletAdapters) ", this.walletAdapters);
     Object.keys(this.walletAdapters).forEach(async (walletName) => {
       const adapter = this.walletAdapters[walletName];
-      if (adapter?.walletType === ADAPTER_CATEGORY.EXTERNAL) {
+      if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
         log.info("init external wallet", this.cachedWallet, walletName);
         const adPromise = new Promise((resolve, reject) => {
           this.subscribeToAdapterEvents(adapter);
           adapter
-            .init({ connect: this.cachedWallet === walletName })
+            .init({ autoConnect: this.cachedWallet === walletName })
             .then(() => {
               adaptersConfig[walletName] = this.aggregatorModalConfig.adapters[walletName];
               resolve(walletName);
@@ -185,8 +172,8 @@ export class Web3AuthModal extends Web3Auth {
   }
 
   private subscribeToLoginModalEvents(): void {
-    this.loginModal.on("LOGIN", async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: CommonLoginOptions }) => {
-      await this.connectTo(params.adapter, params.loginParams);
+    this.loginModal.on("LOGIN", async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: unknown }) => {
+      await this.connectTo<unknown>(params.adapter, params.loginParams);
     });
     this.loginModal.on("INIT_EXTERNAL_WALLETS", async (params: { externalWalletsInitialized: boolean }) => {
       await this.initExternalWalletAdapters(params.externalWalletsInitialized);
