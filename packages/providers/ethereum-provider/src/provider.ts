@@ -24,12 +24,10 @@ import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
-  InvalidProviderConfigError,
   PROVIDER_EVENTS,
-  ProviderNotReadyError,
   RequestArguments,
-  RpcConnectionFailedError,
   SafeEventEmitterProvider,
+  WalletInitializationError,
 } from "@web3auth/base";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
@@ -59,7 +57,7 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
   constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
-    if (!config.chainConfig) throw new InvalidProviderConfigError("Please provide chainConfig");
+    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     super({ config, state });
     this.defaultState = {
       _initialized: false,
@@ -97,9 +95,8 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw new ProviderNotReadyError("Provider not initialized");
+    if (!this.state._initialized) throw WalletInitializationError.notReady("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
-      version: "1", // TODO: get this from the provider
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
       processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
         const rpcProvider = this.getFetchOnlyProvider();
@@ -191,7 +188,7 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
     const network = await fetchOnlyProvider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
 
     if (parseInt(chainConfig.chainId, 16) !== parseInt(network, 10))
-      throw new RpcConnectionFailedError(`Invalid network, net_version is: ${network}`);
+      throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${network}`);
     return network;
   }
 

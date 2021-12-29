@@ -52,6 +52,9 @@ export class WalletInitializationError extends Web3AuthError {
     5005: "Wallet window has been closed by the user",
     5006: "Incompatible chain namespace provided",
     5007: "Adapter has already been included",
+    5008: "Invalid provider Config",
+    5009: "Provider is not ready yet",
+    5010: "Failed to connect with rpc url",
   };
 
   public constructor(code: number, message?: string) {
@@ -94,6 +97,18 @@ export class WalletInitializationError extends Web3AuthError {
   public static duplicateAdapterError(extraMessage = ""): IWeb3AuthError {
     return WalletInitializationError.fromCode(5007, extraMessage);
   }
+
+  public static rpcConnectionError(extraMessage = ""): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5012, extraMessage);
+  }
+
+  public static providerNotReadyError(extraMessage = ""): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5013, extraMessage);
+  }
+
+  public static invalidProviderConfigError(extraMessage = ""): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5008, extraMessage);
+  }
 }
 
 /**
@@ -103,12 +118,9 @@ export class WalletInitializationError extends Web3AuthError {
 export class WalletLoginError extends Web3AuthError {
   protected static messages: ErrorCodes = {
     5000: "Custom",
-    5008: "Invalid provider Config",
-    5009: "Failed to connect with wallet",
-    5010: "Failed to disconnect from wallet",
-    5011: "Wallet is not connected",
-    5012: "Failed to connect with rpc url",
-    5013: "Provider is not ready yet",
+    5011: "Failed to connect with wallet",
+    5012: "Failed to disconnect from wallet",
+    5013: "Wallet is not connected",
   };
 
   public constructor(code: number, message?: string) {
@@ -123,10 +135,6 @@ export class WalletLoginError extends Web3AuthError {
     return new WalletLoginError(code, `${WalletLoginError.messages[code]}${extraMessage}`);
   }
 
-  public static invalidProviderConfigError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5008, extraMessage);
-  }
-
   public static connectionError(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5009, extraMessage);
   }
@@ -137,13 +145,5 @@ export class WalletLoginError extends Web3AuthError {
 
   public static notConnectedError(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5011, extraMessage);
-  }
-
-  public static rpcConnectionError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5012, extraMessage);
-  }
-
-  public static providerNotReadyError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5013, extraMessage);
   }
 }
