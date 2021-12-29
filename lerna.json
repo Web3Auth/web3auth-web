@@ -1,5 +1,8 @@
 {
-  "packages": ["packages/base", "packages/providers/ethereum-provider"],
-  "version": "0.0.0",
+  "packages": [
+    "packages/base",
+    "packages/providers/ethereum-provider"
+  ],
+  "version": "0.0.1",
   "npmClient": "yarn"
 }
