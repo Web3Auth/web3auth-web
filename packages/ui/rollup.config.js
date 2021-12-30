@@ -6,6 +6,8 @@ export default {
     postcss({
       plugins: [],
     }),
-    svg(),
+    svg({
+      base64: true,
+    }),
   ],
 };

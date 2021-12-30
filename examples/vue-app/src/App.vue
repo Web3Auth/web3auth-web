@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomAuthAdapter, getOpenloginAdapter, getTorusEvmAdapter, getTorusSolanaAdapter } from "@web3auth/core";
+import { getCustomAuthAdapter, getOpenloginAdapter } from "@web3auth/core";
 import { Web3AuthModal } from "@web3auth/modal";
 import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
@@ -137,13 +137,13 @@ export default Vue.extend({
           uxMode: "popup"
         }})
 
-        const torusWalletAdapter = await getTorusSolanaAdapter({
-          initParams: {
-            buildEnv: "testing"
-          }
-        })
+        // const torusWalletAdapter = await getTorusSolanaAdapter({
+        //   initParams: {
+        //     buildEnv: "testing"
+        //   }
+        // })
         this.web3auth.configureAdapter(customAuthAdapter);
-        this.web3auth.configureAdapter(torusWalletAdapter);
+        // this.web3auth.configureAdapter(torusWalletAdapter);
 
         await this.web3auth.initModal({
           modalConfig: {
