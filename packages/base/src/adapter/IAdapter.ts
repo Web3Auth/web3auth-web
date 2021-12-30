@@ -1,6 +1,6 @@
 import { LoginConfig, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { AdapterNamespaceType, ChainNamespaceType } from "../chain/IChainInterface";
+import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_ADAPTER_EVENTS = {
@@ -65,6 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   disconnect(): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo> | null>;
+  updateChainConfig(customChainConfig: CustomChainConfig): void;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
@@ -86,15 +87,16 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo> | null>;
+  abstract updateChainConfig(customChainConfig: CustomChainConfig): void;
 }
 
 export interface BaseAdapterConfig {
-  visible?: boolean;
+  showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
 }
 
-export interface Wallet<T> {
+export interface Adapter<T> {
   name: string;
   adapter: () => IAdapter<T>;
 }

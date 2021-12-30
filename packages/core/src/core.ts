@@ -1,20 +1,26 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
+  Adapter,
   ADAPTER_NAMESPACES,
   BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
+  getChainConfig,
   IAdapter,
   SafeEventEmitterProvider,
   UserInfo,
-  Wallet,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 
 import { WALLET_ADAPTER_TYPE } from "./constants";
+
+interface Web3AuthCoreOptions {
+  chainNamespace: ChainNamespaceType;
+  chainId?: number;
+}
 export class Web3Auth extends SafeEventEmitter {
-  readonly chainNamespace: ChainNamespaceType;
+  readonly options: Web3AuthCoreOptions;
 
   public connectedAdapterName: string | undefined;
 
@@ -24,62 +30,71 @@ export class Web3Auth extends SafeEventEmitter {
 
   public provider: SafeEventEmitterProvider;
 
-  public cachedWallet: string;
+  public cachedAdapter: string;
 
   protected initialized: boolean;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
-  constructor(chainNamespace: ChainNamespaceType) {
+  constructor(options: Web3AuthCoreOptions) {
     super();
-    this.cachedWallet = window.sessionStorage.getItem("Web3Auth-CachedWallet");
-    this.chainNamespace = chainNamespace;
+    this.cachedAdapter = window.sessionStorage.getItem("Web3Auth-cachedAdapter");
+    this.options = options;
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
   public async init(): Promise<void> {
     if (this.initialized) throw new Error("Already initialized");
 
-    await Promise.all(
-      Object.keys(this.walletAdapters).map((adapterName) => {
-        this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-        return this.walletAdapters[adapterName].init({ autoConnect: this.cachedWallet === adapterName }).catch((e) => e);
-      })
-    );
+    const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
+      this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
+      // if adapter doesn't have any chain config yet thn set it based on modal namespace and chainId.
+      // this applies only to multichain adapters where chainNamespace cannot be determined from adapter.
+      if (this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN && !this.walletAdapters[adapterName].currentChainNamespace) {
+        const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId);
+        this.walletAdapters[adapterName].updateChainConfig(chainConfig);
+      }
+      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
+    });
+    await Promise.all(initPromises);
 
     this.initialized = true;
   }
 
-  public configureWallet(wallet: Wallet<unknown>): Web3Auth {
+  public configureAdapter(adapter: Adapter<unknown>): Web3Auth {
     if (this.initialized) throw new Error("Wallets cannot be added after initialization");
-    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && wallet.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
+    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && adapter.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN} adapter already exists.`
       );
     }
-    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && wallet.name === WALLET_ADAPTERS.OPENLOGIN) {
+    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapter.name === WALLET_ADAPTERS.OPENLOGIN) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.CUSTOM_AUTH} adapter already exists.`
       );
     }
-    const adapterAlreadyExists = this.walletAdapters[wallet.name];
-    if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${wallet.name} already exists`);
-    const adapter = wallet.adapter();
-    if (adapter.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.namespace !== this.chainNamespace)
+    const adapterAlreadyExists = this.walletAdapters[adapter.name];
+    if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
+    const adapterInstance = adapter.adapter();
+    if (adapterInstance.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapterInstance.namespace !== this.options.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This wallet adapter belongs to ${adapter.namespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+        `This wallet adapter belongs to ${adapterInstance.namespace} which is incompatible with currently used namespace: ${this.options.chainNamespace}`
       );
-    if (adapter.namespace === ADAPTER_NAMESPACES.MULTICHAIN && this.chainNamespace !== adapter.currentChainNamespace)
+    if (
+      adapterInstance.namespace === ADAPTER_NAMESPACES.MULTICHAIN &&
+      adapterInstance.currentChainNamespace &&
+      this.options.chainNamespace !== adapterInstance.currentChainNamespace
+    )
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `${wallet.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.chainNamespace}`
+        `${adapter.name} wallet adapter belongs to ${adapterInstance.currentChainNamespace} which is incompatible with currently used namespace: ${this.options.chainNamespace}`
       );
-    this.walletAdapters[wallet.name] = adapter;
+    this.walletAdapters[adapter.name] = adapterInstance;
     return this;
   }
 
   public clearCache() {
-    window.sessionStorage.removeItem("Web3Auth-CachedWallet");
-    this.cachedWallet = undefined;
+    window.sessionStorage.removeItem("Web3Auth-cachedAdapter");
+    this.cachedAdapter = undefined;
   }
 
   /**
@@ -133,7 +148,7 @@ export class Web3Auth extends SafeEventEmitter {
   }
 
   private cacheWallet(walletName: string) {
-    window.sessionStorage.setItem("Web3Auth-CachedWallet", walletName);
-    this.cachedWallet = walletName;
+    window.sessionStorage.setItem("Web3Auth-cachedAdapter", walletName);
+    this.cachedAdapter = walletName;
   }
 }

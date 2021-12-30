@@ -12,6 +12,7 @@ import type {
   TorusLoginResponse,
   TorusVerifierResponse,
 } from "@toruslabs/customauth";
+import { CustomChainConfig } from "@web3auth/base";
 
 export type UserType = "v1" | "v2";
 
@@ -40,6 +41,13 @@ interface LoginSettings {
       jwtParams?: Auth0ClientOptions;
     }
   >;
+}
+
+export interface CustomAuthAdapterOptions {
+  chainConfig?: CustomChainConfig;
+  adapterSettings?: CustomAuthArgs;
+  initSettings?: InitParams;
+  loginSettings: LoginSettings;
 }
 export {
   CustomAuthArgs,

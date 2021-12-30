@@ -23,27 +23,36 @@ import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
+import { getCustomAuthDefaultOptions } from ".";
 import CustomauthStore from "./customAuthStore";
-import type { CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
+import type { CustomAuthAdapterOptions, CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
 import { parseDirectAuthResult, parseTriggerLoginResult } from "./utils";
-interface CustomauthAdapterOptions {
-  chainConfig: CustomChainConfig;
-  adapterSettings: CustomAuthArgs;
-  initSettings: InitParams;
-  loginSettings: LoginSettings;
-}
 interface LoginParams {
   email: string;
   loginProvider: string;
 }
+
+const DEFAULT_CUSTOM_AUTH_RES: TorusDirectAuthResult = {
+  publicAddress: "",
+  privateKey: "",
+  metadataNonce: "",
+  email: "",
+  name: "",
+  profileImage: "",
+  aggregateVerifier: "",
+  verifier: "",
+  verifierId: "",
+  typeOfLogin: "google",
+  typeOfUser: "v1",
+};
 class CustomauthAdapter extends BaseAdapter<LoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
-  readonly currentChainNamespace: ChainNamespaceType;
-
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
-  public customauthInstance: CustomAuth;
+  public currentChainNamespace: ChainNamespaceType;
+
+  public customAuthInstance: CustomAuth;
 
   public connecting: boolean;
 
@@ -57,8 +66,6 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
 
   private adapterSettings: CustomAuthArgs;
 
-  private privKey: string;
-
   private initSettings: InitParams;
 
   private chainConfig: CustomChainConfig;
@@ -70,26 +77,40 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
   private store: CustomauthStore;
 
   private customAuthResult: TorusDirectAuthResult = {
-    publicAddress: "",
-    privateKey: "",
-    metadataNonce: "",
-    email: "",
-    name: "",
-    profileImage: "",
-    aggregateVerifier: "",
-    verifier: "",
-    verifierId: "",
-    typeOfLogin: "google",
-    typeOfUser: "v1",
+    ...DEFAULT_CUSTOM_AUTH_RES,
   };
 
-  constructor(params: CustomauthAdapterOptions) {
+  constructor(params: CustomAuthAdapterOptions) {
     super();
-    this.adapterSettings = params.adapterSettings;
-    this.loginSettings = params.loginSettings;
-    this.currentChainNamespace = params.chainConfig.chainNamespace;
-    this.chainConfig = params.chainConfig;
-    this.initSettings = params.initSettings;
+    if (!params.loginSettings) {
+      throw WalletInitializationError.invalidParams("loginSettings is required for customAuth adapter");
+    }
+    const defaultOptions = getCustomAuthDefaultOptions(params.chainConfig?.chainNamespace, params.chainConfig?.chainId);
+
+    const adapterSettings = { ...defaultOptions.adapterSettings, ...params.adapterSettings };
+    const loginSettings = { ...params.loginSettings };
+    const initSettings = { ...defaultOptions.initSettings, ...params.initSettings };
+
+    if (!adapterSettings.baseUrl) {
+      throw WalletInitializationError.invalidParams("baseUrl is required in adapter settings");
+    }
+    if (!adapterSettings.redirectPathName) {
+      throw WalletInitializationError.invalidParams("redirectPathName is required in adapter settings");
+    }
+    this.adapterSettings = adapterSettings;
+    this.loginSettings = loginSettings;
+    this.initSettings = initSettings;
+
+    this.currentChainNamespace = params.chainConfig?.chainNamespace;
+    // if no currentChainNamespace is passed then chain config should be set before calling init
+    if (this.currentChainNamespace) {
+      const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
+      this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
+      if (!this.chainConfig.rpcTarget) {
+        throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
+      }
+    }
+
     this.store = CustomauthStore.getInstance();
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
@@ -97,21 +118,21 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
-    this.customauthInstance = new Customauth(this.adapterSettings);
+    this.customAuthInstance = new Customauth(this.adapterSettings);
     let providerFactory: EthereumPrivateKeyProvider | SolanaPrivKeyProvider;
-    await this.customauthInstance.init(this.initSettings);
-    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    await this.customAuthInstance.init(this.initSettings);
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivKeyProvider } = await import("@web3auth/solana-provider");
       this.solanaProviderFactory = new SolanaPrivKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
       providerFactory = this.solanaProviderFactory;
-    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
       providerFactory = this.ethereumProviderFactory;
     } else {
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
@@ -151,6 +172,9 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
     this.store.resetStore();
     this.connected = false;
     this.provider = undefined;
+    this.customAuthResult = {
+      ...DEFAULT_CUSTOM_AUTH_RES,
+    };
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
 
@@ -165,9 +189,15 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
     };
   }
 
+  updateChainConfig(customChainConfig: CustomChainConfig): void {
+    this.chainConfig = { ...customChainConfig };
+    this.currentChainNamespace = customChainConfig.chainNamespace;
+    // TODO: switch chain in provider as well if provider exists
+  }
+
   private async setupProviderWithRedirectResult(providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider): Promise<void> {
     const url = new URL(window.location.href);
-    const hash = url.hash.substr(1);
+    const hash = url.hash.substring(1);
     const queryParams = {};
     url.searchParams.forEach((value, key) => {
       queryParams[key] = value;
@@ -176,7 +206,7 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
       this.ready = true;
       return;
     }
-    const redirectResult = await this.customauthInstance.getRedirectResult({
+    const redirectResult = await this.customAuthInstance.getRedirectResult({
       replaceUrl: true,
       clearLoginDetails: true,
     });
@@ -220,13 +250,14 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
           reject(reason);
         };
         window.addEventListener("unhandledrejection", listener);
-        let finalPrivKey = this.customAuthResult.privateKey;
+        // if user is already logged in.
+        let finalPrivKey = this.customAuthResult?.privateKey;
         try {
           if (!finalPrivKey && params) {
             if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
               throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
             }
-            const result = await this.customauthInstance.triggerLogin({
+            const result = await this.customAuthInstance.triggerLogin({
               ...this.loginSettings?.loginProviderConfig?.[params.loginProvider],
               typeOfLogin: params.loginProvider as LOGIN_TYPE,
             });
@@ -239,7 +270,7 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
             }
           }
           if (finalPrivKey) {
-            if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+            if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
             return providerFactory.setupProvider(finalPrivKey);
           }
           return null;
@@ -291,15 +322,15 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
 
   private async _login(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
-    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
-    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       providerFactory = this.ethereumProviderFactory;
     } else {
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
     return this.setupProvider(providerFactory, params);
   }
 }
 
-export { CustomauthAdapter, CustomauthAdapterOptions };
+export { CustomauthAdapter };

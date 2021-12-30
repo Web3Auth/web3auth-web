@@ -1,14 +1,13 @@
-import { Wallet } from "@web3auth/base";
-import { CustomauthAdapter, CustomauthAdapterOptions } from "@web3auth/customauth-adapter";
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
-import { OpenloginAdapter, OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-adapter";
-import { TorusWalletAdapter, TorusWalletOptions } from "@web3auth/torus-evm-adapter";
-import { SolanaWalletAdapter, SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
+import type { Adapter } from "@web3auth/base";
+import type { CustomAuthAdapterOptions } from "@web3auth/customauth-adapter";
+import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
+import type { TorusWalletOptions } from "@web3auth/torus-evm-adapter";
+import type { SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
 
 import { WALLET_ADAPTERS } from "../constants";
 
-const getTorusEvmWallet = (params: TorusWalletOptions): Wallet<unknown> => {
+const getTorusEvmAdapter = async (params: TorusWalletOptions): Promise<Adapter<unknown>> => {
+  const { TorusWalletAdapter } = await import("@web3auth/torus-evm-adapter");
   return {
     name: WALLET_ADAPTERS.TORUS_EVM,
     adapter: () => {
@@ -18,7 +17,8 @@ const getTorusEvmWallet = (params: TorusWalletOptions): Wallet<unknown> => {
   };
 };
 
-const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet<unknown> => {
+const getTorusSolanaAdapter = async (params: SolanaWalletOptions): Promise<Adapter<unknown>> => {
+  const { SolanaWalletAdapter } = await import("@web3auth/torus-solana-adapter");
   return {
     name: WALLET_ADAPTERS.TORUS_SOLANA,
     adapter: () => {
@@ -28,7 +28,8 @@ const getTorusSolanaWallet = (params: SolanaWalletOptions): Wallet<unknown> => {
   };
 };
 
-const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet<unknown> => {
+const getOpenloginAdapter = async (params: OpenloginAdapterOptions): Promise<Adapter<unknown>> => {
+  const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
   return {
     name: WALLET_ADAPTERS.OPENLOGIN,
     adapter: () => {
@@ -38,7 +39,9 @@ const getOpenloginWallet = (params: OpenloginAdapterOptions): Wallet<unknown> =>
   };
 };
 
-const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet<unknown> => {
+const getCustomAuthAdapter = async (params: CustomAuthAdapterOptions): Promise<Adapter<unknown>> => {
+  const { CustomauthAdapter } = await import("@web3auth/customauth-adapter");
+
   return {
     name: WALLET_ADAPTERS.CUSTOM_AUTH,
     adapter: () => {
@@ -48,7 +51,8 @@ const getCustomauthWallet = (params: CustomauthAdapterOptions): Wallet<unknown> 
   };
 };
 
-const getMetamaskWallet = (): Wallet<unknown> => {
+const getMetamaskAdapter = async (): Promise<Adapter<unknown>> => {
+  const { MetamaskAdapter } = await import("@web3auth/metamask-adapter");
   return {
     name: WALLET_ADAPTERS.METAMASK,
     adapter: () => {
@@ -58,7 +62,8 @@ const getMetamaskWallet = (): Wallet<unknown> => {
   };
 };
 
-const getPhantomWallet = (): Wallet<unknown> => {
+const getPhantomAdapter = async (): Promise<Adapter<unknown>> => {
+  const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
   return {
     name: WALLET_ADAPTERS.PHANTOM,
     adapter: () => {
@@ -68,4 +73,4 @@ const getPhantomWallet = (): Wallet<unknown> => {
   };
 };
 
-export { getCustomauthWallet, getMetamaskWallet, getOpenloginWallet, getPhantomWallet, getTorusEvmWallet, getTorusSolanaWallet };
+export { getCustomAuthAdapter, getMetamaskAdapter, getOpenloginAdapter, getPhantomAdapter, getTorusEvmAdapter, getTorusSolanaAdapter };

@@ -8,13 +8,14 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CustomChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-
+import log from "loglevel";
 class MetamaskAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
@@ -91,6 +92,10 @@ class MetamaskAdapter extends BaseAdapter<void> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
+  }
+
+  updateChainConfig(customChainConfig: CustomChainConfig): void {
+    log.debug("new chain config for metamask", customChainConfig);
   }
 
   private addEventListeners(provider: SafeEventEmitterProvider): void {

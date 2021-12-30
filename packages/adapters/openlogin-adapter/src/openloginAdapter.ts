@@ -22,13 +22,8 @@ import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
-import type { LoginSettings, OpenLoginOptions } from "./interface";
-
-interface OpenloginAdapterOptions {
-  chainConfig: CustomChainConfig;
-  adapterSettings: OpenLoginOptions;
-  loginSettings?: LoginSettings;
-}
+import { getOpenloginDefaultOptions } from ".";
+import type { LoginSettings, OpenloginAdapterOptions, OpenLoginOptions } from "./interface";
 
 interface LoginParams {
   email: string;
@@ -36,8 +31,6 @@ interface LoginParams {
 }
 class OpenloginAdapter extends BaseAdapter<LoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
-
-  readonly currentChainNamespace: ChainNamespaceType;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
@@ -51,11 +44,13 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
 
   public provider: SafeEventEmitterProvider;
 
+  public currentChainNamespace: ChainNamespaceType;
+
   private openloginOptions: Partial<OpenLoginOptions> & Pick<OpenLoginOptions, "clientId" | "network">;
 
   private loginSettings: LoginSettings = {};
 
-  private chainConfig: CustomChainConfig;
+  private chainConfig: CustomChainConfig | null;
 
   private solanaProviderFactory: SolanaPrivKeyProvider;
 
@@ -63,13 +58,26 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
 
   constructor(params: OpenloginAdapterOptions) {
     super();
-    this.openloginOptions = params.adapterSettings;
-    this.loginSettings = params.loginSettings;
-    this.currentChainNamespace = params.chainConfig.chainNamespace;
-    this.chainConfig = params.chainConfig;
+    const { clientId } = params.adapterSettings;
+    if (!clientId) {
+      throw WalletInitializationError.invalidParams("clientId is required");
+    }
+    const defaultOptions = getOpenloginDefaultOptions(params.chainConfig?.chainNamespace, params.chainConfig?.chainId);
+    this.openloginOptions = { ...defaultOptions.adapterSettings, ...params.adapterSettings };
+    this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
+    this.currentChainNamespace = params.chainConfig?.chainNamespace;
+    // if no chainNamespace is passed then chain config should be set before calling init
+    if (this.currentChainNamespace) {
+      const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
+      this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
+      if (!this.chainConfig.rpcTarget) {
+        throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
+      }
+    }
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (this.ready) return;
     const { default: OpenloginSdk, getHashQueryParams } = await import("@toruslabs/openlogin");
     this.openloginInstance = new OpenloginSdk(this.openloginOptions);
@@ -79,16 +87,16 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
       isRedirectResult = true;
     }
     await this.openloginInstance.init();
-    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivKeyProvider } = await import("@web3auth/solana-provider");
       this.solanaProviderFactory = new SolanaPrivKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.solanaProviderFactory.init();
-    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
       await this.ethereumProviderFactory.init();
     } else {
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
 
     this.ready = true;
@@ -133,6 +141,12 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
     return userInfo;
   }
 
+  updateChainConfig(customChainConfig: CustomChainConfig): void {
+    this.chainConfig = { ...customChainConfig };
+    this.currentChainNamespace = customChainConfig.chainNamespace;
+    // TODO: switch chain in provider as well if provider exists
+  }
+
   private async setupProvider(
     providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider,
     params?: LoginParams
@@ -169,7 +183,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
           let finalPrivKey = this.openloginInstance.privKey;
 
           if (finalPrivKey) {
-            if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+            if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
             return providerFactory.setupProvider(finalPrivKey);
           }
           return null;
@@ -207,16 +221,16 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
 
   private async connectWithProvider(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
-    if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;
-    } else if (this.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       providerFactory = this.ethereumProviderFactory;
     } else {
-      throw new Error(`Invalid chainNamespace: ${this.chainConfig.chainNamespace} found while connecting to wallet`);
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
 
     return this.setupProvider(providerFactory, params);
   }
 }
 
-export { OpenloginAdapter, OpenloginAdapterOptions };
+export { OpenloginAdapter };

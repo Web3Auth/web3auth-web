@@ -8,6 +8,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CustomChainConfig,
   PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
@@ -169,6 +170,10 @@ class PhantomAdapter extends BaseAdapter<void> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
+  }
+
+  updateChainConfig(customChainConfig: CustomChainConfig): void {
+    log.debug("new chain config for phantom", customChainConfig);
   }
 
   private _disconnected = () => {

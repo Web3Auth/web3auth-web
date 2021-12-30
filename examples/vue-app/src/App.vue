@@ -53,9 +53,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomauthWallet, getOpenloginWallet, getTorusSolanaWallet, WALLET_ADAPTERS } from "@web3auth/core";
+import { getCustomAuthAdapter, getOpenloginAdapter, getTorusEvmAdapter, getTorusSolanaAdapter } from "@web3auth/core";
 import { Web3AuthModal } from "@web3auth/modal";
-import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import Web3 from "web3"
@@ -71,7 +71,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+      web3auth: new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.EIP155 })
     };
   },
   components: {
@@ -93,32 +93,26 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
+        this.web3auth = new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3 })
         this.subscribeAuthEvents(this.web3auth)
 
-        this.namespace = this.web3auth.chainNamespace
+        this.namespace = this.web3auth.options.chainNamespace
       
-      const customAuthAdapter = getCustomauthWallet({
-        initSettings: {
-          skipInit: true,
-          skipSw: true,
-          skipPrefetch: true
+      const customAuthAdapter = await  getCustomAuthAdapter({
+        chainConfig:{
+          chainNamespace: this.namespace,
+          blockExplorer: "https://explorer.solana.com",
+          chainId: "0x1",
+          displayName: "Solana Mainnet",
+          rpcTarget: "https://solana-mainnet.phantom.tech",
+          ticker: "SOL",
+          tickerName: "Solana Token",
         },
-        chainConfig: {
-        rpcTarget: "https://api.devnet.solana.com",
-        chainId: "0x3",
-        chainNamespace: CHAIN_NAMESPACES.SOLANA,
-        displayName: "devnet",
-        ticker: "sol",
-        tickerName: "solana",
-      }, adapterSettings: {
-        baseUrl: window.location.origin,
-        redirectPathName:"auth",
-        uxMode: "redirect",
-        enableLogging: true,
-        network: "testnet", // details for test net
-        // popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-      }, loginSettings: {
+        adapterSettings: {
+          network: "testnet",
+          baseUrl: window.location.origin,
+          redirectPathName:"auth",
+        }, loginSettings: {
         // loginProvider: "google"
         "loginProviderConfig": {
           "google": {
@@ -137,28 +131,19 @@ export default Vue.extend({
       })
 
         
-        const openloginAdapter = getOpenloginWallet({ chainConfig: {
-          rpcTarget: "https://api.devnet.solana.com",
-          chainId: "0x3",
-          chainNamespace: CHAIN_NAMESPACES.SOLANA,
-          displayName: "devnet",
-          ticker: "sol",
-          tickerName: "solana",
-        }, adapterSettings: {
+        const openloginAdapter = await getOpenloginAdapter({ adapterSettings: {
           network: "testnet",
           clientId: "localhost-id",
           uxMode: "popup"
-        }, loginSettings: {
-          // loginProvider: "google"
         }})
 
-        const torusWalletAdapter = getTorusSolanaWallet({
+        const torusWalletAdapter = await getTorusSolanaAdapter({
           initParams: {
             buildEnv: "testing"
           }
         })
-        this.web3auth.configureWallet(customAuthAdapter);
-        this.web3auth.configureWallet(torusWalletAdapter);
+        this.web3auth.configureAdapter(customAuthAdapter);
+        this.web3auth.configureAdapter(torusWalletAdapter);
 
         await this.web3auth.initModal({
           modalConfig: {
@@ -171,75 +156,54 @@ export default Vue.extend({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3AuthModal(CHAIN_NAMESPACES.EIP155)
+        this.web3auth = new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.EIP155})
         this.subscribeAuthEvents(this.web3auth)
 
-        this.namespace = this.web3auth.chainNamespace
+        this.namespace = this.web3auth.options.chainNamespace
       
-        const openloginAdapter = getOpenloginWallet({ chainConfig: {
-          rpcTarget: "https://polygon-rpc.com",
-          chainId: "0x89",
-          chainNamespace: CHAIN_NAMESPACES.EIP155,
-          displayName: "matic",
-          ticker: "matic",
-          tickerName: "matic",
-        }, adapterSettings: {
+        const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
           network: "testnet",
           clientId: "localhost-id",
           uxMode: "redirect"
-        }, loginSettings: {
-          // loginProvider: "google"
         }})
 
 
-        // const ethCustomAuthAdapter = getCustomauthWallet({
-        //   initSettings: {
-        //     skipInit: true,
-        //     skipSw: true,
-        //     skipPrefetch: true
-        //   },
-        //   chainConfig: {
-        //   rpcTarget: "https://polygon-rpc.com",
-        //   chainId: "0x89",
-        //   chainNamespace: CHAIN_NAMESPACES.EIP155,
-        //   networkName: "matic",
-        //   ticker: "matic",
-        //   tickerName: "matic",
-        // }, adapterSettings: {
-        //   baseUrl: "http://localhost:3000/",
-        //   redirectPathName:"",
-        //   uxMode: "redirect",
-        //   enableLogging: true,
-        //   network: "testnet", // details for test net
-        //   popupFeatures: `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=500,width=500,top=100,left=100`,
-        // }, loginSettings: {
-        //   // loginProvider: "google"
-        //   "loginProviderConfig": {
-        //     "google": {
-        //       "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-        //       "verifier": "google-lrc",
-        //     },
-        //     "facebook": {
-        //       "clientId": "617201755556395", 
-        //       "verifier": "facebook-lrc" 
-        //     }
-        //   }
-        // }
-        // })
+      const ethCustomAuthAdapter = await getCustomAuthAdapter({
+        adapterSettings: {
+          network: "testnet",
+          baseUrl: "http://localhost:3000/",
+          redirectPathName:"auth",
+        }, loginSettings: {
+          // loginProvider: "google"
+          "loginProviderConfig": {
+            "google": {
+              "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+              "verifier": "google-lrc",
+            },
+            "facebook": {
+              "clientId": "617201755556395", 
+              "verifier": "facebook-lrc" 
+            }
+          }
+        }
+        })
 
-        this.web3auth.configureWallet(openloginAdapter);
+        console.log("openloginAdapter", ethCustomAuthAdapter);
+        this.web3auth.configureAdapter(ethCustomAuthAdapter);
 
         await (this.web3auth as Web3AuthModal).initModal({
           // modalConfig: {
-          //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { visible: false }
+          //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { showOnModal: false }
           // }
         });
       } catch (error) {
-        this.console("error", error)
+        console.log("error", error);
+        this.console("error sss", error)
       }
     
     },
     async switchChain() {
+      console.log("this.namespace", this.namespace)
       if (this.namespace === 'solana') {
         await this.initEthAuth();
         localStorage.setItem("chainNamespace", this.namespace)
