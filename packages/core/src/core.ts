@@ -19,7 +19,7 @@ interface Web3AuthCoreOptions {
   chainNamespace: ChainNamespaceType;
   chainId?: number;
 }
-export class Web3Auth extends SafeEventEmitter {
+export class Web3AuthCore extends SafeEventEmitter {
   readonly options: Web3AuthCoreOptions;
 
   public connectedAdapterName: string | undefined;
@@ -61,7 +61,7 @@ export class Web3Auth extends SafeEventEmitter {
     this.initialized = true;
   }
 
-  public configureAdapter(adapter: Adapter<unknown>): Web3Auth {
+  public configureAdapter(adapter: Adapter<unknown>): Web3AuthCore {
     if (this.initialized) throw new Error("Wallets cannot be added after initialization");
     if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && adapter.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(

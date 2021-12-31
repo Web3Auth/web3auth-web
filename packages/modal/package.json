@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/modal",
+  "name": "@web3auth/web3auth",
   "version": "0.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/modal.cjs.js",
-  "module": "dist/modal.esm.js",
-  "unpkg": "dist/modal.umd.min.js",
-  "jsdelivr": "dist/modal.umd.min.js",
+  "main": "dist/web3auth.cjs.js",
+  "module": "dist/web3auth.esm.js",
+  "unpkg": "dist/web3auth.umd.min.js",
+  "jsdelivr": "dist/web3auth.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {

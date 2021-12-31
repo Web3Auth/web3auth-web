@@ -54,14 +54,14 @@
 <script lang="ts">
 import Vue from "vue";
 import { getCustomAuthAdapter, getOpenloginAdapter } from "@web3auth/core";
-import { Web3AuthModal } from "@web3auth/modal";
+import { Web3Auth } from "@web3auth/web3auth";
 import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
 import Web3 from "web3"
 
 import loader from "./assets/torus-power.svg"
-
+  
 export default Vue.extend({
   name: "app",
   data() {
@@ -71,7 +71,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.EIP155 })
+      web3auth: new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155 })
     };
   },
   components: {
@@ -93,7 +93,7 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3 })
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3 })
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace
@@ -145,18 +145,14 @@ export default Vue.extend({
         this.web3auth.configureAdapter(customAuthAdapter);
         // this.web3auth.configureAdapter(torusWalletAdapter);
 
-        await this.web3auth.initModal({
-          modalConfig: {
-            [WALLET_ADAPTERS.CUSTOM_AUTH]: {}
-          }
-        });
+        await this.web3auth.initModal();
       } catch (error) {
         this.console("error", error)
       }
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3AuthModal({ chainNamespace: CHAIN_NAMESPACES.EIP155})
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155})
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace
@@ -191,7 +187,7 @@ export default Vue.extend({
         console.log("openloginAdapter", ethCustomAuthAdapter);
         this.web3auth.configureAdapter(ethCustomAuthAdapter);
 
-        await (this.web3auth as Web3AuthModal).initModal({
+        await (this.web3auth as Web3Auth).initModal({
           // modalConfig: {
           //   [WALLET_ADAPTERS.CUSTOM_AUTH]: { showOnModal: false }
           // }
@@ -288,7 +284,7 @@ export default Vue.extend({
       const userInfo = await this.web3auth.getUserInfo();
       this.console(userInfo)
     },
-    subscribeAuthEvents(web3auth: Web3AuthModal) {
+    subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on (BASE_ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
        this.console("connected to wallet", adapterName)
        this.provider = web3auth.provider;

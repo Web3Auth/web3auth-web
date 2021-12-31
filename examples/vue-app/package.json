@@ -7,11 +7,11 @@
     "serve:local": "yarn run link-local && yarn && yarn run serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "link-local": "yalc link @web3auth/modal @web3auth/core @web3auth/base @web3auth/torus-evm-adapter @web3auth/torus-solana-adapter @web3auth/openlogin-adapter  @web3auth/metamask-adapter @web3auth/phantom-adapter   @web3auth/customauth-adapter @web3auth/ui @web3auth/solana-provider @web3auth/ethereum-provider"
+    "link-local": "yalc link @web3auth/web3auth @web3auth/core @web3auth/base @web3auth/torus-evm-adapter @web3auth/torus-solana-adapter @web3auth/openlogin-adapter  @web3auth/metamask-adapter @web3auth/phantom-adapter   @web3auth/customauth-adapter @web3auth/ui @web3auth/solana-provider @web3auth/ethereum-provider"
   },
   "dependencies": {
     "@toruslabs/openlogin-ed25519": "^1.2.0",
-    "@web3auth/modal": "file:./.yalc/@web3auth/modal",
+    "@web3auth/web3auth": "file:./.yalc/@web3auth/web3auth",
     "ts-custom-error": "^3.2.0",
     "vue": "^2.6.14",
     "web3": "^1.5.1"

@@ -9,7 +9,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
 } from "@web3auth/base";
-import { getDefaultAdapterModule, Web3Auth } from "@web3auth/core";
+import { getDefaultAdapterModule, Web3AuthCore } from "@web3auth/core";
 import LoginModal from "@web3auth/ui";
 import log from "loglevel";
 
@@ -18,12 +18,30 @@ import { WALLET_ADAPTER_TYPE } from "./constants";
 import { DefaultAdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 
-interface Web3AuthOptions {
+export interface Web3AuthOptions {
+  /**
+   * The chain namespace to use. Currently only supports "EIP155" and "SOLANA".
+   */
   chainNamespace: ChainNamespaceType;
+  /**
+   * Numeric chainId for the chainNamespace being used, by default it will be mainnet id for the provided namespace..
+   * For ex: it will be ethereum mainnet `1` for "EIP155" and solana mainnet `1` for "SOLANA".
+   *
+   * @defaultValue mainnnet id of provided chainNamespace
+   */
   chainId?: number;
-  authType?: "DAPP" | "WALLET";
+
+  /**
+   * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
+   * use external wallets like metamask, then you can use the `DAPP` authMode.
+   * If you are a wallet and only want to use you own wallet implementations along with customAuth or openlogin,
+   * then you should use `WALLET` authMode.
+   *
+   * @defaultValue `DAPP`
+   */
+  authMode?: "DAPP" | "WALLET";
 }
-export class Web3AuthModal extends Web3Auth {
+export class Web3Auth extends Web3AuthCore {
   // public for testing purpose
   public loginModal: LoginModal;
 
@@ -37,13 +55,13 @@ export class Web3AuthModal extends Web3Auth {
     super(options);
     // const defaultConfig = {};
     if (this.options.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      if (options.authType === "WALLET") {
+      if (options.authMode === "WALLET") {
         this.aggregatorModalConfig = defaultSolanaWalletModalConfig;
       } else {
         this.aggregatorModalConfig = defaultSolanaDappModalConfig;
       }
     } else if (this.options.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      if (options.authType === "WALLET") {
+      if (options.authMode === "WALLET") {
         this.aggregatorModalConfig = defaultEvmWalletModalConfig;
       } else {
         this.aggregatorModalConfig = defaultEvmDappModalConfig;
