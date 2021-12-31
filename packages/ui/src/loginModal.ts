@@ -334,11 +334,11 @@ export default class LoginModal extends SafeEventEmitter {
 
   private addWalletConnect() {
     const $walletConnect = this.$modal.querySelector(".w3ajs-wallet-connect") as HTMLDivElement;
-    const $container = this.$modal.querySelector(".w3ajs-wallet-connect__container") as HTMLDivElement;
+    const $qrImage = this.$modal.querySelector(".w3ajs-wallet-connect-qr") as HTMLImageElement;
     $walletConnect.classList.remove("w3a-wallet-connect--hidden");
 
     // TODO: Generate Wallet Connect
-    $container.innerText = "Genrate Wallet Connect UI";
+    $qrImage.src = "https://cdn.britannica.com/17/155017-050-9AC96FC8/Example-QR-code.jpg";
   }
 
   private getSocialLogins(): HTMLDivElement {
@@ -402,7 +402,10 @@ export default class LoginModal extends SafeEventEmitter {
                 <!-- Wallet Connect -->
                 <div class="w3ajs-wallet-connect w3a-wallet-connect w3a-wallet-connect--hidden">
                     <i class="w3a-wallet-connect__logo">${walletConnectIcon}</i>
-                    <div class="w3ajs-wallet-connect__container w3a-wallet-connect__container"></div>
+                    <div class="w3ajs-wallet-connect__container w3a-wallet-connect__container">
+                      <div>Scan QR code with a WalletConnect-compatible wallet</div>
+                      <img class="w3ajs-wallet-connect-qr w3a-wallet-connect-qr" src="" />
+                    </div>
                 </div>
               </div>
                 <!-- Other Wallet -->

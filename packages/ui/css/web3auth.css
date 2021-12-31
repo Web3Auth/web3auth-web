@@ -476,14 +476,24 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-    width: 100;
-    text-align: center;
+    padding: 10px 20px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    color: var(--text-color1);
+    font-size: 10px;
+    width: fit-content;
+    margin: auto;
+}
+
+.w3a-wallet-connect-qr {
+    width: 200px;
+    margin: 16px 0;
 }
 
 #w3a-modal .w3a-wallet-connect__logo > svg {
+    text-align: center;
     width: 115px;
     margin-bottom: 16px;
-    height: auto;
 }
 
 /* Text Field */
