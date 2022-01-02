@@ -65,7 +65,7 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.init();
     const adapterPromises = [];
     let hasInAppWallets = false;
-    const allAdapters = new Set(...Object.keys(this.defaultModalConfig.adapters), ...Object.keys(this.walletAdapters));
+    const allAdapters = new Set([...Object.keys(this.defaultModalConfig.adapters), ...Object.keys(this.walletAdapters)]);
     // custom configured adapters
     allAdapters.forEach(async (adapterName) => {
       const adPromise = new Promise((resolve, reject) => {

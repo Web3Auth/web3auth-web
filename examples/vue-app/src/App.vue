@@ -184,8 +184,8 @@ export default Vue.extend({
         })
 
 
-        // this.web3auth.configureAdapter(ethCustomAuthAdapter);
-        this.web3auth.configureAdapter(openloginAdapter);
+        this.web3auth.configureAdapter(ethCustomAuthAdapter);
+        // this.web3auth.configureAdapter(openloginAdapter);
         console.log("ethCustomAuthAdapter", this.web3auth)
 
         await (this.web3auth as Web3Auth).initModal({
