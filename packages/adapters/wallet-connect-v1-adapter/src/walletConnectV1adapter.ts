@@ -113,6 +113,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   setChainConfig(_: CustomChainConfig): void {}
 
+  setAdapterSettings(_: unknown): void {}
+
   private subscribeEvents(provider: WalletConnectProvider): void {
     // Subscribe to session connection
     provider.on("connect", () => {

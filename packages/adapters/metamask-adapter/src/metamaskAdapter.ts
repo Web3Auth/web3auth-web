@@ -46,6 +46,10 @@ class MetamaskAdapter extends BaseAdapter<void> {
     }
   }
 
+  setAdapterSettings(_: unknown): void {}
+
+  setChainConfig(_: CustomChainConfig): void {}
+
   async connect(): Promise<SafeEventEmitterProvider> {
     return new Promise((resolve, reject) => {
       if (!this.ready) throw WalletInitializationError.notReady("Metamask extention is not installed");
@@ -92,8 +96,6 @@ class MetamaskAdapter extends BaseAdapter<void> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
-
-  setChainConfig(_: CustomChainConfig): void {}
 
   private addEventListeners(provider: SafeEventEmitterProvider): void {
     provider.on("disconnect", () => {

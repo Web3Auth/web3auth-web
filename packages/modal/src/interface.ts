@@ -7,8 +7,7 @@ interface ModalConfig extends BaseAdapterConfig {
 
 interface AdaptersModalConfig {
   chainNamespace: ChainNamespaceType;
-  requiredAdapters: Record<string, { alternatives: string[] }>;
-  adapters?: Record<WALLET_ADAPTER_TYPE, ModalConfig & { configurationRequired?: boolean }>;
+  adapters?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
 }
 
 export { AdaptersModalConfig, LoginMethodConfig, MetamaskAdapterConfig, ModalConfig };

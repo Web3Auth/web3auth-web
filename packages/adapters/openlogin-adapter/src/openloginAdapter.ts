@@ -25,11 +25,11 @@ import log from "loglevel";
 import { getOpenloginDefaultOptions } from ".";
 import type { LoginSettings, OpenloginAdapterOptions, OpenLoginOptions } from "./interface";
 
-interface LoginParams {
+export interface OpenloginLoginParams {
   email: string;
   loginProvider: string;
 }
-class OpenloginAdapter extends BaseAdapter<LoginParams> {
+class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
@@ -58,18 +58,17 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
 
   constructor(params: OpenloginAdapterOptions) {
     super();
-    const { clientId } = params.adapterSettings;
-    if (!clientId) {
-      throw WalletInitializationError.invalidParams("clientId is required");
-    }
+    log.debug("const openlogin adapter", params);
     const defaultOptions = getOpenloginDefaultOptions(params.chainConfig?.chainNamespace, params.chainConfig?.chainId);
     this.openloginOptions = { ...defaultOptions.adapterSettings, ...params.adapterSettings };
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
     this.currentChainNamespace = params.chainConfig?.chainNamespace;
     // if no chainNamespace is passed then chain config should be set before calling init
+    log.debug("const openlogin currentChainNamespace", this.currentChainNamespace);
     if (this.currentChainNamespace) {
       const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
       this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
+      log.debug("const openlogin chainConfig", this.chainConfig);
       if (!this.chainConfig.rpcTarget) {
         throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
       }
@@ -77,6 +76,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (this.ready) return;
     const { default: OpenloginSdk, getHashQueryParams } = await import("@toruslabs/openlogin");
@@ -113,7 +113,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
+  async connect(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
     if (!this.ready) throw WalletInitializationError.notReady("Openlogin wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
@@ -142,16 +142,22 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
   }
 
   // should be called only before initialization.
+  setAdapterSettings(adapterSettings: OpenLoginOptions): void {
+    if (this.ready) return;
+    const defaultOptions = getOpenloginDefaultOptions();
+    this.openloginOptions = { ...defaultOptions.adapterSettings, ...adapterSettings };
+  }
+
+  // should be called only before initialization.
   setChainConfig(customChainConfig: CustomChainConfig): void {
     if (this.ready) return;
     this.chainConfig = { ...customChainConfig };
     this.currentChainNamespace = customChainConfig.chainNamespace;
-    // TODO: switch chain in provider as well if provider exists
   }
 
   private async setupProvider(
     providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider,
-    params?: LoginParams
+    params?: OpenloginLoginParams
   ): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
@@ -221,7 +227,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
     });
   }
 
-  private async connectWithProvider(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
     let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       providerFactory = this.solanaProviderFactory;

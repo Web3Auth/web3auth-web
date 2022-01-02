@@ -120,6 +120,8 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
   }
 
   setChainConfig(_: CustomChainConfig): void {}
+
+  setAdapterSettings(_: unknown): void {}
 }
 
 export { SolanaWalletAdapter, SolanaWalletOptions };

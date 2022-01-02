@@ -71,7 +71,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155 })
+      web3auth: new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, clientId: "localhost-id" })
     };
   },
   components: {
@@ -93,7 +93,7 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3 })
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3, clientId: "localhost-id" })
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace
@@ -142,7 +142,7 @@ export default Vue.extend({
         //     buildEnv: "testing"
         //   }
         // })
-        this.web3auth.configureAdapter(customAuthAdapter);
+        // this.web3auth.configureAdapter(customAuthAdapter);
         // this.web3auth.configureAdapter(torusWalletAdapter);
         await this.web3auth.initModal({});
       } catch (error) {
@@ -151,7 +151,7 @@ export default Vue.extend({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155})
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, clientId: "localhost-id"})
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace
@@ -183,8 +183,10 @@ export default Vue.extend({
         }
         })
 
-        console.log("openloginAdapter", ethCustomAuthAdapter);
-        this.web3auth.configureAdapter(ethCustomAuthAdapter);
+
+        // this.web3auth.configureAdapter(ethCustomAuthAdapter);
+        this.web3auth.configureAdapter(openloginAdapter);
+        console.log("ethCustomAuthAdapter", this.web3auth)
 
         await (this.web3auth as Web3Auth).initModal({
           // modalConfig: {
@@ -211,6 +213,7 @@ export default Vue.extend({
       try {
         this.web3auth.connect()
       } catch (error) {
+        console.error(error)
         this.console("error", error)
       }
     },

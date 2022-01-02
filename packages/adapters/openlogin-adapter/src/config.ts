@@ -9,7 +9,7 @@ export const getOpenloginDefaultOptions = (chainNamespace?: ChainNamespaceType, 
       clientId: "localhost-id",
       uxMode: "popup",
     },
-    chainConfig: chainNamespace && chainId ? getChainConfig(chainNamespace, chainId) : null,
+    chainConfig: chainNamespace ? getChainConfig(chainNamespace, chainId) : null,
     loginSettings: {},
   };
 };

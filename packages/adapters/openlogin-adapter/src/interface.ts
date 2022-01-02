@@ -6,6 +6,6 @@ export type { BaseRedirectParams, LoginSettings, OpenLoginOptions };
 
 export interface OpenloginAdapterOptions {
   chainConfig?: CustomChainConfig;
-  adapterSettings: OpenLoginOptions;
+  adapterSettings?: OpenLoginOptions;
   loginSettings?: LoginSettings;
 }

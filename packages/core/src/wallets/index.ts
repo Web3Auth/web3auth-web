@@ -34,8 +34,8 @@ const getOpenloginAdapter = async (params: OpenloginAdapterOptions): Promise<Ada
   return {
     name: WALLET_ADAPTERS.OPENLOGIN,
     adapter: () => {
-      const torusAdapter = new OpenloginAdapter({ ...params });
-      return torusAdapter;
+      const adapter = new OpenloginAdapter({ ...params });
+      return adapter;
     },
   };
 };

@@ -15,12 +15,21 @@ import {
 
 import { WALLET_ADAPTER_TYPE } from "./constants";
 
-interface Web3AuthCoreOptions {
+export interface Web3AuthCoreOptions {
+  /**
+   * The chain namespace to use. Currently only supports "EIP155" and "SOLANA".
+   */
   chainNamespace: ChainNamespaceType;
+  /**
+   * Numeric chainId for the chainNamespace being used, by default it will be mainnet id for the provided namespace..
+   * For ex: it will be ethereum mainnet `1` for "EIP155" and solana mainnet `1` for "SOLANA".
+   *
+   * @defaultValue mainnnet id of provided chainNamespace
+   */
   chainId?: number;
 }
 export class Web3AuthCore extends SafeEventEmitter {
-  readonly options: Web3AuthCoreOptions;
+  readonly coreOptions: Web3AuthCoreOptions;
 
   public connectedAdapterName: string | undefined;
 
@@ -39,7 +48,7 @@ export class Web3AuthCore extends SafeEventEmitter {
   constructor(options: Web3AuthCoreOptions) {
     super();
     this.cachedAdapter = window.sessionStorage.getItem("Web3Auth-cachedAdapter");
-    this.options = options;
+    this.coreOptions = options;
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
@@ -51,7 +60,7 @@ export class Web3AuthCore extends SafeEventEmitter {
       // if adapter doesn't have any chain config yet thn set it based on modal namespace and chainId.
       // this applies only to multichain adapters where chainNamespace cannot be determined from adapter.
       if (this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN && !this.walletAdapters[adapterName].currentChainNamespace) {
-        const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId);
+        const chainConfig = getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainId);
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
@@ -76,17 +85,17 @@ export class Web3AuthCore extends SafeEventEmitter {
     const adapterAlreadyExists = this.walletAdapters[adapter.name];
     if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
     const adapterInstance = adapter.adapter();
-    if (adapterInstance.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapterInstance.namespace !== this.options.chainNamespace)
+    if (adapterInstance.namespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapterInstance.namespace !== this.coreOptions.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This wallet adapter belongs to ${adapterInstance.namespace} which is incompatible with currently used namespace: ${this.options.chainNamespace}`
+        `This wallet adapter belongs to ${adapterInstance.namespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
       );
     if (
       adapterInstance.namespace === ADAPTER_NAMESPACES.MULTICHAIN &&
       adapterInstance.currentChainNamespace &&
-      this.options.chainNamespace !== adapterInstance.currentChainNamespace
+      this.coreOptions.chainNamespace !== adapterInstance.currentChainNamespace
     )
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `${adapter.name} wallet adapter belongs to ${adapterInstance.currentChainNamespace} which is incompatible with currently used namespace: ${this.options.chainNamespace}`
+        `${adapter.name} wallet adapter belongs to ${adapterInstance.currentChainNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
       );
     this.walletAdapters[adapter.name] = adapterInstance;
     return this;

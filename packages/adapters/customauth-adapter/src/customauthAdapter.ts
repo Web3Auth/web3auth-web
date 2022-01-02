@@ -122,6 +122,12 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
 
+  // should be called only before initialization.
+  setAdapterSettings(adapterSettings: CustomAuthArgs): void {
+    if (this.ready) return;
+    this.adapterSettings = { ...adapterSettings };
+  }
+
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");

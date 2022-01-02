@@ -49,6 +49,10 @@ class PhantomAdapter extends BaseAdapter<void> {
     return this._wallet && this._wallet.isConnected && this.connected;
   }
 
+  setAdapterSettings(_: unknown): void {}
+
+  setChainConfig(_: CustomChainConfig): void {}
+
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const isAvailable = this.isPhantomAvailable || (await poll(() => this.isPhantomAvailable, 1000, 3));
@@ -171,8 +175,6 @@ class PhantomAdapter extends BaseAdapter<void> {
     if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
-
-  setChainConfig(_: CustomChainConfig): void {}
 
   private _disconnected = () => {
     const wallet = this._wallet;
