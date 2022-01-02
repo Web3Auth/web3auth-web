@@ -30,7 +30,6 @@
   },
   "files": [
     "dist",
-    "types",
     "src",
     "assets/images",
     "assets/icons"
@@ -51,6 +50,7 @@
   "dependencies": {
     "@web3auth/base": "0.0.1",
     "@toruslabs/openlogin-jrpc": "^1.3.3",
+    "qrcode": "^1.5.0",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {

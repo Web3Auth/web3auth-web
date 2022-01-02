@@ -3,11 +3,12 @@ import type { CustomAuthAdapterOptions } from "@web3auth/customauth-adapter";
 import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import type { TorusWalletOptions } from "@web3auth/torus-evm-adapter";
 import type { SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
+import type { WalletConnectV1AdapterOptions } from "@web3auth/wallet-connect-v1-adapter";
 
 import { WALLET_ADAPTERS } from "../constants";
 
 const getTorusEvmAdapter = async (params: TorusWalletOptions): Promise<Adapter<unknown>> => {
-  const { TorusWalletAdapter } = await import("@web3auth/torus-evm-adapter");
+  const { TorusWalletAdapter } = await import(/* webpackChunkName: "torus-evm-adapter" */ "@web3auth/torus-evm-adapter");
   return {
     name: WALLET_ADAPTERS.TORUS_EVM,
     adapter: () => {
@@ -18,7 +19,7 @@ const getTorusEvmAdapter = async (params: TorusWalletOptions): Promise<Adapter<u
 };
 
 const getTorusSolanaAdapter = async (params: SolanaWalletOptions): Promise<Adapter<unknown>> => {
-  const { SolanaWalletAdapter } = await import("@web3auth/torus-solana-adapter");
+  const { SolanaWalletAdapter } = await import(/* webpackChunkName: "torus-solana-adapter" */ "@web3auth/torus-solana-adapter");
   return {
     name: WALLET_ADAPTERS.TORUS_SOLANA,
     adapter: () => {
@@ -29,7 +30,7 @@ const getTorusSolanaAdapter = async (params: SolanaWalletOptions): Promise<Adapt
 };
 
 const getOpenloginAdapter = async (params: OpenloginAdapterOptions): Promise<Adapter<unknown>> => {
-  const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
+  const { OpenloginAdapter } = await import(/* webpackChunkName: "openlogin-adapter" */ "@web3auth/openlogin-adapter");
   return {
     name: WALLET_ADAPTERS.OPENLOGIN,
     adapter: () => {
@@ -40,7 +41,7 @@ const getOpenloginAdapter = async (params: OpenloginAdapterOptions): Promise<Ada
 };
 
 const getCustomAuthAdapter = async (params: CustomAuthAdapterOptions): Promise<Adapter<unknown>> => {
-  const { CustomauthAdapter } = await import("@web3auth/customauth-adapter");
+  const { CustomauthAdapter } = await import(/* webpackChunkName: "custom-auth-adapter" */ "@web3auth/customauth-adapter");
 
   return {
     name: WALLET_ADAPTERS.CUSTOM_AUTH,
@@ -52,7 +53,7 @@ const getCustomAuthAdapter = async (params: CustomAuthAdapterOptions): Promise<A
 };
 
 const getMetamaskAdapter = async (): Promise<Adapter<unknown>> => {
-  const { MetamaskAdapter } = await import("@web3auth/metamask-adapter");
+  const { MetamaskAdapter } = await import(/* webpackChunkName: "metamask-adapter" */ "@web3auth/metamask-adapter");
   return {
     name: WALLET_ADAPTERS.METAMASK,
     adapter: () => {
@@ -63,7 +64,7 @@ const getMetamaskAdapter = async (): Promise<Adapter<unknown>> => {
 };
 
 const getPhantomAdapter = async (): Promise<Adapter<unknown>> => {
-  const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
+  const { PhantomAdapter } = await import(/* webpackChunkName: "phantom-adapter" */ "@web3auth/phantom-adapter");
   return {
     name: WALLET_ADAPTERS.PHANTOM,
     adapter: () => {
@@ -73,4 +74,23 @@ const getPhantomAdapter = async (): Promise<Adapter<unknown>> => {
   };
 };
 
-export { getCustomAuthAdapter, getMetamaskAdapter, getOpenloginAdapter, getPhantomAdapter, getTorusEvmAdapter, getTorusSolanaAdapter };
+const getWalletConnectV1Adapter = async (params: WalletConnectV1AdapterOptions): Promise<Adapter<unknown>> => {
+  const { WalletConnectV1Adapter } = await import(/* webpackChunkName: "wallet-connect-v1-adapter" */ "@web3auth/wallet-connect-v1-adapter");
+  return {
+    name: WALLET_ADAPTERS.WALLET_CONNECT_V1,
+    adapter: () => {
+      const adapter = new WalletConnectV1Adapter(params);
+      return adapter;
+    },
+  };
+};
+
+export {
+  getCustomAuthAdapter,
+  getMetamaskAdapter,
+  getOpenloginAdapter,
+  getPhantomAdapter,
+  getTorusEvmAdapter,
+  getTorusSolanaAdapter,
+  getWalletConnectV1Adapter,
+};

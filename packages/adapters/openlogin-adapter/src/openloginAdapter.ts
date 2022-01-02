@@ -116,7 +116,7 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
   async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     if (!this.ready) throw WalletInitializationError.notReady("Openlogin wallet adapter is not ready, please init first");
     this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params });
+    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
       return await this.connectWithProvider(params);
     } catch (error) {
@@ -141,7 +141,9 @@ class OpenloginAdapter extends BaseAdapter<LoginParams> {
     return userInfo;
   }
 
-  updateChainConfig(customChainConfig: CustomChainConfig): void {
+  // should be called only before initialization.
+  setChainConfig(customChainConfig: CustomChainConfig): void {
+    if (this.ready) return;
     this.chainConfig = { ...customChainConfig };
     this.currentChainNamespace = customChainConfig.chainNamespace;
     // TODO: switch chain in provider as well if provider exists

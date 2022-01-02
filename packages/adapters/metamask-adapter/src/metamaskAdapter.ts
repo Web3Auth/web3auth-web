@@ -15,7 +15,6 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import log from "loglevel";
 class MetamaskAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
@@ -51,7 +50,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     return new Promise((resolve, reject) => {
       if (!this.ready) throw WalletInitializationError.notReady("Metamask extention is not installed");
       this.connecting = true;
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTING);
+      this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
       try {
         this.provider = typeof window !== "undefined" && (window as any).ethereum;
         const onConnectHandler = () => {
@@ -94,9 +93,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     return {};
   }
 
-  updateChainConfig(customChainConfig: CustomChainConfig): void {
-    log.debug("new chain config for metamask", customChainConfig);
-  }
+  setChainConfig(_: CustomChainConfig): void {}
 
   private addEventListeners(provider: SafeEventEmitterProvider): void {
     provider.on("disconnect", () => {

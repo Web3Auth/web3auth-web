@@ -1,8 +1,8 @@
 import { CHAIN_NAMESPACES, EVM_ADAPTERS, SOLANA_ADAPTERS } from "@web3auth/base";
 
-import { DefaultAdaptersModalConfig } from "./interface";
+import { AdaptersModalConfig } from "./interface";
 
-export const defaultSolanaDappModalConfig: DefaultAdaptersModalConfig = {
+export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   requiredAdapters: {
     [SOLANA_ADAPTERS.OPENLOGIN]: { alternatives: [SOLANA_ADAPTERS.CUSTOM_AUTH] },
@@ -36,7 +36,7 @@ export const defaultSolanaDappModalConfig: DefaultAdaptersModalConfig = {
   },
 };
 
-export const defaultEvmDappModalConfig: DefaultAdaptersModalConfig = {
+export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   requiredAdapters: {
     [EVM_ADAPTERS.OPENLOGIN]: { alternatives: [EVM_ADAPTERS.CUSTOM_AUTH] },
@@ -68,10 +68,16 @@ export const defaultEvmDappModalConfig: DefaultAdaptersModalConfig = {
       showOnDesktop: true,
       configurationRequired: true,
     },
+    [EVM_ADAPTERS.WALLET_CONNECT_V1]: {
+      showOnModal: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+      configurationRequired: false,
+    },
   },
 };
 
-export const defaultSolanaWalletModalConfig: DefaultAdaptersModalConfig = {
+export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   requiredAdapters: {
     [SOLANA_ADAPTERS.OPENLOGIN]: { alternatives: [SOLANA_ADAPTERS.CUSTOM_AUTH] },
@@ -99,7 +105,7 @@ export const defaultSolanaWalletModalConfig: DefaultAdaptersModalConfig = {
   },
 };
 
-export const defaultEvmWalletModalConfig: DefaultAdaptersModalConfig = {
+export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   requiredAdapters: {
     [EVM_ADAPTERS.OPENLOGIN]: { alternatives: [EVM_ADAPTERS.CUSTOM_AUTH] },

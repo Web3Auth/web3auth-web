@@ -29,6 +29,7 @@ import LoginWechat from "./images/login-wechat.svg";
 import LoginWeibo from "./images/login-weibo.svg";
 import Staratlas from "./images/staratlas.svg";
 import TorusPower from "./images/torus-power.svg";
+import WalletConnect from "./images/wallet-connect.svg";
 import Web3auth from "./images/web3auth.svg";
 import Web3authLight from "./images/web3auth-light.svg";
 
@@ -144,5 +145,8 @@ export default {
   },
   expand: {
     image: Expand,
+  },
+  walletConnect: {
+    image: WalletConnect,
   },
 };

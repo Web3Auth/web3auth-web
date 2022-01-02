@@ -1,8 +1,9 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, LoginMethodConfig, WALLET_ADAPTER_TYPE, Web3AuthError } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, LoginMethodConfig, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS, WalletConnectV1Data } from "@web3auth/base";
 import log from "loglevel";
+import QRCode from "qrcode";
 
 import AllImages from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
@@ -30,7 +31,7 @@ export default class LoginModal extends SafeEventEmitter {
     errored: false,
   };
 
-  constructor({ appLogo, version, adapterListener, isDark = true }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, isDark = false }: UIConfig) {
     super();
     this.appLogo = appLogo;
     this.version = version;
@@ -43,7 +44,7 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   init() {
-    const web3authIcon = AllImages[`web3auth${this.isDark ? "-light" : ""}`]?.image;
+    const web3authIcon = AllImages[`web3auth${this.isDark ? "-light" : ""}`].image;
     const closeIcon = AllImages.close.image;
     const torusPower = AllImages["torus-power"].image;
     this.$modal = this.htmlToElement(`
@@ -58,7 +59,7 @@ export default class LoginModal extends SafeEventEmitter {
                         </div>
                     </div>
                     <button class="w3a-header__button w3ajs-close-btn">
-                        <img src="${closeIcon}" alt="">
+                        ${closeIcon}
                     </button>
                 </div>
                 <div class="w3a-modal__content w3ajs-content"></div>
@@ -72,7 +73,7 @@ export default class LoginModal extends SafeEventEmitter {
                             </div>
                             <p>${this.version}</p>
                         </div>
-                        <img height="24" src="${web3authIcon}" alt="">
+                        ${web3authIcon}
                     </div>
                 </div>
                 <div class="w3ajs-modal-loader w3a-modal__loader w3a-modal__loader--hidden">
@@ -90,11 +91,11 @@ export default class LoginModal extends SafeEventEmitter {
                           </button>
                         </div>
                         <div class="w3a-spinner-power">
-                            <img src="${torusPower}" alt="">
+                          ${torusPower}
                         </div>
                     </div>
                     <button class="w3a-header__button w3ajs-loader-close-btn">
-                        <img src="${closeIcon}" alt="">
+                      ${closeIcon}
                     </button>
                 </div>
             </div>
@@ -221,11 +222,11 @@ export default class LoginModal extends SafeEventEmitter {
       }
       this.hasSocialWallet = true;
       $socialLogins.classList.remove("w3a-group--social-hidden");
-      const providerIcon = AllImages[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}`]?.image;
+      const providerIcon = AllImages[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}`].image;
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
-                    <img class="w3a-button__image" src="${providerIcon}" alt="">
+                  ${providerIcon}
                 </button>
             </li>          
         `);
@@ -234,25 +235,21 @@ export default class LoginModal extends SafeEventEmitter {
         this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method } });
       });
 
-      // if ($adapterList.children.length < 5) {
-      //   $adapterExpand.before(adapterButton);
-      //   $adapterExpand.classList.add("w3a-adapter-item--hide");
-      // } else if ($adapterList.children.length === 5) {
-      //   $adapterExpand.after(adapterButton);
-      //   $adapterExpand.classList.add("w3a-adapter-item--hide");
-      // } else {
-      //   $adapterExpand.after(adapterButton);
-      //   $adapterExpand.classList.remove("w3a-adapter-item--hide");
-      // }
       $adapterList.append(adapterButton);
     });
   };
 
-  addWalletLogins = (adaptersConfig: Record<string, BaseAdapterConfig>, options?: { showExternalWallets: boolean }): void => {
+  addWalletLogins = (
+    adaptersConfig: Record<string, BaseAdapterConfig>,
+    adaptersData: Record<string, unknown>,
+    options?: { showExternalWallets: boolean }
+  ): void => {
+    log.info("adaptersConfig", adaptersConfig);
+    log.info("adaptersData", adaptersData);
+
     if (options.showExternalWallets) {
       this.showExternalWallets();
     }
-    const expandIcon = AllImages.expand.image;
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;
     const $adapterList = $externalWallet.querySelector(".w3ajs-wallet-adapters") as HTMLDivElement;
     const $loader = $externalWallet.querySelector(".w3ajs-external-loader") as HTMLDivElement;
@@ -268,54 +265,47 @@ export default class LoginModal extends SafeEventEmitter {
     }
 
     const adapterKeys = Object.keys(adaptersConfig);
-    const firstAdapter = adapterKeys.shift();
-    const showMore = adapterKeys.length > 0;
+    // TODO: Get Previous Login
+    const prevAdapter = "";
+    if (prevAdapter) {
+      adapterKeys.splice(adapterKeys.indexOf(prevAdapter), 1);
+      const prevAdapterIcon = AllImages[`login-${prevAdapter as string}`].image;
 
-    const firstAdapterIcon = AllImages[`login-${firstAdapter}`]?.image;
-
-    // Add main adapter
-    const mainAdapterSection = this.htmlToElement(`
+      // Add main adapter
+      const mainAdapterSection = this.htmlToElement(`
       <div class="w3a-external-group">
         <div class="w3a-external-group__left">
-            <button class="w3ajs-${firstAdapter} w3a-button ${showMore ? `w3a-button--left` : `w3a-button--left-alone`}">
-                <img class="w3a-button__image"
-                    src="${firstAdapterIcon}" alt="">
-                <div>Sign in with ${firstAdapter}</div>
+            <button class="w3ajs-${prevAdapter} w3a-button w3a-button--left">
+                ${prevAdapterIcon}
+                <div class="w3a-button__name">${prevAdapter}</div>
+                <div class="w3a-button__note">Detected</div>
             </button>
         </div>
-        ${
-          showMore
-            ? `<div>
-                  <button class="w3a-button w3ajs-button-expand w3a-button--icon">
-                      <img class="w3a-button__image" src="${expandIcon}" alt="">
-                  </button>
-              </div>`
-            : ""
-        }
       </div>
     `);
-    const $mainAdapterButton = mainAdapterSection.querySelector(`.w3ajs-${firstAdapter}`) as HTMLDivElement;
-    $mainAdapterButton.addEventListener("click", () => {
-      this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter: firstAdapter });
-    });
-
-    if (showMore) {
-      const $adapterExpandBtn = mainAdapterSection.querySelector(".w3ajs-button-expand") as HTMLDivElement;
-
-      $adapterExpandBtn.addEventListener("click", () => {
-        $adapterExpandBtn.classList.toggle("w3a-button--rotate");
-        $adapterList.classList.toggle("w3a-adapter-list--hidden");
+      const $mainAdapterButton = mainAdapterSection.querySelector(`.w3ajs-${prevAdapter}`) as HTMLDivElement;
+      $mainAdapterButton.addEventListener("click", () => {
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter: prevAdapter });
       });
+
+      $adapterList.before(mainAdapterSection);
     }
-    $adapterList.before(mainAdapterSection);
 
     adapterKeys.forEach((adapter) => {
+      if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+        const data = adaptersData[adapter] as WalletConnectV1Data;
+        log.info("uri for wallet connect qr code", data?.uri);
+        this.addWalletConnect(data?.uri);
+        // fire connect event and so that it will be start listening for incoming connections / qr code scans.
+        this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter });
+        return;
+      }
       $externalWallet.classList.remove("w3a-group--ext-wallet-hidden");
-      const providerIcon = AllImages[`login-${adapter}`]?.image;
+      const providerIcon = AllImages[`login-${adapter}`].image;
       const adapterButton = this.htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
-                    <img class="w3a-button__image" src="${providerIcon}" alt="">
+                  ${providerIcon}
                 </button>
                 <p class="w3a-adapter-item__label">${adapter}</p>
             </li>   
@@ -335,6 +325,16 @@ export default class LoginModal extends SafeEventEmitter {
     };
   };
 
+  private async addWalletConnect(qrCodeUri: string) {
+    const qrCode = await QRCode.toDataURL(qrCodeUri);
+    log.debug("wallet connect qr code uri", qrCode);
+    const $walletConnect = this.$modal.querySelector(".w3ajs-wallet-connect") as HTMLDivElement;
+    const $qrImage = this.$modal.querySelector(".w3ajs-wallet-connect-qr") as HTMLImageElement;
+    $walletConnect.classList.remove("w3a-wallet-connect--hidden");
+
+    $qrImage.src = qrCode;
+  }
+
   private getSocialLogins(): HTMLDivElement {
     const expandIcon = AllImages[`expand${this.isDark ? "-light" : ""}`].image;
     const $socialLogins = this.htmlToElement(`
@@ -342,7 +342,7 @@ export default class LoginModal extends SafeEventEmitter {
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
             <ul class="w3a-adapter-list w3a-adapter-list--shrink w3ajs-socials-adapters"></ul>
             <button class="w3a-button-expand w3ajs-button-expand">
-              <img class="w3a-button__image" src="${expandIcon}" alt="">
+              ${expandIcon}
               <span class="w3ajs-button-expand-text">View more options</span>
             </button>
         </div>
@@ -379,7 +379,8 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private getExternalWallet = (): HTMLDivElement => {
-    const arrowLeftIcon = AllImages["arrow-left"]?.image;
+    const arrowLeftIcon = AllImages["arrow-left"].image;
+    const walletConnectIcon = AllImages.walletConnect.image;
     const $externalWallet = this.htmlToElement(`
         <div class="w3ajs-external-wallet w3a-group">
             <div class="w3a-external-toggle w3ajs-external-toggle">
@@ -388,11 +389,19 @@ export default class LoginModal extends SafeEventEmitter {
             </div>
             <div class="w3a-external-container w3a-external-container--hidden w3ajs-external-container">
                 <button class="w3a-external-back w3ajs-external-back">
-                    <img src="${arrowLeftIcon}" alt="">
+                    ${arrowLeftIcon}
                     <h6 class="w3a-group__title">Back</h6>
                 </button>
 
-                <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
+                <!-- Wallet Connect -->
+                <div class="w3ajs-wallet-connect w3a-wallet-connect w3a-wallet-connect--hidden">
+                    <i class="w3a-wallet-connect__logo">${walletConnectIcon}</i>
+                    <div class="w3ajs-wallet-connect__container w3a-wallet-connect__container">
+                      <div>Scan QR code with a WalletConnect-compatible wallet</div>
+                      <img class="w3ajs-wallet-connect-qr w3a-wallet-connect-qr" src="" />
+                    </div>
+                </div>
+              </div>
                 <!-- Other Wallet -->
                 <div class="w3a-external-loader w3ajs-external-loader">
                   <div class="w3a-spinner w3a-spinner--small">
@@ -401,7 +410,7 @@ export default class LoginModal extends SafeEventEmitter {
                     <div class="w3a-spinner__head"></div>
                   </div>
                 </div>
-                <ul class="w3a-adapter-list w3a-adapter-list--hidden w3ajs-wallet-adapters"></ul>
+                <ul class="w3a-adapter-list w3ajs-wallet-adapters"></ul>
             </div>
         </div>
     `) as HTMLDivElement;
@@ -468,10 +477,15 @@ export default class LoginModal extends SafeEventEmitter {
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
     listener.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
-      const provider = (data as any)?.loginProvider || "";
-      this.state.connecting = true;
-      this.state.connected = false;
-      this.toggleLoader(provider);
+      log.debug("connecting with adapter", data);
+      // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
+      // connections without any user interaction.
+      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+        const provider = data?.loginProvider || "";
+        this.state.connecting = true;
+        this.state.connected = false;
+        this.toggleLoader(provider);
+      }
     });
     listener.on(BASE_ADAPTER_EVENTS.CONNECTED, () => {
       this.state.connecting = false;
@@ -480,8 +494,7 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_ADAPTER_EVENTS.CONNECTED);
       }
     });
-    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (data: Web3AuthError) => {
-      log.debug("[Web3Auth] Error: ", data);
+    listener.on(BASE_ADAPTER_EVENTS.ERRORED, () => {
       this.state.connecting = false;
       this.state.connected = false;
       this.toggleLoader();

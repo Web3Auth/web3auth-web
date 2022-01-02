@@ -52,7 +52,7 @@ export class Web3AuthCore extends SafeEventEmitter {
       // this applies only to multichain adapters where chainNamespace cannot be determined from adapter.
       if (this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN && !this.walletAdapters[adapterName].currentChainNamespace) {
         const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId);
-        this.walletAdapters[adapterName].updateChainConfig(chainConfig);
+        this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
     });

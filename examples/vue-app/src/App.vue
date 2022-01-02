@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomAuthAdapter, getOpenloginAdapter } from "@web3auth/core";
+import { getCustomAuthAdapter, getOpenloginAdapter, Web3AuthCore, getTorusEvmAdapter } from "@web3auth/core";
 import { Web3Auth } from "@web3auth/web3auth";
 import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
@@ -61,7 +61,7 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Me
 import Web3 from "web3"
 
 import loader from "./assets/torus-power.svg"
-  
+
 export default Vue.extend({
   name: "app",
   data() {
@@ -144,8 +144,7 @@ export default Vue.extend({
         // })
         this.web3auth.configureAdapter(customAuthAdapter);
         // this.web3auth.configureAdapter(torusWalletAdapter);
-
-        await this.web3auth.initModal();
+        await this.web3auth.initModal({});
       } catch (error) {
         this.console("error", error)
       }

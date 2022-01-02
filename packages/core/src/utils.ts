@@ -17,6 +17,10 @@ export const getDefaultAdapterModule = async (name: WALLET_ADAPTER_TYPE): Promis
     const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
     const adapter = new PhantomAdapter();
     return adapter;
+  } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
+    const { WalletConnectV1Adapter } = await import("@web3auth/wallet-connect-v1-adapter");
+    const adapter = new WalletConnectV1Adapter({});
+    return adapter;
   }
   throw new Error("Invalid wallet adapter name");
 };

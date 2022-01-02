@@ -105,7 +105,7 @@ class PhantomAdapter extends BaseAdapter<void> {
       if (!this.ready) throw WalletInitializationError.notReady("Phantom wallet adapter is not ready, please init first");
       if (this.connected || this.connecting) return;
       this.connecting = true;
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTING);
+      this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.PHANTOM });
 
       const isAvailable = this.isPhantomAvailable || (await poll(() => this.isPhantomAvailable, 1000, 3));
       if (!isAvailable) throw WalletInitializationError.notInstalled();
@@ -172,9 +172,7 @@ class PhantomAdapter extends BaseAdapter<void> {
     return {};
   }
 
-  updateChainConfig(customChainConfig: CustomChainConfig): void {
-    log.debug("new chain config for phantom", customChainConfig);
-  }
+  setChainConfig(_: CustomChainConfig): void {}
 
   private _disconnected = () => {
     const wallet = this._wallet;

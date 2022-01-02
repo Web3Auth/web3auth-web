@@ -75,7 +75,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
   async connect(): Promise<SafeEventEmitterProvider> {
     if (!this.ready) throw WalletInitializationError.notReady("Torus wallet adapter is not ready, please init first");
     this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING);
+    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
       await this.torusInstance.login(this.loginSettings);
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
@@ -105,28 +105,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
     return userInfo;
   }
 
-  updateChainConfig(customChainConfig: CustomChainConfig): void {
-    log.debug("new chain config for torus wallet", customChainConfig);
-    if (!this.torusInstance) return;
-    const { rpcTarget, chainId, displayName } = customChainConfig;
-    this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING);
-    try {
-      this.torusInstance.setProvider({
-        host: rpcTarget,
-        chainId,
-        networkName: displayName,
-      });
-      this.connected = true;
-      this.torusInstance.showTorusButton();
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM);
-    } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
-      throw WalletLoginError.connectionError("Failed to update provider");
-    } finally {
-      this.connecting = false;
-    }
-  }
+  setChainConfig(_: CustomChainConfig): void {}
 }
 
 export { TorusWalletAdapter, TorusWalletOptions };

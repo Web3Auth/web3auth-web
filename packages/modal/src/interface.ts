@@ -5,10 +5,10 @@ interface ModalConfig extends BaseAdapterConfig {
   loginMethods?: LoginMethodConfig;
 }
 
-interface DefaultAdaptersModalConfig extends BaseAdapterConfig {
+interface AdaptersModalConfig extends BaseAdapterConfig {
   chainNamespace: ChainNamespaceType;
   requiredAdapters: Record<string, { alternatives: string[] }>;
   adapters?: Record<WALLET_ADAPTER_TYPE, ModalConfig & { configurationRequired?: boolean }>;
 }
 
-export { DefaultAdaptersModalConfig, LoginMethodConfig, MetamaskAdapterConfig, ModalConfig };
+export { AdaptersModalConfig, LoginMethodConfig, MetamaskAdapterConfig, ModalConfig };

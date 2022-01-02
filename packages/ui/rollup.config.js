@@ -7,7 +7,7 @@ export default {
       plugins: [],
     }),
     svg({
-      base64: true,
+      // base64: true,
     }),
   ],
 };

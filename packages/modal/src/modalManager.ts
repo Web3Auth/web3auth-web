@@ -10,12 +10,12 @@ import {
   WalletInitializationError,
 } from "@web3auth/base";
 import { getDefaultAdapterModule, Web3AuthCore } from "@web3auth/core";
-import LoginModal from "@web3auth/ui";
+import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 
 import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
 import { WALLET_ADAPTER_TYPE } from "./constants";
-import { DefaultAdaptersModalConfig, ModalConfig } from "./interface";
+import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 
 export interface Web3AuthOptions {
@@ -45,7 +45,7 @@ export class Web3Auth extends Web3AuthCore {
   // public for testing purpose
   public loginModal: LoginModal;
 
-  private aggregatorModalConfig: DefaultAdaptersModalConfig = {
+  private aggregatorModalConfig: AdaptersModalConfig = {
     chainNamespace: CHAIN_NAMESPACES.EIP155,
     requiredAdapters: {},
     adapters: {},
@@ -137,7 +137,7 @@ export class Web3Auth extends Web3AuthCore {
                 !this.walletAdapters[adapterName].currentChainNamespace
               ) {
                 const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId);
-                this.walletAdapters[adapterName].updateChainConfig(chainConfig);
+                this.walletAdapters[adapterName].setChainConfig(chainConfig);
               }
               if (ad.type === ADAPTER_CATEGORY.IN_APP) {
                 hasInAppWallets = true;
@@ -164,7 +164,7 @@ export class Web3Auth extends Web3AuthCore {
             !this.walletAdapters[adapterName].currentChainNamespace
           ) {
             const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId);
-            this.walletAdapters[adapterName].updateChainConfig(chainConfig);
+            this.walletAdapters[adapterName].setChainConfig(chainConfig);
           }
           adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
@@ -222,6 +222,7 @@ export class Web3Auth extends Web3AuthCore {
     if (externalWalletsInitialized) return;
     const adapterPromises = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
+    const adaptersData: Record<string, unknown> = {};
 
     log.info("this.walletAdapters) ", this.walletAdapters);
     Object.keys(this.walletAdapters).forEach(async (adapterName) => {
@@ -234,12 +235,13 @@ export class Web3Auth extends Web3AuthCore {
             this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN &&
             !this.walletAdapters[adapterName].currentChainNamespace
           ) {
-            adapter.updateChainConfig(getChainConfig(this.options.chainNamespace, this.options.chainId));
+            adapter.setChainConfig(getChainConfig(this.options.chainNamespace, this.options.chainId));
           }
           adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
             .then(() => {
               adaptersConfig[adapterName] = this.aggregatorModalConfig.adapters[adapterName];
+              adaptersData[adapterName] = adapter.adapterData || {};
               resolve(adapterName);
               return true;
             })
@@ -258,18 +260,18 @@ export class Web3Auth extends Web3AuthCore {
           finalAdaptersConfig[result] = adaptersConfig[result];
         }
       });
-      this.loginModal.addWalletLogins(adaptersConfig, { ...options });
+      this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { ...options });
     }
   }
 
   private subscribeToLoginModalEvents(): void {
-    this.loginModal.on("LOGIN", async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: unknown }) => {
+    this.loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: unknown }) => {
       await this.connectTo<unknown>(params.adapter, params.loginParams);
     });
-    this.loginModal.on("INIT_EXTERNAL_WALLETS", async (params: { externalWalletsInitialized: boolean }) => {
+    this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
       await this.initExternalWalletAdapters(params.externalWalletsInitialized);
     });
-    this.loginModal.on("DISCONNECT", async () => {
+    this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       await this.logout();
     });
   }

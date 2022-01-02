@@ -9,4 +9,5 @@ export interface UIConfig {
 export const LOGIN_MODAL_EVENTS = {
   INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",
   LOGIN: "LOGIN",
+  DISCONNECT: "DISCONNECT",
 };

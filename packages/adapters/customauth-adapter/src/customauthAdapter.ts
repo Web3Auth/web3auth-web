@@ -115,6 +115,13 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
 
+  // should be called only before initialization.
+  setChainConfig(customChainConfig: CustomChainConfig): void {
+    if (this.ready) return;
+    this.chainConfig = { ...customChainConfig };
+    this.currentChainNamespace = customChainConfig.chainNamespace;
+  }
+
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
@@ -155,7 +162,7 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
   async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     if (!this.ready) throw WalletInitializationError.notReady("Customauth wallet adapter is not ready, please init first");
     this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params });
+    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
       return await this._login(params);
     } catch (error) {
@@ -187,12 +194,6 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
       verifier: this.customAuthResult.verifier,
       verifierId: this.customAuthResult.verifierId,
     };
-  }
-
-  updateChainConfig(customChainConfig: CustomChainConfig): void {
-    this.chainConfig = { ...customChainConfig };
-    this.currentChainNamespace = customChainConfig.chainNamespace;
-    // TODO: switch chain in provider as well if provider exists
   }
 
   private async setupProviderWithRedirectResult(providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider): Promise<void> {

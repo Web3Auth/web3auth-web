@@ -61,11 +61,12 @@ export interface IAdapter<T> extends SafeEventEmitter {
   connecting: boolean;
   connected: boolean;
   provider: SafeEventEmitterProvider;
+  adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
-  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
+  connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   disconnect(): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo> | null>;
-  updateChainConfig(customChainConfig: CustomChainConfig): void;
+  setChainConfig(customChainConfig: CustomChainConfig): void;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
@@ -83,11 +84,13 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract provider: SafeEventEmitterProvider;
 
+  public abstract adapterData?: unknown;
+
   abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
+  abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo> | null>;
-  abstract updateChainConfig(customChainConfig: CustomChainConfig): void;
+  abstract setChainConfig(customChainConfig: CustomChainConfig): void;
 }
 
 export interface BaseAdapterConfig {
@@ -102,3 +105,7 @@ export interface Adapter<T> {
 }
 
 export type LoginMethodConfig = LoginConfig;
+
+export interface WalletConnectV1Data {
+  uri: string;
+}
