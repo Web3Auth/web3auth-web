@@ -94,6 +94,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 }
 
 export interface BaseAdapterConfig {
+  label: string;
   showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;

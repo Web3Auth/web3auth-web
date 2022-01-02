@@ -307,7 +307,7 @@ export default class LoginModal extends SafeEventEmitter {
                 <button class="w3a-button w3a-button--icon">
                   ${providerIcon}
                 </button>
-                <p class="w3a-adapter-item__label">${adapter}</p>
+                <p class="w3a-adapter-item__label">${adaptersConfig[adapter]?.label || adapter}</p>
             </li>   
         `);
 

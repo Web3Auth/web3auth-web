@@ -10,24 +10,28 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
   },
   adapters: {
     [SOLANA_ADAPTERS.TORUS_SOLANA]: {
+      label: "Torus Sol Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: false,
     },
     [SOLANA_ADAPTERS.OPENLOGIN]: {
+      label: "OpenLogin",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [SOLANA_ADAPTERS.CUSTOM_AUTH]: {
+      label: "Custom Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [SOLANA_ADAPTERS.PHANTOM]: {
+      label: "Phantom",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -44,31 +48,35 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   },
   adapters: {
     [EVM_ADAPTERS.METAMASK]: {
-      // label: "metaMask",
+      label: "MetaMask",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: false,
     },
     [EVM_ADAPTERS.TORUS_EVM]: {
+      label: "Torus Eth Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: false,
     },
     [EVM_ADAPTERS.OPENLOGIN]: {
+      label: "OpenLogin",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [EVM_ADAPTERS.CUSTOM_AUTH]: {
+      label: "Custom Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [EVM_ADAPTERS.WALLET_CONNECT_V1]: {
+      label: "Wallet Connect",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -85,18 +93,21 @@ export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
   },
   adapters: {
     [SOLANA_ADAPTERS.TORUS_SOLANA]: {
+      label: "Torus Sol Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: false,
     },
     [SOLANA_ADAPTERS.OPENLOGIN]: {
+      label: "OpenLogin",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [SOLANA_ADAPTERS.CUSTOM_AUTH]: {
+      label: "Custom Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -113,12 +124,14 @@ export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
   },
   adapters: {
     [EVM_ADAPTERS.OPENLOGIN]: {
+      label: "OpenLogin",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
       configurationRequired: true,
     },
     [EVM_ADAPTERS.CUSTOM_AUTH]: {
+      label: "Custom Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
