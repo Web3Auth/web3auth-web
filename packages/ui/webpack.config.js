@@ -54,6 +54,9 @@ const config = generateWebpackConfig({
         use: [
           {
             loader: "svg-url-loader",
+            options: {
+              encoding: "none",
+            },
           },
         ],
       },

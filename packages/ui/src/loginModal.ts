@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 
 import AllImages from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
+import { htmlToElement } from "./utils";
 const hasLightIcons = ["apple", "github"];
 export default class LoginModal extends SafeEventEmitter {
   public $modal!: HTMLDivElement;
@@ -47,7 +48,7 @@ export default class LoginModal extends SafeEventEmitter {
     const web3authIcon = AllImages[`web3auth${this.isDark ? "-light" : ""}`].image;
     const closeIcon = AllImages.close.image;
     const torusPower = AllImages["torus-power"].image;
-    this.$modal = this.htmlToElement(`
+    this.$modal = htmlToElement(`
         <div id="w3a-modal" class="w3a-modal w3a-modal--hidden${this.isDark ? "" : " w3a-modal--light"}">
             <div class="w3a-modal__inner w3ajs-inner">
                 <div class="w3a-modal__header">
@@ -223,7 +224,7 @@ export default class LoginModal extends SafeEventEmitter {
       this.hasSocialWallet = true;
       $socialLogins.classList.remove("w3a-group--social-hidden");
       const providerIcon = AllImages[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}`].image;
-      const adapterButton = this.htmlToElement(`
+      const adapterButton = htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
                   ${providerIcon}
@@ -272,7 +273,7 @@ export default class LoginModal extends SafeEventEmitter {
       const prevAdapterIcon = AllImages[`login-${prevAdapter as string}`].image;
 
       // Add main adapter
-      const mainAdapterSection = this.htmlToElement(`
+      const mainAdapterSection = htmlToElement(`
       <div class="w3a-external-group">
         <div class="w3a-external-group__left">
             <button class="w3ajs-${prevAdapter} w3a-button w3a-button--left">
@@ -302,7 +303,7 @@ export default class LoginModal extends SafeEventEmitter {
       }
       $externalWallet.classList.remove("w3a-group--ext-wallet-hidden");
       const providerIcon = AllImages[`login-${adapter}`].image;
-      const adapterButton = this.htmlToElement(`
+      const adapterButton = htmlToElement(`
             <li class="w3a-adapter-item">
                 <button class="w3a-button w3a-button--icon">
                   ${providerIcon}
@@ -337,7 +338,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private getSocialLogins(): HTMLDivElement {
     const expandIcon = AllImages[`expand${this.isDark ? "-light" : ""}`].image;
-    const $socialLogins = this.htmlToElement(`
+    const $socialLogins = htmlToElement(`
         <div class="w3ajs-social-logins w3a-group w3a-group--social-hidden">
             <h6 class="w3a-group__title">CONTINUE WITH</h6>
             <ul class="w3a-adapter-list w3a-adapter-list--shrink w3ajs-socials-adapters"></ul>
@@ -365,7 +366,7 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   private getSocialLoginsEmail = (): HTMLDivElement => {
-    const $socialEmail = this.htmlToElement(`
+    const $socialEmail = htmlToElement(`
         <div class="w3ajs-email-passwordless w3a-group w3a-group--email-hidden">
             <h6 class="w3a-group__title">EMAIL</h6>
           <form class="w3ajs-email-passwordless-form">
@@ -381,7 +382,7 @@ export default class LoginModal extends SafeEventEmitter {
   private getExternalWallet = (): HTMLDivElement => {
     const arrowLeftIcon = AllImages["arrow-left"].image;
     const walletConnectIcon = AllImages.walletConnect.image;
-    const $externalWallet = this.htmlToElement(`
+    const $externalWallet = htmlToElement(`
         <div class="w3ajs-external-wallet w3a-group">
             <div class="w3a-external-toggle w3ajs-external-toggle">
                 <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
@@ -467,13 +468,6 @@ export default class LoginModal extends SafeEventEmitter {
       $loaderLogout.style.display = "none";
     }
   }
-
-  private htmlToElement = <T extends Element>(html: string): T => {
-    const template = window.document.createElement("template");
-    const trimmedHtml = html.trim(); // Never return a text node of whitespace as the result
-    template.innerHTML = trimmedHtml;
-    return template.content.firstChild as T;
-  };
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
     listener.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {

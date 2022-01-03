@@ -156,11 +156,11 @@ export default Vue.extend({
 
         this.namespace = this.web3auth.options.chainNamespace
       
-        const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
-          network: "testnet",
-          clientId: "localhost-id",
-          uxMode: "redirect"
-        }})
+        // const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
+        //   network: "testnet",
+        //   clientId: "localhost-id",
+        //   uxMode: "redirect"
+        // }})
 
 
       const ethCustomAuthAdapter = await getCustomAuthAdapter({

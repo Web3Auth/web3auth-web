@@ -1,3 +1,4 @@
+import { htmlToElement } from "../src/utils";
 import CircleArrowLeft from "./icons/circle-arrow-left.svg";
 import Close from "./icons/close.svg";
 import Expand from "./icons/expand.svg";
@@ -46,107 +47,111 @@ const images = importAll(require.context("../assets/images", false, /\.(png|jpe?
 const icons = importAll(require.context("../assets/icons", false, /\.(png|jpe?g|svg)$/));
 
 export { icons, images };
+
+const getImageSrc = (image: string): string => {
+  return !image.startsWith("<svg") ? `<img src="${image}" alt="">` : image;
+};
 export default {
   "login-apple": {
-    image: LoginApple,
+    image: getImageSrc(LoginApple),
   },
   "login-apple-light": {
-    image: LoginAppleLight,
+    image: getImageSrc(LoginAppleLight),
   },
   "login-custom-auth": {
-    image: LoginCustomAuthWallet,
+    image: getImageSrc(LoginCustomAuthWallet),
   },
   "login-discord": {
-    image: LoginDiscord,
+    image: getImageSrc(LoginDiscord),
   },
   "login-email": {
-    image: LoginEmail,
+    image: getImageSrc(LoginEmail),
   },
   "login-email_password": {
-    image: LoginEmailPassword,
+    image: getImageSrc(LoginEmailPassword),
   },
   "login-facebook": {
-    image: LoginFacebook,
+    image: getImageSrc(LoginFacebook),
   },
   "login-github": {
-    image: LoginGithub,
+    image: getImageSrc(LoginGithub),
   },
   "login-github-light": {
-    image: LoginGithubLight,
+    image: getImageSrc(LoginGithubLight),
   },
   "login-google": {
-    image: LoginGoogle,
+    image: getImageSrc(LoginGoogle),
   },
   "login-jwt": {
-    image: LoginJwt,
+    image: getImageSrc(LoginJwt),
   },
   "login-kakao": {
-    image: LoginKakao,
+    image: getImageSrc(LoginKakao),
   },
   "login-line": {
-    image: LoginLine,
+    image: getImageSrc(LoginLine),
   },
   "login-linkedin": {
-    image: LoginLinkedin,
+    image: getImageSrc(LoginLinkedin),
   },
   "login-metamask": {
-    image: LoginMetamaskWallet,
+    image: getImageSrc(LoginMetamaskWallet),
   },
   "login-openlogin": {
-    image: LoginOpenloginWallet,
+    image: getImageSrc(LoginOpenloginWallet),
   },
   "login-phantom": {
-    image: LoginPhantomWallet,
+    image: getImageSrc(LoginPhantomWallet),
   },
   "login-reddit": {
-    image: LoginReddit,
+    image: getImageSrc(LoginReddit),
   },
   "login-telegram": {
-    image: LoginTelegram,
+    image: getImageSrc(LoginTelegram),
   },
   "login-torus-evm": {
-    image: LoginTorusEvmWallet,
+    image: getImageSrc(LoginTorusEvmWallet),
   },
   "login-torus-solana": {
-    image: LoginTorusSolanaWallet,
+    image: getImageSrc(LoginTorusSolanaWallet),
   },
   "login-twitch": {
-    image: LoginTwitch,
+    image: getImageSrc(LoginTwitch),
   },
   "login-twitter": {
-    image: LoginTwitter,
+    image: getImageSrc(LoginTwitter),
   },
   "login-wechat": {
-    image: LoginWechat,
+    image: getImageSrc(LoginWechat),
   },
   "login-weibo": {
-    image: LoginWeibo,
+    image: getImageSrc(LoginWeibo),
   },
   staratlas: {
-    image: Staratlas,
+    image: getImageSrc(Staratlas),
   },
   "torus-power": {
-    image: TorusPower,
+    image: getImageSrc(TorusPower),
   },
   web3auth: {
-    image: Web3auth,
+    image: getImageSrc(Web3auth),
   },
   "web3auth-light": {
-    image: Web3authLight,
+    image: getImageSrc(Web3authLight),
   },
   "arrow-left": {
-    image: CircleArrowLeft,
+    image: getImageSrc(CircleArrowLeft),
   },
   close: {
-    image: Close,
+    image: getImageSrc(Close),
   },
   "expand-light": {
-    image: ExpandLight,
+    image: getImageSrc(ExpandLight),
   },
   expand: {
-    image: Expand,
+    image: getImageSrc(Expand),
   },
   walletConnect: {
-    image: WalletConnect,
+    image: getImageSrc(WalletConnect),
   },
 };
