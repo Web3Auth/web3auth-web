@@ -3,7 +3,7 @@ import { Connection, SystemProgram, PublicKey, LAMPORTS_PER_SOL, Transaction } f
 import { SolanaProviderWrapper } from "@web3auth/solana-provider"
 
 export const signAndSendTransaction  = async (provider: SafeEventEmitterProvider, console: any) => {
-    try {
+  try {
       const conn = new Connection("https://api.devnet.solana.com")
       const solWeb3 = new SolanaProviderWrapper(provider)
       const pubKey = await solWeb3.requestAccounts()
@@ -17,7 +17,7 @@ export const signAndSendTransaction  = async (provider: SafeEventEmitterProvider
       let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
       const signature = await solWeb3.signAndSendTransaction(transaction)
       console("signature", signature)
-    } catch (error) {
-      console("error", error)
-    }
+  } catch (error) {
+    console("error", error)
   }
+}

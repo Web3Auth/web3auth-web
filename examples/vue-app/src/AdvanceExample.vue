@@ -198,7 +198,6 @@ export default Vue.extend({
     
     },
     async switchChain() {
-      console.log("this.namespace", this.namespace)
       if (this.namespace === 'solana') {
         await this.initEthAuth();
         localStorage.setItem("chainNamespace", this.namespace)
@@ -215,7 +214,7 @@ export default Vue.extend({
         this.console("error", error)
       }
     },
-     async logout(){
+    async logout(){
       await this.web3auth.logout();
       this.provider = undefined
     },
@@ -252,7 +251,5 @@ export default Vue.extend({
       }
     },
   },
-  
-  
 });
 </script>
