@@ -1,4 +1,3 @@
-import { htmlToElement } from "../src/utils";
 import CircleArrowLeft from "./icons/circle-arrow-left.svg";
 import Close from "./icons/close.svg";
 import Expand from "./icons/expand.svg";
