@@ -300,6 +300,7 @@ export default class LoginModal extends SafeEventEmitter {
       $adapterList.before(mainAdapterSection);
     }
 
+    this.addWalletConnect();
     adapterKeys.forEach((adapter) => {
       if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const data = adaptersData[adapter] as WalletConnectV1Data;
@@ -334,11 +335,45 @@ export default class LoginModal extends SafeEventEmitter {
 
   private addWalletConnect() {
     const $walletConnect = this.$modal.querySelector(".w3ajs-wallet-connect") as HTMLDivElement;
-    const $qrImage = this.$modal.querySelector(".w3ajs-wallet-connect-qr") as HTMLImageElement;
+    const $qrImage = $walletConnect.querySelector(".w3ajs-wallet-connect-qr") as HTMLImageElement;
+    const $adapterList = $walletConnect.querySelector(".w3ajs-wallet-connect__list") as HTMLLIElement;
     $walletConnect.classList.remove("w3a-wallet-connect--hidden");
 
     // TODO: Generate Wallet Connect
     $qrImage.src = "https://cdn.britannica.com/17/155017-050-9AC96FC8/Example-QR-code.jpg";
+
+    const adapters = ["google", "facebook"];
+
+    adapters.forEach((adapter) => {
+      const $adapterImage = AllImages[`login-${adapter}${this.isDark && hasLightIcons.includes(adapter) ? "-light" : ""}`].image;
+      const $adapter = this.htmlToElement(`<li>
+        <div>Ledger Live</div>
+        <button class="w3a-button w3a-button--icon">${$adapterImage}</button>
+      </li>`);
+      $adapterList.appendChild($adapter);
+      $adapter.addEventListener("click", () => {
+        // eslint-disable-next-line no-console
+        console.log("method", adapter);
+      });
+    });
+
+    const $toggleQR = $walletConnect.querySelector(".w3ajs-wallet-connect__toggle-qr") as HTMLLIElement;
+    const $toggleDesktop = $walletConnect.querySelector(".w3ajs-wallet-connect__toggle-desktop") as HTMLLIElement;
+    const $containerQr = $walletConnect.querySelector(".w3ajs-wallet-connect__container-qr") as HTMLDivElement;
+    const $containerDesktop = $walletConnect.querySelector(".w3ajs-wallet-connect__container-desktop") as HTMLDivElement;
+    $containerDesktop.style.display = "none";
+    $toggleQR.addEventListener("click", () => {
+      $containerQr.style.display = "block";
+      $containerDesktop.style.display = "none";
+      $toggleQR.classList.add("w3a-wallet-connect__toggle-item--active");
+      $toggleDesktop.classList.remove("w3a-wallet-connect__toggle-item--active");
+    });
+    $toggleDesktop.addEventListener("click", () => {
+      $containerQr.style.display = "none";
+      $containerDesktop.style.display = "block";
+      $toggleDesktop.classList.add("w3a-wallet-connect__toggle-item--active");
+      $toggleQR.classList.remove("w3a-wallet-connect__toggle-item--active");
+    });
   }
 
   private getSocialLogins(): HTMLDivElement {
@@ -403,8 +438,19 @@ export default class LoginModal extends SafeEventEmitter {
                 <div class="w3ajs-wallet-connect w3a-wallet-connect w3a-wallet-connect--hidden">
                     <i class="w3a-wallet-connect__logo">${walletConnectIcon}</i>
                     <div class="w3ajs-wallet-connect__container w3a-wallet-connect__container">
-                      <div>Scan QR code with a WalletConnect-compatible wallet</div>
-                      <img class="w3ajs-wallet-connect-qr w3a-wallet-connect-qr" src="" />
+                      <!-- TODO: Set toggle hidden for now -->
+                      <ul class="w3a-wallet-connect__toggle" style="display:none">
+                        <li class="w3a-wallet-connect__toggle-item w3a-wallet-connect__toggle-item--active w3ajs-wallet-connect__toggle-qr">QR Code</li>
+                        <li class="w3a-wallet-connect__toggle-item w3ajs-wallet-connect__toggle-desktop">Desktop</li>
+                      </ul>
+                      <div class="w3ajs-wallet-connect__container-qr">
+                        <div>Scan QR code with a WalletConnect-compatible wallet</div>
+                        <img class="w3ajs-wallet-connect-qr w3a-wallet-connect-qr" src="" />
+                      </div>
+                      <div class="w3ajs-wallet-connect__container-desktop" style="display: none;">
+                        <div>Choose your preferred wallet</div>
+                        <ul class="w3ajs-wallet-connect__list w3a-wallet-connect-list"></ul>
+                      </div>
                     </div>
                 </div>
               </div>
