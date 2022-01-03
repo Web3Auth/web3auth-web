@@ -82,21 +82,18 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     });
   }
 
+  // intentionally not emitting or setting connecting here
   async connect(): Promise<void> {
     if (!this.ready) throw WalletInitializationError.notReady("Wallet connect adapter is not ready");
     if (this.walletConnectProvider.connected) {
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
       return;
     }
-    this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
     try {
       this.subscribeEvents(this.walletConnectProvider);
     } catch (error) {
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with wallet connect");
-    } finally {
-      this.connecting = false;
     }
   }
 
