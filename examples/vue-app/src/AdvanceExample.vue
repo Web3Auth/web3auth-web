@@ -36,12 +36,9 @@
       }"
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer;">{{ loginButtonStatus }} Connect</button>
-      <!-- <button v-if="!connected" @click="loginWithTorusWallet" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Torus Wallet)</button>
-      <button v-if="!connected" @click="loginWithOpenlogin" style="cursor: pointer;">{{ loginButtonStatus }} (Login with Openlogin)</button> -->
       <button v-if="connected" @click="logout" style="cursor: pointer;">logout</button>
-      <button v-if="connected && provider && namespace === 'solana'" @click="signAndSendTransaction" style="cursor: pointer;">Sign and send Transaction</button>
-      <button v-if="connected && provider && namespace === 'eip155'" @click="sendEth" style="cursor: pointer;">Send Eth</button>
-      <button v-if="connected && provider && namespace === 'eip155'" @click="signEthMessage" style="cursor: pointer;">Sign eth message</button>
+      <SolRpc v-if="connected && provider && namespace === 'solana'" :provider="provider" :console="console"></SolRpc>
+      <EthRpc v-if="connected && provider && namespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer;">Get User Info</button>
 
     </section>
@@ -56,9 +53,8 @@ import Vue from "vue";
 import { getCustomAuthAdapter, getOpenloginAdapter, Web3AuthCore, getTorusEvmAdapter } from "@web3auth/core";
 import { Web3Auth } from "@web3auth/web3auth";
 import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
-import { SolanaProviderWrapper } from "@web3auth/solana-provider"
-import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, Message } from "@solana/web3.js";
-import Web3 from "web3"
+import EthRpc from "./ethRpc.vue" 
+import SolRpc from "./solanaRpc.vue" 
 
 import loader from "./assets/torus-power.svg"
 
@@ -75,7 +71,9 @@ export default Vue.extend({
     };
   },
   components: {
-    loaderSvg: loader
+    loaderSvg: loader,
+    EthRpc,
+    SolRpc,
   },
   async mounted() {
     try {
@@ -217,67 +215,6 @@ export default Vue.extend({
         this.console("error", error)
       }
     },
-    async signAndSendTransaction() {
-      try {
-        const conn = new Connection("https://api.devnet.solana.com")
-        const solWeb3 = new SolanaProviderWrapper(this.provider)
-        const pubKey = await solWeb3.requestAccounts()
-
-        const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-        const TransactionInstruction = SystemProgram.transfer({
-          fromPubkey: new PublicKey(pubKey[0]),
-          toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
-          lamports: 0.01 * LAMPORTS_PER_SOL
-        });
-        let transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
-        const signature = await solWeb3.signAndSendTransaction(transaction)
-        this.console("signature", signature)
-      } catch (error) {
-        this.console("error", error)
-      }
-    },
-    async sendEth() {
-      try {
-        const pubKey = await this.provider.request({ method: "eth_accounts" })
-        console.log("pubKey", pubKey)
-        const web3 = new Web3(this.provider);
-        const blockNumber = await this.provider.request({ method: "eth_getBlockByNumber", params: ["latest", false] })
-        const txRes = await web3.eth.sendTransaction({ from: "0x2c7536E3605D9C16a7a3D7b1898e529396a65c23", to: pubKey[0], value: web3.utils.toWei("0.01") })
-        this.console("txRes", txRes)
-      } catch (error) {
-        this.console("error", error)
-      }
-    },
-    async signEthMessage() {
-      try {
-        const pubKey = await this.provider.request({ method: "eth_accounts" })
-        const web3 = new Web3();
-        web3.setProvider(this.provider)
-        // hex message
-        const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-        (web3.currentProvider as any)?.send(
-          {
-            method: "eth_sign",
-            params: [pubKey[0], message],
-            from: pubKey[0],
-          },
-          (err: Error, result: any) => {
-            if (err) {
-              return this.console(err);
-            }
-            this.console("sign message => true", result);
-          }
-        );
-      } catch (error) {
-        this.console("error", error)
-      }
-    },
-    // async loginWithOpenlogin(){
-    //   await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN_WALLET)
-    // },
-    // async loginWithTorusWallet(){
-    //   await this.web3auth.connectTo(WALLET_ADAPTERS.TORUS_EVM_WALLET)
-    // },
      async logout(){
       await this.web3auth.logout();
       this.provider = undefined
