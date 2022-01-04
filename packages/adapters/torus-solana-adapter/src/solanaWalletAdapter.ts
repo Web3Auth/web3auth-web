@@ -16,7 +16,8 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import type { TorusInjectedProviderProxy } from "@web3auth/solana-provider";
+import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
+import type { InjectedProvider, SolanaInjectedProviderConfig } from "@web3auth/solana-provider";
 import log from "loglevel";
 
 import type { Torus } from "./interface";
@@ -30,6 +31,8 @@ interface SolanaWalletOptions {
   loginSettings?: LoginParams;
   initParams?: TorusParams;
 }
+type ProviderFactory = BaseProvider<SolanaInjectedProviderConfig, BaseProviderState, InjectedProvider>;
+
 class SolanaWalletAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
@@ -53,7 +56,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private loginSettings: LoginParams = {};
 
-  private solanaProviderProxy: TorusInjectedProviderProxy;
+  private solanaProviderProxy: ProviderFactory;
 
   constructor(params: SolanaWalletOptions) {
     super();
@@ -67,11 +70,13 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
-    const { TorusInjectedProviderProxy: SolanaProviderProxy } = await import("@web3auth/solana-provider");
+    const { TorusInjectedProvider: SolanaProviderProxy } = await import("@web3auth/solana-provider");
     this.solanaProviderProxy = new SolanaProviderProxy({
-      config: {},
+      config: {
+        chainConfig: { chainId: "" },
+      },
     });
-    await this.solanaProviderProxy.init();
+    this.solanaProviderProxy.init();
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
@@ -91,9 +96,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      this.provider = this.solanaProviderProxy.setupProviderFromInjectedProvider({
-        provider: this.torusInstance.provider,
-      });
+      this.provider = this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
       this.connected = true;
       this.torusInstance.showTorusButton();
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);

@@ -18,8 +18,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import log from "loglevel";
 
 import { getOpenloginDefaultOptions } from ".";
@@ -29,6 +28,7 @@ export interface OpenloginLoginParams {
   email: string;
   loginProvider: string;
 }
+type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
@@ -52,9 +52,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private chainConfig: CustomChainConfig | null;
 
-  private solanaProviderFactory: SolanaPrivKeyProvider;
-
-  private ethereumProviderFactory: EthereumPrivateKeyProvider;
+  private providerFactory: ProviderFactory;
 
   constructor(params: OpenloginAdapterOptions) {
     super();
@@ -88,13 +86,13 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
     await this.openloginInstance.init();
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivKeyProvider } = await import("@web3auth/solana-provider");
-      this.solanaProviderFactory = new SolanaPrivKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.solanaProviderFactory.init();
+      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      await this.providerFactory.init();
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.ethereumProviderFactory.init();
+      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      await this.providerFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -105,7 +103,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     try {
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
       if (this.openloginInstance.privKey && (options.autoConnect || isRedirectResult)) {
-        await this.connectWithProvider();
+        await this.connectWithProvider(this.providerFactory);
       }
     } catch (error) {
       log.error("Failed to connect with cached openlogin provider", error);
@@ -118,7 +116,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.connecting = true;
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
-      return await this.connectWithProvider(params);
+      return await this.connectWithProvider(this.providerFactory, params);
     } catch (error) {
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with openlogin");
@@ -155,10 +153,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
 
-  private async setupProvider(
-    providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider,
-    params?: OpenloginLoginParams
-  ): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(providerFactory: ProviderFactory, params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (providerFactory.state._errored) {
@@ -225,19 +220,6 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         reject(error);
       });
     });
-  }
-
-  private async connectWithProvider(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
-    let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      providerFactory = this.solanaProviderFactory;
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      providerFactory = this.ethereumProviderFactory;
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
-
-    return this.setupProvider(providerFactory, params);
   }
 }
 

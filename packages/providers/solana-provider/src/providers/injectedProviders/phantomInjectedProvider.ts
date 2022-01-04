@@ -2,11 +2,12 @@ import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
-import { BaseProvider } from "@web3auth/base-provider";
+import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 
 import { SOLANA_NETWORKS, SolanaWallet } from "../../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
+import { SolanaInjectedProviderConfig } from ".";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 
 export interface PhantomWallet extends SolanaWallet {
@@ -19,8 +20,13 @@ export interface PhantomWallet extends SolanaWallet {
 }
 
 // TODO: Add support for changing chainId
-export class PhantomInjectedProvider extends BaseProvider<PhantomWallet> {
+export class PhantomInjectedProvider extends BaseProvider<SolanaInjectedProviderConfig, BaseProviderState, PhantomWallet> {
   public _providerProxy!: SafeEventEmitterProvider;
+
+  constructor({ config, state }: { config?: SolanaInjectedProviderConfig; state?: BaseProviderState }) {
+    super({ config, state });
+    if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
+  }
 
   public setupProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
     if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
@@ -68,7 +74,7 @@ export class PhantomInjectedProvider extends BaseProvider<PhantomWallet> {
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [],
-          chainId: "", // Phantom doesn't have a chainId yet
+          chainId: this.config.chainConfig.chainId, // Phantom doesn't have a chainId yet
           isUnlocked: this.state._initialized,
         };
         end();
@@ -91,7 +97,7 @@ export class PhantomInjectedProvider extends BaseProvider<PhantomWallet> {
     return this._providerProxy;
   }
 
-  protected async lookupNetwork(phantomProvider: PhantomWallet): Promise<void> {
+  protected async lookupNetwork(phantomProvider: PhantomWallet): Promise<string> {
     const genesisHash = await phantomProvider.request<string>({
       method: "getGenesisHash",
       params: [],
@@ -104,5 +110,6 @@ export class PhantomInjectedProvider extends BaseProvider<PhantomWallet> {
           SOLANA_NETWORKS[chainConfig.chainId] || chainConfig.displayName
         } from phantom wallet extention.`
       );
+    return genesisHash.substring(0, 32);
   }
 }

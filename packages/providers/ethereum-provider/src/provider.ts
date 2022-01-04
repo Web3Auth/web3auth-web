@@ -30,12 +30,12 @@ import { createJsonRpcClient } from "./jrpcClient";
 import { createRandomId } from "./utils";
 import { MessageParams, TransactionParams, TypedMessageParams } from "./walletMidddleware";
 
-interface EthereumProviderConfig extends BaseConfig {
+export interface EthereumPrivKeyProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
 
 // TODO: Add support for changing chainId
-export class EthereumPrivateKeyProvider extends BaseProvider<string> {
+export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProviderConfig, BaseProviderState, string> {
   // Assigned in setupProvider
   public _providerProxy!: SafeEventEmitterProvider;
 
@@ -44,15 +44,9 @@ export class EthereumPrivateKeyProvider extends BaseProvider<string> {
   // Assigned in fetch only provider
   private rpcProvider!: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
-  constructor({ config, state }: { config: EthereumProviderConfig; state?: BaseProviderState }) {
+  constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: BaseProviderState }) {
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     super({ config, state });
-    this.defaultState = {
-      _initialized: false,
-      _errored: false,
-      error: null,
-      chainId: "loading",
-    };
     this.chainConfig = {
       ...config.chainConfig,
       chainNamespace: CHAIN_NAMESPACES.EIP155,

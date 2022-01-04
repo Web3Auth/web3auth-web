@@ -14,8 +14,11 @@ export interface BaseProviderConfig extends BaseConfig {
   chainConfig: Partial<CustomChainConfig>;
 }
 
-export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig, BaseProviderState> implements IBaseProvider<T> {
-  constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
+export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, T>
+  extends BaseController<C, S>
+  implements IBaseProvider<T>
+{
+  constructor({ config, state }: { config?: C; state?: S }) {
     super({ config, state });
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     this.defaultState = {
@@ -23,10 +26,10 @@ export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig,
       _errored: false,
       error: null,
       chainId: "loading",
-    };
+    } as S;
     this.defaultConfig = {
       chainConfig: config.chainConfig,
-    };
+    } as C;
   }
 
   public init(provider?: T): void {
@@ -36,7 +39,7 @@ export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig,
           _initialized: true,
           _errored: false,
           error: null,
-        });
+        } as S);
         this.emit(PROVIDER_EVENTS.INITIALIZED);
         return true;
       })
@@ -44,7 +47,7 @@ export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig,
         this.update({
           _errored: true,
           error,
-        });
+        } as S);
         this.emit(PROVIDER_EVENTS.ERRORED, { error });
       });
   }

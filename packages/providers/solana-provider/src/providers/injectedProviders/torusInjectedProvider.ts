@@ -2,16 +2,22 @@ import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
-import { BaseProvider } from "@web3auth/base-provider";
+import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
 import { SOLANA_NETWORKS } from "../../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
-import { createInjectedProviderProxyMiddleware, InjectedProvider } from "./injectedProviderProxy";
+import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
+import { InjectedProvider, SolanaInjectedProviderConfig } from "./interface";
 
-export class TorusInjectedProvider extends BaseProvider<InjectedProvider> {
+export class TorusInjectedProvider extends BaseProvider<SolanaInjectedProviderConfig, BaseProviderState, InjectedProvider> {
   public _providerProxy!: SafeEventEmitterProvider;
+
+  constructor({ config, state }: { config?: SolanaInjectedProviderConfig; state?: BaseProviderState }) {
+    super({ config, state });
+    if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
+  }
 
   public setupProvider(injectedProvider: InjectedProvider): SafeEventEmitterProvider {
     if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
@@ -113,7 +119,7 @@ export class TorusInjectedProvider extends BaseProvider<InjectedProvider> {
     return this._providerProxy;
   }
 
-  protected async lookupNetwork(torusProvider: InjectedProvider): Promise<void> {
+  protected async lookupNetwork(torusProvider: InjectedProvider): Promise<string> {
     const genesisHash = await torusProvider.request<string>({
       method: "getGenesisHash",
       params: [],
@@ -126,5 +132,6 @@ export class TorusInjectedProvider extends BaseProvider<InjectedProvider> {
           SOLANA_NETWORKS[chainConfig.chainId] || chainConfig.displayName
         } from torus wallet`
       );
+    return genesisHash.substring(0, 32);
   }
 }

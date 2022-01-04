@@ -19,14 +19,16 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import log from "loglevel";
 
 import { getCustomAuthDefaultOptions } from "./config";
 import CustomAuthStore from "./customAuthStore";
 import type { CustomAuthAdapterOptions, CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
 import { parseDirectAuthResult, parseTriggerLoginResult } from "./utils";
+
+type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
+
 interface LoginParams {
   email: string;
   loginProvider: string;
@@ -70,9 +72,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   private chainConfig: CustomChainConfig;
 
-  private solanaProviderFactory: SolanaPrivKeyProvider;
-
-  private ethereumProviderFactory: EthereumPrivateKeyProvider;
+  private providerFactory: ProviderFactory;
 
   private store: CustomAuthStore;
 
@@ -132,18 +132,15 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (this.ready) return;
     const { default: Customauth } = await import("@toruslabs/customauth");
     this.customAuthInstance = new Customauth(this.adapterSettings);
-    let providerFactory: EthereumPrivateKeyProvider | SolanaPrivKeyProvider;
     await this.customAuthInstance.init(this.initSettings);
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivKeyProvider } = await import("@web3auth/solana-provider");
-      this.solanaProviderFactory = new SolanaPrivKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.solanaProviderFactory.init();
-      providerFactory = this.solanaProviderFactory;
+      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      await this.providerFactory.init();
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.ethereumProviderFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.ethereumProviderFactory.init();
-      providerFactory = this.ethereumProviderFactory;
+      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      await this.providerFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -153,11 +150,11 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     try {
       // if adapter is already connected and cached then we can proceed to setup the provider
       if (this.customAuthResult.privateKey && options.autoConnect) {
-        await this.setupProvider(providerFactory);
+        await this.setupProvider(this.providerFactory);
       }
       // if adapter is not connected then we should check if url contains redirect login result
       if (!this.customAuthResult.privateKey) {
-        await this.setupProviderWithRedirectResult(providerFactory);
+        await this.setupProviderWithRedirectResult(this.providerFactory);
       }
     } catch (error) {
       log.error("Failed to parse direct auth result", error);
@@ -166,15 +163,15 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   }
 
   async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
-    if (!this.ready) throw WalletInitializationError.notReady("Customauth wallet adapter is not ready, please init first");
+    if (!this.ready) throw WalletInitializationError.notReady("CustomAuth wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
-      return await this._login(params);
+      return await this.setupProvider(this.providerFactory, params);
     } catch (error) {
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       log.error("Error while connecting to custom auth", error);
-      throw WalletLoginError.connectionError("Failed to login with openlogin");
+      throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     } finally {
       this.connecting = false;
     }
@@ -202,7 +199,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     };
   }
 
-  private async setupProviderWithRedirectResult(providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider): Promise<void> {
+  private async setupProviderWithRedirectResult(providerFactory: ProviderFactory): Promise<void> {
     const url = new URL(window.location.href);
     const hash = url.hash.substring(1);
     const queryParams = {};
@@ -233,10 +230,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  private async setupProvider(
-    providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider,
-    params?: LoginParams
-  ): Promise<SafeEventEmitterProvider | null> {
+  private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (providerFactory.state._errored) {
@@ -325,18 +319,6 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
       });
     }
     this.customAuthResult = { ...this.customAuthResult, ...result };
-  }
-
-  private async _login(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
-    let providerFactory: SolanaPrivKeyProvider | EthereumPrivateKeyProvider;
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      providerFactory = this.solanaProviderFactory;
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      providerFactory = this.ethereumProviderFactory;
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
-    return this.setupProvider(providerFactory, params);
   }
 }
 

@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",
+    "@web3auth/base-provider": "^0.0.0",
     "@web3auth/solana-provider": "0.0.0",
     "@web3auth/ethereum-provider": "0.0.1",
     "@toruslabs/openlogin-jrpc": "^1.3.3",
