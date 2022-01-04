@@ -60,7 +60,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   ready: boolean;
   connecting: boolean;
   connected: boolean;
-  provider: SafeEventEmitterProvider;
+  provider: SafeEventEmitterProvider | undefined;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | void>;
@@ -85,7 +85,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract connected: boolean;
 
-  public abstract provider: SafeEventEmitterProvider;
+  public abstract provider: SafeEventEmitterProvider | undefined;
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;

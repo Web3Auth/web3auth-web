@@ -16,7 +16,6 @@ export const getCustomAuthDefaultOptions = (chainNamespace?: ChainNamespaceType,
       skipSw: true,
       skipPrefetch: true,
     },
-    chainConfig: chainNamespace && chainId ? getChainConfig(chainNamespace, chainId) : null,
-    loginSettings: null,
+    chainConfig: chainNamespace && chainId ? getChainConfig(chainNamespace, chainId) : undefined,
   };
 };

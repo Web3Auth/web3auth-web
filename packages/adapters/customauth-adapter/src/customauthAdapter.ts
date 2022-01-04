@@ -1,4 +1,3 @@
-// /* eslint-disable no-console */
 import type CustomAuth from "@toruslabs/customauth";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
@@ -52,27 +51,31 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
-  public currentChainNamespace: ChainNamespaceType;
+  // should be overrided in contructor or from setChainConfig function
+  // before calling init function.
+  public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
-  public customAuthInstance: CustomAuth;
+  public customAuthInstance!: CustomAuth;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public connected: boolean;
+  public connected = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider | undefined;
 
   public readonly loginSettings: LoginSettings;
 
-  private adapterSettings: CustomAuthArgs;
+  private adapterSettings: CustomAuthArgs | undefined;
 
   private initSettings: InitParams;
 
-  private chainConfig: CustomChainConfig;
+  // should be added in contructor or from setChainConfig function
+  // before calling init function.
+  private chainConfig!: CustomChainConfig;
 
-  private providerFactory: ProviderFactory;
+  private providerFactory!: ProviderFactory;
 
   private store: CustomAuthStore;
 
@@ -97,18 +100,17 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (!adapterSettings.redirectPathName) {
       throw WalletInitializationError.invalidParams("redirectPathName is required in adapter settings");
     }
-    this.adapterSettings = adapterSettings;
+    this.adapterSettings = adapterSettings as CustomAuthArgs;
     this.loginSettings = loginSettings;
     this.initSettings = initSettings;
 
-    this.currentChainNamespace = params.chainConfig?.chainNamespace;
-    // if no currentChainNamespace is passed then chain config should be set before calling init
-    if (this.currentChainNamespace) {
-      const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
-      this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
-      if (!this.chainConfig.rpcTarget) {
-        throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
-      }
+    if (params.chainConfig?.chainNamespace) {
+      this.currentChainNamespace = params.chainConfig?.chainNamespace;
+    }
+    const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
+    this.chainConfig = { ...defaultChainIdConfig, ...(params?.chainConfig || {}) } as CustomChainConfig;
+    if (!this.chainConfig.rpcTarget) {
+      throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
     }
 
     this.store = CustomAuthStore.getInstance();
@@ -125,11 +127,14 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   // should be called only before initialization.
   setAdapterSettings(adapterSettings: CustomAuthArgs): void {
     if (this.ready) return;
-    this.adapterSettings = { ...adapterSettings };
+    const defaultOptions = getCustomAuthDefaultOptions();
+    this.adapterSettings = { ...defaultOptions.adapterSettings, ...adapterSettings };
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
+    if (!this.adapterSettings) throw WalletInitializationError.invalidParams("adapterSettings is required for customAuth adapter");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required for customAuth adapter");
     const { default: Customauth } = await import("@toruslabs/customauth");
     this.customAuthInstance = new Customauth(this.adapterSettings);
     await this.customAuthInstance.init(this.initSettings);
@@ -162,12 +167,13 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
+  async connect(params?: LoginParams): Promise<void> {
     if (!this.ready) throw WalletInitializationError.notReady("CustomAuth wallet adapter is not ready, please init first");
     this.connecting = true;
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
-      return await this.setupProvider(this.providerFactory, params);
+      await this.setupProvider(this.providerFactory, params);
+      return;
     } catch (error) {
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       log.error("Error while connecting to custom auth", error);
@@ -202,7 +208,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   private async setupProviderWithRedirectResult(providerFactory: ProviderFactory): Promise<void> {
     const url = new URL(window.location.href);
     const hash = url.hash.substring(1);
-    const queryParams = {};
+    const queryParams: Record<string, string> = {};
     url.searchParams.forEach((value, key) => {
       queryParams[key] = value;
     });
@@ -224,13 +230,13 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
       return;
     }
     this.customAuthResult = parseDirectAuthResult(redirectResult);
-    this._syncCustomauthResult(this.customAuthResult);
+    this._syncCustomauthResult(this.customAuthResult as Record<string, any>);
     if (this.customAuthResult.privateKey) {
       await this.setupProvider(providerFactory);
     }
   }
 
-  private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
+  private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<void> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (providerFactory.state._errored) {
@@ -238,8 +244,8 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
         reject(providerFactory.state.error);
         return;
       }
-      const getProvider = async (): Promise<SafeEventEmitterProvider | null> => {
-        const listener = ({ reason }) => {
+      const setProvider = async (): Promise<void> => {
+        const listener = ({ reason }: { reason: Error }) => {
           switch (reason?.message?.toLowerCase()) {
             case "user closed popup":
               reason = WalletInitializationError.windowClosed(reason.message);
@@ -262,43 +268,43 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
               ...this.loginSettings?.loginProviderConfig?.[params.loginProvider],
               typeOfLogin: params.loginProvider as LOGIN_TYPE,
             });
-            if (this.adapterSettings.uxMode === "popup") {
+            if (this.adapterSettings?.uxMode === "popup") {
               const parsedResult = parseTriggerLoginResult(result);
-              this._syncCustomauthResult(parsedResult);
+              this._syncCustomauthResult(parsedResult as Record<string, any>);
               finalPrivKey = parsedResult.privateKey;
-            } else {
-              return;
             }
+            return;
           }
           if (finalPrivKey) {
             if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            return providerFactory.setupProvider(finalPrivKey);
+            this.provider = providerFactory.setupProvider(finalPrivKey);
+            return;
           }
-          return null;
+          return;
         } catch (err: unknown) {
-          listener({ reason: err });
+          listener({ reason: err as Error });
           throw err;
         } finally {
           window.removeEventListener("unhandledrejection", listener);
         }
       };
       if (providerFactory.state._initialized) {
-        this.provider = await getProvider();
+        await setProvider();
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
-        resolve(this.provider);
+        resolve();
         return;
       }
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        this.provider = await getProvider();
+        await setProvider();
         if (this.provider) {
           this.connected = true;
           this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
         }
         // provider can be null in redirect mode
-        resolve(this.provider);
+        resolve();
       });
       providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
         this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
@@ -307,18 +313,15 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     });
   }
 
-  private _syncCustomauthResult(result?: TorusDirectAuthResult): void {
+  private _syncCustomauthResult(result?: Record<string, unknown>): void {
     if (result) {
-      if (typeof result !== "object") {
-        throw new Error("expected store to be an object");
-      }
-      Object.keys(result).forEach((key) => {
+      Object.keys(result).forEach((key: string) => {
         if (typeof result[key] === "string") {
-          this.store.set(key, result[key]);
+          this.store.set(key, result[key] as string);
         }
       });
+      this.customAuthResult = { ...this.customAuthResult, ...result };
     }
-    this.customAuthResult = { ...this.customAuthResult, ...result };
   }
 }
 

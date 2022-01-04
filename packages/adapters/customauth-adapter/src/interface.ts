@@ -32,7 +32,7 @@ export type TorusDirectAuthResult = {
   typeOfUser: UserType;
 } & TorusKeyPub;
 
-interface LoginSettings {
+export interface LoginSettings {
   loginProviderConfig: Record<
     string,
     {
@@ -53,7 +53,6 @@ export {
   CustomAuthArgs,
   InitParams,
   LOGIN_TYPE,
-  LoginSettings,
   LoginWindowResponse,
   RedirectResult,
   TorusAggregateLoginResponse,

@@ -22,7 +22,7 @@ export default class CustomauthStore {
 
   static getInstance(): CustomauthStore {
     if (!this.instance) {
-      this.instance = new this(sessionStorageAvailable ? window.sessionStorage : new MemoryStore());
+      this.instance = new this(sessionStorageAvailable ? (window.sessionStorage as IStore) : new MemoryStore());
     }
     return this.instance;
   }
