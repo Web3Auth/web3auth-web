@@ -1,12 +1,13 @@
 import { Transaction } from "@solana/web3.js";
-import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { BaseProvider } from "@web3auth/base-provider";
 import bs58 from "bs58";
 
-import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
-import { SolanaWallet } from "../interface";
-import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
+import { SOLANA_NETWORKS, SolanaWallet } from "../../interface";
+import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
+import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 
 export interface PhantomWallet extends SolanaWallet {
   isPhantom?: boolean;
@@ -17,38 +18,11 @@ export interface PhantomWallet extends SolanaWallet {
   _handleDisconnect(...args: unknown[]): unknown;
 }
 
-interface SolanaInjectedProviderState extends BaseState {
-  _initialized: boolean;
-  _errored: boolean;
-  error: Error | null;
-}
-
-type SolanaInjectedProviderConfig = BaseConfig;
-
 // TODO: Add support for changing chainId
-export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedProviderConfig, SolanaInjectedProviderState> {
+export class PhantomInjectedProvider extends BaseProvider<PhantomWallet> {
   public _providerProxy!: SafeEventEmitterProvider;
 
-  constructor({ config, state }: { config?: SolanaInjectedProviderConfig; state?: SolanaInjectedProviderState }) {
-    super({ config, state });
-    this.defaultState = {
-      _initialized: false,
-      _errored: false,
-      error: null,
-    };
-    this.init();
-  }
-
-  public async init(): Promise<void> {
-    this.update({
-      _initialized: true,
-      _errored: false,
-      error: null,
-    });
-    this.emit(PROVIDER_EVENTS.INITIALIZED);
-  }
-
-  public setupProviderFromInjectedProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
+  public setupProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
     if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
@@ -101,7 +75,7 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
       },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
-    const injectedProviderProxy = createInjectedProviderProxyMiddleware({ provider: injectedProvider });
+    const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);
     engine.push(injectedProviderProxy);
@@ -115,5 +89,20 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
     } as SafeEventEmitterProvider;
     this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
     return this._providerProxy;
+  }
+
+  protected async lookupNetwork(phantomProvider: PhantomWallet): Promise<void> {
+    const genesisHash = await phantomProvider.request<string>({
+      method: "getGenesisHash",
+      params: [],
+    });
+    const { chainConfig } = this.config;
+    if (!genesisHash) throw WalletInitializationError.rpcConnectionError(`Failed to connect with phantom wallet`);
+    if (chainConfig.chainId !== genesisHash.substring(0, 32))
+      throw WalletInitializationError.invalidNetwork(
+        `Wallet is connected to wrong network,Please change your network to ${
+          SOLANA_NETWORKS[chainConfig.chainId] || chainConfig.displayName
+        } from phantom wallet extention.`
+      );
   }
 }

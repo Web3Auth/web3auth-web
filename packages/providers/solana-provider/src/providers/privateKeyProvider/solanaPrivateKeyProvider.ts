@@ -1,11 +1,15 @@
 import type { Keypair, Transaction } from "@solana/web3.js";
-import { BaseConfig, BaseController, BaseState, createFetchMiddleware, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { BaseConfig, BaseState, createFetchMiddleware, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import nacl from "@toruslabs/tweetnacl-js";
 import { CustomChainConfig, PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { BaseProvider } from "@web3auth/base-provider";
 import bs58 from "bs58";
+import { ethErrors } from "eth-rpc-errors";
 
-import { createJsonRpcClient } from "../JrpcClient";
-import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
+import { createJsonRpcClient } from "../../JrpcClient";
+import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
+import { createRandomId } from "../../utils";
 
 interface SolanaProviderState extends BaseState {
   _initialized: boolean;
@@ -16,32 +20,26 @@ interface SolanaProviderState extends BaseState {
 interface SolanaProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
-export class SolanaPrivKeyProvider extends BaseController<SolanaProviderConfig, SolanaProviderState> {
-  public _providerProxy: SafeEventEmitterProvider;
+export class SolanaPrivateKeyProvider extends BaseProvider<string> {
+  public _providerProxy!: SafeEventEmitterProvider;
 
   readonly chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 
-  private transactionGenerator: (serializedTx: string) => Transaction;
+  private transactionGenerator!: (serializedTx: string) => Transaction;
 
-  private keyPairGenerator: (privKey: string) => Keypair;
+  private keyPairGenerator!: (privKey: string) => Keypair;
 
   constructor({ config, state }: { config: SolanaProviderConfig & Pick<SolanaProviderConfig, "chainConfig">; state?: SolanaProviderState }) {
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainconfig");
     super({ config, state });
-    this.defaultState = {
-      _initialized: false,
-      _errored: false,
-      error: null,
-    };
     this.chainConfig = config.chainConfig;
-    this.init();
   }
 
   public static getProviderInstance = async (params: {
     privKey: string;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
   }): Promise<SafeEventEmitterProvider> => {
-    const providerFactory = new SolanaPrivKeyProvider({ config: { chainConfig: params.chainConfig } });
+    const providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     return new Promise((resolve, reject) => {
       // wait for provider to get ready
       providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
@@ -65,26 +63,11 @@ export class SolanaPrivKeyProvider extends BaseController<SolanaProviderConfig, 
     this.keyPairGenerator = (privKey: string): Keypair => {
       return SolKeyPair.fromSecretKey(Buffer.from(privKey, "hex"));
     };
-    this.lookupNetwork()
-      .then(() => {
-        this.update({
-          _initialized: true,
-          _errored: false,
-          error: null,
-        });
-        this.emit(PROVIDER_EVENTS.INITIALIZED);
-        return true;
-      })
-      .catch((error) => {
-        this.update({
-          _errored: true,
-          error,
-        });
-        this.emit(PROVIDER_EVENTS.ERRORED, { error });
-      });
+    super.init();
   }
 
   public setupProvider(privKey: string): SafeEventEmitterProvider {
+    if (typeof privKey !== "string") throw WalletInitializationError.invalidParams("privKey must be a string");
     if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
     const keyPair = this.keyPairGenerator(privKey);
 
@@ -93,28 +76,49 @@ export class SolanaPrivKeyProvider extends BaseController<SolanaProviderConfig, 
         return [keyPair.publicKey.toBase58()];
       },
       getAccounts: async () => [keyPair.publicKey.toBase58()],
-      // signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-      //   const transaction = this.transactionGenerator(req.params?.message);
-      //   transaction.partialSign(keyPair);
-      //   return transaction;
-      // },
+      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+        if (!req.params?.message) {
+          throw ethErrors.rpc.invalidParams("message");
+        }
+        const transaction = this.transactionGenerator(req.params?.message as string);
+        transaction.partialSign(keyPair);
+        return transaction;
+      },
+      signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
+        if (!req.params?.message) {
+          throw ethErrors.rpc.invalidParams("message");
+        }
+        const signedMsg = nacl.sign.detached(req.params.message, keyPair.secretKey);
+        return signedMsg;
+      },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        const transaction = this.transactionGenerator(req.params?.message);
+        if (!req.params?.message) {
+          throw ethErrors.rpc.invalidParams("message");
+        }
+        const transaction = this.transactionGenerator(req.params?.message as string);
         transaction.partialSign(keyPair);
 
         const fetchOnlyProvider = this.getFetchOnlyProvider();
-        const sig = await sendRpcRequest<string[], string>(fetchOnlyProvider, "sendTransaction", [bs58.encode(transaction.serialize())]);
+        const sig = await fetchOnlyProvider.sendAsync<string[], string>({
+          jsonrpc: "2.0",
+          id: createRandomId(),
+          method: "sendTransaction",
+          params: [bs58.encode(transaction.serialize())],
+        });
         return { signature: sig };
       },
-      // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-      //   const signedTransactions: Transaction[] = [];
-      //   for (const tx of req.params?.message || []) {
-      //     const transaction = this.transactionGenerator(tx);
-      //     transaction.partialSign(keyPair);
-      //     signedTransactions.push(transaction);
-      //   }
-      //   return signedTransactions;
-      // },
+      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+        if (!req.params?.message || !req.params?.message.length) {
+          throw ethErrors.rpc.invalidParams("message");
+        }
+        const signedTransactions: Transaction[] = [];
+        for (const tx of req.params?.message || []) {
+          const transaction = this.transactionGenerator(tx);
+          transaction.partialSign(keyPair);
+          signedTransactions.push(transaction);
+        }
+        return signedTransactions;
+      },
       getProviderState: (req, res, _, end) => {
         res.result = {
           accounts: [keyPair.publicKey.toBase58()],
@@ -140,20 +144,27 @@ export class SolanaPrivKeyProvider extends BaseController<SolanaProviderConfig, 
     return this._providerProxy;
   }
 
+  protected async lookupNetwork(): Promise<void> {
+    const fetchOnlyProvider = this.getFetchOnlyProvider();
+    const genesisHash = await fetchOnlyProvider.sendAsync<string[], string>({
+      jsonrpc: "2.0",
+      id: createRandomId(),
+      method: "getGenesisHash",
+      params: [],
+    });
+    if (!genesisHash)
+      throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${this.chainConfig.rpcTarget}`);
+    if (this.chainConfig.chainId !== genesisHash.substring(0, 32))
+      throw WalletInitializationError.invalidProviderConfigError(
+        `Provided rpcTarget ${this.chainConfig.rpcTarget} does not belongs to configured chainId ${this.chainConfig.chainId}`
+      );
+  }
+
   private getFetchOnlyProvider(): SafeEventEmitterProvider {
     const engine = new JRPCEngine();
     const networkMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     return provider;
-  }
-
-  private async lookupNetwork(): Promise<void> {
-    const fetchOnlyProvider = this.getFetchOnlyProvider();
-    const res = await sendRpcRequest<[], string>(fetchOnlyProvider, "getHealth", []);
-    if (res !== "ok")
-      throw WalletInitializationError.rpcConnectionError(
-        `Failed to lookup network for following rpc target: ${this.chainConfig.rpcTarget}, lookup status is: ${res}`
-      );
   }
 }

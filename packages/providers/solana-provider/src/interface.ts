@@ -1,7 +1,18 @@
-import type { Transaction } from "@solana/web3.js";
+import type { Cluster, Transaction } from "@solana/web3.js";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments } from "@web3auth/base";
 
+export const SOLANA_CHAIN_IDS: Record<Cluster, string> = {
+  devnet: "8E9rvCKLFQia2Y35HXjjpWzj8weVo44K",
+  "mainnet-beta": "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ",
+  testnet: "0x0", // TDOD: get testnet chain id
+};
+
+export const SOLANA_NETWORKS: Record<string, Cluster> = {
+  "8E9rvCKLFQia2Y35HXjjpWzj8weVo44K": "devnet",
+  "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ": "mainnet-beta",
+  "0x0": "testnet", // TDOD: get testnet chain id
+};
 export interface ISolanaWallet {
   publicKey?: { toBytes(): Uint8Array };
   signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;

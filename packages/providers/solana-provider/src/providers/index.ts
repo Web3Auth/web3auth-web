@@ -1,3 +1,2 @@
-export * from "./phantomSolanaProvider";
-export * from "./solanaPrivKeyProvider";
-export * from "./torusSolanaProvider";
+export * from "./injectedProviders";
+export * from "./privateKeyProvider";

@@ -53,6 +53,7 @@ export class WalletInitializationError extends Web3AuthError {
     5009: "Provider is not ready yet",
     5010: "Failed to connect with rpc url",
     5011: "Invalid params passed in",
+    5013: "Invalid network provided",
   };
 
   public constructor(code: number, message?: string) {
@@ -110,6 +111,10 @@ export class WalletInitializationError extends Web3AuthError {
 
   public static invalidParams(extraMessage = ""): IWeb3AuthError {
     return WalletInitializationError.fromCode(5011, extraMessage);
+  }
+
+  public static invalidNetwork(extraMessage = ""): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5013, extraMessage);
   }
 }
 
