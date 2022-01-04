@@ -137,9 +137,13 @@
 
 #w3a-modal .w3a-spinner-power {
     margin-top: auto;
+    font-size: 12px;
+    line-height: 1.2em;
+    color: var(--text-color2);
 }
-#w3a-modal .w3a-spinner-power img {
-    height: 30px;
+#w3a-modal .w3a-spinner-power > svg {
+    height: 14px;
+    width: auto;
 }
 
 #w3a-modal .w3a-spinner {
@@ -537,7 +541,7 @@
 }
 
 #w3a-modal .w3a-footer__links a {
-    color: var(--text-color2);
+    color: var(--text-color1);
     text-decoration: none;
 }
 
@@ -549,12 +553,21 @@
     margin: 0 2px;
 }
 
+#w3a-modal .w3a-footer__secured {
+    text-align: right;
+}
+#w3a-modal .w3a-footer__secured > svg {
+    height: 14px;
+    width: auto;
+}
+
+
 /* LIGHT MODE */
 #w3a-modal.w3a-modal--light {
     --bg1: #ffffff;
     --bg2: #f9f9fb;
-    --text-color1: #6f717a;
-    --text-color2: #0f1222;
+    --text-color1: #A2A5B5;
+    --text-color2: #5C6C7F;
 }
 
 #w3a-modal .w3a-group:not(.w3a-group--hidden):not(:last-child),
@@ -569,7 +582,7 @@
     background-color: #ffffff;
     border: 1px solid #f3f3f4;
     box-shadow: none;
-    color: #595857;
+    color: #B7B8BD;
 }
 
 #w3a-modal.w3a-modal--light button.w3a-button:focus-visible {
