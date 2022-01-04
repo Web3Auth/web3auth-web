@@ -22,7 +22,6 @@ export type CustomChainConfig = {
    * RPC target Url for the chain
    */
   rpcTarget: string;
-
   /**
    * Display Name for the chain
    */
@@ -30,7 +29,7 @@ export type CustomChainConfig = {
   /**
    * Url of the block explorer
    */
-  blockExplorer?: string;
+  blockExplorer: string;
   /**
    * Default currency ticker of the network (e.g: ETH)
    */

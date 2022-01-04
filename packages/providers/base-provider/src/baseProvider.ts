@@ -1,25 +1,28 @@
 import { BaseConfig, BaseController, BaseState, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { CustomChainConfig, PROVIDER_EVENTS, WalletInitializationError } from "@web3auth/base";
 
-import { IBaseProvider } from ".";
+import { IBaseProvider } from "./IBaseProvider";
 
 export interface BaseProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
   error: Error | null;
+  chainId: string;
 }
 
-interface BaseProviderConfig extends BaseConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+export interface BaseProviderConfig extends BaseConfig {
+  chainConfig: Partial<CustomChainConfig>;
 }
+
 export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig, BaseProviderState> implements IBaseProvider<T> {
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config, state });
-    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainconfig");
+    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     this.defaultState = {
       _initialized: false,
       _errored: false,
       error: null,
+      chainId: "loading",
     };
     this.defaultConfig = {
       chainConfig: config.chainConfig,
@@ -48,5 +51,5 @@ export abstract class BaseProvider<T> extends BaseController<BaseProviderConfig,
 
   abstract setupProvider(provider: T): SafeEventEmitterProvider;
 
-  protected abstract lookupNetwork(provider?: T): Promise<void>;
+  protected abstract lookupNetwork(provider?: T): Promise<string>;
 }

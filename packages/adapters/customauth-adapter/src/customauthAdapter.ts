@@ -23,8 +23,8 @@ import type { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import type { SolanaPrivKeyProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
-import { getCustomAuthDefaultOptions } from ".";
-import CustomauthStore from "./customAuthStore";
+import { getCustomAuthDefaultOptions } from "./config";
+import CustomAuthStore from "./customAuthStore";
 import type { CustomAuthAdapterOptions, CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
 import { parseDirectAuthResult, parseTriggerLoginResult } from "./utils";
 interface LoginParams {
@@ -45,7 +45,7 @@ const DEFAULT_CUSTOM_AUTH_RES: TorusDirectAuthResult = {
   typeOfLogin: "google",
   typeOfUser: "v1",
 };
-class CustomauthAdapter extends BaseAdapter<LoginParams> {
+class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
@@ -74,7 +74,7 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
 
   private ethereumProviderFactory: EthereumPrivateKeyProvider;
 
-  private store: CustomauthStore;
+  private store: CustomAuthStore;
 
   private customAuthResult: TorusDirectAuthResult = {
     ...DEFAULT_CUSTOM_AUTH_RES,
@@ -111,7 +111,7 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
       }
     }
 
-    this.store = CustomauthStore.getInstance();
+    this.store = CustomAuthStore.getInstance();
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
 
@@ -340,4 +340,4 @@ class CustomauthAdapter extends BaseAdapter<LoginParams> {
   }
 }
 
-export { CustomauthAdapter };
+export { CustomAuthAdapter as CustomauthAdapter };

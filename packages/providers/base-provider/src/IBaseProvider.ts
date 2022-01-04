@@ -1,4 +1,4 @@
-import { SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import type { SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 
 export interface IBaseProvider<T> {
   init(provider?: T): void;
