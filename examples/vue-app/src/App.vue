@@ -41,8 +41,10 @@ export default Vue.extend({
   methods: {
     async switchExampleMode() {
       if (this.exampleMode === 'advance') {
+        this.exampleMode = "beginner"
         localStorage.setItem("exampleMode", "beginner")
-      } else if (this.exampleMode === 'beginner') {
+      } else {
+        this.exampleMode = "advance"
         localStorage.setItem("exampleMode", "advance")
       }
     },

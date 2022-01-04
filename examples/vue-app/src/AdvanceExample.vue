@@ -50,9 +50,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomAuthAdapter, getOpenloginAdapter, Web3AuthCore, getTorusEvmAdapter } from "@web3auth/core";
+import { getCustomAuthAdapter, getOpenloginAdapter, getTorusSolanaAdapter } from "@web3auth/core";
 import { Web3Auth } from "@web3auth/web3auth";
-import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
+import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue" 
 import SolRpc from "./solanaRpc.vue" 
 
@@ -135,13 +135,13 @@ export default Vue.extend({
           uxMode: "popup"
         }})
 
-        // const torusWalletAdapter = await getTorusSolanaAdapter({
-        //   initParams: {
-        //     buildEnv: "testing"
-        //   }
-        // })
-        // this.web3auth.configureAdapter(customAuthAdapter);
-        // this.web3auth.configureAdapter(torusWalletAdapter);
+        const torusWalletAdapter = await getTorusSolanaAdapter({
+          initParams: {
+            buildEnv: "testing"
+          }
+        })
+        this.web3auth.configureAdapter(customAuthAdapter);
+        this.web3auth.configureAdapter(torusWalletAdapter);
         await this.web3auth.initModal({});
       } catch (error) {
         this.console("error", error)
