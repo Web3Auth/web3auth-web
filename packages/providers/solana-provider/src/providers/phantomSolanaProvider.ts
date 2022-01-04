@@ -1,11 +1,13 @@
+import { Transaction } from "@solana/web3.js";
 import { BaseConfig, BaseController, BaseState, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { PROVIDER_EVENTS, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import bs58 from "bs58";
 
 import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
 import { SolanaWallet } from "../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
+
 export interface PhantomWallet extends SolanaWallet {
   isPhantom?: boolean;
   publicKey?: { toBytes(): Uint8Array };
@@ -14,17 +16,18 @@ export interface PhantomWallet extends SolanaWallet {
   disconnect(): Promise<void>;
   _handleDisconnect(...args: unknown[]): unknown;
 }
+
 interface SolanaInjectedProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
-  error: Error;
+  error: Error | null;
 }
 
 type SolanaInjectedProviderConfig = BaseConfig;
-export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedProviderConfig, SolanaInjectedProviderState> {
-  public _providerProxy: SafeEventEmitterProvider;
 
-  readonly chainConfig: CustomChainConfig;
+// TODO: Add support for changing chainId
+export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedProviderConfig, SolanaInjectedProviderState> {
+  public _providerProxy!: SafeEventEmitterProvider;
 
   constructor({ config, state }: { config?: SolanaInjectedProviderConfig; state?: SolanaInjectedProviderState }) {
     super({ config, state });
@@ -49,49 +52,49 @@ export class SolanaInjectedProviderProxy extends BaseController<SolanaInjectedPr
     if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
-        return [bs58.encode(injectedProvider.publicKey.toBytes())];
+        return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
       },
-      getAccounts: async () => [bs58.encode(injectedProvider.publicKey)],
-      // signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-      //   const transaction = (await injectedProvider.request({
-      //     method: "signTransaction",
-      //     params: {
-      //       message: req.params?.message,
-      //     },
-      //   })) as Transaction;
-      //   return transaction;
-      // },
+      getAccounts: async () => (injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : []),
+      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+        const transaction = await injectedProvider.request<Transaction>({
+          method: "signTransaction",
+          params: {
+            message: req.params?.message,
+          },
+        });
+        return transaction;
+      },
       signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-        const message = (await injectedProvider.request({
+        const message = await injectedProvider.request<Uint8Array>({
           method: "signMessage",
           params: {
             message: req.params?.message,
           },
-        })) as Uint8Array;
+        });
         return message;
       },
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        const txRes = (await injectedProvider.request({
+        const txRes = await injectedProvider.request<{ signature: string }>({
           method: "signAndSendTransaction",
           params: {
             message: req.params?.message,
           },
-        })) as { signature: string };
+        });
         return { signature: txRes.signature };
       },
-      // signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-      //   const transaction = (await injectedProvider.request({
-      //     method: "signAllTransactions",
-      //     params: {
-      //       message: req.params?.message,
-      //     },
-      //   })) as Transaction[];
-      //   return transaction;
-      // },
+      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+        const transaction = await injectedProvider.request<Transaction[]>({
+          method: "signAllTransactions",
+          params: {
+            message: req.params?.message,
+          },
+        });
+        return transaction;
+      },
       getProviderState: (req, res, _, end) => {
         res.result = {
-          accounts: [""],
-          chainId: this.chainConfig.chainId,
+          accounts: injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [],
+          chainId: "", // Phantom doesn't have a chainId yet
           isUnlocked: this.state._initialized,
         };
         end();

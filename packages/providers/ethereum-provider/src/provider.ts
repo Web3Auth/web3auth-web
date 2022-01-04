@@ -40,7 +40,7 @@ import { MessageParams, TransactionParams, TypedMessageParams } from "./walletMi
 interface EthereumProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
-  error: Error;
+  error: Error | null;
   network: string;
 }
 
@@ -50,11 +50,13 @@ interface EthereumProviderConfig extends BaseConfig {
 
 // TODO: Add support for changing chainId
 export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderConfig, EthereumProviderState> {
-  public _providerProxy: SafeEventEmitterProvider;
+  // Assigned in setupProvider
+  public _providerProxy!: SafeEventEmitterProvider;
 
   readonly chainConfig: CustomChainConfig;
 
-  private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
+  // Assigned in fetch only provider
+  private rpcProvider!: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
   constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");

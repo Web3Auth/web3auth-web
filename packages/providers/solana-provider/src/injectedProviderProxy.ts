@@ -2,7 +2,7 @@ import { createAsyncMiddleware, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequ
 import { RequestArguments } from "@web3auth/base";
 
 export interface InjectedProviderOptions {
-  provider: { request(args: RequestArguments): Promise<unknown> };
+  provider: { request<T>(args: RequestArguments): Promise<T> };
 }
 
 export function createInjectedProviderProxyMiddleware({ provider }: InjectedProviderOptions): JRPCMiddleware<unknown, unknown> {

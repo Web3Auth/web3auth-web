@@ -6,7 +6,7 @@ export interface RequestArguments {
   params?: unknown[] | object;
 }
 
-export type Maybe<T> = Partial<T> | null | undefined;
+export type Maybe<T> = T | Partial<T> | null | undefined;
 
 export interface SafeEventEmitterProvider extends SafeEventEmitter {
   sendAsync: <T, U>(req: JRPCRequest<T>) => Promise<U>;

@@ -14,10 +14,10 @@ import {
 export interface IProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  signTransaction?: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
-  signAllTransactions?: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
+  signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
+  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
   signAndSendTransaction: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
-  signMessage?: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
+  signMessage: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
   getProviderState: (
     req: JRPCRequest<[]>,
     res: JRPCResponse<InPageWalletProviderState>,
@@ -67,9 +67,7 @@ export function createGenericJRPCMiddleware<T, U>(
     if (!handler) throw new Error(`WalletMiddleware - ${targetMethod} not provided`);
 
     const result = await handler(request);
-    if (!result) {
-      return next();
-    }
+
     response.result = result;
     return undefined;
   });

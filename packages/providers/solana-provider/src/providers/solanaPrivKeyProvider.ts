@@ -6,11 +6,11 @@ import bs58 from "bs58";
 
 import { createJsonRpcClient } from "../JrpcClient";
 import { createSolanaMiddleware, IProviderHandlers } from "../solanaRpcMiddlewares";
-import { sendRpcRequest } from "../utils";
+
 interface SolanaProviderState extends BaseState {
   _initialized: boolean;
   _errored: boolean;
-  error: Error;
+  error: Error | null;
 }
 
 interface SolanaProviderConfig extends BaseConfig {
