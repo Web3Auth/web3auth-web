@@ -2,19 +2,18 @@ import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
-import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { SOLANA_NETWORKS } from "../../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
-import { InjectedProvider, SolanaInjectedProviderConfig } from "./interface";
+import { InjectedProvider } from "./interface";
 
-export class TorusInjectedProvider extends BaseProvider<SolanaInjectedProviderConfig, BaseProviderState, InjectedProvider> {
+export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
   public _providerProxy!: SafeEventEmitterProvider;
 
-  constructor({ config, state }: { config?: SolanaInjectedProviderConfig; state?: BaseProviderState }) {
+  constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config, state });
     if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
   }
@@ -94,10 +93,20 @@ export class TorusInjectedProvider extends BaseProvider<SolanaInjectedProviderCo
         return signedTransactions;
       },
 
-      getProviderState: (req, res, _, end) => {
+      getProviderState: async (req, res, _, end) => {
+        const [accounts, chainId] = await Promise.all([
+          injectedProvider.request<string[]>({
+            method: "solana_requestAccounts",
+            params: {},
+          }),
+          injectedProvider.request<string>({
+            method: "solana_chainId",
+            params: {},
+          }),
+        ]);
         res.result = {
-          accounts: [""],
-          chainId: this.config.chainConfig.chainId,
+          accounts,
+          chainId,
           isUnlocked: this.state._initialized,
         };
         end();
@@ -119,19 +128,11 @@ export class TorusInjectedProvider extends BaseProvider<SolanaInjectedProviderCo
     return this._providerProxy;
   }
 
-  protected async lookupNetwork(torusProvider: InjectedProvider): Promise<string> {
-    const genesisHash = await torusProvider.request<string>({
-      method: "getGenesisHash",
-      params: [],
+  protected async lookupNetwork(provider: InjectedProvider): Promise<string> {
+    const chainId = await provider.request<string>({
+      method: "solana_chainId",
+      params: {},
     });
-    const { chainConfig } = this.config;
-    if (!genesisHash) throw WalletInitializationError.rpcConnectionError(`Failed to connect with torus wallet`);
-    if (chainConfig.chainId !== genesisHash.substring(0, 32))
-      throw WalletInitializationError.invalidNetwork(
-        `Wallet is connected to wrong network,Please change your network to ${
-          SOLANA_NETWORKS[chainConfig.chainId] || chainConfig.displayName
-        } from torus wallet`
-      );
-    return genesisHash.substring(0, 32);
+    return chainId;
   }
 }

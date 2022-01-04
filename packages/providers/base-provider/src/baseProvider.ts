@@ -54,5 +54,5 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   abstract setupProvider(provider: T): SafeEventEmitterProvider;
 
-  protected abstract lookupNetwork(provider?: T): Promise<string>;
+  protected abstract lookupNetwork(provider?: T): Promise<string | void>;
 }
