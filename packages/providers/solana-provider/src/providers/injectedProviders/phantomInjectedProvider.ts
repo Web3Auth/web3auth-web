@@ -4,6 +4,7 @@ import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
+import { ethErrors } from "eth-rpc-errors";
 
 import { SolanaWallet } from "../../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
@@ -34,6 +35,9 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
         return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
       },
       getAccounts: async () => (injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : []),
+      getPrivateKey: async () => {
+        throw ethErrors.rpc.methodNotSupported();
+      },
       signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
         const transaction = await injectedProvider.request<Transaction>({
           method: "signTransaction",

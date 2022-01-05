@@ -98,6 +98,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
     if (!this.state._initialized) throw WalletInitializationError.notReady("Provider not initialized");
     const providerHandlers: IProviderHandlers = {
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
+      getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
       processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
         const rpcProvider = this.getFetchOnlyProvider();
         const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);

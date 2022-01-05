@@ -68,6 +68,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
         return [keyPair.publicKey.toBase58()];
       },
       getAccounts: async () => [keyPair.publicKey.toBase58()],
+      getPrivateKey: async () => privKey,
       signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");

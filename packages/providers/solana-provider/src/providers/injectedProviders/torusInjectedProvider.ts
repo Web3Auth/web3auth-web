@@ -37,6 +37,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         return accounts;
       },
 
+      getPrivateKey: async () => {
+        throw ethErrors.rpc.methodNotSupported();
+      },
+
       signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
         const message = await injectedProvider.request<Uint8Array>({
           method: "signMessage",

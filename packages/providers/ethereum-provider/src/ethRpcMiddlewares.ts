@@ -6,6 +6,7 @@ export type IProviderHandlers = WalletMiddlewareOptions;
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
     getAccounts,
+    getPrivateKey,
     processTransaction,
     processEthSignMessage,
     processTypedMessage,
@@ -21,6 +22,7 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     }),
     createWalletMiddleware({
       getAccounts,
+      getPrivateKey,
       processTransaction,
       processEthSignMessage,
       processTypedMessage,
