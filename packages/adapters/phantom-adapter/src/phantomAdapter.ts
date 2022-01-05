@@ -29,17 +29,17 @@ class PhantomAdapter extends BaseAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider | undefined;
 
-  public _wallet: PhantomWallet;
+  public _wallet!: PhantomWallet;
 
-  public connected: boolean;
+  public connected = false;
 
-  private phantomProvider: PhantomInjectedProvider;
+  private phantomProvider!: PhantomInjectedProvider;
 
   get isPhantomAvailable(): boolean {
     return typeof window !== "undefined" && !!(window as any).solana?.isPhantom;
@@ -59,7 +59,7 @@ class PhantomAdapter extends BaseAdapter<void> {
     if (!isAvailable) throw WalletInitializationError.notInstalled();
     const { PhantomInjectedProvider } = await import("@web3auth/solana-provider");
     this.phantomProvider = new PhantomInjectedProvider({});
-    await this.phantomProvider.init();
+    this.phantomProvider.init();
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.PHANTOM);
 
@@ -81,7 +81,7 @@ class PhantomAdapter extends BaseAdapter<void> {
         reject(this.phantomProvider.state.error);
         return;
       }
-      const getProvider = async (): Promise<SafeEventEmitterProvider | null> => {
+      const getProvider = async (): Promise<SafeEventEmitterProvider> => {
         return this.phantomProvider.setupProvider(injectedProvider);
       };
       if (this.phantomProvider.state._initialized) {
@@ -104,7 +104,7 @@ class PhantomAdapter extends BaseAdapter<void> {
     });
   }
 
-  async connect(): Promise<SafeEventEmitterProvider> {
+  async connect(): Promise<void> {
     try {
       if (!this.ready) throw WalletInitializationError.notReady("Phantom wallet adapter is not ready, please init first");
       if (this.connected || this.connecting) return;
@@ -180,7 +180,6 @@ class PhantomAdapter extends BaseAdapter<void> {
     const wallet = this._wallet;
     if (this.isWalletConnected) {
       wallet.off("disconnect", this._disconnected);
-      this._wallet = null;
       this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
     }
   };
