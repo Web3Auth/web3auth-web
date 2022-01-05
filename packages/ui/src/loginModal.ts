@@ -82,11 +82,7 @@ export default class LoginModal extends SafeEventEmitter {
                 <div class="w3ajs-modal-loader w3a-modal__loader w3a-modal__loader--hidden">
                     <div class="w3a-modal__loader-content">
                         <div class="w3a-modal__loader-info">
-                          <div class="w3ajs-modal-loader__spinner w3a-spinner">
-                              <div class="w3a-spinner__body"></div>
-                              <div class="w3a-spinner__cover"></div>
-                              <div class="w3a-spinner__head"></div>
-                          </div>
+                          <div class="w3ajs-modal-loader__spinner w3a-spinner"><div></div><div></div><div></div><div></div></div>
                           <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
                           <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
                           <button class="w3a-logout w3ajs-logout" style="display: none">
@@ -409,11 +405,7 @@ export default class LoginModal extends SafeEventEmitter {
               </div>
               <!-- Other Wallet -->
               <div class="w3a-external-loader w3ajs-external-loader">
-                <div class="w3a-spinner w3a-spinner--small">
-                  <div class="w3a-spinner__body"></div>
-                  <div class="w3a-spinner__cover"></div>
-                  <div class="w3a-spinner__head"></div>
-                </div>
+                <div class="w3ajs-modal-loader__spinner w3a-spinner w3a-spinner--small"><div></div><div></div><div></div><div></div></div>
               </div>
               <ul class="w3a-adapter-list w3ajs-wallet-adapters"></ul>
             </div>
@@ -423,17 +415,17 @@ export default class LoginModal extends SafeEventEmitter {
     return $externalWallet;
   };
 
-  private toggleLoader(provider = "") {
+  private toggleLoader() {
     const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
-    const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
+    // const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
     if (this.state.connecting) {
       $loader.classList.remove("w3a-modal__loader--hidden");
-      $loaderLabel.style.display = "block";
-      $loaderLabel.innerText = provider;
+      // $loaderLabel.style.display = "block";
+      // $loaderLabel.innerText = provider;
     } else {
       $loader.classList.add("w3a-modal__loader--hidden");
-      $loaderLabel.style.display = "none";
-      $loaderLabel.innerText = "";
+      // $loaderLabel.style.display = "none";
+      // $loaderLabel.innerText = "";
     }
   }
 
@@ -479,10 +471,10 @@ export default class LoginModal extends SafeEventEmitter {
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
       if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-        const provider = data?.loginProvider || "";
+        // const provider = data?.loginProvider || "";
         this.state.connecting = true;
         this.state.connected = false;
-        this.toggleLoader(provider);
+        this.toggleLoader();
       }
     });
     listener.on(BASE_ADAPTER_EVENTS.CONNECTED, () => {

@@ -2,7 +2,7 @@
   <div id="app">
     <h3>Login With Web3Auth</h3>
     <h3>Connect with {{ namespace === 'solana' ? `${namespace} web3auth` : 'ethereum web3auth' }} </h3>
-      <div id="w3a-modal" class="w3a-modal" v-if="loading">
+      <!-- <div id="w3a-modal" class="w3a-modal" v-if="loading">
         <div class="w3ajs-modal-loader w3a-modal__loader">
           <div class="w3a-modal__loader-content">
               <div class="w3a-modal__loader-info">
@@ -22,7 +22,7 @@
               <img src="${closeIcon}" alt="">
           </button>
         </div>
-      </div>
+      </div> -->
     <section
       :style="{
         fontSize: '12px',
