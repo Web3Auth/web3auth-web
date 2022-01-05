@@ -1,4 +1,4 @@
-import { LoginConfig, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -65,7 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   init(options?: AdapterInitOptions): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   disconnect(): Promise<void>;
-  getUserInfo(): Promise<Partial<UserInfo> | null>;
+  getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
 }
@@ -90,7 +90,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   abstract disconnect(): Promise<void>;
-  abstract getUserInfo(): Promise<Partial<UserInfo> | null>;
+  abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract setChainConfig(customChainConfig: CustomChainConfig): void;
   abstract setAdapterSettings(adapterSettings: unknown): void;
 }
@@ -107,7 +107,47 @@ export interface Adapter<T> {
   adapter: () => IAdapter<T>;
 }
 
-export type LoginMethodConfig = LoginConfig;
+export type LoginMethodConfig = Record<
+  string,
+  {
+    /**
+     * Display Name. If not provided, we use the default for openlogin app
+     */
+    name: string;
+    /**
+     * Description for button. If provided, it renders as a full length button. else, icon button
+     */
+    description?: string;
+    /**
+     * Logo to be shown on mouse hover. If not provided, we use the default for openlogin app
+     */
+    logoHover?: string;
+    /**
+     * Logo to be shown on dark background (dark theme). If not provided, we use the default for openlogin app
+     */
+    logoLight?: string;
+    /**
+     * Logo to be shown on light background (light theme). If not provided, we use the default for openlogin app
+     */
+    logoDark?: string;
+    /**
+     * Show login button on the main list
+     */
+    mainOption?: boolean;
+    /**
+     * Whether to show the login button on modal or not
+     */
+    showOnModal?: boolean;
+    /**
+     * Whether to show the login button on desktop
+     */
+    showOnDesktop?: boolean;
+    /**
+     * Whether to show the login button on mobile
+     */
+    showOnMobile?: boolean;
+  }
+>;
 
 export interface WalletConnectV1Data {
   uri: string;

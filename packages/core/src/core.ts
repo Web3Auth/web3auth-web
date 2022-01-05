@@ -4,6 +4,7 @@ import {
   ADAPTER_NAMESPACES,
   BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
+  CustomChainConfig,
   getChainConfig,
   IAdapter,
   SafeEventEmitterProvider,
@@ -33,15 +34,15 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public connectedAdapterName: string | undefined;
 
-  public connected: boolean;
+  public connected = false;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider | undefined;
 
-  public cachedAdapter: string;
+  public cachedAdapter?: string | null;
 
-  protected initialized: boolean;
+  protected initialized = false;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
@@ -60,7 +61,7 @@ export class Web3AuthCore extends SafeEventEmitter {
       // if adapter doesn't have any chain config yet thn set it based on modal namespace and chainId.
       // this applies only to multichain adapters where chainNamespace cannot be determined from adapter.
       if (this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN && !this.walletAdapters[adapterName].currentChainNamespace) {
-        const chainConfig = getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainId);
+        const chainConfig = getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainId) as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
@@ -117,12 +118,12 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   async logout(): Promise<void> {
-    if (!this.connected) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!this.connected || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.walletAdapters[this.connectedAdapterName].disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!this.connected || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
@@ -131,7 +132,7 @@ export class Web3AuthCore extends SafeEventEmitter {
       this.connected = true;
       this.connecting = false;
       const connectedAd = this.walletAdapters[connectedAdapterName];
-      this.provider = connectedAd.provider;
+      this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = connectedAdapterName;
 
       this.cacheWallet(connectedAdapterName);

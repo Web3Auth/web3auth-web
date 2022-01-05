@@ -203,7 +203,7 @@ export default class LoginModal extends SafeEventEmitter {
     }
   };
 
-  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: Record<string, LoginMethodConfig>): void => {
+  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, adapterConfig: BaseAdapterConfig, loginMethods: LoginMethodConfig): void => {
     const $socialLogins = this.$modal.querySelector(".w3ajs-social-logins") as HTMLDivElement;
     const $adapterList = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
     const $adapterExpandBtn = $socialLogins.querySelector(".w3ajs-button-expand") as HTMLButtonElement;

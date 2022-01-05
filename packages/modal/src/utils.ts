@@ -20,19 +20,19 @@ const OPENLOGIN_PROVIDERS = [
 export const getAdapterSocialLogins = (
   adapterName: string,
   adapter: IAdapter<unknown>,
-  loginMethodsConfig: Record<string, LoginMethodConfig> = {}
-): Record<string, LoginMethodConfig> => {
-  const finalLoginMethodsConfig: Record<string, LoginMethodConfig> = {};
+  loginMethodsConfig: LoginMethodConfig = {}
+): LoginMethodConfig => {
+  const finalLoginMethodsConfig: LoginMethodConfig = {};
   if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH) {
     const customAuthAdapter = adapter as CustomauthAdapter;
-    Object.keys(customAuthAdapter.loginSettings?.loginProviderConfig).forEach((loginMethod) => {
-      const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
+    Object.keys(customAuthAdapter.loginSettings?.loginProviderConfig).forEach((loginMethod: string) => {
+      const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || { name: loginMethod };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
   } else if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
-      finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
+      finalLoginMethodsConfig[loginMethod] = { name: loginMethod, ...currentLoginMethodConfig };
     });
   } else {
     throw new Error(`${adapterName} is not a valid adapter`);
