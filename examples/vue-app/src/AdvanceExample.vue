@@ -128,12 +128,7 @@ export default Vue.extend({
       }
       })
 
-        
-        const openloginAdapter = await getOpenloginAdapter({ adapterSettings: {
-          network: "testnet",
-          clientId: "localhost-id",
-          uxMode: "popup"
-        }})
+
 
         const torusWalletAdapter = await getTorusSolanaAdapter({
           initParams: {
@@ -154,37 +149,13 @@ export default Vue.extend({
 
         this.namespace = this.web3auth.options.chainNamespace
       
-        // const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
-        //   network: "testnet",
-        //   clientId: "localhost-id",
-        //   uxMode: "redirect"
-        // }})
-
-
-      const ethCustomAuthAdapter = await getCustomAuthAdapter({
-        adapterSettings: {
+        const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
           network: "testnet",
-          baseUrl: "http://localhost:3000/",
-          redirectPathName:"auth",
-        }, loginSettings: {
-          // loginProvider: "google"
-          "loginProviderConfig": {
-            "google": {
-              "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-              "verifier": "google-lrc",
-            },
-            "facebook": {
-              "clientId": "617201755556395", 
-              "verifier": "facebook-lrc" 
-            }
-          }
-        }
-        })
+          clientId: "localhost-id",
+          uxMode: "redirect"
+        }})
 
-
-        this.web3auth.configureAdapter(ethCustomAuthAdapter);
-        // this.web3auth.configureAdapter(openloginAdapter);
-        console.log("ethCustomAuthAdapter", this.web3auth)
+        this.web3auth.configureAdapter(openloginAdapter);
 
         await (this.web3auth as Web3Auth).initModal({
           // modalConfig: {

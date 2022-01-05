@@ -216,7 +216,10 @@ export class Web3Auth extends Web3AuthCore {
               resolve(adapterName);
               return true;
             })
-            .catch((err) => reject(err));
+            .catch((err) => {
+              log.error("error while initialization external wallets", err);
+              reject(err);
+            });
         });
         adapterPromises.push(adPromise);
       }

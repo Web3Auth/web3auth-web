@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth</h3>
-    <h3>Connect with {{ namespace === 'solana' ? `${namespace} web3auth` : 'ethereum web3auth' }} </h3>
+    <h3>Connect with {{ web3auth.options.chainNamespace }} web3auth </h3>
       <!-- <div id="w3a-modal" class="w3a-modal" v-if="loading">
         <div class="w3ajs-modal-loader w3a-modal__loader">
           <div class="w3a-modal__loader-content">
@@ -92,7 +92,6 @@ export default Vue.extend({
       try {
         this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3, clientId: "localhost-id" })
         this.subscribeAuthEvents(this.web3auth)
-        this.namespace = this.web3auth.options.chainNamespace
         await this.web3auth.initModal({});
       } catch (error) {
         this.console("error", error)
@@ -110,13 +109,13 @@ export default Vue.extend({
     
     },
     async switchChain() {
-      console.log("this.namespace", this.namespace)
-      if (this.namespace === 'solana') {
+      console.log("this.namespace", this.web3auth.options.chainNamespace)
+      if (this.web3auth.options.chainNamespace === 'solana') {
         await this.initEthAuth();
-        localStorage.setItem("chainNamespace", this.namespace)
-      } else if (this.namespace === 'eip155') {
+        localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace)
+      } else if (this.web3auth.options.chainNamespace === 'eip155') {
         await this.initSolanaAuth();
-        localStorage.setItem("chainNamespace", this.namespace)
+        localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace)
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
@@ -137,6 +136,7 @@ export default Vue.extend({
         this.connected = false
       })
       web3auth.on(BASE_ADAPTER_EVENTS.ERRORED, (error)=>{
+        console.log("error", error)
         this.console("errored", error)
         this.loginButtonStatus = ""
       })

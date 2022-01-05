@@ -120,6 +120,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   // should be called only before initialization.
   setChainConfig(customChainConfig: CustomChainConfig): void {
     if (this.ready) return;
+    log.debug("setting chain config", customChainConfig);
     this.chainConfig = { ...customChainConfig };
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
