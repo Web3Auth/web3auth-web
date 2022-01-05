@@ -1,3 +1,4 @@
+import detectEthereumProvider from "@metamask/detect-provider";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -15,6 +16,12 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
+
+interface EthereumProvider extends SafeEventEmitterProvider {
+  isMetaMask?: boolean;
+  isConnected: () => boolean;
+}
+
 class MetamaskAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
@@ -22,19 +29,21 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public connected: boolean;
+  public connected = false;
 
-  public provider: SafeEventEmitterProvider | any;
+  // added after connecting
+  public provider!: SafeEventEmitterProvider | undefined;
+
+  private metamaskProvider!: EthereumProvider;
 
   async init(options: AdapterInitOptions): Promise<void> {
     if (this.ready) return;
-    const wallet = typeof window !== "undefined" && (window as any).ethereum;
-    if (!wallet) throw WalletInitializationError.notFound();
-    if (!wallet.isMetaMask) throw WalletInitializationError.notInstalled();
+    this.metamaskProvider = (await detectEthereumProvider({ mustBeMetaMask: true })) as EthereumProvider;
+    if (!this.metamaskProvider) throw WalletInitializationError.notInstalled("Metamask extension is not installed");
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.METAMASK);
     try {
@@ -50,30 +59,32 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   setChainConfig(_: CustomChainConfig): void {}
 
-  async connect(): Promise<SafeEventEmitterProvider> {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.ready) throw WalletInitializationError.notReady("Metamask extention is not installed");
       this.connecting = true;
       this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
       try {
-        this.provider = typeof window !== "undefined" && (window as any).ethereum;
+        if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
         const onConnectHandler = () => {
           this.connected = true;
+          this.provider = this.metamaskProvider;
           this.provider.removeListener("connect", onConnectHandler);
           this.addEventListeners(this.provider);
           this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK);
-          resolve(this.provider);
+          resolve();
         };
-        this.provider.on("connect", onConnectHandler);
-        this.provider
+        this.metamaskProvider.on("connect", onConnectHandler);
+        // trigger metamask to open
+        (this.metamaskProvider as any)
           .request({ method: "eth_requestAccounts" })
           .then(() => {
-            if (this.provider.isConnected()) {
+            if (this.metamaskProvider.isConnected()) {
               onConnectHandler();
             }
             return true;
           })
-          .catch((err) => {
+          .catch((err: Error) => {
             reject(err);
           });
       } catch (error) {

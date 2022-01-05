@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",
+    "@metamask/detect-provider": "^1.2.0",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {
