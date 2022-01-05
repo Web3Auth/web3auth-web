@@ -28,8 +28,8 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
   }
 
-  public setupProvider(injectedProvider: PhantomWallet): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
+  public async setupProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider> {
+    await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
@@ -78,7 +78,7 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
         res.result = {
           accounts: injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [],
           chainId: "", // Phantom doesn't have a chainId yet
-          isUnlocked: this.state._initialized,
+          isUnlocked: injectedProvider.isConnected,
         };
         end();
       },

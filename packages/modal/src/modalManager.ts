@@ -1,13 +1,4 @@
-import {
-  ADAPTER_CATEGORY,
-  ADAPTER_NAMESPACES,
-  BaseAdapterConfig,
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  getChainConfig,
-  IAdapter,
-  WALLET_ADAPTERS,
-} from "@web3auth/base";
+import { ADAPTER_CATEGORY, BaseAdapterConfig, CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTERS } from "@web3auth/base";
 import { getDefaultAdapterModule, Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
@@ -121,10 +112,8 @@ export class Web3Auth extends Web3AuthCore {
             hasInAppWallets = true;
           }
           this.subscribeToAdapterEvents(adapter);
-          if (
-            this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN &&
-            !this.walletAdapters[adapterName].currentChainNamespace
-          ) {
+
+          if (!adapter.chainConfigProxy) {
             const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId) as CustomChainConfig;
             this.walletAdapters[adapterName].setChainConfig(chainConfig);
           }
@@ -202,10 +191,8 @@ export class Web3Auth extends Web3AuthCore {
         log.info("init external wallet", this.cachedAdapter, adapterName);
         const adPromise: Promise<string | Error> = new Promise((resolve, reject) => {
           this.subscribeToAdapterEvents(adapter);
-          if (
-            this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN &&
-            !this.walletAdapters[adapterName].currentChainNamespace
-          ) {
+
+          if (!adapter.chainConfigProxy) {
             adapter.setChainConfig(getChainConfig(this.options.chainNamespace, this.options.chainId) as CustomChainConfig);
           }
           adapter

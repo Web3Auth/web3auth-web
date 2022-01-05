@@ -76,7 +76,6 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
         chainConfig: { chainId: "" },
       },
     });
-    this.solanaProviderProxy.init();
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
@@ -96,7 +95,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      this.provider = this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
       this.connected = true;
       this.torusInstance.showTorusButton();
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);

@@ -11,7 +11,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
-  PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -50,8 +49,6 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private loginSettings: LoginSettings = {};
 
-  private chainConfig: CustomChainConfig | null;
-
   private providerFactory: ProviderFactory;
 
   constructor(params: OpenloginAdapterOptions) {
@@ -73,6 +70,10 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
+  get chainConfigProxy(): CustomChainConfig | undefined {
+    return this.chainConfig ? { ...this.chainConfig } : undefined;
+  }
+
   async init(options: AdapterInitOptions): Promise<void> {
     if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
@@ -88,11 +89,9 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
       this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.providerFactory.init();
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.providerFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -156,11 +155,6 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   private async connectWithProvider(providerFactory: ProviderFactory, params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      if (providerFactory.state._errored) {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, providerFactory.state.error);
-        reject(providerFactory.state.error);
-        return;
-      }
       const getProvider = async (): Promise<SafeEventEmitterProvider | null> => {
         const listener = ({ reason }) => {
           switch (reason?.message?.toLowerCase()) {
@@ -187,7 +181,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
           if (finalPrivKey) {
             if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            return providerFactory.setupProvider(finalPrivKey);
+            return await providerFactory.setupProvider(finalPrivKey);
           }
           return null;
         } catch (err: unknown) {
@@ -197,28 +191,12 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
           window.removeEventListener("unhandledrejection", listener);
         }
       };
-      if (providerFactory.state._initialized) {
-        this.provider = await getProvider();
-        if (this.provider) {
-          this.connected = true;
-          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
-        }
-        resolve(this.provider);
-        return;
+      this.provider = await getProvider();
+      if (this.provider) {
+        this.connected = true;
+        this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
       }
-      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        this.provider = await getProvider();
-        if (this.provider) {
-          this.connected = true;
-          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
-        }
-        // provider can be null in redirect mode
-        resolve(this.provider);
-      });
-      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
-        reject(error);
-      });
+      resolve(this.provider);
     });
   }
 }

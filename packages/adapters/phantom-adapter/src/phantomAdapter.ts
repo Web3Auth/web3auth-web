@@ -9,7 +9,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
-  PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -59,7 +58,6 @@ class PhantomAdapter extends BaseAdapter<void> {
     if (!isAvailable) throw WalletInitializationError.notInstalled();
     const { PhantomInjectedProvider } = await import("@web3auth/solana-provider");
     this.phantomProvider = new PhantomInjectedProvider({});
-    this.phantomProvider.init();
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.PHANTOM);
 
@@ -73,34 +71,16 @@ class PhantomAdapter extends BaseAdapter<void> {
     }
   }
 
-  async subscribeToProviderEvents(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
+  async connectWithProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      if (this.phantomProvider.state._errored) {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, this.phantomProvider.state.error);
-        reject(this.phantomProvider.state.error);
-        return;
-      }
+    return new Promise(async (resolve) => {
       const getProvider = async (): Promise<SafeEventEmitterProvider> => {
         return this.phantomProvider.setupProvider(injectedProvider);
       };
-      if (this.phantomProvider.state._initialized) {
-        this.provider = await getProvider();
-        this.connected = true;
-        this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.PHANTOM);
-        resolve(this.provider);
-        return;
-      }
-      this.phantomProvider.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        this.provider = await getProvider();
-        this.connected = true;
-        this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.PHANTOM);
-        resolve(this.provider);
-      });
-      this.phantomProvider.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
-        reject(error);
-      });
+      this.provider = await getProvider();
+      this.connected = true;
+      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.PHANTOM);
+      resolve(this.provider);
     });
   }
 
@@ -123,7 +103,7 @@ class PhantomAdapter extends BaseAdapter<void> {
           await new Promise<void>((resolve, reject) => {
             const connect = async () => {
               wallet.off("connect", connect);
-              await this.subscribeToProviderEvents(wallet);
+              await this.connectWithProvider(wallet);
               resolve();
             };
 

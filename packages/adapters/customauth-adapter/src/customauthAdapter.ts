@@ -11,7 +11,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
-  PROVIDER_EVENTS,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -70,10 +69,6 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   private adapterSettings: CustomAuthArgs | undefined;
 
   private initSettings: InitParams;
-
-  // should be added in contructor or from setChainConfig function
-  // before calling init function.
-  private chainConfig!: CustomChainConfig;
 
   private providerFactory!: ProviderFactory;
 
@@ -142,11 +137,9 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
       this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.providerFactory.init();
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      await this.providerFactory.init();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -240,12 +233,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<void> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      if (providerFactory.state._errored) {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, providerFactory.state.error);
-        reject(providerFactory.state.error);
-        return;
-      }
-      const setProvider = async (): Promise<void> => {
+      const connectWithProvider = async (): Promise<void> => {
         const listener = ({ reason }: { reason: Error }) => {
           switch (reason?.message?.toLowerCase()) {
             case "user closed popup":
@@ -278,7 +266,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
           }
           if (finalPrivKey) {
             if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            this.provider = providerFactory.setupProvider(finalPrivKey);
+            this.provider = await providerFactory.setupProvider(finalPrivKey);
             return;
           }
           return;
@@ -289,28 +277,12 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
           window.removeEventListener("unhandledrejection", listener);
         }
       };
-      if (providerFactory.state._initialized) {
-        await setProvider();
-        if (this.provider) {
-          this.connected = true;
-          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
-        }
-        resolve();
-        return;
+      await connectWithProvider();
+      if (this.provider) {
+        this.connected = true;
+        this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
       }
-      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        await setProvider();
-        if (this.provider) {
-          this.connected = true;
-          this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
-        }
-        // provider can be null in redirect mode
-        resolve();
-      });
-      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
-        reject(error);
-      });
+      resolve();
     });
   }
 

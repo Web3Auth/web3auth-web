@@ -56,6 +56,7 @@ export interface AdapterInitOptions {
 export interface IAdapter<T> extends SafeEventEmitter {
   namespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
+  chainConfigProxy: CustomChainConfig | undefined;
   type: ADAPTER_CATEGORY_TYPE;
   ready: boolean;
   connecting: boolean;
@@ -73,6 +74,10 @@ export interface IAdapter<T> extends SafeEventEmitter {
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public adapterData?: unknown = {};
 
+  // should be added in contructor or from setChainConfig function
+  // before calling init function.
+  protected chainConfig: CustomChainConfig | undefined;
+
   public abstract namespace: AdapterNamespaceType;
 
   public abstract currentChainNamespace: ChainNamespaceType;
@@ -86,6 +91,10 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   public abstract connected: boolean;
 
   public abstract provider: SafeEventEmitterProvider | undefined;
+
+  get chainConfigProxy(): CustomChainConfig | undefined {
+    return this.chainConfig ? { ...this.chainConfig } : undefined;
+  }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;

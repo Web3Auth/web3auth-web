@@ -18,8 +18,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
   }
 
-  public setupProvider(injectedProvider: InjectedProvider): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw WalletInitializationError.providerNotReadyError("Provider not initialized");
+  public async setupProvider(injectedProvider: InjectedProvider): Promise<SafeEventEmitterProvider> {
+    await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         const accounts = (await injectedProvider.request({
@@ -111,7 +111,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         res.result = {
           accounts,
           chainId,
-          isUnlocked: this.state._initialized,
+          isUnlocked: !!accounts?.length,
         };
         end();
       },

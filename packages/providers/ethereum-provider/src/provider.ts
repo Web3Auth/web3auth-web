@@ -13,14 +13,7 @@ import {
 } from "@metamask/eth-sig-util";
 import { BaseConfig, createFetchMiddleware, createSwappableProxy, providerFromEngine, signMessage } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import {
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  PROVIDER_EVENTS,
-  RequestArguments,
-  SafeEventEmitterProvider,
-  WalletInitializationError,
-} from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
@@ -51,7 +44,6 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
       ...config.chainConfig,
       chainNamespace: CHAIN_NAMESPACES.EIP155,
     };
-    this.init();
   }
 
   public static getProviderInstance = async (params: {
@@ -59,43 +51,12 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
   }): Promise<SafeEventEmitterProvider> => {
     const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
-    return new Promise((resolve, reject) => {
-      // wait for provider to get ready
-      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        const provider = providerFactory.setupProvider(params.privKey);
-        resolve(provider);
-      });
-      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        reject(error);
-      });
-      providerFactory.init();
-    });
+    const provider = await providerFactory.setupProvider(params.privKey);
+    return provider;
   };
 
-  public async init(): Promise<void> {
-    this.lookupNetwork()
-      .then((chainId) => {
-        this.update({
-          _initialized: true,
-          _errored: false,
-          error: null,
-          chainId,
-        });
-        this.emit(PROVIDER_EVENTS.INITIALIZED);
-        return true;
-      })
-      .catch((error) => {
-        log.error("error while looking up network", error);
-        this.update({
-          _errored: true,
-          error,
-        });
-        this.emit(PROVIDER_EVENTS.ERRORED, { error });
-      });
-  }
-
-  public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw WalletInitializationError.notReady("Provider not initialized");
+  public async setupProvider(privKey: string): Promise<SafeEventEmitterProvider> {
+    await this.lookupNetwork();
     const providerHandlers: IProviderHandlers = {
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
       getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
