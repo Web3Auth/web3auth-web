@@ -16,8 +16,8 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
-import type { InjectedProvider, SolanaInjectedProviderConfig } from "@web3auth/solana-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import type { InjectedProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
 import type { Torus } from "./interface";
@@ -31,7 +31,7 @@ interface SolanaWalletOptions {
   loginSettings?: LoginParams;
   initParams?: TorusParams;
 }
-type ProviderFactory = BaseProvider<SolanaInjectedProviderConfig, BaseProviderState, InjectedProvider>;
+type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
 class SolanaWalletAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -40,29 +40,29 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public connected: boolean;
+  public connected = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider;
 
-  public torusInstance: Torus;
+  public torusInstance!: Torus;
 
-  private torusWalletOptions: TorusCtorArgs;
+  private torusWalletOptions?: TorusCtorArgs;
 
-  private initParams: TorusParams;
+  private initParams?: TorusParams;
 
-  private loginSettings: LoginParams = {};
+  private loginSettings?: LoginParams = {};
 
-  private solanaProviderProxy: ProviderFactory;
+  private solanaProviderProxy!: ProviderFactory;
 
   constructor(params: SolanaWalletOptions) {
     super();
-    this.torusWalletOptions = params.adapterSettings;
-    this.initParams = params.initParams;
-    this.loginSettings = params.loginSettings;
+    this.torusWalletOptions = params.adapterSettings || {};
+    this.initParams = params.initParams || {};
+    this.loginSettings = params.loginSettings || {};
   }
 
   async init(options: AdapterInitOptions): Promise<void> {

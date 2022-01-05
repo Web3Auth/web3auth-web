@@ -31,27 +31,27 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public connected: boolean;
+  public connected = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider;
 
-  public torusInstance: Torus;
+  public torusInstance!: Torus;
 
-  private torusWalletOptions: TorusCtorArgs;
+  private torusWalletOptions?: TorusCtorArgs;
 
-  private initParams: TorusParams;
+  private initParams?: TorusParams;
 
-  private loginSettings: LoginParams = {};
+  private loginSettings?: LoginParams = {};
 
   constructor(params: TorusWalletOptions) {
     super();
-    this.torusWalletOptions = params.adapterSettings;
-    this.initParams = params.initParams;
-    this.loginSettings = params.loginSettings;
+    this.torusWalletOptions = params.adapterSettings || {};
+    this.initParams = params.initParams || {};
+    this.loginSettings = params.loginSettings || {};
   }
 
   async init(options: AdapterInitOptions): Promise<void> {

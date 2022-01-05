@@ -30,17 +30,17 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   readonly adapterOptions: WalletConnectV1AdapterOptions;
 
-  public connecting: boolean;
+  public connecting = false;
 
-  public ready: boolean;
+  public ready = false;
 
-  public provider: SafeEventEmitterProvider;
+  public provider!: SafeEventEmitterProvider | undefined;
 
   public adapterData: WalletConnectV1Data = {
     uri: "",
   };
 
-  public walletConnectProvider: WalletConnectProvider;
+  public walletConnectProvider!: WalletConnectProvider | undefined;
 
   constructor(options: WalletConnectV1AdapterOptions) {
     super();
@@ -59,7 +59,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       qrcode: false,
     });
     return new Promise((resolve) => {
-      this.walletConnectProvider.connector.on("display_uri", async (err, payload) => {
+      (this.walletConnectProvider as WalletConnectProvider).connector.on("display_uri", async (err, payload) => {
         if (err) {
           this.emit(BASE_ADAPTER_EVENTS.ERRORED, WalletLoginError.connectionError("Failed to display wallet connect qr code"));
           return;
@@ -73,8 +73,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         this.ready = true;
         resolve();
       });
-      this.walletConnectProvider.enable();
-      if (this.walletConnectProvider.connected) {
+      (this.walletConnectProvider as WalletConnectProvider).enable();
+      if ((this.walletConnectProvider as WalletConnectProvider).connected) {
         this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
         this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
         resolve();
@@ -84,7 +84,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   // intentionally not emitting or setting connecting here
   async connect(): Promise<void> {
-    if (!this.ready) throw WalletInitializationError.notReady("Wallet connect adapter is not ready");
+    if (!this.ready || !this.walletConnectProvider) throw WalletInitializationError.notReady("Wallet connect adapter is not ready");
     if (this.walletConnectProvider.connected) {
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
       return;
@@ -98,7 +98,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected || !this.walletConnectProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
     await this.walletConnectProvider.disconnect();
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
