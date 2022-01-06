@@ -3,6 +3,8 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
+  ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
   BASE_ADAPTER_EVENTS,
@@ -14,9 +16,7 @@ import {
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
-  WalletInitializationError,
   WalletLoginError,
-  Web3AuthError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import type { InjectedProvider } from "@web3auth/solana-provider";
@@ -37,17 +37,15 @@ interface SolanaWalletOptions {
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
 class SolanaWalletAdapter extends BaseAdapter<void> {
+  readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
+
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting = false;
-
-  public ready = false;
-
-  public connected = false;
+  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   public provider!: SafeEventEmitterProvider;
 
@@ -70,6 +68,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    super.checkInitializationRequirements();
     // set chainConfig for mainnet by default if not set
     let network: NetworkInterface | undefined;
     if (!this.chainConfig) {
@@ -80,7 +79,6 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
       const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
       network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
     }
-    if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
@@ -90,8 +88,8 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
         chainConfig: this.chainConfig as CustomChainConfig,
       },
     });
-    this.ready = true;
-    this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
+    this.status = ADAPTER_STATUS.READY;
+    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
     try {
       if (options.autoConnect) {
@@ -99,55 +97,51 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
       }
     } catch (error) {
       log.error("Failed to connect with cached torus solana provider", error);
-      this.emit("ERRORED", error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider> {
-    if (!this.ready) throw WalletInitializationError.notReady("Torus wallet adapter is not ready, please init first");
-    this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
+  async connect(): Promise<void> {
+    super.checkConnectionRequirements();
+    this.status = ADAPTER_STATUS.CONNECTING;
+    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      try {
-        this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
-      } catch (error: unknown) {
-        const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-        const network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
-        if ((error as Web3AuthError).code === 5013) {
-          // try to change network once if user is connected to wrong network
-          await this.torusInstance.setProvider(network);
-          this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
-        } else {
-          throw error;
-        }
-      }
-      this.connected = true;
-      this.torusInstance.showTorusButton();
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
-      return this.provider;
+      this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      this._onConnectHandler();
+      return;
     } catch (error) {
+      // if ((error as Web3AuthError).code === 5013) {
+      //   // try to change network once if user is connected to wrong network
+      //   this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      // } else {
+      //   throw error;
+      // }
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
-    } finally {
-      this.connecting = false;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     await this.torusInstance.logout();
-    this.connected = false;
+    this.status = ADAPTER_STATUS.DISCONNECTED;
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
   }
 
   setAdapterSettings(_: unknown): void {}
+
+  private _onConnectHandler() {
+    this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.torusInstance.showTorusButton();
+    this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
+  }
 }
 
 export { SolanaWalletAdapter, SolanaWalletOptions };

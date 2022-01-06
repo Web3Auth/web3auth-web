@@ -1,5 +1,5 @@
-import { BaseConfig, BaseController, BaseState, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { CustomChainConfig, WalletInitializationError } from "@web3auth/base";
+import { BaseConfig, BaseController, BaseState } from "@toruslabs/base-controllers";
+import { CustomChainConfig, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 
 import { IBaseProvider } from "./IBaseProvider";
 

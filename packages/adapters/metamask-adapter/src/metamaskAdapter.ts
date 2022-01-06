@@ -4,9 +4,9 @@ import {
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BASE_ADAPTER_EVENTS,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -34,6 +34,8 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   readonly name: string = WALLET_ADAPTERS.METAMASK;
 
+  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
+
   // added after connecting
   public provider!: SafeEventEmitterProvider | undefined;
 
@@ -45,31 +47,29 @@ class MetamaskAdapter extends BaseAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
-    if (this.status === ADAPTER_STATUS.READY) return;
+    super.checkInitializationRequirements();
     this.metamaskProvider = (await detectEthereumProvider({ mustBeMetaMask: true })) as EthereumProvider;
     if (!this.metamaskProvider) throw WalletInitializationError.notInstalled("Metamask extension is not installed");
     this.status = ADAPTER_STATUS.READY;
-    this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.METAMASK);
+    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.METAMASK);
     try {
       if (options.autoConnect) {
         await this.connect();
       }
     } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
     }
   }
 
   setAdapterSettings(_: unknown): void {}
 
   async connect(): Promise<void> {
+    super.checkConnectionRequirements();
     // set default to mainnet
     if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-    if (this.status < ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Metamask extension is not installed");
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
 
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
+    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
     try {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
@@ -81,50 +81,45 @@ class MetamaskAdapter extends BaseAdapter<void> {
       this.provider = this.metamaskProvider;
       this.provider.once("disconnect", () => {
         this.status = ADAPTER_STATUS.DISCONNECTED;
-        this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
+        this.emit(ADAPTER_STATUS.DISCONNECTED);
       });
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.METAMASK);
+      this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.METAMASK);
     } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
       this.status = ADAPTER_STATUS.READY;
       throw WalletLoginError.connectionError("Failed to login with metamask wallet");
     }
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     this.provider?.removeAllListeners();
-    this.connected = false;
-    this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
+    this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
   private async switchChain(chainConfig: CustomChainConfig): Promise<void> {
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
     try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await this.metamaskProvider.request!({
+      await this.metamaskProvider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: chainConfig.chainId }],
       });
     } catch (switchError: unknown) {
       // This error code indicates that the chain has not been added to MetaMask.
       if ((switchError as any).code === 4902) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await this.metamaskProvider.request!({
-            method: "wallet_addEthereumChain",
-            params: [{ chainId: chainConfig.chainId, chainName: chainConfig.displayName, rpcUrls: [chainConfig.rpcTarget] }],
-          });
-        } catch (addError) {
-          // handle "add" error
-        }
+        await this.metamaskProvider.request({
+          method: "wallet_addEthereumChain",
+          params: [{ chainId: chainConfig.chainId, chainName: chainConfig.displayName, rpcUrls: [chainConfig.rpcTarget] }],
+        });
+      } else {
+        throw switchError;
       }
-      // handle other "switch" errors
     }
   }
 }

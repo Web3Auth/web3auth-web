@@ -3,9 +3,10 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
+  ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BASE_ADAPTER_EVENTS,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -14,7 +15,6 @@ import {
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
-  WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 import log from "loglevel";
@@ -27,17 +27,15 @@ interface TorusWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 class TorusWalletAdapter extends BaseAdapter<never> {
+  readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
+
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  public connecting = false;
-
-  public ready = false;
-
-  public connected = false;
+  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   public provider!: SafeEventEmitterProvider;
 
@@ -58,6 +56,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    super.checkInitializationRequirements();
     // set chainConfig for mainnet by default if not set
     let network: NetworkInterface | undefined;
     if (!this.chainConfig) {
@@ -68,7 +67,6 @@ class TorusWalletAdapter extends BaseAdapter<never> {
       const { chainId, blockExplorer, displayName, rpcTarget } = this.chainConfig as CustomChainConfig;
       network = { chainId: parseInt(chainId as string, 16), host: rpcTarget, blockExplorer, networkName: displayName };
     }
-    if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/torus-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
     await this.torusInstance.init({
@@ -76,8 +74,8 @@ class TorusWalletAdapter extends BaseAdapter<never> {
       ...this.initParams,
       network,
     });
-    this.ready = true;
-    this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_EVM);
+    this.status = ADAPTER_STATUS.READY;
+    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.TORUS_EVM);
 
     try {
       if (options.autoConnect) {
@@ -85,39 +83,38 @@ class TorusWalletAdapter extends BaseAdapter<never> {
       }
     } catch (error) {
       log.error("Failed to connect with torus evm provider", error);
-      this.emit("ERRORED", error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
     }
   }
 
   async connect(): Promise<SafeEventEmitterProvider> {
-    if (!this.ready) throw WalletInitializationError.notReady("Torus wallet adapter is not ready, please init first");
-    this.connecting = true;
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
+    super.checkInitializationRequirements();
+    this.status = ADAPTER_STATUS.CONNECTING;
+    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
       await this.torusInstance.login(this.loginSettings);
+      // TODO: need to make types compatible in torus embed
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
-      this.connected = true;
+      this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM);
+      this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM);
       return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
     } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus wallet");
-    } finally {
-      this.connecting = false;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
-    this.connected = false;
-    this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
+    this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
