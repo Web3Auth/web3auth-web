@@ -2,10 +2,11 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": true
   },
-    "eslint.workingDirectories": [
-        {
-          "directory": "packages/*",
-          "changeProcessCWD": true
-        }
-      ],
+  "eslint.workingDirectories": [
+    {
+      "directory": "packages/*",
+      "changeProcessCWD": true
+    }
+  ],
+  "cSpell.words": ["Solana"]
 }

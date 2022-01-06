@@ -22,18 +22,18 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
-        const accounts = (await injectedProvider.request({
+        const accounts = await injectedProvider.request<string[]>({
           method: "solana_requestAccounts",
           params: {},
-        })) as string[];
+        });
         return accounts;
       },
 
       getAccounts: async () => {
-        const accounts = (await injectedProvider.request({
+        const accounts = await injectedProvider.request<string[]>({
           method: "solana_accounts",
           params: {},
-        })) as string[];
+        });
         return accounts;
       },
 
@@ -56,10 +56,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
           throw ethErrors.rpc.invalidParams("message");
         }
         const message = bs58.decode(req.params.message).toString("hex");
-        const response = (await injectedProvider.request({
+        const response = await injectedProvider.request<string>({
           method: "sign_transaction",
           params: { message },
-        })) as string;
+        });
 
         const buf = Buffer.from(response, "hex");
         const sendTx = Transaction.from(buf);
@@ -95,25 +95,6 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
           signedTransactions.push(sendTx);
         }
         return signedTransactions;
-      },
-
-      getProviderState: async (req, res, _, end) => {
-        const [accounts, chainId] = await Promise.all([
-          injectedProvider.request<string[]>({
-            method: "solana_requestAccounts",
-            params: {},
-          }),
-          injectedProvider.request<string>({
-            method: "solana_chainId",
-            params: {},
-          }),
-        ]);
-        res.result = {
-          accounts,
-          chainId,
-          isUnlocked: !!accounts?.length,
-        };
-        end();
       },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);

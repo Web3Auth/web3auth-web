@@ -29,25 +29,25 @@ export class SolanaProviderWrapper implements ISolanaWallet {
     return { signature };
   }
 
-  // public async signTransaction(transaction: Transaction): Promise<Transaction> {
-  //   const signedTransaction = (await this.provider.request({
-  //     method: "signTransaction",
-  //     params: {
-  //       message: bs58.encode(transaction.serializeMessage()),
-  //     },
-  //   })) as Transaction;
-  //   return signedTransaction;
-  // }
+  public async signTransaction(transaction: Transaction): Promise<Transaction> {
+    const signedTransaction = (await this.provider.request({
+      method: "signTransaction",
+      params: {
+        message: bs58.encode(transaction.serializeMessage()),
+      },
+    })) as Transaction;
+    return signedTransaction;
+  }
 
-  // public async signAllTransactions(transactions: string[]): Promise<Transaction[]> {
-  //   const signedTransaction = (await this.provider.request({
-  //     method: "signAllTransactions",
-  //     params: {
-  //       message: transactions,
-  //     },
-  //   })) as Transaction[];
-  //   return signedTransaction;
-  // }
+  public async signAllTransactions(transactions: string[]): Promise<Transaction[]> {
+    const signedTransaction = (await this.provider.request({
+      method: "signAllTransactions",
+      params: {
+        message: transactions,
+      },
+    })) as Transaction[];
+    return signedTransaction;
+  }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {
     const response = await this.provider.request<Uint8Array>({

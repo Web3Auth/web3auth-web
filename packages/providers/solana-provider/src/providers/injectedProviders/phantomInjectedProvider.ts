@@ -74,14 +74,6 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
         });
         return transaction;
       },
-      getProviderState: (req, res, _, end) => {
-        res.result = {
-          accounts: injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [],
-          chainId: "", // Phantom doesn't have a chainId yet
-          isUnlocked: injectedProvider.isConnected,
-        };
-        end();
-      },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
@@ -100,7 +92,9 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     return this._providerProxy;
   }
 
-  protected async lookupNetwork(_: PhantomWallet): Promise<void> {
+  protected async lookupNetwork(_: PhantomWallet): Promise<string> {
+    const { chainConfig } = this.config;
+    return chainConfig.chainId || "";
     // const genesisHash = await phantomProvider.request<string>({
     //   method: "getGenesisHash",
     //   params: [],

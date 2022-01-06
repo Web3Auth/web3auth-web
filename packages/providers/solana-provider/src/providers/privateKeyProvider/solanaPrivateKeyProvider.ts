@@ -71,7 +71,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
           throw ethErrors.rpc.invalidParams("message");
         }
         const transaction = transactionGenerator(req.params?.message as string);
-        transaction.partialSign(keyPair);
+        transaction.sign(keyPair);
 
         const fetchOnlyProvider = this.getFetchOnlyProvider();
         const sig = await fetchOnlyProvider.sendAsync<string[], string>({
@@ -94,14 +94,6 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
         }
         return signedTransactions;
       },
-      getProviderState: (req, res, _, end) => {
-        res.result = {
-          accounts: [keyPair.publicKey.toBase58()],
-          chainId: this.config.chainConfig.chainId,
-          isUnlocked: true,
-        };
-        end();
-      },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const engine = new JRPCEngine();
@@ -121,20 +113,16 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
 
   protected async lookupNetwork(): Promise<string> {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
-    const genesisHash = await fetchOnlyProvider.sendAsync<string[], string>({
+    const health = await fetchOnlyProvider.sendAsync<string[], string>({
       jsonrpc: "2.0",
       id: createRandomId(),
-      method: "getGenesisHash",
+      method: "getHealth",
       params: [],
     });
     const { chainConfig } = this.config;
-    if (!genesisHash)
+    if (health !== "ok")
       throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chainConfig.rpcTarget}`);
-    if (chainConfig.chainId !== genesisHash.substring(0, 32))
-      throw WalletInitializationError.invalidProviderConfigError(
-        `Provided rpcTarget ${chainConfig.rpcTarget} does not belongs to configured chainId ${chainConfig.chainId}`
-      );
-    return genesisHash.substring(0, 32);
+    return chainConfig.chainId;
   }
 
   private getFetchOnlyProvider(): SafeEventEmitterProvider {
