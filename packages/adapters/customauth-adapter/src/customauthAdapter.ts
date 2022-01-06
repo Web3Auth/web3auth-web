@@ -22,7 +22,7 @@ import log from "loglevel";
 
 import { getCustomAuthDefaultOptions } from "./config";
 import CustomAuthStore from "./customAuthStore";
-import type { CustomAuthAdapterOptions, CustomAuthArgs, InitParams, LOGIN_TYPE, LoginSettings, TorusDirectAuthResult } from "./interface";
+import type { CustomAuthAdapterOptions, CustomAuthArgs, CustomAuthResult, InitParams, LOGIN_TYPE, LoginSettings } from "./interface";
 import { parseDirectAuthResult, parseTriggerLoginResult } from "./utils";
 
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
@@ -32,7 +32,7 @@ interface LoginParams {
   loginProvider: string;
 }
 
-const DEFAULT_CUSTOM_AUTH_RES: TorusDirectAuthResult = {
+const DEFAULT_CUSTOM_AUTH_RES: CustomAuthResult = {
   publicAddress: "",
   privateKey: "",
   metadataNonce: "",
@@ -45,6 +45,7 @@ const DEFAULT_CUSTOM_AUTH_RES: TorusDirectAuthResult = {
   typeOfLogin: "google",
   typeOfUser: "v1",
 };
+
 class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
@@ -74,7 +75,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   private store: CustomAuthStore;
 
-  private customAuthResult: TorusDirectAuthResult = {
+  private customAuthResult: CustomAuthResult = {
     ...DEFAULT_CUSTOM_AUTH_RES,
   };
 

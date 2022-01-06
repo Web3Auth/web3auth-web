@@ -53,14 +53,21 @@ export interface AdapterInitOptions {
   autoConnect?: boolean;
 }
 
+export const ADAPTER_STATUS = {
+  READY: 1,
+  CONNECTING: 2,
+  CONNECTED: 3,
+  DISCONNECTED: 4,
+} as const;
+export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
+
 export interface IAdapter<T> extends SafeEventEmitter {
   namespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
   chainConfigProxy: CustomChainConfig | undefined;
   type: ADAPTER_CATEGORY_TYPE;
-  ready: boolean;
-  connecting: boolean;
-  connected: boolean;
+  name: string;
+  status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | undefined;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
@@ -84,11 +91,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract type: ADAPTER_CATEGORY_TYPE;
 
-  public abstract connecting: boolean;
+  public abstract name: string;
 
-  public abstract ready: boolean;
-
-  public abstract connected: boolean;
+  public abstract status: ADAPTER_STATUS_TYPE;
 
   public abstract provider: SafeEventEmitterProvider | undefined;
 
@@ -97,7 +102,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   }
 
   setChainConfig(customChainConfig: CustomChainConfig): void {
-    if (this.ready) return;
+    if (this.status === ADAPTER_STATUS.READY) return;
     this.chainConfig = customChainConfig;
   }
 

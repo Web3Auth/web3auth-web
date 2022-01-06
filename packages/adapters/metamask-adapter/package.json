@@ -33,8 +33,6 @@
     "src"
   ],
   "devDependencies": {
-    "@types/lodash": "^4.14.176",
-    "@types/pify": "^5.0.1",
     "lint-staged": "^11.2.6"
   },
   "dependencies": {

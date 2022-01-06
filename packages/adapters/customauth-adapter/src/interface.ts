@@ -16,7 +16,7 @@ import { CustomChainConfig } from "@web3auth/base";
 
 export type UserType = "v1" | "v2";
 
-export type TorusDirectAuthResult = {
+export type CustomAuthResult = {
   publicAddress: string;
   privateKey: string;
   metadataNonce: string;
@@ -49,6 +49,7 @@ export interface CustomAuthAdapterOptions {
   initSettings?: InitParams;
   loginSettings: LoginSettings;
 }
+
 export {
   CustomAuthArgs,
   InitParams,
