@@ -150,8 +150,14 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
     const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
     engine.push(fetchMiddleware);
     const provider = providerFromEngine(engine);
-    this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(provider);
-    return provider;
+    const providerWithRequest = {
+      ...provider,
+      request: async (args: RequestArguments) => {
+        return provider.sendAsync({ jsonrpc: "2.0", id: createRandomId(), ...args });
+      },
+    } as SafeEventEmitterProvider;
+    this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    return providerWithRequest;
   }
 
   private async getCommonConfiguration(supportsEIP1559: boolean) {
