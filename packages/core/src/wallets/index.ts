@@ -1,11 +1,9 @@
-import type { Adapter } from "@web3auth/base";
+import { Adapter, WALLET_ADAPTERS } from "@web3auth/base";
 import type { CustomAuthAdapterOptions } from "@web3auth/customauth-adapter";
 import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import type { TorusWalletOptions } from "@web3auth/torus-evm-adapter";
 import type { SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
 import type { WalletConnectV1AdapterOptions } from "@web3auth/wallet-connect-v1-adapter";
-
-import { WALLET_ADAPTERS } from "../constants";
 
 const getTorusEvmAdapter = async (params: TorusWalletOptions): Promise<Adapter<unknown>> => {
   const { TorusWalletAdapter } = await import(/* webpackChunkName: "torus-evm-adapter" */ "@web3auth/torus-evm-adapter");
