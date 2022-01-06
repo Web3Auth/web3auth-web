@@ -7,9 +7,9 @@ import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { createJsonRpcClient } from "../../JrpcClient";
-import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
-import { createRandomId } from "../../utils";
+import { createJsonRpcClient } from "../../rpc/JrpcClient";
+import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
+import { createRandomId } from "../../rpc/utils";
 
 export interface SolanaPrivKeyProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;

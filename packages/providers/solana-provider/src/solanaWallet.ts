@@ -4,7 +4,7 @@ import bs58 from "bs58";
 
 import { ISolanaWallet } from "./interface";
 
-export class SolanaProviderWrapper implements ISolanaWallet {
+export class SolanaWallet implements ISolanaWallet {
   public provider: SafeEventEmitterProvider;
 
   constructor(provider: SafeEventEmitterProvider) {

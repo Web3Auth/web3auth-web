@@ -7,7 +7,7 @@ import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
 import { SolanaWallet } from "../../interface";
-import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
+import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 
 export interface PhantomWallet extends SolanaWallet {

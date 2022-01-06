@@ -6,7 +6,7 @@ import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/b
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { createSolanaMiddleware, IProviderHandlers } from "../../solanaRpcMiddlewares";
+import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 import { InjectedProvider } from "./interface";
 
