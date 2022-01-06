@@ -35,17 +35,15 @@
     "assets/icons"
   ],
   "devDependencies": {
-    "@types/lodash": "^4.14.176",
-    "svg-url-loader": "^7.1.0",
-    "@types/pify": "^5.0.1",
-    "lint-staged": "^11.2.6",
-    "css-loader": "^2.1.1",
+    "svg-url-loader": "^7.1.1",
+    "lint-staged": "^12.1.5",
+    "css-loader": "^6.5.1",
     "style-loader": "^2.0.0",
     "file-loader": "^6.2.0",
     "@types/webpack-env": "1.16.3",
     "postcss": "^8.4.5",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-svg":"^2.0.0"
+    "rollup-plugin-svg": "^2.0.0"
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",

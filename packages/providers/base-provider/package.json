@@ -24,7 +24,7 @@
     "@web3auth/base": "^0.0.1"
   },
   "devDependencies": {
-    "lint-staged": "^12.1.4"
+    "lint-staged": "^12.1.5"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

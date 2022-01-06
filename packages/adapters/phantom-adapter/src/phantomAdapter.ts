@@ -25,6 +25,7 @@ import { poll } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
 }
+
 export class PhantomAdapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.PHANTOM;
 

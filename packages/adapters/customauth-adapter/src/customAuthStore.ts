@@ -3,9 +3,9 @@ import { IStore } from "./IStore";
 import { MemoryStore } from "./memoryStore";
 import { sessionStorageAvailable } from "./utils";
 
-export default class CustomauthStore {
+export default class CustomAuthStore {
   // eslint-disable-next-line no-use-before-define
-  private static instance: CustomauthStore;
+  private static instance: CustomAuthStore;
 
   public storage: IStore;
 
@@ -20,7 +20,7 @@ export default class CustomauthStore {
     }
   }
 
-  static getInstance(): CustomauthStore {
+  static getInstance(): CustomAuthStore {
     if (!this.instance) {
       this.instance = new this(sessionStorageAvailable ? (window.sessionStorage as IStore) : new MemoryStore());
     }

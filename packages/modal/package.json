@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.17.20",
-    "lint-staged": "^11.2.6"
+    "lint-staged": "^12.1.5"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

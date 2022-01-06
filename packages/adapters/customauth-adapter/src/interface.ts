@@ -19,7 +19,6 @@ export type UserType = "v1" | "v2";
 export type CustomAuthResult = {
   publicAddress: string;
   privateKey: string;
-  metadataNonce: string;
   email: string;
   name: string;
   profileImage: string;
@@ -27,9 +26,6 @@ export type CustomAuthResult = {
   verifier: string;
   verifierId: string;
   typeOfLogin: LOGIN_TYPE;
-  ref?: string;
-  registerOnly?: boolean;
-  typeOfUser: UserType;
 } & TorusKeyPub;
 
 export interface LoginSettings {

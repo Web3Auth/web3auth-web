@@ -1,9 +1,11 @@
-import type CustomAuth from "@toruslabs/customauth";
+import CustomAuth from "@toruslabs/customauth";
 import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
   ADAPTER_NAMESPACES,
+  ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
   BASE_ADAPTER_EVENTS,
@@ -47,21 +49,19 @@ const DEFAULT_CUSTOM_AUTH_RES: CustomAuthResult = {
 };
 
 class CustomAuthAdapter extends BaseAdapter<LoginParams> {
+  readonly name: string = WALLET_ADAPTERS.CUSTOM_AUTH;
+
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
-  // should be overrided in contructor or from setChainConfig function
+  // should be overridden in constructor or from setChainConfig function
   // before calling init function.
   public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   public customAuthInstance!: CustomAuth;
 
-  public connecting = false;
-
-  public ready = false;
-
-  public connected = false;
+  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   public provider!: SafeEventEmitterProvider | undefined;
 

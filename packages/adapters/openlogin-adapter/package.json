@@ -33,9 +33,7 @@
     "src"
   ],
   "devDependencies": {
-    "@types/lodash": "^4.14.176",
-    "@types/pify": "^5.0.1",
-    "lint-staged": "^11.2.6"
+    "lint-staged": "^12.1.5"
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",

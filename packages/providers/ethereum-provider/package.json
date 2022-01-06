@@ -34,9 +34,9 @@
   },
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",
-    "@types/node": "^14.17.20",
+    "@types/node": "^14",
     "@types/web3": "^1.2.2",
-    "lint-staged": "^12.1.4"
+    "lint-staged": "^12.1.5"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
