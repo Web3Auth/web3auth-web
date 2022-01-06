@@ -37,7 +37,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   // added after connecting
-  public provider!: SafeEventEmitterProvider | undefined;
+  public provider!: SafeEventEmitterProvider | null;
 
   private metamaskProvider!: EthereumProvider;
 

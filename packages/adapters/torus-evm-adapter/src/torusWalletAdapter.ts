@@ -15,6 +15,7 @@ import {
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
+  WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 import log from "loglevel";
@@ -37,9 +38,9 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider;
+  public provider: SafeEventEmitterProvider | null = null;
 
-  public torusInstance!: Torus;
+  public torusInstance: Torus | null = null;
 
   private torusWalletOptions?: TorusCtorArgs;
 
@@ -89,6 +90,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async connect(): Promise<SafeEventEmitterProvider> {
     super.checkInitializationRequirements();
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
@@ -107,14 +109,17 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.provider = null;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
