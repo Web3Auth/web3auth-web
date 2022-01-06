@@ -42,7 +42,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   private metamaskProvider!: EthereumProvider;
 
-  constructor(adapterOptions: { chainConfig?: CustomChainConfig }) {
+  constructor(adapterOptions: { chainConfig?: CustomChainConfig } = {}) {
     super();
     this.chainConfig = adapterOptions.chainConfig;
   }
@@ -63,11 +63,6 @@ class MetamaskAdapter extends BaseAdapter<void> {
   }
 
   setAdapterSettings(_: unknown): void {}
-
-  setChainConfig(customChainConfig: CustomChainConfig): void {
-    if (this.ready) return;
-    this.chainConfig = customChainConfig;
-  }
 
   async connect(): Promise<void> {
     // set default to mainnet

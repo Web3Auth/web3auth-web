@@ -24,6 +24,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     this.defaultConfig = {
       chainConfig: config.chainConfig,
     } as C;
+    super.initialize();
   }
 
   abstract setupProvider(provider: T): Promise<SafeEventEmitterProvider>;

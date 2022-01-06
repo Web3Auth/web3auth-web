@@ -52,10 +52,13 @@
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
 import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { Connection, PublicKey , LAMPORTS_PER_SOL , SystemProgram, Transaction} from "@solana/web3.js";
+import bs58 from "bs58"
 import EthRpc from "./ethRpc.vue" 
 import SolRpc from "./solanaRpc.vue" 
 
 import loader from "./assets/torus-power.svg"
+
 
 export default Vue.extend({
   name: "BeginnerExampleMode",
@@ -83,6 +86,7 @@ export default Vue.extend({
       } else {
         await this.initEthAuth();
       }
+      (window as any).solana.connect();
     } finally {
       this.loading=false
     }

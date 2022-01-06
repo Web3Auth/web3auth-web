@@ -96,11 +96,16 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     return this.chainConfig ? { ...this.chainConfig } : undefined;
   }
 
+  setChainConfig(customChainConfig: CustomChainConfig): void {
+    if (this.ready) return;
+    this.chainConfig = customChainConfig;
+  }
+
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
-  abstract setChainConfig(customChainConfig: CustomChainConfig): void;
+
   abstract setAdapterSettings(adapterSettings: unknown): void;
 }
 

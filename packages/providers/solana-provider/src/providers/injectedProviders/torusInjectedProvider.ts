@@ -137,6 +137,9 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       method: "solana_chainId",
       params: {},
     });
+    if (chainId !== this.config.chainConfig.chainId) {
+      throw WalletInitializationError.invalidNetwork(`Wrong network. Expected ${this.config.chainConfig.chainId} but got ${chainId}`);
+    }
     return chainId;
   }
 }

@@ -122,11 +122,6 @@ class TorusWalletAdapter extends BaseAdapter<never> {
     return userInfo;
   }
 
-  setChainConfig(chainConfig: CustomChainConfig): void {
-    if (this.ready) return;
-    this.chainConfig = chainConfig;
-  }
-
   setAdapterSettings(_: unknown): void {}
 }
 

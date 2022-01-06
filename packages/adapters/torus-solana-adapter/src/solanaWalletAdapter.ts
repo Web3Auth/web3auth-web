@@ -1,4 +1,4 @@
-import type { LOGIN_PROVIDER_TYPE, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import type { LOGIN_PROVIDER_TYPE, NetworkInterface, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -10,11 +10,13 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
+  getChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import type { InjectedProvider } from "@web3auth/solana-provider";
@@ -29,7 +31,8 @@ type LoginParams = {
 interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
-  initParams?: TorusParams;
+  initParams?: Omit<TorusParams, "network">;
+  chainConfig?: CustomChainConfig;
 }
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
@@ -63,17 +66,28 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
+    this.chainConfig = params.chainConfig;
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    // set chainConfig for mainnet by default if not set
+    let network: NetworkInterface | undefined;
+    if (!this.chainConfig) {
+      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
+      const { blockExplorer, displayName, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId: "0x1", rpcTarget: "mainnet", blockExplorerUrl: blockExplorer, displayName, ticker, tickerName, logo: "" };
+    } else {
+      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+    }
     if (this.ready) return;
     const { default: TorusSdk } = await import("@toruslabs/solana-embed");
     this.torusInstance = new TorusSdk(this.torusWalletOptions);
-    await this.torusInstance.init({ showTorusButton: false, ...this.initParams });
+    await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
     const { TorusInjectedProvider: SolanaProviderProxy } = await import("@web3auth/solana-provider");
     this.solanaProviderProxy = new SolanaProviderProxy({
       config: {
-        chainConfig: { chainId: "" },
+        chainConfig: this.chainConfig as CustomChainConfig,
       },
     });
     this.ready = true;
@@ -95,7 +109,19 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(BASE_ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      try {
+        this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      } catch (error: unknown) {
+        const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+        const network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+        if ((error as Web3AuthError).code === 5013) {
+          // try to change network once if user is connected to wrong network
+          await this.torusInstance.setProvider(network);
+          this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+        } else {
+          throw error;
+        }
+      }
       this.connected = true;
       this.torusInstance.showTorusButton();
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
@@ -120,8 +146,6 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
   }
-
-  setChainConfig(_: CustomChainConfig): void {}
 
   setAdapterSettings(_: unknown): void {}
 }

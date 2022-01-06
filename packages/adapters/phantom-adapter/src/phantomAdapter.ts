@@ -9,6 +9,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
+  getChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -20,8 +21,10 @@ import type { PhantomInjectedProvider, PhantomWallet } from "@web3auth/solana-pr
 import log from "loglevel";
 
 import { poll } from "./utils";
-
-class PhantomAdapter extends BaseAdapter<void> {
+export interface PhantomAdapterOptions {
+  chainConfig?: CustomChainConfig;
+}
+export class PhantomAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
@@ -34,30 +37,37 @@ class PhantomAdapter extends BaseAdapter<void> {
 
   public provider!: SafeEventEmitterProvider | undefined;
 
-  public _wallet!: PhantomWallet;
+  public _wallet!: PhantomWallet | undefined;
 
   public connected = false;
 
   private phantomProvider!: PhantomInjectedProvider;
+
+  constructor(options: PhantomAdapterOptions = {}) {
+    super();
+    this.chainConfig = options.chainConfig;
+  }
 
   get isPhantomAvailable(): boolean {
     return typeof window !== "undefined" && !!(window as any).solana?.isPhantom;
   }
 
   get isWalletConnected(): boolean {
-    return this._wallet && this._wallet.isConnected && this.connected;
+    return !!(this._wallet && this._wallet.isConnected && this.connected);
   }
 
   setAdapterSettings(_: unknown): void {}
 
-  setChainConfig(_: CustomChainConfig): void {}
-
   async init(options: AdapterInitOptions): Promise<void> {
+    // set chainConfig for mainnet by default if not set
+    if (!this.chainConfig) {
+      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
+    }
     if (this.ready) return;
     const isAvailable = this.isPhantomAvailable || (await poll(() => this.isPhantomAvailable, 1000, 3));
     if (!isAvailable) throw WalletInitializationError.notInstalled();
     const { PhantomInjectedProvider } = await import("@web3auth/solana-provider");
-    this.phantomProvider = new PhantomInjectedProvider({});
+    this.phantomProvider = new PhantomInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.ready = true;
     this.emit(BASE_ADAPTER_EVENTS.READY, WALLET_ADAPTERS.PHANTOM);
 
@@ -127,6 +137,8 @@ class PhantomAdapter extends BaseAdapter<void> {
           // eslint-disable-next-line require-atomic-updates
           wallet._handleDisconnect = handleDisconnect;
         }
+      } else {
+        await this.connectWithProvider(wallet);
       }
 
       if (!wallet.publicKey) throw WalletLoginError.connectionError();
@@ -144,10 +156,9 @@ class PhantomAdapter extends BaseAdapter<void> {
     if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     try {
       await this._wallet?.disconnect();
-      this.provider = undefined;
       this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
-    } catch (error: any) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError(error?.message));
+    } catch (error: unknown) {
+      this.emit(BASE_ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }
   }
 
@@ -158,11 +169,12 @@ class PhantomAdapter extends BaseAdapter<void> {
 
   private _disconnected = () => {
     const wallet = this._wallet;
-    if (this.isWalletConnected) {
+    if (this.isWalletConnected && wallet) {
       wallet.off("disconnect", this._disconnected);
+      this._wallet = undefined;
+      this.provider = undefined;
+      this.connected = false;
       this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
     }
   };
 }
-
-export { PhantomAdapter };
