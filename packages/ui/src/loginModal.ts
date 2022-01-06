@@ -498,16 +498,12 @@ export default class LoginModal extends SafeEventEmitter {
       log.error("error", error);
       this.state.connecting = false;
       this.state.connected = false;
-      if (error.code === 1) {
-        const hideClass = "w3a-modal--hidden";
-        if (this.$modal.classList.contains(hideClass)) {
-          this.toggleModal(true);
-        }
-
-        this.toggleMessage(error.message, BASE_ADAPTER_EVENTS.ERRORED);
-      } else {
-        this.toggleLoader();
+      const hideClass = "w3a-modal--hidden";
+      if (this.$modal.classList.contains(hideClass)) {
+        this.toggleModal(true);
       }
+
+      this.toggleMessage(error.message, BASE_ADAPTER_EVENTS.ERRORED);
     });
     listener.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
