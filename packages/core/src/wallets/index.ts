@@ -1,5 +1,6 @@
 import { Adapter, WALLET_ADAPTERS } from "@web3auth/base";
 import type { CustomAuthAdapterOptions } from "@web3auth/customauth-adapter";
+import type { MetamaskAdapterOptions } from "@web3auth/metamask-adapter";
 import type { OpenloginAdapterOptions } from "@web3auth/openlogin-adapter";
 import type { TorusWalletOptions } from "@web3auth/torus-evm-adapter";
 import type { SolanaWalletOptions } from "@web3auth/torus-solana-adapter";
@@ -50,12 +51,12 @@ const getCustomAuthAdapter = async (params: CustomAuthAdapterOptions): Promise<A
   };
 };
 
-const getMetamaskAdapter = async (): Promise<Adapter<unknown>> => {
+const getMetamaskAdapter = async (params: MetamaskAdapterOptions): Promise<Adapter<unknown>> => {
   const { MetamaskAdapter } = await import(/* webpackChunkName: "metamask-adapter" */ "@web3auth/metamask-adapter");
   return {
     name: WALLET_ADAPTERS.METAMASK,
     adapter: () => {
-      const adapter = new MetamaskAdapter();
+      const adapter = new MetamaskAdapter({ ...params });
       return adapter;
     },
   };

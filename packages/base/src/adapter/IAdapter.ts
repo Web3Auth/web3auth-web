@@ -1,7 +1,7 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { WalletInitializationError } from "..";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { WalletInitializationError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export const BASE_ADAPTER_EVENTS = {

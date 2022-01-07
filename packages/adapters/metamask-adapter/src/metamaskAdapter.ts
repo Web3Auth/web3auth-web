@@ -24,6 +24,9 @@ interface EthereumProvider extends SafeEventEmitterProvider {
   isConnected: () => boolean;
   chainId: string;
 }
+export interface MetamaskAdapterOptions {
+  chainConfig?: CustomChainConfig;
+}
 
 class MetamaskAdapter extends BaseAdapter<void> {
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -41,7 +44,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   private metamaskProvider: EthereumProvider | null = null;
 
-  constructor(adapterOptions: { chainConfig?: CustomChainConfig } = {}) {
+  constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
     this.chainConfig = adapterOptions.chainConfig;
   }

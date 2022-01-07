@@ -10,6 +10,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CustomChainConfig,
+  getChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -20,8 +21,7 @@ import {
 import log from "loglevel";
 
 import { defaultWalletConnectV1Options } from "./config";
-import type { WalletConnectV1AdapterOptions } from "./interface";
-
+import { WalletConnectV1AdapterOptions } from "./interface";
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -46,6 +46,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   constructor(options: WalletConnectV1AdapterOptions) {
     super();
     this.adapterOptions = { ...defaultWalletConnectV1Options, ...options };
+    this.chainConfig = options.chainConfig;
   }
 
   get connected(): boolean {
@@ -53,6 +54,9 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   async init(): Promise<void> {
+    if (!this.chainConfig) {
+      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
+    }
     super.checkInitializationRequirements();
     // Create a connector
     this.walletConnectProvider = new WalletConnectProvider({
@@ -112,7 +116,21 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   private subscribeEvents(provider: WalletConnectProvider): void {
     // Subscribe to session connection
-    provider.on("connect", () => {
+    provider.on("connect", (error: Error, payload: { params: { accounts: string[]; chainId: string }[] }) => {
+      if (error) {
+        this.emit(ADAPTER_STATUS.ERRORED, error);
+        return;
+      }
+      const { chainId } = payload.params[0];
+      if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
+        this.emit(
+          ADAPTER_STATUS.ERRORED,
+          WalletInitializationError.invalidNetwork(
+            `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
+          )
+        );
+        return;
+      }
       this.provider = provider as unknown as SafeEventEmitterProvider;
       this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     });

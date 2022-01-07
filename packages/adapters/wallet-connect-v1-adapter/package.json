@@ -33,11 +33,11 @@
     "src"
   ],
   "devDependencies": {
-    "@walletconnect/types": "~1.7.0",
     "lint-staged": "^12.1.5"
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",
+    "@walletconnect/types": "~1.7.0",
     "@walletconnect/web3-provider": "~1.7.0",
     "loglevel": "^1.8.0"
   },
