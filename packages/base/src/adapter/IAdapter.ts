@@ -84,7 +84,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public adapterData?: unknown = {};
 
-  // should be added in contructor or from setChainConfig function
+  // should be added in constructor or from setChainConfig function
   // before calling init function.
   protected chainConfig: CustomChainConfig | undefined;
 
@@ -98,7 +98,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
-  public abstract provider: SafeEventEmitterProvider | undefined;
+  public abstract provider: SafeEventEmitterProvider | null;
 
   get chainConfigProxy(): CustomChainConfig | undefined {
     return this.chainConfig ? { ...this.chainConfig } : undefined;
@@ -119,7 +119,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
     if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
-    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already intialized");
+    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;

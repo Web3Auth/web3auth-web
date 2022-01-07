@@ -1,4 +1,4 @@
-import type { LoginParams, NetworkInterface, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
+import Torus, { LoginParams, NetworkInterface, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -15,17 +15,18 @@ import {
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
+  WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 import log from "loglevel";
 
-import type { Torus } from "./interface";
 interface TorusWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
 }
+
 class TorusWalletAdapter extends BaseAdapter<never> {
   readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
 
@@ -37,9 +38,9 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider;
+  public provider: SafeEventEmitterProvider | null = null;
 
-  public torusInstance!: Torus;
+  public torusInstance: Torus | null = null;
 
   private torusWalletOptions?: TorusCtorArgs;
 
@@ -67,8 +68,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
       const { chainId, blockExplorer, displayName, rpcTarget } = this.chainConfig as CustomChainConfig;
       network = { chainId: parseInt(chainId as string, 16), host: rpcTarget, blockExplorer, networkName: displayName };
     }
-    const { default: TorusSdk } = await import("@toruslabs/torus-embed");
-    this.torusInstance = new TorusSdk(this.torusWalletOptions);
+    this.torusInstance = new Torus(this.torusWalletOptions);
     await this.torusInstance.init({
       showTorusButton: false,
       ...this.initParams,
@@ -87,18 +87,27 @@ class TorusWalletAdapter extends BaseAdapter<never> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider> {
+  async connect(): Promise<void> {
     super.checkInitializationRequirements();
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
       await this.torusInstance.login(this.loginSettings);
-      // TODO: need to make types compatible in torus embed
+      const { chainId } = this.torusInstance.provider;
+      if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
+        this.emit(
+          ADAPTER_STATUS.ERRORED,
+          WalletInitializationError.invalidNetwork(
+            `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
+          )
+        );
+        return;
+      }
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
       this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM);
-      return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
     } catch (error) {
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus wallet");
@@ -107,6 +116,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     this.status = ADAPTER_STATUS.DISCONNECTED;
@@ -115,6 +125,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }

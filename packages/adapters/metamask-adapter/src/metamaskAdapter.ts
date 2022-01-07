@@ -37,9 +37,9 @@ class MetamaskAdapter extends BaseAdapter<void> {
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   // added after connecting
-  public provider!: SafeEventEmitterProvider | undefined;
+  public provider: SafeEventEmitterProvider | null = null;
 
-  private metamaskProvider!: EthereumProvider;
+  private metamaskProvider: EthereumProvider | null = null;
 
   constructor(adapterOptions: { chainConfig?: CustomChainConfig } = {}) {
     super();
@@ -94,6 +94,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     this.provider?.removeAllListeners();
+    this.provider = null;
     this.status = ADAPTER_STATUS.DISCONNECTED;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
