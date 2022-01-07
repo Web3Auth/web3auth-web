@@ -1,17 +1,18 @@
-import { storageAvailable, TORUS_METHOD } from "@toruslabs/customauth";
-
 import {
-  CustomAuthResult,
   LoginWindowResponse,
   RedirectResult,
+  storageAvailable,
+  TORUS_METHOD,
   TorusAggregateLoginResponse,
   TorusHybridAggregateLoginResponse,
   TorusKeyPub,
   TorusLoginResponse,
   TorusVerifierResponse,
-} from "./interface";
+} from "@toruslabs/customauth";
 
-export function parseDirectAuthResult(redirectResult: RedirectResult): CustomAuthResult {
+import { CustomAuthResult } from "./interface";
+
+export function parseCustomAuthResult(redirectResult: RedirectResult): CustomAuthResult {
   const { result, method } = redirectResult;
   let userInfo: TorusVerifierResponse & LoginWindowResponse;
   let publicAddress: string;
@@ -35,15 +36,6 @@ export function parseDirectAuthResult(redirectResult: RedirectResult): CustomAut
     privateKey: privateKey?.padStart(64, "0") || "",
     ...userInfo,
     pubKey,
-  };
-}
-
-export function parseTriggerLoginResult(loginResult: TorusLoginResponse): CustomAuthResult {
-  return {
-    ...loginResult.userInfo,
-    privateKey: loginResult.privateKey,
-    publicAddress: loginResult.publicAddress,
-    pubKey: loginResult.pubKey,
   };
 }
 
