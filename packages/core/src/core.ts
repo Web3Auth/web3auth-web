@@ -2,6 +2,8 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   Adapter,
   ADAPTER_NAMESPACES,
+  ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
   CustomChainConfig,
@@ -9,12 +11,11 @@ import {
   IAdapter,
   SafeEventEmitterProvider,
   UserInfo,
+  WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-
-import { WALLET_ADAPTER_TYPE } from "./constants";
 
 export interface Web3AuthCoreOptions {
   /**
@@ -29,38 +30,32 @@ export interface Web3AuthCoreOptions {
    */
   chainId?: number;
 }
+const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthCore extends SafeEventEmitter {
   readonly coreOptions: Web3AuthCoreOptions;
 
-  public connectedAdapterName: string | undefined;
+  public connectedAdapterName: string | null = null;
 
-  public connected = false;
+  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public connecting = false;
-
-  public provider!: SafeEventEmitterProvider | undefined;
+  public provider: SafeEventEmitterProvider | null = null;
 
   public cachedAdapter?: string | null;
-
-  protected initialized = false;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
   constructor(options: Web3AuthCoreOptions) {
     super();
-    this.cachedAdapter = window.sessionStorage.getItem("Web3Auth-cachedAdapter");
+    this.cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
     this.coreOptions = options;
-    this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
   public async init(): Promise<void> {
-    if (this.initialized) throw new Error("Already initialized");
-
     const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-      // if adapter doesn't have any chain config yet thn set it based on modal namespace and chainId.
-      // this applies only to multichain adapters where chainNamespace cannot be determined from adapter.
-      if (this.walletAdapters[adapterName].namespace === ADAPTER_NAMESPACES.MULTICHAIN && !this.walletAdapters[adapterName].currentChainNamespace) {
+      // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
+      // if no chainNamespace or chainId is being provided, it will connect with mainnet.
+      if (!this.walletAdapters[adapterName].chainConfigProxy) {
         const chainConfig = getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainId) as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
@@ -68,11 +63,14 @@ export class Web3AuthCore extends SafeEventEmitter {
     });
     await Promise.all(initPromises);
 
-    this.initialized = true;
+    this.status = ADAPTER_STATUS.READY;
   }
 
   public configureAdapter(adapter: Adapter<unknown>): Web3AuthCore {
-    if (this.initialized) throw new Error("Wallets cannot be added after initialization");
+    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
+    if (this.status === ADAPTER_STATUS.READY)
+      throw WalletInitializationError.notReady("Adapter is already initialized, so no more adapters can be added");
     if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && adapter.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN} adapter already exists.`
@@ -103,7 +101,7 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   public clearCache() {
-    window.sessionStorage.removeItem("Web3Auth-cachedAdapter");
+    window.sessionStorage.removeItem(ADAPTER_CACHE_KEY);
     this.cachedAdapter = undefined;
   }
 
@@ -118,47 +116,48 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   async logout(): Promise<void> {
-    if (!this.connected || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.walletAdapters[this.connectedAdapterName].disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
-      this.connected = true;
-      this.connecting = false;
+      this.status = ADAPTER_STATUS.CONNECTED;
       const connectedAd = this.walletAdapters[connectedAdapterName];
       this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = connectedAdapterName;
-
       this.cacheWallet(connectedAdapterName);
       this.emit(BASE_ADAPTER_EVENTS.CONNECTED, connectedAdapterName);
     });
     walletAdapter.on(BASE_ADAPTER_EVENTS.DISCONNECTED, (data) => {
-      this.connected = false;
-      this.connecting = false;
-      this.provider = undefined;
+      this.status = ADAPTER_STATUS.DISCONNECTED;
+      this.provider = null;
       this.clearCache();
       this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED, data);
     });
     walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
-      this.connecting = true;
-      this.provider = undefined;
+      this.status = ADAPTER_STATUS.CONNECTING;
       this.emit(BASE_ADAPTER_EVENTS.CONNECTING, data);
     });
     walletAdapter.on(BASE_ADAPTER_EVENTS.ERRORED, (data) => {
-      this.connecting = false;
-      this.provider = undefined;
+      this.status = ADAPTER_STATUS.ERRORED;
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, data);
     });
   }
 
+  protected checkInitRequirements(): void {
+    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
+    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
+  }
+
   private cacheWallet(walletName: string) {
-    window.sessionStorage.setItem("Web3Auth-cachedAdapter", walletName);
+    window.sessionStorage.setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
   }
 }

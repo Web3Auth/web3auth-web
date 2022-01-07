@@ -16,6 +16,7 @@ import {
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
+  WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
@@ -41,9 +42,9 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider;
+  public provider: SafeEventEmitterProvider | null = null;
 
-  public torusInstance!: Torus;
+  public torusInstance: Torus | null = null;
 
   private torusWalletOptions?: TorusCtorArgs;
 
@@ -97,6 +98,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
 
   async connect(): Promise<void> {
     super.checkConnectionRequirements();
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
@@ -105,12 +107,6 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
       this._onConnectHandler();
       return;
     } catch (error) {
-      // if ((error as Web3AuthError).code === 5013) {
-      //   // try to change network once if user is connected to wrong network
-      //   this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
-      // } else {
-      //   throw error;
-      // }
       this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
@@ -118,13 +114,16 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
 
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
     this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.provider = null;
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
   }
@@ -132,6 +131,7 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
   setAdapterSettings(_: unknown): void {}
 
   private _onConnectHandler() {
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.DISCONNECTED;
     this.torusInstance.showTorusButton();
     this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);

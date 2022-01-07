@@ -35,13 +35,13 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider | undefined;
+  public provider!: SafeEventEmitterProvider | null;
 
   public adapterData: WalletConnectV1Data = {
     uri: "",
   };
 
-  public walletConnectProvider!: WalletConnectProvider | undefined;
+  public walletConnectProvider!: WalletConnectProvider | null;
 
   constructor(options: WalletConnectV1AdapterOptions) {
     super();
@@ -120,8 +120,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     // Subscribe to session disconnection
     provider.on("disconnect", (code: number, reason: string) => {
       log.debug("wallet connect, disconnected", code, reason);
-      this.provider = undefined;
-      this.walletConnectProvider = undefined;
+      this.provider = null;
+      this.walletConnectProvider = null;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
     });
   }

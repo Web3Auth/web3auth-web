@@ -8,5 +8,8 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": ["Solana"]
+  "cSpell.words": [
+    "openlogin",
+    "Solana"
+  ]
 }

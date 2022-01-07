@@ -130,6 +130,12 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
     const networkMiddleware = createFetchMiddleware({ rpcTarget: this.config.chainConfig.rpcTarget });
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
-    return provider;
+    const providerWithRequest = {
+      ...provider,
+      request: async (args: RequestArguments) => {
+        return provider.sendAsync(args);
+      },
+    } as SafeEventEmitterProvider;
+    return providerWithRequest;
   }
 }

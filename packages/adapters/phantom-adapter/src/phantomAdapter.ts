@@ -21,7 +21,7 @@ import {
 import type { PhantomInjectedProvider, PhantomWallet } from "@web3auth/solana-provider";
 import log from "loglevel";
 
-import { poll } from "./utils";
+import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
 }
@@ -37,19 +37,15 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider | undefined;
+  public provider!: SafeEventEmitterProvider | null;
 
-  public _wallet!: PhantomWallet | undefined;
+  public _wallet!: PhantomWallet | null;
 
   private phantomProvider!: PhantomInjectedProvider;
 
   constructor(options: PhantomAdapterOptions = {}) {
     super();
     this.chainConfig = options.chainConfig;
-  }
-
-  get isPhantomAvailable(): boolean {
-    return typeof window !== "undefined" && !!(window as any).solana?.isPhantom;
   }
 
   get isWalletConnected(): boolean {
@@ -64,10 +60,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
     }
-    const isAvailable = this.isPhantomAvailable || (await poll(() => this.isPhantomAvailable, 1000, 3));
-    if (!isAvailable) throw WalletInitializationError.notInstalled();
-    this._wallet = typeof window !== "undefined" && (window as any).solana;
-
+    this._wallet = await detectProvider({ interval: 500, count: 3 });
+    if (!this._wallet) throw WalletInitializationError.notInstalled();
     const { PhantomInjectedProvider } = await import("@web3auth/solana-provider");
     this.phantomProvider = new PhantomInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.status = ADAPTER_STATUS.READY;
@@ -157,8 +151,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
     const wallet = this._wallet;
     if (this.isWalletConnected && wallet) {
       wallet.off("disconnect", this._disconnected);
-      this._wallet = undefined;
-      this.provider = undefined;
+      this._wallet = null;
+      this.provider = null;
       this.status = ADAPTER_STATUS.DISCONNECTED;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
     }

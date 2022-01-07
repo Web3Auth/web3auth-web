@@ -1,7 +1,15 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BASE_ADAPTER_EVENTS, BaseAdapterConfig, LoginMethodConfig, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS, WalletConnectV1Data } from "@web3auth/base";
+import {
+  BASE_ADAPTER_EVENTS,
+  BaseAdapterConfig,
+  LoginMethodConfig,
+  WALLET_ADAPTER_TYPE,
+  WALLET_ADAPTERS,
+  WalletConnectV1Data,
+  Web3AuthError,
+} from "@web3auth/base";
 import log from "loglevel";
 import QRCode from "qrcode";
 
@@ -85,9 +93,6 @@ export default class LoginModal extends SafeEventEmitter {
                           <div class="w3ajs-modal-loader__spinner w3a-spinner"><div></div><div></div><div></div><div></div></div>
                           <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
                           <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
-                          <button class="w3a-logout w3ajs-logout" style="display: none">
-                              <h6 class="w3a-group__title">Logout</h6>
-                          </button>
                         </div>
                         <div class="w3a-spinner-power">
                           <div>Secured by</div>
@@ -103,7 +108,7 @@ export default class LoginModal extends SafeEventEmitter {
     `);
     const $content = this.$modal.querySelector(".w3ajs-content");
 
-    const $closeBtn = this.$modal.querySelector(".w3ajs-close-btn");
+    const $closeBtn = this.$modal.querySelector(".w3ajs-close-btn") as HTMLButtonElement;
 
     const $loaderCloseBtn = this.$modal.querySelector(".w3ajs-loader-close-btn");
 
@@ -115,7 +120,6 @@ export default class LoginModal extends SafeEventEmitter {
     const $externalToggleButton = $externalToggle?.querySelector(".w3ajs-external-toggle__button");
     const $externalBackButton = $externalWallet.querySelector(".w3ajs-external-back");
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
-    const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
 
     this.showExternalWallets = () => {
       $externalToggle?.classList.toggle("w3a-external-toggle--hidden");
@@ -136,19 +140,16 @@ export default class LoginModal extends SafeEventEmitter {
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
     });
 
-    $closeBtn.addEventListener("click", this.toggleModal);
+    $closeBtn.addEventListener("click", () => this.toggleModal());
 
     $loaderCloseBtn?.addEventListener("click", () => {
-      if (this.state.connected) {
+      const errorModal = this.$modal.classList.contains("w3a-modal--error");
+      if (this.state.connected || errorModal) {
         this.toggleMessage("");
         this.toggleModal();
       } else {
         this.toggleMessage("");
       }
-    });
-
-    $loaderLogout?.addEventListener("click", () => {
-      this.emit("DISCONNECT");
     });
 
     $content?.appendChild($torusWallet);
@@ -159,9 +160,15 @@ export default class LoginModal extends SafeEventEmitter {
     this.state.initialized = true;
   }
 
-  toggleModal = (): void => {
+  toggleModal = (isErrorOnly = false): void => {
     const hideClass = "w3a-modal--hidden";
     const $inner = this.$modal.querySelector(".w3ajs-inner");
+
+    if (isErrorOnly) {
+      this.$modal.classList.add("w3a-modal--error");
+    } else {
+      this.$modal.classList.remove("w3a-modal--error");
+    }
 
     if (this.$modal.classList.contains(hideClass)) {
       this.$modal.classList.remove(hideClass);
@@ -431,11 +438,10 @@ export default class LoginModal extends SafeEventEmitter {
 
   private toggleMessage(message: string, type = "") {
     const $loader = this.$modal.querySelector(".w3ajs-modal-loader");
-    const $loaderSpinner = this.$modal.querySelector(".w3ajs-modal-loader__spinner") as HTMLDivElement;
-    const $loaderLabel = this.$modal.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
-    const $loaderMessage = this.$modal.querySelector(".w3ajs-modal-loader__message") as HTMLDivElement;
-    const $loaderClose = this.$modal.querySelector(".w3ajs-loader-close-btn") as HTMLDivElement;
-    const $loaderLogout = this.$modal.querySelector(".w3ajs-logout") as HTMLButtonElement;
+    const $loaderSpinner = $loader.querySelector(".w3ajs-modal-loader__spinner") as HTMLDivElement;
+    const $loaderLabel = $loader.querySelector(".w3ajs-modal-loader__label") as HTMLDivElement;
+    const $loaderMessage = $loader.querySelector(".w3ajs-modal-loader__message") as HTMLDivElement;
+    const $loaderClose = $loader.querySelector(".w3ajs-loader-close-btn") as HTMLDivElement;
 
     $loaderLabel.style.display = "none";
     if (message) {
@@ -453,15 +459,14 @@ export default class LoginModal extends SafeEventEmitter {
     }
 
     if (type === BASE_ADAPTER_EVENTS.ERRORED) {
+      $loaderSpinner.style.display = "none";
       $loaderMessage.classList.add("w3a-spinner-message--error");
     } else {
       $loaderMessage.classList.remove("w3a-spinner-message--error");
     }
 
     if (type === BASE_ADAPTER_EVENTS.CONNECTED) {
-      $loaderLogout.style.display = "block";
-    } else {
-      $loaderLogout.style.display = "none";
+      $loaderSpinner.style.display = "none";
     }
   }
 
@@ -479,15 +484,26 @@ export default class LoginModal extends SafeEventEmitter {
     });
     listener.on(BASE_ADAPTER_EVENTS.CONNECTED, () => {
       this.state.connecting = false;
+      log.debug("connected with adapter");
       if (!this.state.connected) {
         this.state.connected = true;
-        this.toggleMessage("You are now connected to your wallet. Close the modal to go to the app", BASE_ADAPTER_EVENTS.CONNECTED);
+        this.toggleMessage("You are now connected to your wallet", BASE_ADAPTER_EVENTS.CONNECTED);
+        setTimeout(() => {
+          this.toggleMessage("");
+          this.toggleModal();
+        }, 3000);
       }
     });
-    listener.on(BASE_ADAPTER_EVENTS.ERRORED, () => {
+    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
+      log.error("error", error);
       this.state.connecting = false;
       this.state.connected = false;
-      this.toggleLoader();
+      const hideClass = "w3a-modal--hidden";
+      if (this.$modal.classList.contains(hideClass)) {
+        this.toggleModal(true);
+      }
+
+      this.toggleMessage(error.message, BASE_ADAPTER_EVENTS.ERRORED);
     });
     listener.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;

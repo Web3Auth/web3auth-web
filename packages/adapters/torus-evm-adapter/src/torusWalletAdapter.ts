@@ -89,7 +89,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async connect(): Promise<void> {
     super.checkInitializationRequirements();
-    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
@@ -116,16 +116,17 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.provider = null;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus is not initialized");
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
