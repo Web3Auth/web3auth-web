@@ -153,7 +153,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
       wallet.off("disconnect", this._disconnected);
       this._wallet = null;
       this.provider = null;
-      this.status = ADAPTER_STATUS.DISCONNECTED;
+      // ready to be connected again
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
     }
   };

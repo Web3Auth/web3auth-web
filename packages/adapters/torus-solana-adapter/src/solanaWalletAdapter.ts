@@ -1,4 +1,4 @@
-import Torus, { NetworkInterface, TorusCtorArgs, TorusLoginParams, TorusParams } from "@toruslabs/solana-embed";
+import Torus, { LOGIN_PROVIDER_TYPE, NetworkInterface, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -23,7 +23,12 @@ import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/b
 import type { InjectedProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
-interface SolanaWalletOptions {
+export type TorusLoginParams = {
+  loginProvider?: LOGIN_PROVIDER_TYPE;
+  login_hint?: string;
+};
+
+export interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
@@ -31,7 +36,7 @@ interface SolanaWalletOptions {
 }
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
-class SolanaWalletAdapter extends BaseAdapter<void> {
+export class SolanaWalletAdapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
 
   readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -116,7 +121,8 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
-    this.status = ADAPTER_STATUS.DISCONNECTED;
+    // ready to connect again
+    this.status = ADAPTER_STATUS.READY;
     this.provider = null;
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }
@@ -137,5 +143,3 @@ class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
   }
 }
-
-export { SolanaWalletAdapter, SolanaWalletOptions };

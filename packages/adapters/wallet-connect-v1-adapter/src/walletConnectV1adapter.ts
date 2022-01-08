@@ -140,6 +140,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       log.debug("wallet connect, disconnected", code, reason);
       this.provider = null;
       this.walletConnectProvider = null;
+      // ready to connect again
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
     });
   }

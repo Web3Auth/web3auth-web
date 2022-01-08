@@ -85,7 +85,6 @@ export default Vue.extend({
       } else {
         await this.initEthAuth();
       }
-      (window as any).solana.connect();
     } finally {
       this.loading = false;
     }

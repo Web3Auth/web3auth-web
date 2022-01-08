@@ -119,7 +119,8 @@ class TorusWalletAdapter extends BaseAdapter<never> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
-    this.status = ADAPTER_STATUS.DISCONNECTED;
+    // ready to be connected again
+    this.status = ADAPTER_STATUS.READY;
     this.provider = null;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }

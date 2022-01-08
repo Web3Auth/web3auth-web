@@ -124,7 +124,8 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     await this.openloginInstance.logout();
-    this.status = ADAPTER_STATUS.DISCONNECTED;
+    // ready to be connected again
+    this.status = ADAPTER_STATUS.READY;
     this.provider = undefined;
     this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
   }

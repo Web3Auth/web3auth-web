@@ -186,7 +186,8 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     this.store.resetStore();
-    this.status = ADAPTER_STATUS.DISCONNECTED;
+    // ready to be connected again
+    this.status = ADAPTER_STATUS.READY;
     this.provider = null;
     this.customAuthResult = {
       ...DEFAULT_CUSTOM_AUTH_RES,
