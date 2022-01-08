@@ -114,15 +114,24 @@ export default Vue.extend({
         // loginProvider: "google"
         "loginProviderConfig": {
           "google": {
-            "clientId": "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-            "verifier": "google-lrc",
+            method: "triggerLogin",
+            args: {
+              typeOfLogin: "google",
+              verifier: "google-lrc",
+              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+            }
           },
           "twitter": {
-            "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
-            "verifier": "torus-auth0-twitter-lrc" ,
-            jwtParams: {
-              "domain": "https://torus-test.auth0.com"
-            }
+             method: "triggerLogin",
+             args: {
+              typeOfLogin: "twitter",
+              "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
+              "verifier": "torus-auth0-twitter-lrc" ,
+              jwtParams: {
+                "domain": "https://torus-test.auth0.com"
+              }
+             }
+           
           }
         }
       }

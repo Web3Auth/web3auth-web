@@ -37,7 +37,7 @@
   "devDependencies": {
     "svg-url-loader": "^7.1.1",
     "lint-staged": "^12.1.5",
-    "css-loader": "^6.5.1",
+    "css-loader": "^2.1.1",
     "style-loader": "^2.0.0",
     "file-loader": "^6.2.0",
     "@types/webpack-env": "1.16.3",
