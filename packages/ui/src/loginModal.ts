@@ -2,7 +2,7 @@ import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
-  BASE_ADAPTER_EVENTS,
+  ADAPTER_STATUS,
   BaseAdapterConfig,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
@@ -458,20 +458,20 @@ export default class LoginModal extends SafeEventEmitter {
       $loaderMessage.innerText = "";
     }
 
-    if (type === BASE_ADAPTER_EVENTS.ERRORED) {
+    if (type === ADAPTER_STATUS.ERRORED) {
       $loaderSpinner.style.display = "none";
       $loaderMessage.classList.add("w3a-spinner-message--error");
     } else {
       $loaderMessage.classList.remove("w3a-spinner-message--error");
     }
 
-    if (type === BASE_ADAPTER_EVENTS.CONNECTED) {
+    if (type === ADAPTER_STATUS.CONNECTED) {
       $loaderSpinner.style.display = "none";
     }
   }
 
   private subscribeCoreEvents(listener: SafeEventEmitter) {
-    listener.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
+    listener.on(ADAPTER_STATUS.CONNECTING, (data) => {
       log.debug("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
@@ -482,19 +482,19 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleLoader();
       }
     });
-    listener.on(BASE_ADAPTER_EVENTS.CONNECTED, () => {
+    listener.on(ADAPTER_STATUS.CONNECTED, () => {
       this.state.connecting = false;
       log.debug("connected with adapter");
       if (!this.state.connected) {
         this.state.connected = true;
-        this.toggleMessage("You are now connected to your wallet", BASE_ADAPTER_EVENTS.CONNECTED);
+        this.toggleMessage("You are now connected to your wallet", ADAPTER_STATUS.CONNECTED);
         setTimeout(() => {
           this.toggleMessage("");
           this.toggleModal();
         }, 3000);
       }
     });
-    listener.on(BASE_ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
+    listener.on(ADAPTER_STATUS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error);
       this.state.connecting = false;
       this.state.connected = false;
@@ -503,9 +503,9 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleModal(true);
       }
 
-      this.toggleMessage(error.message, BASE_ADAPTER_EVENTS.ERRORED);
+      this.toggleMessage(error.message, ADAPTER_STATUS.ERRORED);
     });
-    listener.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
+    listener.on(ADAPTER_STATUS.DISCONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = false;
       this.toggleMessage("");

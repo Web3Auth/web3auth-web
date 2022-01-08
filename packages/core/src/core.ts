@@ -4,7 +4,6 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
-  BASE_ADAPTER_EVENTS,
   ChainNamespaceType,
   CustomChainConfig,
   getChainConfig,
@@ -126,27 +125,27 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
-    walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
+    walletAdapter.on(ADAPTER_STATUS.CONNECTED, (connectedAdapterName: WALLET_ADAPTER_TYPE) => {
       this.status = ADAPTER_STATUS.CONNECTED;
       const connectedAd = this.walletAdapters[connectedAdapterName];
       this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = connectedAdapterName;
       this.cacheWallet(connectedAdapterName);
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTED, connectedAdapterName);
+      this.emit(ADAPTER_STATUS.CONNECTED, connectedAdapterName);
     });
-    walletAdapter.on(BASE_ADAPTER_EVENTS.DISCONNECTED, (data) => {
+    walletAdapter.on(ADAPTER_STATUS.DISCONNECTED, (data) => {
       this.status = ADAPTER_STATUS.DISCONNECTED;
       this.provider = null;
       this.clearCache();
-      this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED, data);
+      this.emit(ADAPTER_STATUS.DISCONNECTED, data);
     });
-    walletAdapter.on(BASE_ADAPTER_EVENTS.CONNECTING, (data) => {
+    walletAdapter.on(ADAPTER_STATUS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(BASE_ADAPTER_EVENTS.CONNECTING, data);
+      this.emit(ADAPTER_STATUS.CONNECTING, data);
     });
-    walletAdapter.on(BASE_ADAPTER_EVENTS.ERRORED, (data) => {
+    walletAdapter.on(ADAPTER_STATUS.ERRORED, (data) => {
       this.status = ADAPTER_STATUS.ERRORED;
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, data);
+      this.emit(ADAPTER_STATUS.ERRORED, data);
     });
   }
 

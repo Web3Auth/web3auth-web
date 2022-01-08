@@ -4,14 +4,6 @@ import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../
 import { WalletInitializationError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
-export const BASE_ADAPTER_EVENTS = {
-  READY: "ready",
-  CONNECTED: "connected",
-  DISCONNECTED: "disconnected",
-  CONNECTING: "connecting",
-  ERRORED: "errored",
-};
-
 export type UserInfo = {
   /**
    * Email of the logged in user

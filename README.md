@@ -21,7 +21,7 @@ yarn add @web3auth/modal
 
 ```tsx
 import { Web3AuthModal } from "@web3auth/modal";
-import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES } from "@web3auth/base";
 const web3auth = new Web3AuthModal(CHAIN_NAMESPACES.SOLANA)
 
 await web3auth.initModal();
@@ -32,17 +32,17 @@ login() {
 }
 // listening to modal events, on successfull login, `CONNECTED` event will be emitted.
 subscribeAuthEvents(web3auth: Web3AuthModal) {
-    web3auth.on(BASE_ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
+    web3auth.on(ADAPTER_STATUS.CONNECTED, (adapterName: string)=>{
       console.log("connected to wallet", adapterName, web3auth.provider)
     })
-    web3auth.on(BASE_ADAPTER_EVENTS.CONNECTING, ()=>{
+    web3auth.on(ADAPTER_STATUS.CONNECTING, ()=>{
       console.log("connecting")
 
     })
-    web3auth.on(BASE_ADAPTER_EVENTS.DISCONNECTED, ()=>{
+    web3auth.on(ADAPTER_STATUS.DISCONNECTED, ()=>{
       console.log("disconnected")
     })
-    web3auth.on(BASE_ADAPTER_EVENTS.ERRORED, (error)=>{
+    web3auth.on(ADAPTER_STATUS.ERRORED, (error)=>{
       console.log("errored", error)
     })
   }

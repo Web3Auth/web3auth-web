@@ -51,7 +51,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
-import { BASE_ADAPTER_EVENTS, CHAIN_NAMESPACES, Web3AuthError } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, Web3AuthError } from "@web3auth/base";
 import { Connection, PublicKey, LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import EthRpc from "./ethRpc.vue";
@@ -120,22 +120,22 @@ export default Vue.extend({
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(BASE_ADAPTER_EVENTS.CONNECTED, (adapterName: string) => {
+      web3auth.on(ADAPTER_STATUS.CONNECTED, (adapterName: string) => {
         this.console("connected to wallet", adapterName);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
         this.connected = true;
       });
-      web3auth.on(BASE_ADAPTER_EVENTS.CONNECTING, () => {
+      web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
         this.console("connecting");
         this.loginButtonStatus = "Connecting...";
       });
-      web3auth.on(BASE_ADAPTER_EVENTS.DISCONNECTED, () => {
+      web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.console("disconnected");
         this.loginButtonStatus = "";
         this.connected = false;
       });
-      web3auth.on(BASE_ADAPTER_EVENTS.ERRORED, (error) => {
+      web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
@@ -166,7 +166,7 @@ export default Vue.extend({
     },
     showError() {
       this.web3auth.emit(
-        BASE_ADAPTER_EVENTS.ERRORED,
+        ADAPTER_STATUS.ERRORED,
         {
           code: 1,
           message: "Show Error",

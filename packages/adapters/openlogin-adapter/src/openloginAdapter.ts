@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BASE_ADAPTER_EVENTS,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -116,7 +115,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       await this.connectWithProvider(this.providerFactory, params);
       return;
     } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
   }
@@ -127,7 +126,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
     this.provider = undefined;
-    this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -194,7 +193,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.provider = await getProvider();
       if (this.provider) {
         this.status = ADAPTER_STATUS.CONNECTED;
-        this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
+        this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
       } else {
         reject(WalletLoginError.connectionError("Failed to connect with openlogin"));
       }

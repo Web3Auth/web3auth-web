@@ -7,7 +7,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BASE_ADAPTER_EVENTS,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -112,7 +111,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       this._onConnectHandler();
       return;
     } catch (error) {
-      this.emit(BASE_ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
   }
@@ -124,7 +123,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     // ready to connect again
     this.status = ADAPTER_STATUS.READY;
     this.provider = null;
-    this.emit(BASE_ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -140,6 +139,6 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.DISCONNECTED;
     this.torusInstance.showTorusButton();
-    this.emit(BASE_ADAPTER_EVENTS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
+    this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
   }
 }
