@@ -43,7 +43,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
       signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
         const message = await injectedProvider.request<Uint8Array>({
-          method: "signMessage",
+          method: "sign_message",
           params: {
             message: req.params?.message,
           },
