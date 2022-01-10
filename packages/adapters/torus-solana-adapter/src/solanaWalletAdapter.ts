@@ -59,7 +59,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private solanaProviderProxy!: ProviderFactory;
 
-  private reconnecting = false;
+  private rehydrated = false;
 
   constructor(params: SolanaWalletOptions) {
     super();
@@ -95,7 +95,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
     try {
       if (options.autoConnect) {
-        this.reconnecting = true;
+        this.rehydrated = true;
         await this.connect();
       }
     } catch (error) {
@@ -145,6 +145,6 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTED;
     this.torusInstance.showTorusButton();
-    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
   }
 }

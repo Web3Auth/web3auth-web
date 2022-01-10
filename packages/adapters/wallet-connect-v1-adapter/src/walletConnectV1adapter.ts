@@ -44,7 +44,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public walletConnectProvider!: WalletConnectProvider | null;
 
-  private reconnecting = false;
+  private rehydrated = false;
 
   constructor(options: WalletConnectV1AdapterOptions) {
     super();
@@ -84,7 +84,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       (this.walletConnectProvider as WalletConnectProvider).enable();
       if ((this.walletConnectProvider as WalletConnectProvider).connected) {
         this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
-        this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
+        this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
         resolve();
       }
     });
@@ -137,7 +137,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         return;
       }
       this.provider = provider as unknown as SafeEventEmitterProvider;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     });
 
     // Subscribe to session disconnection
@@ -145,7 +145,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       log.debug("wallet connect, disconnected", code, reason);
       this.provider = null;
       this.walletConnectProvider = null;
-      this.reconnecting = false;
+      this.rehydrated = false;
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);

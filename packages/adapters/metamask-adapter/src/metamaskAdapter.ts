@@ -43,7 +43,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
   // added after connecting
   public provider: SafeEventEmitterProvider | null = null;
 
-  private reconnecting = false;
+  private rehydrated = false;
 
   private metamaskProvider: EthereumProvider | null = null;
 
@@ -60,7 +60,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.METAMASK);
     try {
       if (options.autoConnect) {
-        this.reconnecting = true;
+        this.rehydrated = true;
         await this.connect();
       }
     } catch (error) {
@@ -90,7 +90,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
         // ready to be connected again
         this.disconnect();
       });
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
@@ -105,7 +105,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.provider = null;
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
-    this.reconnecting = false;
+    this.rehydrated = false;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 

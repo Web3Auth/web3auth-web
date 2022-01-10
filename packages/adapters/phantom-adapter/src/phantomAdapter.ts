@@ -44,7 +44,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   private phantomProvider!: PhantomInjectedProvider;
 
-  private reconnecting = false;
+  private rehydrated = false;
 
   constructor(options: PhantomAdapterOptions = {}) {
     super();
@@ -71,7 +71,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
     try {
       if (options.autoConnect) {
-        this.reconnecting = true;
+        this.rehydrated = true;
         await this.connect();
       }
     } catch (error) {
@@ -83,7 +83,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   async connectWithProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
     this.provider = await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 
@@ -159,7 +159,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
       wallet.off("disconnect", this._disconnected);
       this._wallet = null;
       this.provider = null;
-      this.reconnecting = false;
+      this.rehydrated = false;
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
