@@ -19,7 +19,7 @@ import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
 import { htmlToElement } from "./utils";
 const hasLightIcons = ["apple", "github"];
 export default class LoginModal extends SafeEventEmitter {
-  public $modal!: HTMLDivElement;
+  private $modal!: HTMLDivElement;
 
   private appLogo: string;
 
