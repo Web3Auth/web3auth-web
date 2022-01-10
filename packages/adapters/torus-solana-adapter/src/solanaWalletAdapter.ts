@@ -1,4 +1,4 @@
-import Torus, { LOGIN_PROVIDER_TYPE, NetworkInterface, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import Torus, { NetworkInterface, TorusCtorArgs, TorusLoginParams, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -22,11 +22,6 @@ import {
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import type { InjectedProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
-
-export type TorusLoginParams = {
-  loginProvider?: LOGIN_PROVIDER_TYPE;
-  login_hint?: string;
-};
 
 export interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;
