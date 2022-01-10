@@ -1,3 +1,0 @@
-import { WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
-
-export { WALLET_ADAPTER_TYPE, WALLET_ADAPTERS };

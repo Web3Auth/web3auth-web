@@ -7,6 +7,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
@@ -14,7 +15,6 @@ import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 
 import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
-import { WALLET_ADAPTER_TYPE } from "./constants";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 

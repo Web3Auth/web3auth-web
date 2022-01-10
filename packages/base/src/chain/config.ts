@@ -1,5 +1,5 @@
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
-
+export const DEFAULT_INFURA_ID = "776218ac4734478c90191dde8cae483c";
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;
@@ -14,7 +14,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
     return {
       chainNamespace,
       chainId: "0x1",
-      rpcTarget: "https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c",
+      rpcTarget: `https://mainnet.infura.io/v3/${DEFAULT_INFURA_ID}`,
       displayName: "Ethereum Mainnet",
       blockExplorer: "https://etherscan.io/",
       ticker: "ETH",
@@ -24,7 +24,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
     return {
       chainNamespace,
       chainId: "0x3",
-      rpcTarget: "https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c",
+      rpcTarget: `https://ropsten.infura.io/v3/${DEFAULT_INFURA_ID}`,
       displayName: "ropsten",
       blockExplorer: "https://ropsten.etherscan.io/",
       ticker: "ETH",
@@ -34,7 +34,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
     return {
       chainNamespace,
       chainId: "0x4",
-      rpcTarget: "https://rinkeby.infura.io/v3/776218ac4734478c90191dde8cae483c",
+      rpcTarget: `https://rinkeby.infura.io/v3/${DEFAULT_INFURA_ID}`,
       displayName: "rinkeby",
       blockExplorer: "https://rinkeby.etherscan.io/",
       ticker: "ETH",
@@ -44,7 +44,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
     return {
       chainNamespace,
       chainId: "0x5",
-      rpcTarget: "https://goerli.infura.io/v3/776218ac4734478c90191dde8cae483c",
+      rpcTarget: `https://goerli.infura.io/v3/${DEFAULT_INFURA_ID}`,
       displayName: "goerli",
       blockExplorer: "https://goerli.etherscan.io/",
       ticker: "ETH",
@@ -54,7 +54,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
     return {
       chainNamespace,
       chainId: "0x2a",
-      rpcTarget: "https://kovan.infura.io/v3/776218ac4734478c90191dde8cae483c",
+      rpcTarget: `https://kovan.infura.io/v3/${DEFAULT_INFURA_ID}`,
       displayName: "kovan",
       blockExplorer: "https://kovan.etherscan.io/",
       ticker: "ETH",
