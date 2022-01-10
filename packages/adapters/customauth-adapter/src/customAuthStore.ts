@@ -38,16 +38,16 @@ export default class CustomAuthStore {
   }
 
   getStore(): Record<string, unknown> {
-    return JSON.parse(this.storage.getItem(storeKey));
+    return JSON.parse(this.storage.getItem(storeKey) || "{}");
   }
 
   get<T>(key: string): T {
-    const store = JSON.parse(this.storage.getItem(storeKey));
+    const store = JSON.parse(this.storage.getItem(storeKey) || "{}");
     return store[key];
   }
 
   set<T>(key: string, value: T): void {
-    const store = JSON.parse(this.storage.getItem(storeKey));
+    const store = JSON.parse(this.storage.getItem(storeKey) || "{}");
     store[key] = value;
     this.storage.setItem(storeKey, JSON.stringify(store));
   }

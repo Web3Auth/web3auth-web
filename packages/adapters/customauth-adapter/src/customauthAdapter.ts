@@ -3,6 +3,7 @@ import CustomAuth, {
   CustomAuthArgs,
   HybridAggregateLoginParams,
   InitParams,
+  LOGIN,
   SingleLoginParams,
   TORUS_METHOD,
   TorusAggregateLoginResponse,
@@ -10,7 +11,6 @@ import CustomAuth, {
   TorusLoginResponse,
   UX_MODE,
 } from "@toruslabs/customauth";
-import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -41,7 +41,7 @@ import { parseCustomAuthResult } from "./utils";
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 
 interface LoginParams {
-  email: string;
+  login_hint: string;
   loginProvider: string;
 }
 
@@ -54,7 +54,7 @@ const DEFAULT_CUSTOM_AUTH_RES: CustomAuthResult = {
   aggregateVerifier: "",
   verifier: "",
   verifierId: "",
-  typeOfLogin: "google",
+  typeOfLogin: LOGIN.GOOGLE,
 };
 
 class CustomAuthAdapter extends BaseAdapter<LoginParams> {
@@ -68,7 +68,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   // before calling init function.
   public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
-  public customAuthInstance!: CustomAuth;
+  public customAuthInstance: CustomAuth | null = null;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -80,13 +80,15 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   private initSettings: InitParams;
 
-  private providerFactory!: ProviderFactory;
+  private providerFactory: ProviderFactory | null = null;
 
   private store: CustomAuthStore;
 
   private customAuthResult: CustomAuthResult = {
     ...DEFAULT_CUSTOM_AUTH_RES,
   };
+
+  private rehydrated = false;
 
   constructor(params: CustomAuthAdapterOptions) {
     super();
@@ -143,26 +145,19 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required for customAuth adapter");
     this.customAuthInstance = new CustomAuth(this.adapterSettings);
     await this.customAuthInstance.init(this.initSettings);
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
+
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
 
     try {
+      if (options.autoConnect) this.rehydrated = true;
       // if adapter is already connected and cached then we can proceed to setup the provider
       if (this.customAuthResult.privateKey && options.autoConnect) {
-        await this.setupProvider(this.providerFactory);
+        await this.setupProvider();
       }
       // if adapter is not connected then we should check if url contains redirect login result
       if (!this.customAuthResult.privateKey && (await this.isRedirectResultAvailable())) {
-        await this.setupProvider(this.providerFactory);
+        await this.setupProvider();
       }
     } catch (error) {
       log.error("Failed to parse direct auth result", error);
@@ -175,7 +170,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
-      await this.setupProvider(this.providerFactory, params);
+      await this.setupProvider(params);
       return;
     } catch (error) {
       // ready again to be connected
@@ -195,6 +190,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     this.customAuthResult = {
       ...DEFAULT_CUSTOM_AUTH_RES,
     };
+    this.rehydrated = false;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 
@@ -219,90 +215,79 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (!hash && Object.keys(queryParams).length === 0) {
       return false;
     }
+    if (!this.customAuthInstance) throw WalletInitializationError.notReady("customAuthInstance is not ready");
     const redirectResult = await this.customAuthInstance.getRedirectResult({
       replaceUrl: true,
       clearLoginDetails: true,
     });
     if (redirectResult.error) {
-      log.error("Failed to parse direct auth result", redirectResult.error);
+      log.error("Failed to parse custom auth result", redirectResult.error);
       if (redirectResult.error !== "Unsupported method type") {
         throw WalletLoginError.connectionError(redirectResult.error);
       }
       return false;
     }
     this.customAuthResult = parseCustomAuthResult(redirectResult);
-    this._syncCustomauthResult(this.customAuthResult as Record<string, any>);
-    if (this.customAuthResult.privateKey) {
-      return true;
-    }
-    return false;
+    this._syncCustomAuthResult(this.customAuthResult as Record<string, any>);
+    return !!this.customAuthResult.privateKey;
   }
 
-  private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<void> {
-    const connectWithProvider = async (): Promise<void> => {
-      const listener = ({ reason }: { reason: Error }) => {
-        switch (reason?.message?.toLowerCase()) {
-          case "user closed popup":
-            reason = WalletInitializationError.windowClosed(reason.message);
-            break;
-          case "unable to open window":
-            reason = WalletInitializationError.windowBlocked(reason.message);
-            break;
-        }
-        throw reason;
-      };
-      window.addEventListener("unhandledrejection", listener);
-      // if user is already logged in.
-      let finalPrivKey = this.customAuthResult?.privateKey;
-      try {
-        if (!finalPrivKey && params) {
-          if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
-            throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
-          }
-          const loginConfig = this.loginSettings?.loginProviderConfig?.[params.loginProvider];
-          let result: TorusLoginResponse | TorusHybridAggregateLoginResponse | TorusAggregateLoginResponse;
-          if (loginConfig.method === TORUS_METHOD.TRIGGER_LOGIN) {
-            result = await this.customAuthInstance.triggerLogin(loginConfig.args as SingleLoginParams);
-          } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_LOGIN) {
-            result = await this.customAuthInstance.triggerAggregateLogin(loginConfig.args as AggregateLoginParams);
-          } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_HYBRID_LOGIN) {
-            result = await this.customAuthInstance.triggerHybridAggregateLogin(loginConfig.args as HybridAggregateLoginParams);
-          } else {
-            throw WalletLoginError.connectionError(`Unsupported customauth method type: ${loginConfig.method}`);
-          }
+  private async setupProvider(params?: LoginParams): Promise<void> {
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required for customAuth adapter");
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
+    }
 
-          if (this.adapterSettings?.uxMode === UX_MODE.POPUP) {
-            const parsedResult = parseCustomAuthResult({ method: loginConfig.method, result, state: {}, args: loginConfig.args });
-            this._syncCustomauthResult(parsedResult as Record<string, any>);
-            finalPrivKey = parsedResult.privateKey;
-          }
-          return;
-        }
-        log.debug("final priv key", finalPrivKey);
-        if (finalPrivKey) {
-          if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-          this.provider = await providerFactory.setupProvider(finalPrivKey);
-          log.debug("provider", this.provider);
+    if (!this.customAuthInstance) throw WalletInitializationError.notReady("customAuthInstance is not ready");
 
-          return;
-        }
-        return;
-      } catch (err: unknown) {
-        listener({ reason: err as Error });
-        throw err;
-      } finally {
-        window.removeEventListener("unhandledrejection", listener);
+    let finalPrivKey = this.customAuthResult?.privateKey;
+
+    if (!finalPrivKey && params) {
+      if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
+        throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
       }
-    };
-    await connectWithProvider();
-    if (this.provider) {
-      log.debug("provider 2", this.provider);
+      const loginConfig = this.loginSettings?.loginProviderConfig?.[params.loginProvider];
+      let result: TorusLoginResponse | TorusHybridAggregateLoginResponse | TorusAggregateLoginResponse;
+      if (loginConfig.method === TORUS_METHOD.TRIGGER_LOGIN) {
+        result = await this.customAuthInstance.triggerLogin(loginConfig.args as SingleLoginParams);
+      } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_LOGIN) {
+        result = await this.customAuthInstance.triggerAggregateLogin(loginConfig.args as AggregateLoginParams);
+      } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_HYBRID_LOGIN) {
+        result = await this.customAuthInstance.triggerHybridAggregateLogin(loginConfig.args as HybridAggregateLoginParams);
+      } else {
+        throw WalletLoginError.connectionError(`Unsupported CustomAuth method type: ${loginConfig.method}`);
+      }
+
+      if (this.adapterSettings?.uxMode === UX_MODE.POPUP) {
+        const parsedResult = parseCustomAuthResult({ method: loginConfig.method, result, state: {}, args: loginConfig.args });
+        this._syncCustomAuthResult(parsedResult as Record<string, any>);
+        finalPrivKey = parsedResult.privateKey;
+      } else if (this.adapterSettings?.uxMode === UX_MODE.REDIRECT) {
+        return;
+      }
+    }
+    log.debug("final private key", finalPrivKey);
+    if (finalPrivKey) {
+      if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+        const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
+        finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+      }
+      this.provider = await this.providerFactory.setupProvider(finalPrivKey);
+      log.debug("provider", this.provider);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: !params } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    } else {
+      throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     }
   }
 
-  private _syncCustomauthResult(result?: Record<string, unknown>): void {
+  private _syncCustomAuthResult(result?: Record<string, unknown>): void {
     if (result) {
       Object.keys(result).forEach((key: string) => {
         if (typeof result[key] === "string") {
