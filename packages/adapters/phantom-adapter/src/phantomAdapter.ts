@@ -103,10 +103,11 @@ export class PhantomAdapter extends BaseAdapter<void> {
               await this.connectWithProvider(this._wallet as PhantomWallet);
               resolve();
             };
+            if (!this._wallet) return reject(WalletInitializationError.notInstalled());
 
-            this._wallet?.on("connect", connect);
+            this._wallet.on("connect", connect);
 
-            this._wallet?.connect().catch((reason: any) => {
+            this._wallet.connect().catch((reason: unknown) => {
               this._wallet?.off("connect", connect);
               reject(reason);
             });
