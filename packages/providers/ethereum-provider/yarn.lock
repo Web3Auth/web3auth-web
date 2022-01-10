@@ -224,10 +224,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@toruslabs/base-controllers@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.4.2.tgz#127a00fcb9ae51fd3a2368ab9e4d7fd46806cee7"
-  integrity sha512-8nhgVdjM6oTZ/lALmObymmk/XLVzLWgbq04AQY7P5FFQZnpwdMQ7k7piKdX7waaeyfRzgb5b/Zrf7LFEgAGvqQ==
+"@toruslabs/base-controllers@^1.4.4":
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.4.4.tgz#a76f60bb09f17509d503f12f8bedada7405f6785"
+  integrity sha512-j2h/pWejGGgrv3N/tYOyX2LP40B5Lj14Z2PylrGlX9lxDrr+qanpMwdcC0NU6WIHBTKXZWEyrsGqq+BRST0rkQ==
   dependencies:
     "@toruslabs/http-helpers" "^2.1.4"
     "@toruslabs/openlogin-jrpc" "^1.3.3"
@@ -1943,10 +1943,10 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
-lint-staged@^12.1.5:
-  version "12.1.5"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.1.5.tgz#e05582fc39aed5cb13b9dd1dfb8330407246d809"
-  integrity sha512-WyKb+0sNKDTd1LwwAfTBPp0XmdaKkAOEbg4oHE4Kq2+oQVchg/VAcjVQtSqZih1izNsTURjc2EkhG/syRQUXdA==
+lint-staged@^12.1.7:
+  version "12.1.7"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.1.7.tgz#fe9137992ac18a456422bb8484dd30be0140629f"
+  integrity sha512-bltv/ejiLWtowExpjU+s5z8j1Byjg9AlmaAjMmqNbIicY69u6sYIwXGg0dCn0TlkrrY2CphtHIXAkbZ+1VoWQQ==
   dependencies:
     cli-truncate "^3.1.0"
     colorette "^2.0.16"

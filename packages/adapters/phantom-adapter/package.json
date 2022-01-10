@@ -34,7 +34,7 @@
     "src"
   ],
   "devDependencies": {
-    "lint-staged": "^12.1.5"
+    "lint-staged": "^12.1.7"
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",
