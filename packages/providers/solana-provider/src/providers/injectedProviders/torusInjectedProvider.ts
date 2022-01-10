@@ -5,11 +5,11 @@ import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError }
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
+import log from "loglevel";
 
 import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 import { InjectedProvider } from "./interface";
-
 export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
   public _providerProxy!: SafeEventEmitterProvider;
 
@@ -67,6 +67,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       },
 
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+        log.debug("signAndSendTransaction");
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
