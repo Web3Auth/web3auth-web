@@ -1,22 +1,24 @@
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { IAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import type { CustomauthAdapter } from "@web3auth/customauth-adapter";
+import type { CustomAuthAdapter } from "@web3auth/customauth-adapter";
 
 const OPENLOGIN_PROVIDERS = [
-  "google",
-  "facebook",
-  "twitter",
-  "reddit",
-  "discord",
-  "twitch",
-  "apple",
-  "line",
-  "github",
-  "kakao",
-  "linkedin",
-  "weibo",
-  "wechat",
-  "email_passwordless",
+  LOGIN_PROVIDER.GOOGLE,
+  LOGIN_PROVIDER.FACEBOOK,
+  LOGIN_PROVIDER.TWITTER,
+  LOGIN_PROVIDER.REDDIT,
+  LOGIN_PROVIDER.DISCORD,
+  LOGIN_PROVIDER.TWITCH,
+  LOGIN_PROVIDER.APPLE,
+  LOGIN_PROVIDER.LINE,
+  LOGIN_PROVIDER.GITHUB,
+  LOGIN_PROVIDER.KAKAO,
+  LOGIN_PROVIDER.LINKEDIN,
+  LOGIN_PROVIDER.WEIBO,
+  LOGIN_PROVIDER.WECHAT,
+  LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
 ];
+
 export const getAdapterSocialLogins = (
   adapterName: string,
   adapter: IAdapter<unknown>,
@@ -24,7 +26,7 @@ export const getAdapterSocialLogins = (
 ): LoginMethodConfig => {
   const finalLoginMethodsConfig: LoginMethodConfig = {};
   if (adapterName === WALLET_ADAPTERS.CUSTOM_AUTH) {
-    const customAuthAdapter = adapter as CustomauthAdapter;
+    const customAuthAdapter = adapter as CustomAuthAdapter;
     Object.keys(customAuthAdapter.loginSettings?.loginProviderConfig).forEach((loginMethod: string) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || { name: loginMethod };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };

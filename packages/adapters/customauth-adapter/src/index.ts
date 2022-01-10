@@ -1,3 +1,3 @@
 export * from "./config";
-export * from "./customauthAdapter";
+export * from "./customAuthAdapter";
 export * from "./interface";

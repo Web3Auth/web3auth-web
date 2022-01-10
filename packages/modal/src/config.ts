@@ -6,7 +6,7 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   adapters: {
     [SOLANA_ADAPTERS.TORUS_SOLANA]: {
-      label: "Torus Sol Wallet",
+      label: "Torus Solana Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -29,14 +29,14 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
 export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   adapters: {
-    [EVM_ADAPTERS.METAMASK]: {
-      label: "MetaMask",
+    [EVM_ADAPTERS.TORUS_EVM]: {
+      label: "Torus Eth Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [EVM_ADAPTERS.TORUS_EVM]: {
-      label: "Torus Eth Wallet",
+    [EVM_ADAPTERS.METAMASK]: {
+      label: "MetaMask",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -59,12 +59,6 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
 export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   adapters: {
-    [SOLANA_ADAPTERS.TORUS_SOLANA]: {
-      label: "Torus Sol Wallet",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
     [SOLANA_ADAPTERS.OPENLOGIN]: {
       label: "OpenLogin",
       showOnModal: true,

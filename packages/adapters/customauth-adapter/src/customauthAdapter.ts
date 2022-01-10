@@ -57,7 +57,7 @@ const DEFAULT_CUSTOM_AUTH_RES: CustomAuthResult = {
   typeOfLogin: LOGIN.GOOGLE,
 };
 
-class CustomAuthAdapter extends BaseAdapter<LoginParams> {
+export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   readonly name: string = WALLET_ADAPTERS.CUSTOM_AUTH;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
@@ -298,5 +298,3 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 }
-
-export { CustomAuthAdapter as CustomauthAdapter };

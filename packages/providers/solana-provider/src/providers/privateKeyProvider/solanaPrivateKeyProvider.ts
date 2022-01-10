@@ -1,4 +1,4 @@
-import type { Keypair, Transaction } from "@solana/web3.js";
+import { Keypair, Message, Transaction } from "@solana/web3.js";
 import { BaseConfig, createFetchMiddleware, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
@@ -33,14 +33,13 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
 
   public async setupProvider(privKey: string): Promise<SafeEventEmitterProvider> {
     await this.lookupNetwork();
-    const { Transaction: SolTx, Keypair: SolKeyPair, Message } = await import("@solana/web3.js");
     const transactionGenerator = (serializedTx: string): Transaction => {
       const decodedTx = bs58.decode(serializedTx);
-      const tx = SolTx.populate(Message.from(decodedTx));
+      const tx = Transaction.populate(Message.from(decodedTx));
       return tx;
     };
     const keyPairGenerator = (): Keypair => {
-      return SolKeyPair.fromSecretKey(Buffer.from(privKey, "hex"));
+      return Keypair.fromSecretKey(Buffer.from(privKey, "hex"));
     };
     if (typeof privKey !== "string") throw WalletInitializationError.invalidParams("privKey must be a string");
     const keyPair = keyPairGenerator();

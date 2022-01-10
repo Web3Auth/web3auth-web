@@ -1,4 +1,3 @@
-import { getDefaultAdapterModule } from "@web3auth/adapter-factory";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_STATUS,
@@ -6,7 +5,6 @@ import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
-  IAdapter,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -15,6 +13,7 @@ import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 
 import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
+import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 
@@ -77,123 +76,103 @@ export class Web3Auth extends Web3AuthCore {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
     this.loginModal.init();
-    const adapterPromises: Promise<string | Error | null>[] = [];
-    // variable to check if we have any in app wallets
-    // currently all default in app and external wallets can be hidden or shown based on config.
-    let hasInAppWallets = false;
 
     // merge default adapters with the custom configured adapters.
-    const allAdapters = new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)]);
+    const allAdapters = [...new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
-    allAdapters.forEach(async (adapterName) => {
-      const adPromise: Promise<string | Error | null> = new Promise((resolve, reject) => {
-        // start with the default config of adapter.
-        let adapterConfig = this.defaultModalConfig.adapters?.[adapterName] || {
-          label: adapterName,
-          showOnModal: true,
-          showOnMobile: true,
-          showOnDesktop: true,
-        };
+    const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
+      // start with the default config of adapter.
+      let adapterConfig = this.defaultModalConfig.adapters?.[adapterName] || {
+        label: adapterName,
+        showOnModal: true,
+        showOnMobile: true,
+        showOnDesktop: true,
+      };
 
-        // override the default config of adapter if some config is being provided by the user.
-        if (params?.modalConfig?.[adapterName]) {
-          adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
+      // override the default config of adapter if some config is being provided by the user.
+      if (params?.modalConfig?.[adapterName]) {
+        adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
+      }
+      (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
+
+      // check if adapter is configured/added by user and exist in walletAdapters map.
+      const adapter = this.walletAdapters[adapterName];
+      // if adapter is not custom configured then check if it is available in default adapters.
+      if (!adapter) {
+        // if custom auth is configured then no need to use default openlogin
+        if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapterName === WALLET_ADAPTERS.OPENLOGIN) {
+          return;
+        }
+        // if adapter is not configured and some default configuration is available, use it.
+        const ad = await getDefaultAdapterModule({
+          name: adapterName,
+          chainNamespace: this.options.chainNamespace,
+          chainId: this.options.chainConfig?.chainId,
+          clientId: this.options.clientId,
+        });
+
+        this.walletAdapters[adapterName] = ad;
+
+        return adapterName;
+      } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
+        // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
+        // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
+        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
+          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
         }
 
-        // check if adapter is configured/added by user and exist in walletAdapters map.
+        // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
+        // and chainNamespace.
+        if (!adapter.chainConfigProxy) {
+          const chainConfig = {
+            ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
+            ...this.coreOptions.chainConfig,
+          } as CustomChainConfig;
+          this.walletAdapters[adapterName].setChainConfig(chainConfig);
+        }
+
+        return adapterName;
+      }
+      return adapterName;
+    });
+
+    const adapterNames = await Promise.all(adapterConfigurationPromises);
+    const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => adapter.type === ADAPTER_CATEGORY.IN_APP);
+
+    // Now, initialize the adapters.
+    const initPromises = adapterNames.map(async (adapterName) => {
+      if (!adapterName) return;
+      try {
         const adapter = this.walletAdapters[adapterName];
-        // if adapter is not custom configured thn check if it is available in default adapters.
-        if (!adapter) {
-          // if custom auth is configured then no need to use default openlogin
-          if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-            resolve(null);
-            return;
-          }
-          // if adapter is not configured and some default configuration is available, use it.
-          getDefaultAdapterModule({
-            name: adapterName,
-            chainNamespace: this.options.chainNamespace,
-            chainId: this.options.chainConfig?.chainId,
-            clientId: this.options.clientId,
-          })
-            .then(async (ad: IAdapter<unknown>) => {
-              this.walletAdapters[adapterName] = ad;
-              if (ad.type === ADAPTER_CATEGORY.IN_APP) {
-                hasInAppWallets = true;
-              }
-              // in-app wallets or cached wallet (being connected or already connected) are initialized first.
-              if (ad.type === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedAdapter) {
-                this.subscribeToAdapterEvents(ad);
-
-                await ad.init({ autoConnect: this.cachedAdapter === adapterName });
-                if (ad.type === ADAPTER_CATEGORY.IN_APP) {
-                  this.initializeInAppWallet(adapterName);
-                }
-              }
-              (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
-              resolve(adapterName);
-              return true;
-            })
-            .catch((err) => reject(err));
-        } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapterName === this.cachedAdapter) {
-          // if adapter is configured thn only initialize in app or cached adapter.
-          // external wallets are initialized on INIT_EXTERNAL_WALLET event.
-          if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
-            hasInAppWallets = true;
-          }
-          this.subscribeToAdapterEvents(adapter);
-
-          // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
-          // and chainNamespace.
-          if (!adapter.chainConfigProxy) {
-            const chainConfig = {
-              ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
-              ...this.coreOptions.chainConfig,
-            } as CustomChainConfig;
-            this.walletAdapters[adapterName].setChainConfig(chainConfig);
-          }
-          // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
-          // this id is being overrided if user is also passing client id in openlogin's adapter constructor.
-          if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-            this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
-          }
-          adapter
-            .init({ autoConnect: this.cachedAdapter === adapterName })
-            .then(() => {
-              (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
-              // note: not adding cachedWallet to modal if it is external wallet.
-              // adding it later if no in-app wallets are available.
-              if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
-                this.initializeInAppWallet(adapterName);
-              }
-              resolve(adapterName);
-              return true;
-            })
-            .catch((err) => reject(err));
-        } else {
-          // for external wallets, no need to init here
-          (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
-          resolve(adapterName);
+        if (adapter.type === ADAPTER_CATEGORY.EXTERNAL) {
+          return;
         }
-      });
-      adapterPromises.push(adPromise);
+        // in-app wallets or cached wallet (being connected or already connected) are initialized first.
+        // if adapter is configured thn only initialize in app or cached adapter.
+        // external wallets are initialized on INIT_EXTERNAL_WALLET event.
+        this.subscribeToAdapterEvents(adapter);
+
+        await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+
+        // note: not adding cachedWallet to modal if it is external wallet.
+        // adding it later if no in-app wallets are available.
+        if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
+          this.initializeInAppWallet(adapterName);
+        }
+      } catch (error) {
+        log.error(error, "error while initializing adapter");
+      }
     });
 
     this.status = ADAPTER_STATUS.READY;
 
-    if (adapterPromises.length > 0) {
-      await Promise.all(
-        adapterPromises.map((p) =>
-          p.catch((e: Error) => {
-            log.info("error while intializing adapter", e);
-            return e;
-          })
-        )
-      );
-      if (!hasInAppWallets) {
-        // if no in app wallet is available then initialize external wallets in modal
-        await this.initExternalWalletAdapters(false, { showExternalWallets: true });
-      }
+    await Promise.all(initPromises);
+
+    // variable to check if we have any in app wallets
+    // currently all default in app and external wallets can be hidden or shown based on config.
+    if (!hasInAppWallets) {
+      // if no in app wallet is available then initialize external wallets in modal
+      await this.initExternalWalletAdapters(false, { showExternalWallets: true });
     }
   }
 
@@ -204,50 +183,33 @@ export class Web3Auth extends Web3AuthCore {
 
   private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWallets: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
-    const adapterPromises: Promise<string | Error>[] = [];
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
     const adaptersData: Record<string, unknown> = {};
-    Object.keys(this.walletAdapters).forEach(async (adapterName) => {
-      const adapter = this.walletAdapters[adapterName];
-      if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
-        log.debug("init external wallet", this.cachedAdapter, adapterName);
-        const adPromise: Promise<string | Error> = new Promise((resolve, reject) => {
+    const adapterPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
+      try {
+        const adapter = this.walletAdapters[adapterName];
+        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
+          log.debug("init external wallet", this.cachedAdapter, adapterName);
           this.subscribeToAdapterEvents(adapter);
 
-          if (!adapter.chainConfigProxy) {
-            const chainConfig = {
-              ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
-              ...this.coreOptions.chainConfig,
-            } as CustomChainConfig;
-            adapter.setChainConfig(chainConfig);
-          }
-          adapter
-            .init({ autoConnect: this.cachedAdapter === adapterName })
-            .then(() => {
-              adaptersConfig[adapterName] = (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
-              adaptersData[adapterName] = adapter.adapterData || {};
-              resolve(adapterName);
-              return true;
-            })
-            .catch((err) => {
-              log.error("error while initialization external wallets", err);
-              reject(err);
-            });
-        });
-        adapterPromises.push(adPromise);
+          await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+          adaptersConfig[adapterName] = (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+          adaptersData[adapterName] = adapter.adapterData || {};
+          return adapterName;
+        }
+      } catch (error) {
+        log.error(error, "error while initializing adapter");
       }
     });
 
-    if (adapterPromises.length > 0) {
-      const adapterInitResults: (string | Error)[] = await Promise.all(adapterPromises.map((p) => p.catch((e: Error) => e)));
-      const finalAdaptersConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {};
-      adapterInitResults.forEach((result: string | Error) => {
-        if (!(result instanceof Error)) {
-          finalAdaptersConfig[result] = adaptersConfig[result];
-        }
-      });
-      this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
-    }
+    const adapterInitResults = await Promise.all(adapterPromises);
+    const finalAdaptersConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {};
+    adapterInitResults.forEach((result: string | undefined) => {
+      if (result) {
+        finalAdaptersConfig[result] = adaptersConfig[result];
+      }
+    });
+    this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
   }
 
   private initializeInAppWallet(adapterName: string): void {

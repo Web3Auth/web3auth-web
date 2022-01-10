@@ -2,6 +2,7 @@
   "extends": "../../../tsconfig.json",
   "include": ["src", "test"],
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "module": "esnext"
   }
 }
