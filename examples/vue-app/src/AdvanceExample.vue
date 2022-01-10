@@ -91,7 +91,7 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3, clientId: "localhost-id" })
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainConfig: { chainId: "0x3" }, clientId: "localhost-id" })
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace

@@ -32,7 +32,7 @@ export const getAdapterSocialLogins = (
   } else if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {};
-      finalLoginMethodsConfig[loginMethod] = { name: loginMethod, ...currentLoginMethodConfig };
+      finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
   } else {
     throw new Error(`${adapterName} is not a valid adapter`);

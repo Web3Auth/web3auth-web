@@ -24,12 +24,11 @@ export interface Web3AuthCoreOptions {
    */
   chainNamespace: ChainNamespaceType;
   /**
-   * Numeric chainId for the chainNamespace being used, by default it will be mainnet id for the provided namespace..
-   * For ex: it will be ethereum mainnet `1` for "EIP155" and solana mainnet `1` for "SOLANA".
+   * custom chain configuration for chainNamespace
    *
-   * @defaultValue mainnnet id of provided chainNamespace
+   * @defaultValue mainnnet config of provided chainNamespace
    */
-  chainId?: number;
+  chainConfig?: Partial<CustomChainConfig>;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -59,7 +58,10 @@ export class Web3AuthCore extends SafeEventEmitter {
       // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
-        const chainConfig = getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainId) as CustomChainConfig;
+        const chainConfig = {
+          ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
+          ...this.coreOptions.chainConfig,
+        } as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
