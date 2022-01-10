@@ -504,7 +504,6 @@ export default class LoginModal extends SafeEventEmitter {
       this.state.connected = false;
       const hideClass = "w3a-modal--hidden";
       if (this.$modal.classList.contains(hideClass)) {
-        if (error.message === "User denied transaction signature.") {
         this.toggleModal(true);
       }
 
