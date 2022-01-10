@@ -1,3 +1,4 @@
+import { getDefaultAdapterModule } from "@web3auth/adapter-factory";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_STATUS,
@@ -8,7 +9,7 @@ import {
   IAdapter,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import { getDefaultAdapterModule, Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
+import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 

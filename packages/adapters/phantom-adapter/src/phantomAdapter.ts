@@ -154,10 +154,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
   }
 
   private _disconnected = () => {
-    const wallet = this._wallet;
-    log.debug("disconnecting phantom", this.isWalletConnected, wallet);
-    if (this.isWalletConnected && wallet) {
-      wallet.off("disconnect", this._disconnected);
+    if (this._wallet) {
+      this._wallet.off("disconnect", this._disconnected);
       this._wallet = null;
       this.provider = null;
       this.rehydrated = false;

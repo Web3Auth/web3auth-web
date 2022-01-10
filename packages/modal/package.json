@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@web3auth/base": "0.0.1",
+    "@web3auth/adapter-factory": "0.0.0",
     "@web3auth/ui": "0.0.0",
     "@web3auth/core": "0.0.0",
     "loglevel": "^1.8.0"
