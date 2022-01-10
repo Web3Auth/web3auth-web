@@ -50,7 +50,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomAuthAdapter, getOpenloginAdapter, getTorusSolanaAdapter } from "@web3auth/core";
+import { getCustomAuthAdapter, getOpenloginAdapter, getTorusSolanaAdapter } from "@web3auth/adapter-factory";
 import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue" 

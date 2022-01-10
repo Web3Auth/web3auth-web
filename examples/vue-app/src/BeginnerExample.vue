@@ -52,8 +52,6 @@
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError } from "@web3auth/base";
-import { Connection, PublicKey, LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
-import bs58 from "bs58";
 import EthRpc from "./ethRpc.vue";
 import SolRpc from "./solanaRpc.vue";
 

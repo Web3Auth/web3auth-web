@@ -153,7 +153,6 @@ export class PhantomAdapter extends BaseAdapter<void> {
   private _onDisconnect = () => {
     if (this._wallet) {
       this._wallet.off("disconnect", this._onDisconnect);
-      this._wallet = null;
       this.provider = null;
       this.rehydrated = false;
       // ready to be connected again
