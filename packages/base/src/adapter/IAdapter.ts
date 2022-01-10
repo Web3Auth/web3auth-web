@@ -67,7 +67,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
   status: ADAPTER_STATUS_TYPE;
-  provider: SafeEventEmitterProvider | undefined;
+  provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | void>;

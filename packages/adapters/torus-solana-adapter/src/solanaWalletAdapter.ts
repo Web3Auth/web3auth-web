@@ -56,7 +56,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(params: SolanaWalletOptions) {
+  constructor(params: SolanaWalletOptions = {}) {
     super();
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};

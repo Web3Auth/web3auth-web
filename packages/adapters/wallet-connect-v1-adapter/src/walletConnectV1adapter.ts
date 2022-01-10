@@ -48,7 +48,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: WalletConnectV1AdapterOptions) {
+  constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
     this.adapterOptions = { ...defaultWalletConnectV1Options, ...options };
     this.chainConfig = options.chainConfig;

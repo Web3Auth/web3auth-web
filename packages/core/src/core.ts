@@ -26,7 +26,7 @@ export interface Web3AuthCoreOptions {
   /**
    * custom chain configuration for chainNamespace
    *
-   * @defaultValue mainnnet config of provided chainNamespace
+   * @defaultValue mainnet config of provided chainNamespace
    */
   chainConfig?: Partial<CustomChainConfig>;
 }
@@ -66,9 +66,8 @@ export class Web3AuthCore extends SafeEventEmitter {
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
     });
-    await Promise.all(initPromises);
-
     this.status = ADAPTER_STATUS.READY;
+    await Promise.all(initPromises);
   }
 
   public configureAdapter(adapter: Adapter<unknown>): Web3AuthCore {

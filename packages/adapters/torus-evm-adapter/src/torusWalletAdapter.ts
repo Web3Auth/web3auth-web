@@ -21,14 +21,14 @@ import {
 } from "@web3auth/base";
 import log from "loglevel";
 
-interface TorusWalletOptions {
+export interface TorusWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
 }
 
-class TorusWalletAdapter extends BaseAdapter<never> {
+export class TorusWalletAdapter extends BaseAdapter<never> {
   readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -51,7 +51,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   private rehydrated = false;
 
-  constructor(params: TorusWalletOptions) {
+  constructor(params: TorusWalletOptions = {}) {
     super();
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
@@ -141,5 +141,3 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
   setAdapterSettings(_: unknown): void {}
 }
-
-export { TorusWalletAdapter, TorusWalletOptions };
