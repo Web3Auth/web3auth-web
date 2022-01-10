@@ -10,6 +10,7 @@ import {
   getChainConfig,
   IAdapter,
   SafeEventEmitterProvider,
+  storageAvailable,
   UserInfo,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
@@ -47,7 +48,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   constructor(options: Web3AuthCoreOptions) {
     super();
-    this.cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
+    this.cachedAdapter = storageAvailable("sessionStorage") ? window.sessionStorage.getItem(ADAPTER_CACHE_KEY) : null;
     this.coreOptions = options;
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
@@ -105,6 +106,7 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   public clearCache() {
+    if (!storageAvailable("sessionStorage")) return;
     window.sessionStorage.removeItem(ADAPTER_CACHE_KEY);
     this.cachedAdapter = null;
   }
@@ -155,6 +157,7 @@ export class Web3AuthCore extends SafeEventEmitter {
     });
     walletAdapter.on(ADAPTER_STATUS.ERRORED, (data) => {
       this.status = ADAPTER_STATUS.ERRORED;
+      this.clearCache();
       this.emit(ADAPTER_STATUS.ERRORED, data);
       log.debug("errored", this.status, this.connectedAdapterName);
     });
@@ -167,6 +170,7 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   private cacheWallet(walletName: string) {
+    if (!storageAvailable("sessionStorage")) return;
     window.sessionStorage.setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
   }

@@ -115,6 +115,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
+      this.rehydrated = false;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus wallet");
     }

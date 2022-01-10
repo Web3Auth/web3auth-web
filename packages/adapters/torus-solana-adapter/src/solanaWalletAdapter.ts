@@ -112,6 +112,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
+      this.rehydrated = false;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }

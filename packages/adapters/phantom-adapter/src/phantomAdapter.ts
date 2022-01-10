@@ -122,6 +122,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
     } catch (error: unknown) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
+      this.rehydrated = false;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw error;
     }

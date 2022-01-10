@@ -70,6 +70,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     });
     if (this.walletConnectProvider.connected) {
       this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
+      this.rehydrated = true;
       this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
       return;
     }
@@ -109,6 +110,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
+      this.rehydrated = true;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with wallet connect");
     }
