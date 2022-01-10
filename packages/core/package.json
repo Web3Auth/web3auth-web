@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/core",
-  "version": "0.0.0",
+  "version": "^0.0.0",
   "description": "Multi chain wallet aggregator core for web3Auth",
   "keywords": [
     "web3Auth/core",
