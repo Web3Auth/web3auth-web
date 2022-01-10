@@ -41,7 +41,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public provider: SafeEventEmitterProvider | null = null;
 
-  public cachedAdapter?: string | null;
+  public cachedAdapter: string | null = null;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
@@ -106,7 +106,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public clearCache() {
     window.sessionStorage.removeItem(ADAPTER_CACHE_KEY);
-    this.cachedAdapter = undefined;
+    this.cachedAdapter = null;
   }
 
   /**
