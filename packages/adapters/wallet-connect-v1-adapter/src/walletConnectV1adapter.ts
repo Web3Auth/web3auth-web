@@ -23,6 +23,8 @@ import log from "loglevel";
 
 import { defaultWalletConnectV1Options } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
+
+// TODO: Move to using standalone client with our jrpc provider instead of @walletconnect/web3-provider
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -36,13 +38,13 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider!: SafeEventEmitterProvider | null;
+  public provider: SafeEventEmitterProvider | null = null;
 
   public adapterData: WalletConnectV1Data = {
     uri: "",
   };
 
-  public walletConnectProvider!: WalletConnectProvider | null;
+  public walletConnectProvider: WalletConnectProvider | null = null;
 
   private rehydrated = false;
 
@@ -53,21 +55,30 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   get connected(): boolean {
-    return this.walletConnectProvider ? this.walletConnectProvider.connected : false;
+    return this.walletConnectProvider?.connected || false;
   }
 
   async init(): Promise<void> {
+    super.checkInitializationRequirements();
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
     }
-    super.checkInitializationRequirements();
     // Create a connector
     this.walletConnectProvider = new WalletConnectProvider({
       ...this.adapterOptions.adapterSettings,
       qrcode: false,
     });
-    return new Promise((resolve) => {
-      (this.walletConnectProvider as WalletConnectProvider).connector.on("display_uri", async (err, payload) => {
+    if (this.walletConnectProvider.connected) {
+      this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      return;
+    }
+    await new Promise<void>((resolve, reject) => {
+      if (!this.walletConnectProvider) {
+        this.emit(ADAPTER_STATUS.ERRORED, WalletLoginError.connectionError("Failed to setup wallet connect qr code"));
+        return;
+      }
+      this.walletConnectProvider.connector.on("display_uri", async (err, payload) => {
         if (err) {
           this.emit(ADAPTER_STATUS.ERRORED, WalletLoginError.connectionError("Failed to display wallet connect qr code"));
           return;
@@ -81,12 +92,11 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         this.status = ADAPTER_STATUS.READY;
         resolve();
       });
-      (this.walletConnectProvider as WalletConnectProvider).enable();
-      if ((this.walletConnectProvider as WalletConnectProvider).connected) {
-        this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
-        this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
-        resolve();
-      }
+
+      this.walletConnectProvider.enable().catch((error) => {
+        this.emit(ADAPTER_STATUS.ERRORED, error);
+        reject(error);
+      });
     });
   }
 
@@ -114,8 +124,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
-
-  setChainConfig(_: CustomChainConfig): void {}
 
   setAdapterSettings(_: unknown): void {}
 
@@ -149,6 +157,12 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);
+    });
+
+    provider.on("session_update", async (error: Error) => {
+      if (error) {
+        this.emit(ADAPTER_STATUS.ERRORED, error);
+      }
     });
   }
 }

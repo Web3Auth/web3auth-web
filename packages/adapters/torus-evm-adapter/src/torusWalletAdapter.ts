@@ -62,7 +62,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
     // set chainConfig for mainnet by default if not set
-    let network: NetworkInterface | undefined;
+    let network: NetworkInterface;
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
       const { blockExplorer, displayName } = this.chainConfig as CustomChainConfig;

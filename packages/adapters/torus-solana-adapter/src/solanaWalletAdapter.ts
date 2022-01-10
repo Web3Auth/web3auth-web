@@ -20,7 +20,7 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import type { InjectedProvider } from "@web3auth/solana-provider";
+import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
 export interface SolanaWalletOptions {
@@ -52,7 +52,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private loginSettings?: TorusLoginParams = {};
 
-  private solanaProviderProxy!: ProviderFactory;
+  private solanaProviderProxy: ProviderFactory | null = null;
 
   private rehydrated = false;
 
@@ -67,7 +67,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
     // set chainConfig for mainnet by default if not set
-    let network: NetworkInterface | undefined;
+    let network: NetworkInterface;
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
       const { blockExplorer, displayName, ticker, tickerName } = this.chainConfig as CustomChainConfig;
@@ -76,11 +76,9 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
       network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
     }
-    const { default: TorusSdk } = await import("@toruslabs/solana-embed");
-    this.torusInstance = new TorusSdk(this.torusWalletOptions);
+    this.torusInstance = new Torus(this.torusWalletOptions);
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
-    const { TorusInjectedProvider: SolanaProviderProxy } = await import("@web3auth/solana-provider");
-    this.solanaProviderProxy = new SolanaProviderProxy({
+    this.solanaProviderProxy = new TorusInjectedProvider({
       config: {
         chainConfig: this.chainConfig as CustomChainConfig,
       },
@@ -102,13 +100,15 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
   async connect(): Promise<void> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    if (!this.solanaProviderProxy) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
       this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
-      this._onConnectHandler();
-      return;
+      this.status = ADAPTER_STATUS.CONNECTED;
+      this.torusInstance.showTorusButton();
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
@@ -135,11 +135,4 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
   }
 
   setAdapterSettings(_: unknown): void {}
-
-  private _onConnectHandler() {
-    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    this.status = ADAPTER_STATUS.CONNECTED;
-    this.torusInstance.showTorusButton();
-    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
-  }
 }

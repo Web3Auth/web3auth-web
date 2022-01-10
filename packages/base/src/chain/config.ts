@@ -8,7 +8,8 @@ const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   }
   throw new Error(`Chain namespace ${chainNamespace} is not supported`);
 };
-export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null => {
+
+export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.EIP155;
   if (chainId === 1) {
     return {
@@ -105,7 +106,7 @@ export const getEvmChainConfig = (chainId?: number): CustomChainConfig | null =>
   return null;
 };
 
-export const getSolanaChainConfig = (chainId?: number): CustomChainConfig | null => {
+export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.SOLANA;
   if (chainId === 1) {
     return {
@@ -113,28 +114,28 @@ export const getSolanaChainConfig = (chainId?: number): CustomChainConfig | null
       blockExplorer: "https://explorer.solana.com",
       chainId: "0x1",
       displayName: "Solana Mainnet",
-      rpcTarget: "https://solana-mainnet.phantom.tech",
+      rpcTarget: "https://api.mainnet-beta.solana.com",
       ticker: "SOL",
       tickerName: "Solana Token",
     };
   } else if (chainId === 2) {
     return {
       rpcTarget: "https://api.testnet.solana.com",
-      blockExplorer: "https://explorer.solana.com",
+      blockExplorer: "https://explorer.solana.com?cluster=testnet",
       chainId: "0x2",
       chainNamespace,
       displayName: "testnet",
-      ticker: "sol",
+      ticker: "SOL",
       tickerName: "solana",
     };
   } else if (chainId === 3) {
     return {
       rpcTarget: "https://api.devnet.solana.com",
-      blockExplorer: "https://explorer.solana.com",
+      blockExplorer: "https://explorer.solana.com?cluster=devnet",
       chainId: "0x3",
       chainNamespace,
       displayName: "devnet",
-      ticker: "sol",
+      ticker: "SOL",
       tickerName: "solana",
     };
   }
