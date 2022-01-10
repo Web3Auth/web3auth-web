@@ -24,8 +24,8 @@
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^14.17.20",
-    "lint-staged": "^12.1.5"
+    "@types/node": "^14",
+    "lint-staged": "^12.1.7"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

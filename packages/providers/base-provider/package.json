@@ -20,11 +20,11 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^1.4.2",
+    "@toruslabs/base-controllers": "^1.4.4",
     "@web3auth/base": "^0.0.1"
   },
   "devDependencies": {
-    "lint-staged": "^12.1.5"
+    "lint-staged": "^12.1.7"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
