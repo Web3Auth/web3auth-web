@@ -37,8 +37,8 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <SolRpc v-if="connected && provider && namespace === 'solana'" :provider="provider" :console="console"></SolRpc>
-      <EthRpc v-if="connected && provider && namespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
+      <SolRpc v-if="connected && provider && web3auth.options.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
+      <EthRpc v-if="connected && provider && web3auth.options.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <button @click="showError" style="cursor: pointer">Show Error</button>
     </section>

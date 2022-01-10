@@ -70,8 +70,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     let network: NetworkInterface;
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-      const { blockExplorer, displayName, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-      network = { chainId: "0x1", rpcTarget: "mainnet", blockExplorerUrl: blockExplorer, displayName, ticker, tickerName, logo: "" };
+      const { blockExplorer, displayName, ticker, tickerName, rpcTarget, chainId } = this.chainConfig as CustomChainConfig;
+      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, ticker, tickerName, logo: "" };
     } else {
       const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
       network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };

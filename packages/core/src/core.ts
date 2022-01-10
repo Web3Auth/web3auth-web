@@ -1,6 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
-  Adapter,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -71,7 +70,7 @@ export class Web3AuthCore extends SafeEventEmitter {
     await Promise.all(initPromises);
   }
 
-  public configureAdapter(adapter: Adapter<unknown>): Web3AuthCore {
+  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthCore {
     if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY)
@@ -88,20 +87,19 @@ export class Web3AuthCore extends SafeEventEmitter {
     }
     const adapterAlreadyExists = this.walletAdapters[adapter.name];
     if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
-    const adapterInstance = adapter.adapter();
-    if (adapterInstance.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapterInstance.adapterNamespace !== this.coreOptions.chainNamespace)
+    if (adapter.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.adapterNamespace !== this.coreOptions.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This wallet adapter belongs to ${adapterInstance.adapterNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
+        `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
       );
     if (
-      adapterInstance.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
-      adapterInstance.currentChainNamespace &&
-      this.coreOptions.chainNamespace !== adapterInstance.currentChainNamespace
+      adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
+      adapter.currentChainNamespace &&
+      this.coreOptions.chainNamespace !== adapter.currentChainNamespace
     )
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `${adapter.name} wallet adapter belongs to ${adapterInstance.currentChainNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
+        `${adapter.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
       );
-    this.walletAdapters[adapter.name] = adapterInstance;
+    this.walletAdapters[adapter.name] = adapter;
     return this;
   }
 

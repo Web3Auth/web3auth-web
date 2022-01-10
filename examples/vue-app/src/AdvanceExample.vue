@@ -50,7 +50,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getCustomAuthAdapter, getOpenloginAdapter, getTorusSolanaAdapter } from "@web3auth/adapter-factory";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter"
+import { CustomAuthAdapter } from "@web3auth/customauth-adapter"
+import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter"
+
 import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue" 
@@ -96,57 +99,55 @@ export default Vue.extend({
 
         this.namespace = this.web3auth.options.chainNamespace
       
-      const customAuthAdapter = await  getCustomAuthAdapter({
-        chainConfig:{
-          chainNamespace: this.namespace,
-          blockExplorer: "https://explorer.solana.com",
-          chainId: "0x1",
-          displayName: "Solana Mainnet",
-          rpcTarget: "https://solana-mainnet.phantom.tech",
-          ticker: "SOL",
-          tickerName: "Solana Token",
-        },
-        adapterSettings: {
-          network: "testnet",
-          baseUrl: window.location.origin,
-          redirectPathName:"auth",
-        }, loginSettings: {
-        // loginProvider: "google"
-        "loginProviderConfig": {
-          "google": {
-            method: "triggerLogin",
-            args: {
-              typeOfLogin: "google",
-              verifier: "google-lrc",
-              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-            }
+        const customAuthAdapter = new CustomAuthAdapter({
+          chainConfig:{
+            chainNamespace: this.namespace,
+            blockExplorer: "https://explorer.solana.com",
+            chainId: "0x1",
+            displayName: "Solana Mainnet",
+            rpcTarget: "https://solana-mainnet.phantom.tech",
+            ticker: "SOL",
+            tickerName: "Solana Token",
           },
-          "twitter": {
-             method: "triggerLogin",
-             args: {
-              typeOfLogin: "twitter",
-              "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
-              "verifier": "torus-auth0-twitter-lrc" ,
-              jwtParams: {
-                "domain": "https://torus-test.auth0.com"
+          adapterSettings: {
+            network: "testnet",
+            baseUrl: window.location.origin,
+            redirectPathName:"auth",
+          }, loginSettings: {
+          // loginProvider: "google"
+          "loginProviderConfig": {
+            "google": {
+              method: "triggerLogin",
+              args: {
+                typeOfLogin: "google",
+                verifier: "google-lrc",
+                clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
               }
-             }
-           
+            },
+            "twitter": {
+              method: "triggerLogin",
+              args: {
+                typeOfLogin: "twitter",
+                "clientId": "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO", 
+                "verifier": "torus-auth0-twitter-lrc" ,
+                jwtParams: {
+                  "domain": "https://torus-test.auth0.com"
+                }
+              }
+            
+            }
           }
         }
-      }
-      })
+        })
 
-
-
-        const torusWalletAdapter = await getTorusSolanaAdapter({
+        const torusWalletAdapter = new SolanaWalletAdapter({
           initParams: {
             buildEnv: "testing"
           }
         })
         this.web3auth.configureAdapter(customAuthAdapter);
         this.web3auth.configureAdapter(torusWalletAdapter);
-        await this.web3auth.initModal({});
+      await this.web3auth.initModal({});
       } catch (error) {
         this.console("error", error)
       }
@@ -158,7 +159,7 @@ export default Vue.extend({
 
         this.namespace = this.web3auth.options.chainNamespace
       
-        const openloginAdapter = await getOpenloginAdapter({adapterSettings: {
+        const openloginAdapter = new OpenloginAdapter({adapterSettings: {
           network: "testnet",
           clientId: "localhost-id",
           uxMode: "redirect"

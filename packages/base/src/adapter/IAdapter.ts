@@ -1,5 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
+import { getChainConfig } from "..";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -102,7 +103,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   setChainConfig(customChainConfig: CustomChainConfig): void {
     if (this.status === ADAPTER_STATUS.READY) return;
-    this.chainConfig = customChainConfig;
+    if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+    const defaultChainConfig = getChainConfig(this.currentChainNamespace, customChainConfig.chainId);
+    this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
   }
 
   checkConnectionRequirements(): void {
@@ -131,11 +134,6 @@ export interface BaseAdapterConfig {
   showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
-}
-
-export interface Adapter<T> {
-  name: string;
-  adapter: () => IAdapter<T>;
 }
 
 export type LoginMethodConfig = Record<

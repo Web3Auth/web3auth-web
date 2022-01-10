@@ -144,7 +144,8 @@ export class Web3Auth extends Web3AuthCore {
       if (!adapterName) return;
       try {
         const adapter = this.walletAdapters[adapterName];
-        if (adapter.type === ADAPTER_CATEGORY.EXTERNAL) {
+        // only initialize a external adapter here if it is a cached adapter.
+        if (this.cachedAdapter !== adapterName && adapter.type === ADAPTER_CATEGORY.EXTERNAL) {
           return;
         }
         // in-app wallets or cached wallet (being connected or already connected) are initialized first.
