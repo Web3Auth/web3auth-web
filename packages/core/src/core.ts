@@ -28,7 +28,7 @@ export interface Web3AuthCoreOptions {
    *
    * @defaultValue mainnet config of provided chainNamespace
    */
-  chainConfig?: Partial<CustomChainConfig>;
+  chainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";

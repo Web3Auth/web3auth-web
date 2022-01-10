@@ -140,7 +140,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
         this.emit(
           ADAPTER_STATUS.ERRORED,
-          WalletInitializationError.invalidNetwork(
+          WalletInitializationError.fromCode(
+            5000,
             `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
           )
         );

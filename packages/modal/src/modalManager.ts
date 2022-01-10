@@ -107,7 +107,7 @@ export class Web3Auth extends Web3AuthCore {
         const ad = await getDefaultAdapterModule({
           name: adapterName,
           chainNamespace: this.options.chainNamespace,
-          chainId: this.options.chainConfig?.chainId,
+          customChainConfig: this.options.chainConfig,
           clientId: this.options.clientId,
         });
 

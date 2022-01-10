@@ -3,6 +3,7 @@ import "../css/web3auth.css";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   BaseAdapterConfig,
   CONNECTED_EVENT_DATA,
   LoginMethodConfig,
@@ -224,7 +225,7 @@ export default class LoginModal extends SafeEventEmitter {
           event.preventDefault();
           const data = new FormData(event.target as HTMLFormElement);
           const email = data.get("email");
-          if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, loginHint: email } });
+          if (email) this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter, loginParams: { loginProvider: method, login_hint: email } });
         });
         return;
       } else if (method === "webauthn" || method === "jwt") {
@@ -471,6 +472,20 @@ export default class LoginModal extends SafeEventEmitter {
     }
   }
 
+  private showMessage(params: { timeout?: number; message: string; type: ADAPTER_STATUS_TYPE }) {
+    const { timeout = 3000, message, type } = params;
+    const hideClass = "w3a-modal--hidden";
+    // show modal if is hidden
+    if (this.$modal.classList.contains(hideClass)) {
+      this.toggleModal();
+    }
+    this.toggleMessage(message, type);
+    setTimeout(() => {
+      this.toggleMessage("");
+      this.toggleModal();
+    }, timeout);
+  }
+
   private subscribeCoreEvents(listener: SafeEventEmitter) {
     listener.on(ADAPTER_STATUS.CONNECTING, (data) => {
       log.debug("connecting with adapter", data);
@@ -485,16 +500,12 @@ export default class LoginModal extends SafeEventEmitter {
     });
     listener.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.state.connecting = false;
-      log.debug("connected with adapter");
+      log.debug("connected with adapter", this.state.connected, data);
       if (!this.state.connected) {
         this.state.connected = true;
         // only show success if not being reconnected again.
         if (!data.reconnected) {
-          this.toggleMessage("You are now connected to your wallet", ADAPTER_STATUS.CONNECTED);
-          setTimeout(() => {
-            this.toggleMessage("");
-            this.toggleModal();
-          }, 3000);
+          this.showMessage({ message: "You are connected with your account", type: ADAPTER_STATUS.CONNECTED });
         }
       }
     });
@@ -507,7 +518,11 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleModal(true);
       }
 
-      this.toggleMessage(error.message, ADAPTER_STATUS.ERRORED);
+      if (error.code === 5000) {
+        this.toggleMessage(error.message, ADAPTER_STATUS.ERRORED);
+      } else {
+        this.toggleLoader();
+      }
     });
     listener.on(ADAPTER_STATUS.DISCONNECTED, () => {
       this.state.connecting = false;

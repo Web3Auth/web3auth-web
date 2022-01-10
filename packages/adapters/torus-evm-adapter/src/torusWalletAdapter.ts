@@ -102,7 +102,8 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         this.emit(
           ADAPTER_STATUS.ERRORED,
-          WalletInitializationError.invalidNetwork(
+          WalletInitializationError.fromCode(
+            5000,
             `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
           )
         );

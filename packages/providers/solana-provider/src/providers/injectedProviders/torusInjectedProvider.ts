@@ -45,7 +45,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         const message = await injectedProvider.request<Uint8Array>({
           method: "sign_message",
           params: {
-            message: req.params?.message,
+            data: req.params?.message,
           },
         });
         return message;
@@ -56,6 +56,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
           throw ethErrors.rpc.invalidParams("message");
         }
         const message = bs58.decode(req.params.message).toString("hex");
+        log.debug("tx message", message);
         const response = await injectedProvider.request<string>({
           method: "sign_transaction",
           params: { message },
@@ -120,7 +121,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       params: {},
     });
     if (chainId !== this.config.chainConfig.chainId) {
-      throw WalletInitializationError.invalidNetwork(`Wrong network. Expected ${this.config.chainConfig.chainId} but got ${chainId}`);
+      throw WalletInitializationError.fromCode(5000, `Wrong network. Expected ${this.config.chainConfig.chainId} but got ${chainId}`);
     }
     return chainId;
   }

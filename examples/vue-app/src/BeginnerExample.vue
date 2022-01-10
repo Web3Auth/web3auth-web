@@ -2,7 +2,7 @@
   <div id="app">
     <h3>Login With Web3Auth</h3>
     <h3>Connect with {{ web3auth.options.chainNamespace }} web3auth</h3>
-    <!-- <div id="w3a-modal" class="w3a-modal" v-if="loading">
+    <div id="w3a-modal" class="w3a-modal" v-if="loading">
         <div class="w3ajs-modal-loader w3a-modal__loader">
           <div class="w3a-modal__loader-content">
               <div class="w3a-modal__loader-info">
@@ -22,13 +22,13 @@
               <img src="${closeIcon}" alt="">
           </button>
         </div>
-      </div> -->
+      </div>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button v-if="!connected" @click="switchChain" style="cursor: pointer">Switch Chain</button>
+      <button v-if="!connected" @click="switchChain" style="cursor: pointer">Switch To {{ web3auth.options.chainNamespace === "solana" ? "Ethereum" : "solana" }}</button>
     </section>
     <section
       :style="{
@@ -40,7 +40,7 @@
       <SolRpc v-if="connected && provider && web3auth.options.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
       <EthRpc v-if="connected && provider && web3auth.options.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button @click="showError" style="cursor: pointer">Show Error</button>
+      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
@@ -94,6 +94,7 @@ export default Vue.extend({
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
+         console.log("error", error)
         this.console("error", error);
       }
     },
@@ -108,14 +109,20 @@ export default Vue.extend({
       }
     },
     async switchChain() {
-      console.log("this.namespace", this.web3auth.options.chainNamespace);
-      if (this.web3auth.options.chainNamespace === "solana") {
-        await this.initEthAuth();
-        localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
-      } else if (this.web3auth.options.chainNamespace === "eip155") {
-        await this.initSolanaAuth();
-        localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
+      try {
+        this.loading = true;
+        console.log("this.namespace", this.web3auth.options.chainNamespace);
+        if (this.web3auth.options.chainNamespace === "solana") {
+          await this.initEthAuth();
+          localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
+        } else if (this.web3auth.options.chainNamespace === "eip155") {
+          await this.initSolanaAuth();
+          localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
+        }
+      } finally {
+        this.loading = false;
       }
+      
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
@@ -161,15 +168,6 @@ export default Vue.extend({
       if (el) {
         el.innerHTML = JSON.stringify(args || {}, null, 2);
       }
-    },
-    showError() {
-      this.web3auth.emit(
-        ADAPTER_STATUS.ERRORED,
-        {
-          code: 1,
-          message: "Show Error",
-        } as Web3AuthError
-      );
     },
   },
 });
