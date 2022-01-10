@@ -175,6 +175,8 @@ export class Web3Auth extends Web3AuthCore {
       adapterPromises.push(adPromise);
     });
 
+    this.status = ADAPTER_STATUS.READY;
+
     if (adapterPromises.length > 0) {
       await Promise.all(
         adapterPromises.map((p) =>
@@ -189,7 +191,6 @@ export class Web3Auth extends Web3AuthCore {
         await this.initExternalWalletAdapters(false, { showExternalWallets: true });
       }
     }
-    this.status = ADAPTER_STATUS.READY;
   }
 
   public connect() {

@@ -10,6 +10,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
   SafeEventEmitterProvider,
@@ -29,7 +30,7 @@ export interface MetamaskAdapterOptions {
 }
 
 class MetamaskAdapter extends BaseAdapter<void> {
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
@@ -41,6 +42,8 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   // added after connecting
   public provider: SafeEventEmitterProvider | null = null;
+
+  private reconnecting = false;
 
   private metamaskProvider: EthereumProvider | null = null;
 
@@ -57,6 +60,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.METAMASK);
     try {
       if (options.autoConnect) {
+        this.reconnecting = true;
         await this.connect();
       }
     } catch (error) {
@@ -86,10 +90,11 @@ class MetamaskAdapter extends BaseAdapter<void> {
         // ready to be connected again
         this.disconnect();
       });
-      this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.METAMASK);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
     } catch (error) {
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
+      this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with metamask wallet");
     }
   }
@@ -100,6 +105,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.provider = null;
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
+    this.reconnecting = false;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 

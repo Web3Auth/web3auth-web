@@ -52,7 +52,7 @@
 import Vue from "vue";
 import { getCustomAuthAdapter, getOpenloginAdapter, getTorusSolanaAdapter } from "@web3auth/core";
 import { Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue" 
 import SolRpc from "./solanaRpc.vue" 
 
@@ -189,6 +189,8 @@ export default Vue.extend({
     connect() {
       try {
         this.web3auth.connect()
+        console.log("web3auth", this.web3auth)
+        // (window as any).web3auth = this.web3auth
       } catch (error) {
         console.error(error)
         this.console("error", error)
@@ -203,8 +205,8 @@ export default Vue.extend({
       this.console(userInfo)
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on (ADAPTER_STATUS.CONNECTED, (adapterName: string)=>{
-       this.console("connected to wallet", adapterName)
+      web3auth.on (ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA)=>{
+       this.console("connected to wallet", data)
        this.provider = web3auth.provider;
        this.loginButtonStatus = "Logged in"
        this.connected = true
@@ -215,12 +217,19 @@ export default Vue.extend({
 
       })
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, ()=>{
+        console.log("disconnected")
         this.console("disconnected")
         this.loginButtonStatus = ""
         this.connected = false
       })
       web3auth.on(ADAPTER_STATUS.ERRORED, (error)=>{
+                console.log("errroed")
         this.console("errored", error)
+        this.loginButtonStatus = ""
+      })
+      web3auth.on(ADAPTER_STATUS.READY, ()=>{
+                console.log("ready")
+        this.console("ready")
         this.loginButtonStatus = ""
       })
     },
@@ -233,3 +242,4 @@ export default Vue.extend({
   },
 });
 </script>
+

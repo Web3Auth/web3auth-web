@@ -11,6 +11,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
@@ -32,7 +33,7 @@ type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, strin
 class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
 
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
@@ -115,6 +116,8 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       await this.connectWithProvider(this.providerFactory, params);
       return;
     } catch (error) {
+      // ready again to be connected
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
@@ -193,7 +196,7 @@ class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.provider = await getProvider();
       if (this.provider) {
         this.status = ADAPTER_STATUS.CONNECTED;
-        this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.OPENLOGIN);
+        this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
       } else {
         reject(WalletLoginError.connectionError("Failed to connect with openlogin"));
       }

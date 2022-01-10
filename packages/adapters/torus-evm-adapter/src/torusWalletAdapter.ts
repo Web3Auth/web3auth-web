@@ -10,6 +10,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
   SafeEventEmitterProvider,
@@ -30,7 +31,7 @@ interface TorusWalletOptions {
 class TorusWalletAdapter extends BaseAdapter<never> {
   readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
 
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
@@ -47,6 +48,8 @@ class TorusWalletAdapter extends BaseAdapter<never> {
   private initParams?: TorusParams;
 
   private loginSettings?: LoginParams = {};
+
+  private reconnecting = false;
 
   constructor(params: TorusWalletOptions) {
     super();
@@ -79,6 +82,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
 
     try {
       if (options.autoConnect) {
+        this.reconnecting = true;
         await this.connect();
       }
     } catch (error) {
@@ -88,7 +92,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
   }
 
   async connect(): Promise<void> {
-    super.checkInitializationRequirements();
+    super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
@@ -107,8 +111,10 @@ class TorusWalletAdapter extends BaseAdapter<never> {
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.TORUS_EVM);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
     } catch (error) {
+      // ready again to be connected
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus wallet");
     }
@@ -122,6 +128,7 @@ class TorusWalletAdapter extends BaseAdapter<never> {
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
     this.provider = null;
+    this.reconnecting = false;
     this.emit(ADAPTER_STATUS.DISCONNECTED);
   }
 

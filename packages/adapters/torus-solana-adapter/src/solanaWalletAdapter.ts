@@ -10,6 +10,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
   SafeEventEmitterProvider,
@@ -38,7 +39,7 @@ type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, Injec
 export class SolanaWalletAdapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
 
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
 
@@ -57,6 +58,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
   private loginSettings?: TorusLoginParams = {};
 
   private solanaProviderProxy!: ProviderFactory;
+
+  private reconnecting = false;
 
   constructor(params: SolanaWalletOptions) {
     super();
@@ -92,6 +95,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
     try {
       if (options.autoConnect) {
+        this.reconnecting = true;
         await this.connect();
       }
     } catch (error) {
@@ -111,6 +115,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       this._onConnectHandler();
       return;
     } catch (error) {
+      // ready again to be connected
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
@@ -137,8 +143,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private _onConnectHandler() {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    this.status = ADAPTER_STATUS.DISCONNECTED;
+    this.status = ADAPTER_STATUS.CONNECTED;
     this.torusInstance.showTorusButton();
-    this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.TORUS_SOLANA);
+    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
   }
 }

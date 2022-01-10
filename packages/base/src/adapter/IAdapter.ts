@@ -1,7 +1,7 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { WalletInitializationError } from "../errors";
+import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 
 export type UserInfo = {
@@ -56,8 +56,12 @@ export const ADAPTER_STATUS = {
 } as const;
 export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
 
+export type CONNECTED_EVENT_DATA = {
+  adapter: string;
+  reconnected: boolean;
+};
 export interface IAdapter<T> extends SafeEventEmitter {
-  namespace: AdapterNamespaceType;
+  adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
   chainConfigProxy: CustomChainConfig | undefined;
   type: ADAPTER_CATEGORY_TYPE;
@@ -80,7 +84,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   // before calling init function.
   protected chainConfig: CustomChainConfig | undefined;
 
-  public abstract namespace: AdapterNamespaceType;
+  public abstract adapterNamespace: AdapterNamespaceType;
 
   public abstract currentChainNamespace: ChainNamespaceType;
 
@@ -102,9 +106,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   }
 
   checkConnectionRequirements(): void {
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
-    if (this.status !== ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletLoginError.connectionError("Already pending connection");
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
+    if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
   }
 
   checkInitializationRequirements(): void {

@@ -51,7 +51,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, Web3AuthError } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError } from "@web3auth/base";
 import { Connection, PublicKey, LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import EthRpc from "./ethRpc.vue";
@@ -92,7 +92,7 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3, clientId: "localhost-id" });
+        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: 3, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
@@ -120,8 +120,8 @@ export default Vue.extend({
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(ADAPTER_STATUS.CONNECTED, (adapterName: string) => {
-        this.console("connected to wallet", adapterName);
+      web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+        this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
         this.connected = true;

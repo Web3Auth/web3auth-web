@@ -9,6 +9,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
   SafeEventEmitterProvider,
@@ -25,7 +26,7 @@ import { WalletConnectV1AdapterOptions } from "./interface";
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
@@ -42,6 +43,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   };
 
   public walletConnectProvider!: WalletConnectProvider | null;
+
+  private reconnecting = false;
 
   constructor(options: WalletConnectV1AdapterOptions) {
     super();
@@ -81,7 +84,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       (this.walletConnectProvider as WalletConnectProvider).enable();
       if ((this.walletConnectProvider as WalletConnectProvider).connected) {
         this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
-        this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
+        this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
         resolve();
       }
     });
@@ -94,6 +97,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     try {
       this.subscribeEvents(this.walletConnectProvider);
     } catch (error) {
+      // ready again to be connected
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with wallet connect");
     }
@@ -132,7 +137,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         return;
       }
       this.provider = provider as unknown as SafeEventEmitterProvider;
-      this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.WALLET_CONNECT_V1);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.reconnecting } as CONNECTED_EVENT_DATA);
     });
 
     // Subscribe to session disconnection
@@ -140,6 +145,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       log.debug("wallet connect, disconnected", code, reason);
       this.provider = null;
       this.walletConnectProvider = null;
+      this.reconnecting = false;
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.DISCONNECTED);

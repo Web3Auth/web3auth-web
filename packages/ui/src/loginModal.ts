@@ -4,6 +4,7 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_STATUS,
   BaseAdapterConfig,
+  CONNECTED_EVENT_DATA,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
@@ -482,16 +483,19 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleLoader();
       }
     });
-    listener.on(ADAPTER_STATUS.CONNECTED, () => {
+    listener.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.state.connecting = false;
       log.debug("connected with adapter");
       if (!this.state.connected) {
         this.state.connected = true;
-        this.toggleMessage("You are now connected to your wallet", ADAPTER_STATUS.CONNECTED);
-        setTimeout(() => {
-          this.toggleMessage("");
-          this.toggleModal();
-        }, 3000);
+        // only show success if not being reconnected again.
+        if (!data.reconnected) {
+          this.toggleMessage("You are now connected to your wallet", ADAPTER_STATUS.CONNECTED);
+          setTimeout(() => {
+            this.toggleMessage("");
+            this.toggleModal();
+          }, 3000);
+        }
       }
     });
     listener.on(ADAPTER_STATUS.ERRORED, (error: Web3AuthError) => {
@@ -500,6 +504,7 @@ export default class LoginModal extends SafeEventEmitter {
       this.state.connected = false;
       const hideClass = "w3a-modal--hidden";
       if (this.$modal.classList.contains(hideClass)) {
+        if (error.message === "User denied transaction signature.") {
         this.toggleModal(true);
       }
 

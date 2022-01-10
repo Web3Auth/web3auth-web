@@ -22,6 +22,7 @@ import {
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
@@ -59,7 +60,7 @@ const DEFAULT_CUSTOM_AUTH_RES: CustomAuthResult = {
 class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   readonly name: string = WALLET_ADAPTERS.CUSTOM_AUTH;
 
-  readonly namespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
@@ -151,7 +152,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
-    this.status = ADAPTER_STATUS.CONNECTED;
+    this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
 
     try {
@@ -160,7 +161,7 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
         await this.setupProvider(this.providerFactory);
       }
       // if adapter is not connected then we should check if url contains redirect login result
-      if (!this.customAuthResult.privateKey && this.isRedirectResultAvailable()) {
+      if (!this.customAuthResult.privateKey && (await this.isRedirectResultAvailable())) {
         await this.setupProvider(this.providerFactory);
       }
     } catch (error) {
@@ -177,6 +178,8 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
       await this.setupProvider(this.providerFactory, params);
       return;
     } catch (error) {
+      // ready again to be connected
+      this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
       log.error("Error while connecting to custom auth", error);
       throw WalletLoginError.connectionError("Failed to login with CustomAuth");
@@ -236,68 +239,67 @@ class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   }
 
   private async setupProvider(providerFactory: ProviderFactory, params?: LoginParams): Promise<void> {
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      const connectWithProvider = async (): Promise<void> => {
-        const listener = ({ reason }: { reason: Error }) => {
-          switch (reason?.message?.toLowerCase()) {
-            case "user closed popup":
-              reason = WalletInitializationError.windowClosed(reason.message);
-              break;
-            case "unable to open window":
-              reason = WalletInitializationError.windowBlocked(reason.message);
-              break;
+    const connectWithProvider = async (): Promise<void> => {
+      const listener = ({ reason }: { reason: Error }) => {
+        switch (reason?.message?.toLowerCase()) {
+          case "user closed popup":
+            reason = WalletInitializationError.windowClosed(reason.message);
+            break;
+          case "unable to open window":
+            reason = WalletInitializationError.windowBlocked(reason.message);
+            break;
+        }
+        throw reason;
+      };
+      window.addEventListener("unhandledrejection", listener);
+      // if user is already logged in.
+      let finalPrivKey = this.customAuthResult?.privateKey;
+      try {
+        if (!finalPrivKey && params) {
+          if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
+            throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
           }
-          reject(reason);
-        };
-        window.addEventListener("unhandledrejection", listener);
-        // if user is already logged in.
-        let finalPrivKey = this.customAuthResult?.privateKey;
-        try {
-          if (!finalPrivKey && params) {
-            if (!this.loginSettings?.loginProviderConfig?.[params.loginProvider]) {
-              throw new Error(`Login provider ${params.loginProvider} settings not found in loginSettings`);
-            }
-            const loginConfig = this.loginSettings?.loginProviderConfig?.[params.loginProvider];
-            let result: TorusLoginResponse | TorusHybridAggregateLoginResponse | TorusAggregateLoginResponse;
-            if (loginConfig.method === TORUS_METHOD.TRIGGER_LOGIN) {
-              result = await this.customAuthInstance.triggerLogin(loginConfig.args as SingleLoginParams);
-            } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_LOGIN) {
-              result = await this.customAuthInstance.triggerAggregateLogin(loginConfig.args as AggregateLoginParams);
-            } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_HYBRID_LOGIN) {
-              result = await this.customAuthInstance.triggerHybridAggregateLogin(loginConfig.args as HybridAggregateLoginParams);
-            } else {
-              reject(WalletLoginError.connectionError(`Unsupported customauth method type: ${loginConfig.method}`));
-              return;
-            }
+          const loginConfig = this.loginSettings?.loginProviderConfig?.[params.loginProvider];
+          let result: TorusLoginResponse | TorusHybridAggregateLoginResponse | TorusAggregateLoginResponse;
+          if (loginConfig.method === TORUS_METHOD.TRIGGER_LOGIN) {
+            result = await this.customAuthInstance.triggerLogin(loginConfig.args as SingleLoginParams);
+          } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_LOGIN) {
+            result = await this.customAuthInstance.triggerAggregateLogin(loginConfig.args as AggregateLoginParams);
+          } else if (loginConfig.method === TORUS_METHOD.TRIGGER_AGGREGATE_HYBRID_LOGIN) {
+            result = await this.customAuthInstance.triggerHybridAggregateLogin(loginConfig.args as HybridAggregateLoginParams);
+          } else {
+            throw WalletLoginError.connectionError(`Unsupported customauth method type: ${loginConfig.method}`);
+          }
 
-            if (this.adapterSettings?.uxMode === UX_MODE.POPUP) {
-              const parsedResult = parseCustomAuthResult({ method: loginConfig.method, result, state: {}, args: loginConfig.args });
-              this._syncCustomauthResult(parsedResult as Record<string, any>);
-              finalPrivKey = parsedResult.privateKey;
-            }
-            return;
-          }
-          if (finalPrivKey) {
-            if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-            this.provider = await providerFactory.setupProvider(finalPrivKey);
-            return;
+          if (this.adapterSettings?.uxMode === UX_MODE.POPUP) {
+            const parsedResult = parseCustomAuthResult({ method: loginConfig.method, result, state: {}, args: loginConfig.args });
+            this._syncCustomauthResult(parsedResult as Record<string, any>);
+            finalPrivKey = parsedResult.privateKey;
           }
           return;
-        } catch (err: unknown) {
-          listener({ reason: err as Error });
-          throw err;
-        } finally {
-          window.removeEventListener("unhandledrejection", listener);
         }
-      };
-      await connectWithProvider();
-      if (this.provider) {
-        this.status = ADAPTER_STATUS.CONNECTED;
-        this.emit(ADAPTER_STATUS.CONNECTED, WALLET_ADAPTERS.CUSTOM_AUTH);
+        log.debug("final priv key", finalPrivKey);
+        if (finalPrivKey) {
+          if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+          this.provider = await providerFactory.setupProvider(finalPrivKey);
+          log.debug("provider", this.provider);
+
+          return;
+        }
+        return;
+      } catch (err: unknown) {
+        listener({ reason: err as Error });
+        throw err;
+      } finally {
+        window.removeEventListener("unhandledrejection", listener);
       }
-      resolve();
-    });
+    };
+    await connectWithProvider();
+    if (this.provider) {
+      log.debug("provider 2", this.provider);
+      this.status = ADAPTER_STATUS.CONNECTED;
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: !params } as CONNECTED_EVENT_DATA);
+    }
   }
 
   private _syncCustomauthResult(result?: Record<string, unknown>): void {
