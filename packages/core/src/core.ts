@@ -31,6 +31,7 @@ export interface Web3AuthCoreOptions {
    */
   chainId?: number;
 }
+
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthCore extends SafeEventEmitter {
   readonly coreOptions: Web3AuthCoreOptions;

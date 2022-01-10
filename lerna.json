@@ -1,5 +1,13 @@
 {
-  "packages": ["packages/base", "packages/core","packages/modal","packages/ui", "packages/providers/*", "packages/adapters/*"],
+  "packages": [
+    "packages/base",
+    "packages/core",
+    "packages/modal",
+    "packages/adapter-factory",
+    "packages/ui",
+    "packages/providers/*",
+    "packages/adapters/*"
+  ],
   "version": "0.0.0",
   "npmClient": "yarn"
 }
