@@ -74,7 +74,7 @@ export class Web3Auth extends Web3AuthCore {
     this.subscribeToLoginModalEvents();
   }
 
-  public async initModal(params: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
+  public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
     this.loginModal.init();
     const adapterPromises: Promise<string | Error | null>[] = [];
@@ -96,7 +96,7 @@ export class Web3Auth extends Web3AuthCore {
         };
 
         // override the default config of adapter if some config is being provided by the user.
-        if (params.modalConfig?.[adapterName]) {
+        if (params?.modalConfig?.[adapterName]) {
           adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
         }
 
@@ -113,7 +113,7 @@ export class Web3Auth extends Web3AuthCore {
           getDefaultAdapterModule({
             name: adapterName,
             chainNamespace: this.options.chainNamespace,
-            chainId: this.options.chainId,
+            chainId: this.options.chainConfig?.chainId,
             clientId: this.options.clientId,
           })
             .then(async (ad: IAdapter<unknown>) => {
@@ -146,7 +146,10 @@ export class Web3Auth extends Web3AuthCore {
           // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
           // and chainNamespace.
           if (!adapter.chainConfigProxy) {
-            const chainConfig = getChainConfig(this.options.chainNamespace, this.options.chainId) as CustomChainConfig;
+            const chainConfig = {
+              ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
+              ...this.coreOptions.chainConfig,
+            } as CustomChainConfig;
             this.walletAdapters[adapterName].setChainConfig(chainConfig);
           }
           // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
@@ -212,7 +215,11 @@ export class Web3Auth extends Web3AuthCore {
           this.subscribeToAdapterEvents(adapter);
 
           if (!adapter.chainConfigProxy) {
-            adapter.setChainConfig(getChainConfig(this.options.chainNamespace, this.options.chainId) as CustomChainConfig);
+            const chainConfig = {
+              ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
+              ...this.coreOptions.chainConfig,
+            } as CustomChainConfig;
+            adapter.setChainConfig(chainConfig);
           }
           adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
