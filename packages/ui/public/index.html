@@ -1,0 +1,88 @@
+<html>
+
+<head>
+  <title>Test web3auth app</title>
+  <script src="./ui.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@toruslabs/openlogin-jrpc"></script>
+</head>
+
+<body>
+  <h1>Test web3auth app</h1>
+  <div>
+    <button class="show-modal">Show Modal</button>
+  </div>
+  <script>
+    (async function init() {
+      try {
+        const testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
+        const testModal = new Ui({
+          appLogo: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+          version: "V 1.12.3", adapterListener: testEventEmitter, isDark: true
+        });
+        testModal.init();
+
+        testModal.addSocialLogins("openlogin", null, {
+          google: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+        });
+
+        testModal.addSocialLogins("openlogin", null, {
+          facebook: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+          github: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+          twitter: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+          kakao: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+          weibo: {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+        });
+
+        testModal.addWalletLogins({
+          "torus-evm": {
+            showOnModal: true,
+            showOnMobile: true,
+            showOnDesktop: true,
+          },
+        },{},{});
+
+        testModal.on("LOGIN", (params) => {
+          // eslint-disable-next-line no-console
+          console.log("LOGIN", params);
+        });
+        testModal.on("INIT_EXTERNAL_WALLETS", (params) => {
+          // eslint-disable-next-line no-console
+          console.log("INIT_EXTERNAL_WALLETS", params);
+        });
+
+        document.querySelector('.show-modal').addEventListener('click', () => {
+          testModal.toggleModal();
+        })
+
+      } catch (error) {
+        console.log("error in ui", error);
+      }
+    })();
+  </script>
+</body>
+
+</html>

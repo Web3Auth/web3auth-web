@@ -1,8 +1,15 @@
 {
-    "eslint.workingDirectories": [
-        {
-          "directory": "packages/*",
-          "changeProcessCWD": true
-        }
-      ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "eslint.workingDirectories": [
+    {
+      "directory": "packages/*",
+      "changeProcessCWD": true
+    }
+  ],
+  "cSpell.words": [
+    "openlogin",
+    "Solana"
+  ]
 }

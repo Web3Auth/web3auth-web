@@ -1,6 +1,8 @@
 export const MULTI_CHAIN_ADAPTERS = {
   OPENLOGIN: "openlogin",
   CUSTOM_AUTH: "custom-auth",
+  WALLET_CONNECT_V1: "wallet-connect-v1",
+  WALLET_CONNECT_V2: "wallet-connect-v2",
 };
 
 export const SOLANA_ADAPTERS = {

@@ -1,8 +1,13 @@
 {
   "packages": [
     "packages/base",
-    "packages/providers/ethereum-provider"
+    "packages/core",
+    "packages/modal",
+    "packages/adapter-factory",
+    "packages/ui",
+    "packages/providers/*",
+    "packages/adapters/*"
   ],
-  "version": "0.0.1",
+  "version": "0.0.0",
   "npmClient": "yarn"
 }

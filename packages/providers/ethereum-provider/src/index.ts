@@ -1,2 +1,2 @@
-export * from "./provider";
-export * from "./utils";
+export * from "./privateKeyProvider/EthereumPrivateKeyProvider";
+export * from "./rpc/utils";

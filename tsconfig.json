@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "strict": false,
-    "module": "es6",
+    "module": "esnext",
     "target": "es6",
     "lib": ["ES2020", "DOM"],
     "sourceMap": true,
@@ -15,6 +15,7 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
+      "@web3auth/*-adapter": ["packages/adapters/*-adapter/src"],
       "@web3auth/*-provider": ["packages/providers/*-provider/src"],
       "@web3auth/*": ["packages/*/src"]
     }

@@ -34,6 +34,7 @@ function resemblesAddress(str: string): boolean {
 
 export interface WalletMiddlewareOptions {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
+  getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
   processDecryptMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => string;
   processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<string>;
   processEthSignMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
@@ -47,6 +48,7 @@ export interface WalletMiddlewareOptions {
 
 export function createWalletMiddleware({
   getAccounts,
+  getPrivateKey,
   processDecryptMessage,
   processEncryptionPublicKey,
   processEthSignMessage,
@@ -272,9 +274,17 @@ export function createWalletMiddleware({
     res.result = processDecryptMessage(msgParams, req);
   }
 
+  async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!getPrivateKey) {
+      throw ethErrors.rpc.methodNotSupported();
+    }
+    res.result = getPrivateKey(req);
+  }
+
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
+    eth_private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),

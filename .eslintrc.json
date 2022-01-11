@@ -9,6 +9,9 @@
     "ecmaVersion": 11,
     "project": "./tsconfig.json"
   },
+  "rules": {
+    "@typescript-eslint/no-throw-literal": 0
+  },
   "env": {
     "es2020": true,
     "browser": true,

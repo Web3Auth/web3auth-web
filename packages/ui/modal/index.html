@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:500,600,700" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=DM%20Sans:400,500,700" rel="stylesheet" />
+    <link rel="stylesheet" href="web3auth.css" />
+  </head>
+
+  <body>
+    <template>
+      <div class="w3a-modal">
+        <div class="w3a-modal__inner">
+          <div class="w3a-modal__header">
+            <div class="w3a-header">
+              <img class="w3a-header__logo" src="./images/staratlas.svg" alt="" />
+              <div>
+                <h1 class="w3a-header__title">Sign in</h1>
+                <p class="w3a-header__subtitle">Select one of the following to continue</p>
+              </div>
+            </div>
+            <button class="w3a-header__button">
+              <img src="./icons/close.svg" alt="" />
+            </button>
+          </div>
+          <div class="w3a-modal__content">
+            <!-- Torus Login -->
+            <div class="w3a-group">
+              <h6 class="w3a-group__title">CONTINUE WITH</h6>
+              <ul class="w3a-adapter-list">
+                <li class="w3a-adapter-item">
+                  <button class="w3a-button w3a-button--icon">
+                    <img class="w3a-button__image" src="./images/login-google.svg" alt="" />
+                  </button>
+                </li>
+                <li class="w3a-adapter-item">
+                  <button class="w3a-button w3a-button--icon">
+                    <img class="w3a-button__image" src="./images/login-facebook.svg" alt="" />
+                  </button>
+                </li>
+                <li class="w3a-adapter-item">
+                  <button class="w3a-button w3a-button--icon">
+                    <img class="w3a-button__image" src="./images/login-twitter.svg" alt="" />
+                  </button>
+                </li>
+                <li class="w3a-adapter-item">
+                  <button class="w3a-button w3a-button--icon">
+                    <img class="w3a-button__image" src="./images/login-discord.svg" alt="" />
+                  </button>
+                </li>
+                <li class="w3a-adapter-item">
+                  <button class="w3a-button w3a-button--icon">
+                    <img class="w3a-button__image" src="./icons/expand.svg" alt="" />
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <hr class="w3a-group__divider" />
+            <!-- EMAIL PASSWORD -->
+            <div class="w3a-group">
+              <h6 class="w3a-group__title">EMAIL</h6>
+              <form>
+                <input class="w3a-text-field" type="text" placeholder="Email" />
+                <button class="w3a-button">Continue with Email</button>
+              </form>
+            </div>
+            <hr class="w3a-group__divider" />
+            <!-- External Wallet -->
+            <div class="w3a-group">
+              <div>
+                <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
+                <button class="w3a-button">Connect with Wallet</button>
+              </div>
+              <div>
+                <div class="w3a-external-back">
+                  <img src="./icons/circle-arrow-left.svg" alt="" />
+                  <h6 class="w3a-group__title">Back</h6>
+                </div>
+
+                <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
+                <div class="w3a-external-group">
+                  <div class="w3a-external-group__left">
+                    <button class="w3a-button">
+                      <img class="w3a-button__image w3a-button__image--left" src="./images/login-torus.svg" alt="" />
+                      Sign in with Torus
+                    </button>
+                  </div>
+                  <div>
+                    <button class="w3a-button w3a-button--icon">
+                      <img src="./icons/expand.svg" alt="" />
+                    </button>
+                  </div>
+                </div>
+                <!-- Other Wallet -->
+                <ul class="w3a-adapter-list">
+                  <li class="w3a-adapter-item">
+                    <button class="w3a-button w3a-button--icon">
+                      <img class="w3a-button__image" src="./images/login-phantom.png" alt="" />
+                    </button>
+                    <p class="w3a-adapter-item__label">Phantom</p>
+                  </li>
+                  <li class="w3a-adapter-item">
+                    <button class="w3a-button w3a-button--icon">
+                      <img class="w3a-button__image" src="./images/login-sollet.png" alt="" />
+                    </button>
+                    <p class="w3a-adapter-item__label">Sollet</p>
+                  </li>
+                  <li class="w3a-adapter-item">
+                    <button class="w3a-button w3a-button--icon">
+                      <img class="w3a-button__image" src="./images/login-solflare.png" alt="" />
+                    </button>
+                    <p class="w3a-adapter-item__label">Solflare</p>
+                  </li>
+                  <li class="w3a-adapter-item">
+                    <button class="w3a-button w3a-button--icon">
+                      <img class="w3a-button__image" src="./images/login-solong.png" alt="" />
+                    </button>
+                    <p class="w3a-adapter-item__label">Solong</p>
+                  </li>
+                  <li class="w3a-adapter-item">
+                    <button class="w3a-button w3a-button--icon">
+                      <img class="w3a-button__image" src="./images/login-ledger.png" alt="" />
+                    </button>
+                    <p class="w3a-adapter-item__label">Ledger</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="w3a-modal__footer">
+            <div class="w3a-footer">
+              <div>
+                <ul class="w3a-footer__links">
+                  <li class="w3a-footer__links-item"><a href="">Terms of use</a></li>
+                  <li class="w3a-footer__links-item"><a href="">Privacy policy</a></li>
+                </ul>
+                <p>V 1.12.3</p>
+              </div>
+              <img height="24" src="./images/web3auth.svg" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+    <script type="module" src="./bundle.js"></script>
+  </body>
+</html>

@@ -11,65 +11,39 @@ import {
   TypedDataV1,
   TypedMessage,
 } from "@metamask/eth-sig-util";
-import {
-  BaseConfig,
-  BaseController,
-  BaseState,
-  createFetchMiddleware,
-  createSwappableProxy,
-  providerFromEngine,
-  signMessage,
-} from "@toruslabs/base-controllers";
+import { BaseConfig, createFetchMiddleware, createSwappableProxy, providerFromEngine, signMessage } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import {
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  PROVIDER_EVENTS,
-  RequestArguments,
-  SafeEventEmitterProvider,
-  WalletInitializationError,
-} from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
 
-import { createEthMiddleware, IProviderHandlers } from "./ethRpcMiddlewares";
-import { createJsonRpcClient } from "./jrpcClient";
-import { createRandomId } from "./utils";
-import { MessageParams, TransactionParams, TypedMessageParams } from "./walletMidddleware";
+import { createEthMiddleware, IProviderHandlers } from "../rpc/ethRpcMiddlewares";
+import { createJsonRpcClient } from "../rpc/jrpcClient";
+import { createRandomId } from "../rpc/utils";
+import { MessageParams, TransactionParams, TypedMessageParams } from "../rpc/walletMidddleware";
 
-interface EthereumProviderState extends BaseState {
-  _initialized: boolean;
-  _errored: boolean;
-  error: Error;
-  network: string;
-}
-
-interface EthereumProviderConfig extends BaseConfig {
+export interface EthereumPrivKeyProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
 
 // TODO: Add support for changing chainId
-export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderConfig, EthereumProviderState> {
-  public _providerProxy: SafeEventEmitterProvider;
+export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProviderConfig, BaseProviderState, string> {
+  // Assigned in setupProvider
+  public _providerProxy!: SafeEventEmitterProvider;
 
   readonly chainConfig: CustomChainConfig;
 
-  private rpcProvider: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
+  // Assigned in fetch only provider
+  private rpcProvider!: SafeEventEmitterProvider; // for direct communication with chain (without intercepted methods)
 
-  constructor({ config, state }: { config: EthereumProviderConfig & Pick<EthereumProviderConfig, "chainConfig">; state?: EthereumProviderState }) {
+  constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: BaseProviderState }) {
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     super({ config, state });
-    this.defaultState = {
-      _initialized: false,
-      _errored: false,
-      error: null,
-      network: "loading",
-    };
     this.chainConfig = {
       ...config.chainConfig,
       chainNamespace: CHAIN_NAMESPACES.EIP155,
     };
-    this.init();
   }
 
   public static getProviderInstance = async (params: {
@@ -77,45 +51,15 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
   }): Promise<SafeEventEmitterProvider> => {
     const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
-    return new Promise((resolve, reject) => {
-      // wait for provider to get ready
-      providerFactory.once(PROVIDER_EVENTS.INITIALIZED, async () => {
-        const provider = providerFactory.setupProvider(params.privKey);
-        resolve(provider);
-      });
-      providerFactory.on(PROVIDER_EVENTS.ERRORED, (error) => {
-        reject(error);
-      });
-      providerFactory.init();
-    });
+    const provider = await providerFactory.setupProvider(params.privKey);
+    return provider;
   };
 
-  public async init(): Promise<void> {
-    this.lookupNetwork()
-      .then((network) => {
-        this.update({
-          _initialized: true,
-          _errored: false,
-          error: null,
-          network,
-        });
-        this.emit(PROVIDER_EVENTS.INITIALIZED);
-        return true;
-      })
-      .catch((error) => {
-        log.error("error while looking up network", error);
-        this.update({
-          _errored: true,
-          error,
-        });
-        this.emit(PROVIDER_EVENTS.ERRORED, { error });
-      });
-  }
-
-  public setupProvider(privKey: string): SafeEventEmitterProvider {
-    if (!this.state._initialized) throw WalletInitializationError.notReady("Provider not initialized");
+  public async setupProvider(privKey: string): Promise<SafeEventEmitterProvider> {
+    await this.lookupNetwork();
     const providerHandlers: IProviderHandlers = {
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
+      getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
       processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
         const rpcProvider = this.getFetchOnlyProvider();
         const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
@@ -190,17 +134,7 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
     return this._providerProxy;
   }
 
-  private getFetchOnlyProvider(): SafeEventEmitterProvider {
-    if (this.rpcProvider) return this.rpcProvider;
-    const engine = new JRPCEngine();
-    const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
-    engine.push(fetchMiddleware);
-    const provider = providerFromEngine(engine);
-    this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(provider);
-    return provider;
-  }
-
-  private async lookupNetwork(): Promise<string> {
+  protected async lookupNetwork(): Promise<string> {
     const fetchOnlyProvider = this.getFetchOnlyProvider();
     const chainConfig = { ...this.chainConfig };
     const network = await fetchOnlyProvider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
@@ -210,15 +144,31 @@ export class EthereumPrivateKeyProvider extends BaseController<EthereumProviderC
     return network;
   }
 
+  private getFetchOnlyProvider(): SafeEventEmitterProvider {
+    if (this.rpcProvider) return this.rpcProvider;
+    const engine = new JRPCEngine();
+    const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.chainConfig.rpcTarget });
+    engine.push(fetchMiddleware);
+    const provider = providerFromEngine(engine);
+    const providerWithRequest = {
+      ...provider,
+      request: async (args: RequestArguments) => {
+        return provider.sendAsync({ jsonrpc: "2.0", id: createRandomId(), ...args });
+      },
+    } as SafeEventEmitterProvider;
+    this.rpcProvider = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    return providerWithRequest;
+  }
+
   private async getCommonConfiguration(supportsEIP1559: boolean) {
-    const { displayName: name, chainId } = this.chainConfig;
+    const { displayName: name } = this.chainConfig;
     const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
-    const networkId = this.state.network;
+    const { chainId } = this.state;
 
     const customChainParams = {
       name,
-      chainId: parseInt(chainId, 16),
-      networkId: networkId === "loading" ? 0 : Number.parseInt(networkId, 10),
+      chainId: chainId === "loading" ? 0 : parseInt(chainId, 16),
+      networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 10),
       hardfork,
     };
 
