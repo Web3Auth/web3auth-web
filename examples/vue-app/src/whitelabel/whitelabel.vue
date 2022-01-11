@@ -7,6 +7,7 @@
         fontSize: '12px',
       }"
     >
+    <Loader :isLoading="loading"/>
     </section>
     <section
       :style="{
@@ -28,14 +29,23 @@
 <script lang="ts">
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError } from "@web3auth/base";
-import EthRpc from "./ethRpc.vue";
-import SolRpc from "./solanaRpc.vue";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import EthRpc from "../ethRpc.vue";
+import Loader from "../components/loader.vue";
 
-import loader from "./assets/torus-power.svg";
 
 export default Vue.extend({
-  name: "BeginnerExampleMode",
+  name: "WhitelabelExample",
+  props: {
+    theme: {
+        type: String,
+        default: 'light'
+    },
+    logo: {
+        type: String,
+        default: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+    },
+  },
   data() {
     return {
       loading: false,
@@ -47,9 +57,8 @@ export default Vue.extend({
     };
   },
   components: {
-    loaderSvg: loader,
     EthRpc,
-    SolRpc,
+    Loader
   },
   async mounted() {
     await this.initWhitelabledModal();
@@ -57,12 +66,15 @@ export default Vue.extend({
   methods: {
     async initWhitelabledModal() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" });
+        this.loading = true
+        this.web3auth = new Web3Auth({ uiConfig: { appLogo: this.logo, theme: this.theme }, chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" });
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);
+      } finally {
+        this.loading = false
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
