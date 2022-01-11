@@ -39,6 +39,13 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    * Logo for your dapp, by default it will be the web3auth logo.
    */
   dappLogo?: string;
+
+  /**
+   * theme for the modal
+   *
+   * @defaultValue `light`
+   */
+  theme?: "light" | "dark";
 }
 export class Web3Auth extends Web3AuthCore {
   public loginModal: LoginModal;
@@ -70,7 +77,7 @@ export class Web3Auth extends Web3AuthCore {
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
-    this.loginModal = new LoginModal({ appLogo: this.options.dappLogo || "", version: "", adapterListener: this });
+    this.loginModal = new LoginModal({ theme: this.options.theme, appLogo: this.options.dappLogo || "", version: "", adapterListener: this });
     this.subscribeToLoginModalEvents();
   }
 

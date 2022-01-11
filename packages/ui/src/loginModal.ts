@@ -42,11 +42,11 @@ export default class LoginModal extends SafeEventEmitter {
     errored: false,
   };
 
-  constructor({ appLogo, version, adapterListener, isDark = false }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
     super();
     this.appLogo = appLogo;
     this.version = version;
-    this.isDark = isDark;
+    this.isDark = theme === "dark";
     this.subscribeCoreEvents(adapterListener);
   }
 
