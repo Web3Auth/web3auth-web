@@ -7,7 +7,7 @@
         fontSize: '12px',
       }"
     >
-    <Loader :isLoading="loading"/>
+      <Loader :isLoading="loading" />
     </section>
     <section
       :style="{
@@ -16,7 +16,11 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <EthRpc v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
+      <EthRpc
+        v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'"
+        :provider="provider"
+        :console="console"
+      ></EthRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -27,23 +31,20 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import EthRpc from "../rpc/ethRpc.vue";
 import Loader from "../components/loader.vue";
-
-
+import config from "../config";
 export default Vue.extend({
   name: "WhitelabelExample",
   props: {
     theme: {
-        type: String,
-        default: 'light'
+      type: String,
+      default: "light",
     },
     logo: {
-        type: String,
-        default: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+      type: String,
+      default: "https://cryptologos.cc/logos/solana-sol-logo.svg",
     },
   },
   data() {
@@ -53,12 +54,12 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig:{ chainNamespace: CHAIN_NAMESPACES.EIP155}, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
     EthRpc,
-    Loader
+    Loader,
   },
   async mounted() {
     await this.initWhitelabledModal();
@@ -66,15 +67,19 @@ export default Vue.extend({
   methods: {
     async initWhitelabledModal() {
       try {
-        this.loading = true
-        this.web3auth = new Web3Auth({ uiConfig: { appLogo: this.logo, theme: this.theme }, chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" });
+        this.loading = true;
+        this.web3auth = new Web3Auth({
+          uiConfig: { appLogo: this.logo, theme: this.theme as "light" | "dark" },
+          chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
+          clientId: config.clientId,
+        });
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

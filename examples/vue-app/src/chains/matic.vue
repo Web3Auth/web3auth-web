@@ -27,16 +27,18 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConf
 import PolygonRpc from "../rpc/polygonRpc.vue";
 import Loader from "@/components/loader.vue";
 
+import config from "../config";
+import EthRpc from "./ethRpc.vue";
 
 const polygonMumbaiConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://rpc-mumbai.maticvigil.com",
-    blockExplorer: "https://mumbai-explorer.matic.today",
-    chainId: "0x13881",
-    displayName: "Polygon Mumbai Testnet",
-    ticker: "matic",
-    tickerName: "matic",
-}
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc-mumbai.maticvigil.com",
+  blockExplorer: "https://mumbai-explorer.matic.today",
+  chainId: "0x13881",
+  displayName: "Polygon Mumbai Testnet",
+  ticker: "matic",
+  tickerName: "matic",
+};
 
 export default Vue.extend({
   name: "PolygonChain",
@@ -46,7 +48,7 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
@@ -54,7 +56,7 @@ export default Vue.extend({
     Loader
 },
   async mounted() {
-          console.log("polygon")
+    console.log("polygon")
     await this.initPolygonWeb3Auth();
   },
   methods: {
@@ -67,7 +69,7 @@ export default Vue.extend({
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
-        console.log("error", error)
+        console.log("error", error);
         this.console("error", error);
       } finally {
         this.loading = false

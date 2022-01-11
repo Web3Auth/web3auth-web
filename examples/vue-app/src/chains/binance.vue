@@ -20,20 +20,18 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
 import EthRpc from "../rpc/ethRpc.vue";
 import Loader from "@/components/loader.vue";
 
 const binanceChainConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
-    blockExplorer: "https://testnet.bscscan.com",
-    chainId: "0x61",
-    displayName: "Binance SmartChain Testnet",
-    ticker: "BNB",
-    tickerName: "BNB",
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
+  blockExplorer: "https://testnet.bscscan.com",
+  chainId: "0x61",
+  displayName: "Binance SmartChain Testnet",
+  ticker: "BNB",
+  tickerName: "BNB",
 };
 
 export default Vue.extend({
@@ -44,7 +42,7 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
@@ -62,7 +60,7 @@ export default Vue.extend({
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
-         console.log("error", error)
+        console.log("error", error);
         this.console("error", error);
       } finally {
         this.loading = false
