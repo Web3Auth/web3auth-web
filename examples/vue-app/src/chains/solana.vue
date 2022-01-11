@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth X Solana</h3>
-         <Loader :isLoading="loading"></Loader>
+    <Loader :isLoading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
@@ -21,9 +21,13 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
-import SolanaRpc from "../rpc/solanaRpc.vue";
-import Loader from "@/components/loader.vue";
+import { Web3Auth } from "@web3auth/web3auth";
+import Vue from "vue";
 
+import Loader from "@/components/loader.vue";
+import config from "@/config";
+
+import SolanaRpc from "../rpc/solanaRpc.vue";
 const solanaChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   rpcTarget: "https://api.testnet.solana.com",
@@ -47,15 +51,15 @@ export default Vue.extend({
   },
   components: {
     SolanaRpc,
-    Loader
-},
+    Loader,
+  },
   async mounted() {
     await this.initSolanaAuth();
   },
   methods: {
     async initSolanaAuth() {
       try {
-        this.loading = true
+        this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
@@ -63,7 +67,7 @@ export default Vue.extend({
         console.log("error", error);
         this.console("error", error);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

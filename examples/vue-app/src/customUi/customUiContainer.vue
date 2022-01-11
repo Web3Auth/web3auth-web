@@ -1,37 +1,32 @@
 <template>
-
-
- <Openlogin v-if="authType === 'openlogin'"/>
- <CustomAuth v-else-if="authType === 'customAuth'"/>
-
+  <Openlogin v-if="authType === 'openlogin'" />
+  <CustomAuth v-else-if="authType === 'customAuth'" />
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import Openlogin from "./openlogin.vue";
+
 import CustomAuth from "./customAuth.vue";
+import Openlogin from "./openlogin.vue";
 
 export default Vue.extend({
   name: "CustomUiContainer",
   props: {
     authType: {
-        type: String,
-        default: "openlogin"
-    }
+      type: String,
+      default: "openlogin",
+    },
   },
   data() {
-    return {
-    };
+    return {};
   },
   components: {
     Openlogin,
-    CustomAuth
-},
+    CustomAuth,
+  },
   async mounted() {
-      console.log("chain", this.chain)
+    console.log("chain", this.chain);
   },
-  methods: {
-   
-  },
+  methods: {},
 });
 </script>

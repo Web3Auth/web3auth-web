@@ -1,43 +1,38 @@
 <template>
-
-
- <Ethereum v-if="chain === 'ethereum'"/>
-  <Solana v-else-if="chain === 'solana'"/>
-  <Matic v-else-if="chain === 'polygon'"/>
-  <Binance v-else-if="chain === 'binance'"/>
-
+  <Ethereum v-if="chain === 'ethereum'" />
+  <Solana v-else-if="chain === 'solana'" />
+  <Matic v-else-if="chain === 'polygon'" />
+  <Binance v-else-if="chain === 'binance'" />
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import Solana from "./solana.vue";
+
+import Binance from "./binance.vue";
 import Ethereum from "./ethereum.vue";
 import Matic from "./matic.vue";
-import Binance from "./binance.vue";
+import Solana from "./solana.vue";
 
 export default Vue.extend({
   name: "ChainContainer",
   props: {
     chain: {
-        type: String,
-        default: "ethereum"
-    }
+      type: String,
+      default: "ethereum",
+    },
   },
   data() {
-    return {
-    };
+    return {};
   },
   components: {
     Solana,
     Ethereum,
     Matic,
-    Binance
-},
+    Binance,
+  },
   async mounted() {
-      console.log("chain", this.chain)
+    console.log("chain", this.chain);
   },
-  methods: {
-   
-  },
+  methods: {},
 });
 </script>

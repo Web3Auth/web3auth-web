@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth X Polygon</h3>
-         <Loader :isLoading="loading"></Loader>
+    <Loader :isLoading="loading"></Loader>
 
     <section
       :style="{
@@ -21,15 +21,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
-import PolygonRpc from "../rpc/polygonRpc.vue";
+import { Web3Auth } from "@web3auth/web3auth";
+import Vue from "vue";
+
 import Loader from "@/components/loader.vue";
 
 import config from "../config";
-import EthRpc from "./ethRpc.vue";
-
+import PolygonRpc from "../rpc/polygonRpc.vue";
 const polygonMumbaiConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc-mumbai.maticvigil.com",
@@ -53,17 +52,17 @@ export default Vue.extend({
   },
   components: {
     PolygonRpc,
-    Loader
-},
+    Loader,
+  },
   async mounted() {
-    console.log("polygon")
+    console.log("polygon");
     await this.initPolygonWeb3Auth();
   },
   methods: {
     async initPolygonWeb3Auth() {
-      console.log("polygon")
+      console.log("polygon");
       try {
-        this.loading = true
+        this.loading = true;
 
         this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
@@ -72,7 +71,7 @@ export default Vue.extend({
         console.log("error", error);
         this.console("error", error);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

@@ -6,26 +6,31 @@
         fontSize: '12px',
       }"
     >
-    <div>
-     <select name="exampleMode" v-model="exampleMode" @change="syncConfig">
+      <div>
+        <select name="exampleMode" v-model="exampleMode" @change="syncConfig">
           <option selected value="default">Default</option>
           <option value="customUi">Custom UI</option>
           <option value="whitelabel">Whitelabel</option>
-      </select>
-      <select  :style="{
-        margin: '20px',
-      }" v-if="exampleMode === 'default'" name="chain" v-model="chain" @change="syncConfig">
+        </select>
+        <select
+          :style="{
+            margin: '20px',
+          }"
+          v-if="exampleMode === 'default'"
+          name="chain"
+          v-model="chain"
+          @change="syncConfig"
+        >
           <option selected value="ethereum">Ethereum</option>
           <option value="solana">Solana</option>
           <!-- <option value="polygon">Polygon</option> -->
           <option value="binance">Binance</option>
-      </select>
-    </div>
-    
+        </select>
+      </div>
     </section>
     <section>
       <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
-      <WhitelabelExample :theme="'dark'"  v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
+      <WhitelabelExample :theme="'dark'" v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
       <CustomUiContainer :authType="'customAuth'" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
     </section>
   </div>
@@ -33,11 +38,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import ConfigurableExample from "./default/configurableModal.vue"
-import WhitelabelExample from "./whitelabel/whitelabel.vue"
-import CustomUiContainer from "./customUi/customUiContainer.vue";
 
-import BeginnerExampleMode from "./BeginnerExample.vue";
+import CustomUiContainer from "./customUi/customUiContainer.vue";
+import ConfigurableExample from "./default/configurableModal.vue";
 // import ConfigurableExample from "./ConfigurableExample.vue";
 import WhitelabelExample from "./whitelabel/whitelabel.vue";
 
@@ -47,29 +50,28 @@ export default Vue.extend({
     return {
       exampleMode: "default",
       chain: null,
-      authType: null
+      authType: null,
     };
   },
   components: {
     ConfigurableExample: ConfigurableExample,
     WhitelabelExample: WhitelabelExample,
-    CustomUiContainer
-},
+    CustomUiContainer,
+  },
   mounted() {
     console.log("mounted");
-    const existingConfig = localStorage.getItem("web3auth_example_config")
-    const modalConfig =  existingConfig ?  JSON.parse(existingConfig) : {}
-    this.exampleMode = modalConfig["exampleMode"] || "default"
-    this.chain = modalConfig["chain"] || "ethereum"
-    this.authType = modalConfig["authType"] || "openlogin"
-
+    const existingConfig = localStorage.getItem("web3auth_example_config");
+    const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
+    this.exampleMode = modalConfig["exampleMode"] || "default";
+    this.chain = modalConfig["chain"] || "ethereum";
+    this.authType = modalConfig["authType"] || "openlogin";
   },
   methods: {
     syncConfig(e) {
-      console.log("key",e);
-      const existingConfig = localStorage.getItem("web3auth_example_config")
-      const modalConfig =  existingConfig ?  JSON.parse(existingConfig) : {}
-      localStorage.setItem("web3auth_example_config", JSON.stringify({ ...modalConfig, [e.target.name]: this[e.target.name] }))
+      console.log("key", e);
+      const existingConfig = localStorage.getItem("web3auth_example_config");
+      const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
+      localStorage.setItem("web3auth_example_config", JSON.stringify({ ...modalConfig, [e.target.name]: this[e.target.name] }));
     },
   },
 });

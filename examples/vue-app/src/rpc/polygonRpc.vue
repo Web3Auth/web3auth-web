@@ -64,7 +64,7 @@ const polygon = {
 
 export default Vue.extend({
   name: "PolygonRpc",
-  props: ['provider', 'console'],
+  props: ["provider", "console"],
   data() {
     return {};
   },

@@ -14,11 +14,12 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { signAndSendTransaction, signTransaction, signMessage, signAllTransactions, getAccounts } from "../lib/sol"
+
+import { getAccounts, signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../lib/sol";
 
 export default Vue.extend({
   name: "SolanaRpc",
-  props: ['provider', 'console'],
+  props: ["provider", "console"],
   data() {
     return {};
   },
