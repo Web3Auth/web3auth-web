@@ -15,10 +15,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { signAndSendTransaction, signTransaction, signMessage, signAllTransactions, getAccounts } from "./lib/sol"
+import { signAndSendTransaction, signTransaction, signMessage, signAllTransactions, getAccounts } from "../lib/sol"
 
 export default Vue.extend({
-  name: "SolRpc",
+  name: "SolanaRpc",
   props: ['provider', 'console'],
   data() {
     return {

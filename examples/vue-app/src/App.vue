@@ -6,24 +6,33 @@
         fontSize: '12px',
       }"
     >
-      <select name="exampleMode" v-model="exampleMode" @onchange="updateDemoMode">
-          <option value="default">Default</option>
-          <option value="yourModal">Your Own UI</option>
-          <option selected value="whitelabel">Whitelabel</option>
+    <div>
+     <select name="exampleMode" v-model="exampleMode" @change="syncConfig">
+          <option selected value="default">Default</option>
+          <!-- <option value="yourModal">Your Own UI</option> -->
+          <option value="whitelabel">Whitelabel</option>
       </select>
+      <select  :style="{
+        margin: '20px',
+      }" v-if="exampleMode === 'default'" name="chain" v-model="chain" @change="syncConfig">
+          <option selected value="ethereum">Ethereum</option>
+          <option value="solana">Solana</option>
+          <!-- <option value="polygon">Polygon</option> -->
+          <option value="binance">Binance</option>
+      </select>
+    </div>
+    
     </section>
     <section>
-      <!-- <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample> -->
-      <BeginnerExampleMode v-if="exampleMode === 'default'"></BeginnerExampleMode>
-      <WhitelabelExample :theme="'dark'"  v-if="exampleMode === 'whitelabel'"></WhitelabelExample>
+      <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
+      <WhitelabelExample :theme="'dark'"  v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
     </section>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import ConfigurableExample from "./ConfigurableExample.vue"
-import BeginnerExampleMode from "./BeginnerExample.vue"
+import ConfigurableExample from "./default/configurableModal.vue"
 import WhitelabelExample from "./whitelabel/whitelabel.vue"
 
 
@@ -31,22 +40,29 @@ export default Vue.extend({
   name: "app",
   data() {
     return {
-      exampleMode: "default"
+      exampleMode: "default",
+      chain: null
     };
   },
   components: {
     ConfigurableExample: ConfigurableExample,
-    BeginnerExampleMode: BeginnerExampleMode,
     WhitelabelExample: WhitelabelExample
 },
   mounted() {
-    this.exampleMode = localStorage.getItem("exampleMode")
-    if (!this.exampleMode) this.exampleMode = "default";
+    console.log("mounted");
+    const existingConfig = localStorage.getItem("web3auth_example_config")
+    const modalConfig =  existingConfig ?  JSON.parse(existingConfig) : {}
+    this.exampleMode = modalConfig["exampleMode"] || "default"
+    this.chain = modalConfig["chain"] || "ethereum"
+
   },
   methods: {
-    updateDemoMode() {
-      localStorage.setItem("exampleMode", this.exampleMode)
-    }
+    syncConfig(e) {
+      console.log("key",e);
+      const existingConfig = localStorage.getItem("web3auth_example_config")
+      const modalConfig =  existingConfig ?  JSON.parse(existingConfig) : {}
+      localStorage.setItem("web3auth_example_config", JSON.stringify({ ...modalConfig, [e.target.name]: this[e.target.name] }))
+    },
   },
 });
 </script>

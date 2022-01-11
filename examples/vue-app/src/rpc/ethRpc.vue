@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { sendEth, signEthMessage, getAccounts, getBalance } from "./lib/eth"
+import { sendEth, signEthMessage, getAccounts, getBalance } from "../lib/eth"
 
 export default Vue.extend({
   name: "EthRpc",
