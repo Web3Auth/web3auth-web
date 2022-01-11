@@ -111,13 +111,12 @@ export default Vue.extend({
     async switchChain() {
       try {
         this.loading = true;
-        console.log("this.namespace", this.web3auth.options.chainNamespace);
-        if (this.web3auth.options.chainNamespace === "solana") {
+        if (this.web3auth.options.chainConfig.chainNamespace === "solana") {
           await this.initEthAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
-        } else if (this.web3auth.options.chainNamespace === "eip155") {
+          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
+        } else if (this.web3auth.options.chainConfig.chainNamespace === "eip155") {
           await this.initSolanaAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainNamespace);
+          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
         }
       } finally {
         this.loading = false;
