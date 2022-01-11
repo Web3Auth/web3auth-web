@@ -16,10 +16,10 @@
   dependencies:
     "@babel/highlight" "^7.16.7"
 
-"@babel/compat-data@^7.13.11", "@babel/compat-data@^7.16.4":
-  version "7.16.4"
-  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.16.4.tgz#081d6bbc336ec5c2435c6346b2ae1fb98b5ac68e"
-  integrity sha512-1o/jo7D+kC9ZjHX5v+EHrdjl3PhxMrLSOTGsOdHJ+KL8HCaEK6ehrVL2RS6oHDZp+L7xLirLrPmQtEng769J/Q==
+"@babel/compat-data@^7.13.11", "@babel/compat-data@^7.16.4", "@babel/compat-data@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.16.8.tgz#31560f9f29fdf1868de8cb55049538a1b9732a60"
+  integrity sha512-m7OkX0IdKLKPpBlJtF561YJal5y/jyI5fNfWbPxh2D/nbzzGI4qRyrD8xO2jB24u7l+5I2a43scCG2IrfjC50Q==
 
 "@babel/core@^7.11.0":
   version "7.16.7"
@@ -42,12 +42,12 @@
     semver "^6.3.0"
     source-map "^0.5.0"
 
-"@babel/generator@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.16.7.tgz#b42bf46a3079fa65e1544135f32e7958f048adbb"
-  integrity sha512-/ST3Sg8MLGY5HVYmrjOgL60ENux/HfO/CsUh7y4MalThufhE/Ff/6EibFDHi4jiDCaWfJKoqbE6oTh21c5hrRg==
+"@babel/generator@^7.16.7", "@babel/generator@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.16.8.tgz#359d44d966b8cd059d543250ce79596f792f2ebe"
+  integrity sha512-1ojZwE9+lOXzcWdWmO6TbUzDfqLD39CmEhN8+2cX9XkDo5yW1OpgfejfliysR2AWLpMamTiOiAp/mtroaymhpw==
   dependencies:
-    "@babel/types" "^7.16.7"
+    "@babel/types" "^7.16.8"
     jsesc "^2.5.1"
     source-map "^0.5.0"
 
@@ -188,14 +188,14 @@
   resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.16.7.tgz#aa3a8ab4c3cceff8e65eb9e73d87dc4ff320b2f5"
   integrity sha512-Qg3Nk7ZxpgMrsox6HreY1ZNKdBq7K72tDSliA6dCl5f007jR4ne8iD5UzuNnCJH2xBf2BEEVGr+/OL6Gdp7RxA==
 
-"@babel/helper-remap-async-to-generator@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/helper-remap-async-to-generator/-/helper-remap-async-to-generator-7.16.7.tgz#5ce2416990d55eb6e099128338848ae8ffa58a9a"
-  integrity sha512-C3o117GnP/j/N2OWo+oepeWbFEKRfNaay+F1Eo5Mj3A1SRjyx+qaFhm23nlipub7Cjv2azdUUiDH+VlpdwUFRg==
+"@babel/helper-remap-async-to-generator@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/helper-remap-async-to-generator/-/helper-remap-async-to-generator-7.16.8.tgz#29ffaade68a367e2ed09c90901986918d25e57e3"
+  integrity sha512-fm0gH7Flb8H51LqJHy3HJ3wnE1+qtYR2A99K06ahwrawLdOFsCEWjZOrYricXJHoPSudNKxrMBUPEIPxiIIvBw==
   dependencies:
     "@babel/helper-annotate-as-pure" "^7.16.7"
-    "@babel/helper-wrap-function" "^7.16.7"
-    "@babel/types" "^7.16.7"
+    "@babel/helper-wrap-function" "^7.16.8"
+    "@babel/types" "^7.16.8"
 
 "@babel/helper-replace-supers@^7.16.7":
   version "7.16.7"
@@ -239,15 +239,15 @@
   resolved "https://registry.yarnpkg.com/@babel/helper-validator-option/-/helper-validator-option-7.16.7.tgz#b203ce62ce5fe153899b617c08957de860de4d23"
   integrity sha512-TRtenOuRUVo9oIQGPC5G9DgK4743cdxvtOw0weQNpZXaS16SCBi5MNjZF8vba3ETURjZpTbVn7Vvcf2eAwFozQ==
 
-"@babel/helper-wrap-function@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/helper-wrap-function/-/helper-wrap-function-7.16.7.tgz#8ddf9eaa770ed43de4bc3687f3f3b0d6d5ecf014"
-  integrity sha512-7a9sABeVwcunnztZZ7WTgSw6jVYLzM1wua0Z4HIXm9S3/HC96WKQTkFgGEaj5W06SHHihPJ6Le6HzS5cGOQMNw==
+"@babel/helper-wrap-function@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/helper-wrap-function/-/helper-wrap-function-7.16.8.tgz#58afda087c4cd235de92f7ceedebca2c41274200"
+  integrity sha512-8RpyRVIAW1RcDDGTA+GpPAwV22wXCfKOoM9bet6TLkGIFTkRQSkH1nMQ5Yet4MpoXe1ZwHPVtNasc2w0uZMqnw==
   dependencies:
     "@babel/helper-function-name" "^7.16.7"
     "@babel/template" "^7.16.7"
-    "@babel/traverse" "^7.16.7"
-    "@babel/types" "^7.16.7"
+    "@babel/traverse" "^7.16.8"
+    "@babel/types" "^7.16.8"
 
 "@babel/helpers@^7.16.7":
   version "7.16.7"
@@ -267,10 +267,10 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@babel/parser@^7.16.7", "@babel/parser@^7.7.0":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.16.7.tgz#d372dda9c89fcec340a82630a9f533f2fe15877e"
-  integrity sha512-sR4eaSrnM7BV7QPzGfEX5paG/6wrZM3I0HDzfIAK06ESvo9oy3xBuVBxE3MbQaKNhvg8g/ixjMWo2CGpzpHsDA==
+"@babel/parser@^7.16.7", "@babel/parser@^7.16.8", "@babel/parser@^7.7.0":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.16.8.tgz#61c243a3875f7d0b0962b0543a33ece6ff2f1f17"
+  integrity sha512-i7jDUfrVBWc+7OKcBzEe5n7fbv3i2fWtxKzzCvOjnzSxMfWMigAhtfJ7qzZNGFNMsCCd67+uz553dYKWXPvCKw==
 
 "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@^7.16.7":
   version "7.16.7"
@@ -288,13 +288,13 @@
     "@babel/helper-skip-transparent-expression-wrappers" "^7.16.0"
     "@babel/plugin-proposal-optional-chaining" "^7.16.7"
 
-"@babel/plugin-proposal-async-generator-functions@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.16.7.tgz#739adc1212a9e4892de440cd7dfffb06172df78d"
-  integrity sha512-TTXBT3A5c11eqRzaC6beO6rlFT3Mo9C2e8eB44tTr52ESXSK2CIc2fOp1ynpAwQA8HhBMho+WXhMHWlAe3xkpw==
+"@babel/plugin-proposal-async-generator-functions@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.16.8.tgz#3bdd1ebbe620804ea9416706cd67d60787504bc8"
+  integrity sha512-71YHIvMuiuqWJQkebWJtdhQTfd4Q4mF76q2IX37uZPkG9+olBxsX+rH1vkhFto4UeJZ9dPY2s+mDvhDm1u2BGQ==
   dependencies:
     "@babel/helper-plugin-utils" "^7.16.7"
-    "@babel/helper-remap-async-to-generator" "^7.16.7"
+    "@babel/helper-remap-async-to-generator" "^7.16.8"
     "@babel/plugin-syntax-async-generators" "^7.8.4"
 
 "@babel/plugin-proposal-class-properties@^7.16.7", "@babel/plugin-proposal-class-properties@^7.8.3":
@@ -544,14 +544,14 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.16.7"
 
-"@babel/plugin-transform-async-to-generator@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-async-to-generator/-/plugin-transform-async-to-generator-7.16.7.tgz#646e1262ac341b587ff5449844d4492dbb10ac4b"
-  integrity sha512-pFEfjnK4DfXCfAlA5I98BYdDJD8NltMzx19gt6DAmfE+2lXRfPUoa0/5SUjT4+TDE1W/rcxU/1lgN55vpAjjdg==
+"@babel/plugin-transform-async-to-generator@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-async-to-generator/-/plugin-transform-async-to-generator-7.16.8.tgz#b83dff4b970cf41f1b819f8b49cc0cfbaa53a808"
+  integrity sha512-MtmUmTJQHCnyJVrScNzNlofQJ3dLFuobYn3mwOTKHnSCMtbNsqvF71GQmJfFjdrXSsAA7iysFmYWw4bXZ20hOg==
   dependencies:
     "@babel/helper-module-imports" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
-    "@babel/helper-remap-async-to-generator" "^7.16.7"
+    "@babel/helper-remap-async-to-generator" "^7.16.8"
 
 "@babel/plugin-transform-block-scoped-functions@^7.16.7":
   version "7.16.7"
@@ -657,10 +657,10 @@
     "@babel/helper-plugin-utils" "^7.16.7"
     babel-plugin-dynamic-import-node "^2.3.3"
 
-"@babel/plugin-transform-modules-commonjs@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.16.7.tgz#fd119e6a433c527d368425b45df361e1e95d3c1a"
-  integrity sha512-h2RP2kE7He1ZWKyAlanMZrAbdv+Acw1pA8dQZhE025WJZE2z0xzFADAinXA9fxd5bn7JnM+SdOGcndGx1ARs9w==
+"@babel/plugin-transform-modules-commonjs@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.16.8.tgz#cdee19aae887b16b9d331009aa9a219af7c86afe"
+  integrity sha512-oflKPvsLT2+uKQopesJt3ApiaIS2HW+hzHFcwRNtyDGieAeC/dIHZX8buJQ2J2X1rxGPy4eRcUijm3qcSPjYcA==
   dependencies:
     "@babel/helper-module-transforms" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
@@ -686,10 +686,10 @@
     "@babel/helper-module-transforms" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
 
-"@babel/plugin-transform-named-capturing-groups-regex@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-named-capturing-groups-regex/-/plugin-transform-named-capturing-groups-regex-7.16.7.tgz#749d90d94e73cf62c60a0cc8d6b94d29305a81f2"
-  integrity sha512-kFy35VwmwIQwCjwrAQhl3+c/kr292i4KdLPKp5lPH03Ltc51qnFlIADoyPxc/6Naz3ok3WdYKg+KK6AH+D4utg==
+"@babel/plugin-transform-named-capturing-groups-regex@^7.16.8":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-named-capturing-groups-regex/-/plugin-transform-named-capturing-groups-regex-7.16.8.tgz#7f860e0e40d844a02c9dcf9d84965e7dfd666252"
+  integrity sha512-j3Jw+n5PvpmhRR+mrgIh04puSANCk/T/UA3m3P1MjJkhlK906+ApHhDIqBQDdOgL/r1UYpz4GNclTXxyZrYGSw==
   dependencies:
     "@babel/helper-create-regexp-features-plugin" "^7.16.7"
 
@@ -737,14 +737,14 @@
     "@babel/helper-plugin-utils" "^7.16.7"
 
 "@babel/plugin-transform-runtime@^7.11.0", "@babel/plugin-transform-runtime@^7.5.5":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-runtime/-/plugin-transform-runtime-7.16.7.tgz#1da184cb83a2287a01956c10c60e66dd503c18aa"
-  integrity sha512-2FoHiSAWkdq4L06uaDN3rS43i6x28desUVxq+zAFuE6kbWYQeiLPJI5IC7Sg9xKYVcrBKSQkVUfH6aeQYbl9QA==
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-runtime/-/plugin-transform-runtime-7.16.8.tgz#3339368701103edae708f0fba9e4bfb70a3e5872"
+  integrity sha512-6Kg2XHPFnIarNweZxmzbgYnnWsXxkx9WQUVk2sksBRL80lBC1RAQV3wQagWxdCHiYHqPN+oenwNIuttlYgIbQQ==
   dependencies:
     "@babel/helper-module-imports" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
     babel-plugin-polyfill-corejs2 "^0.3.0"
-    babel-plugin-polyfill-corejs3 "^0.4.0"
+    babel-plugin-polyfill-corejs3 "^0.5.0"
     babel-plugin-polyfill-regenerator "^0.3.0"
     semver "^6.3.0"
 
@@ -800,17 +800,17 @@
     "@babel/helper-plugin-utils" "^7.16.7"
 
 "@babel/preset-env@^7.11.0":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/preset-env/-/preset-env-7.16.7.tgz#c491088856d0b3177822a2bf06cb74d76327aa56"
-  integrity sha512-urX3Cee4aOZbRWOSa3mKPk0aqDikfILuo+C7qq7HY0InylGNZ1fekq9jmlr3pLWwZHF4yD7heQooc2Pow2KMyQ==
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/preset-env/-/preset-env-7.16.8.tgz#e682fa0bcd1cf49621d64a8956318ddfb9a05af9"
+  integrity sha512-9rNKgVCdwHb3z1IlbMyft6yIXIeP3xz6vWvGaLHrJThuEIqWfHb0DNBH9VuTgnDfdbUDhkmkvMZS/YMCtP7Elg==
   dependencies:
-    "@babel/compat-data" "^7.16.4"
+    "@babel/compat-data" "^7.16.8"
     "@babel/helper-compilation-targets" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
     "@babel/helper-validator-option" "^7.16.7"
     "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression" "^7.16.7"
     "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining" "^7.16.7"
-    "@babel/plugin-proposal-async-generator-functions" "^7.16.7"
+    "@babel/plugin-proposal-async-generator-functions" "^7.16.8"
     "@babel/plugin-proposal-class-properties" "^7.16.7"
     "@babel/plugin-proposal-class-static-block" "^7.16.7"
     "@babel/plugin-proposal-dynamic-import" "^7.16.7"
@@ -840,7 +840,7 @@
     "@babel/plugin-syntax-private-property-in-object" "^7.14.5"
     "@babel/plugin-syntax-top-level-await" "^7.14.5"
     "@babel/plugin-transform-arrow-functions" "^7.16.7"
-    "@babel/plugin-transform-async-to-generator" "^7.16.7"
+    "@babel/plugin-transform-async-to-generator" "^7.16.8"
     "@babel/plugin-transform-block-scoped-functions" "^7.16.7"
     "@babel/plugin-transform-block-scoping" "^7.16.7"
     "@babel/plugin-transform-classes" "^7.16.7"
@@ -854,10 +854,10 @@
     "@babel/plugin-transform-literals" "^7.16.7"
     "@babel/plugin-transform-member-expression-literals" "^7.16.7"
     "@babel/plugin-transform-modules-amd" "^7.16.7"
-    "@babel/plugin-transform-modules-commonjs" "^7.16.7"
+    "@babel/plugin-transform-modules-commonjs" "^7.16.8"
     "@babel/plugin-transform-modules-systemjs" "^7.16.7"
     "@babel/plugin-transform-modules-umd" "^7.16.7"
-    "@babel/plugin-transform-named-capturing-groups-regex" "^7.16.7"
+    "@babel/plugin-transform-named-capturing-groups-regex" "^7.16.8"
     "@babel/plugin-transform-new-target" "^7.16.7"
     "@babel/plugin-transform-object-super" "^7.16.7"
     "@babel/plugin-transform-parameters" "^7.16.7"
@@ -872,11 +872,11 @@
     "@babel/plugin-transform-unicode-escapes" "^7.16.7"
     "@babel/plugin-transform-unicode-regex" "^7.16.7"
     "@babel/preset-modules" "^0.1.5"
-    "@babel/types" "^7.16.7"
+    "@babel/types" "^7.16.8"
     babel-plugin-polyfill-corejs2 "^0.3.0"
-    babel-plugin-polyfill-corejs3 "^0.4.0"
+    babel-plugin-polyfill-corejs3 "^0.5.0"
     babel-plugin-polyfill-regenerator "^0.3.0"
-    core-js-compat "^3.19.1"
+    core-js-compat "^3.20.2"
     semver "^6.3.0"
 
 "@babel/preset-modules@^0.1.5":
@@ -906,26 +906,26 @@
     "@babel/parser" "^7.16.7"
     "@babel/types" "^7.16.7"
 
-"@babel/traverse@^7.0.0", "@babel/traverse@^7.13.0", "@babel/traverse@^7.16.7", "@babel/traverse@^7.7.0":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.16.7.tgz#dac01236a72c2560073658dd1a285fe4e0865d76"
-  integrity sha512-8KWJPIb8c2VvY8AJrydh6+fVRo2ODx1wYBU2398xJVq0JomuLBZmVQzLPBblJgHIGYG4znCpUZUZ0Pt2vdmVYQ==
+"@babel/traverse@^7.0.0", "@babel/traverse@^7.13.0", "@babel/traverse@^7.16.7", "@babel/traverse@^7.16.8", "@babel/traverse@^7.7.0":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.16.8.tgz#bab2f2b09a5fe8a8d9cad22cbfe3ba1d126fef9c"
+  integrity sha512-xe+H7JlvKsDQwXRsBhSnq1/+9c+LlQcCK3Tn/l5sbx02HYns/cn7ibp9+RV1sIUqu7hKg91NWsgHurO9dowITQ==
   dependencies:
     "@babel/code-frame" "^7.16.7"
-    "@babel/generator" "^7.16.7"
+    "@babel/generator" "^7.16.8"
     "@babel/helper-environment-visitor" "^7.16.7"
     "@babel/helper-function-name" "^7.16.7"
     "@babel/helper-hoist-variables" "^7.16.7"
     "@babel/helper-split-export-declaration" "^7.16.7"
-    "@babel/parser" "^7.16.7"
-    "@babel/types" "^7.16.7"
+    "@babel/parser" "^7.16.8"
+    "@babel/types" "^7.16.8"
     debug "^4.1.0"
     globals "^11.1.0"
 
-"@babel/types@^7.0.0", "@babel/types@^7.16.0", "@babel/types@^7.16.7", "@babel/types@^7.4.4", "@babel/types@^7.7.0":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.16.7.tgz#4ed19d51f840ed4bd5645be6ce40775fecf03159"
-  integrity sha512-E8HuV7FO9qLpx6OtoGfUQ2cjIYnbFwvZWYBS+87EwtdMvmUPJSwykpovFB+8insbpF0uJcpr8KMUi64XZntZcg==
+"@babel/types@^7.0.0", "@babel/types@^7.16.0", "@babel/types@^7.16.7", "@babel/types@^7.16.8", "@babel/types@^7.4.4", "@babel/types@^7.7.0":
+  version "7.16.8"
+  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.16.8.tgz#0ba5da91dd71e0a4e7781a30f22770831062e3c1"
+  integrity sha512-smN2DQc5s4M7fntyjGtyIPbRJv6wW4rU/94fmYJ7PKQuZkC0qGMHXJbg6sNGt12JmVr4k5YaptI/XtiLJBnmIg==
   dependencies:
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
@@ -1401,7 +1401,7 @@
   dependencies:
     lodash.merge "^4.6.2"
 
-"@toruslabs/openlogin-ed25519@^1.2.0", "@toruslabs/openlogin-ed25519@^1.3.3":
+"@toruslabs/openlogin-ed25519@^1.3.3":
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-ed25519/-/openlogin-ed25519-1.3.4.tgz#ad6cdb8fe01b18809b977f4136a16a73d54d09e2"
   integrity sha512-5jIWSPoWmbPS/k0mqsukiLeN1lH00aOI7kJ/LlTfgBhlPrzAFDdicoks6+B/VtLlNcTeOob6ochC/abNvxuN+A==
@@ -2247,140 +2247,168 @@
   dependencies:
     "@walletconnect/window-getters" "^1.0.0"
 
-"@web3auth/base-provider@^0.0.0", "@web3auth/base-provider@file:./.yalc/@web3auth/base-provider":
-  version "0.0.0"
+"@web3auth/base-provider@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/base-provider/-/base-provider-0.1.0.tgz#730b36e0a519b263029304218223676ff655e269"
+  integrity sha512-IO96jNlqhO9NlqKVGA3odpJVLGMqEtWY1WdXO5ygVqbS02zunMW8qFocUtAOVgsdFT1WRGhjWi0B+dTL+ypPdA==
   dependencies:
     "@toruslabs/base-controllers" "^1.4.4"
-    "@web3auth/base" "^0.0.1"
+    "@web3auth/base" "^0.1.0"
 
-"@web3auth/base@0.0.1", "@web3auth/base@^0.0.1", "@web3auth/base@file:./.yalc/@web3auth/base":
-  version "0.0.1"
+"@web3auth/base@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/base/-/base-0.1.0.tgz#8976c813680b13a45d1605bc36b54e5758ff7828"
+  integrity sha512-vcDs94/sFSAs+S0Ikz5yXbz0nD8PHy7Ic/DkUaqDam6v58KOU2sNl5c3ZI3sn5R3+AbXYtFryTuh7FkRx+ppZg==
   dependencies:
     "@toruslabs/openlogin-jrpc" "^1.3.3"
     ts-custom-error "^3.2.0"
 
-"@web3auth/core@^0.0.0", "@web3auth/core@file:./.yalc/@web3auth/core":
-  version "0.0.0"
+"@web3auth/core@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/core/-/core-0.1.0.tgz#924cff3713b497b0b9968a9c9c151a9b822b00fc"
+  integrity sha512-yP2SuphXySGDJu5pRy/SMCKyXVAfl2FHF+jbhCPpMs3hpGSwaVMJR4NT3SKphUK3FmVRNV178TmtL7bivIluSA==
   dependencies:
     "@toruslabs/openlogin-jrpc" "^1.3.3"
-    "@web3auth/base" "0.0.1"
+    "@web3auth/base" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/customauth-adapter@^0.0.0", "@web3auth/customauth-adapter@file:./.yalc/@web3auth/customauth-adapter":
-  version "0.0.0"
+"@web3auth/customauth-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/customauth-adapter/-/customauth-adapter-0.1.0.tgz#8c37076ea07f1cb3ac457e60b39b031151c9b026"
+  integrity sha512-hM2+WF7bJ1lWuna8tQkMo5zmql2Q8LxhOK+NJ8mHaKS34T5HHxVXfr9n0eq9pS1uoBam9n30L6oCcxAKq1fF7A==
   dependencies:
     "@toruslabs/customauth" "^6.1.1"
     "@toruslabs/openlogin-ed25519" "^1.3.3"
-    "@web3auth/base" "0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
-    "@web3auth/ethereum-provider" "0.0.1"
-    "@web3auth/solana-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
+    "@web3auth/ethereum-provider" "^0.1.0"
+    "@web3auth/solana-provider" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/ethereum-provider@0.0.1", "@web3auth/ethereum-provider@file:./.yalc/@web3auth/ethereum-provider":
-  version "0.0.1"
+"@web3auth/ethereum-provider@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/ethereum-provider/-/ethereum-provider-0.1.0.tgz#e51e948a6bafea3d7423b2097f4b003429fca5dd"
+  integrity sha512-AYxsXnp6kB0I4zo5/Te0FTE/1Iy7slSvvu7f9ytg6mJuOLqbvAeqBBgIB0ks34S5y+YsaW7o024qoXuGL96aBA==
   dependencies:
     "@ethereumjs/common" "^2.6.0"
     "@ethereumjs/tx" "^3.4.0"
     "@metamask/eth-sig-util" "^4.0.0"
     "@toruslabs/base-controllers" "^1.4.4"
     "@toruslabs/openlogin-jrpc" "^1.3.3"
-    "@web3auth/base" "^0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
     eth-rpc-errors "^4.0.3"
     ethereumjs-util "^7.1.3"
     json-rpc-random-id "^1.0.1"
     loglevel "^1.8.0"
 
-"@web3auth/metamask-adapter@^0.0.0", "@web3auth/metamask-adapter@file:./.yalc/@web3auth/metamask-adapter":
-  version "0.0.0"
+"@web3auth/metamask-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/metamask-adapter/-/metamask-adapter-0.1.0.tgz#ed14b466e6a072ba5a47e1e03c3bf9eed2068aef"
+  integrity sha512-yWBZiqhyKJ/qdytXH2xMrP3AZXBLIzN1NUsdH9bk+QTkl0UnlouOWqaG/EhpoBN/mtTsCVtTos5Ea0xZmJPYoQ==
   dependencies:
     "@metamask/detect-provider" "^1.2.0"
-    "@web3auth/base" "0.0.1"
+    "@web3auth/base" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/openlogin-adapter@^0.0.0", "@web3auth/openlogin-adapter@file:./.yalc/@web3auth/openlogin-adapter":
-  version "0.0.0"
+"@web3auth/openlogin-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/openlogin-adapter/-/openlogin-adapter-0.1.0.tgz#35ff32f7cf33625f5f40eedadb3d4e2557ae9da7"
+  integrity sha512-i/wew6J8KDI4sUJl5jW5MIKiP3eomtgai8EUHSVsW3ZDYFyHT+YtqYWu7At8Ma0Iy/9p/2PCMCQXR9QqKQC2Ow==
   dependencies:
     "@toruslabs/openlogin" "^1.3.4"
     "@toruslabs/openlogin-ed25519" "^1.3.3"
-    "@web3auth/base" "0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
-    "@web3auth/ethereum-provider" "0.0.1"
-    "@web3auth/solana-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
+    "@web3auth/ethereum-provider" "^0.1.0"
+    "@web3auth/solana-provider" "^0.1.0"
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@web3auth/phantom-adapter@^0.0.0", "@web3auth/phantom-adapter@file:./.yalc/@web3auth/phantom-adapter":
-  version "0.0.0"
+"@web3auth/phantom-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/phantom-adapter/-/phantom-adapter-0.1.0.tgz#62ac1525b4fa44935ce4a75248803f7ebe3070ae"
+  integrity sha512-v5Y6yKQi499srVHm4i0fSqAPuSmkwDqgcAotcGUlgEd1VCdk43vMNddXlQ+6mFWQ2FtCUzD9mmhrJknpe32ZRA==
   dependencies:
-    "@web3auth/base" "0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
-    "@web3auth/solana-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
+    "@web3auth/solana-provider" "^0.1.0"
     bn.js "^5.2.0"
     loglevel "^1.8.0"
 
-"@web3auth/solana-provider@^0.0.0", "@web3auth/solana-provider@file:./.yalc/@web3auth/solana-provider":
-  version "0.0.0"
+"@web3auth/solana-provider@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/solana-provider/-/solana-provider-0.1.0.tgz#bf31144a87ebe2c17b7836d3f76f2f26f5acbc0c"
+  integrity sha512-DwEPkn8fvg6IBVudg1ZawQREBamll1b4abypwKs4/O9zHxIGWhz0kvRe0tqTQpkqB0X7D46LNawHQkq6E1+XVA==
   dependencies:
     "@solana/web3.js" "^1.31.0"
     "@toruslabs/base-controllers" "^1.4.4"
     "@toruslabs/openlogin-jrpc" "^1.3.3"
     "@toruslabs/tweetnacl-js" "^1.0.3"
-    "@web3auth/base" "0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
     bn.js "^5.2.0"
     bs58 "^4.0.1"
     eth-rpc-errors "^4.0.3"
     json-rpc-random-id "^1.0.1"
     loglevel "^1.8.0"
 
-"@web3auth/torus-evm-adapter@^0.0.0", "@web3auth/torus-evm-adapter@file:./.yalc/@web3auth/torus-evm-adapter":
-  version "0.0.0"
+"@web3auth/torus-evm-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/torus-evm-adapter/-/torus-evm-adapter-0.1.0.tgz#31ed48bd40d8b3fb20b2147a6ed694f2712483ec"
+  integrity sha512-Ham6r/AIoiVW2RAIxro7olO3kTsynvw2RdnMT3emnz4ZQDfhtiMEgPaUj4b9TuJnF7gtnqyGfjCwtWGpYHKuYA==
   dependencies:
     "@toruslabs/torus-embed" "^1.20.0"
-    "@web3auth/base" "0.0.1"
+    "@web3auth/base" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/torus-solana-adapter@^0.0.0", "@web3auth/torus-solana-adapter@file:./.yalc/@web3auth/torus-solana-adapter":
-  version "0.0.0"
+"@web3auth/torus-solana-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/torus-solana-adapter/-/torus-solana-adapter-0.1.0.tgz#a6aeb8ab3cf776d9d8a80e457214c25c29e60cf2"
+  integrity sha512-2QmOTDqG/39OvOlXuXBuPSHfdO2n+lXxc16ks6J4r+M9RrqkZqZTsXI3T7Tm00BUgYT+zKBQVJk0BHTa/CAyGA==
   dependencies:
     "@toruslabs/solana-embed" "^0.0.10"
-    "@web3auth/base" "0.0.1"
-    "@web3auth/base-provider" "^0.0.0"
-    "@web3auth/solana-provider" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/base-provider" "^0.1.0"
+    "@web3auth/solana-provider" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/ui@^0.0.0", "@web3auth/ui@file:./.yalc/@web3auth/ui":
-  version "0.0.0"
+"@web3auth/ui@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/ui/-/ui-0.1.0.tgz#c6efa26d4a82b1ca68a1f54335dc4cd1b3a60413"
+  integrity sha512-kHmElBLp56nEUq0GfeDloNPaSoPeof6jTpGG4B2U0TTdB1tGmHrzbGMlIi2v3ARZmGI/w0GA6X/of5ME8wNzjQ==
   dependencies:
     "@toruslabs/openlogin-jrpc" "^1.3.3"
-    "@web3auth/base" "0.0.1"
+    "@web3auth/base" "^0.1.0"
     loglevel "^1.8.0"
     qrcode "^1.5.0"
 
-"@web3auth/wallet-connect-v1-adapter@^0.0.0", "@web3auth/wallet-connect-v1-adapter@file:./.yalc/@web3auth/wallet-connect-v1-adapter":
-  version "0.0.0"
+"@web3auth/wallet-connect-v1-adapter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/wallet-connect-v1-adapter/-/wallet-connect-v1-adapter-0.1.0.tgz#83db3707674048a342eaafaf1a2246ee6c26da27"
+  integrity sha512-laQ2MSNJW1YW4AYu5MX834T8DSfBGYA5Z3b2NKAHLGi/t00d2o9yU9t0C9F2W4+nQ4LGcopk1+9RSHV/U2k2yQ==
   dependencies:
     "@walletconnect/types" "~1.7.0"
     "@walletconnect/web3-provider" "~1.7.0"
-    "@web3auth/base" "0.0.1"
+    "@web3auth/base" "^0.1.0"
     loglevel "^1.8.0"
 
-"@web3auth/web3auth@file:./.yalc/@web3auth/web3auth":
-  version "0.0.0"
+"@web3auth/web3auth@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@web3auth/web3auth/-/web3auth-0.1.0.tgz#f77b156b71bb00833ae9773699b087acf837f143"
+  integrity sha512-zPvOsHO2rb8soJ9cVXVsuRFzoCdQP6ZIJcQoIuLVcWsIDofROsyKto1Wcvd4l0/WQ8d9pGzDxSxgLnyBy4Pxug==
   dependencies:
     "@toruslabs/openlogin" "^1.3.4"
-    "@web3auth/base" "0.0.1"
-    "@web3auth/core" "^0.0.0"
-    "@web3auth/customauth-adapter" "^0.0.0"
-    "@web3auth/metamask-adapter" "^0.0.0"
-    "@web3auth/openlogin-adapter" "^0.0.0"
-    "@web3auth/phantom-adapter" "^0.0.0"
-    "@web3auth/torus-evm-adapter" "^0.0.0"
-    "@web3auth/torus-solana-adapter" "^0.0.0"
-    "@web3auth/ui" "^0.0.0"
-    "@web3auth/wallet-connect-v1-adapter" "^0.0.0"
+    "@web3auth/base" "^0.1.0"
+    "@web3auth/core" "^0.1.0"
+    "@web3auth/customauth-adapter" "^0.1.0"
+    "@web3auth/metamask-adapter" "^0.1.0"
+    "@web3auth/openlogin-adapter" "^0.1.0"
+    "@web3auth/phantom-adapter" "^0.1.0"
+    "@web3auth/torus-evm-adapter" "^0.1.0"
+    "@web3auth/torus-solana-adapter" "^0.1.0"
+    "@web3auth/ui" "^0.1.0"
+    "@web3auth/wallet-connect-v1-adapter" "^0.1.0"
     loglevel "^1.8.0"
 
 "@webassemblyjs/ast@1.9.0":
@@ -2957,13 +2985,13 @@ babel-plugin-polyfill-corejs2@^0.3.0:
     "@babel/helper-define-polyfill-provider" "^0.3.0"
     semver "^6.1.1"
 
-babel-plugin-polyfill-corejs3@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-polyfill-corejs3/-/babel-plugin-polyfill-corejs3-0.4.0.tgz#0b571f4cf3d67f911512f5c04842a7b8e8263087"
-  integrity sha512-YxFreYwUfglYKdLUGvIF2nJEsGwj+RhWSX/ije3D2vQPOXuyMLMtg/cCGMDpOA7Nd+MwlNdnGODbd2EwUZPlsw==
+babel-plugin-polyfill-corejs3@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-polyfill-corejs3/-/babel-plugin-polyfill-corejs3-0.5.0.tgz#f81371be3fe499d39e074e272a1ef86533f3d268"
+  integrity sha512-Hcrgnmkf+4JTj73GbK3bBhlVPiLL47owUAnoJIf69Hakl3q+KfodbDXiZWGMM7iqCZTxCG3Z2VRfPNYES4rXqQ==
   dependencies:
     "@babel/helper-define-polyfill-provider" "^0.3.0"
-    core-js-compat "^3.18.0"
+    core-js-compat "^3.20.0"
 
 babel-plugin-polyfill-regenerator@^0.3.0:
   version "0.3.0"
@@ -4013,7 +4041,7 @@ copy-webpack-plugin@^5.1.1:
     serialize-javascript "^4.0.0"
     webpack-log "^2.0.0"
 
-core-js-compat@^3.18.0, core-js-compat@^3.19.1, core-js-compat@^3.6.5:
+core-js-compat@^3.20.0, core-js-compat@^3.20.2, core-js-compat@^3.6.5:
   version "3.20.2"
   resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.20.2.tgz#d1ff6936c7330959b46b2e08b122a8b14e26140b"
   integrity sha512-qZEzVQ+5Qh6cROaTPFLNS4lkvQ6mBzE3R6A6EEpssj7Zr2egMHgsy4XapdifqJDGC9CBiNv7s+ejI96rLNQFdg==
@@ -4731,9 +4759,9 @@ ejs@^2.6.1:
   integrity sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
 
 electron-to-chromium@^1.4.17:
-  version "1.4.39"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.39.tgz#19c8e8ff712fe62bfdd4f3fe1c3b3fb4aa179ebb"
-  integrity sha512-bFH3gdRq/l7WlzSleiO6dwpZH3RhiJ8vlMq0tOJMfT+5nb+x397eJn2RHF6Ho/9GCKv+BkimNlUMHl9+Yh+Qcg==
+  version "1.4.40"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.40.tgz#f5dbced7bfbc7072e5e7ca5487f8f9a42c8bc768"
+  integrity sha512-j+eVIyQGt2EU5xPWUblhpp5P5z5xyAdRgzogBgfe2F5JGV17gr9pfzWBua6DlPL00LavbOjxubWkWkbVQe9Wlw==
 
 elliptic@6.5.4, elliptic@^6.4.0, elliptic@^6.5.2, elliptic@^6.5.3, elliptic@^6.5.4:
   version "6.5.4"
@@ -9346,9 +9374,9 @@ qs@6.9.6:
   integrity sha512-TIRk4aqYLNoJUbd+g2lEdz5kLWIuTMRagAXxl78Q0RiVjAOugHmeKNGdd3cwo/ktpf9aL9epCfFqWDEKysUlLQ==
 
 qs@~6.5.2:
-  version "6.5.2"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
-  integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.3.tgz#3aeeffc91967ef6e35c0e488ef46fb296ab76aad"
+  integrity sha512-qxXIEh4pCGfHICj1mAJQ2/2XVZkjCDTcEgfoSQxc/fYivUZxTkk7L3bDBJSoNrEzXI17oUO5Dp07ktqE5KzczA==
 
 query-string@6.13.5:
   version "6.13.5"
