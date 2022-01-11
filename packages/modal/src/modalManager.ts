@@ -17,6 +17,19 @@ import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 
+export interface UIConfig {
+  /**
+   * Logo for your app.
+   */
+  appLogo?: string;
+
+  /**
+   * theme for the modal
+   *
+   * @defaultValue `light`
+   */
+  theme?: "light" | "dark";
+}
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * Client id for web3auth.
@@ -34,11 +47,10 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    * @defaultValue `DAPP`
    */
   authMode?: "DAPP" | "WALLET";
-
   /**
-   * Logo for your dapp, by default it will be the web3auth logo.
+   * Config for configuring modal ui display properties
    */
-  dappLogo?: string;
+  uiConfig?: UIConfig;
 }
 export class Web3Auth extends Web3AuthCore {
   public loginModal: LoginModal;
@@ -70,7 +82,12 @@ export class Web3Auth extends Web3AuthCore {
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
-    this.loginModal = new LoginModal({ appLogo: this.options.dappLogo || "", version: "", adapterListener: this });
+    this.loginModal = new LoginModal({
+      theme: this.options.uiConfig?.theme,
+      appLogo: this.options.uiConfig?.appLogo || "",
+      version: "",
+      adapterListener: this,
+    });
     this.subscribeToLoginModalEvents();
   }
 

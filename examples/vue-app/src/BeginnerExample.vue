@@ -2,27 +2,7 @@
   <div id="app">
     <h3>Login With Web3Auth</h3>
     <h3>Connect with {{ web3auth.options.chainConfig.chainNamespace }} web3auth</h3>
-    <div id="w3a-modal" class="w3a-modal" v-if="loading">
-        <div class="w3ajs-modal-loader w3a-modal__loader">
-          <div class="w3a-modal__loader-content">
-              <div class="w3a-modal__loader-info">
-                <div class="w3ajs-modal-loader__spinner w3a-spinner">
-                    <div class="w3a-spinner__body"></div>
-                    <div class="w3a-spinner__cover"></div>
-                    <div class="w3a-spinner__head"></div>
-                </div>
-                <div class="w3ajs-modal-loader__label w3a-spinner-label"></div>
-                <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
-              </div>
-              <div class="w3a-spinner-power">
-                <loaderSvg/>
-              </div>
-          </div>
-          <button class="w3a-header__button w3ajs-loader-close-btn">
-              <img src="${closeIcon}" alt="">
-          </button>
-        </div>
-      </div>
+    <Loader :isLoading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
@@ -55,7 +35,7 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError }
 import EthRpc from "./ethRpc.vue";
 import SolRpc from "./solanaRpc.vue";
 
-import loader from "./assets/torus-power.svg";
+import Loader from "./components/loader.vue";
 
 export default Vue.extend({
   name: "BeginnerExampleMode",
@@ -70,10 +50,10 @@ export default Vue.extend({
     };
   },
   components: {
-    loaderSvg: loader,
+    Loader,
     EthRpc,
     SolRpc,
-  },
+},
   async mounted() {
     try {
       this.loading = true;

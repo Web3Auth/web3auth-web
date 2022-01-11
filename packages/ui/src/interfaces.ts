@@ -4,7 +4,7 @@ export interface UIConfig {
   appLogo: string;
   version: string;
   adapterListener: SafeEventEmitter;
-  isDark?: boolean;
+  theme?: "light" | "dark";
 }
 export const LOGIN_MODAL_EVENTS = {
   INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",

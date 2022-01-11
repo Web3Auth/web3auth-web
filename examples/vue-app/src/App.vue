@@ -1,16 +1,21 @@
 <template>
   <div id="app">
-    <h3>Using {{ exampleMode === 'beginner' ? `Basic Example` : 'Advance Example' }} </h3>
+    <h3>{{ exampleMode }}</h3>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button @click="switchExampleMode" style="cursor: pointer;">Switch Example Mode</button>
+      <select name="exampleMode" v-model="exampleMode" @onchange="updateDemoMode">
+          <option value="default">Default</option>
+          <option value="yourModal">Your Own UI</option>
+          <option selected value="whitelabel">Whitelabel</option>
+      </select>
     </section>
     <section>
-      <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample>
-      <BeginnerExampleMode v-if="exampleMode === 'beginner'"></BeginnerExampleMode>
+      <!-- <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample> -->
+      <BeginnerExampleMode v-if="exampleMode === 'default'"></BeginnerExampleMode>
+      <WhitelabelExample :theme="'dark'"  v-if="exampleMode === 'whitelabel'"></WhitelabelExample>
     </section>
   </div>
 </template>
@@ -19,38 +24,30 @@
 import Vue from "vue";
 import ConfigurableExample from "./ConfigurableExample.vue"
 import BeginnerExampleMode from "./BeginnerExample.vue"
+import WhitelabelExample from "./whitelabel/whitelabel.vue"
 
-import loader from "./assets/torus-power.svg"
 
 export default Vue.extend({
   name: "app",
   data() {
     return {
-      exampleMode: "beginner"
+      exampleMode: "default"
     };
   },
   components: {
-    loaderSvg: loader,
     ConfigurableExample: ConfigurableExample,
-    BeginnerExampleMode: BeginnerExampleMode
+    BeginnerExampleMode: BeginnerExampleMode,
+    WhitelabelExample: WhitelabelExample
 },
   mounted() {
     this.exampleMode = localStorage.getItem("exampleMode")
-    if (!this.exampleMode) this.exampleMode = "beginner";
+    if (!this.exampleMode) this.exampleMode = "default";
   },
   methods: {
-    async switchExampleMode() {
-      if (this.exampleMode === 'advance') {
-        this.exampleMode = "beginner"
-        localStorage.setItem("exampleMode", "beginner")
-      } else {
-        this.exampleMode = "advance"
-        localStorage.setItem("exampleMode", "advance")
-      }
-    },
+    updateDemoMode() {
+      localStorage.setItem("exampleMode", this.exampleMode)
+    }
   },
-  
-  
 });
 </script>
 
