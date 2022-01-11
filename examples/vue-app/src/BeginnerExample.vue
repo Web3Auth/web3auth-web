@@ -22,7 +22,7 @@
               <img src="${closeIcon}" alt="">
           </button>
         </div>
-      </div>
+    </div>
     <section
       :style="{
         fontSize: '12px',
