@@ -53,10 +53,10 @@ export default Vue.extend({
     Loader
 },
   async mounted() {
-    await this.initBinanceWeb3Auth();
+    await this.initEthAuth();
   },
   methods: {
-    async initBinanceWeb3Auth() {
+    async initEthAuth() {
       try {
         this.loading = true
         this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: "localhost-id", authMode: "DAPP" });

@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Solana</h3>
+    <h3>Login With Web3Auth X Polygon</h3>
          <Loader :isLoading="loading"></Loader>
+
     <section
       :style="{
         fontSize: '12px',
@@ -9,7 +10,7 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <SolanaRpc v-if="connected && provider" :provider="provider" :console="console"></SolanaRpc>
+      <PolygonRpc v-if="connected && provider" :provider="provider" :console="console"></PolygonRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -23,42 +24,46 @@
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
-import SolanaRpc from "../rpc/solanaRpc.vue";
+import PolygonRpc from "../rpc/polygonRpc.vue";
 import Loader from "@/components/loader.vue";
 
-const solanaChainConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.SOLANA,
-    rpcTarget: "https://api.testnet.solana.com",
-    blockExplorer: "https://explorer.solana.com?cluster=testnet",
-    chainId: "0x2",
-    displayName: "testnet",
-    ticker: "SOL",
-    tickerName: "solana",
-};
+
+const polygonMumbaiConfig: CustomChainConfig = {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    rpcTarget: "https://rpc-mumbai.maticvigil.com",
+    blockExplorer: "https://mumbai-explorer.matic.today",
+    chainId: "0x13881",
+    displayName: "Polygon Mumbai Testnet",
+    ticker: "matic",
+    tickerName: "matic",
+}
 
 export default Vue.extend({
-  name: "SolanaChain",
+  name: "PolygonChain",
   data() {
     return {
       loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
     };
   },
   components: {
-    SolanaRpc,
+    PolygonRpc,
     Loader
 },
   async mounted() {
-    await this.initSolanaAuth();
+          console.log("polygon")
+    await this.initPolygonWeb3Auth();
   },
   methods: {
-    async initSolanaAuth() {
+    async initPolygonWeb3Auth() {
+      console.log("polygon")
       try {
         this.loading = true
-        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+
+        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {

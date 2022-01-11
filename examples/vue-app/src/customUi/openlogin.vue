@@ -1,16 +1,23 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Polygon</h3>
-         <Loader :isLoading="loading"></Loader>
-
+    <h3>Login With Web3Auth</h3>
+    <Loader :isLoading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
+    </section>
+    <section
+      :style="{
+        fontSize: '12px',
+      }"
+    >
+      <button v-if="!connected" name="google" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With Google</button>
+      <button v-if="!connected" name="facebook" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With facebook</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <PolygonRpc v-if="connected && provider" :provider="provider" :console="console"></PolygonRpc>
+      <!-- <SolRpc v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
+      <EthRpc v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc> -->
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -22,56 +29,53 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
-import PolygonRpc from "../rpc/polygonRpc.vue";
-import Loader from "@/components/loader.vue";
+import { Web3AuthCore } from "@web3auth/core";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
+import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter"
+import EthRpc from "../rpc/ethRpc.vue";
+import SolRpc from "../rpc/solanaRpc.vue";
 
-
-const polygonMumbaiConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://rpc-mumbai.maticvigil.com",
-    blockExplorer: "https://mumbai-explorer.matic.today",
-    chainId: "0x13881",
-    displayName: "Polygon Mumbai Testnet",
-    ticker: "matic",
-    tickerName: "matic",
-}
+import Loader from "../components/loader.vue";
 
 export default Vue.extend({
-  name: "PolygonChain",
+  name: "BeginnerExampleMode",
   data() {
     return {
       loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
+      namespace: undefined,
+      web3auth: new Web3AuthCore({ chainConfig:{ chainNamespace: CHAIN_NAMESPACES.EIP155} }),
     };
   },
   components: {
-    PolygonRpc,
-    Loader
+    Loader,
+    EthRpc,
+    SolRpc,
 },
   async mounted() {
-    await this.initBinanceWeb3Auth();
+   await this.initWeb3Auth();
   },
   methods: {
-    async initPolygonWeb3Auth() {
+    async initWeb3Auth() {
       try {
-        this.loading = true
-
-        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3AuthCore({  chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155} });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({});
+        const openloginAdapter = new OpenloginAdapter({adapterSettings: {
+          network: "testnet",
+          clientId: "localhost-id",
+          uxMode: "redirect"
+        }})
+
+        this.web3auth.configureAdapter(openloginAdapter);
+        await this.web3auth.init();
       } catch (error) {
-        console.log("error", error)
+         console.log("error", error)
         this.console("error", error);
-      } finally {
-        this.loading = false
       }
     },
-    subscribeAuthEvents(web3auth: Web3Auth) {
+    subscribeAuthEvents(web3auth: Web3AuthCore) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
@@ -93,9 +97,9 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect() {
+    connect(e) {
       try {
-        this.web3auth.connect();
+        this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: e.target.name,login_hint: "" } as OpenloginLoginParams);
       } catch (error) {
         console.error(error);
         this.console("error", error);

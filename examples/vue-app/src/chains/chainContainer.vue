@@ -1,17 +1,18 @@
 <template>
+
+
  <Ethereum v-if="chain === 'ethereum'"/>
   <Solana v-else-if="chain === 'solana'"/>
-  <Polygon v-else-if="chain === 'polygon'"/>
+  <Matic v-else-if="chain === 'polygon'"/>
   <Binance v-else-if="chain === 'binance'"/>
 
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-
 import Solana from "./solana.vue";
 import Ethereum from "./ethereum.vue";
-import Polygon from "./polygon.vue";
+import Matic from "./matic.vue";
 import Binance from "./binance.vue";
 
 export default Vue.extend({
@@ -29,7 +30,7 @@ export default Vue.extend({
   components: {
     Solana,
     Ethereum,
-    Polygon,
+    Matic,
     Binance
 },
   async mounted() {

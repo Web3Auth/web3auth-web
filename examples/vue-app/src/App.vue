@@ -9,7 +9,7 @@
     <div>
      <select name="exampleMode" v-model="exampleMode" @change="syncConfig">
           <option selected value="default">Default</option>
-          <!-- <option value="yourModal">Your Own UI</option> -->
+          <option value="customUi">Custom UI</option>
           <option value="whitelabel">Whitelabel</option>
       </select>
       <select  :style="{
@@ -26,6 +26,7 @@
     <section>
       <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
       <WhitelabelExample :theme="'dark'"  v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
+      <CustomUiContainer :authType="'customAuth'" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
     </section>
   </div>
 </template>
@@ -34,6 +35,7 @@
 import Vue from "vue";
 import ConfigurableExample from "./default/configurableModal.vue"
 import WhitelabelExample from "./whitelabel/whitelabel.vue"
+import CustomUiContainer from "./customUi/customUiContainer.vue";
 
 
 export default Vue.extend({
@@ -41,12 +43,14 @@ export default Vue.extend({
   data() {
     return {
       exampleMode: "default",
-      chain: null
+      chain: null,
+      authType: null
     };
   },
   components: {
     ConfigurableExample: ConfigurableExample,
-    WhitelabelExample: WhitelabelExample
+    WhitelabelExample: WhitelabelExample,
+    CustomUiContainer
 },
   mounted() {
     console.log("mounted");
@@ -54,6 +58,7 @@ export default Vue.extend({
     const modalConfig =  existingConfig ?  JSON.parse(existingConfig) : {}
     this.exampleMode = modalConfig["exampleMode"] || "default"
     this.chain = modalConfig["chain"] || "ethereum"
+    this.authType = modalConfig["authType"] || "openlogin"
 
   },
   methods: {
