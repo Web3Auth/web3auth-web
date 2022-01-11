@@ -48,7 +48,6 @@ jobs:
       - name: Build example
         if: github.ref == 'refs/heads/master'
         run: |
-          yarn run local-publish
           cd examples/vue-app
           yarn run link-local
           yarn
