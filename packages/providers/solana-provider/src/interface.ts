@@ -5,7 +5,7 @@ export interface ISolanaWallet {
   publicKey?: { toBytes(): Uint8Array };
   signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;
   signTransaction?(transaction: Transaction): Promise<Transaction>;
-  signAllTransactions?(transactions: string[]): Promise<Transaction[]>;
+  signAllTransactions?(transactions: Transaction[]): Promise<Transaction[]>;
   signMessage(message: Uint8Array): Promise<Uint8Array>;
   request<T>(args: RequestArguments): Promise<T>;
 }
@@ -14,7 +14,7 @@ export abstract class SolanaWallet extends SafeEventEmitter implements ISolanaWa
   abstract publicKey?: { toBytes(): Uint8Array };
   abstract signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;
   abstract signTransaction(transaction: Transaction): Promise<Transaction>;
-  abstract signAllTransactions(transactions: string[]): Promise<Transaction[]>;
+  abstract signAllTransactions(transactions: Transaction[]): Promise<Transaction[]>;
   abstract signMessage(message: Uint8Array): Promise<Uint8Array>;
   abstract request<T>(args: RequestArguments): Promise<T>;
 }

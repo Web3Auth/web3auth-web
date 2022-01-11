@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Polygon</h3>
+    <h3>Login With Web3Auth X Ethereum</h3>
     <section
       :style="{
         fontSize: '12px',
@@ -21,64 +21,8 @@
 <script lang="ts">
 import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue";
-import { use, POSClient } from "@maticnetwork/maticjs"
-import { Web3ClientPlugin } from "@maticnetwork/maticjs-web3";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-
-// install web3 plugin
-use(Web3ClientPlugin)
-
-const ethChainConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    chainId: "0x3",
-    rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-    displayName: "ropsten",
-    blockExplorer: "https://ropsten.etherscan.io/",
-    ticker: "ETH",
-    tickerName: "Ethereum",
-};
-
-const polygonMumbaiConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://rpc-mumbai.maticvigil.com",
-    blockExplorer: "https://mumbai-explorer.matic.today",
-    chainId: "0x13881",
-    displayName: "Polygon Mumbai Testnet",
-    ticker: "matic",
-    tickerName: "matic",
-}
-
-const maticClient = {
-  _matic: new POSClient(),
-  connect: async(privateKey: string,_network: string, _version: string, polygonProvider: SafeEventEmitterProvider): Promise<POSClient> => {
-    const posClient = new POSClient();
-    await posClient.init({
-        network: 'testnet',
-        version: 'mumbai',
-        parent: {
-        provider: EthereumPrivateKeyProvider.getProviderInstance({ privKey: privateKey, chainConfig: ethChainConfig }),
-        defaultConfig: {
-            from : ""
-        }
-        },
-        child: {
-        provider: polygonProvider,
-        defaultConfig: {
-            from : ""
-        }
-        }
-    });
-    return posClient;
-  },
-  getClient: async(privateKey: string, _network: string, _version: string, polygonProvider: SafeEventEmitterProvider): Promise<POSClient>=> {
-    if(maticClient._matic) {
-      return maticClient._matic
-    } 
-    return await maticClient.connect(privateKey, _network, _version, polygonProvider);
-  }
-}
 
 const solanaChainConfig: CustomChainConfig = {
     chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -97,7 +41,7 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: "localhost-id" }),
     };
   },
   components: {
@@ -109,7 +53,7 @@ export default Vue.extend({
   methods: {
     async initBinanceWeb3Auth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {

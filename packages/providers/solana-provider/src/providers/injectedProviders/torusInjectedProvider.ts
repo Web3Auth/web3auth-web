@@ -1,4 +1,4 @@
-import { Message, Transaction } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
@@ -55,12 +55,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        const message = bs58.decode(req.params.message);
-        const txn = Transaction.populate(Message.from(message));
-        const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
+        const message = bs58.decode(req.params.message).toString("hex");
         const response = await injectedProvider.request<string>({
           method: "sign_transaction",
-          params: { message: serializedTxn },
+          params: { message },
         });
 
         const buf = Buffer.from(response, "hex");
@@ -73,12 +71,11 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        const message = bs58.decode(req.params.message);
-        const txn = Transaction.populate(Message.from(message));
-        const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
+        const message = bs58.decode(req.params.message).toString("hex");
+
         const response = await injectedProvider.request<string>({
           method: "send_transaction",
-          params: { message: serializedTxn },
+          params: { message },
         });
         return { signature: response };
       },
@@ -87,21 +84,16 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         if (!req.params?.message || !req.params?.message.length) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        const signedTransactions: Transaction[] = [];
+        const messages: string[] = [];
         for (const transaction of req.params.message) {
-          const message = bs58.decode(transaction);
-          const txn = Transaction.populate(Message.from(message));
-          const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
-          const response = await injectedProvider.request<string>({
-            method: "sign_transaction",
-            params: { message: serializedTxn },
-          });
-          const buf = Buffer.from(response, "hex");
-          const sendTx = Transaction.from(buf);
-
-          signedTransactions.push(sendTx);
+          const message = bs58.decode(transaction).toString("hex");
+          messages.push(message);
         }
-        return signedTransactions;
+        const response = await injectedProvider.request<Transaction[]>({
+          method: "sign_all_transactions",
+          params: { message: messages },
+        });
+        return response;
       },
     };
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);

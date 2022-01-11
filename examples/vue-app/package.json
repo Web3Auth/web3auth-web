@@ -14,7 +14,9 @@
     "@web3auth/web3auth": "file:./.yalc/@web3auth/web3auth",
     "ts-custom-error": "^3.2.0",
     "vue": "^2.6.14",
-    "web3": "^1.5.1"
+    "web3": "^1.5.1",
+    "@maticnetwork/maticjs": "^3.1.0",
+    "@maticnetwork/maticjs-web3": "^1.0.0"
   },
   "resolutions": {
     "@web3auth/base": "file:./.yalc/@web3auth/base",

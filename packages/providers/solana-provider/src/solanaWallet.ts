@@ -23,7 +23,7 @@ export class SolanaWallet implements ISolanaWallet {
     const { signature } = await this.provider.request<{ signature: string }>({
       method: "signAndSendTransaction",
       params: {
-        message: bs58.encode(transaction.serializeMessage()),
+        message: bs58.encode(transaction.serialize({ requireAllSignatures: false })),
       },
     });
     return { signature };
@@ -33,17 +33,20 @@ export class SolanaWallet implements ISolanaWallet {
     const signedTransaction = (await this.provider.request({
       method: "signTransaction",
       params: {
-        message: bs58.encode(transaction.serializeMessage()),
+        message: bs58.encode(transaction.serialize({ requireAllSignatures: false })),
       },
     })) as Transaction;
     return signedTransaction;
   }
 
-  public async signAllTransactions(transactions: string[]): Promise<Transaction[]> {
+  public async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+    const messages = transactions.map((transaction) => {
+      return bs58.encode(transaction.serialize({ requireAllSignatures: false }));
+    });
     const signedTransaction = (await this.provider.request({
       method: "signAllTransactions",
       params: {
-        message: transactions,
+        message: messages,
       },
     })) as Transaction[];
     return signedTransaction;
