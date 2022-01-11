@@ -42,13 +42,12 @@ jobs:
       - name: Bootstrap dependencies
         run: yarn run bootstrap
 
-      - name: Build
-        run: yarn run pack:lerna
+      - name: Build and publish locally
+        run: yarn run local-publish
 
       - name: Build example
         if: github.ref == 'refs/heads/master'
         run: |
-          yarn run local-publish
           cd examples/vue-app
           yarn run link-local
           yarn
