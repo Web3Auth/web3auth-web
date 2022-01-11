@@ -6,10 +6,11 @@
     {
       "directory": "packages/*",
       "changeProcessCWD": true
+    },
+    {
+      "directory": "examples/*/*",
+      "changeProcessCWD": true
     }
   ],
-  "cSpell.words": [
-    "openlogin",
-    "Solana"
-  ]
+  "cSpell.words": ["openlogin", "Solana"]
 }

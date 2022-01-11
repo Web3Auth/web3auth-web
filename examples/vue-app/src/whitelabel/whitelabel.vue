@@ -31,12 +31,13 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import EthRpc from "../ethRpc.vue";
+import { Web3Auth } from "@web3auth/web3auth";
+import Vue from "vue";
+
 import Loader from "../components/loader.vue";
 import config from "../config";
+import EthRpc from "../ethRpc.vue";
 
 export default Vue.extend({
   name: "WhitelabelExample",
@@ -72,7 +73,7 @@ export default Vue.extend({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
-          uiConfig: { appLogo: this.logo, theme: this.theme },
+          uiConfig: { appLogo: this.logo, theme: this.theme as "light" | "dark" },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId,
         });

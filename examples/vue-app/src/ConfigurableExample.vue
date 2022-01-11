@@ -48,18 +48,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { CustomAuthAdapter } from "@web3auth/customauth-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import EthRpc from "./ethRpc.vue";
-import SolRpc from "./solanaRpc.vue";
+import { CustomAuthAdapter } from "@web3auth/customauth-adapter";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { Web3Auth } from "@web3auth/web3auth";
+import Vue from "vue";
 
 import loader from "./assets/torus-power.svg";
 import config from "./config";
+import EthRpc from "./ethRpc.vue";
+import SolRpc from "./solanaRpc.vue";
 
 export default Vue.extend({
   name: "ConfigurableExample",

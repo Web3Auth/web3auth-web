@@ -1,25 +1,17 @@
 {
   "root": true,
   "env": {
-    "browser": true,
-    "node": true,
-    "es6": true
+    "node": true
   },
-  "extends": [
-    "plugin:vue/essential",
-    "vue",
-    "eslint:recommended",
-    "@vue/typescript/recommended",
-    "@vue/prettier",
-    "@vue/prettier/@typescript-eslint"
-  ],
+  "extends": ["plugin:vue/essential", "eslint:recommended", "@vue/typescript/recommended", "@vue/prettier", "@vue/prettier/@typescript-eslint"],
   "plugins": ["simple-import-sort"],
   "parserOptions": {
     "ecmaVersion": 2020
   },
+  "ignorePatterns": "*.config.js",
   "rules": {
-    "no-console": "warn",
-    "no-debugger": "warn",
+    "no-console": 0,
+    "no-debugger": 0,
     "simple-import-sort/imports": 2,
     "simple-import-sort/exports": 2,
     "prettier/prettier": [

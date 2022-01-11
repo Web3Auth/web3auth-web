@@ -39,14 +39,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError } from "@web3auth/base";
-import EthRpc from "./ethRpc.vue";
-import SolRpc from "./solanaRpc.vue";
+import { Web3Auth } from "@web3auth/web3auth";
+import Vue from "vue";
 
 import Loader from "./components/loader.vue";
 import config from "./config";
+import EthRpc from "./ethRpc.vue";
+import SolRpc from "./solanaRpc.vue";
 
 export default Vue.extend({
   name: "BeginnerExampleMode",
