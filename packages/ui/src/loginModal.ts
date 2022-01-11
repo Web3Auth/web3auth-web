@@ -480,6 +480,7 @@ export default class LoginModal extends SafeEventEmitter {
       this.toggleModal();
     }
     this.toggleMessage(message, type);
+
     setTimeout(() => {
       this.toggleMessage("");
       this.toggleModal();

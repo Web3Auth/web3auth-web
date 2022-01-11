@@ -9,7 +9,7 @@
       <button @click="switchExampleMode" style="cursor: pointer;">Switch Example Mode</button>
     </section>
     <section>
-      <AdvanceExampleMode v-if="exampleMode === 'advance'"></AdvanceExampleMode>
+      <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample>
       <BeginnerExampleMode v-if="exampleMode === 'beginner'"></BeginnerExampleMode>
     </section>
   </div>
@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import AdvanceExampleMode from "./AdvanceExample.vue"
+import ConfigurableExample from "./ConfigurableExample.vue"
 import BeginnerExampleMode from "./BeginnerExample.vue"
 
 import loader from "./assets/torus-power.svg"
@@ -31,7 +31,7 @@ export default Vue.extend({
   },
   components: {
     loaderSvg: loader,
-    AdvanceExampleMode: AdvanceExampleMode,
+    ConfigurableExample: ConfigurableExample,
     BeginnerExampleMode: BeginnerExampleMode
 },
   mounted() {

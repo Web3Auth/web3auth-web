@@ -62,7 +62,7 @@ import SolRpc from "./solanaRpc.vue"
 import loader from "./assets/torus-power.svg"
 
 export default Vue.extend({
-  name: "AdvanceExampleMode",
+  name: "ConfigurableExample",
   data() {
     return {
       loading: false,
