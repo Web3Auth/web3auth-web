@@ -23,15 +23,16 @@ import Vue from "vue";
 import { Web3Auth } from "@web3auth/web3auth";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
 import EthRpc from "./ethRpc.vue";
+import config from "../config";
 
 const ethChainConfig: CustomChainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    chainId: "0x3",
-    rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-    displayName: "ropsten",
-    blockExplorer: "https://ropsten.etherscan.io/",
-    ticker: "ETH",
-    tickerName: "Ethereum",
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  chainId: "0x3",
+  rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
+  displayName: "ropsten",
+  blockExplorer: "https://ropsten.etherscan.io/",
+  ticker: "ETH",
+  tickerName: "Ethereum",
 };
 
 export default Vue.extend({
@@ -41,7 +42,7 @@ export default Vue.extend({
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
@@ -53,11 +54,11 @@ export default Vue.extend({
   methods: {
     async initBinanceWeb3Auth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
-         console.log("error", error)
+        console.log("error", error);
         this.console("error", error);
       }
     },
