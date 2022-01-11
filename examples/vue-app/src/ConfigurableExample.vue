@@ -70,7 +70,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, clientId: "localhost-id" })
+      web3auth: new Web3Auth({chainConfig: {  chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id" })
     };
   },
   components: {
@@ -94,7 +94,7 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainConfig: { chainId: "0x3" }, clientId: "localhost-id" })
+        this.web3auth = new Web3Auth({ chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: "localhost-id" })
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace
@@ -154,7 +154,7 @@ export default Vue.extend({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainNamespace: CHAIN_NAMESPACES.EIP155, clientId: "localhost-id"})
+        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: "localhost-id"})
         this.subscribeAuthEvents(this.web3auth)
 
         this.namespace = this.web3auth.options.chainNamespace

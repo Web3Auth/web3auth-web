@@ -50,7 +50,8 @@ export class Web3Auth extends Web3AuthCore {
   constructor(options: Web3AuthOptions) {
     super(options);
     this.options = { ...options };
-    if (this.options.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    const providedChainConfig = this.options.chainConfig;
+    if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       if (options.authMode === "WALLET") {
         // default config for solana wallet modal
         this.defaultModalConfig = defaultSolanaWalletModalConfig;
@@ -58,7 +59,7 @@ export class Web3Auth extends Web3AuthCore {
         // default config for solana dapp modal
         this.defaultModalConfig = defaultSolanaDappModalConfig;
       }
-    } else if (this.options.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    } else if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       if (options.authMode === "WALLET") {
         // default config for evm wallet modal
         this.defaultModalConfig = defaultEvmWalletModalConfig;
@@ -67,7 +68,7 @@ export class Web3Auth extends Web3AuthCore {
         this.defaultModalConfig = defaultEvmDappModalConfig;
       }
     } else {
-      throw new Error(`Invalid chainNamespace provided: ${this.options.chainNamespace}`);
+      throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
     this.loginModal = new LoginModal({ appLogo: this.options.dappLogo || "", version: "", adapterListener: this });
     this.subscribeToLoginModalEvents();
@@ -76,6 +77,7 @@ export class Web3Auth extends Web3AuthCore {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
     this.loginModal.init();
+    const providedChainConfig = this.options.chainConfig;
 
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
@@ -106,7 +108,6 @@ export class Web3Auth extends Web3AuthCore {
         // if adapter is not configured and some default configuration is available, use it.
         const ad = await getDefaultAdapterModule({
           name: adapterName,
-          chainNamespace: this.options.chainNamespace,
           customChainConfig: this.options.chainConfig,
           clientId: this.options.clientId,
         });
@@ -125,7 +126,7 @@ export class Web3Auth extends Web3AuthCore {
         // and chainNamespace.
         if (!adapter.chainConfigProxy) {
           const chainConfig = {
-            ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
+            ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
             ...this.coreOptions.chainConfig,
           } as CustomChainConfig;
           this.walletAdapters[adapterName].setChainConfig(chainConfig);

@@ -3,7 +3,7 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
-  ChainNamespaceType,
+  CHAIN_NAMESPACES,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
@@ -20,15 +20,11 @@ import log from "loglevel";
 
 export interface Web3AuthCoreOptions {
   /**
-   * The chain namespace to use. Currently only supports "EIP155" and "SOLANA".
-   */
-  chainNamespace: ChainNamespaceType;
-  /**
    * custom chain configuration for chainNamespace
    *
    * @defaultValue mainnet config of provided chainNamespace
    */
-  chainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>;
+  chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -47,6 +43,8 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   constructor(options: Web3AuthCoreOptions) {
     super();
+    if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
+      throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
     this.cachedAdapter = storageAvailable("sessionStorage") ? window.sessionStorage.getItem(ADAPTER_CACHE_KEY) : null;
     this.coreOptions = options;
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
@@ -58,9 +56,11 @@ export class Web3AuthCore extends SafeEventEmitter {
       // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
+        const providedChainConfig = this.coreOptions.chainConfig;
+        if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
         const chainConfig = {
-          ...getChainConfig(this.coreOptions.chainNamespace, this.coreOptions.chainConfig?.chainId),
-          ...this.coreOptions.chainConfig,
+          ...getChainConfig(providedChainConfig.chainNamespace, providedChainConfig.chainId),
+          ...providedChainConfig,
         } as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
@@ -75,6 +75,10 @@ export class Web3AuthCore extends SafeEventEmitter {
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY)
       throw WalletInitializationError.notReady("Adapter is already initialized, so no more adapters can be added");
+    const providedChainConfig = this.coreOptions.chainConfig;
+
+    if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
+
     if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && adapter.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
       throw new Error(
         `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN} adapter already exists.`
@@ -87,17 +91,18 @@ export class Web3AuthCore extends SafeEventEmitter {
     }
     const adapterAlreadyExists = this.walletAdapters[adapter.name];
     if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
-    if (adapter.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.adapterNamespace !== this.coreOptions.chainNamespace)
+    if (adapter.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.adapterNamespace !== providedChainConfig.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
+        `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
       );
+
     if (
       adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
       adapter.currentChainNamespace &&
-      this.coreOptions.chainNamespace !== adapter.currentChainNamespace
+      providedChainConfig.chainNamespace !== adapter.currentChainNamespace
     )
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `${adapter.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${this.coreOptions.chainNamespace}`
+        `${adapter.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
       );
     this.walletAdapters[adapter.name] = adapter;
     return this;

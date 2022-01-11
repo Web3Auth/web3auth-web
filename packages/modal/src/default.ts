@@ -1,23 +1,18 @@
 import type { OpenLoginOptions } from "@toruslabs/openlogin";
-import {
-  CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  CustomChainConfig,
-  getChainConfig,
-  IAdapter,
-  WALLET_ADAPTER_TYPE,
-  WALLET_ADAPTERS,
-} from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 
 export const getDefaultAdapterModule = async (params: {
   name: WALLET_ADAPTER_TYPE;
-  chainNamespace: ChainNamespaceType;
   clientId: string;
-  customChainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>;
+  customChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
 }): Promise<IAdapter<unknown>> => {
-  const { name, chainNamespace, customChainConfig, clientId } = params;
-  if (!Object.values(CHAIN_NAMESPACES).includes(chainNamespace)) throw new Error(`Invalid chainNamespace: ${chainNamespace}`);
-  const finalChainConfig = { ...(getChainConfig(chainNamespace, customChainConfig?.chainId) as CustomChainConfig), ...(customChainConfig || {}) };
+  const { name, customChainConfig, clientId } = params;
+  if (!Object.values(CHAIN_NAMESPACES).includes(customChainConfig.chainNamespace))
+    throw new Error(`Invalid chainNamespace: ${customChainConfig.chainNamespace}`);
+  const finalChainConfig = {
+    ...(getChainConfig(customChainConfig.chainNamespace, customChainConfig?.chainId) as CustomChainConfig),
+    ...(customChainConfig || {}),
+  };
   if (name === WALLET_ADAPTERS.TORUS_EVM) {
     const { TorusWalletAdapter } = await import("@web3auth/torus-evm-adapter");
     const adapter = new TorusWalletAdapter({ chainConfig: finalChainConfig });
@@ -40,7 +35,7 @@ export const getDefaultAdapterModule = async (params: {
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
-    const defaultOptions = getOpenloginDefaultOptions(chainNamespace, customChainConfig?.chainId);
+    const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId },
