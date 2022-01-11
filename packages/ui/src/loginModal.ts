@@ -477,13 +477,15 @@ export default class LoginModal extends SafeEventEmitter {
     const hideClass = "w3a-modal--hidden";
     // show modal if is hidden
     if (this.$modal.classList.contains(hideClass)) {
-      this.toggleModal();
+      this.toggleModal(true);
     }
     this.toggleMessage(message, type);
 
     setTimeout(() => {
-      this.toggleMessage("");
-      this.toggleModal();
+      if (!this.$modal.classList.contains(hideClass)) {
+        this.toggleMessage("");
+        this.toggleModal();
+      }
     }, timeout);
   }
 
