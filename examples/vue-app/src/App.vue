@@ -1,31 +1,28 @@
 <template>
   <div id="app">
-    <h3>{{ exampleMode }}</h3>
+    <home />
+    <!-- <h3>Using {{ exampleMode === 'beginner' ? `Basic Example` : 'Advance Example' }} </h3>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <select name="exampleMode" v-model="exampleMode" @onchange="updateDemoMode">
-        <option value="default">Default</option>
-        <option value="yourModal">Your Own UI</option>
-        <option selected value="whitelabel">Whitelabel</option>
-      </select>
-    </section>
-    <section>
-      <!-- <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample> -->
-      <BeginnerExampleMode v-if="exampleMode === 'default'"></BeginnerExampleMode>
-      <WhitelabelExample :theme="'dark'" v-if="exampleMode === 'whitelabel'"></WhitelabelExample>
-    </section>
+      <button @click="switchExampleMode" style="cursor: pointer;">Switch Example Mode</button>
+    </section> -->
+    <!-- <section>
+      <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample>
+      <BeginnerExampleMode v-if="exampleMode === 'beginner'"></BeginnerExampleMode>
+    </section> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
-import BeginnerExampleMode from "./BeginnerExample.vue";
+// import BeginnerExampleMode from "./BeginnerExample.vue";
 // import ConfigurableExample from "./ConfigurableExample.vue";
-import WhitelabelExample from "./whitelabel/whitelabel.vue";
+// import WhitelabelExample from "./whitelabel/whitelabel.vue";
+import home from "./home.vue";
 
 export default Vue.extend({
   name: "app",
@@ -36,8 +33,9 @@ export default Vue.extend({
   },
   components: {
     // ConfigurableExample: ConfigurableExample,
-    BeginnerExampleMode: BeginnerExampleMode,
-    WhitelabelExample: WhitelabelExample,
+    // BeginnerExampleMode: BeginnerExampleMode,
+    // WhitelabelExample: WhitelabelExample,
+    home: home,
   },
   mounted() {
     this.exampleMode = localStorage.getItem("exampleMode");
@@ -58,7 +56,6 @@ export default Vue.extend({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 #console {
   border: 0px solid black;

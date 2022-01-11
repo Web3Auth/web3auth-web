@@ -24,7 +24,7 @@ import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import config from "../config";
-import EthRpc from "./ethRpc.vue";
+import EthRpc from "../ethRpc.vue";
 
 const ethChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
