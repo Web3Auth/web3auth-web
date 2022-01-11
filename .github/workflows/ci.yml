@@ -1,0 +1,87 @@
+name: Build & Release
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node: ["16.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install yarn
+        run: npm install -g yarn yalc
+
+      - name: Set output of cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Node dependency cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ matrix.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Bootstrap dependencies
+        run: yarn run bootstrap
+
+      - name: Build
+        run: yarn run pack:lerna
+
+      - name: Build example
+        if: github.ref == 'refs/heads/master'
+        run: |
+          yarn run local-publish
+          cd examples/vue-app
+          yarn run link-local
+          yarn
+          yarn run build
+
+      # Set the credentials from repository settings/secrets
+      - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/master'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION_US }}
+
+      # Copy the files from build folder to the S3 bucket
+      # Upload to S3
+      - name: sync s3
+        if: github.ref == 'refs/heads/master'
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          SOURCE_DIR: "./examples/vue-app/dist"
+          AWS_REGION: "us-east-1"
+          AWS_S3_BUCKET: "demo-app.web3auth.io"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Invalidate Cloudfront (this action)
+      - name: invalidate
+        if: github.ref == 'refs/heads/master'
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          PATHS: "/*"
+          AWS_REGION: ${{ secrets.AWS_REGION_US }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
