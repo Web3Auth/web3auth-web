@@ -45,8 +45,9 @@
     }
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions"
+    "> 0.5%",
+    "last 2 versions",
+    "not dead"
   ],
   "resolutions": {
     "@web3auth/base": "file:./.yalc/@web3auth/base",
