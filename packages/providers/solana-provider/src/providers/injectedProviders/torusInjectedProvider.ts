@@ -1,4 +1,4 @@
-import { Transaction } from "@solana/web3.js";
+import { Message, Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
@@ -55,11 +55,12 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        const message = bs58.decode(req.params.message).toString("hex");
-        log.debug("tx message", message);
+        const message = bs58.decode(req.params.message);
+        const txn = Transaction.populate(Message.from(message));
+        const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
         const response = await injectedProvider.request<string>({
           method: "sign_transaction",
-          params: { message },
+          params: { message: serializedTxn },
         });
 
         const buf = Buffer.from(response, "hex");
@@ -72,10 +73,12 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        const message = bs58.decode(req.params.message).toString("hex");
+        const message = bs58.decode(req.params.message);
+        const txn = Transaction.populate(Message.from(message));
+        const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
         const response = await injectedProvider.request<string>({
           method: "send_transaction",
-          params: { message },
+          params: { message: serializedTxn },
         });
         return { signature: response };
       },
@@ -86,10 +89,12 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         }
         const signedTransactions: Transaction[] = [];
         for (const transaction of req.params.message) {
-          const message = bs58.decode(transaction).toString("hex");
+          const message = bs58.decode(transaction);
+          const txn = Transaction.populate(Message.from(message));
+          const serializedTxn = txn.serialize({ requireAllSignatures: false }).toString("hex");
           const response = await injectedProvider.request<string>({
             method: "sign_transaction",
-            params: { message },
+            params: { message: serializedTxn },
           });
           const buf = Buffer.from(response, "hex");
           const sendTx = Transaction.from(buf);
