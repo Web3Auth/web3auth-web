@@ -4,11 +4,11 @@
       fontSize: '12px',
     }"
   >
-    <button @click="onSignAndSendTransaction" style="cursor: pointer">Sign and send txn</button>
-    <button @click="onSignTransaction" style="cursor: pointer">Sign txn</button>
-    <button @click="onSignMessage" style="cursor: pointer">Sign Message</button>
-    <button @click="onSignAllTransactions" style="cursor: pointer">Sign Multiple Transactions</button>
-    <button @click="onGetAccounts" style="cursor: pointer">Get Account</button>
+    <button class="rpcBtn" @click="onSignAndSendTransaction" style="cursor: pointer">Sign and send txn</button>
+    <button class="rpcBtn" @click="onSignTransaction" style="cursor: pointer">Sign txn</button>
+    <button class="rpcBtn" @click="onSignMessage" style="cursor: pointer">Sign Message</button>
+    <button class="rpcBtn" @click="onSignAllTransactions" style="cursor: pointer">Sign Multiple Transactions</button>
+    <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
   </section>
 </template>
 

@@ -4,8 +4,8 @@
       fontSize: '12px',
     }"
   >
-    <button @click="onDepositEth" style="cursor: pointer">Deposit eth</button>
-    <button @click="onGetAccounts" style="cursor: pointer">Get Accounts</button>
+    <button class="rpcBtn" @click="onDepositEth" style="cursor: pointer">Deposit eth</button>
+    <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Accounts</button>
   </section>
 </template>
 

@@ -216,6 +216,10 @@ export default class LoginModal extends SafeEventEmitter {
     if (Object.keys(loginMethods).length > 5) $adapterExpandBtn.style.display = "flex";
 
     Object.keys(loginMethods).forEach((method: string) => {
+      // TODO: link mobile and desktop visibility config.
+      if (!loginMethods[method].showOnModal) {
+        return;
+      }
       if (method === "email_passwordless") {
         this.hasSocialEmailWallet = true;
         const $emailPasswordlessSection = this.$modal.querySelector(".w3ajs-email-passwordless") as HTMLDivElement;

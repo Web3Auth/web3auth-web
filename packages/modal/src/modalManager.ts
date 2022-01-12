@@ -116,8 +116,11 @@ export class Web3Auth extends Web3AuthCore {
 
       // check if adapter is configured/added by user and exist in walletAdapters map.
       const adapter = this.walletAdapters[adapterName];
+      log.debug("adapter config", adapterName, this.defaultModalConfig.adapters?.[adapterName].showOnModal);
+
       // if adapter is not custom configured then check if it is available in default adapters.
-      if (!adapter) {
+      // and if adapter is not hidden by user
+      if (!adapter && this.defaultModalConfig.adapters?.[adapterName].showOnModal) {
         // if custom auth is configured then no need to use default openlogin
         if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapterName === WALLET_ADAPTERS.OPENLOGIN) {
           return;
@@ -133,6 +136,7 @@ export class Web3Auth extends Web3AuthCore {
 
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
+        if (!this.defaultModalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
         // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
@@ -151,7 +155,6 @@ export class Web3Auth extends Web3AuthCore {
 
         return adapterName;
       }
-      return adapterName;
     });
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
@@ -231,7 +234,7 @@ export class Web3Auth extends Web3AuthCore {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
   }
 
   private initializeInAppWallet(adapterName: string): void {

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <!-- <h3>Login With Web3Auth</h3> -->
     <section
       :style="{
         fontSize: '12px',
@@ -11,7 +11,7 @@
         fontSize: '12px',
       }"
     >
-      <ChainContainer :chain="chain"></ChainContainer>
+      <ChainContainer :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
     </section>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
@@ -30,6 +30,9 @@ export default Vue.extend({
     chain: {
       type: String,
       default: "ethereum",
+    },
+    adapterConfig: {
+      type: Object,
     },
   },
   data() {

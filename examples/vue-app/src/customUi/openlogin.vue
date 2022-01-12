@@ -26,13 +26,13 @@
 </template>
 
 <script lang="ts">
-import config from "../config";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import Vue from "vue";
 
 import Loader from "../components/loader.vue";
+import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
 export default Vue.extend({
