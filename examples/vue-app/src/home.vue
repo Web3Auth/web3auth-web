@@ -7,7 +7,7 @@
         <select class="flex-60 dropdown" name="chain" id="chain" v-model="form.chain">
           <option value="ethereum">Ethereum</option>
           <option value="binance">Binance</option>
-          <option value="polygon">Polygon</option>
+          <option value="polygon">matic</option>
           <option value="solana">Solana</option>
         </select>
       </div>
@@ -110,7 +110,7 @@ import Vue from "vue";
 
 import binance from "./chains/binance.vue";
 import ethereum from "./chains/ethereum.vue";
-import polygon from "./chains/polygon.vue";
+import matic from "./chains/matic.vue";
 
 export default Vue.extend({
   name: "home",
@@ -123,7 +123,7 @@ export default Vue.extend({
   components: {
     ethereum: ethereum,
     binance: binance,
-    polygon: polygon,
+    matic: matic,
   },
   mounted() {
     let defaultConfig = {
