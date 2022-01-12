@@ -33,8 +33,8 @@
             <div class="flex-60">
               <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                 <label :for="loginType.id">
-                  <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
-                  <span>{{ loginType.name }}</span>
+                  <input v-if="loginType.name !== 'Facebook'" type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
+                  <span v-if="loginType.name !== 'Facebook'">{{ loginType.name }}</span>
                 </label>
               </li>
             </div>
@@ -128,7 +128,7 @@ import WhitelabelExample from "./whitelabel/whitelabel.vue";
 
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
-  LOGIN_PROVIDER.FACEBOOK,
+  // LOGIN_PROVIDER.FACEBOOK,
   LOGIN_PROVIDER.TWITTER,
   LOGIN_PROVIDER.REDDIT,
   LOGIN_PROVIDER.DISCORD,
@@ -163,12 +163,30 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   });
 };
 
-const defaultConfig = {
+const defaultFormConfig = {
   chain: "ethereum",
   selectedUiMode: "default",
   uiMode: {
     default: {
-      login: defaultLoginProviders(),
+      login: [...defaultLoginProviders()],
+      adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
+    },
+    customUi: {
+      type: "openlogin",
+    },
+    whitelabel: {
+      logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+      theme: "light",
+    },
+  },
+};
+
+const defaultComponentConfig = {
+  chain: "ethereum",
+  selectedUiMode: "default",
+  uiMode: {
+    default: {
+      login: [...defaultLoginProviders(), { id: "facebook", name: "Facebook", checked: false }],
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
@@ -185,9 +203,9 @@ export default Vue.extend({
   data() {
     return {
       // storing config collected from user input.
-      form: { ...defaultConfig },
+      form: { ...defaultFormConfig },
       // sending to other components
-      config: { ...defaultConfig },
+      config: { ...defaultComponentConfig },
     };
   },
   components: {
@@ -196,15 +214,26 @@ export default Vue.extend({
     CustomUiContainer,
   },
   mounted() {
-    const storedConfig = localStorage.getItem("web3AuthExampleConfig");
+    const storedConfig = sessionStorage.getItem("web3AuthExampleConfig");
     const finalStoredConfig = JSON.parse(storedConfig || "{}");
     this.config = merge(this.config, finalStoredConfig);
     this.form = merge({}, this.config);
+    this.config.uiMode.default.login.push({
+      id: "facebook",
+      name: "Facebook",
+      checked: false,
+    });
   },
   methods: {
     saveConfig: function () {
-      localStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
+      sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
+      // // temp hack to hide fb, todo: fix later
+      this.config.uiMode.default.login.push({
+        id: "facebook",
+        name: "Facebook",
+        checked: false,
+      });
     },
     onChainSelect: function (e) {
       console.log("e", e.target.value);
