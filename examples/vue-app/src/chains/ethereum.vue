@@ -62,7 +62,7 @@ export default Vue.extend({
     async initEthAuth() {
       try {
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
