@@ -61,9 +61,9 @@ export default Vue.extend({
     async initBinanceWeb3Auth() {
       try {
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({});
+        await this.web3auth.initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

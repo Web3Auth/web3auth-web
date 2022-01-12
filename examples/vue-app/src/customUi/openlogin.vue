@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+import config from "../config";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
@@ -61,7 +62,7 @@ export default Vue.extend({
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: "testnet",
-            clientId: "localhost-id",
+            clientId: config.clientId,
             uxMode: "redirect",
           },
         });
