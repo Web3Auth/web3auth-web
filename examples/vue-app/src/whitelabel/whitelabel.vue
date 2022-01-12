@@ -42,13 +42,19 @@ import EthRpc from "../rpc/ethRpc.vue";
 export default Vue.extend({
   name: "WhitelabelExample",
   props: {
-    theme: {
-      type: String,
-      default: "light",
+    uiConfig: {
+      type: Object,
+      default: () => ({
+        theme: "light",
+        logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+      }),
     },
-    logo: {
-      type: String,
-      default: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+  },
+  watch: {
+    uiConfig: async function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      await this.initWhitelabledModal();
     },
   },
   data() {
@@ -73,7 +79,7 @@ export default Vue.extend({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
-          uiConfig: { appLogo: this.logo, theme: this.theme as "light" | "dark" },
+          uiConfig: { appLogo: this.uiConfig.logoUrl, theme: this.uiConfig.theme },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId,
         });

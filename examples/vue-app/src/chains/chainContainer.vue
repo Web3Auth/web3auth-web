@@ -1,8 +1,8 @@
 <template>
-  <Ethereum v-if="chain === 'ethereum'" />
-  <Solana v-else-if="chain === 'solana'" />
-  <Matic v-else-if="chain === 'polygon'" />
-  <Binance v-else-if="chain === 'binance'" />
+  <Ethereum :adapterConfig="adapterConfig" v-if="chain === 'ethereum'" />
+  <Solana :adapterConfig="adapterConfig" v-else-if="chain === 'solana'" />
+  <Matic :adapterConfig="adapterConfig" v-else-if="chain === 'polygon'" />
+  <Binance :adapterConfig="adapterConfig" v-else-if="chain === 'binance'" />
 </template>
 
 <script lang="ts">
@@ -20,13 +20,17 @@ export default Vue.extend({
       type: String,
       default: "ethereum",
     },
+    adapterConfig: {
+      type: Object,
+    },
   },
   data() {
     return {};
   },
   components: {
-    Solana,
     Ethereum,
+
+    Solana,
     Matic,
     Binance,
   },

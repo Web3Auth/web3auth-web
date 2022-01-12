@@ -4,10 +4,10 @@
       fontSize: '12px',
     }"
   >
-    <button @click="onSendEth" style="cursor: pointer">Send Eth</button>
-    <button @click="onSignEthMessage" style="cursor: pointer">Sign eth message</button>
-    <button @click="onGetAccounts" style="cursor: pointer">Get Account</button>
-    <button @click="onGetBalance" style="cursor: pointer">Get Balance</button>
+    <button class="rpcBtn" @click="onSendEth" style="cursor: pointer">Send Eth</button>
+    <button class="rpcBtn" @click="onSignEthMessage" style="cursor: pointer">Sign eth message</button>
+    <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
+    <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
   </section>
 </template>
 

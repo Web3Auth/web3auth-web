@@ -1,19 +1,20 @@
 <template>
   <div id="app">
-    <section>
+    <Home />
+    <!-- <DefaultModal /> -->
+    <!-- <section>
       <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
       <WhitelabelExample :theme="'dark'" v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
-      <CustomUiContainer :authType="'customAuth'" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
-    </section>
+      <CustomUiContainer :authType="authType" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
+    </section> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
-import CustomUiContainer from "./customUi/customUiContainer.vue";
-import ConfigurableExample from "./default/configurableModal.vue";
-import WhitelabelExample from "./whitelabel/whitelabel.vue";
+// import DefaultModal from "./default/defaultModal.vue";
+import Home from "./home.vue";
 
 export default Vue.extend({
   name: "app",
@@ -25,26 +26,11 @@ export default Vue.extend({
     };
   },
   components: {
-    ConfigurableExample: ConfigurableExample,
-    WhitelabelExample: WhitelabelExample,
-    CustomUiContainer,
+    Home,
+    // DefaultModal,
   },
-  mounted() {
-    console.log("mounted");
-    const existingConfig = localStorage.getItem("web3auth_example_config");
-    const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
-    this.exampleMode = modalConfig["exampleMode"] || "default";
-    this.chain = modalConfig["chain"] || "ethereum";
-    this.authType = modalConfig["authType"] || "openlogin";
-  },
-  methods: {
-    syncConfig(e) {
-      console.log("key", e);
-      const existingConfig = localStorage.getItem("web3auth_example_config");
-      const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
-      localStorage.setItem("web3auth_example_config", JSON.stringify({ ...modalConfig, [e.target.name]: this[e.target.name] }));
-    },
-  },
+
+  methods: {},
 });
 </script>
 
@@ -69,12 +55,7 @@ export default Vue.extend({
 #console > p {
   margin: 0.5em;
 }
-button {
-  height: 25px;
-  margin: 5px;
-  background: none;
-  border-radius: 5px;
-}
+
 /* Modal */
 #w3a-modal {
   --bg1: #0f1222;

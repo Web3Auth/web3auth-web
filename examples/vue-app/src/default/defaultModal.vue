@@ -89,6 +89,7 @@ export default Vue.extend({
         });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
+        console.log("web3auth", this.web3auth);
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

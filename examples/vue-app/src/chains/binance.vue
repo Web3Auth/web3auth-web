@@ -7,10 +7,10 @@
         fontSize: '12px',
       }"
     >
-      <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
-      <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -41,14 +41,25 @@ const binanceChainConfig: CustomChainConfig = {
 
 export default Vue.extend({
   name: "BinanceChain",
+  props: {
+    adapterConfig: {
+      type: Object,
+    },
+  },
   data() {
     return {
+      modalConfig: {},
       loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
+  },
+  watch: {
+    adapterConfig: async function (newSettings, oldSettings) {
+      await this.initBinanceWeb3Auth();
+    },
   },
   components: {
     EthRpc,
@@ -58,12 +69,34 @@ export default Vue.extend({
     await this.initBinanceWeb3Auth();
   },
   methods: {
+    parseConfig() {
+      this.adapterConfig.adapter.forEach((adapterConf) => {
+        this.modalConfig[adapterConf.id] = {
+          name: adapterConf.name,
+          showOnModal: adapterConf.checked,
+        };
+        if (adapterConf.id === "openlogin") {
+          const loginMethodsConfig: LoginMethodConfig = {};
+          this.adapterConfig.login.forEach((loginProvider) => {
+            loginMethodsConfig[loginProvider.id] = {
+              name: loginProvider.name,
+              showOnModal: loginProvider.checked,
+            };
+          });
+          this.modalConfig[adapterConf.id] = {
+            ...this.modalConfig[adapterConf.id],
+            loginMethods: loginMethodsConfig,
+          };
+        }
+      });
+    },
     async initBinanceWeb3Auth() {
       try {
+        this.parseConfig();
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({});
+        await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
