@@ -76,7 +76,7 @@ export default Vue.extend({
           name: adapterConf.name,
           showOnModal: adapterConf.checked,
         };
-        if (adapterConf.id === "openlogin") {
+        if (adapterConf.id === "openlogin" || adapterConf.id==="customAuth") {
           const loginMethodsConfig: LoginMethodConfig = {};
           this.adapterConfig.login.forEach((loginProvider) => {
             loginMethodsConfig[loginProvider.id] = {
