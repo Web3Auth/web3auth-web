@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth X Ethereum</h3>
+    <Loader :isLoading="loading"></Loader>
+
     <section
       :style="{
         fontSize: '12px',
@@ -23,8 +25,10 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConf
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
+import Loader from "@/components/loader.vue";
+
 import config from "../config";
-import EthRpc from "../ethRpc.vue";
+import EthRpc from "../rpc/ethRpc.vue";
 
 const ethChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -37,9 +41,10 @@ const ethChainConfig: CustomChainConfig = {
 };
 
 export default Vue.extend({
-  name: "EthereumExample",
+  name: "EthereumChain",
   data() {
     return {
+      loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
@@ -48,19 +53,23 @@ export default Vue.extend({
   },
   components: {
     EthRpc,
+    Loader,
   },
   async mounted() {
-    await this.initBinanceWeb3Auth();
+    await this.initEthAuth();
   },
   methods: {
-    async initBinanceWeb3Auth() {
+    async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        this.loading = true;
+        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
+      } finally {
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

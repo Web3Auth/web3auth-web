@@ -1,49 +1,48 @@
 <template>
   <div id="app">
-    <home />
-    <!-- <h3>Using {{ exampleMode === 'beginner' ? `Basic Example` : 'Advance Example' }} </h3>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button @click="switchExampleMode" style="cursor: pointer;">Switch Example Mode</button>
-    </section> -->
-    <!-- <section>
-      <ConfigurableExample v-if="exampleMode === 'advance'"></ConfigurableExample>
-      <BeginnerExampleMode v-if="exampleMode === 'beginner'"></BeginnerExampleMode>
-    </section> -->
+    <section>
+      <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
+      <WhitelabelExample :theme="'dark'" v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
+      <CustomUiContainer :authType="'customAuth'" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
-// import BeginnerExampleMode from "./BeginnerExample.vue";
-// import ConfigurableExample from "./ConfigurableExample.vue";
-// import WhitelabelExample from "./whitelabel/whitelabel.vue";
-import home from "./home.vue";
+import CustomUiContainer from "./customUi/customUiContainer.vue";
+import ConfigurableExample from "./default/configurableModal.vue";
+import WhitelabelExample from "./whitelabel/whitelabel.vue";
 
 export default Vue.extend({
   name: "app",
   data() {
     return {
       exampleMode: "default",
+      chain: null,
+      authType: null,
     };
   },
   components: {
-    // ConfigurableExample: ConfigurableExample,
-    // BeginnerExampleMode: BeginnerExampleMode,
-    // WhitelabelExample: WhitelabelExample,
-    home: home,
+    ConfigurableExample: ConfigurableExample,
+    WhitelabelExample: WhitelabelExample,
+    CustomUiContainer,
   },
   mounted() {
-    this.exampleMode = localStorage.getItem("exampleMode");
-    if (!this.exampleMode) this.exampleMode = "default";
+    console.log("mounted");
+    const existingConfig = localStorage.getItem("web3auth_example_config");
+    const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
+    this.exampleMode = modalConfig["exampleMode"] || "default";
+    this.chain = modalConfig["chain"] || "ethereum";
+    this.authType = modalConfig["authType"] || "openlogin";
   },
   methods: {
-    updateDemoMode() {
-      localStorage.setItem("exampleMode", this.exampleMode);
+    syncConfig(e) {
+      console.log("key", e);
+      const existingConfig = localStorage.getItem("web3auth_example_config");
+      const modalConfig = existingConfig ? JSON.parse(existingConfig) : {};
+      localStorage.setItem("web3auth_example_config", JSON.stringify({ ...modalConfig, [e.target.name]: this[e.target.name] }));
     },
   },
 });

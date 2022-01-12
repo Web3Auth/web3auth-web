@@ -1,17 +1,8 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
-    <h3>Connect with {{ web3auth.options.chainConfig.chainNamespace }} web3auth</h3>
+    <h3>Login With Web3Auth X Polygon</h3>
     <Loader :isLoading="loading"></Loader>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button v-if="!connected" @click="switchChain" style="cursor: pointer">
-        Switch To {{ web3auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
-      </button>
-    </section>
+
     <section
       :style="{
         fontSize: '12px',
@@ -19,16 +10,7 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <SolRpc
-        v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'solana'"
-        :provider="provider"
-        :console="console"
-      ></SolRpc>
-      <EthRpc
-        v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'"
-        :provider="provider"
-        :console="console"
-      ></EthRpc>
+      <PolygonRpc v-if="connected && provider" :provider="provider" :console="console"></PolygonRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -39,80 +21,55 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, Web3AuthError } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
-import Loader from "./components/loader.vue";
-import config from "./config";
-import EthRpc from "./ethRpc.vue";
-import SolRpc from "./solanaRpc.vue";
+import Loader from "@/components/loader.vue";
+
+import config from "../config";
+import PolygonRpc from "../rpc/polygonRpc.vue";
+const polygonMumbaiConfig: CustomChainConfig = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc-mumbai.maticvigil.com",
+  blockExplorer: "https://mumbai-explorer.matic.today",
+  chainId: "0x13881",
+  displayName: "Polygon Mumbai Testnet",
+  ticker: "matic",
+  tickerName: "matic",
+};
 
 export default Vue.extend({
-  name: "BeginnerExampleMode",
+  name: "PolygonChain",
   data() {
     return {
       loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      namespace: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
+    PolygonRpc,
     Loader,
-    EthRpc,
-    SolRpc,
   },
   async mounted() {
-    try {
-      this.loading = true;
-      const namespace = localStorage.getItem("chainNamespace");
-      if (namespace === "solana") {
-        await this.initSolanaAuth();
-      } else {
-        await this.initEthAuth();
-      }
-    } finally {
-      this.loading = false;
-    }
+    console.log("polygon");
+    await this.initPolygonWeb3Auth();
   },
   methods: {
-    async initSolanaAuth() {
+    async initPolygonWeb3Auth() {
+      console.log("polygon");
       try {
-        this.web3auth = new Web3Auth({
-          chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.SOLANA },
-          clientId: config.clientId,
-          authMode: "DAPP",
-        });
+        this.loading = true;
+
+        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: "localhost-id", authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
-      }
-    },
-    async initEthAuth() {
-      try {
-        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId });
-        this.subscribeAuthEvents(this.web3auth);
-        await (this.web3auth as Web3Auth).initModal({});
-      } catch (error) {
-        console.log("error", error);
-        this.console("error sss", error);
-      }
-    },
-    async switchChain() {
-      try {
-        this.loading = true;
-        if (this.web3auth.options.chainConfig.chainNamespace === "solana") {
-          await this.initEthAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
-        } else if (this.web3auth.options.chainConfig.chainNamespace === "eip155") {
-          await this.initSolanaAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
-        }
       } finally {
         this.loading = false;
       }
