@@ -25,8 +25,8 @@ import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";
-import config from "../config";
 
+import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
 const solanaChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -76,7 +76,7 @@ export default Vue.extend({
           name: adapterConf.name,
           showOnModal: adapterConf.checked,
         };
-        if (adapterConf.id === "openlogin" || adapterConf.id==="customAuth") {
+        if (adapterConf.id === "openlogin" || adapterConf.id === "customAuth") {
           const loginMethodsConfig: LoginMethodConfig = {};
           this.adapterConfig.login.forEach((loginProvider) => {
             loginMethodsConfig[loginProvider.id] = {
