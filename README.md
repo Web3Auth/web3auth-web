@@ -4,7 +4,7 @@ What is Web3Auth?
 
 Web3Auth, is pluggable infrastructure that enables Web3 wallets and applications to provide seamless user logins for both mainstream and Web3.0 users. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets, and existing key management solutions, Web3Auth provides dApps/wallets a familiar experience that fits every user.
 
-## Official Documentation
+### Official Documentation
 
 - https://docs.web3auth.io
 
