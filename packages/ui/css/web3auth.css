@@ -86,7 +86,7 @@
     overflow: hidden;
     border-radius: 6px;
     position: relative;
-    max-height: 90%;
+    max-height: 95%;
     overflow-y: auto;
     opacity: 0;
     transition: 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -110,7 +110,7 @@
     background: var(--bg2);
 }
 #w3a-modal .w3a-modal__footer {
-    padding: 16px 34px 24px;
+    padding: 16px 34px;
     background: var(--bg1);
 }
 
@@ -270,6 +270,9 @@
 #w3a-modal .w3a-group {
     margin-bottom: 24px;
 }
+#w3a-modal .w3a-group:last-child {
+    margin-bottom: 0;
+}
 
 #w3a-modal .w3a-group.w3a-group--hidden,
 #w3a-modal .w3a-group.w3a-group--social-hidden,
@@ -424,13 +427,17 @@
     font-size: 12px;
     margin-top: 16px;
     display: flex;
-    border: 0;
+    border: 8px;
     color: var(--text-color2);
     align-items: center;
     cursor: pointer;
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 0 10px 0 8px;
+    background: transparent;
 }
 
-#w3a-modal button.w3a-button-expand .w3a-button__image {
+#w3a-modal button.w3a-button-expand svg {
     width: 12px;
     height: auto;
     margin-right: 4px;
