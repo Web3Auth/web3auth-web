@@ -97,7 +97,7 @@
       </div>
     </div>
     <div class="content">
-      <h2>DEMO: {{ config.chain }} x {{ config.selectedUiMode }}</h2>
+      <!-- <h2>DEMO: {{ config.chain }} x {{ config.selectedUiMode }}</h2> -->
       <section>
         <ConfigurableExample
           :adapterConfig="config.uiMode.default"

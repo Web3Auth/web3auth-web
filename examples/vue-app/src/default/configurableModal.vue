@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <!-- <h3>Login With Web3Auth</h3> -->
     <section
       :style="{
         fontSize: '12px',
