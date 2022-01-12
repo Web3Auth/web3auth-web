@@ -1,13 +1,19 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Binance Smart Chain</h3>
+    <h3>Login With Web3Auth</h3>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
       }"
+    ></section>
+    <section
+      :style="{
+        fontSize: '12px',
+      }"
     >
-      <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
+      <button v-if="!connected" name="google" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With Google</button>
+      <button v-if="!connected" name="facebook" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With facebook</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
@@ -20,58 +26,55 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/web3auth";
+import config from "../config";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
+import { Web3AuthCore } from "@web3auth/core";
+import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import Vue from "vue";
 
-import Loader from "@/components/loader.vue";
-
-import config from "../config";
+import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
 
-const binanceChainConfig: CustomChainConfig = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
-  blockExplorer: "https://testnet.bscscan.com",
-  chainId: "0x61",
-  displayName: "Binance SmartChain Testnet",
-  ticker: "BNB",
-  tickerName: "BNB",
-};
-
 export default Vue.extend({
-  name: "BinanceChain",
+  name: "BeginnerExampleMode",
   data() {
     return {
       loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
+      namespace: undefined,
+      web3auth: new Web3AuthCore({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 } }),
     };
   },
   components: {
-    EthRpc,
     Loader,
+    EthRpc,
   },
   async mounted() {
-    await this.initBinanceWeb3Auth();
+    await this.initWeb3Auth();
   },
   methods: {
-    async initBinanceWeb3Auth() {
+    async initWeb3Auth() {
       try {
-        this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        this.web3auth = new Web3AuthCore({ chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 } });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal();
+        const openloginAdapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: "testnet",
+            clientId: config.clientId,
+            uxMode: "redirect",
+          },
+        });
+
+        this.web3auth.configureAdapter(openloginAdapter);
+        await this.web3auth.init();
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
-      } finally {
-        this.loading = false;
       }
     },
-    subscribeAuthEvents(web3auth: Web3Auth) {
+    subscribeAuthEvents(web3auth: Web3AuthCore) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
@@ -93,9 +96,9 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect() {
+    connect(e) {
       try {
-        this.web3auth.connect();
+        this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: e.target.name, login_hint: "" } as OpenloginLoginParams);
       } catch (error) {
         console.error(error);
         this.console("error", error);

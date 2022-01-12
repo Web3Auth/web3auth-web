@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Ethereum</h3>
+    <h3>Login With Web3Auth X Solana</h3>
+    <Loader :isLoading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
@@ -8,7 +9,7 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
+      <SolanaRpc v-if="connected && provider" :provider="provider" :console="console"></SolanaRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -23,9 +24,10 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConf
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
+import Loader from "@/components/loader.vue";
 import config from "../config";
-import EthRpc from "./ethRpc.vue";
 
+import SolanaRpc from "../rpc/solanaRpc.vue";
 const solanaChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   rpcTarget: "https://api.testnet.solana.com",
@@ -37,9 +39,10 @@ const solanaChainConfig: CustomChainConfig = {
 };
 
 export default Vue.extend({
-  name: "SolanaExample",
+  name: "SolanaChain",
   data() {
     return {
+      loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
@@ -47,20 +50,24 @@ export default Vue.extend({
     };
   },
   components: {
-    EthRpc,
+    SolanaRpc,
+    Loader,
   },
   async mounted() {
-    await this.initBinanceWeb3Auth();
+    await this.initSolanaAuth();
   },
   methods: {
-    async initBinanceWeb3Auth() {
+    async initSolanaAuth() {
       try {
+        this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
+      } finally {
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

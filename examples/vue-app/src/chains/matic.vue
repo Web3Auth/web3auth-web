@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <h3>Login With Web3Auth X Polygon</h3>
+    <Loader :isLoading="loading"></Loader>
+
     <section
       :style="{
         fontSize: '12px',
@@ -8,7 +10,7 @@
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
+      <PolygonRpc v-if="connected && provider" :provider="provider" :console="console"></PolygonRpc>
       <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -19,13 +21,14 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
-import config from "../config";
-import EthRpc from "./ethRpc.vue";
+import Loader from "@/components/loader.vue";
 
+import config from "../config";
+import PolygonRpc from "../rpc/polygonRpc.vue";
 const polygonMumbaiConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc-mumbai.maticvigil.com",
@@ -37,9 +40,10 @@ const polygonMumbaiConfig: CustomChainConfig = {
 };
 
 export default Vue.extend({
-  name: "PolygonExample",
+  name: "PolygonChain",
   data() {
     return {
+      loading: false,
       loginButtonStatus: "",
       connected: false,
       provider: undefined,
@@ -47,20 +51,27 @@ export default Vue.extend({
     };
   },
   components: {
-    EthRpc,
+    PolygonRpc,
+    Loader,
   },
   async mounted() {
+    console.log("polygon");
     await this.initPolygonWeb3Auth();
   },
   methods: {
     async initPolygonWeb3Auth() {
+      console.log("polygon");
       try {
+        this.loading = true;
+
         this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
+      } finally {
+        this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {

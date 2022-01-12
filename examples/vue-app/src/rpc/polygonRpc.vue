@@ -63,7 +63,7 @@ const polygon = {
 };
 
 export default Vue.extend({
-  name: "EthRpc",
+  name: "PolygonRpc",
   props: ["provider", "console"],
   data() {
     return {};

@@ -37,7 +37,7 @@ import Vue from "vue";
 
 import Loader from "../components/loader.vue";
 import config from "../config";
-import EthRpc from "../ethRpc.vue";
+import EthRpc from "../rpc/ethRpc.vue";
 
 export default Vue.extend({
   name: "WhitelabelExample",
