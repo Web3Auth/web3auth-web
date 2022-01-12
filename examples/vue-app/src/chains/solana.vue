@@ -25,7 +25,7 @@ import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";
-import config from "@/config";
+import config from "../config";
 
 import SolanaRpc from "../rpc/solanaRpc.vue";
 const solanaChainConfig: CustomChainConfig = {
@@ -96,7 +96,7 @@ export default Vue.extend({
         this.parseConfig();
 
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {

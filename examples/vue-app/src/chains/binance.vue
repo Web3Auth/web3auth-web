@@ -94,7 +94,7 @@ export default Vue.extend({
       try {
         this.parseConfig();
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: "localhost-id", authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
