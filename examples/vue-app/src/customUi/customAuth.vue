@@ -12,11 +12,15 @@
         fontSize: '12px',
       }"
     >
-      <button v-if="!connected" name="google" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With Google</button>
-      <button v-if="!connected" name="twitter" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Login With twitter</button>
-      <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="!connected" name="google" @click="connect" style="cursor: pointer">
+        {{ loginButtonStatus }} Login With Google
+      </button>
+      <button class="rpcBtn" v-if="!connected" name="twitter" @click="connect" style="cursor: pointer">
+        {{ loginButtonStatus }} Login With twitter
+      </button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
-      <button v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
