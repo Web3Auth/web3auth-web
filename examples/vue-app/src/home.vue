@@ -226,7 +226,7 @@ body {
 }
 
 .sidebar {
-  width: 30%;
+  min-width: 40%;
   border-right: 1px solid #ebecf0;
   background-color: #f4f5f7;
   height: 100%;
