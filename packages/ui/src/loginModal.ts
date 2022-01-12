@@ -19,6 +19,11 @@ import AllImages from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
 import { htmlToElement } from "./utils";
 const hasLightIcons = ["apple", "github"];
+
+const DEFAULT_LOGO_URL = {
+  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
+  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
+};
 export default class LoginModal extends SafeEventEmitter {
   private $modal!: HTMLDivElement;
 
@@ -44,7 +49,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
     super();
-    this.appLogo = appLogo;
+    this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
     this.version = version;
     this.isDark = theme === "dark";
     this.subscribeCoreEvents(adapterListener);
