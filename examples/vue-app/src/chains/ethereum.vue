@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Ethereum</h3>
+    <h2>Login with Web3Auth and Ethereum</h2>
     <Loader :isLoading="loading"></Loader>
 
     <section

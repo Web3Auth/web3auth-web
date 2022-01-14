@@ -1,17 +1,10 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
-    <h3>Connect with {{ web3auth.options.chainConfig.chainNamespace }} web3auth</h3>
+    <h2>Login with Web3Auth and {{ web3auth.options.chainConfig.chainNamespace }}</h2>
     <Loader :isLoading="loading"></Loader>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button v-if="!connected" @click="switchChain" style="cursor: pointer">
-        Switch To {{ web3auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
-      </button>
-    </section>
+    <button v-if="!connected" @click="switchChain" style="cursor: pointer">
+      Switch To {{ web3auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
+    </button>
     <section
       :style="{
         fontSize: '12px',

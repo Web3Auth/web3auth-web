@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <h2>Login With Web3Auth</h2>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{

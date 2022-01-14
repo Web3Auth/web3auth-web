@@ -97,9 +97,8 @@
           </div>
         </div>
       </div>
-      <div class="flex">
-        <span class="form-label" />
-        <button class="btn form-control" @click="saveConfig">Submit</button>
+      <div class="btn-group">
+        <button class="btn" @click="saveConfig">Submit</button>
       </div>
     </div>
     <div class="content">
@@ -264,8 +263,8 @@ body {
 .container {
   display: flex;
   flex-wrap: wrap;
-  height: 100%;
   align-items: stretch;
+  height: 100%;
 }
 
 .sidebar {
@@ -278,8 +277,9 @@ body {
 
 .content {
   flex-basis: 0;
-  min-width: 40%;
   flex-grow: 999;
+  min-width: 40%;
+  padding: 20px;
 }
 
 .flex {
@@ -320,6 +320,10 @@ body {
   margin-right: 0;
 }
 
+.btn-group {
+  text-align: center;
+}
+
 .btn {
   padding: 9px 16px;
   max-height: 40px;
@@ -328,8 +332,8 @@ body {
   text-align: center;
   font-weight: 500;
   cursor: pointer;
-  min-width: 60%;
-  margin: 20px 0;
+  min-width: 70%;
+  margin: 30px 0 10px;
   height: 40px;
   color: #0364ff;
   background-color: #fff;

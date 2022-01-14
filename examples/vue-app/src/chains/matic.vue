@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Polygon</h3>
+    <h2>Login with Web3Auth and Polygon</h2>
     <Loader :isLoading="loading"></Loader>
 
     <section

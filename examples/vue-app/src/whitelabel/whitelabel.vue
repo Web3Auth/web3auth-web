@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <h2>Login with Web3Auth</h2>
     <h3>Connect with {{ web3auth.options.chainConfig.chainNamespace }} web3auth</h3>
     <section
       :style="{
