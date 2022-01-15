@@ -154,3 +154,30 @@ export class WalletLoginError extends Web3AuthError {
     return WalletLoginError.fromCode(5113, extraMessage);
   }
 }
+
+export class AdapterFactoryError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5200: "Invalid params",
+    5201: "Adapter factory is already initialized",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletLoginError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletLoginError(code, `${AdapterFactoryError.messages[code]}${extraMessage}`);
+  }
+
+  public static invalidParams(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5200, extraMessage);
+  }
+
+  public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5201, extraMessage);
+  }
+}
