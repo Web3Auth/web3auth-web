@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth X Solana</h3>
+    <h2>Login with Web3Auth and Solana</h2>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{
@@ -8,7 +8,7 @@
       }"
     >
       <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <SolanaRpc v-if="connected && provider" :provider="provider" :console="console"></SolanaRpc>
       <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->

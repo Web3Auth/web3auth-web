@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <h2>Login with Web3Auth</h2>
     <h3>Connect with {{ web3auth.options.chainConfig.chainNamespace }} web3auth</h3>
     <section
       :style="{
@@ -15,7 +15,7 @@
       }"
     >
       <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <EthRpc
         v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'"
         :provider="provider"

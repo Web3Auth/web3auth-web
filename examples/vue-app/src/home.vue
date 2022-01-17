@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <div class="sidebar">
-      <h2>Configuration</h2>
+      <h2>Demo Settings</h2>
       <div class="flex chain">
-        <label class="flex-20 fw-500" for="chain">Chain</label>
-        <select class="flex-60 dropdown" name="chain" id="chain" v-model="form.chain" @change="onChainSelect">
+        <label class="form-label" for="chain">Chain</label>
+        <select class="form-control dropdown" name="chain" id="chain" v-model="form.chain" @change="onChainSelect">
           <option value="ethereum">Ethereum</option>
           <option value="binance">Binance</option>
           <!-- <option value="polygon">matic</option> -->
@@ -14,14 +14,20 @@
 
       <div class="ui-mode">
         <div class="flex ui-mode">
-          <span class="flex-20 fw-500">UI Mode</span>
-          <span class="flex-60">
-            <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
-            <label for="default" class="mr-10">Default</label>
-            <input type="radio" id="customUi" value="customUi" v-model="form.selectedUiMode" />
-            <label for="customUi" class="mr-10">Custom UI</label>
-            <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
-            <label for="whitelabel">WhiteLabel</label>
+          <span class="form-label">UI Mode</span>
+          <span class="form-control radio-group">
+            <label for="default" class="radio-button">
+              <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
+              Default
+            </label>
+            <label for="customUi" class="radio-button">
+              <input type="radio" id="customUi" value="customUi" v-model="form.selectedUiMode" />
+              CustomUI
+            </label>
+            <label for="whitelabel" class="radio-button">
+              <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
+              WhiteLabel
+            </label>
           </span>
         </div>
         <br />
@@ -29,8 +35,8 @@
         <!-- UI MODE DEFAULT -->
         <div v-if="form.selectedUiMode == 'default'">
           <div class="flex">
-            <span class="flex-20 fw-500">Login</span>
-            <div class="flex-60">
+            <span class="form-label">Login</span>
+            <div class="form-control">
               <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                 <label :for="loginType.id">
                   <input v-if="loginType.name !== 'Facebook'" type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
@@ -41,8 +47,8 @@
           </div>
           <br />
           <div class="flex">
-            <span class="flex-20 fw-500">Wallet</span>
-            <div class="flex-60">
+            <span class="form-label">Wallet</span>
+            <div class="form-control">
               <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
                 <label :for="walletType.id">
                   <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
@@ -56,13 +62,13 @@
         <!-- UI MODE YOUR OWN MODAL -->
         <div v-if="form.selectedUiMode == 'customUi'">
           <div class="flex">
-            <span class="flex-20 fw-500">Type</span>
-            <span class="flex-60">
+            <span class="form-label">Type</span>
+            <span class="form-control">
               <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
               <label for="openlogin">OpenLogin</label>
               <br />
               <input type="radio" id="customAuth" name="customAuth" value="customAuth" v-model="form.uiMode.customUi.type" />
-              <label for="customauth">CustomAuth</label>
+              <label for="customAuth">CustomAuth</label>
               <br />
             </span>
           </div>
@@ -72,15 +78,15 @@
         <!-- UI MODE WHITELABEL -->
         <div v-if="form.selectedUiMode == 'whitelabel'">
           <div class="flex">
-            <span class="flex-20 fw-500">Logo URL</span>
-            <span class="flex-60">
+            <span class="form-label">Logo URL</span>
+            <span class="form-control">
               <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
             </span>
           </div>
           <br />
           <div class="flex">
-            <span class="flex-20 fw-500">theme</span>
-            <span class="flex-60">
+            <span class="form-label">Theme</span>
+            <span class="form-control">
               <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
               <label for="light">Light</label>
               <br />
@@ -91,9 +97,8 @@
           </div>
         </div>
       </div>
-      <div class="flex">
-        <span class="flex-20" />
-        <button class="btn flex-60" @click="saveConfig">Submit</button>
+      <div class="btn-group">
+        <button class="btn" @click="saveConfig">Submit</button>
       </div>
     </div>
     <div class="content">
@@ -245,39 +250,54 @@ export default Vue.extend({
 </script>
 
 <style>
+html,
 body {
   margin: 0;
+  height: 100%;
+}
+
+#app {
+  height: 100%;
 }
 
 .container {
   display: flex;
-  height: 100vh;
-}
-
-.sidebar {
-  min-width: 40%;
-  border-right: 1px solid #ebecf0;
-  background-color: #f4f5f7;
+  flex-wrap: wrap;
+  align-items: stretch;
   height: 100%;
 }
 
+.sidebar {
+  flex-grow: 1;
+  flex-basis: 25rem;
+  border-right: 1px solid #ebecf0;
+  background-color: #f4f5f7;
+  padding: 20px;
+}
+
 .content {
-  width: 70%;
+  flex-basis: 0;
+  flex-grow: 999;
+  min-width: 40%;
+  padding: 20px;
 }
 
 .flex {
   display: flex;
 }
 
-.flex-20 {
-  flex-basis: 20%;
+.form-label {
+  flex-basis: 5rem;
   text-align: right;
-  margin-right: 20px;
+  margin-right: 10px;
+  font-weight: 500;
 }
-.flex-60 {
+
+.form-control {
   flex-basis: 60%;
   text-align: left;
 }
+
 .dropdown {
   width: 100%;
   font-size: 16px;
@@ -287,12 +307,23 @@ body {
   box-sizing: border-box;
 }
 
-.mr-10 {
+.radio-group {
+  flex-basis: 70%;
+  flex-grow: 1;
+}
+
+.radio-button {
+  display: inline-block;
   margin-right: 10px;
 }
-.fw-500 {
-  font-weight: 500;
+.radio-button:last-child {
+  margin-right: 0;
 }
+
+.btn-group {
+  text-align: center;
+}
+
 .btn {
   padding: 9px 16px;
   max-height: 40px;
@@ -301,8 +332,8 @@ body {
   text-align: center;
   font-weight: 500;
   cursor: pointer;
-  min-width: 60%;
-  margin-top: 10px;
+  min-width: 70%;
+  margin: 30px 0 10px;
   height: 40px;
   color: #0364ff;
   background-color: #fff;
@@ -343,12 +374,8 @@ body {
   box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 50%);
 }
 
-.ui-mode {
-  padding: 20px 0;
-}
-
 .chain {
-  padding: 20px 0;
+  margin-bottom: 20px;
 }
 
 .text {

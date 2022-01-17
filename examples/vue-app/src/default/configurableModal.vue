@@ -1,20 +1,8 @@
 <template>
   <div id="app">
-    <!-- <h3>Login With Web3Auth</h3> -->
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    ></section>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <ChainContainer :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
-    </section>
+    <ChainContainer :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
     <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+      <code style="white-space: pre-line"></code>
     </div>
   </div>
 </template>

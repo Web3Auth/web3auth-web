@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Login With Web3Auth</h3>
+    <h2>Login With Web3Auth</h2>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{
@@ -18,7 +18,7 @@
       <button class="rpcBtn" v-if="!connected" name="facebook" @click="connect" style="cursor: pointer">
         {{ loginButtonStatus }} Login With facebook
       </button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
       <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
