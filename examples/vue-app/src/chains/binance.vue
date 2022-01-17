@@ -4,7 +4,7 @@
     <Loader :isLoading="loading"></Loader>
     <section>
       <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
       <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->

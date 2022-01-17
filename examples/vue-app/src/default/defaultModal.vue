@@ -11,7 +11,7 @@
       }"
     >
       <button v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <SolRpc
         v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'solana'"
         :provider="provider"

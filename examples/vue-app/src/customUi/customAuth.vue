@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Web3Auth X CustomAuth</h3>
+    <h3>Web3Auth and CustomAuth</h3>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{
@@ -18,7 +18,7 @@
       <button class="rpcBtn" v-if="!connected" name="twitter" @click="connect" style="cursor: pointer">
         {{ loginButtonStatus }} Login With twitter
       </button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
       <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->

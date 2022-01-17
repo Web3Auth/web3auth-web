@@ -15,7 +15,7 @@
       }"
     >
       <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">logout</button>
+      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
       <EthRpc
         v-if="connected && provider && web3auth.options.chainConfig.chainNamespace === 'eip155'"
         :provider="provider"
