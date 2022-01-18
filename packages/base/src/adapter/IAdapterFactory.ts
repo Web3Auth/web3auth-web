@@ -25,7 +25,6 @@ export interface IAdapterFactory {
   options: AdapterFactoryOptions;
   status: ADAPTER_STATUS_TYPE;
   walletAdapters: Record<WALLET_ADAPTER_TYPE, IAdapter<unknown>>;
-  adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig>;
   init(options: AdapterFactoryInitOptions): Promise<void>;
 }
 
@@ -34,14 +33,12 @@ export abstract class BaseAdapterFactory implements IAdapterFactory {
 
   walletAdapters: Record<WALLET_ADAPTER_TYPE, IAdapter<unknown>> = {};
 
-  adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig> = {};
-
   private factoryChainNamespace: ChainNamespaceType;
 
   abstract options: AdapterFactoryOptions;
 
   constructor(options: { factoryChainNamespace: ChainNamespaceType }) {
-    if (options.factoryChainNamespace) throw AdapterFactoryError.invalidParams("Please provide factoryChainNamespace in adapter factory");
+    if (!options.factoryChainNamespace) throw AdapterFactoryError.invalidParams("Please provide factoryChainNamespace in adapter factory");
     this.factoryChainNamespace = options.factoryChainNamespace;
   }
 
@@ -55,10 +52,8 @@ export abstract class BaseAdapterFactory implements IAdapterFactory {
         `Expected chainNamespace to be ${this.factoryChainNamespace} and found ${options.chainConfig.chainNamespace}`
       );
 
-    this.adaptersConfig = options.adaptersConfig;
-
     await Promise.all(
-      Object.keys(this.adaptersConfig).map(async (adapterName) => {
+      Object.keys(options.adaptersConfig).map(async (adapterName) => {
         try {
           if (!this.walletAdapters[adapterName] && options.adapterFactoryConfig?.[adapterName]?.initializeAdapter) {
             const ad = await this.getDefaultAdapterModule({

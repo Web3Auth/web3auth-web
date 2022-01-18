@@ -123,7 +123,8 @@
 <script lang="ts">
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
-import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
+import { defaultEvmDappAdaptersConfig } from "@web3auth/evm-adapter-factory";
+import { defaultSolanaDappAdaptersConfig } from "@web3auth/solana-adapter-factory";
 import merge from "lodash.merge";
 import Vue from "vue";
 
@@ -158,8 +159,9 @@ const defaultLoginProviders = () => {
 };
 
 const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
-  const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappModalConfig : defaultEvmDappModalConfig;
-  return Object.keys(adaptersConfig.adapters).map((adapterName) => {
+  const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappAdaptersConfig : defaultEvmDappAdaptersConfig;
+  return Object.keys(adaptersConfig).map((adapterName) => {
+    console.log("adapterName", adapterName);
     return {
       id: adapterName,
       name: adapterName.substring(0, 1).toUpperCase() + adapterName.substring(1),

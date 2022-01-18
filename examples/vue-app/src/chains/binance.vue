@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { EvmAdapterFactory } from "@web3auth/evm-adapter-factory";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -91,8 +92,9 @@ export default Vue.extend({
         this.parseConfig();
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        this.web3auth.addAdapterFactory(new EvmAdapterFactory());
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({ adaptersConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

@@ -170,14 +170,14 @@ export class AdapterFactoryError extends Web3AuthError {
   }
 
   public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletLoginError(code, `${AdapterFactoryError.messages[code]}${extraMessage}`);
+    return new AdapterFactoryError(code, `${AdapterFactoryError.messages[code]}${extraMessage}`);
   }
 
   public static invalidParams(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5200, extraMessage);
+    return AdapterFactoryError.fromCode(5200, extraMessage);
   }
 
   public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5201, extraMessage);
+    return AdapterFactoryError.fromCode(5201, extraMessage);
   }
 }

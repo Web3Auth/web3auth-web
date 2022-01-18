@@ -21,6 +21,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { SolanaAdapterFactory } from "@web3auth/solana-adapter-factory";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -97,8 +98,9 @@ export default Vue.extend({
 
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        this.web3auth.addAdapterFactory(new SolanaAdapterFactory());
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({ adaptersConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

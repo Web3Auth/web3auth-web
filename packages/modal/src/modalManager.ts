@@ -76,6 +76,7 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.init();
     const adapterFactoryConfig: AdapterFactoryConfig = {};
     Object.keys(this.walletAdapters).forEach((adapterName) => {
+      // don't initialize adapters in factory which are custom configured here.
       adapterFactoryConfig[adapterName] = { initializeAdapter: false };
     });
     if (this.adapterFactory)
@@ -86,10 +87,12 @@ export class Web3Auth extends Web3AuthCore {
         adaptersConfig: params?.adaptersConfig || {},
       });
     const defaultAdapters = this.adapterFactory?.walletAdapters || {};
+    Object.keys(defaultAdapters).forEach((adName) => {
+      if (!this.walletAdapters[adName]) this.walletAdapters[adName] = defaultAdapters[adName];
+    });
     const providedChainConfig = this.options.chainConfig;
-    const allAdapters = [...Object.keys(this.walletAdapters), ...Object.keys(defaultAdapters)];
 
-    const adapterConfigurationPromises = allAdapters.map(async (adapterName: string) => {
+    const adapterConfigurationPromises = Object.keys(this.walletAdapters).map(async (adapterName: string) => {
       const adapterConfig = params?.adaptersConfig?.[adapterName] || {
         label: adapterName,
         showOnModal: true,
@@ -97,12 +100,12 @@ export class Web3Auth extends Web3AuthCore {
         showOnDesktop: true,
       };
       this.adaptersConfig[adapterName] = adapterConfig;
-      const adapter = this.walletAdapters[adapterName] || defaultAdapters[adapterName];
+      const adapter = this.walletAdapters[adapterName];
       if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
         // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
+          adapter.setAdapterSettings({ clientId: this.options.clientId });
         }
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
@@ -112,7 +115,7 @@ export class Web3Auth extends Web3AuthCore {
             ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
             ...this.coreOptions.chainConfig,
           } as CustomChainConfig;
-          this.walletAdapters[adapterName].setChainConfig(chainConfig);
+          adapter.setChainConfig(chainConfig);
         }
 
         return adapterName;

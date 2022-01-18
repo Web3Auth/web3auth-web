@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { EvmAdapterFactory } from "@web3auth/evm-adapter-factory";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -83,6 +84,7 @@ export default Vue.extend({
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId,
         });
+        this.web3auth.addAdapterFactory(new EvmAdapterFactory());
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal({});
       } catch (error) {

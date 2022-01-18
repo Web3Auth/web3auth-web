@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/evm-adapter-factory",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Factory for adding/configuring adapters for web3auth",
   "keywords": [
     "web3Auth/evm-adapter-factory",
@@ -38,7 +38,7 @@
     "@types/lodash.clonedeep": "^4.5.6"
   },
   "dependencies": {
-    "@web3auth/base": "^0.1.0",
+    "@web3auth/base": "^0.1.1",
     "@web3auth/metamask-adapter": "^0.1.1",
     "@web3auth/openlogin-adapter": "^0.1.1",
     "@web3auth/torus-evm-adapter": "^0.1.1",

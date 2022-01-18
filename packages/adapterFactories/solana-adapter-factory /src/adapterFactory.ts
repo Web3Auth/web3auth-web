@@ -13,6 +13,7 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
+import log from "loglevel";
 
 import { defaultSolanaDappAdaptersConfig, defaultSolanaWalletAdaptersConfig } from "./config";
 
@@ -34,9 +35,9 @@ export class SolanaAdapterFactory extends BaseAdapterFactory {
     } else {
       throw AdapterFactoryError.invalidParams(`Invalid factory mode: ${this.options.factoryMode}`);
     }
-
-    const allAdapters = [...new Set([...Object.keys(defaultAdaptersConfig || {}), ...Object.keys(this.walletAdapters)])];
-    Object.keys(allAdapters).forEach((adapterName) => {
+    const allDefaultAdapters = [...Object.keys(defaultAdaptersConfig || {})];
+    log.debug("allDefaultAdapters", allDefaultAdapters);
+    allDefaultAdapters.forEach((adapterName) => {
       optCopy.adaptersConfig[adapterName] = {
         ...(defaultAdaptersConfig[adapterName] || {
           label: adapterName,
@@ -46,8 +47,14 @@ export class SolanaAdapterFactory extends BaseAdapterFactory {
         }),
         ...(optCopy.adaptersConfig[adapterName] || {}),
       };
+      optCopy.adapterFactoryConfig[adapterName] = {
+        ...optCopy.adapterFactoryConfig[adapterName],
+        initializeAdapter: optCopy.adapterFactoryConfig[adapterName].initializeAdapter !== false,
+      } || { initializeAdapter: true };
     });
-    return super.init(options);
+    log.debug("optCopy", optCopy);
+
+    return super.init(optCopy);
   }
 
   getDefaultAdapterModule = async (params: {
@@ -79,6 +86,6 @@ export class SolanaAdapterFactory extends BaseAdapterFactory {
       });
       return adapter;
     }
-    throw new Error("Invalid wallet adapter name");
+    throw new Error(`Invalid wallet adapter name: ${name}`);
   };
 }

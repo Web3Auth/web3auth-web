@@ -33,6 +33,8 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { EvmAdapterFactory } from "@web3auth/evm-adapter-factory";
+import { SolanaAdapterFactory } from "@web3auth/solana-adapter-factory";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -80,6 +82,7 @@ export default Vue.extend({
           clientId: config.clientId,
           authMode: "DAPP",
         });
+        this.web3auth.addAdapterFactory(new SolanaAdapterFactory());
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({});
         console.log("web3auth", this.web3auth);
@@ -91,6 +94,8 @@ export default Vue.extend({
     async initEthAuth() {
       try {
         this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId });
+        this.web3auth.addAdapterFactory(new EvmAdapterFactory());
+
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal({});
       } catch (error) {

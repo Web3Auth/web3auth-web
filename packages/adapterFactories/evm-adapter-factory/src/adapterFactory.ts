@@ -13,6 +13,7 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
+import log from "loglevel";
 
 import { defaultEvmDappAdaptersConfig, defaultEvmWalletAdaptersConfig } from "./config";
 
@@ -35,8 +36,8 @@ export class EvmAdapterFactory extends BaseAdapterFactory {
       throw AdapterFactoryError.invalidParams(`Invalid factory mode: ${this.options.factoryMode}`);
     }
     const allDefaultAdapters = [...Object.keys(defaultAdaptersConfig || {})];
-
-    Object.keys(allDefaultAdapters).forEach((adapterName) => {
+    log.debug("allDefaultAdapters", allDefaultAdapters);
+    allDefaultAdapters.forEach((adapterName) => {
       optCopy.adaptersConfig[adapterName] = {
         ...(defaultAdaptersConfig[adapterName] || {
           label: adapterName,
@@ -46,9 +47,13 @@ export class EvmAdapterFactory extends BaseAdapterFactory {
         }),
         ...(optCopy.adaptersConfig[adapterName] || {}),
       };
-      optCopy.adapterFactoryConfig = optCopy.adapterFactoryConfig || {};
-      optCopy.adapterFactoryConfig[adapterName].initializeAdapter = optCopy.adapterFactoryConfig[adapterName].initializeAdapter !== false;
+      optCopy.adapterFactoryConfig[adapterName] = {
+        ...optCopy.adapterFactoryConfig[adapterName],
+        initializeAdapter: optCopy.adapterFactoryConfig[adapterName]?.initializeAdapter !== false,
+      } || { initializeAdapter: true };
     });
+    log.debug("optCopy", optCopy);
+
     return super.init(optCopy);
   }
 
@@ -85,6 +90,6 @@ export class EvmAdapterFactory extends BaseAdapterFactory {
       });
       return adapter;
     }
-    throw new Error("Invalid wallet adapter name");
+    throw new Error(`Invalid wallet adapter name: ${name}`);
   };
 }
