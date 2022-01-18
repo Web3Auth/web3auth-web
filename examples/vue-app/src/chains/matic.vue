@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h2>Login with Web3Auth and Ethereum</h2>
+    <h2>Login with Web3Auth and Polygon</h2>
     <Loader :isLoading="loading"></Loader>
 
     <section
@@ -10,7 +10,7 @@
     >
       <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
       <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
+      <PolygonRpc v-if="connected && provider" :provider="provider" :console="console"></PolygonRpc>
       <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -28,20 +28,19 @@ import Vue from "vue";
 import Loader from "@/components/loader.vue";
 
 import config from "../config";
-import EthRpc from "../rpc/ethRpc.vue";
-
-const ethChainConfig: CustomChainConfig = {
+import PolygonRpc from "../rpc/polygonRpc.vue";
+const polygonMumbaiConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0x3",
-  rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-  displayName: "ropsten",
-  blockExplorer: "https://ropsten.etherscan.io/",
-  ticker: "ETH",
-  tickerName: "Ethereum",
+  rpcTarget: "https://rpc-mumbai.maticvigil.com",
+  blockExplorer: "https://mumbai-explorer.matic.today",
+  chainId: "0x13881",
+  displayName: "Polygon Mumbai Testnet",
+  ticker: "matic",
+  tickerName: "matic",
 };
 
 export default Vue.extend({
-  name: "EthereumChain",
+  name: "PolygonChain",
   props: {
     adapterConfig: {
       type: Object,
@@ -51,7 +50,7 @@ export default Vue.extend({
     adapterConfig: async function (newVal, oldVal) {
       // watch it
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
+      await this.initPolygonWeb3Auth();
     },
   },
   data() {
@@ -65,12 +64,12 @@ export default Vue.extend({
     };
   },
   components: {
-    EthRpc,
+    PolygonRpc,
     Loader,
   },
-
   async mounted() {
-    await this.initEthAuth();
+    console.log("polygon");
+    await this.initPolygonWeb3Auth();
   },
   methods: {
     parseConfig() {
@@ -94,15 +93,15 @@ export default Vue.extend({
         }
       });
     },
-    async initEthAuth() {
+    async initPolygonWeb3Auth() {
+      console.log("polygon");
+      this.parseConfig();
       try {
-        this.parseConfig();
-        console.log("config", this.modalConfig);
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
+
+        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
-        console.log("modal initialized", config);
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

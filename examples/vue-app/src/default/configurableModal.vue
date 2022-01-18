@@ -1,0 +1,33 @@
+<template>
+  <div id="app">
+    <ChainContainer :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
+    <div id="console" style="white-space: pre-line">
+      <code style="white-space: pre-line"></code>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+
+import ChainContainer from "../chains/chainContainer.vue";
+
+export default Vue.extend({
+  name: "ConfigurableExample",
+  props: {
+    chain: {
+      type: String,
+      default: "ethereum",
+    },
+    adapterConfig: {
+      type: Object,
+    },
+  },
+  data() {
+    return {};
+  },
+  components: {
+    ChainContainer,
+  },
+});
+</script>

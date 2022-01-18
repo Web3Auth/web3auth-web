@@ -19,6 +19,11 @@ import AllImages from "../assets";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
 import { htmlToElement } from "./utils";
 const hasLightIcons = ["apple", "github"];
+
+const DEFAULT_LOGO_URL = {
+  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
+  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
+};
 export default class LoginModal extends SafeEventEmitter {
   private $modal!: HTMLDivElement;
 
@@ -42,11 +47,11 @@ export default class LoginModal extends SafeEventEmitter {
     errored: false,
   };
 
-  constructor({ appLogo, version, adapterListener, isDark = false }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
     super();
-    this.appLogo = appLogo;
+    this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
     this.version = version;
-    this.isDark = isDark;
+    this.isDark = theme === "dark";
     this.subscribeCoreEvents(adapterListener);
   }
 
@@ -216,6 +221,10 @@ export default class LoginModal extends SafeEventEmitter {
     if (Object.keys(loginMethods).length > 5) $adapterExpandBtn.style.display = "flex";
 
     Object.keys(loginMethods).forEach((method: string) => {
+      // TODO: link mobile and desktop visibility config.
+      if (!loginMethods[method].showOnModal) {
+        return;
+      }
       if (method === "email_passwordless") {
         this.hasSocialEmailWallet = true;
         const $emailPasswordlessSection = this.$modal.querySelector(".w3ajs-email-passwordless") as HTMLDivElement;

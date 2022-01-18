@@ -10,13 +10,13 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/core.cjs.js",
-  "module": "dist/core.esm.js",
-  "unpkg": "dist/core.umd.min.js",
-  "jsdelivr": "dist/core.umd.min.js",
+  "main": "dist/solanaAdapterFactory.cjs.js",
+  "module": "dist/solanaAdapterFactory.esm.js",
+  "unpkg": "dist/solanaAdapterFactory.umd.min.js",
+  "jsdelivr": "dist/solanaAdapterFactory.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/solana-adapter-factory#readme",
   "license": "ISC",
   "scripts": {
     "local-publish": "yalc publish",
@@ -39,9 +39,9 @@
   },
   "dependencies": {
     "@web3auth/base": "^0.1.0",
-    "@web3auth/torus-solana-adapter": "^0.1.0",
-    "@web3auth/openlogin-adapter": "^0.1.0",
-    "@web3auth/phantom-adapter": "^0.1.0",
+    "@web3auth/torus-solana-adapter": "^0.1.1",
+    "@web3auth/openlogin-adapter": "^0.1.1",
+    "@web3auth/phantom-adapter": "^0.1.1",
     "lodash.clonedeep": "^4.5.0",
     "loglevel": "^1.8.0"
   },

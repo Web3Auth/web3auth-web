@@ -15,6 +15,19 @@ import log from "loglevel";
 
 import { getAdapterSocialLogins } from "./utils";
 
+export interface UIConfig {
+  /**
+   * Logo for your app.
+   */
+  appLogo?: string;
+
+  /**
+   * theme for the modal
+   *
+   * @defaultValue `light`
+   */
+  theme?: "light" | "dark";
+}
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * Client id for web3auth.
@@ -32,11 +45,10 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    * @defaultValue `DAPP`
    */
   authMode?: "DAPP" | "WALLET";
-
   /**
-   * Logo for your dapp, by default it will be the web3auth logo.
+   * Config for configuring modal ui display properties
    */
-  dappLogo?: string;
+  uiConfig?: UIConfig;
 }
 export class Web3Auth extends Web3AuthCore {
   public loginModal: LoginModal;
@@ -50,7 +62,7 @@ export class Web3Auth extends Web3AuthCore {
   constructor(options: Web3AuthOptions) {
     super(options);
     this.options = { ...options };
-    this.loginModal = new LoginModal({ appLogo: this.options.dappLogo || "", version: "", adapterListener: this });
+    this.loginModal = new LoginModal({ appLogo: this.options.uiConfig?.appLogo || "", version: "", adapterListener: this });
     this.subscribeToLoginModalEvents();
   }
 
@@ -105,7 +117,6 @@ export class Web3Auth extends Web3AuthCore {
 
         return adapterName;
       }
-      return adapterName;
     });
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
@@ -185,7 +196,7 @@ export class Web3Auth extends Web3AuthCore {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(adaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
   }
 
   private initializeInAppWallet(adapterName: string): void {

@@ -114,6 +114,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       await this.connectWithProvider(params);
       return;
     } catch (error) {
+      log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_STATUS.ERRORED, error);
@@ -179,8 +180,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.provider = await this.providerFactory.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
-    } else {
-      throw WalletLoginError.connectionError("Failed to connect with openlogin");
     }
   }
 }

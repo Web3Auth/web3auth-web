@@ -111,15 +111,15 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     this.loginSettings = loginSettings;
     this.initSettings = initSettings;
 
+    // if no chainNamespace is passed then chain config should be set before calling init
     if (params.chainConfig?.chainNamespace) {
       this.currentChainNamespace = params.chainConfig?.chainNamespace;
+      const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
+      this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
+      if (!this.chainConfig.rpcTarget) {
+        throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
+      }
     }
-    const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
-    this.chainConfig = { ...defaultChainIdConfig, ...(params?.chainConfig || {}) } as CustomChainConfig;
-    if (!this.chainConfig.rpcTarget) {
-      throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
-    }
-
     // syncing storage with custom auth result.
     this.store = CustomAuthStore.getInstance();
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
