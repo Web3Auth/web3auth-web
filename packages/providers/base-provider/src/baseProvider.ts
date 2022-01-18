@@ -16,8 +16,8 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   implements IBaseProvider<T>
 {
   constructor({ config, state }: { config?: C; state?: S }) {
-    super({ config, state });
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
+    super({ config, state });
     this.defaultState = {
       chainId: "loading",
     } as S;

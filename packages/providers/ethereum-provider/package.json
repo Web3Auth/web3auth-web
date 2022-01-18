@@ -20,6 +20,7 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
+    "@walletconnect/types": "~1.7.0",
     "@ethereumjs/common": "^2.6.0",
     "@ethereumjs/tx": "^3.4.0",
     "@metamask/eth-sig-util": "^4.0.0",

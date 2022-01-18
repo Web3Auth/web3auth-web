@@ -18,10 +18,10 @@ import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
 
-import { createEthMiddleware, IProviderHandlers } from "../rpc/ethRpcMiddlewares";
-import { createJsonRpcClient } from "../rpc/jrpcClient";
-import { createRandomId } from "../rpc/utils";
-import { MessageParams, TransactionParams, TypedMessageParams } from "../rpc/walletMidddleware";
+import { createEthMiddleware, IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
+import { createJsonRpcClient } from "../../rpc/jrpcClient";
+import { createRandomId } from "../../rpc/utils";
+import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
 
 export interface EthereumPrivKeyProviderConfig extends BaseConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;

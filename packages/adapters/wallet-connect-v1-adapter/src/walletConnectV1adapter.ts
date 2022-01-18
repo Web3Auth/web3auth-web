@@ -1,4 +1,4 @@
-import WalletConnectProvider from "@walletconnect/web3-provider";
+import WalletConnect from "@walletconnect/client";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -19,12 +19,10 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import log from "loglevel";
+import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { defaultWalletConnectV1Options } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
-
-// TODO: Move to using standalone client with our jrpc provider instead of @walletconnect/web3-provider
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -44,7 +42,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     uri: "",
   };
 
-  public walletConnectProvider: WalletConnectProvider | null = null;
+  public connector: WalletConnect | null = null;
 
   private rehydrated = false;
 
@@ -55,7 +53,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   get connected(): boolean {
-    return this.walletConnectProvider?.connected || false;
+    return !!this.connector?.connected;
   }
 
   async init(): Promise<void> {
@@ -63,23 +61,109 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
     }
+    const walletConnectOptions = this.adapterOptions.adapterSettings || {};
+    walletConnectOptions.bridge = walletConnectOptions.bridge || "https://bridge.walletconnect.org";
     // Create a connector
-    this.walletConnectProvider = new WalletConnectProvider({
-      ...this.adapterOptions.adapterSettings,
-      qrcode: false,
-    });
-    if (this.walletConnectProvider.connected) {
-      this.provider = this.walletConnectProvider as unknown as SafeEventEmitterProvider;
+    this.connector = new WalletConnect(walletConnectOptions);
+    if (this.connector.connected) {
+      this.provider = this.connector as unknown as SafeEventEmitterProvider;
       this.rehydrated = true;
       this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
       return;
     }
     await new Promise<void>((resolve, reject) => {
-      if (!this.walletConnectProvider) {
+      if (!this.connector) {
         this.emit(ADAPTER_STATUS.ERRORED, WalletLoginError.connectionError("Failed to setup wallet connect qr code"));
         return;
       }
-      this.walletConnectProvider.connector.on("display_uri", async (err, payload) => {
+      this.createNewSession()
+        .then(() => {
+          return resolve();
+        })
+        .catch((err) => {
+          return reject(err);
+        });
+    });
+  }
+
+  // intentionally not emitting or setting connecting here
+  // this should be called immediately after displaying qr code.
+  async connect(): Promise<void> {
+    super.checkConnectionRequirements();
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.connector) return reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+
+        if (this.connected) {
+          this.onConnectHandler({ accounts: this.connector.accounts, chainId: `0x${this.connector.chainId.toString(16)}` })
+            .then(() => {
+              return resolve();
+            })
+            .catch((err) => {
+              return reject(err);
+            });
+        }
+        const _handler = async (error: Error | null, payload: { params: { accounts: string[]; chainId: string }[] }) => {
+          if (error) {
+            this.emit(ADAPTER_STATUS.ERRORED, error);
+          }
+          if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+
+          await this.onConnectHandler(payload.params[0]);
+          this.connector.off("connect");
+          return resolve();
+        };
+        // Subscribe to session connection
+        this.connector.on("connect", _handler);
+        this.subscribeEvents(this.connector);
+      } catch (error) {
+        // ready again to be connected
+        this.status = ADAPTER_STATUS.READY;
+        this.rehydrated = true;
+        this.emit(ADAPTER_STATUS.ERRORED, error);
+        reject(WalletLoginError.connectionError("Failed to login with wallet connect"));
+      }
+    });
+  }
+
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    const { cleanup } = options;
+    return new Promise((resolve, reject) => {
+      if (!this.connector || !this.connected) return reject(WalletLoginError.notConnectedError("Not connected with wallet"));
+      this.connector
+        .killSession()
+        .then(async () => {
+          this.provider = null;
+          this.rehydrated = false;
+          if (cleanup) {
+            this.connector = null;
+            this.status = ADAPTER_STATUS.NOT_READY;
+          } else {
+            await this.createNewSession();
+            // ready to connect again
+            this.status = ADAPTER_STATUS.READY;
+          }
+          this.emit(ADAPTER_STATUS.DISCONNECTED);
+          return resolve();
+        })
+        .catch((err) => {
+          return reject(err);
+        });
+    });
+  }
+
+  async getUserInfo(): Promise<Partial<UserInfo>> {
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    return {};
+  }
+
+  setAdapterSettings(_: unknown): void {}
+
+  private async createNewSession() {
+    return new Promise<void>((resolve, reject) => {
+      if (!this.connector) return reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+
+      this.connector.on("display_uri", async (err, payload) => {
         if (err) {
           this.emit(ADAPTER_STATUS.ERRORED, WalletLoginError.connectionError("Failed to display wallet connect qr code"));
           return;
@@ -91,78 +175,39 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         };
         this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
         this.status = ADAPTER_STATUS.READY;
-        resolve();
+        this.connector?.off("display_uri");
+        return resolve();
       });
 
-      this.walletConnectProvider.enable().catch((error) => {
+      this.connector.createSession().catch((error) => {
         this.emit(ADAPTER_STATUS.ERRORED, error);
         reject(error);
       });
     });
   }
 
-  // intentionally not emitting or setting connecting here
-  async connect(): Promise<void> {
-    super.checkConnectionRequirements();
-    if (!this.walletConnectProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
-    try {
-      this.subscribeEvents(this.walletConnectProvider);
-    } catch (error) {
-      // ready again to be connected
-      this.status = ADAPTER_STATUS.READY;
-      this.rehydrated = true;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
-      throw WalletLoginError.connectionError("Failed to login with wallet connect");
+  private async onConnectHandler(params: { accounts: string[]; chainId: string }) {
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
+
+    const { chainId } = params;
+    if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
+      this.emit(
+        ADAPTER_STATUS.ERRORED,
+        WalletInitializationError.fromCode(
+          5000,
+          `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
+        )
+      );
+      return;
     }
+    const wcProviderFactory = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
+    this.provider = await wcProviderFactory.setupProvider(this.connector);
+    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
   }
 
-  async disconnect(): Promise<void> {
-    if (!this.connected || !this.walletConnectProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await this.walletConnectProvider.disconnect();
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
-  }
-
-  async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
-    return {};
-  }
-
-  setAdapterSettings(_: unknown): void {}
-
-  private subscribeEvents(provider: WalletConnectProvider): void {
-    // Subscribe to session connection
-    provider.on("connect", (error: Error, payload: { params: { accounts: string[]; chainId: string }[] }) => {
-      if (error) {
-        this.emit(ADAPTER_STATUS.ERRORED, error);
-        return;
-      }
-      const { chainId } = payload.params[0];
-      if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        this.emit(
-          ADAPTER_STATUS.ERRORED,
-          WalletInitializationError.fromCode(
-            5000,
-            `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
-          )
-        );
-        return;
-      }
-      this.provider = provider as unknown as SafeEventEmitterProvider;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
-    });
-
-    // Subscribe to session disconnection
-    provider.on("disconnect", (code: number, reason: string) => {
-      log.debug("wallet connect, disconnected", code, reason);
-      this.provider = null;
-      this.walletConnectProvider = null;
-      this.rehydrated = false;
-      // ready to connect again
-      this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_STATUS.DISCONNECTED);
-    });
-
-    provider.on("session_update", async (error: Error) => {
+  private subscribeEvents(connector: WalletConnect): void {
+    connector.on("session_update", async (error: Error | null) => {
       if (error) {
         this.emit(ADAPTER_STATUS.ERRORED, error);
       }

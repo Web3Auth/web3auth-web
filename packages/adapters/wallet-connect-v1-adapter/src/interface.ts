@@ -1,7 +1,7 @@
-import type { IWalletConnectProviderOptions } from "@walletconnect/types";
+import type { IWalletConnectOptions } from "@walletconnect/types";
 import { CustomChainConfig } from "@web3auth/base";
 
 export interface WalletConnectV1AdapterOptions {
-  adapterSettings?: IWalletConnectProviderOptions;
+  adapterSettings?: IWalletConnectOptions;
   chainConfig?: CustomChainConfig;
 }

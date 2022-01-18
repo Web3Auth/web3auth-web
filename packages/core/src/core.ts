@@ -50,6 +50,11 @@ export class Web3AuthCore extends SafeEventEmitter {
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
+  get canConnect(): boolean {
+    const adapters = Object.keys(this.walletAdapters);
+    return adapters.length > 0 && adapters.every((adapterName) => this.walletAdapters[adapterName].status === "ready");
+  }
+
   public async init(): Promise<void> {
     const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
