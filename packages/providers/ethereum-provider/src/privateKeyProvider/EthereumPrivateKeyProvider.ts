@@ -15,6 +15,7 @@ import { createFetchMiddleware, createSwappableProxy, providerFromEngine, signMe
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
 
@@ -145,7 +146,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<SafeEventEmitterProvider> {
-    if (!this._providerProxy) throw new Error("Provider is not initialized");
+    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const existingKey = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
@@ -157,7 +158,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
   }
 
   public async switchChain(params: { chainId: string }): Promise<SafeEventEmitterProvider> {
-    if (!this._providerProxy) throw new Error("Provider is not initialized");
+    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
@@ -168,20 +169,20 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
   }
 
   public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw new Error("chainId is required");
-    if (!chainConfig.rpcTarget) throw new Error("chainId is required");
+    if (!chainConfig.chainId) throw ethErrors.rpc.invalidParams("chainId is required");
+    if (!chainConfig.rpcTarget) throw ethErrors.rpc.invalidParams("chainId is required");
     this.configure({
       networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
     });
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerProxy) throw new Error("Provider is not initialized");
+    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const chainConfig = { ...this.chainConfig };
     const network = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
 
     if (parseInt(chainConfig.chainId, 16) !== parseInt(network, 10))
-      throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${network}`);
+      throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
 
     if (this.state.chainId !== chainConfig.chainId) {
       this.emit("chainChanged", this.state.chainId);
@@ -223,7 +224,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<EthereumPrivKeyProv
 
   private getChainConfig(chainId: string): CustomChainConfig | undefined {
     const chainConfig = this.config.networks[chainId];
-    if (!chainConfig) throw new Error(`Chain ${chainId} is not supported, please add chainConfig for it`);
+    if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
     return chainConfig;
   }
 
