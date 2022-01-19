@@ -6,6 +6,7 @@ import {
   JRPCResponse,
   mergeMiddleware,
 } from "@toruslabs/openlogin-jrpc";
+import { ethErrors } from "eth-rpc-errors";
 
 import { createWalletMiddleware, WalletMiddlewareOptions } from "./walletMidddleware";
 
@@ -57,15 +58,23 @@ export interface AddEthereumChainParameter {
 }
 
 export interface IChainSwitchHandlers {
-  addChain: (req: JRPCRequest<AddEthereumChainParameter>) => Promise<void>;
-  switchChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
+  addChain: (params: AddEthereumChainParameter) => Promise<void>;
+  switchChain: (params: { chainId: string }) => Promise<void>;
 }
 export function createChainSwitchMiddleware({ addChain, switchChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
-  async function addNewChain(req: JRPCRequest<AddEthereumChainParameter>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await addChain(req);
+  async function addNewChain(req: JRPCRequest<AddEthereumChainParameter[]>, res: JRPCResponse<unknown>): Promise<void> {
+    const chainParams = req.params?.length ? req.params[0] : undefined;
+    if (!chainParams) throw ethErrors.rpc.invalidParams("Missing chain params");
+    if (!chainParams.chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
+    if (!chainParams.rpcUrls || chainParams.rpcUrls.length === 0) throw ethErrors.rpc.invalidParams("Missing rpcUrls in chainParams");
+    if (!chainParams.nativeCurrency) throw ethErrors.rpc.invalidParams("Missing nativeCurrency in chainParams");
+
+    res.result = await addChain(chainParams);
   }
-  async function updateChain(req: JRPCRequest<{ chainId: string }>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await switchChain(req);
+  async function updateChain(req: JRPCRequest<{ chainId: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
+    const chainParams = req.params?.length ? req.params[0] : undefined;
+    if (!chainParams) throw ethErrors.rpc.invalidParams("Missing chainId");
+    res.result = await switchChain(chainParams);
   }
 
   return createScaffoldMiddleware({
@@ -75,11 +84,13 @@ export function createChainSwitchMiddleware({ addChain, switchChain }: IChainSwi
 }
 
 export interface IAccountHandlers {
-  updatePrivatekey: (req: JRPCRequest<{ privateKey: string }>) => Promise<void>;
+  updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
 }
 export function createAccountMiddleware({ updatePrivatekey }: IAccountHandlers): JRPCMiddleware<unknown, unknown> {
-  async function updateAccount(req: JRPCRequest<{ privateKey: string }>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await updatePrivatekey(req);
+  async function updateAccount(req: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
+    const accountParams = req.params?.length ? req.params[0] : undefined;
+    if (!accountParams?.privateKey) throw ethErrors.rpc.invalidParams("Missing privateKey");
+    res.result = await updatePrivatekey(accountParams);
   }
 
   return createScaffoldMiddleware({
