@@ -109,11 +109,17 @@ class MetamaskAdapter extends BaseAdapter<void> {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     this.provider?.removeAllListeners();
-    // ready to be connected again
-    this.status = ADAPTER_STATUS.READY;
+    if (options.cleanup) {
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.metamaskProvider = null;
+    } else {
+      // ready to be connected again
+      this.status = ADAPTER_STATUS.READY;
+    }
+
     this.rehydrated = false;
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }

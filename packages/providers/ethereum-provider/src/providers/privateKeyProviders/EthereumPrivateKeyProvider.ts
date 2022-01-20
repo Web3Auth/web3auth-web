@@ -54,7 +54,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
       getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
       processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-        const rpcProvider = this._providerProxy;
+        const rpcProvider = this.provider;
         if (!rpcProvider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
         const common = await this.getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas);
         const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
@@ -135,25 +135,25 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<SafeEventEmitterProvider> {
-    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-    const existingKey = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_private_key" });
+    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    const existingKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.emit("accountsChanged", {
-        accounts: await this._providerProxy.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" }),
+      this.provider.emit("accountsChanged", {
+        accounts: await this.provider.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" }),
       });
     }
-    return this._providerProxy as SafeEventEmitterProvider;
+    return this.provider as SafeEventEmitterProvider;
   }
 
   public async switchChain(params: { chainId: string }): Promise<SafeEventEmitterProvider> {
-    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_private_key" });
+    const privKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "eth_private_key" });
     return this.setupProvider(privKey);
   }
 
@@ -166,8 +166,8 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
 
     if (this.state.chainId !== chainId) {
-      this.emit("chainChanged", this.state.chainId);
-      this.emit("connect", { chainId });
+      this.provider.emit("chainChanged", this.state.chainId);
+      this.provider.emit("connect", { chainId });
     }
     this.update({ chainId });
     return network;

@@ -25,9 +25,6 @@ export interface WalletConnectProviderConfig extends BaseConfig {
 
 // TODO: Add support for changing chainId
 export class WalletConnectProvider extends BaseProvider<WalletConnectProviderConfig, BaseProviderState, IConnector> {
-  // Assigned in setupProvider
-  public _providerProxy: SafeEventEmitterProvider | null = null;
-
   readonly chainConfig: CustomChainConfig;
 
   private accounts: string[];
@@ -137,7 +134,7 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
   private async onConnectorStateUpdate(connector: IConnector) {
     connector.on("session_update", async (error: Error, payload) => {
       if (error) {
-        this.emit("error", error);
+        this.provider.emit("error", error);
         return;
       }
       const { accounts, chainId, rpcUrl } = payload;
@@ -145,7 +142,7 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
       if (!this.accounts || (accounts && this.accounts !== accounts)) {
         this.accounts = accounts;
         await this.setupEngine(connector);
-        this.emit("accountsChanged", accounts);
+        this.provider.emit("accountsChanged", accounts);
       }
       // Check if chainId changed and trigger event
       if (!this.chainId || (chainId && this.chainId !== chainId)) {
@@ -155,7 +152,7 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
           chainConfig: { ...this.config.chainConfig, chainId: `0x${this.chainId.toString(16)}`, rpcTarget: rpcUrl },
         });
         await this.setupEngine(connector);
-        this.emit("chainChanged", chainId);
+        this.provider.emit("chainChanged", chainId);
       }
     });
   }

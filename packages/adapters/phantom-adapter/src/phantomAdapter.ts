@@ -137,10 +137,15 @@ export class PhantomAdapter extends BaseAdapter<void> {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     try {
       await this._wallet?.disconnect();
+      if (options.cleanup) {
+        this.status = ADAPTER_STATUS.NOT_READY;
+        this.phantomProvider = null;
+        this._wallet = null;
+      }
       this.emit(ADAPTER_EVENTS.DISCONNECTED);
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
@@ -164,8 +169,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
     if (this._wallet) {
       this._wallet.off("disconnect", this._onDisconnect);
       this.rehydrated = false;
-      // ready to be connected again
-      this.status = ADAPTER_STATUS.READY;
+      // ready to be connected again only if it was previously connected and not cleaned up
+      this.status = this.status === ADAPTER_STATUS.CONNECTED ? ADAPTER_STATUS.READY : ADAPTER_STATUS.NOT_READY;
       this.emit(ADAPTER_EVENTS.DISCONNECTED);
     }
   };

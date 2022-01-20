@@ -140,9 +140,9 @@ export class Web3AuthCore extends SafeEventEmitter {
     await this.walletAdapters[walletName].connect(loginParams);
   }
 
-  async logout(): Promise<void> {
+  async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    await this.walletAdapters[this.connectedAdapterName].disconnect();
+    await this.walletAdapters[this.connectedAdapterName].disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

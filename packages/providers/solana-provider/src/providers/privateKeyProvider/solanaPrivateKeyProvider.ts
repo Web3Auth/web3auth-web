@@ -133,7 +133,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
     const existingKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.emit("accountsChanged", {
+      this.provider.emit("accountsChanged", {
         accounts: await this.provider.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "requestAccounts" }),
       });
     }
@@ -141,13 +141,13 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
   }
 
   public async switchChain(params: { chainId: string }): Promise<SafeEventEmitterProvider> {
-    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "" });
+    const privKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "" });
     return this.setupProvider(privKey);
   }
 
@@ -164,8 +164,8 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
       throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chainConfig.rpcTarget}`);
 
     if (this.state.chainId !== chainConfig.chainId) {
-      this.emit("chainChanged", chainConfig.chainId);
-      this.emit("connect", { chainId: this.config.chainConfig.chainId });
+      this.provider.emit("chainChanged", chainConfig.chainId);
+      this.provider.emit("connect", { chainId: this.config.chainConfig.chainId });
     }
     this.update({ chainId: chainConfig.chainId });
     return chainConfig.chainId;

@@ -129,12 +129,19 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
     await this.openloginInstance.logout();
-    // ready to be connected again
-    this.status = ADAPTER_STATUS.READY;
+    if (options.cleanup) {
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.openloginInstance = null;
+      this.providerFactory = null;
+    } else {
+      // ready to be connected again
+      this.status = ADAPTER_STATUS.READY;
+    }
+
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 

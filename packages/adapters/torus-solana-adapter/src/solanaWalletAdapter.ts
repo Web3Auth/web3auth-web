@@ -131,12 +131,20 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
-    // ready to connect again
-    this.status = ADAPTER_STATUS.READY;
+    if (options.cleanup) {
+      // ready to connect again
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.torusInstance = null;
+      this.solanaProviderProxy = null;
+    } else {
+      // ready to connect again
+      this.status = ADAPTER_STATUS.READY;
+    }
+
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 

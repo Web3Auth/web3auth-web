@@ -183,11 +183,17 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     this.store.resetStore();
-    // ready to be connected again
-    this.status = ADAPTER_STATUS.READY;
+    if (options.cleanup) {
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.customAuthInstance = null;
+      this.providerFactory = null;
+    } else {
+      // ready to be connected again
+      this.status = ADAPTER_STATUS.READY;
+    }
     this.customAuthResult = {
       ...DEFAULT_CUSTOM_AUTH_RES,
     };

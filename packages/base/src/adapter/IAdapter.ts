@@ -77,7 +77,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | void>;
-  disconnect(): Promise<void>;
+  disconnect(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
@@ -113,6 +113,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
   }
 
+  setAdapterSettings(_: unknown): void {}
+
   checkConnectionRequirements(): void {
     if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletLoginError.connectionError("Already pending connection");
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
@@ -135,8 +137,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
-
-  abstract setAdapterSettings(adapterSettings: unknown): void;
 }
 
 export interface BaseAdapterConfig {
