@@ -12,6 +12,7 @@ const defaultConfig = {
   ],
   sourceType: "unambiguous",
 };
+
 const babelLoader = {
   test: /\.(ts|js)x?$/,
   exclude: /(node_modules|bower_components)/,
@@ -25,6 +26,7 @@ const babelLoader = {
     },
   },
 };
+
 const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");

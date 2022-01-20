@@ -24,6 +24,7 @@ const DEFAULT_LOGO_URL = {
   light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
   dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
 };
+
 export default class LoginModal extends SafeEventEmitter {
   private $modal!: HTMLDivElement;
 
@@ -60,8 +61,8 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   init() {
-    const web3authIcon = AllImages[`web3auth${this.isDark ? "-light" : ""}`].image;
-    const closeIcon = AllImages.close.image;
+    // const web3authIcon = AllImages[`web3auth${this.isDark ? "-light" : ""}`].image;
+    // const closeIcon = AllImages.close.image;
     this.$modal = htmlToElement(`
         <div id="w3a-modal" class="w3a-modal w3a-modal--hidden${this.isDark ? "" : " w3a-modal--light"}">
             <div class="w3a-modal__inner w3ajs-inner">
@@ -354,84 +355,6 @@ export default class LoginModal extends SafeEventEmitter {
 
     $qrImage.src = qrCode;
   }
-
-  private getSocialLogins(): HTMLDivElement {
-    const expandIcon = AllImages[`expand${this.isDark ? "-light" : ""}`].image;
-    const $socialLogins = htmlToElement(`
-        <div class="w3ajs-social-logins w3a-group w3a-group--social-hidden">
-            <h6 class="w3a-group__title">CONTINUE WITH</h6>
-            <ul class="w3a-adapter-list w3a-adapter-list--shrink w3ajs-socials-adapters"></ul>
-            <button class="w3a-button-expand w3ajs-button-expand" style="display: none;">
-              ${expandIcon}
-              <span class="w3ajs-button-expand-text">View more options</span>
-            </button>
-        </div>
-    `) as HTMLDivElement;
-
-    const $adapterList = $socialLogins.querySelector(".w3ajs-socials-adapters") as HTMLDivElement;
-    const $adapterExpandBtn = $socialLogins.querySelector(".w3ajs-button-expand") as HTMLButtonElement;
-    const $adapterExpandText = $adapterExpandBtn.querySelector(".w3ajs-button-expand-text") as HTMLSpanElement;
-    $adapterExpandBtn.addEventListener("click", () => {
-      $adapterList.classList.toggle("w3a-adapter-list--shrink");
-      $adapterExpandBtn.classList.toggle("w3a-button--rotate");
-      if ($adapterExpandBtn.classList.contains("w3a-button--rotate")) {
-        $adapterExpandText.innerText = "View less options";
-      } else {
-        $adapterExpandText.innerText = "View more options";
-      }
-    });
-
-    return $socialLogins;
-  }
-
-  private getSocialLoginsEmail = (): HTMLDivElement => {
-    const $socialEmail = htmlToElement(`
-        <div class="w3ajs-email-passwordless w3a-group w3a-group--email-hidden">
-            <h6 class="w3a-group__title">EMAIL</h6>
-          <form class="w3ajs-email-passwordless-form">
-            <input class="w3a-text-field" type="email" name="email" required placeholder="Email">
-            <button class="w3a-button" type="submit">Continue with Email</button>
-        </form>
-        </div>
-    `) as HTMLDivElement;
-
-    return $socialEmail;
-  };
-
-  private getExternalWallet = (): HTMLDivElement => {
-    const arrowLeftIcon = AllImages["arrow-left"].image;
-    const walletConnectIcon = AllImages.walletConnect.image;
-    const $externalWallet = htmlToElement(`
-        <div class="w3ajs-external-wallet w3a-group">
-            <div class="w3a-external-toggle w3ajs-external-toggle">
-                <h6 class="w3a-group__title">EXTERNAL WALLET</h6>
-                <button class="w3a-button w3ajs-external-toggle__button">Connect with Wallet</button>
-            </div>
-            <div class="w3a-external-container w3a-external-container--hidden w3ajs-external-container">
-              <button class="w3a-external-back w3ajs-external-back">
-                  ${arrowLeftIcon}
-                  <h6 class="w3a-group__title">Back</h6>
-              </button>
-
-              <!-- Wallet Connect -->
-              <div class="w3ajs-wallet-connect w3a-wallet-connect w3a-wallet-connect--hidden">
-                  <i class="w3a-wallet-connect__logo">${walletConnectIcon}</i>
-                  <div class="w3ajs-wallet-connect__container w3a-wallet-connect__container">
-                    <div>Scan QR code with a WalletConnect-compatible wallet</div>
-                    <img class="w3ajs-wallet-connect-qr w3a-wallet-connect-qr" src="" />
-                  </div>
-              </div>
-              <!-- Other Wallet -->
-              <div class="w3a-external-loader w3ajs-external-loader">
-                <div class="w3ajs-modal-loader__spinner w3a-spinner w3a-spinner--small"><div></div><div></div><div></div><div></div></div>
-              </div>
-              <ul class="w3a-adapter-list w3ajs-wallet-adapters"></ul>
-            </div>
-        </div>
-    `) as HTMLDivElement;
-
-    return $externalWallet;
-  };
 
   private toggleLoader() {
     const $loader = this.$modal.querySelector(".w3ajs-modal-loader");

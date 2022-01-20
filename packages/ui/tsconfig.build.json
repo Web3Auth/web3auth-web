@@ -1,3 +1,6 @@
 {
-  "include": ["src", "css", "assets"]
+  "include": ["src", "css", "assets"],
+  "compilerOptions": {
+    "jsx": "preserve"
+  }
 }
