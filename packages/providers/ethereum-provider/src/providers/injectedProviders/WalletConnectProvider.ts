@@ -1,16 +1,17 @@
 import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { BaseConfig, createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { IConnector, ITxData } from "@walletconnect/types";
 import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
+  isHexStrict,
   RequestArguments,
   SafeEventEmitterProvider,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { BaseProvider, BaseProviderState } from "@web3auth/base-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 import log from "loglevel";
 
@@ -19,24 +20,15 @@ import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { createRandomId } from "../../rpc/utils";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
 
-export interface WalletConnectProviderConfig extends BaseConfig {
+export interface WalletConnectProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
 
-// TODO: Add support for changing chainId
-export class WalletConnectProvider extends BaseProvider<WalletConnectProviderConfig, BaseProviderState, IConnector> {
-  readonly chainConfig: CustomChainConfig;
-
+export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, IConnector> {
   private accounts: string[];
 
-  private chainId: number;
-
   constructor({ config, state }: { config: WalletConnectProviderConfig; state?: BaseProviderState }) {
-    super({ config, state });
-    this.chainConfig = {
-      ...config.chainConfig,
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-    };
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
   }
 
   public static getProviderInstance = async (params: {
@@ -55,17 +47,17 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
 
   protected async lookupNetwork(connector: IConnector): Promise<string> {
     if (!connector.connected) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
-    if (parseInt(this.chainConfig.chainId, 16) !== parseInt(connector.chainId.toString(), 10))
-      throw WalletInitializationError.rpcConnectionError(
-        `Invalid network, net_version is: ${connector.chainId}, expected: ${parseInt(this.chainConfig.chainId, 16)}`
-      );
-    return this.chainConfig.chainId;
+    const { chainId } = this.config.chainConfig;
+    const connectedHexChainId = isHexStrict(connector.chainId.toString()) ? connector.chainId : `0x${connector.chainId.toString(16)}`;
+    if (chainId !== connectedHexChainId)
+      throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
+    return chainId;
   }
 
   private async setupEngine(connector: IConnector): Promise<SafeEventEmitterProvider> {
     const ethMiddleware = await this.getEthMiddleWare(connector);
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createJsonRpcClient(this.chainConfig);
+    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
     engine.push(ethMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
@@ -76,13 +68,12 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
       },
     } as SafeEventEmitterProvider;
     this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    await this.lookupNetwork(connector);
     return this._providerProxy;
   }
 
   private async getEthMiddleWare(connector: IConnector): Promise<JRPCMiddleware<unknown, unknown>> {
-    await this.lookupNetwork(connector);
     this.accounts = connector.accounts || [];
-    this.chainId = connector.chainId;
     const providerHandlers: IProviderHandlers = {
       getPrivateKey: async () => {
         throw ethErrors.rpc.methodNotSupported();
@@ -137,22 +128,23 @@ export class WalletConnectProvider extends BaseProvider<WalletConnectProviderCon
         this.provider.emit("error", error);
         return;
       }
-      const { accounts, chainId, rpcUrl } = payload;
+      const { accounts, chainId: connectedChainId, rpcUrl } = payload;
       // Check if accounts changed and trigger event
       if (!this.accounts || (accounts && this.accounts !== accounts)) {
         this.accounts = accounts;
         await this.setupEngine(connector);
         this.provider.emit("accountsChanged", accounts);
       }
+      const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event
-      if (!this.chainId || (chainId && this.chainId !== chainId)) {
-        this.chainId = chainId;
+      if (connectedChainId && this.state.chainId !== connectedHexChainId) {
+        this.update({ chainId: connectedHexChainId });
         // Handle rpcUrl update
         this.configure({
-          chainConfig: { ...this.config.chainConfig, chainId: `0x${this.chainId.toString(16)}`, rpcTarget: rpcUrl },
+          chainConfig: { ...this.config.chainConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl },
         });
         await this.setupEngine(connector);
-        this.provider.emit("chainChanged", chainId);
+        this.provider.emit("chainChanged", this.config.chainConfig.chainId);
       }
     });
   }

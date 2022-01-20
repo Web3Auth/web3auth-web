@@ -1,7 +1,7 @@
 import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
@@ -14,8 +14,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
   public _providerProxy!: SafeEventEmitterProvider;
 
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
-    super({ config, state });
-    if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
   public async setupProvider(injectedProvider: InjectedProvider): Promise<SafeEventEmitterProvider> {

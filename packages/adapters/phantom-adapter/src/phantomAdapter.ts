@@ -39,8 +39,6 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  // public provider: SafeEventEmitterProvider | null = null;
-
   public _wallet: PhantomWallet | null = null;
 
   private phantomProvider: PhantomInjectedProvider | null = null;

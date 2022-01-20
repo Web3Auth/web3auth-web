@@ -22,9 +22,9 @@ import { createRandomId } from "../../rpc/utils";
 export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
-export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProviderConfig, BaseProviderState, string> {
+export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, string> {
   constructor({ config, state }: { config: SolanaPrivKeyProviderConfig; state?: BaseProviderState }) {
-    super({ config, state });
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
   public static getProviderInstance = async (params: {
@@ -107,7 +107,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<SolanaPrivKeyProvider
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
 
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig);
+    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
     engine.push(this.getChainSwitchMiddleware());
     engine.push(this.getAccountMiddleware());
     engine.push(solanaMiddleware);
