@@ -1,5 +1,6 @@
 import { BaseConfig, BaseController, BaseState } from "@toruslabs/base-controllers";
 import { CustomChainConfig, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseProvider } from "./IBaseProvider";
 
@@ -16,7 +17,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   extends BaseController<C, S>
   implements IBaseProvider<T>
 {
-  // Assigned in setupProvider
+  // should be Assigned in setupProvider
   public _providerProxy: SafeEventEmitterProvider | null = null;
 
   constructor({ config, state }: { config?: C; state?: S }) {
@@ -40,6 +41,20 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   set provider(_: SafeEventEmitterProvider | null) {
     throw new Error("method not implemented");
+  }
+
+  public addChain(chainConfig: CustomChainConfig): void {
+    if (!chainConfig.chainId) throw ethErrors.rpc.invalidParams("chainId is required");
+    if (!chainConfig.rpcTarget) throw ethErrors.rpc.invalidParams("chainId is required");
+    this.configure({
+      networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
+    } as C);
+  }
+
+  public getChainConfig(chainId: string): CustomChainConfig | undefined {
+    const chainConfig = this.config.networks?.[chainId];
+    if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
+    return chainConfig;
   }
 
   abstract setupProvider(provider: T): Promise<SafeEventEmitterProvider>;

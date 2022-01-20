@@ -116,7 +116,6 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
-    log.debug("setting up json rpc client for", this.config.chainConfig);
     // Not a partial anymore because of checks in ctor
     const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
     engine.push(ethMiddleware);
@@ -158,19 +157,11 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     return this.setupProvider(privKey);
   }
 
-  public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw ethErrors.rpc.invalidParams("chainId is required");
-    if (!chainConfig.rpcTarget) throw ethErrors.rpc.invalidParams("chainId is required");
-    this.configure({
-      networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
-    });
-  }
-
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const { chainId } = this.config.chainConfig;
     if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
-    const network = await this._providerProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
+    const network = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "net_version", params: [] });
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
 
@@ -195,12 +186,6 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     };
 
     return Common.custom(customChainParams);
-  }
-
-  private getChainConfig(chainId: string): CustomChainConfig | undefined {
-    const chainConfig = this.config.networks?.[chainId];
-    if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
-    return chainConfig;
   }
 
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {

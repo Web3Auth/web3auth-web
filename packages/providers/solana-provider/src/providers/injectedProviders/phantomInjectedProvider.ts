@@ -21,15 +21,12 @@ export interface PhantomWallet extends SolanaWallet {
 
 // TODO: Add support for changing chainId
 export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, PhantomWallet> {
-  public _providerProxy!: SafeEventEmitterProvider;
-
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config, state });
     if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
   }
 
   public async setupProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider> {
-    await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
@@ -85,11 +82,15 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
       },
     } as SafeEventEmitterProvider;
     this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    await this.lookupNetwork(injectedProvider);
     return this._providerProxy;
   }
 
   protected async lookupNetwork(_: PhantomWallet): Promise<string> {
     const { chainConfig } = this.config;
+    this.update({
+      chainId: chainConfig.chainId,
+    });
     return chainConfig.chainId || "";
     // const genesisHash = await phantomProvider.request<string>({
     //   method: "getGenesisHash",
