@@ -14,6 +14,7 @@ import CustomAuth, {
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -146,7 +147,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     await this.customAuthInstance.init(this.initSettings);
 
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
 
     try {
       if (options.autoConnect) this.rehydrated = true;
@@ -167,14 +168,14 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   async connect(params?: LoginParams): Promise<void> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
       await this.setupProvider(params);
       return;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       log.error("Error while connecting to custom auth", error);
       throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     }
@@ -190,7 +191,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
       ...DEFAULT_CUSTOM_AUTH_RES,
     };
     this.rehydrated = false;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -280,7 +281,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
       this.provider = await this.providerFactory.setupProvider(finalPrivKey);
       log.debug("provider", this.provider);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } else {
       throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     }

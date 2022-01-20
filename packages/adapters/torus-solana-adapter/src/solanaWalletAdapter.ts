@@ -2,6 +2,7 @@ import Torus, { NetworkInterface, TorusCtorArgs, TorusLoginParams, TorusParams }
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -87,7 +88,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       },
     });
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
     try {
       if (options.autoConnect) {
@@ -96,7 +97,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       }
     } catch (error) {
       log.error("Failed to connect with cached torus solana provider", error);
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
     }
   }
 
@@ -105,18 +106,18 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     if (!this.solanaProviderProxy) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
       this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
   }
@@ -128,7 +129,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     // ready to connect again
     this.status = ADAPTER_STATUS.READY;
     this.provider = null;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

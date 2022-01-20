@@ -2,6 +2,7 @@ import Torus, { LoginParams, NetworkInterface, TorusCtorArgs, TorusParams } from
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -78,7 +79,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       network,
     });
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.TORUS_EVM);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_EVM);
 
     try {
       if (options.autoConnect) {
@@ -87,7 +88,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       }
     } catch (error) {
       log.error("Failed to connect with torus evm provider", error);
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
     }
   }
 
@@ -95,13 +96,13 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
       await this.torusInstance.login(this.loginSettings);
       const { chainId } = this.torusInstance.provider;
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         this.emit(
-          ADAPTER_STATUS.ERRORED,
+          ADAPTER_EVENTS.ERRORED,
           WalletInitializationError.fromCode(
             5000,
             `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
@@ -112,12 +113,12 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with torus wallet");
     }
   }
@@ -131,7 +132,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     this.status = ADAPTER_STATUS.READY;
     this.provider = null;
     this.rehydrated = false;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

@@ -2,6 +2,7 @@ import OpenLogin, { getHashQueryParams, OPENLOGIN_NETWORK, OpenLoginOptions } fr
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -93,7 +94,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     await this.openloginInstance.init();
 
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.OPENLOGIN);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN);
 
     try {
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
@@ -109,7 +110,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async connect(params?: OpenloginLoginParams): Promise<void> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
       await this.connectWithProvider(params);
       return;
@@ -117,7 +118,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
   }
@@ -129,7 +130,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
     this.provider = null;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -179,7 +180,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       }
       this.provider = await this.providerFactory.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
     }
   }
 }

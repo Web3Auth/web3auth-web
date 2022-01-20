@@ -55,6 +55,11 @@ export const ADAPTER_STATUS = {
   DISCONNECTED: "disconnected",
   ERRORED: "errored",
 } as const;
+
+export const ADAPTER_EVENTS = {
+  ...ADAPTER_STATUS,
+  ADAPTER_DATA_UPDATED: "adapter_data_updated",
+} as const;
 export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
 
 export type CONNECTED_EVENT_DATA = {
@@ -121,6 +126,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }
 
+  updateAdapterData(data: unknown): void {
+    this.adapterData = data;
+    this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  }
+
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   abstract disconnect(): Promise<void>;
@@ -180,4 +190,9 @@ export type LoginMethodConfig = Record<
 
 export interface WalletConnectV1Data {
   uri: string;
+}
+
+export interface IAdapterDataEvent {
+  adapterName: string;
+  data: unknown;
 }

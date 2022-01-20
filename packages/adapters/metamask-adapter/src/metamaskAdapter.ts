@@ -2,6 +2,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -57,14 +58,14 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.metamaskProvider = (await detectEthereumProvider({ mustBeMetaMask: true })) as EthereumProvider;
     if (!this.metamaskProvider) throw WalletInitializationError.notInstalled("Metamask extension is not installed");
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.METAMASK);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.METAMASK);
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();
       }
     } catch (error) {
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
     }
   }
 
@@ -76,7 +77,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
 
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
     try {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
@@ -90,12 +91,12 @@ class MetamaskAdapter extends BaseAdapter<void> {
         // ready to be connected again
         this.disconnect();
       });
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw WalletLoginError.connectionError("Failed to login with metamask wallet");
     }
   }
@@ -107,7 +108,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
     this.rehydrated = false;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

@@ -1,5 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -141,33 +142,38 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
-    walletAdapter.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.status = ADAPTER_STATUS.CONNECTED;
       const connectedAd = this.walletAdapters[data.adapter];
       this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
-      this.emit(ADAPTER_STATUS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.DISCONNECTED, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
       this.provider = null;
       this.clearCache();
-      this.emit(ADAPTER_STATUS.DISCONNECTED, data);
+      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
       log.debug("disconnected", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.CONNECTING, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(ADAPTER_STATUS.CONNECTING, data);
+      this.emit(ADAPTER_EVENTS.CONNECTING, data);
       log.debug("connecting", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.ERRORED, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.ERRORED, (data) => {
       this.status = ADAPTER_STATUS.ERRORED;
       this.clearCache();
-      this.emit(ADAPTER_STATUS.ERRORED, data);
+      this.emit(ADAPTER_EVENTS.ERRORED, data);
       log.debug("errored", this.status, this.connectedAdapterName);
+    });
+
+    walletAdapter.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (data) => {
+      log.debug("adapter data updated", data);
+      this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, data);
     });
   }
 
