@@ -73,8 +73,6 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public readonly loginSettings: LoginSettings;
 
   private adapterSettings: CustomAuthArgs | null = null;
@@ -124,6 +122,10 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     // syncing storage with custom auth result.
     this.store = CustomAuthStore.getInstance();
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    return this.providerFactory?.provider || null;
   }
 
   // should be called only before initialization.
@@ -186,7 +188,6 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     this.store.resetStore();
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
-    this.provider = null;
     this.customAuthResult = {
       ...DEFAULT_CUSTOM_AUTH_RES,
     };
@@ -278,8 +279,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
-      this.provider = await this.providerFactory.setupProvider(finalPrivKey);
-      log.debug("provider", this.provider);
+      await this.providerFactory.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } else {

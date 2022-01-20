@@ -57,7 +57,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?._providerProxy || null;
+    return this.phantomProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {

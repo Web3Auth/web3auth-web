@@ -36,8 +36,6 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public cachedAdapter: string | null = null;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
@@ -54,6 +52,18 @@ export class Web3AuthCore extends SafeEventEmitter {
   get canConnect(): boolean {
     const adapters = Object.keys(this.walletAdapters);
     return adapters.length > 0 && adapters.every((adapterName) => this.walletAdapters[adapterName].status === "ready");
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      const adapter = this.walletAdapters[this.connectedAdapterName];
+      return adapter.provider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   public async init(): Promise<void> {
@@ -144,8 +154,6 @@ export class Web3AuthCore extends SafeEventEmitter {
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.status = ADAPTER_STATUS.CONNECTED;
-      const connectedAd = this.walletAdapters[data.adapter];
-      this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
@@ -154,7 +162,6 @@ export class Web3AuthCore extends SafeEventEmitter {
     walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      this.provider = null;
       this.clearCache();
       this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
       log.debug("disconnected", this.status, this.connectedAdapterName);

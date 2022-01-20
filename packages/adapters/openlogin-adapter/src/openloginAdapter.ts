@@ -44,8 +44,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   private openloginOptions: OpenLoginOptions;
@@ -79,6 +77,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   get chainConfigProxy(): CustomChainConfig | undefined {
     return this.chainConfig ? { ...this.chainConfig } : undefined;
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    return this.providerFactory?.provider || null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -129,7 +135,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     await this.openloginInstance.logout();
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
-    this.provider = null;
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
@@ -178,7 +183,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
-      this.provider = await this.providerFactory.setupProvider(finalPrivKey);
+      await this.providerFactory.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
     }

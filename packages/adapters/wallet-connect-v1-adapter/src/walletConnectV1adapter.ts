@@ -37,13 +37,13 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public adapterData: WalletConnectV1Data = {
     uri: "",
   };
 
   public connector: WalletConnect | null = null;
+
+  private wcProviderFactory: WalletConnectProvider | null = null;
 
   private rehydrated = false;
 
@@ -57,6 +57,17 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     return !!this.connector?.connected;
   }
 
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.wcProviderFactory) {
+      return this.wcProviderFactory.provider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
+  }
+
   async init(): Promise<void> {
     super.checkInitializationRequirements();
     if (!this.chainConfig) {
@@ -66,8 +77,10 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     walletConnectOptions.bridge = walletConnectOptions.bridge || "https://bridge.walletconnect.org";
     // Create a connector
     this.connector = new WalletConnect(walletConnectOptions);
+    this.wcProviderFactory = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
+
     if (this.connector.connected) {
-      this.provider = this.connector as unknown as SafeEventEmitterProvider;
+      await this.wcProviderFactory.setupProvider(this.connector);
       this.rehydrated = true;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
       return;
@@ -185,7 +198,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   private async onConnectHandler(params: { accounts: string[]; chainId: string }) {
-    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector || !this.wcProviderFactory) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
 
     const { chainId } = params;
@@ -199,8 +212,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       );
       return;
     }
-    const wcProviderFactory = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
-    this.provider = await wcProviderFactory.setupProvider(this.connector);
+    await this.wcProviderFactory.setupProvider(this.connector);
     this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
   }
 

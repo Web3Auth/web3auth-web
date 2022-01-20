@@ -40,8 +40,6 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public torusInstance: Torus | null = null;
 
   private torusWalletOptions?: TorusCtorArgs;
@@ -58,6 +56,17 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig;
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.torusInstance) {
+      return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -110,7 +119,6 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
         );
         return;
       }
-      this.provider = this.torusInstance.provider as unknown as SafeEventEmitterProvider;
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
@@ -130,7 +138,6 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     this.torusInstance.hideTorusButton();
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
-    this.provider = null;
     this.rehydrated = false;
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }

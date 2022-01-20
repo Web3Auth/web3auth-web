@@ -43,8 +43,6 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public torusInstance: Torus | null = null;
 
   private torusWalletOptions?: TorusCtorArgs;
@@ -63,6 +61,17 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig;
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProviderProxy) {
+      return this.solanaProviderProxy.provider as unknown as SafeEventEmitterProvider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -109,7 +118,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      this.provider = await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
+      await this.solanaProviderProxy.setupProvider(this.torusInstance.provider as InjectedProvider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
@@ -128,7 +137,6 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     await this.torusInstance.logout();
     // ready to connect again
     this.status = ADAPTER_STATUS.READY;
-    this.provider = null;
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 

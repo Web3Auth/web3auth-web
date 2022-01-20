@@ -41,9 +41,6 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  // added after connecting
-  public provider: SafeEventEmitterProvider | null = null;
-
   private rehydrated = false;
 
   private metamaskProvider: EthereumProvider | null = null;
@@ -51,6 +48,17 @@ class MetamaskAdapter extends BaseAdapter<void> {
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
     this.chainConfig = adapterOptions.chainConfig;
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.metamaskProvider) {
+      return this.metamaskProvider as SafeEventEmitterProvider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -86,7 +94,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
         await this.switchChain(this.chainConfig as CustomChainConfig);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.provider = this.metamaskProvider;
+      if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
       this.provider.once("disconnect", () => {
         // ready to be connected again
         this.disconnect();
@@ -104,7 +112,6 @@ class MetamaskAdapter extends BaseAdapter<void> {
   async disconnect(): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     this.provider?.removeAllListeners();
-    this.provider = null;
     // ready to be connected again
     this.status = ADAPTER_STATUS.READY;
     this.rehydrated = false;
