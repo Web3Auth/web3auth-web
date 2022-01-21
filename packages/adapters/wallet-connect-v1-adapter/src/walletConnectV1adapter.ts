@@ -111,7 +111,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
             this.emit(ADAPTER_EVENTS.ERRORED, error);
           }
           await this.onConnectHandler(payload.params[0]);
-          this.connector?.off("connect");
           return resolve();
         });
       } catch (error: unknown) {
