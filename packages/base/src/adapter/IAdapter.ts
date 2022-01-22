@@ -76,8 +76,8 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
-  connect(params?: T): Promise<SafeEventEmitterProvider | void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
+  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
@@ -134,7 +134,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
+  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
 }

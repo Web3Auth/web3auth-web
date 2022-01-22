@@ -55,7 +55,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?.provider || null;
+    return this.phantomProvider?.isInitialized ? this.phantomProvider : null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -87,7 +87,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
     }
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -97,10 +97,10 @@ export class PhantomAdapter extends BaseAdapter<void> {
       if (!this._wallet.isConnected) {
         const handleDisconnect = this._wallet._handleDisconnect;
         try {
-          await new Promise<void>((resolve, reject) => {
+          await new Promise<SafeEventEmitterProvider | null>((resolve, reject) => {
             const connect = async () => {
               await this.connectWithProvider(this._wallet as PhantomWallet);
-              resolve();
+              resolve(this.provider);
             };
             if (!this._wallet) return reject(WalletInitializationError.notInstalled());
             this._wallet.once("connect", connect);
@@ -126,6 +126,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
       if (!this._wallet.publicKey) throw WalletLoginError.connectionError();
       this._wallet.on("disconnect", this._onDisconnect);
+
+      return this.provider;
     } catch (error: unknown) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;

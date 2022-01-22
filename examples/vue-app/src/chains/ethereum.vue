@@ -8,10 +8,10 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
-      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
+      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -97,12 +97,10 @@ export default Vue.extend({
     async initEthAuth() {
       try {
         this.parseConfig();
-        console.log("config", this.modalConfig);
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
-        console.log("modal initialized", config);
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
@@ -132,9 +130,9 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect() {
+    async connect() {
       try {
-        this.web3auth.connect();
+        this.provider = await this.web3auth.connect();
       } catch (error) {
         console.error(error);
         this.console("error", error);

@@ -12,15 +12,12 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!connected" name="google" @click="connect" style="cursor: pointer">
-        {{ loginButtonStatus }} Login With Google
-      </button>
-      <button class="rpcBtn" v-if="!connected" name="facebook" @click="connect" style="cursor: pointer">
-        {{ loginButtonStatus }} Login With facebook
-      </button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
-      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="!provider" name="google" @click="connect" style="cursor: pointer">Login With Google</button>
+      <button class="rpcBtn" v-if="!provider" name="facebook" @click="connect" style="cursor: pointer">Login With facebook</button>
+      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
+
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -100,9 +97,12 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect(e) {
+    async connect(e) {
       try {
-        this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: e.target.name, login_hint: "" } as OpenloginLoginParams);
+        this.provider = await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+          loginProvider: e.target.name,
+          login_hint: "",
+        } as OpenloginLoginParams);
       } catch (error) {
         console.error(error);
         this.console("error", error);

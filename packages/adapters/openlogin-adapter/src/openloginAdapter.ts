@@ -80,7 +80,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.providerFactory?.provider || null;
+    return this.providerFactory?.isInitialized ? this.providerFactory : null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -113,13 +113,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  async connect(params?: OpenloginLoginParams): Promise<void> {
+  async connect(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
       await this.connectWithProvider(params);
-      return;
+      return this.provider;
     } catch (error) {
       log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected

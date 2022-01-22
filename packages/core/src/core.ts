@@ -134,10 +134,10 @@ export class Web3AuthCore extends SafeEventEmitter {
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<void> {
+  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
     if (!this.walletAdapters[walletName])
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    await this.walletAdapters[walletName].connect(loginParams);
+    return this.walletAdapters[walletName].connect(loginParams);
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {

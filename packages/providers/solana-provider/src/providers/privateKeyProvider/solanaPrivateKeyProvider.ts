@@ -3,7 +3,7 @@ import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-contro
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
 import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState, createRandomId } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
@@ -17,12 +17,14 @@ import {
   IChainSwitchHandlers,
   IProviderHandlers,
 } from "../../rpc/solanaRpcMiddlewares";
-import { createRandomId } from "../../rpc/utils";
 
 export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
-export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, string> {
+export interface SolanaPrivKeyProviderState extends BaseProviderState {
+  privateKey?: string;
+}
+export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, SolanaPrivKeyProviderState, string> {
   constructor({ config, state }: { config: SolanaPrivKeyProviderConfig; state?: BaseProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
@@ -32,10 +34,18 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, B
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
   }): Promise<SafeEventEmitterProvider> => {
     const providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
-    return providerFactory.setupProvider(params.privKey);
+    await providerFactory.setupProvider(params.privKey);
+    return providerFactory;
   };
 
-  public async setupProvider(privKey: string): Promise<SafeEventEmitterProvider> {
+  public async enable(): Promise<string[]> {
+    if (!this.state.privateKey)
+      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: -32603 });
+    await this.setupProvider(this.state.privateKey);
+    return this._providerEngineProxy.sendAsync({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" });
+  }
+
+  public async setupProvider(privKey: string): Promise<void> {
     const transactionGenerator = (serializedTx: string): Transaction => {
       const decodedTx = bs58.decode(serializedTx);
       const tx = Transaction.populate(Message.from(decodedTx));
@@ -76,12 +86,12 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, B
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+        if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
 
         const transaction = transactionGenerator(req.params?.message as string);
         transaction.sign(keyPair);
 
-        const sig = await this.provider.sendAsync<string[], string>({
+        const sig = await this._providerEngineProxy.sendAsync<string[], string>({
           jsonrpc: "2.0",
           id: createRandomId(),
           method: "sendTransaction",
@@ -121,39 +131,36 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, B
       },
     } as SafeEventEmitterProvider;
 
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
 
     await this.lookupNetwork();
-
-    return this._providerProxy;
   }
 
-  public async updateAccount(params: { privateKey: string }): Promise<SafeEventEmitterProvider> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-    const existingKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "solanaPrivateKey" });
+  public async updateAccount(params: { privateKey: string }): Promise<void> {
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    const existingKey = await this._providerEngineProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.provider.emit("accountsChanged", {
-        accounts: await this.provider.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "requestAccounts" }),
+      this._providerEngineProxy.emit("accountsChanged", {
+        accounts: await this._providerEngineProxy.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "requestAccounts" }),
       });
     }
-    return this.provider as SafeEventEmitterProvider;
   }
 
-  public async switchChain(params: { chainId: string }): Promise<SafeEventEmitterProvider> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this.provider.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "" });
-    return this.setupProvider(privKey);
+    const privKey = await this._providerEngineProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "" });
+    await this.setupProvider(privKey);
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-    const health = await this.provider.sendAsync<string[], string>({
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    const health = await this._providerEngineProxy.sendAsync<string[], string>({
       jsonrpc: "2.0",
       id: createRandomId(),
       method: "getHealth",
@@ -164,8 +171,8 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, B
       throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chainConfig.rpcTarget}`);
 
     if (this.state.chainId !== chainConfig.chainId) {
-      this.provider.emit("chainChanged", chainConfig.chainId);
-      this.provider.emit("connect", { chainId: this.config.chainConfig.chainId });
+      this.emit("chainChanged", chainConfig.chainId);
+      this.emit("connect", { chainId: this.config.chainConfig.chainId });
     }
     this.update({ chainId: chainConfig.chainId });
     return chainConfig.chainId;

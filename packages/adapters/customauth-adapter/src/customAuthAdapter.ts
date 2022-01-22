@@ -125,7 +125,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.providerFactory?.provider || null;
+    return this.providerFactory?.isInitialized ? this.providerFactory : null;
   }
 
   // should be called only before initialization.
@@ -167,13 +167,13 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  async connect(params?: LoginParams): Promise<void> {
+  async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
       await this.setupProvider(params);
-      return;
+      return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;

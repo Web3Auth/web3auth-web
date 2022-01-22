@@ -12,15 +12,11 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!connected" name="google" @click="connect" style="cursor: pointer">
-        {{ loginButtonStatus }} Login With Google
-      </button>
-      <button class="rpcBtn" v-if="!connected" name="twitter" @click="connect" style="cursor: pointer">
-        {{ loginButtonStatus }} Login With twitter
-      </button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc v-if="connected && provider" :provider="provider" :console="console"></EthRpc>
-      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="!provider" name="google" @click="connect" style="cursor: pointer">Login With Google</button>
+      <button class="rpcBtn" v-if="!provider" name="twitter" @click="connect" style="cursor: pointer">Login With twitter</button>
+      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -37,7 +33,6 @@ import Vue from "vue";
 
 import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
-import SolRpc from "../rpc/solanaRpc.vue";
 import { OpenloginLoginParams } from ".yalc/@web3auth/openlogin-adapter/dist/types";
 
 export default Vue.extend({
@@ -125,9 +120,12 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect(e) {
+    async connect(e) {
       try {
-        this.web3auth.connectTo(WALLET_ADAPTERS.CUSTOM_AUTH, { loginProvider: e.target.name, login_hint: "" } as OpenloginLoginParams);
+        this.provider = await this.web3auth.connectTo(WALLET_ADAPTERS.CUSTOM_AUTH, {
+          loginProvider: e.target.name,
+          login_hint: "",
+        } as OpenloginLoginParams);
       } catch (error) {
         console.error(error);
         this.console("error", error);

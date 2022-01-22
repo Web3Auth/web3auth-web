@@ -19,6 +19,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import log from "loglevel";
 
@@ -101,7 +102,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     }
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
@@ -110,24 +111,21 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       await this.torusInstance.login(this.loginSettings);
       const { chainId } = this.torusInstance.provider;
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
-        this.emit(
-          ADAPTER_EVENTS.ERRORED,
-          WalletInitializationError.fromCode(
-            5000,
-            `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
-          )
+        throw WalletInitializationError.fromCode(
+          5000,
+          `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
         );
-        return;
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
-      throw WalletLoginError.connectionError("Failed to login with torus wallet");
+      this.emit(ADAPTER_STATUS.ERRORED, error);
+      throw error instanceof Web3AuthError ? error : WalletLoginError.connectionError("Failed to login with torus wallet");
     }
   }
 

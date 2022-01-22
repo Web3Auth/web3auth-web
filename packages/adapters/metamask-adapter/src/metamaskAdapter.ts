@@ -79,7 +79,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   setAdapterSettings(_: unknown): void {}
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     // set default to mainnet
     if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
@@ -100,6 +100,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
         this.disconnect();
       });
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;

@@ -25,7 +25,7 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public async setupProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider> {
+  public async setupProvider(injectedProvider: PhantomWallet): Promise<void> {
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
@@ -80,9 +80,8 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
         return provider.sendAsync(args);
       },
     } as SafeEventEmitterProvider;
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
     await this.lookupNetwork(injectedProvider);
-    return this._providerProxy;
   }
 
   protected async lookupNetwork(_: PhantomWallet): Promise<string> {

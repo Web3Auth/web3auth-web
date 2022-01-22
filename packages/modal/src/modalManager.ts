@@ -1,10 +1,12 @@
 import {
   ADAPTER_CATEGORY,
+  ADAPTER_EVENTS,
   ADAPTER_STATUS,
   BaseAdapterConfig,
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
+  SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -198,9 +200,18 @@ export class Web3Auth extends Web3AuthCore {
     }
   }
 
-  public connect() {
+  public async connect(): Promise<SafeEventEmitterProvider | null> {
     if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    if (this.provider) return this.provider;
     this.loginModal.toggleModal();
+    return new Promise((resolve, reject) => {
+      this.once(ADAPTER_EVENTS.CONNECTED, () => {
+        return resolve(this.provider);
+      });
+      this.once(ADAPTER_EVENTS.ERRORED, (err: unknown) => {
+        return reject(err);
+      });
+    });
   }
 
   private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWallets: boolean }): Promise<void> {
