@@ -31,7 +31,7 @@ export interface OpenloginLoginParams {
   loginProvider: string;
 }
 
-type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
+type PrivateKeyProvider = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 
 export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
@@ -50,7 +50,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private loginSettings: LoginSettings = {};
 
-  private providerFactory: ProviderFactory | null = null;
+  private privKeyProvider: PrivateKeyProvider | null = null;
 
   constructor(params: OpenloginAdapterOptions) {
     super();
@@ -80,7 +80,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.providerFactory?.isInitialized ? this.providerFactory : null;
+    return this.privKeyProvider?.isInitialized ? this.privKeyProvider : null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -136,7 +136,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
       this.openloginInstance = null;
-      this.providerFactory = null;
+      this.privKeyProvider = null;
     } else {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
@@ -171,10 +171,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -190,7 +190,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
-      await this.providerFactory.setupProvider(finalPrivKey);
+      await this.privKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
     }
