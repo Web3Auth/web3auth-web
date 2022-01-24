@@ -239,6 +239,7 @@
 #w3a-modal .w3a-header {
     display: flex;
     color: var(--text-color2);
+    align-items: center;
 }
 #w3a-modal .w3a-header__logo {
     height: auto;
