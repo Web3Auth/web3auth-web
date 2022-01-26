@@ -202,6 +202,7 @@ export class Web3Auth extends Web3AuthCore {
 
   public async connect(): Promise<SafeEventEmitterProvider | null> {
     if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    // if already connected return provider
     if (this.provider) return this.provider;
     this.loginModal.toggleModal();
     return new Promise((resolve, reject) => {
@@ -276,6 +277,10 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+      if (visibility && this.status !== ADAPTER_STATUS.CONNECTING && this.status !== ADAPTER_STATUS.CONNECTED) {
+        // refreshing session for wallet connect whenever modal is opened.
+        this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
+      }
     });
   }
 }

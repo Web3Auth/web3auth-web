@@ -1,6 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { getChainConfig } from "..";
+import { getChainConfig, WALLET_ADAPTERS } from "..";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -116,14 +116,16 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   setAdapterSettings(_: unknown): void {}
 
   checkConnectionRequirements(): void {
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletLoginError.connectionError("Already pending connection");
+    // we reconnect without killing existing wallet connect session on calling connect again.
+    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
+    else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
+
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
     if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
   }
 
   checkInitializationRequirements(): void {
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }

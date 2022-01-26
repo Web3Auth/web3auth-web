@@ -49,11 +49,6 @@ export class Web3AuthCore extends SafeEventEmitter {
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
-  get canConnect(): boolean {
-    const adapters = Object.keys(this.walletAdapters);
-    return adapters.length > 0 && adapters.every((adapterName) => this.walletAdapters[adapterName].status === "ready");
-  }
-
   get provider(): SafeEventEmitterProvider | null {
     if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
       const adapter = this.walletAdapters[this.connectedAdapterName];
@@ -159,6 +154,7 @@ export class Web3AuthCore extends SafeEventEmitter {
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
     });
+
     walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
