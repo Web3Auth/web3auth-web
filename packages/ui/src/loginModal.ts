@@ -121,9 +121,34 @@ export default class LoginModal extends SafeEventEmitter {
 
     const $torusWallet = this.getSocialLogins();
     const $torusWalletEmail = this.getSocialLoginsEmail();
-    const $externalWallet = this.getExternalWallet();
 
+    $closeBtn.addEventListener("click", () => this.toggleModal());
+
+    $loaderCloseBtn?.addEventListener("click", () => {
+      const errorModal = this.$modal.classList.contains("w3a-modal--error");
+      if (this.state.connected || errorModal) {
+        this.toggleMessage("");
+        this.toggleModal();
+      } else {
+        this.toggleMessage("");
+      }
+    });
+
+    $content?.appendChild($torusWallet);
+    $content?.appendChild($torusWalletEmail);
+
+    document.body.appendChild(this.$modal);
+    this.state.initialized = true;
+  }
+
+  initExternalWalletContainer = () => {
+    const $content = this.$modal.querySelector(".w3ajs-content");
+    const $torusWallet = this.$modal.querySelector(".w3ajs-social-logins");
+    const $torusWalletEmail = this.$modal.querySelector(".w3ajs-email-passwordless");
+
+    const $externalWallet = this.getExternalWallet();
     const $externalToggle = $externalWallet.querySelector(".w3ajs-external-toggle");
+
     const $externalToggleButton = $externalToggle?.querySelector(".w3ajs-external-toggle__button");
     const $externalBackButton = $externalWallet.querySelector(".w3ajs-external-back");
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
@@ -146,26 +171,8 @@ export default class LoginModal extends SafeEventEmitter {
       $torusWallet.classList.toggle("w3a-group--hidden");
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
     });
-
-    $closeBtn.addEventListener("click", () => this.toggleModal());
-
-    $loaderCloseBtn?.addEventListener("click", () => {
-      const errorModal = this.$modal.classList.contains("w3a-modal--error");
-      if (this.state.connected || errorModal) {
-        this.toggleMessage("");
-        this.toggleModal();
-      } else {
-        this.toggleMessage("");
-      }
-    });
-
-    $content?.appendChild($torusWallet);
-    $content?.appendChild($torusWalletEmail);
     $content?.appendChild($externalWallet);
-
-    document.body.appendChild(this.$modal);
-    this.state.initialized = true;
-  }
+  };
 
   toggleModal = (isErrorOnly = false): void => {
     const hideClass = "w3a-modal--hidden";
@@ -195,7 +202,7 @@ export default class LoginModal extends SafeEventEmitter {
     const $socialLogins = this.$modal.querySelector(".w3ajs-social-logins");
     const $socialEmailPasswordless = this.$modal.querySelector(".w3ajs-email-passwordless");
 
-    if (!$externalContainer.classList.contains("w3a-external-container--hidden")) {
+    if ($externalContainer && !$externalContainer.classList.contains("w3a-external-container--hidden")) {
       $externalContainer?.classList.add("w3a-external-container--hidden");
       $externalToggle?.classList.remove("w3a-external-toggle--hidden");
       $socialLogins.classList.remove("w3a-group--hidden");
@@ -262,12 +269,13 @@ export default class LoginModal extends SafeEventEmitter {
   addWalletLogins = (
     adaptersConfig: Record<string, BaseAdapterConfig>,
     adaptersData: Record<string, unknown>,
-    options?: { showExternalWallets: boolean }
+    options?: { showExternalWalletsOnly: boolean }
   ): void => {
+    log.info("showExternalWallets", options.showExternalWalletsOnly);
     log.info("adaptersConfig", adaptersConfig);
     log.info("adaptersData", adaptersData);
 
-    if (options.showExternalWallets) {
+    if (options.showExternalWalletsOnly) {
       this.showExternalWallets();
     }
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;
