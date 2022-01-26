@@ -10,7 +10,9 @@
       <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
       <button class="rpcBtn" @click="getConnectedChainId" style="cursor: pointer">Get chainId</button>
       <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'custom-auth'" @click="addChain" style="cursor: pointer">Add Chain</button>
+      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'custom-auth'" @click="addChain" style="cursor: pointer">
+        Add Chain
+      </button>
       <button class="rpcBtn" @click="switchChain" style="cursor: pointer">Switch Chain</button>
     </section>
     <section
