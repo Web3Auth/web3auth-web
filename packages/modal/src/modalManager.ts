@@ -273,5 +273,9 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       await this.logout();
     });
+    this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
+      log.debug("is login modal visible", visibility);
+      this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+    });
   }
 }

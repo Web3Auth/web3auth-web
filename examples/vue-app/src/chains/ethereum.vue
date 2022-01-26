@@ -12,6 +12,8 @@
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
+      <span>{{ connecting }}</span>
+
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -22,6 +24,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -60,6 +63,7 @@ export default Vue.extend({
       loading: false,
       loginButtonStatus: "",
       connected: false,
+      connecting: false,
       provider: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
@@ -117,6 +121,7 @@ export default Vue.extend({
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
         this.console("connecting");
+        this.connecting = true;
         this.loginButtonStatus = "Connecting...";
       });
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
@@ -128,6 +133,9 @@ export default Vue.extend({
         console.log("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
+      });
+      web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
+        this.connecting = isVisible;
       });
     },
     async connect() {

@@ -183,11 +183,13 @@ export default class LoginModal extends SafeEventEmitter {
       this.$modal.classList.remove(hideClass);
       setTimeout(() => {
         $inner.classList.add("w3a-modal__inner--active");
+        this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, true);
       }, 100);
     } else {
       $inner.classList.remove("w3a-modal__inner--active");
       setTimeout(() => {
         this.$modal.classList.add(hideClass);
+        this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
       }, 200);
     }
 
