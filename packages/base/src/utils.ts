@@ -29,3 +29,7 @@ export function storageAvailable(type: string): boolean {
     );
   }
 }
+
+export const isHexStrict = (hex: string): boolean => {
+  return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
+};

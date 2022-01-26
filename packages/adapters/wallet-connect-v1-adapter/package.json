@@ -37,8 +37,9 @@
   },
   "dependencies": {
     "@walletconnect/types": "~1.7.0",
-    "@walletconnect/web3-provider": "~1.7.0",
+    "@walletconnect/client": "~1.7.0",
     "@web3auth/base": "^0.1.1",
+    "@web3auth/ethereum-provider": "^0.1.1",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {

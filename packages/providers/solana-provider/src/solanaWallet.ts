@@ -13,7 +13,7 @@ export class SolanaWallet implements ISolanaWallet {
 
   public async requestAccounts(): Promise<string[]> {
     const accounts = await this.provider.request<string[]>({
-      method: "solana_requestAccounts",
+      method: "requestAccounts",
       params: {},
     });
     return accounts;

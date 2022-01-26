@@ -31,7 +31,7 @@ export function createRequestAccountsMiddleware({
 }): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware(async (request, response, next) => {
     const { method } = request;
-    if (method !== "solana_requestAccounts") return next();
+    if (method !== "requestAccounts") return next();
 
     if (!requestAccounts) throw new Error("WalletMiddleware - opts.requestAccounts not provided");
     // This calls the UI login function
@@ -70,4 +70,33 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey),
   ]);
+}
+export interface AddSolanaChainParameter {
+  chainId: string; // A 0x-prefixed hexadecimal string
+  chainName: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string; // 2-6 characters long
+    decimals: 18;
+  };
+  rpcUrls: string[];
+  blockExplorerUrls?: string[];
+}
+
+export interface IChainSwitchHandlers {
+  addNewChainConfig: (req: JRPCRequest<AddSolanaChainParameter>) => Promise<void>;
+  switchSolanaChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
+}
+export function createChainSwitchMiddleware({ addNewChainConfig, switchSolanaChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
+  return mergeMiddleware([
+    createGenericJRPCMiddleware<AddSolanaChainParameter, void>("addSolanaChain", addNewChainConfig),
+    createGenericJRPCMiddleware<{ chainId: string }, void>("switchSolanaChain", switchSolanaChain),
+  ]);
+}
+
+export interface IAccountHandlers {
+  updatePrivatekey: (req: JRPCRequest<{ privateKey: string }>) => Promise<void>;
+}
+export function createAccountMiddleware({ updatePrivatekey }: IAccountHandlers): JRPCMiddleware<unknown, unknown> {
+  return mergeMiddleware([createGenericJRPCMiddleware<{ privateKey: string }, void>("updateAccount", updatePrivatekey)]);
 }

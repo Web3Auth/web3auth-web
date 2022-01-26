@@ -1,6 +1,7 @@
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -38,8 +39,6 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public _wallet: PhantomWallet | null = null;
 
   private phantomProvider: PhantomInjectedProvider | null = null;
@@ -55,6 +54,14 @@ export class PhantomAdapter extends BaseAdapter<void> {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
 
+  get provider(): SafeEventEmitterProvider | null {
+    return this.phantomProvider?.isInitialized ? this.phantomProvider : null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
+  }
+
   setAdapterSettings(_: unknown): void {}
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -67,7 +74,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
     if (!this._wallet) throw WalletInitializationError.notInstalled();
     this.phantomProvider = new PhantomInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.PHANTOM);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.PHANTOM);
 
     try {
       if (options.autoConnect) {
@@ -80,20 +87,20 @@ export class PhantomAdapter extends BaseAdapter<void> {
     }
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<SafeEventEmitterProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(ADAPTER_STATUS.CONNECTING, { adapter: WALLET_ADAPTERS.PHANTOM });
+      this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.PHANTOM });
 
       if (!this._wallet) throw WalletInitializationError.notInstalled();
       if (!this._wallet.isConnected) {
         const handleDisconnect = this._wallet._handleDisconnect;
         try {
-          await new Promise<void>((resolve, reject) => {
+          await new Promise<SafeEventEmitterProvider | null>((resolve, reject) => {
             const connect = async () => {
               await this.connectWithProvider(this._wallet as PhantomWallet);
-              resolve();
+              resolve(this.provider);
             };
             if (!this._wallet) return reject(WalletInitializationError.notInstalled());
             this._wallet.once("connect", connect);
@@ -119,22 +126,29 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
       if (!this._wallet.publicKey) throw WalletLoginError.connectionError();
       this._wallet.on("disconnect", this._onDisconnect);
+
+      return this.provider;
     } catch (error: unknown) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw error;
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     try {
       await this._wallet?.disconnect();
-      this.emit(ADAPTER_STATUS.DISCONNECTED);
+      if (options.cleanup) {
+        this.status = ADAPTER_STATUS.NOT_READY;
+        this.phantomProvider = null;
+        this._wallet = null;
+      }
+      this.emit(ADAPTER_EVENTS.DISCONNECTED);
     } catch (error: unknown) {
-      this.emit(ADAPTER_STATUS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
+      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }
   }
 
@@ -145,20 +159,19 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   private async connectWithProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
-    this.provider = await this.phantomProvider.setupProvider(injectedProvider);
+    await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 
   private _onDisconnect = () => {
     if (this._wallet) {
       this._wallet.off("disconnect", this._onDisconnect);
-      this.provider = null;
       this.rehydrated = false;
-      // ready to be connected again
-      this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_STATUS.DISCONNECTED);
+      // ready to be connected again only if it was previously connected and not cleaned up
+      this.status = this.status === ADAPTER_STATUS.CONNECTED ? ADAPTER_STATUS.READY : ADAPTER_STATUS.NOT_READY;
+      this.emit(ADAPTER_EVENTS.DISCONNECTED);
     }
   };
 }

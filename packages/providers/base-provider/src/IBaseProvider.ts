@@ -1,5 +1,5 @@
-import type { SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import type { SafeEventEmitterProvider } from "@web3auth/base";
 
-export interface IBaseProvider<T> {
-  setupProvider(provider: T): Promise<SafeEventEmitterProvider>;
+export interface IBaseProvider<T> extends SafeEventEmitterProvider {
+  setupProvider(provider: T): Promise<void>;
 }

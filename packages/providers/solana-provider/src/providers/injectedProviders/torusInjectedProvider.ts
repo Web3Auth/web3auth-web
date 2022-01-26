@@ -1,24 +1,20 @@
 import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
-import log from "loglevel";
 
 import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 import { InjectedProvider } from "./interface";
 export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
-  public _providerProxy!: SafeEventEmitterProvider;
-
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
-    super({ config, state });
-    if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public async setupProvider(injectedProvider: InjectedProvider): Promise<SafeEventEmitterProvider> {
+  public async setupProvider(injectedProvider: InjectedProvider): Promise<void> {
     await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
@@ -67,7 +63,6 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       },
 
       signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        log.debug("signAndSendTransaction");
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
@@ -108,8 +103,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         return provider.sendAsync(args);
       },
     } as SafeEventEmitterProvider;
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
-    return this._providerProxy;
+    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
   }
 
   protected async lookupNetwork(provider: InjectedProvider): Promise<string> {
