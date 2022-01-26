@@ -84,5 +84,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   abstract setupProvider(provider: P): Promise<void>;
 
+  abstract switchChain(params: { chainId: string }): Promise<void>;
+
   protected abstract lookupNetwork(provider?: P): Promise<string | void>;
 }

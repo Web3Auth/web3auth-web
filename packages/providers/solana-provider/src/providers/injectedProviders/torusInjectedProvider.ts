@@ -14,6 +14,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
+  public async switchChain(_: { chainId: string }): Promise<void> {
+    return Promise.resolve();
+  }
+
   public async setupProvider(injectedProvider: InjectedProvider): Promise<void> {
     await this.lookupNetwork(injectedProvider);
     const providerHandlers: IProviderHandlers = {

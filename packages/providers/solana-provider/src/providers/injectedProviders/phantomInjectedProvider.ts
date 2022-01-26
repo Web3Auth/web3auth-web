@@ -25,6 +25,10 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
+  public async switchChain(_: { chainId: string }): Promise<void> {
+    return Promise.resolve();
+  }
+
   public async setupProvider(injectedProvider: PhantomWallet): Promise<void> {
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {

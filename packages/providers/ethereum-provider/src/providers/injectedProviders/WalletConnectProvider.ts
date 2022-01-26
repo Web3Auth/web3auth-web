@@ -57,6 +57,10 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     await this.setupEngine(connector);
   }
 
+  public async switchChain(_: { chainId: string }): Promise<void> {
+    return Promise.resolve();
+  }
+
   protected async lookupNetwork(connector: IConnector): Promise<string> {
     if (!connector.connected) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
     const { chainId } = this.config.chainConfig;
