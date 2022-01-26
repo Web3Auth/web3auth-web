@@ -192,11 +192,19 @@ export class Web3Auth extends Web3AuthCore {
 
     await Promise.all(initPromises);
 
+    const hasExternalWallets = allAdapters.some((adapterName) => {
+      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.defaultModalConfig.adapters?.[adapterName].showOnModal;
+    });
+
+    if (hasExternalWallets) {
+      this.loginModal.initExternalWalletContainer();
+    }
+
     // variable to check if we have any in app wallets
     // currently all default in app and external wallets can be hidden or shown based on config.
-    if (!hasInAppWallets) {
+    if (!hasInAppWallets && hasExternalWallets) {
       // if no in app wallet is available then initialize external wallets in modal
-      await this.initExternalWalletAdapters(false, { showExternalWallets: true });
+      await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
     }
   }
 
@@ -215,7 +223,7 @@ export class Web3Auth extends Web3AuthCore {
     });
   }
 
-  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWallets: boolean }): Promise<void> {
+  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
     const adaptersData: Record<string, unknown> = {};
@@ -246,7 +254,7 @@ export class Web3Auth extends Web3AuthCore {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
   }
 
   private initializeInAppWallet(adapterName: string): void {
