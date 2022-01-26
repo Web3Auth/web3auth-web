@@ -1,24 +1,8 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { IAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 import type { CustomAuthAdapter } from "@web3auth/customauth-adapter";
 import log from "loglevel";
 
-const OPENLOGIN_PROVIDERS = [
-  LOGIN_PROVIDER.GOOGLE,
-  LOGIN_PROVIDER.FACEBOOK,
-  LOGIN_PROVIDER.TWITTER,
-  LOGIN_PROVIDER.REDDIT,
-  LOGIN_PROVIDER.DISCORD,
-  LOGIN_PROVIDER.TWITCH,
-  LOGIN_PROVIDER.APPLE,
-  LOGIN_PROVIDER.LINE,
-  LOGIN_PROVIDER.GITHUB,
-  LOGIN_PROVIDER.KAKAO,
-  LOGIN_PROVIDER.LINKEDIN,
-  LOGIN_PROVIDER.WEIBO,
-  LOGIN_PROVIDER.WECHAT,
-  LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
-];
+import { OPENLOGIN_PROVIDERS } from "./config";
 
 export const getAdapterSocialLogins = (
   adapterName: string,

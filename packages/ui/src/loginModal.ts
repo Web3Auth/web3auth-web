@@ -35,6 +35,8 @@ export default class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
+  private loginMethodsOrder: string[];
+
   private hasSocialWallet = false;
 
   private hasSocialEmailWallet = false;
@@ -49,11 +51,12 @@ export default class LoginModal extends SafeEventEmitter {
     errored: false,
   };
 
-  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "light", loginMethodsOrder = [] }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
     this.version = version;
     this.isDark = theme === "dark";
+    this.loginMethodsOrder = loginMethodsOrder;
     this.subscribeCoreEvents(adapterListener);
   }
 
@@ -254,8 +257,10 @@ export default class LoginModal extends SafeEventEmitter {
       this.hasSocialWallet = true;
       $socialLogins.classList.remove("w3a-group--social-hidden");
       const providerIcon = AllImages[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}`].image;
+      const orderIndex = this.loginMethodsOrder.indexOf(method) + 1;
+      const order = orderIndex || this.loginMethodsOrder.length + 1;
       const adapterButton = htmlToElement(`
-            <li class="w3a-adapter-item">
+            <li class="w3a-adapter-item" style="order: ${order}">
                 <button class="w3a-button w3a-button--icon">
                   ${providerIcon}
                 </button>

@@ -76,7 +76,7 @@ export default Vue.extend({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
-          uiConfig: { appLogo: this.uiConfig.logoUrl, theme: this.uiConfig.theme },
+          uiConfig: { appLogo: this.uiConfig.logoUrl, theme: this.uiConfig.theme, loginMethodsOrder: this.uiConfig.loginMethodsOrder },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId,
         });
