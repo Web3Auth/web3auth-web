@@ -1,5 +1,5 @@
 import { Keypair, Message, Transaction } from "@solana/web3.js";
-import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
 import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
@@ -131,7 +131,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
       },
     } as SafeEventEmitterProvider;
 
-    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this.updateProviderEngineProxy(providerWithRequest);
 
     await this.lookupNetwork();
   }

@@ -125,7 +125,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.privKeyProvider?.isInitialized ? this.privKeyProvider : null;
+    return this.privKeyProvider?.provider || null;
   }
 
   // should be called only before initialization.

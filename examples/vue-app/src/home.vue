@@ -194,7 +194,7 @@ const defaultComponentConfig = {
   selectedUiMode: "default",
   uiMode: {
     default: {
-      login: [...defaultLoginProviders(), { id: "facebook", name: "Facebook", checked: false }],
+      login: [...defaultLoginProviders()],
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
@@ -226,22 +226,22 @@ export default Vue.extend({
     const finalStoredConfig = JSON.parse(storedConfig || "{}");
     this.config = merge(this.config, finalStoredConfig);
     this.form = merge({}, this.config);
-    this.config.uiMode.default.login.push({
-      id: "facebook",
-      name: "Facebook",
-      checked: false,
-    });
+    // this.config.uiMode.default.login.push({
+    //   id: "facebook",
+    //   name: "Facebook",
+    //   checked: false,
+    // });
   },
   methods: {
     saveConfig: function () {
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
       // // temp hack to hide fb, todo: fix later
-      this.config.uiMode.default.login.push({
-        id: "facebook",
-        name: "Facebook",
-        checked: false,
-      });
+      // this.config.uiMode.default.login.push({
+      //   id: "facebook",
+      //   name: "Facebook",
+      //   checked: false,
+      // });
     },
     onChainSelect: function (e) {
       console.log("e", e.target.value);

@@ -1,4 +1,4 @@
-import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState, createRandomId } from "@web3auth/base-provider";
@@ -61,7 +61,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
         return provider.sendAsync({ jsonrpc: "2.0", id: createRandomId(), ...args });
       },
     } as SafeEventEmitterProvider;
-    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this.updateProviderEngineProxy(providerWithRequest);
     await this.lookupNetwork();
   }
 

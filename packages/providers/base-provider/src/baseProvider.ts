@@ -37,11 +37,11 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
-  get isInitialized(): boolean {
-    return !!this._providerEngineProxy;
+  get provider(): SafeEventEmitterProvider | null {
+    return this._providerEngineProxy;
   }
 
-  set isInitialized(_) {
+  set provider(_) {
     throw new Error("Method not implemented.");
   }
 

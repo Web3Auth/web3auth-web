@@ -1,4 +1,4 @@
-import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 import type { IConnector } from "@walletconnect/types";
 import {
@@ -83,7 +83,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
         return provider.sendAsync({ jsonrpc: "2.0", id: createRandomId(), ...args });
       },
     } as SafeEventEmitterProvider;
-    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this.updateProviderEngineProxy(providerWithRequest);
     await this.lookupNetwork(connector);
   }
 

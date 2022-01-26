@@ -1,5 +1,5 @@
 import { Transaction } from "@solana/web3.js";
-import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
@@ -103,7 +103,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
         return provider.sendAsync(args);
       },
     } as SafeEventEmitterProvider;
-    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this.updateProviderEngineProxy(providerWithRequest);
   }
 
   protected async lookupNetwork(provider: InjectedProvider): Promise<string> {
