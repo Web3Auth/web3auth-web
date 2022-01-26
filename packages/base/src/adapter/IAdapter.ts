@@ -1,9 +1,10 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { getChainConfig, WALLET_ADAPTERS } from "..";
+import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
+import { WALLET_ADAPTERS } from "../wallet";
 
 export type UserInfo = {
   /**
