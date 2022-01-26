@@ -70,6 +70,9 @@
               <input type="radio" id="customAuth" name="customAuth" value="customAuth" v-model="form.uiMode.customUi.type" />
               <label for="customAuth">CustomAuth</label>
               <br />
+              <input type="radio" id="walletConnect" name="walletConnect" value="walletConnect" v-model="form.uiMode.customUi.type" />
+              <label for="customAuth">Wallet Connect</label>
+              <br />
             </span>
           </div>
           <br />

@@ -7,10 +7,10 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <SolanaRpc v-if="connected && provider" :provider="provider" :console="console"></SolanaRpc>
-      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
+      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -130,9 +130,9 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect() {
+    async connect() {
       try {
-        this.web3auth.connect();
+        await this.web3auth.connect();
       } catch (error) {
         console.error(error);
         this.console("error", error);

@@ -14,6 +14,7 @@ import CustomAuth, {
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -38,7 +39,7 @@ import CustomAuthStore from "./customAuthStore";
 import type { CustomAuthAdapterOptions, CustomAuthResult, LoginSettings } from "./interface";
 import { parseCustomAuthResult } from "./utils";
 
-type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
+type PrivateKeyProvider = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 
 interface LoginParams {
   login_hint: string;
@@ -72,15 +73,13 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public readonly loginSettings: LoginSettings;
 
   private adapterSettings: CustomAuthArgs | null = null;
 
   private initSettings: InitParams;
 
-  private providerFactory: ProviderFactory | null = null;
+  private privKeyProvider: PrivateKeyProvider | null = null;
 
   private store: CustomAuthStore;
 
@@ -125,6 +124,10 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     this.customAuthResult = { ...this.customAuthResult, ...this.store.getStore() };
   }
 
+  get provider(): SafeEventEmitterProvider | null {
+    return this.privKeyProvider?.isInitialized ? this.privKeyProvider : null;
+  }
+
   // should be called only before initialization.
   setChainConfig(customChainConfig: CustomChainConfig): void {
     super.setChainConfig(customChainConfig);
@@ -146,7 +149,7 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     await this.customAuthInstance.init(this.initSettings);
 
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_STATUS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.CUSTOM_AUTH);
 
     try {
       if (options.autoConnect) this.rehydrated = true;
@@ -164,33 +167,38 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     }
   }
 
-  async connect(params?: LoginParams): Promise<void> {
+  async connect(params?: LoginParams): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_STATUS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.CUSTOM_AUTH });
     try {
       await this.setupProvider(params);
-      return;
+      return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error);
       log.error("Error while connecting to custom auth", error);
       throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     this.store.resetStore();
-    // ready to be connected again
-    this.status = ADAPTER_STATUS.READY;
-    this.provider = null;
+    if (options.cleanup) {
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.customAuthInstance = null;
+      this.privKeyProvider = null;
+    } else {
+      // ready to be connected again
+      this.status = ADAPTER_STATUS.READY;
+    }
     this.customAuthResult = {
       ...DEFAULT_CUSTOM_AUTH_RES,
     };
     this.rehydrated = false;
-    this.emit(ADAPTER_STATUS.DISCONNECTED);
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -235,10 +243,10 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required for customAuth adapter");
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -277,10 +285,9 @@ export class CustomAuthAdapter extends BaseAdapter<LoginParams> {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
-      this.provider = await this.providerFactory.setupProvider(finalPrivKey);
-      log.debug("provider", this.provider);
+      await this.privKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.CUSTOM_AUTH, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     } else {
       throw WalletLoginError.connectionError("Failed to login with CustomAuth");
     }

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h3>Web3Auth and CustomAuth</h3>
+    <h2>Login With Web3Auth</h2>
     <Loader :isLoading="loading"></Loader>
     <section
       :style="{
@@ -12,13 +12,13 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" name="google" @click="connect" style="cursor: pointer">Login With Google</button>
-      <button class="rpcBtn" v-if="!provider" name="twitter" @click="connect" style="cursor: pointer">Login With twitter</button>
+      <button class="rpcBtn" v-if="!provider" name="walletConnect" @click="connect" style="cursor: pointer">Login With Wallet Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
+
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
+    <span>{{ web3auth.status }}</span>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
     </div>
@@ -26,14 +26,15 @@
 </template>
 
 <script lang="ts">
+import QRCodeModal from "@walletconnect/qrcode-modal";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
-import { CustomAuthAdapter } from "@web3auth/customauth-adapter";
+import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import Vue from "vue";
 
 import Loader from "../components/loader.vue";
+import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
-import { OpenloginLoginParams } from ".yalc/@web3auth/openlogin-adapter/dist/types";
 
 export default Vue.extend({
   name: "BeginnerExampleMode",
@@ -59,39 +60,8 @@ export default Vue.extend({
       try {
         this.web3auth = new Web3AuthCore({ chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 } });
         this.subscribeAuthEvents(this.web3auth);
-        const customAuthAdapter = new CustomAuthAdapter({
-          adapterSettings: {
-            network: "testnet",
-            baseUrl: window.location.origin,
-            redirectPathName: "auth",
-          },
-          loginSettings: {
-            // loginProvider: "google"
-            loginProviderConfig: {
-              google: {
-                method: "triggerLogin",
-                args: {
-                  typeOfLogin: "google",
-                  verifier: "google-lrc",
-                  clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-                },
-              },
-              twitter: {
-                method: "triggerLogin",
-                args: {
-                  typeOfLogin: "twitter",
-                  clientId: "A7H8kkcmyFRlusJQ9dZiqBLraG2yWIsO",
-                  verifier: "torus-auth0-twitter-lrc",
-                  jwtParams: {
-                    domain: "https://torus-test.auth0.com",
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        this.web3auth.configureAdapter(customAuthAdapter);
+        const adapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal } });
+        this.web3auth.configureAdapter(adapter);
         await this.web3auth.init();
       } catch (error) {
         console.log("error", error);
@@ -122,10 +92,7 @@ export default Vue.extend({
     },
     async connect(e) {
       try {
-        this.provider = await this.web3auth.connectTo(WALLET_ADAPTERS.CUSTOM_AUTH, {
-          loginProvider: e.target.name,
-          login_hint: "",
-        } as OpenloginLoginParams);
+        await this.web3auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1);
       } catch (error) {
         console.error(error);
         this.console("error", error);

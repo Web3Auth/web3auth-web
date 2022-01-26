@@ -23,7 +23,7 @@ yarn add @web3auth/web3auth
 
 ```tsx
  import { Web3Auth } from "@web3auth/web3auth";
- import { CHAIN_NAMESPACES } from "@web3auth/base";
+ import { CHAIN_NAMESPACES, ADAPTER_EVENTS } from "@web3auth/base";
 
   // We are initializing with EIP155 namespace which
   // will initialize the modal with ethereum mainnet
@@ -36,17 +36,17 @@ yarn add @web3auth/web3auth
   await web3auth.initModal();
   // listening to modal events, on successfull login, `CONNECTED` event will be emitted.
   subscribeAuthEvents(web3auth: Web3AuthModal) {
-    web3auth.on(ADAPTER_STATUS.CONNECTED, (adapterName: string)=>{
+    web3auth.on(ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
       console.log("connected to wallet", adapterName, web3auth.provider)
     })
-    web3auth.on(ADAPTER_STATUS.CONNECTING, ()=>{
+    web3auth.on(ADAPTER_EVENTS.CONNECTING, ()=>{
       console.log("connecting")
 
     })
-    web3auth.on(ADAPTER_STATUS.DISCONNECTED, ()=>{
+    web3auth.on(ADAPTER_EVENTS.DISCONNECTED, ()=>{
       console.log("disconnected")
     })
-    web3auth.on(ADAPTER_STATUS.ERRORED, (error)=>{
+    web3auth.on(ADAPTER_EVENTS.ERRORED, (error)=>{
       console.log("errored", error)
     })
   }

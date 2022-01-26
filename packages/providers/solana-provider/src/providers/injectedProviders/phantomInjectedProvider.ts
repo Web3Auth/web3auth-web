@@ -1,7 +1,7 @@
 import { Transaction } from "@solana/web3.js";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
@@ -21,15 +21,11 @@ export interface PhantomWallet extends SolanaWallet {
 
 // TODO: Add support for changing chainId
 export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, PhantomWallet> {
-  public _providerProxy!: SafeEventEmitterProvider;
-
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
-    super({ config, state });
-    if (!this.config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId in chain config");
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public async setupProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider> {
-    await this.lookupNetwork(injectedProvider);
+  public async setupProvider(injectedProvider: PhantomWallet): Promise<void> {
     const providerHandlers: IProviderHandlers = {
       requestAccounts: async () => {
         return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
@@ -84,12 +80,15 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
         return provider.sendAsync(args);
       },
     } as SafeEventEmitterProvider;
-    this._providerProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
-    return this._providerProxy;
+    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    await this.lookupNetwork(injectedProvider);
   }
 
   protected async lookupNetwork(_: PhantomWallet): Promise<string> {
     const { chainConfig } = this.config;
+    this.update({
+      chainId: chainConfig.chainId,
+    });
     return chainConfig.chainId || "";
     // const genesisHash = await phantomProvider.request<string>({
     //   method: "getGenesisHash",

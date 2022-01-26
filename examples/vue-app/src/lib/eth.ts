@@ -51,6 +51,17 @@ export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole:
     uiConsole("error", error);
   }
 };
+export const getChainId = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string> => {
+  try {
+    const web3 = new Web3(provider as any);
+    const chainId = await web3.eth.getChainId();
+    uiConsole(chainId.toString());
+    return chainId.toString();
+  } catch (error) {
+    console.error("Error", error);
+    uiConsole("error", error);
+  }
+};
 export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
   try {
     const web3 = new Web3(provider as any);

@@ -1,11 +1,13 @@
 import {
   ADAPTER_CATEGORY,
+  ADAPTER_EVENTS,
   ADAPTER_STATUS,
   AdapterConfig,
   AdapterFactoryConfig,
   CustomChainConfig,
   getChainConfig,
   IAdapterFactory,
+  SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -155,20 +157,38 @@ export class Web3Auth extends Web3AuthCore {
 
     await Promise.all(initPromises);
 
+    const hasExternalWallets = Object.keys(this.walletAdapters).some((adapterName) => {
+      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.adaptersConfig[adapterName].showOnModal;
+    });
+
+    if (hasExternalWallets) {
+      this.loginModal.initExternalWalletContainer();
+    }
+
     // variable to check if we have any in app wallets
     // currently all default in app and external wallets can be hidden or shown based on config.
-    if (!hasInAppWallets) {
+    if (!hasInAppWallets && hasExternalWallets) {
       // if no in app wallet is available then initialize external wallets in modal
-      await this.initExternalWalletAdapters(false, { showExternalWallets: true });
+      await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
     }
   }
 
-  public connect() {
+  public async connect(): Promise<SafeEventEmitterProvider | null> {
     if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    // if already connected return provider
+    if (this.provider) return this.provider;
     this.loginModal.toggleModal();
+    return new Promise((resolve, reject) => {
+      this.once(ADAPTER_EVENTS.CONNECTED, () => {
+        return resolve(this.provider);
+      });
+      this.once(ADAPTER_EVENTS.ERRORED, (err: unknown) => {
+        return reject(err);
+      });
+    });
   }
 
-  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWallets: boolean }): Promise<void> {
+  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, AdapterConfig> = {};
     const adaptersData: Record<string, unknown> = {};
@@ -199,7 +219,7 @@ export class Web3Auth extends Web3AuthCore {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWallets: !!options?.showExternalWallets });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
   }
 
   private initializeInAppWallet(adapterName: string): void {
@@ -222,6 +242,14 @@ export class Web3Auth extends Web3AuthCore {
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       await this.logout();
+    });
+    this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
+      log.debug("is login modal visible", visibility);
+      this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+      if (visibility && this.status !== ADAPTER_STATUS.CONNECTING && this.status !== ADAPTER_STATUS.CONNECTED) {
+        // refreshing session for wallet connect whenever modal is opened.
+        this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
+      }
     });
   }
 }

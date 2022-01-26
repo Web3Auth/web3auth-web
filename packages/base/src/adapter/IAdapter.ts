@@ -1,6 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { getChainConfig } from "..";
+import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
@@ -55,6 +55,11 @@ export const ADAPTER_STATUS = {
   DISCONNECTED: "disconnected",
   ERRORED: "errored",
 } as const;
+
+export const ADAPTER_EVENTS = {
+  ...ADAPTER_STATUS,
+  ADAPTER_DATA_UPDATED: "adapter_data_updated",
+} as const;
 export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
 
 export type CONNECTED_EVENT_DATA = {
@@ -71,62 +76,11 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
-  connect(params?: T): Promise<SafeEventEmitterProvider | void>;
-  disconnect(): Promise<void>;
+  disconnect(options?: { cleanup: boolean }): Promise<void>;
+  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
-}
-
-export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
-  public adapterData?: unknown = {};
-
-  // should be added in constructor or from setChainConfig function
-  // before calling init function.
-  protected chainConfig: CustomChainConfig | undefined;
-
-  public abstract adapterNamespace: AdapterNamespaceType;
-
-  public abstract currentChainNamespace: ChainNamespaceType;
-
-  public abstract type: ADAPTER_CATEGORY_TYPE;
-
-  public abstract name: string;
-
-  public abstract status: ADAPTER_STATUS_TYPE;
-
-  public abstract provider: SafeEventEmitterProvider | null;
-
-  get chainConfigProxy(): CustomChainConfig | undefined {
-    return this.chainConfig ? { ...this.chainConfig } : undefined;
-  }
-
-  setChainConfig(customChainConfig: CustomChainConfig): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
-    const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
-    this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
-  }
-
-  checkConnectionRequirements(): void {
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletLoginError.connectionError("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
-    if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
-  }
-
-  checkInitializationRequirements(): void {
-    if (this.status === ADAPTER_STATUS.NOT_READY) return;
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
-    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
-  }
-
-  abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
-  abstract disconnect(): Promise<void>;
-  abstract getUserInfo(): Promise<Partial<UserInfo>>;
-
-  abstract setAdapterSettings(adapterSettings: unknown): void;
 }
 
 export type LoginMethodConfig = Record<
@@ -210,3 +164,65 @@ export type WALLET_ADAPTER_TYPE = typeof WALLET_ADAPTERS[keyof typeof WALLET_ADA
 export type SOLANA_ADAPTER_TYPE = typeof SOLANA_ADAPTERS[keyof typeof SOLANA_ADAPTERS];
 export type EVM_ADAPTER_TYPE = typeof EVM_ADAPTERS[keyof typeof EVM_ADAPTERS];
 export type MULTI_CHAIN_ADAPTER_TYPE = typeof MULTI_CHAIN_ADAPTERS[keyof typeof MULTI_CHAIN_ADAPTERS];
+export interface IAdapterDataEvent {
+  adapterName: string;
+  data: unknown;
+}
+
+export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
+  public adapterData?: unknown = {};
+
+  // should be added in constructor or from setChainConfig function
+  // before calling init function.
+  protected chainConfig: CustomChainConfig | undefined;
+
+  public abstract adapterNamespace: AdapterNamespaceType;
+
+  public abstract currentChainNamespace: ChainNamespaceType;
+
+  public abstract type: ADAPTER_CATEGORY_TYPE;
+
+  public abstract name: string;
+
+  public abstract status: ADAPTER_STATUS_TYPE;
+
+  public abstract provider: SafeEventEmitterProvider | null;
+
+  get chainConfigProxy(): CustomChainConfig | undefined {
+    return this.chainConfig ? { ...this.chainConfig } : undefined;
+  }
+
+  setChainConfig(customChainConfig: CustomChainConfig): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+    const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
+    this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
+  }
+
+  setAdapterSettings(_: unknown): void {}
+
+  checkConnectionRequirements(): void {
+    // we reconnect without killing existing wallet connect session on calling connect again.
+    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
+    else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
+
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
+    if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
+  }
+
+  checkInitializationRequirements(): void {
+    if (this.status === ADAPTER_STATUS.NOT_READY) return;
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
+    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
+  }
+
+  updateAdapterData(data: unknown): void {
+    this.adapterData = data;
+    this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  }
+
+  abstract init(options?: AdapterInitOptions): Promise<void>;
+  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
+  abstract disconnect(): Promise<void>;
+  abstract getUserInfo(): Promise<Partial<UserInfo>>;
+}

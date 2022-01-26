@@ -2,10 +2,12 @@ import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
+  ADAPTER_EVENTS,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   BaseAdapterConfig,
   CONNECTED_EVENT_DATA,
+  IAdapterDataEvent,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
@@ -121,9 +123,34 @@ export default class LoginModal extends SafeEventEmitter {
 
     const $torusWallet = this.getSocialLogins();
     const $torusWalletEmail = this.getSocialLoginsEmail();
-    const $externalWallet = this.getExternalWallet();
 
+    $closeBtn.addEventListener("click", () => this.toggleModal());
+
+    $loaderCloseBtn?.addEventListener("click", () => {
+      const errorModal = this.$modal.classList.contains("w3a-modal--error");
+      if (this.state.connected || errorModal) {
+        this.toggleMessage("");
+        this.toggleModal();
+      } else {
+        this.toggleMessage("");
+      }
+    });
+
+    $content?.appendChild($torusWallet);
+    $content?.appendChild($torusWalletEmail);
+
+    document.body.appendChild(this.$modal);
+    this.state.initialized = true;
+  }
+
+  initExternalWalletContainer = () => {
+    const $content = this.$modal.querySelector(".w3ajs-content");
+    const $torusWallet = this.$modal.querySelector(".w3ajs-social-logins");
+    const $torusWalletEmail = this.$modal.querySelector(".w3ajs-email-passwordless");
+
+    const $externalWallet = this.getExternalWallet();
     const $externalToggle = $externalWallet.querySelector(".w3ajs-external-toggle");
+
     const $externalToggleButton = $externalToggle?.querySelector(".w3ajs-external-toggle__button");
     const $externalBackButton = $externalWallet.querySelector(".w3ajs-external-back");
     const $externalContainer = $externalWallet.querySelector(".w3ajs-external-container");
@@ -146,26 +173,8 @@ export default class LoginModal extends SafeEventEmitter {
       $torusWallet.classList.toggle("w3a-group--hidden");
       $torusWalletEmail.classList.toggle("w3a-group--hidden");
     });
-
-    $closeBtn.addEventListener("click", () => this.toggleModal());
-
-    $loaderCloseBtn?.addEventListener("click", () => {
-      const errorModal = this.$modal.classList.contains("w3a-modal--error");
-      if (this.state.connected || errorModal) {
-        this.toggleMessage("");
-        this.toggleModal();
-      } else {
-        this.toggleMessage("");
-      }
-    });
-
-    $content?.appendChild($torusWallet);
-    $content?.appendChild($torusWalletEmail);
     $content?.appendChild($externalWallet);
-
-    document.body.appendChild(this.$modal);
-    this.state.initialized = true;
-  }
+  };
 
   toggleModal = (isErrorOnly = false): void => {
     const hideClass = "w3a-modal--hidden";
@@ -181,11 +190,13 @@ export default class LoginModal extends SafeEventEmitter {
       this.$modal.classList.remove(hideClass);
       setTimeout(() => {
         $inner.classList.add("w3a-modal__inner--active");
+        this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, true);
       }, 100);
     } else {
       $inner.classList.remove("w3a-modal__inner--active");
       setTimeout(() => {
         this.$modal.classList.add(hideClass);
+        this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
       }, 200);
     }
 
@@ -195,7 +206,7 @@ export default class LoginModal extends SafeEventEmitter {
     const $socialLogins = this.$modal.querySelector(".w3ajs-social-logins");
     const $socialEmailPasswordless = this.$modal.querySelector(".w3ajs-email-passwordless");
 
-    if (!$externalContainer.classList.contains("w3a-external-container--hidden")) {
+    if ($externalContainer && !$externalContainer.classList.contains("w3a-external-container--hidden")) {
       $externalContainer?.classList.add("w3a-external-container--hidden");
       $externalToggle?.classList.remove("w3a-external-toggle--hidden");
       $socialLogins.classList.remove("w3a-group--hidden");
@@ -262,12 +273,13 @@ export default class LoginModal extends SafeEventEmitter {
   addWalletLogins = (
     adaptersConfig: Record<string, BaseAdapterConfig>,
     adaptersData: Record<string, unknown>,
-    options?: { showExternalWallets: boolean }
+    options?: { showExternalWalletsOnly: boolean }
   ): void => {
+    log.info("showExternalWallets", options.showExternalWalletsOnly);
     log.info("adaptersConfig", adaptersConfig);
     log.info("adaptersData", adaptersData);
 
-    if (options.showExternalWallets) {
+    if (options.showExternalWalletsOnly) {
       this.showExternalWallets();
     }
     const $externalWallet = this.$modal.querySelector(".w3ajs-external-wallet") as HTMLDivElement;
@@ -315,7 +327,7 @@ export default class LoginModal extends SafeEventEmitter {
       if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const data = adaptersData[adapter] as WalletConnectV1Data;
         log.info("uri for wallet connect qr code", data?.uri);
-        this.addWalletConnect(data?.uri);
+        this.updateWalletConnect(data?.uri);
         // fire connect event and so that it will be start listening for incoming connections / qr code scans.
         this.emit(LOGIN_MODAL_EVENTS.LOGIN, { adapter });
         return;
@@ -345,12 +357,12 @@ export default class LoginModal extends SafeEventEmitter {
     };
   };
 
-  private async addWalletConnect(qrCodeUri: string) {
+  private async updateWalletConnect(qrCodeUri: string) {
     const qrCode = await QRCode.toDataURL(qrCodeUri);
     log.debug("wallet connect qr code uri", qrCode);
     const $walletConnect = this.$modal.querySelector(".w3ajs-wallet-connect") as HTMLDivElement;
     const $qrImage = this.$modal.querySelector(".w3ajs-wallet-connect-qr") as HTMLImageElement;
-    $walletConnect.classList.remove("w3a-wallet-connect--hidden");
+    if ($walletConnect.classList.contains("w3a-wallet-connect--hidden")) $walletConnect.classList.remove("w3a-wallet-connect--hidden");
 
     $qrImage.src = qrCode;
   }
@@ -469,14 +481,14 @@ export default class LoginModal extends SafeEventEmitter {
       $loaderMessage.innerText = "";
     }
 
-    if (type === ADAPTER_STATUS.ERRORED) {
+    if (type === ADAPTER_EVENTS.ERRORED) {
       $loaderSpinner.style.display = "none";
       $loaderMessage.classList.add("w3a-spinner-message--error");
     } else {
       $loaderMessage.classList.remove("w3a-spinner-message--error");
     }
 
-    if (type === ADAPTER_STATUS.CONNECTED) {
+    if (type === ADAPTER_EVENTS.CONNECTED) {
       $loaderSpinner.style.display = "none";
     }
   }
@@ -498,8 +510,15 @@ export default class LoginModal extends SafeEventEmitter {
     }, timeout);
   }
 
+  private handleAdapterData = (adapterData: IAdapterDataEvent) => {
+    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
+      const walletConnectData = adapterData.data as WalletConnectV1Data;
+      this.updateWalletConnect(walletConnectData.uri);
+    }
+  };
+
   private subscribeCoreEvents(listener: SafeEventEmitter) {
-    listener.on(ADAPTER_STATUS.CONNECTING, (data) => {
+    listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       log.debug("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
@@ -510,7 +529,7 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleLoader();
       }
     });
-    listener.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    listener.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.state.connecting = false;
       log.debug("connected with adapter", this.state.connected, data);
       if (!this.state.connected) {
@@ -521,7 +540,7 @@ export default class LoginModal extends SafeEventEmitter {
         }
       }
     });
-    listener.on(ADAPTER_STATUS.ERRORED, (error: Web3AuthError) => {
+    listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error);
       this.state.connecting = false;
       this.state.connected = false;
@@ -536,10 +555,13 @@ export default class LoginModal extends SafeEventEmitter {
         this.toggleLoader();
       }
     });
-    listener.on(ADAPTER_STATUS.DISCONNECTED, () => {
+    listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
       this.state.connecting = false;
       this.state.connected = false;
       this.toggleMessage("");
+    });
+    listener.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (adapterData: IAdapterDataEvent) => {
+      this.handleAdapterData(adapterData);
     });
   }
 }
