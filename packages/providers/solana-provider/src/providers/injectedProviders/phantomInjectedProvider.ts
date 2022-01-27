@@ -6,11 +6,11 @@ import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/b
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { SolanaWallet } from "../../interface";
+import { ISolanaWallet } from "../../interface";
 import { createSolanaMiddleware, IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "./injectedProviderProxy";
 
-export interface PhantomWallet extends SolanaWallet {
+export interface PhantomWallet extends ISolanaWallet {
   isPhantom?: boolean;
   publicKey?: { toBytes(): Uint8Array };
   isConnected: boolean;
