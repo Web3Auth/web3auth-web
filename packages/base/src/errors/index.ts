@@ -128,6 +128,7 @@ export class WalletLoginError extends Web3AuthError {
     5111: "Failed to connect with wallet",
     5112: "Failed to disconnect from wallet",
     5113: "Wallet is not connected",
+    5114: "Wallet popup has been closed by the user",
   };
 
   public constructor(code: number, message?: string) {
@@ -152,5 +153,9 @@ export class WalletLoginError extends Web3AuthError {
 
   public static notConnectedError(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5113, extraMessage);
+  }
+
+  public static popupClosed(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5114, extraMessage);
   }
 }
