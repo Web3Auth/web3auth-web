@@ -241,19 +241,23 @@ export default Vue.extend({
     this.config = merge(this.config, finalStoredConfig);
     if (finalStoredConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = finalStoredConfig.uiMode.whitelabel.loginMethodsOrder;
     this.form = merge({}, this.config);
-    this.config.uiMode.default.login.push({
-      id: "facebook",
-      name: "Facebook",
-      checked: false,
-    });
-
-    this.tempLoginMethodsOrder = this.config.uiMode.whitelabel.loginMethodsOrder.join(",");
+    // this.config.uiMode.default.login.push({
+    //   id: "facebook",
+    //   name: "Facebook",
+    //   checked: false,
+    // });
   },
   methods: {
     saveConfig: function () {
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
+      // // temp hack to hide fb, todo: fix later
+      // this.config.uiMode.default.login.push({
+      //   id: "facebook",
+      //   name: "Facebook",
+      //   checked: false,
+      // });
     },
     onChainSelect: function (e) {
       console.log("e", e.target.value);

@@ -24,7 +24,7 @@
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^14",
+    "@types/node": "^16",
     "lint-staged": "^12.1.7"
   },
   "peerDependencies": {

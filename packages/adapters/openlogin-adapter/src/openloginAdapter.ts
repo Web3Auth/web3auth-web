@@ -80,7 +80,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.privKeyProvider?.isInitialized ? this.privKeyProvider : null;
+    return this.privKeyProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {

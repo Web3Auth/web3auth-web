@@ -1,10 +1,7 @@
-import { Keypair, Message, Transaction } from "@solana/web3.js";
-import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
+import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import nacl from "@toruslabs/tweetnacl-js";
-import { CHAIN_NAMESPACES, CustomChainConfig, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState, createRandomId } from "@web3auth/base-provider";
-import bs58 from "bs58";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
 import { createJsonRpcClient } from "../../rpc/JrpcClient";
@@ -15,8 +12,8 @@ import {
   createSolanaMiddleware,
   IAccountHandlers,
   IChainSwitchHandlers,
-  IProviderHandlers,
 } from "../../rpc/solanaRpcMiddlewares";
+import { getProviderHandlers } from "./solanaPrivateKeyUtils";
 
 export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -32,7 +29,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   public static getProviderInstance = async (params: {
     privKey: string;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<SafeEventEmitterProvider> => {
+  }): Promise<SolanaPrivateKeyProvider> => {
     const providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -40,79 +37,13 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
-      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: -32603 });
+      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
-    return this._providerEngineProxy.sendAsync({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" });
+    return this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" });
   }
 
   public async setupProvider(privKey: string): Promise<void> {
-    const transactionGenerator = (serializedTx: string): Transaction => {
-      const decodedTx = bs58.decode(serializedTx);
-      const tx = Transaction.populate(Message.from(decodedTx));
-      return tx;
-    };
-    const keyPairGenerator = (): Keypair => {
-      return Keypair.fromSecretKey(Buffer.from(privKey, "hex"));
-    };
-    if (typeof privKey !== "string") throw WalletInitializationError.invalidParams("privKey must be a string");
-    const keyPair = keyPairGenerator();
-
-    const providerHandlers: IProviderHandlers = {
-      requestAccounts: async () => {
-        return [keyPair.publicKey.toBase58()];
-      },
-      getAccounts: async () => [keyPair.publicKey.toBase58()],
-
-      getPrivateKey: async () => privKey,
-
-      signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-        if (!req.params?.message) {
-          throw ethErrors.rpc.invalidParams("message");
-        }
-        const transaction = transactionGenerator(req.params?.message as string);
-        transaction.partialSign(keyPair);
-        return transaction;
-      },
-
-      signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-        if (!req.params?.message) {
-          throw ethErrors.rpc.invalidParams("message");
-        }
-        const signedMsg = nacl.sign.detached(req.params.message, keyPair.secretKey);
-        return signedMsg;
-      },
-
-      signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-        if (!req.params?.message) {
-          throw ethErrors.rpc.invalidParams("message");
-        }
-        if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-
-        const transaction = transactionGenerator(req.params?.message as string);
-        transaction.sign(keyPair);
-
-        const sig = await this._providerEngineProxy.sendAsync<string[], string>({
-          jsonrpc: "2.0",
-          id: createRandomId(),
-          method: "sendTransaction",
-          params: [bs58.encode(transaction.serialize())],
-        });
-        return { signature: sig };
-      },
-
-      signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-        if (!req.params?.message || !req.params?.message.length) {
-          throw ethErrors.rpc.invalidParams("message");
-        }
-        const signedTransactions: Transaction[] = [];
-        for (const tx of req.params?.message || []) {
-          const transaction = transactionGenerator(tx);
-          transaction.partialSign(keyPair);
-          signedTransactions.push(transaction);
-        }
-        return signedTransactions;
-      },
-    };
+    const providerHandlers = await getProviderHandlers({ privKey, getProviderEngineProxy: this.getProviderEngineProxy.bind(this) });
 
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
 
@@ -124,58 +55,49 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
     engine.push(networkMiddleware);
 
     const provider = providerFromEngine(engine);
-    const providerWithRequest = {
-      ...provider,
-      request: async (args: RequestArguments) => {
-        return provider.sendAsync(args);
-      },
-    } as SafeEventEmitterProvider;
 
-    this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
+    this.updateProviderEngineProxy(provider);
 
     await this.lookupNetwork();
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-    const existingKey = await this._providerEngineProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "solanaPrivateKey" });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    const existingKey = await this._providerEngineProxy.request<unknown, string>({ method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
       this._providerEngineProxy.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.sendAsync<[], string[]>({ jsonrpc: "2.0", id: createRandomId(), method: "requestAccounts" }),
+        accounts: await this._providerEngineProxy.request<unknown, string[]>({ method: "requestAccounts" }),
       });
     }
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerEngineProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "" });
+    const privKey = await this._providerEngineProxy.request<unknown, string>({ method: "solanaPrivateKey" });
     await this.setupProvider(privKey);
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
-    const health = await this._providerEngineProxy.sendAsync<string[], string>({
-      jsonrpc: "2.0",
-      id: createRandomId(),
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    const health = await this._providerEngineProxy.request<unknown, string>({
       method: "getHealth",
       params: [],
     });
     const { chainConfig } = this.config;
     if (health !== "ok")
       throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chainConfig.rpcTarget}`);
-
-    if (this.state.chainId !== chainConfig.chainId) {
-      this.emit("chainChanged", chainConfig.chainId);
-      this.emit("connect", { chainId: this.config.chainConfig.chainId });
-    }
     this.update({ chainId: chainConfig.chainId });
-    return chainConfig.chainId;
+    if (this.state.chainId !== chainConfig.chainId) {
+      this.provider.emit("chainChanged", this.state.chainId);
+      this.provider.emit("connect", { chainId: this.state.chainId });
+    }
+    return this.state.chainId;
   }
 
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
