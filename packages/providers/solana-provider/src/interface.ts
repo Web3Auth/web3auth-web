@@ -11,11 +11,15 @@ export interface ISolanaWallet {
   request<T>(args: RequestArguments): Promise<T>;
 }
 
-export interface ISolanaWalletProvider extends SafeEventEmitter {
+export interface IPhantomWalletProvider extends SafeEventEmitter {
+  isConnected: boolean;
   publicKey?: { toBytes(): Uint8Array };
   signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;
   signTransaction?(transaction: Transaction): Promise<Transaction>;
   signAllTransactions?(transactions: Transaction[]): Promise<Transaction[]>;
   signMessage(message: Uint8Array): Promise<Uint8Array>;
   request<T>(args: RequestArguments): Promise<T>;
+  _handleDisconnect(...args: unknown[]): void;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
 }

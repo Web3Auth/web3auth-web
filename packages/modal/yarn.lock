@@ -15,11 +15,12 @@
     secp256k1 "^3.8.0"
 
 "@toruslabs/http-helpers@^2.1.4":
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.1.4.tgz#63fa45cf456a332525959648085d43ec6f42298c"
-  integrity sha512-OXSHdjm5He+XRrnZoEyhw3JqFRIlyaRZA6j0gSrSnKaUyKnVqTAfYgMYBw2oQ2GZYTjK44nnEZ0y9aU0rn4oyQ==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.2.0.tgz#c494984701ff60eb93c0eaef279daa93b5bcea81"
+  integrity sha512-xkzZZuE+DmWmJBTYneCrMJY24izNQCOdoJMpsXKQx20Va/rTQvNPbdkpx9LBf/pisk8jOwETNAfFQ8YTBc/bZw==
   dependencies:
     lodash.merge "^4.6.2"
+    loglevel "^1.8.0"
 
 "@toruslabs/openlogin-jrpc@^1.3.4":
   version "1.3.4"
@@ -553,9 +554,9 @@ lilconfig@2.0.4:
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
 lint-staged@^12.1.7:
-  version "12.1.7"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.1.7.tgz#fe9137992ac18a456422bb8484dd30be0140629f"
-  integrity sha512-bltv/ejiLWtowExpjU+s5z8j1Byjg9AlmaAjMmqNbIicY69u6sYIwXGg0dCn0TlkrrY2CphtHIXAkbZ+1VoWQQ==
+  version "12.3.2"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.2.tgz#c87fe59dca475b7d1cb56863c5faa03c145e1446"
+  integrity sha512-gtw4Cbj01SuVSfAOXC6ivd/7VKHTj51yj5xV8TgktFmYNMsZzXuSd5/brqJEA93v63wL7R6iDlunMANOechC0A==
   dependencies:
     cli-truncate "^3.1.0"
     colorette "^2.0.16"
@@ -563,25 +564,25 @@ lint-staged@^12.1.7:
     debug "^4.3.3"
     execa "^5.1.1"
     lilconfig "2.0.4"
-    listr2 "^3.13.5"
+    listr2 "^4.0.1"
     micromatch "^4.0.4"
     normalize-path "^3.0.0"
-    object-inspect "^1.11.1"
+    object-inspect "^1.12.0"
     string-argv "^0.3.1"
     supports-color "^9.2.1"
     yaml "^1.10.2"
 
-listr2@^3.13.5:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/listr2/-/listr2-3.14.0.tgz#23101cc62e1375fd5836b248276d1d2b51fdbe9e"
-  integrity sha512-TyWI8G99GX9GjE54cJ+RrNMcIFBfwMPxc3XTFiAYGN4s10hWROGtOg7+O6u6LE3mNkyld7RSLE6nrKBvTfcs3g==
+listr2@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/listr2/-/listr2-4.0.1.tgz#e050c1fd390276e191f582603d6e3531cd6fd2b3"
+  integrity sha512-D65Nl+zyYHL2jQBGmxtH/pU8koPZo5C8iCNE8EoB04RwPgQG1wuaKwVbeZv9LJpiH4Nxs0FCp+nNcG8OqpniiA==
   dependencies:
     cli-truncate "^2.1.0"
     colorette "^2.0.16"
     log-update "^4.0.0"
     p-map "^4.0.0"
     rfdc "^1.3.0"
-    rxjs "^7.5.1"
+    rxjs "^7.5.2"
     through "^2.3.8"
     wrap-ansi "^7.0.0"
 
@@ -702,7 +703,7 @@ npm-run-path@^4.0.1:
   dependencies:
     path-key "^3.0.0"
 
-object-inspect@^1.11.1:
+object-inspect@^1.12.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.12.0.tgz#6e2c120e868fd1fd18cb4f18c31741d0d6e776f0"
   integrity sha512-Ho2z80bVIvJloH+YzRmpZVQe87+qASmBUKZDWgx9cu+KDrX2ZDH/3tMy+gXbZETVGs2M8YdxObOh7XAtim9Y0g==
@@ -781,9 +782,9 @@ postcss-modules-values@^2.0.0:
     postcss "^7.0.6"
 
 postcss-selector-parser@^6.0.0:
-  version "6.0.8"
-  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.8.tgz#f023ed7a9ea736cd7ef70342996e8e78645a7914"
-  integrity sha512-D5PG53d209Z1Uhcc0qAZ5U3t5HagH3cxu+WLZ22jt3gLUpXM4eXXfiO14jiDWST3NNooX/E8wISfOhZ9eIjGTQ==
+  version "6.0.9"
+  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.9.tgz#ee71c3b9ff63d9cd130838876c13a2ec1a992b2f"
+  integrity sha512-UO3SgnZOVTwu4kyLR22UQ1xZh086RyNZppb7lLAKBFK8a32ttG5i87Y/P3+2bRSjZNyJ1B7hfFNo273tKe9YxQ==
   dependencies:
     cssesc "^3.0.0"
     util-deprecate "^1.0.2"
@@ -860,7 +861,7 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rxjs@^7.5.1:
+rxjs@^7.5.2:
   version "7.5.2"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.2.tgz#11e4a3a1dfad85dbf7fb6e33cbba17668497490b"
   integrity sha512-PwDt186XaL3QN5qXj/H9DGyHhP3/RYYgZZwqBv9Tv8rsAaiwFH1IsJJlcgD37J7UW5a6O67qX0KWKS3/pu0m4w==
@@ -956,9 +957,9 @@ slice-ansi@^5.0.0:
     is-fullwidth-code-point "^4.0.0"
 
 source-map-js@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.1.tgz#a1741c131e3c77d048252adfa24e23b908670caf"
-  integrity sha512-4+TN2b3tqOCd/kaGRJ/sTYA0tR0mdXx26ipdolxcwtJVqEnqNYvlCAt1q3ypy4QMlYus+Zh34RNtYLoq2oQ4IA==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.2.tgz#adbc361d9c62df380125e7f161f71c826f1e490c"
+  integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
 
 source-map@^0.6.1:
   version "0.6.1"

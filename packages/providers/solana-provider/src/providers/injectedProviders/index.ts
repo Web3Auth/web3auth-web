@@ -1,3 +1,3 @@
 export * from "./interface";
-export * from "./phantomInjectedProvider";
-export * from "./torusInjectedProvider";
+export * from "./phantom/phantomInjectedProvider";
+export * from "./torus/torusInjectedProvider";

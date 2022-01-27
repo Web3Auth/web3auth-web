@@ -78,14 +78,15 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
   protected async lookupNetwork(connector: IConnector): Promise<string> {
     if (!connector.connected) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
+    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
     const connectedHexChainId = isHexStrict(connector.chainId.toString()) ? connector.chainId : `0x${connector.chainId.toString(16)}`;
     if (chainId !== connectedHexChainId)
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.emit("connect", { chainId });
-    this.emit("chainChanged", this.state.chainId);
+    this.provider.emit("connect", { chainId });
+    this.provider.emit("chainChanged", this.state.chainId);
     return connectedHexChainId;
   }
 
@@ -112,9 +113,9 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
   private async onConnectorStateUpdate(connector: IConnector) {
     connector.on("session_update", async (error: Error | null, payload) => {
-      if (!this._providerEngineProxy) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
+      if (!this.provider) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
       if (error) {
-        this.emit("error", error);
+        this.provider.emit("error", error);
         return;
       }
       const { accounts, chainId: connectedChainId, rpcUrl } = payload;
@@ -124,7 +125,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
           accounts,
         });
         // await this.setupEngine(connector);
-        this.emit("accountsChanged", accounts);
+        this.provider.emit("accountsChanged", accounts);
       }
       const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event
