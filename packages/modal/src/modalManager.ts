@@ -299,7 +299,8 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      if (visibility && this.status !== ADAPTER_STATUS.CONNECTING && this.status !== ADAPTER_STATUS.CONNECTED) {
+      const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.status;
+      if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
         // refreshing session for wallet connect whenever modal is opened.
         this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
       }

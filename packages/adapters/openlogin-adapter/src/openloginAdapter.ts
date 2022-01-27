@@ -120,11 +120,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     try {
       await this.connectWithProvider(params);
       return this.provider;
-    } catch (error) {
+    } catch (error: unknown) {
       log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if ((error as Error)?.message.includes("user closed popup")) {
+        throw WalletLoginError.popupClosed();
+      }
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
   }
