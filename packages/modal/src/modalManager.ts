@@ -14,7 +14,13 @@ import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 
-import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
+import {
+  defaultEvmDappModalConfig,
+  defaultEvmWalletModalConfig,
+  defaultSolanaDappModalConfig,
+  defaultSolanaWalletModalConfig,
+  OPENLOGIN_PROVIDERS,
+} from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
@@ -31,6 +37,13 @@ export interface UIConfig {
    * @defaultValue `light`
    */
   theme?: "light" | "dark";
+
+  /**
+   * order of how login methods are shown
+   *
+   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
+   */
+  loginMethodsOrder?: string[];
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
@@ -89,6 +102,7 @@ export class Web3Auth extends Web3AuthCore {
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,
+      loginMethodsOrder: this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
     });
     this.subscribeToLoginModalEvents();
   }

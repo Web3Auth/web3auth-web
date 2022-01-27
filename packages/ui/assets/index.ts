@@ -33,20 +33,6 @@ import WalletConnect from "./images/wallet-connect.svg";
 import Web3auth from "./images/web3auth.svg";
 import Web3authLight from "./images/web3auth-light.svg";
 
-function importAll(r) {
-  const images = {};
-  r.keys().map((item) => {
-    images[item.replace("./", "")] = r(item);
-    return true;
-  });
-  return images;
-}
-
-const images = importAll(require.context("../assets/images", false, /\.(png|jpe?g|svg)$/));
-const icons = importAll(require.context("../assets/icons", false, /\.(png|jpe?g|svg)$/));
-
-export { icons, images };
-
 const getImageSrc = (image: string): string => {
   return !image.startsWith("<svg") ? `<img src="${image}" alt="">` : image;
 };
