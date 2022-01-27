@@ -1,7 +1,6 @@
-import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { createSwappableProxy, providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import type { IConnector, ITxData } from "@walletconnect/types";
+import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
+import type { IConnector } from "@walletconnect/types";
 import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
@@ -13,11 +12,10 @@ import {
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState, createRandomId } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
-import log from "loglevel";
 
-import { createEthMiddleware, IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
+import { createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
-import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
+import { getProviderHandlers } from "./walletConnectUtils";
 
 export interface WalletConnectProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -51,7 +49,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     if (!this.connector)
       throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: -32603 });
     await this.setupProvider(this.connector);
-    return this._providerEngineProxy.sendAsync({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" });
+    return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
   public async setupProvider(connector: IConnector): Promise<void> {
@@ -69,7 +67,11 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
   }
 
   private async setupEngine(connector: IConnector): Promise<void> {
-    const ethMiddleware = await this.getEthMiddleWare(connector);
+    const providerHandlers = getProviderHandlers({ connector });
+    this.update({
+      accounts: connector.accounts || [],
+    });
+    const ethMiddleware = createEthMiddleware(providerHandlers);
     const engine = new JRPCEngine();
     const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
     engine.push(ethMiddleware);
@@ -83,58 +85,6 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     } as SafeEventEmitterProvider;
     this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerWithRequest);
     await this.lookupNetwork(connector);
-  }
-
-  private async getEthMiddleWare(connector: IConnector): Promise<JRPCMiddleware<unknown, unknown>> {
-    this.update({
-      accounts: connector.accounts || [],
-    });
-    const providerHandlers: IProviderHandlers = {
-      getPrivateKey: async () => {
-        throw ethErrors.rpc.methodNotSupported();
-      },
-      getAccounts: async (_: JRPCRequest<unknown>) => {
-        const { accounts } = connector;
-        if (accounts && accounts.length) {
-          return accounts;
-        }
-        throw new Error("Failed to get accounts");
-      },
-      processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-        const result = await connector.sendTransaction(txParams as ITxData);
-        return result;
-      },
-      processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-        const result = await connector.signTransaction(txParams as ITxData);
-        return result;
-      },
-      processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-        const result = await connector.signMessage([msgParams.from, msgParams.data]);
-        return result;
-      },
-      processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-        const result = await connector.signPersonalMessage([msgParams.data, msgParams.from]);
-        return result;
-      },
-      processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-        log.debug("processTypedMessage", msgParams);
-        const result = await connector.signTypedData([msgParams.from, msgParams.data]);
-        return result;
-      },
-      processTypedMessageV3: async (_: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-        throw ethErrors.rpc.methodNotSupported();
-      },
-      processTypedMessageV4: async (_: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-        throw ethErrors.rpc.methodNotSupported();
-      },
-      processEncryptionPublicKey: async (_: string): Promise<string> => {
-        throw ethErrors.rpc.methodNotSupported();
-      },
-      processDecryptMessage: (_: MessageParams<string>): string => {
-        throw ethErrors.rpc.methodNotSupported();
-      },
-    };
-    return createEthMiddleware(providerHandlers);
   }
 
   private async onConnectorStateUpdate(connector: IConnector) {
@@ -162,7 +112,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
           chainConfig: { ...this.config.chainConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl },
         });
         await this.setupEngine(connector);
-        this.emit("chainChanged", this.config.chainConfig.chainId);
+        this.emit("chainChanged", this.state.chainId);
       }
     });
   }

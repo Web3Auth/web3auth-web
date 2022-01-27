@@ -1,4 +1,4 @@
-import { BaseConfig, BaseController, BaseState } from "@toruslabs/base-controllers";
+import { BaseConfig, BaseController, BaseState, createSwappableProxy } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, Maybe, RequestArguments, SafeEventEmitterProvider, SendCallBack, WalletInitializationError } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
@@ -72,6 +72,14 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   public send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<U>): void {
     if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
     return this._providerEngineProxy.send(req, callback);
+  }
+
+  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+    if (this._providerEngineProxy) {
+      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+    } else {
+      this._providerEngineProxy = createSwappableProxy<SafeEventEmitterProvider>(providerEngineProxy);
+    }
   }
 
   abstract setupProvider(provider: P): Promise<void>;

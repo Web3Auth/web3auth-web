@@ -27,7 +27,8 @@
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
-    "lint-staged": "^12.1.7"
+    "lint-staged": "^12.1.7",
+    "@types/json-rpc-random-id": "^1.0.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
