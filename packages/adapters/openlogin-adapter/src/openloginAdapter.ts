@@ -159,7 +159,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   setAdapterSettings(adapterSettings: OpenLoginOptions): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     const defaultOptions = getOpenloginDefaultOptions();
-    this.openloginOptions = { ...defaultOptions.adapterSettings, ...adapterSettings };
+    this.openloginOptions = { ...defaultOptions.adapterSettings, ...(this.openloginOptions || {}), ...adapterSettings };
   }
 
   // should be called only before initialization.

@@ -1,8 +1,8 @@
 <template>
-  <Ethereum :adapterConfig="adapterConfig" v-if="chain === 'ethereum'" />
-  <Solana :adapterConfig="adapterConfig" v-else-if="chain === 'solana'" />
-  <Matic :adapterConfig="adapterConfig" v-else-if="chain === 'polygon'" />
-  <Binance :adapterConfig="adapterConfig" v-else-if="chain === 'binance'" />
+  <Ethereum :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-if="chain === 'ethereum'" />
+  <Solana :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'solana'" />
+  <Matic :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'polygon'" />
+  <Binance :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'binance'" />
 </template>
 
 <script lang="ts">
@@ -22,6 +22,10 @@ export default Vue.extend({
     },
     adapterConfig: {
       type: Object,
+    },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
     },
   },
   data() {
