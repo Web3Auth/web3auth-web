@@ -190,21 +190,21 @@
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
 
-"@toruslabs/customauth@^6.1.1":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@toruslabs/customauth/-/customauth-6.1.1.tgz#e44850f04fdaada17f4c40ea00d900fafed00177"
-  integrity sha512-WO5cYtvcaCaEwAGkteRy/DWFqVNZwUnjnJlOpkdZ4/+Ji6dNFnhh5eEkVSsJIElweBaG1XMnBJg3Z9wupBNxyw==
+"@toruslabs/customauth@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/customauth/-/customauth-7.0.0.tgz#5ef6bec4ac9a845fdd8ebc594d2b128ca5675e98"
+  integrity sha512-CptMAYRfbfswYuus3gPvzFSixuKEfsmQoPH/AHBcvPc/h9dDM43HtpwrltjEj6fdkzFyyuZpV7GnYtkRZ1TxIg==
   dependencies:
     "@chaitanyapotti/register-service-worker" "^1.7.3"
-    "@toruslabs/fetch-node-details" "^4.0.2"
-    "@toruslabs/http-helpers" "^2.1.4"
-    "@toruslabs/torus.js" "^4.2.3"
+    "@toruslabs/fetch-node-details" "^5.0.0"
+    "@toruslabs/http-helpers" "^2.2.0"
+    "@toruslabs/torus.js" "^5.0.1"
     broadcast-channel "^4.9.0"
     events "^3.3.0"
     jwt-decode "^3.1.2"
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
-    web3-utils "^1.6.1"
+    web3-utils "^1.7.0"
 
 "@toruslabs/eccrypto@^1.1.8":
   version "1.1.8"
@@ -218,15 +218,15 @@
   optionalDependencies:
     secp256k1 "^3.8.0"
 
-"@toruslabs/fetch-node-details@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@toruslabs/fetch-node-details/-/fetch-node-details-4.0.2.tgz#8c6862110bbfafa5e2af475a4cd91d5e18fe20dc"
-  integrity sha512-xzWvfY93mE/FP4yqYdhLcFGUE4bHyvbfLvQrC/Ujja958Zh+BxWdE6nfVqPP6O/424cm+f3vNixRkl680R+9ig==
+"@toruslabs/fetch-node-details@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/fetch-node-details/-/fetch-node-details-5.0.0.tgz#4c310b67ba185503f75a54ea9ec6c3dbd68f50ff"
+  integrity sha512-3xHTfuJFcel0wqA/L8AXMQU7lCEsBbNahdyTHiUdwWKcHRu4UGPQ256bypuRJRgDy2NF+MRHNBVob+1iiQpmXw==
   dependencies:
-    web3-eth-contract "^1.6.1"
-    web3-utils "^1.6.1"
+    web3-eth-contract "^1.7.0"
+    web3-utils "^1.7.0"
 
-"@toruslabs/http-helpers@^2.1.4":
+"@toruslabs/http-helpers@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.2.0.tgz#c494984701ff60eb93c0eaef279daa93b5bcea81"
   integrity sha512-xkzZZuE+DmWmJBTYneCrMJY24izNQCOdoJMpsXKQx20Va/rTQvNPbdkpx9LBf/pisk8jOwETNAfFQ8YTBc/bZw==
@@ -241,18 +241,18 @@
   dependencies:
     "@toruslabs/tweetnacl-js" "^1.0.3"
 
-"@toruslabs/torus.js@^4.2.3":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus.js/-/torus.js-4.2.6.tgz#c206f53357541f45b94579abc27572e9482adb7e"
-  integrity sha512-DN84qHN+maIO5ZlblcIivKQwONibGKJg9vTifb3G7cr5QmTkWpnzwEcLT+w7fRnj7BhbzBeEhjeYzLOBpiE+6Q==
+"@toruslabs/torus.js@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus.js/-/torus.js-5.0.1.tgz#4c95275e7abac8956fc45c1d41837ee90a3a45cf"
+  integrity sha512-rhICMJuAIA/LiS/IuWCqKEqpP8nezw/Hhlphr0VIMelkaQTqAZbS/g1cwlAdPezenTS2CTULfx509pifMLMl/w==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
-    "@toruslabs/http-helpers" "^2.1.4"
+    "@toruslabs/http-helpers" "^2.2.0"
     bn.js "^5.2.0"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
     loglevel "^1.8.0"
-    web3-utils "^1.6.1"
+    web3-utils "^1.7.0"
 
 "@toruslabs/tweetnacl-js@^1.0.3":
   version "1.0.3"
@@ -1782,7 +1782,7 @@ web3-eth-abi@1.7.0:
     "@ethersproject/abi" "5.0.7"
     web3-utils "1.7.0"
 
-web3-eth-contract@^1.6.1:
+web3-eth-contract@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-1.7.0.tgz#3795767a65d7b87bd22baea3e18aafdd928d5313"
   integrity sha512-2LY1Xwxu5rx468nqHuhvupQAIpytxIUj3mGL9uexszkhrQf05THVe3i4OnUCzkeN6B2cDztNOqLT3j9SSnVQDg==
@@ -1829,7 +1829,7 @@ web3-providers-ws@1.7.0:
     web3-core-helpers "1.7.0"
     websocket "^1.0.32"
 
-web3-utils@1.7.0, web3-utils@^1.6.1:
+web3-utils@1.7.0, web3-utils@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.7.0.tgz#c59f0fd43b2449357296eb54541810b99b1c771c"
   integrity sha512-O8Tl4Ky40Sp6pe89Olk2FsaUkgHyb5QAXuaKo38ms3CxZZ4d3rPGfjP9DNKGm5+IUgAZBNpF1VmlSmNCqfDI1w==

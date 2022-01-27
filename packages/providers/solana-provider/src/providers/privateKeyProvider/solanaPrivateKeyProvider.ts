@@ -43,7 +43,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public async setupProvider(privKey: string): Promise<void> {
-    const providerHandlers = await getProviderHandlers({ privKey, getProviderEngineProxy: this.getProviderEngineProxy });
+    const providerHandlers = await getProviderHandlers({ privKey, getProviderEngineProxy: this.getProviderEngineProxy.bind(this) });
 
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
 
