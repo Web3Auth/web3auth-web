@@ -34,6 +34,26 @@
 
         <!-- UI MODE DEFAULT -->
         <div v-if="form.selectedUiMode == 'default'">
+          <div class="ui-mode">
+            <div class="flex ui-mode">
+              <span class="form-label">Openlogin Network</span>
+              <span class="form-control radio-group">
+                <label for="mainnet" class="radio-button">
+                  <input type="radio" id="mainnet" value="mainnet" v-model="form.openloginNetwork" />
+                  Mainnet
+                </label>
+                <label for="testnet" class="radio-button">
+                  <input type="radio" id="testnet" value="testnet" v-model="form.openloginNetwork" />
+                  Testnet
+                </label>
+                <label for="cyan" class="radio-button">
+                  <input type="radio" id="cyan" value="cyan" v-model="form.openloginNetwork" />
+                  Cyan
+                </label>
+              </span>
+            </div>
+            <br />
+          </div>
           <div class="flex">
             <span class="form-label">Login</span>
             <div class="form-control">
@@ -57,6 +77,7 @@
               </li>
             </div>
           </div>
+          <br />
         </div>
 
         <!-- UI MODE YOUR OWN MODAL -->
@@ -119,6 +140,7 @@
       <!-- <h2>DEMO: {{ config.chain }} x {{ config.selectedUiMode }}</h2> -->
       <section>
         <ConfigurableExample
+          :openloginNetwork="config.openloginNetwork"
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
           v-if="config.selectedUiMode === 'default'"
@@ -185,6 +207,7 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
 const defaultFormConfig = {
   chain: "ethereum",
   selectedUiMode: "default",
+  openloginNetwork: "testnet",
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
@@ -204,6 +227,7 @@ const defaultFormConfig = {
 const defaultComponentConfig = {
   chain: "ethereum",
   selectedUiMode: "default",
+  openloginNetwork: "testnet",
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
@@ -252,6 +276,7 @@ export default Vue.extend({
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
+      console.log("config saved", this.config);
       // // temp hack to hide fb, todo: fix later
       // this.config.uiMode.default.login.push({
       //   id: "facebook",
