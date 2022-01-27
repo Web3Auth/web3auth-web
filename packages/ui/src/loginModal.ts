@@ -35,6 +35,8 @@ export default class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
+  private loginMethodsOrder: string[];
+
   private hasSocialWallet = false;
 
   private hasSocialEmailWallet = false;
@@ -49,11 +51,12 @@ export default class LoginModal extends SafeEventEmitter {
     errored: false,
   };
 
-  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "light", loginMethodsOrder = [] }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
     this.version = version;
     this.isDark = theme === "dark";
+    this.loginMethodsOrder = loginMethodsOrder;
     this.subscribeCoreEvents(adapterListener);
   }
 
@@ -230,7 +233,7 @@ export default class LoginModal extends SafeEventEmitter {
     const $adapterExpandBtn = $socialLogins.querySelector(".w3ajs-button-expand") as HTMLButtonElement;
 
     if (Object.keys(loginMethods).length > 5) $adapterExpandBtn.style.display = "flex";
-
+    let currentMethodsLength = Object.keys(loginMethods).length;
     Object.keys(loginMethods).forEach((method: string) => {
       // TODO: link mobile and desktop visibility config.
       if (!loginMethods[method].showOnModal) {
@@ -254,8 +257,12 @@ export default class LoginModal extends SafeEventEmitter {
       this.hasSocialWallet = true;
       $socialLogins.classList.remove("w3a-group--social-hidden");
       const providerIcon = AllImages[`login-${method}${this.isDark && hasLightIcons.includes(method) ? "-light" : ""}`].image;
+      const orderIndex = this.loginMethodsOrder.indexOf(method) + 1;
+      const order = orderIndex || currentMethodsLength + 1;
+      currentMethodsLength = currentMethodsLength + 1;
+
       const adapterButton = htmlToElement(`
-            <li class="w3a-adapter-item">
+            <li class="w3a-adapter-item" style="order: ${order}">
                 <button class="w3a-button w3a-button--icon">
                   ${providerIcon}
                 </button>

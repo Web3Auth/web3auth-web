@@ -98,6 +98,17 @@
               <br />
             </span>
           </div>
+          <br />
+          <div class="order-container">
+            <div class="form-label">
+              <div>Login Methods Order</div>
+              <a @click="setDefaultLoginMethodsOrder">Set to default</a>
+            </div>
+            <div>
+              <textarea rows="5" class="order-list" v-model="tempLoginMethodsOrder" />
+            </div>
+            <div></div>
+          </div>
         </div>
       </div>
       <div class="btn-group">
@@ -185,6 +196,7 @@ const defaultFormConfig = {
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
       theme: "light",
+      loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
     },
   },
 };
@@ -203,6 +215,7 @@ const defaultComponentConfig = {
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
       theme: "light",
+      loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
     },
   },
 };
@@ -214,6 +227,7 @@ export default Vue.extend({
       form: { ...defaultFormConfig },
       // sending to other components
       config: { ...defaultComponentConfig },
+      tempLoginMethodsOrder: "",
     };
   },
   components: {
@@ -225,10 +239,19 @@ export default Vue.extend({
     const storedConfig = sessionStorage.getItem("web3AuthExampleConfig");
     const finalStoredConfig = JSON.parse(storedConfig || "{}");
     this.config = merge(this.config, finalStoredConfig);
+    if (finalStoredConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = finalStoredConfig.uiMode.whitelabel.loginMethodsOrder;
     this.form = merge({}, this.config);
+    this.config.uiMode.default.login.push({
+      id: "facebook",
+      name: "Facebook",
+      checked: false,
+    });
+
+    this.tempLoginMethodsOrder = this.config.uiMode.whitelabel.loginMethodsOrder.join(",");
   },
   methods: {
     saveConfig: function () {
+      this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
     },
@@ -236,6 +259,9 @@ export default Vue.extend({
       console.log("e", e.target.value);
       this.form.uiMode.default.adapter =
         e.target.value === "solana" ? defaultAdapters(CHAIN_NAMESPACES.SOLANA) : defaultAdapters(CHAIN_NAMESPACES.EIP155);
+    },
+    setDefaultLoginMethodsOrder: function () {
+      this.tempLoginMethodsOrder = DEFAULT_LOGIN_PROVIDERS.join(",");
     },
   },
 });
@@ -381,5 +407,25 @@ body {
 
 .list-style-none {
   list-style: none;
+}
+
+.order-container {
+  text-align: left;
+}
+.order-container .form-label {
+  text-align: left;
+  display: flex;
+  width: 100%;
+  padding: 0;
+}
+.order-container .form-label a {
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 12px;
+  color: #0364ff;
+  text-align: right;
+}
+.order-list {
+  width: 100%;
 }
 </style>
