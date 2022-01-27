@@ -38,17 +38,18 @@ async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Par
 export function getProviderHandlers({
   privKey,
   chainConfig,
-  providerEngineProxy,
+  getProviderEngineProxy,
 }: {
   privKey: string;
   chainConfig: Partial<CustomChainConfig>;
-  providerEngineProxy?: SafeEventEmitterProvider;
+  getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
     getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
     processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      if (!providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
       const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
       const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
       const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();

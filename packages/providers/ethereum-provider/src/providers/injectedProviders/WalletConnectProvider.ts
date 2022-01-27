@@ -39,7 +39,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
   public static getProviderInstance = async (params: {
     connector: IConnector;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<SafeEventEmitterProvider> => {
+  }): Promise<WalletConnectProvider> => {
     const providerFactory = new WalletConnectProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.connector);
     return providerFactory;
@@ -47,7 +47,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
   public async enable(): Promise<string[]> {
     if (!this.connector)
-      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: -32603 });
+      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     await this.setupProvider(this.connector);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
@@ -57,8 +57,23 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     await this.setupEngine(connector);
   }
 
-  public async switchChain(_: { chainId: string }): Promise<void> {
-    return Promise.resolve();
+  public async switchChain({ chainId }: { chainId: string }): Promise<void> {
+    const currentChainConfig = this.getChainConfig(chainId);
+    const { ticker, tickerName, rpcTarget } = currentChainConfig;
+    this.update({
+      chainId: "loading",
+    });
+    await this.connector.updateChain({
+      chainId: Number.parseInt(chainId, 16),
+      nativeCurrency: {
+        name: tickerName,
+        symbol: ticker,
+      },
+      networkId: Number.parseInt(chainId, 10),
+      rpcUrl: rpcTarget,
+    });
+    this.configure({ chainConfig: currentChainConfig });
+    await this.lookupNetwork(this.connector);
   }
 
   protected async lookupNetwork(connector: IConnector): Promise<string> {
@@ -67,6 +82,10 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     const connectedHexChainId = isHexStrict(connector.chainId.toString()) ? connector.chainId : `0x${connector.chainId.toString(16)}`;
     if (chainId !== connectedHexChainId)
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
+
+    this.update({ chainId: connectedHexChainId });
+    this.emit("connect", { chainId });
+    this.emit("chainChanged", this.state.chainId);
     return connectedHexChainId;
   }
 
@@ -110,13 +129,11 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
       const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event
       if (connectedChainId && this.state.chainId !== connectedHexChainId) {
-        this.update({ chainId: connectedHexChainId });
         // Handle rpcUrl update
         this.configure({
           chainConfig: { ...this.config.chainConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl },
         });
         await this.setupEngine(connector);
-        this.emit("chainChanged", this.state.chainId);
       }
     });
   }

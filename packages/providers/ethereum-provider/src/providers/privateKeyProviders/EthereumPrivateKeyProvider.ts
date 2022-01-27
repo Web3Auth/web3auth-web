@@ -30,7 +30,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   public static getProviderInstance = async (params: {
     privKey: string;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<SafeEventEmitterProvider> => {
+  }): Promise<EthereumPrivateKeyProvider> => {
     const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -38,13 +38,17 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
-      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: -32603 });
+      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
   public async setupProvider(privKey: string): Promise<void> {
-    const providerHandlers = getProviderHandlers({ privKey, chainConfig: this.config.chainConfig, providerEngineProxy: this._providerEngineProxy });
+    const providerHandlers = getProviderHandlers({
+      privKey,
+      chainConfig: this.config.chainConfig,
+      getProviderEngineProxy: this.getProviderEngineProxy,
+    });
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
@@ -66,7 +70,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const existingKey = await this._providerEngineProxy.request<string>({ method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
@@ -77,7 +81,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
@@ -88,7 +92,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
     if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
     const network = await this._providerEngineProxy.request<string>({

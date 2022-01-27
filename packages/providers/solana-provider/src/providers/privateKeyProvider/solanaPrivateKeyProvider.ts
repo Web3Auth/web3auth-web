@@ -32,7 +32,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   public static getProviderInstance = async (params: {
     privKey: string;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<SafeEventEmitterProvider> => {
+  }): Promise<SolanaPrivateKeyProvider> => {
     const providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -40,7 +40,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
-      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: -32603 });
+      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
     return this._providerEngineProxy.sendAsync({ jsonrpc: "2.0", id: createRandomId(), method: "eth_accounts" });
   }
@@ -86,7 +86,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
         if (!req.params?.message) {
           throw ethErrors.rpc.invalidParams("message");
         }
-        if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+        if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
 
         const transaction = transactionGenerator(req.params?.message as string);
         transaction.sign(keyPair);
@@ -137,7 +137,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const existingKey = await this._providerEngineProxy.sendAsync<[], string>({ jsonrpc: "2.0", id: createRandomId(), method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
@@ -148,7 +148,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
@@ -159,7 +159,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: -32603 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const health = await this._providerEngineProxy.sendAsync<string[], string>({
       jsonrpc: "2.0",
       id: createRandomId(),
