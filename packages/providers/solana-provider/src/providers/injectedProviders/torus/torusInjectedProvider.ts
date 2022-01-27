@@ -1,6 +1,6 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, isHexStrict, RequestArguments, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
@@ -8,10 +8,6 @@ import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
 import { InjectedProvider } from "../interface";
 import { getTorusHandlers } from "./providerHandlers";
-
-// All providers must implement interface of IBaseProvider
-// Must implement chain functionality of addChain & switchChain
-// emit from state
 
 export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
   constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
@@ -31,9 +27,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     if (!this.provider) throw ethErrors.provider.custom({ message: "Torus solana provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
 
-    const connectedChainId = await this.provider.request<string>({
+    const connectedChainId = await this.provider.request<unknown, string>({
       method: "solana_chainId",
-      params: {},
     });
 
     const connectedHexChainId = isHexStrict(connectedChainId.toString()) ? connectedChainId : `0x${parseInt(connectedChainId, 10).toString(16)}`;
@@ -41,8 +36,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.emit("connect", { chainId: this.state.chainId });
-    this.emit("chainChanged", this.state.chainId);
+    this.provider.emit("connect", { chainId: this.state.chainId });
+    this.provider.emit("chainChanged", this.state.chainId);
     return this.state.chainId;
   }
 
@@ -54,19 +49,13 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     engine.push(solanaMiddleware);
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
-    const providerWithRequest = {
-      ...provider,
-      request: async (args: RequestArguments) => {
-        return provider.sendAsync(args);
-      },
-    } as SafeEventEmitterProvider;
-    this.updateProviderEngineProxy(providerWithRequest);
+    this.updateProviderEngineProxy(provider);
     await this.lookupNetwork();
   }
 
   private async handleInjectedProviderUpdate(injectedProvider: InjectedProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
-      this.emit("accountsChanged", accounts);
+      this.provider.emit("accountsChanged", accounts);
     });
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;

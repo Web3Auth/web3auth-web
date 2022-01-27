@@ -1,16 +1,8 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 import type { IConnector } from "@walletconnect/types";
-import {
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  isHexStrict,
-  RequestArguments,
-  SafeEventEmitterProvider,
-  WalletInitializationError,
-  WalletLoginError,
-} from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState, createRandomId } from "@web3auth/base-provider";
+import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError, WalletLoginError } from "@web3auth/base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
 import { createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
@@ -85,8 +77,8 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.emit("connect", { chainId });
-    this.emit("chainChanged", this.state.chainId);
+    this.provider.emit("connect", { chainId });
+    this.provider.emit("chainChanged", this.state.chainId);
     return connectedHexChainId;
   }
 
@@ -101,13 +93,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     engine.push(ethMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
-    const providerWithRequest = {
-      ...provider,
-      request: async (args: RequestArguments) => {
-        return provider.sendAsync({ jsonrpc: "2.0", id: createRandomId(), ...args });
-      },
-    } as SafeEventEmitterProvider;
-    this.updateProviderEngineProxy(providerWithRequest);
+    this.updateProviderEngineProxy(provider);
     await this.lookupNetwork(connector);
   }
 
@@ -115,7 +101,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     connector.on("session_update", async (error: Error | null, payload) => {
       if (!this.provider) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
       if (error) {
-        this.emit("error", error);
+        this.provider.emit("error", error);
         return;
       }
       const { accounts, chainId: connectedChainId, rpcUrl } = payload;
@@ -125,7 +111,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
           accounts,
         });
         // await this.setupEngine(connector);
-        this.emit("accountsChanged", accounts);
+        this.provider.emit("accountsChanged", accounts);
       }
       const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event

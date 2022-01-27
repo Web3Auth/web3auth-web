@@ -1,6 +1,6 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import { CHAIN_NAMESPACES } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { IPhantomWalletProvider } from "../../../interface";
@@ -26,13 +26,7 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
 
-    const providerWithRequest = {
-      ...provider,
-      request: async (args: RequestArguments) => {
-        return provider.sendAsync(args);
-      },
-    } as SafeEventEmitterProvider;
-    this.updateProviderEngineProxy(providerWithRequest);
+    this.updateProviderEngineProxy(provider);
     await this.lookupNetwork(injectedProvider);
   }
 

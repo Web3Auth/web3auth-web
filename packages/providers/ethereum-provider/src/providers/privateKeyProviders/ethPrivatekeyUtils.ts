@@ -11,9 +11,9 @@ import {
   TypedDataV1,
   TypedMessage,
 } from "@metamask/eth-sig-util";
-import { signMessage } from "@toruslabs/base-controllers";
+import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import log from "loglevel";
@@ -53,7 +53,7 @@ export function getProviderHandlers({
       const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
       const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
       const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
-      const txHash = await providerEngineProxy.request<string>({
+      const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
         params: [`0x${signedTx.toString("hex")}`],
       });

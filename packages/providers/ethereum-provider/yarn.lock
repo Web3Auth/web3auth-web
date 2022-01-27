@@ -36,10 +36,10 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
-"@toruslabs/base-controllers@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.0.tgz#7404e49a68332d61afa8039a01c6d155c97f20e1"
-  integrity sha512-AaLEjwhX324RVXrvOIVyemg2v4cZFeimGiaFp1FqqUPFX5KD41cttegTkByEJjVwO9VyEWFYE0YqEbqzpoqnXA==
+"@toruslabs/base-controllers@^1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.1.tgz#3a0ead028e7a30aba5c4ac0d3fd26b7ce2d8f79a"
+  integrity sha512-aaOmh8uELiYi/UU7HiEk48xNluv1B0x769DrLyBL9clAy0OD1mWerHFcQJLydJdN95evG98W3LzfNb39/kC5Dw==
   dependencies:
     "@toruslabs/http-helpers" "^2.1.4"
     "@toruslabs/openlogin-jrpc" "^1.3.4"

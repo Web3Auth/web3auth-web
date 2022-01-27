@@ -1908,7 +1908,7 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@toruslabs/eslint-config-typescript@^0.1.4":
+"@toruslabs/eslint-config-typescript@^0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@toruslabs/eslint-config-typescript/-/eslint-config-typescript-0.1.5.tgz#675fd878d77d1e9f70d78c04dd64b318581dc41f"
   integrity sha512-XpWMTqszbpSHPHmPMUPdfIEiMtxIaxbBi6gHerEVQnKG8XvjYu2i2q999sMNYIJHErMeteDCnWWq7lVFyyjBOg==
@@ -1920,7 +1920,7 @@
     eslint-config-problems "^6.0.0"
     eslint-config-standard "^17.0.0-0"
 
-"@toruslabs/torus-scripts@^0.1.6":
+"@toruslabs/torus-scripts@^0.1.7":
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-0.1.7.tgz#fccd064f53892148b9f5353daab95042837cdc3e"
   integrity sha512-kU+UMrP+DeTm7qTihD3q1H5PHSKwO2Xenl079WcWfrqyXim1AfPkPbp7RTOFpYMnHIJfwXbQP6cycy029fTAgQ==
@@ -3962,6 +3962,14 @@ eslint-plugin-es@^3.0.0:
     eslint-utils "^2.0.0"
     regexpp "^3.0.0"
 
+eslint-plugin-es@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-es/-/eslint-plugin-es-4.1.0.tgz#f0822f0c18a535a97c3e714e89f88586a7641ec9"
+  integrity sha512-GILhQTnjYE2WorX5Jyi5i4dz5ALWxBIdQECVQavL6s7cI76IZTDWleTHkxz/QT3kvcs2QlGHvKLYsSlPOlPXnQ==
+  dependencies:
+    eslint-utils "^2.0.0"
+    regexpp "^3.0.0"
+
 eslint-plugin-import@^2.25.4:
   version "2.25.4"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.25.4.tgz#322f3f916a4e9e991ac7af32032c25ce313209f1"
@@ -3988,6 +3996,19 @@ eslint-plugin-mocha@^10.0.3:
   dependencies:
     eslint-utils "^3.0.0"
     ramda "^0.27.1"
+
+eslint-plugin-n@^14.0.0:
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-14.0.0.tgz#aa7944f5b1fd69cf64ecb1ddd1a4762bb0f4f352"
+  integrity sha512-mNwplPLsbaKhHyA0fa/cy8j+oF6bF6l81hzBTWa6JOvPcMNAuIogk2ih6d9tYvWYzyUG+7ZFeChqbzdFpg2QrQ==
+  dependencies:
+    eslint-plugin-es "^4.1.0"
+    eslint-utils "^3.0.0"
+    ignore "^5.1.1"
+    is-core-module "^2.3.0"
+    minimatch "^3.0.4"
+    resolve "^1.10.1"
+    semver "^6.1.0"
 
 eslint-plugin-node@^11.1.0:
   version "11.1.0"
@@ -5160,7 +5181,7 @@ is-ci@^2.0.0:
   dependencies:
     ci-info "^2.0.0"
 
-is-core-module@^2.1.0, is-core-module@^2.5.0, is-core-module@^2.8.0, is-core-module@^2.8.1:
+is-core-module@^2.1.0, is-core-module@^2.3.0, is-core-module@^2.5.0, is-core-module@^2.8.0, is-core-module@^2.8.1:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.8.1.tgz#f59fdfca701d5879d0a6b100a40aa1560ce27211"
   integrity sha512-SdNCUs284hr40hFTFP6l0IfZ/RSrMXF3qgoRHd3/79unUTvrFO/JoXwkGm+5J/Oe3E/b5GsnG330uUNgRpu1PA==
