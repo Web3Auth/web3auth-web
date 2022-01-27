@@ -100,8 +100,8 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
       throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chainConfig.rpcTarget}`);
     this.update({ chainId: chainConfig.chainId });
     if (this.state.chainId !== chainConfig.chainId) {
-      this.provider.emit("chainChanged", this.state.chainId);
-      this.provider.emit("connect", { chainId: this.state.chainId });
+      this.emit("chainChanged", this.state.chainId);
+      this.emit("connect", { chainId: this.state.chainId });
     }
     return this.state.chainId;
   }

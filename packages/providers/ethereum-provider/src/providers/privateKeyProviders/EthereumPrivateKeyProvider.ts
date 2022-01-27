@@ -103,8 +103,8 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
 
     if (this.state.chainId !== chainId) {
-      this.provider.emit("chainChanged", chainId);
-      this.provider.emit("connect", { chainId });
+      this.emit("chainChanged", chainId);
+      this.emit("connect", { chainId });
     }
     this.update({ chainId });
     return network;

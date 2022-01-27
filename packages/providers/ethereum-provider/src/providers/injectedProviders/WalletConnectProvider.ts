@@ -85,8 +85,8 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.provider.emit("connect", { chainId });
-    this.provider.emit("chainChanged", this.state.chainId);
+    this.emit("connect", { chainId });
+    this.emit("chainChanged", this.state.chainId);
     return connectedHexChainId;
   }
 
@@ -115,7 +115,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     connector.on("session_update", async (error: Error | null, payload) => {
       if (!this.provider) throw WalletLoginError.notConnectedError("Wallet connect connector is not connected");
       if (error) {
-        this.provider.emit("error", error);
+        this.emit("error", error);
         return;
       }
       const { accounts, chainId: connectedChainId, rpcUrl } = payload;
@@ -125,7 +125,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
           accounts,
         });
         // await this.setupEngine(connector);
-        this.provider.emit("accountsChanged", accounts);
+        this.emit("accountsChanged", accounts);
       }
       const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event

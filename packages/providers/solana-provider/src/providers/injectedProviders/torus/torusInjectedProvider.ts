@@ -41,8 +41,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.provider.emit("connect", { chainId: this.state.chainId });
-    this.provider.emit("chainChanged", this.state.chainId);
+    this.emit("connect", { chainId: this.state.chainId });
+    this.emit("chainChanged", this.state.chainId);
     return this.state.chainId;
   }
 
@@ -66,7 +66,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   private async handleInjectedProviderUpdate(injectedProvider: InjectedProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
-      this.provider.emit("accountsChanged", accounts);
+      this.emit("accountsChanged", accounts);
     });
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;
