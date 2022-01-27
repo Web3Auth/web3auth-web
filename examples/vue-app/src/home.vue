@@ -39,8 +39,8 @@
             <div class="form-control">
               <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                 <label :for="loginType.id">
-                  <input v-if="loginType.name !== 'Facebook'" type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
-                  <span v-if="loginType.name !== 'Facebook'">{{ loginType.name }}</span>
+                  <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
+                  <span>{{ loginType.name }}</span>
                 </label>
               </li>
             </div>
@@ -136,7 +136,7 @@ import WhitelabelExample from "./whitelabel/whitelabel.vue";
 
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
-  // LOGIN_PROVIDER.FACEBOOK,
+  LOGIN_PROVIDER.FACEBOOK,
   LOGIN_PROVIDER.TWITTER,
   LOGIN_PROVIDER.REDDIT,
   LOGIN_PROVIDER.DISCORD,
@@ -194,7 +194,7 @@ const defaultComponentConfig = {
   selectedUiMode: "default",
   uiMode: {
     default: {
-      login: [...defaultLoginProviders(), { id: "facebook", name: "Facebook", checked: false }],
+      login: [...defaultLoginProviders()],
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
@@ -226,22 +226,11 @@ export default Vue.extend({
     const finalStoredConfig = JSON.parse(storedConfig || "{}");
     this.config = merge(this.config, finalStoredConfig);
     this.form = merge({}, this.config);
-    this.config.uiMode.default.login.push({
-      id: "facebook",
-      name: "Facebook",
-      checked: false,
-    });
   },
   methods: {
     saveConfig: function () {
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
-      // // temp hack to hide fb, todo: fix later
-      this.config.uiMode.default.login.push({
-        id: "facebook",
-        name: "Facebook",
-        checked: false,
-      });
     },
     onChainSelect: function (e) {
       console.log("e", e.target.value);
