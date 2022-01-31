@@ -2,16 +2,16 @@
 
 - ### Pre requirements:-
 
--  Install yarn:- npm i -g yarn
+    -  Install yarn:- `npm i -g yarn`
 
-- Install yalc:- npm i -g yalc
+    - Install yalc:- `npm i -g yalc`
 
-- Build packages:-
+    - Build packages:-
 
-    - Go to project root folder: cd ../../
-    - Build project:- yarn run local-publish
+        - Go to project root folder: `cd ../../`
+        - Build project:- `yarn run local-publish`
 
-- Run the example:-
+    - Run the example:-
 
-    - Go to example: cd example/vue-app
-    - Run example:- yarn run serve:local
+        - Go to example: `cd example/vue-app`
+        - Run example:- `yarn run serve:local`
