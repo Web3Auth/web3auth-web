@@ -1,29 +1,18 @@
-# helloworld
+## Web3Auth Vue Example
 
-## Project setup
-```
-npm install
-```
+- ### Pre requirements:-
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+    -  Install yarn:- `npm i -g yarn`
 
-### Compiles and minifies for production
-```
-npm run build
-```
+    - Install yalc:- `npm i -g yalc`
 
-### Run your tests
-```
-npm run test
-```
+    - Build packages:-
 
-### Lints and fixes files
-```
-npm run lint
-```
+        - Go to project root folder: `cd ../../`
+        - Install deps: `yarn` && `yarn run bootstrap`
+        - Build project:- `yarn run local-publish`
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+    - Run the example:-
+
+        - Go to example: `cd example/vue-app`
+        - Run example:- `yarn run serve:local`
