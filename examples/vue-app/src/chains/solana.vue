@@ -98,7 +98,12 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({
+          modalConfig: {
+            name: "google",
+            showOnModal: true,
+          },
+        });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

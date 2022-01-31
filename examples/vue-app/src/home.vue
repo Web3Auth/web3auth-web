@@ -2,133 +2,173 @@
   <div class="container">
     <div class="sidebar">
       <h2>Demo Settings</h2>
-      <div class="flex chain">
-        <label class="form-label" for="chain">Chain</label>
-        <select class="form-control dropdown" name="chain" id="chain" v-model="form.chain" @change="onChainSelect">
-          <option value="ethereum">Ethereum</option>
-          <option value="binance">Binance</option>
-          <!-- <option value="polygon">matic</option> -->
-          <option value="solana">Solana</option>
-        </select>
+
+      <div class="flex authMode">
+        <!-- <label class="form-label" for="chain">Chain</label> -->
+
+        <span class="form-label">Auth Mode</span>
+        <span class="form-control radio-group">
+          <label for="hosted" class="radio-button">
+            <input type="radio" id="hosted" value="hosted" v-model="form.authMode" />
+            Hosted
+          </label>
+          <label for="ownAuth" class="radio-button">
+            <input type="radio" id="ownAuth" value="ownAuth" v-model="form.authMode" />
+            Use Your Own Auth
+          </label>
+        </span>
       </div>
 
-      <div class="ui-mode">
-        <div class="flex ui-mode">
-          <span class="form-label">UI Mode</span>
+      <hr />
+
+      <div class="hosted" v-if="config.authMode === 'hosted'">
+        <div class="flex chain">
+          <!-- <label class="form-label" for="chain">Chain</label> -->
+
+          <span class="form-label">Select Chain</span>
           <span class="form-control radio-group">
-            <label for="default" class="radio-button">
-              <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
-              Default
+            <label for="ethereum" class="radio-button">
+              <input type="radio" id="ethereum" value="ethereum" v-model="form.chain" />
+              Ethereum
             </label>
-            <label for="customUi" class="radio-button">
-              <input type="radio" id="customUi" value="customUi" v-model="form.selectedUiMode" />
-              CustomUI
+            <label for="solana" class="radio-button">
+              <input type="radio" id="solana" value="solana" v-model="form.chain" />
+              Solana
             </label>
-            <label for="whitelabel" class="radio-button">
-              <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
-              WhiteLabel
+            <label for="binance" class="radio-button">
+              <input type="radio" id="binance" value="binance" v-model="form.chain" />
+              Binance
             </label>
           </span>
         </div>
-        <br />
-
-        <!-- UI MODE DEFAULT -->
-        <div v-if="form.selectedUiMode == 'default'">
-          <div class="flex">
-            <span class="form-label">Login</span>
-            <div class="form-control">
-              <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
-                <label :for="loginType.id">
-                  <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
-                  <span>{{ loginType.name }}</span>
-                </label>
-              </li>
-            </div>
+        <hr />
+        <div class="ui-mode">
+          <div class="flex ui-mode">
+            <span class="form-label">UI</span>
+            <span class="form-control radio-group">
+              <label for="default" class="radio-button">
+                <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
+                Default
+              </label>
+              <!-- <label for="customUi" class="radio-button">
+              <input type="radio" id="customUi" value="customUi" v-model="form.selectedUiMode" />
+              CustomUI
+            </label> -->
+              <label for="whitelabel" class="radio-button">
+                <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
+                WhiteLabel
+              </label>
+            </span>
           </div>
           <br />
-          <div class="flex">
-            <span class="form-label">Wallet</span>
-            <div class="form-control">
-              <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
-                <label :for="walletType.id">
-                  <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
-                  <span>{{ walletType.name }}</span>
-                </label>
-              </li>
+
+          <!-- UI MODE DEFAULT -->
+          <div v-if="form.selectedUiMode == 'default'">
+            <div class="flex">
+              <span class="form-label">Login</span>
+              <div class="form-control">
+                <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
+                  <label :for="loginType.id">
+                    <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
+                    <span>{{ loginType.name }}</span>
+                  </label>
+                </li>
+              </div>
+            </div>
+            <br />
+            <div class="flex">
+              <span class="form-label">Wallet</span>
+              <div class="form-control">
+                <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
+                  <label :for="walletType.id">
+                    <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
+                    <span>{{ walletType.name }}</span>
+                  </label>
+                </li>
+              </div>
             </div>
           </div>
-        </div>
+          <hr />
 
-        <!-- UI MODE YOUR OWN MODAL -->
-        <div v-if="form.selectedUiMode == 'customUi'">
-          <div class="flex">
-            <span class="form-label">Type</span>
-            <span class="form-control">
-              <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
-              <label for="openlogin">OpenLogin</label>
-              <br />
-              <input type="radio" id="customAuth" name="customAuth" value="customAuth" v-model="form.uiMode.customUi.type" />
-              <label for="customAuth">CustomAuth</label>
-              <br />
-              <input type="radio" id="walletConnect" name="walletConnect" value="walletConnect" v-model="form.uiMode.customUi.type" />
+          <!-- UI MODE YOUR OWN MODAL -->
+          <div v-if="form.selectedUiMode == 'customUi'">
+            <div class="flex">
+              <span class="form-label">Type</span>
+              <span class="form-control">
+                <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
+                <label for="openlogin">OpenLogin</label>
+                <br />
+                <input type="radio" id="customAuth" name="customAuth" value="customAuth" v-model="form.uiMode.customUi.type" />
+                <label for="customAuth">CustomAuth</label>
+                <br />
+                <!-- <input type="radio" id="walletConnect" name="walletConnect" value="walletConnect" v-model="form.uiMode.customUi.type" />
               <label for="customAuth">Wallet Connect</label>
-              <br />
-            </span>
+              <br /> -->
+              </span>
+            </div>
+            <br />
           </div>
-          <br />
-        </div>
 
-        <!-- UI MODE WHITELABEL -->
-        <div v-if="form.selectedUiMode == 'whitelabel'">
-          <div class="flex">
-            <span class="form-label">Logo URL</span>
-            <span class="form-control">
-              <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
-            </span>
-          </div>
-          <br />
-          <div class="flex">
-            <span class="form-label">Theme</span>
-            <span class="form-control">
-              <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
-              <label for="light">Light</label>
-              <br />
-              <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
-              <label for="dark">Dark</label>
-              <br />
-            </span>
-          </div>
-          <br />
-          <div class="order-container">
-            <div class="form-label">
-              <div>Login Methods Order</div>
-              <a @click="setDefaultLoginMethodsOrder">Set to default</a>
+          <!-- UI MODE WHITELABEL -->
+          <div v-if="form.selectedUiMode == 'whitelabel'">
+            <div class="flex">
+              <span class="form-label">Logo URL</span>
+              <span class="form-control">
+                <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
+              </span>
             </div>
-            <div>
-              <textarea rows="5" class="order-list" v-model="tempLoginMethodsOrder" />
+            <br />
+            <div class="flex">
+              <span class="form-label">Theme</span>
+              <span class="form-control">
+                <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
+                <label for="light">Light</label>
+                <br />
+                <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
+                <label for="dark">Dark</label>
+                <br />
+              </span>
             </div>
-            <div></div>
+            <br />
+            <div class="order-container">
+              <div class="form-label">
+                <div>Login Methods Order</div>
+                <a @click="setDefaultLoginMethodsOrder">Set to default</a>
+              </div>
+              <div>
+                <textarea rows="5" class="order-list" v-model="tempLoginMethodsOrder" />
+              </div>
+              <div></div>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="ownAuth" v-else-if="config.authMode === 'ownAuth'">
+        <!-- <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer> -->
+      </div>
+
       <div class="btn-group">
         <button class="btn" @click="saveConfig">Submit</button>
       </div>
     </div>
     <div class="content">
-      <!-- <h2>DEMO: {{ config.chain }} x {{ config.selectedUiMode }}</h2> -->
       <section>
+        <!-- hosted auth -->
         <ConfigurableExample
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
-          v-if="config.selectedUiMode === 'default'"
+          v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
         ></ConfigurableExample>
-        <CustomUiContainer :authType="config.uiMode.customUi.type" v-else-if="config.selectedUiMode === 'customUi'"></CustomUiContainer>
+
         <WhitelabelExample
           :uiConfig="config.uiMode.whitelabel"
           :chain="config.chain"
-          v-else-if="config.selectedUiMode === 'whitelabel'"
+          v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
         ></WhitelabelExample>
+
+        <!-- Custom auth -->
+        <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
       </section>
     </div>
   </div>
@@ -184,6 +224,7 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
 
 const defaultFormConfig = {
   chain: "ethereum",
+  authMode: "hosted",
   selectedUiMode: "default",
   uiMode: {
     default: {
@@ -203,6 +244,7 @@ const defaultFormConfig = {
 
 const defaultComponentConfig = {
   chain: "ethereum",
+  authMode: "hosted",
   selectedUiMode: "default",
   uiMode: {
     default: {
@@ -300,7 +342,7 @@ body {
 .content {
   flex-basis: 0;
   flex-grow: 999;
-  min-width: 40%;
+  min-width: 30%;
   padding: 20px;
 }
 
