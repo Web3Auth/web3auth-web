@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ChainContainer :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
+    <ChainContainer :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
     <div id="console" style="white-space: pre-line">
       <code style="white-space: pre-line"></code>
     </div>
@@ -21,6 +21,10 @@ export default Vue.extend({
     },
     adapterConfig: {
       type: Object,
+    },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
     },
   },
   data() {

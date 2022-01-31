@@ -1,9 +1,12 @@
 <template>
   <div class="container">
     <div class="sidebar">
+      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/vue-app" target="blank">
+        <img src="./assets/github-logo.png" width="30px" />
+      </a>
       <h2>Demo Settings</h2>
 
-      <div class="flex authMode">
+      <div class="flex-vertical-center authMode">
         <!-- <label class="form-label" for="chain">Chain</label> -->
 
         <span class="form-label">Auth Mode</span>
@@ -22,7 +25,28 @@
       <hr />
 
       <div class="hosted" v-if="config.authMode === 'hosted'">
-        <div class="flex chain">
+        <div class="ui-mode">
+          <div class="flex-vertical-center ui-mode">
+            <span class="form-label">Openlogin Network</span>
+            <span class="form-control radio-group">
+              <label for="mainnet" class="radio-button">
+                <input type="radio" id="mainnet" value="mainnet" v-model="form.openloginNetwork" />
+                Mainnet
+              </label>
+              <label for="testnet" class="radio-button">
+                <input type="radio" id="testnet" value="testnet" v-model="form.openloginNetwork" />
+                Testnet
+              </label>
+              <label for="cyan" class="radio-button">
+                <input type="radio" id="cyan" value="cyan" v-model="form.openloginNetwork" />
+                Cyan
+              </label>
+            </span>
+          </div>
+          <br />
+        </div>
+        <hr />
+        <div class="flex-vertical-center chain">
           <!-- <label class="form-label" for="chain">Chain</label> -->
 
           <span class="form-label">Select Chain</span>
@@ -43,7 +67,7 @@
         </div>
         <hr />
         <div class="ui-mode">
-          <div class="flex ui-mode">
+          <div class="flex-vertical-center ui-mode">
             <span class="form-label">UI</span>
             <span class="form-control radio-group">
               <label for="default" class="radio-button">
@@ -60,11 +84,11 @@
               </label>
             </span>
           </div>
-          <br />
+          <hr />
 
           <!-- UI MODE DEFAULT -->
           <div v-if="form.selectedUiMode == 'default'">
-            <div class="flex">
+            <div class="flex-vertical-center">
               <span class="form-label">Login</span>
               <div class="form-control">
                 <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
@@ -75,8 +99,8 @@
                 </li>
               </div>
             </div>
-            <br />
-            <div class="flex">
+            <hr />
+            <div class="flex-vertical-center">
               <span class="form-label">Wallet</span>
               <div class="form-control">
                 <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
@@ -92,7 +116,7 @@
 
           <!-- UI MODE YOUR OWN MODAL -->
           <div v-if="form.selectedUiMode == 'customUi'">
-            <div class="flex">
+            <div class="flex-vertical-center">
               <span class="form-label">Type</span>
               <span class="form-control">
                 <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
@@ -111,14 +135,14 @@
 
           <!-- UI MODE WHITELABEL -->
           <div v-if="form.selectedUiMode == 'whitelabel'">
-            <div class="flex">
+            <div class="flex-vertical-center">
               <span class="form-label">Logo URL</span>
               <span class="form-control">
                 <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
               </span>
             </div>
             <br />
-            <div class="flex">
+            <div class="flex-vertical-center">
               <span class="form-label">Theme</span>
               <span class="form-control">
                 <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
@@ -149,13 +173,14 @@
       </div>
 
       <div class="btn-group">
-        <button class="btn" @click="saveConfig">Submit</button>
+        <button class="btn submit-btn" @click="saveConfig">Submit</button>
       </div>
     </div>
     <div class="content">
       <section>
         <!-- hosted auth -->
         <ConfigurableExample
+          :openloginNetwork="config.openloginNetwork"
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
           v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
@@ -226,13 +251,14 @@ const defaultFormConfig = {
   chain: "ethereum",
   authMode: "hosted",
   selectedUiMode: "default",
+  openloginNetwork: "testnet",
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
-      type: "openlogin",
+      type: "customAuth",
     },
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
@@ -246,13 +272,14 @@ const defaultComponentConfig = {
   chain: "ethereum",
   authMode: "hosted",
   selectedUiMode: "default",
+  openloginNetwork: "testnet",
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
-      type: "openlogin",
+      type: "customAuth",
     },
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
@@ -294,6 +321,7 @@ export default Vue.extend({
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
+      console.log("config saved", this.config);
       // // temp hack to hide fb, todo: fix later
       // this.config.uiMode.default.login.push({
       //   id: "facebook",
@@ -346,15 +374,18 @@ body {
   padding: 20px;
 }
 
-.flex {
+.flex-vertical-center {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .form-label {
-  flex-basis: 5rem;
+  flex-basis: 3rem;
   text-align: right;
   margin-right: 10px;
-  font-weight: 500;
+  font-weight: 800;
 }
 
 .form-control {
@@ -386,6 +417,8 @@ body {
 
 .btn-group {
   text-align: center;
+  position: fixed;
+  bottom: 0;
 }
 
 .btn {
@@ -401,9 +434,12 @@ body {
   height: 40px;
   color: #0364ff;
   background-color: #fff;
-  border: 1px solid #0364ff;
+  border: 3px solid #0364ff;
   box-sizing: border-box;
   border-radius: 6px;
+}
+.submit-btn {
+  width: 400px;
 }
 
 .btn:hover {

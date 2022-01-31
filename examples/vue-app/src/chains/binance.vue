@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -41,6 +42,10 @@ export default Vue.extend({
     adapterConfig: {
       type: Object,
     },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
+    },
   },
   data() {
     return {
@@ -55,6 +60,11 @@ export default Vue.extend({
   watch: {
     adapterConfig: async function (newSettings, oldSettings) {
       await this.initBinanceWeb3Auth();
+    },
+    openloginNetwork: async function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      await this.initEthAuth();
     },
   },
   components: {
@@ -91,6 +101,14 @@ export default Vue.extend({
         this.parseConfig();
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: binanceChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        const openloginAdapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: this.openloginNetwork,
+            clientId: config.clientId,
+          },
+        });
+
+        this.web3auth.configureAdapter(openloginAdapter);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
