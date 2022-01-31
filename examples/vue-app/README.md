@@ -9,6 +9,7 @@
     - Build packages:-
 
         - Go to project root folder: `cd ../../`
+        - Install deps: `yarn` && `yarn run bootstrap`
         - Build project:- `yarn run local-publish`
 
     - Run the example:-
