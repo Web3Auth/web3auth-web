@@ -122,6 +122,7 @@ export default Vue.extend({
 
         this.web3auth.configureAdapter(openloginAdapter);
         this.subscribeAuthEvents(this.web3auth);
+
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
