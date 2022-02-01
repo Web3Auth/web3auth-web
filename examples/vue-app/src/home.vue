@@ -89,7 +89,7 @@
           <!-- UI MODE DEFAULT -->
           <div v-if="form.selectedUiMode == 'default'">
             <div class="flex-vertical-center">
-              <span class="form-label">Login</span>
+              <span class="form-label">Social Logins</span>
               <div class="form-control">
                 <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                   <label :for="loginType.id">
@@ -101,7 +101,7 @@
             </div>
             <hr />
             <div class="flex-vertical-center">
-              <span class="form-label">Wallet</span>
+              <span class="form-label">External Wallets</span>
               <div class="form-control">
                 <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
                   <label :for="walletType.id">
@@ -379,10 +379,11 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 20px;
 }
 
 .form-label {
-  flex-basis: 3rem;
+  flex-basis: 2rem;
   text-align: right;
   margin-right: 10px;
   font-weight: 800;
