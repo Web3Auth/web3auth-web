@@ -108,6 +108,7 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
         const openloginAdapter = new OpenloginAdapter({
+          chainConfig: solanaChainConfig,
           adapterSettings: {
             network: this.openloginNetwork,
             clientId: config.clientId,
