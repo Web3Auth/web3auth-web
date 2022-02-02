@@ -14,5 +14,5 @@
 
     - Run the example:-
 
-        - Go to example: `cd example/vue-app`
+        - Go to example: `cd examples/vue-app`
         - Run example:- `yarn run serve:local`
