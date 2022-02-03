@@ -32,7 +32,7 @@ const currentPath = path.resolve(".");
 const config = generateWebpackConfig({
   pkgBaseConfig: {
     output: {
-      libraryExport: "default",
+      // libraryExport: "default",
     },
   },
   currentPath,
