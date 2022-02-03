@@ -63,6 +63,10 @@
               <input type="radio" id="binance" value="binance" v-model="form.chain" />
               Binance
             </label>
+            <label for="polygon" class="radio-button">
+              <input type="radio" id="polygon" value="polygon" v-model="form.chain" />
+              Polygon
+            </label>
           </span>
         </div>
         <hr />

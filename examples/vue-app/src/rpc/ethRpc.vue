@@ -13,7 +13,9 @@
       <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'custom-auth'" @click="addChain" style="cursor: pointer">
         Add Chain
       </button>
-      <button class="rpcBtn" @click="switchChain" style="cursor: pointer">Switch Chain</button>
+      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'metamask'" @click="switchChain" style="cursor: pointer">
+        Switch Chain
+      </button>
     </section>
     <section
       :style="{
