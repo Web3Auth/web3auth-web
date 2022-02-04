@@ -365,6 +365,7 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private async updateWalletConnect(qrCodeUri: string) {
+    if (!qrCodeUri) return;
     const qrCode = await QRCode.toDataURL(qrCodeUri);
     log.debug("wallet connect qr code uri", qrCode);
     const $walletConnect = this.$modal.querySelector(".w3ajs-wallet-connect") as HTMLDivElement;
