@@ -25,31 +25,35 @@ yarn add @web3auth/web3auth
  import { Web3Auth } from "@web3auth/web3auth";
  import { CHAIN_NAMESPACES, ADAPTER_EVENTS } from "@web3auth/base";
 
-  // We are initializing with EIP155 namespace which
-  // will initialize the modal with ethereum mainnet
-  // by default.
-  const web3auth = new Web3Auth({
-      chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }
-      clientId: "localhost-id" // get your clientId from https://developer.web3auth.io
-  });
+ (async()=>{
+    // We are initializing with EIP155 namespace which
+    // will initialize the modal with ethereum mainnet
+    // by default.
+    const web3auth = new Web3Auth({
+        chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }
+        clientId: "localhost-id" // get your clientId from https://developer.web3auth.io
+    });
 
-  await web3auth.initModal();
-  // listening to modal events, on successfull login, `CONNECTED` event will be emitted.
-  subscribeAuthEvents(web3auth: Web3AuthModal) {
-    web3auth.on(ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
-      console.log("connected to wallet", adapterName, web3auth.provider)
-    })
-    web3auth.on(ADAPTER_EVENTS.CONNECTING, ()=>{
-      console.log("connecting")
+    await web3auth.initModal();
+    // listening to modal events, on successfull login, `CONNECTED` event will be emitted.
+    subscribeAuthEvents(web3auth: Web3AuthModal) {
+      web3auth.on(ADAPTER_EVENTS.CONNECTED, (adapterName: string)=>{
+        console.log("connected to wallet", adapterName, web3auth.provider)
+      })
+      web3auth.on(ADAPTER_EVENTS.CONNECTING, ()=>{
+        console.log("connecting")
 
-    })
-    web3auth.on(ADAPTER_EVENTS.DISCONNECTED, ()=>{
-      console.log("disconnected")
-    })
-    web3auth.on(ADAPTER_EVENTS.ERRORED, (error)=>{
-      console.log("errored", error)
-    })
-  }
-  web3auth.connect();
+      })
+      web3auth.on(ADAPTER_EVENTS.DISCONNECTED, ()=>{
+        console.log("disconnected")
+      })
+      web3auth.on(ADAPTER_EVENTS.ERRORED, (error)=>{
+        console.log("errored", error)
+      })
+    }
+
+    // you can use this provider with web3
+    const provider = await web3auth.connect();
+ })()
 
 ```
