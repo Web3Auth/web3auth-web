@@ -2,6 +2,7 @@
 const path = require("path");
 const generateWebpackConfig = require("../../webpack.config");
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 const webpack = require("webpack");
 
 // eslint-disable-next-line import/no-extraneous-dependencies
