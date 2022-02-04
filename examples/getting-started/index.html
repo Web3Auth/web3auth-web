@@ -73,21 +73,6 @@
 
         async function initWeb3() {
             const web3 = new Web3(web3AuthInstance.provider);
-            try {
-                (await web3.eth.getAccounts())[0]
-            } catch (error) {
-                console.log("error", error)
-                $("#error").text("Error: " + error.message);
-                try {
-                    const acc = await web3AuthInstance.provider.request({method: "eth_accounts"})
-                } catch (error) {
-                    console.log("error rpc", error)
-                    $("#error").text("Error: " + error.message);
-                    return;
-                }
-                return;
-            }
-            
             const address = (await web3.eth.getAccounts())[0];
             const balance = await web3.eth.getBalance(address);
             $("#address").text("Address: " + address + ".");
@@ -97,7 +82,6 @@
         $("#login").click(async function (event) {
             try {
                 const provider = await  web3AuthInstance.connect()
-                debugger
                 console.log("provider after login", provider)
                 await initWeb3();
                 const user = await web3AuthInstance.getUserInfo();
