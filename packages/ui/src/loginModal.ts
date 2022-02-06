@@ -222,7 +222,7 @@ export default class LoginModal extends SafeEventEmitter {
     $socialAdapterExpandText.innerText = "View more options";
     $socialAdapters.classList.add("w3a-adapter-list--shrink");
 
-    if (!this.hasSocialEmailWallet && !this.hasSocialWallet) {
+    if (!this.hasSocialEmailWallet && !this.hasSocialWallet && !isErrorOnly) {
       this.showExternalWallets();
     }
   };
