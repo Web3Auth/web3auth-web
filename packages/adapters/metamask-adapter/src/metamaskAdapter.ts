@@ -139,7 +139,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
       });
     } catch (switchError: unknown) {
       // This error code indicates that the chain has not been added to MetaMask.
-      if ((switchError as any).code === 4902) {
+      if ((switchError as { code: number }).code === 4902) {
         await this.metamaskProvider.request({
           method: "wallet_addEthereumChain",
           params: [{ chainId: chainConfig.chainId, chainName: chainConfig.displayName, rpcUrls: [chainConfig.rpcTarget] }],
