@@ -8,17 +8,11 @@ function App() {
   const [user, setUser] = useState(null);
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
     console.log("useEffect");
 
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
-      console.log("subscribeAuthEvents ", subscribed);
-
-      if (subscribed) {
-        return;
-      }
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);
@@ -40,8 +34,6 @@ function App() {
       web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
         console.log("modal visibility", isVisible);
       });
-
-      setSubscribed(true);
     };
 
     const polygonMumbaiConfig = {
@@ -70,7 +62,7 @@ function App() {
     };
 
     initializeModal();
-  }, [subscribed]);
+  }, []);
 
   const login = async () => {
     if (!web3auth) return;
@@ -110,7 +102,7 @@ function App() {
     );
   };
 
-  return loaded && user ? renderAuthenticated() : renderUnauthenticated();
+  return loaded ? (user ? renderAuthenticated() : renderUnauthenticated()): <h1>Loading....</h1>;
 }
 
 export default App;
