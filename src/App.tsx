@@ -4,8 +4,10 @@ import { ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import Button from '@mui/material/Button';
 
 function App() {
+
   const [user, setUser] = useState(null);
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -49,7 +51,7 @@ function App() {
 
     const web3auth = new Web3Auth({
       chainConfig: polygonMumbaiConfig,
-      clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
+      clientId: "BBjCfTJZgWe5TGx2WNnozJ4aPQEitgYBJoqJAv50bdh6nocRyNwAa0iUs0kOVLqJiTBou963d1SKR8soHy2z-VE",
     });
 
     setWeb3auth(web3auth);
@@ -83,9 +85,9 @@ function App() {
   const renderUnauthenticated = () => {
     return (
       <div className="App">
-        <button className="app-link" onClick={login}>
+        <Button className="app-link" onClick={login}>
           LOGIN
-        </button>
+        </Button>
       </div>
     );
   };
@@ -93,12 +95,12 @@ function App() {
   const renderAuthenticated = () => {
     return (
       <div className="App">
-        <button className="app-link" onClick={logout}>
+        <Button className="app-link" onClick={logout}>
           LOG OUT
-        </button>
-        <button className="app-link" onClick={getUserInfo}>
+        </Button>
+        <Button className="app-link" onClick={getUserInfo}>
           Log user info
-        </button>
+        </Button>
       </div>
     );
   };
