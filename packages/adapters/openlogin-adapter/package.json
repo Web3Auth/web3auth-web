@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
