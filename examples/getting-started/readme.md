@@ -5,6 +5,11 @@
 - `npm i -g http-server`
 
 
-### Run Example
+### Run Ethereum Example
 
-- `http-server .`
+- `http-server eth/`
+
+
+### Run Solana Example
+
+- `http-server solana/`
