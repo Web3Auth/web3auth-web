@@ -10,7 +10,6 @@ import { Web3Storage } from 'web3.storage'
 function App() {
 
   function getAccessToken() {
-    console.log("check:", process.env.REACT_APP_WEB3STORAGE_TOKEN);
     // Get your own API token at https://web3.storage/account/
     return process.env.REACT_APP_WEB3STORAGE_TOKEN;
   }
