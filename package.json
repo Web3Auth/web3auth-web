@@ -1,75 +1,52 @@
 {
-  "name": "web3auth",
+  "name": "react-test",
+  "version": "0.1.0",
   "private": true,
-  "description": "Monorepo for web3 auth packages",
+  "dependencies": {
+    "@web3auth/base": "^0.2.2",
+    "@web3auth/web3auth": "^0.2.2",
+    "ethers": "^5.5.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "local-publish": "cross-env FORCE_COLOR=1 lerna run local-publish",
-    "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
-    "just:publish:lerna": "lerna publish",
-    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
-    "build": "cross-env FORCE_COLOR=1 lerna run --stream build",
-    "dev": "lerna run dev",
-    "test": "cross-env FORCE_COLOR=1 lerna run test --parallel",
-    "test-debugger": "cross-env FORCE_COLOR=1 lerna run test-debugger --parallel",
-    "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
-    "pack:lerna": "lerna exec 'yarn pack'",
-    "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
-    "@toruslabs/eslint-config-typescript": "^0.2.0",
-    "@toruslabs/torus-scripts": "^0.2.2",
-    "@types/node": "^16",
-    "@typescript-eslint/eslint-plugin": "^5.9.1",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.6.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-mocha": "^10.0.3",
-    "eslint-plugin-n": "^14.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-simple-import-sort": "^7.0.0",
-    "eslint-plugin-tsdoc": "^0.2.14",
-    "husky": "^7.0.4",
-    "lerna": "^4.0.0",
-    "lint-staged": "^12.3.2",
-    "prettier": "^2.5.1",
-    "rimraf": "^3.0.2",
-    "ts-node": "^10.4.0",
-    "tsconfig-paths": "^3.12.0",
-    "tsconfig-paths-webpack-plugin": "^3.5.2",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.4",
-    "yalc": "^1.0.0-pre.53"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
-  },
-  "keywords": [
-    "web3",
-    "ethereum",
-    "solana",
-    "wallet",
-    "aggregator",
-    "authentication",
-    "login",
-    "blockchain",
-    "key management"
-  ],
-  "lint-staged": {
-    "*": "lerna run --concurrency 1 --stream --since HEAD --exclude-dependents pre-commit -- "
-  },
-  "author": "Torus Labs",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Web3Auth/Web3Auth/issues"
-  },
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
-  "engines": {
-    "node": ">=14.17.0",
-    "npm": ">=6.x"
+    "@types/node": "^16.11.22",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
+    "assert": "^2.0.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.1.11",
+    "react-scripts": "5.0.0",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "typescript": "^4.5.5",
+    "url": "^0.11.0"
   }
 }

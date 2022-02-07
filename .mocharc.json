@@ -1,7 +1,0 @@
-{
-  "loader": "ts-node/esm/transpile-only",
-  "extension": ["ts"],
-  "require": ["../../test/setup.js"],
-  "timeout": 0,
-  "exit": true
-}

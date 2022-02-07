@@ -1,23 +1,26 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
-    "strict": false,
-    "module": "esnext",
-    "target": "es6",
-    "lib": ["ES2020", "DOM"],
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "noImplicitThis": true,
-    "declaration": true,
-    "declarationDir": "./types",
-    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "baseUrl": ".",
-    "paths": {
-      "@web3auth/*-adapter": ["packages/adapters/*-adapter/src"],
-      "@web3auth/*-provider": ["packages/providers/*-provider/src"],
-      "@web3auth/*": ["packages/*/src"]
-    }
-  }
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
 }
