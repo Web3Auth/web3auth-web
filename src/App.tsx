@@ -5,6 +5,7 @@ import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Button from '@mui/material/Button';
+import { Web3Storage } from 'web3.storage'
 
 function App() {
 
