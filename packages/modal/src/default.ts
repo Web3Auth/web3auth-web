@@ -38,6 +38,7 @@ export const getDefaultAdapterModule = async (params: {
     const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
+      chainConfig: { ...(defaultOptions.chainConfig || {}), ...finalChainConfig },
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId },
     });
     return adapter;
