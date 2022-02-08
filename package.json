@@ -15,7 +15,8 @@
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start:ui": "cross-env FORCE_COLOR=1 lerna run --stream start:ui --scope=@web3auth/ui"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-typescript": "^0.2.0",

@@ -8,6 +8,8 @@ const currentPath = path.resolve(".");
 
 const config = generateWebpackConfig({
   pkgBaseConfig: {
+    mode: "development", // only for testing
+    entry: path.resolve(__dirname, "src/index.tsx"),
     output: {
       libraryExport: "default",
     },
@@ -17,6 +19,7 @@ const config = generateWebpackConfig({
   alias: {},
   module: {
     rules: [
+      { test: /\.tsx?$/, loader: "ts-loader" },
       {
         test: /\.css$/i,
         use: { loader: "style-loader", options: {} },
