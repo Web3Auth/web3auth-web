@@ -1,6 +1,8 @@
-export default function SocialLoginEmail(props) {
+import React from "react";
+
+export default function SocialLoginEmail() {
   return (
-    <div className="w3ajs-email-passwordless w3a-group w3a-group--email-hidden">
+    <div className="w3ajs-email-passwordless w3a-group w3a-group--email">
       <h6 className="w3a-group__title">EMAIL</h6>
       <form className="w3ajs-email-passwordless-form">
         <input className="w3a-text-field" type="email" name="email" required placeholder="Email" />
