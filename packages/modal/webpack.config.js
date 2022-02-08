@@ -2,29 +2,12 @@
 const path = require("path");
 const generateWebpackConfig = require("../../webpack.config");
 
-const defaultConfig = {
-  presets: ["@babel/env", "@babel/typescript"],
-  plugins: [
-    "@babel/plugin-syntax-bigint",
-    "@babel/plugin-proposal-object-rest-spread",
-    "@babel/plugin-proposal-class-properties",
-    "@babel/transform-runtime",
-  ],
-  sourceType: "unambiguous",
-};
-const babelLoader = {
-  test: /\.(ts|js)x?$/,
-  exclude: /(node_modules|bower_components)/,
-  use: {
-    loader: "babel-loader",
-    options: {
-      ...defaultConfig,
-      babelrc: false,
-      configFile: false,
-      cacheDirectory: true,
-    },
-  },
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+const webpack = require("webpack");
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const torusConfig = require("@toruslabs/torus-scripts/config/torus.config");
+
 const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");
@@ -32,15 +15,26 @@ const currentPath = path.resolve(".");
 const config = generateWebpackConfig({
   pkgBaseConfig: {
     output: {
-      libraryExport: "default",
+      // libraryExport: "default",
     },
+  },
+  pkgUmdConfig: {
+    output: {
+      // libraryExport: "default",
+      filename: `${torusConfig.name}.umd.min.js`,
+      libraryTarget: "umd",
+    },
+    plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1,
+      }),
+    ],
   },
   currentPath,
   pkg,
   alias: {},
   module: {
     rules: [
-      babelLoader,
       {
         test: /\.css$/i,
         use: { loader: "style-loader", options: {} },

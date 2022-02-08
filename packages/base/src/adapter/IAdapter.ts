@@ -1,9 +1,10 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { getChainConfig } from "..";
+import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
+import { WALLET_ADAPTERS } from "../wallet";
 
 export type UserInfo = {
   /**
@@ -55,6 +56,11 @@ export const ADAPTER_STATUS = {
   DISCONNECTED: "disconnected",
   ERRORED: "errored",
 } as const;
+
+export const ADAPTER_EVENTS = {
+  ...ADAPTER_STATUS,
+  ADAPTER_DATA_UPDATED: "adapter_data_updated",
+} as const;
 export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
 
 export type CONNECTED_EVENT_DATA = {
@@ -71,8 +77,8 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
   init(options?: AdapterInitOptions): Promise<void>;
-  connect(params?: T): Promise<SafeEventEmitterProvider | void>;
-  disconnect(): Promise<void>;
+  disconnect(options?: { cleanup: boolean }): Promise<void>;
+  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
@@ -95,11 +101,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
-  public abstract provider: SafeEventEmitterProvider | null;
-
   get chainConfigProxy(): CustomChainConfig | undefined {
     return this.chainConfig ? { ...this.chainConfig } : undefined;
   }
+
+  public abstract get provider(): SafeEventEmitterProvider | null;
 
   setChainConfig(customChainConfig: CustomChainConfig): void {
     if (this.status === ADAPTER_STATUS.READY) return;
@@ -108,25 +114,32 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
   }
 
+  setAdapterSettings(_: unknown): void {}
+
   checkConnectionRequirements(): void {
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletLoginError.connectionError("Already pending connection");
+    // we reconnect without killing existing wallet connect session on calling connect again.
+    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
+    else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
+
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
     if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
   }
 
   checkInitializationRequirements(): void {
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }
 
+  updateAdapterData(data: unknown): void {
+    this.adapterData = data;
+    this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  }
+
   abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<SafeEventEmitterProvider | void>;
+  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
-
-  abstract setAdapterSettings(adapterSettings: unknown): void;
 }
 
 export interface BaseAdapterConfig {
@@ -180,4 +193,9 @@ export type LoginMethodConfig = Record<
 
 export interface WalletConnectV1Data {
   uri: string;
+}
+
+export interface IAdapterDataEvent {
+  adapterName: string;
+  data: unknown;
 }

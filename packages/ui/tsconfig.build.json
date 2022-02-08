@@ -1,6 +1,7 @@
 {
   "include": ["src", "css", "assets"],
   "compilerOptions": {
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "rootDir": "."
   }
 }

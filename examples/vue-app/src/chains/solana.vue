@@ -7,10 +7,10 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!connected" @click="connect" style="cursor: pointer">{{ loginButtonStatus }} Connect</button>
-      <button class="rpcBtn" v-if="connected" @click="logout" style="cursor: pointer">Logout</button>
-      <SolanaRpc v-if="connected && provider" :provider="provider" :console="console"></SolanaRpc>
-      <button class="rpcBtn" v-if="connected" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
+      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -21,6 +21,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -44,6 +45,10 @@ export default Vue.extend({
     adapterConfig: {
       type: Object,
     },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
+    },
   },
   watch: {
     adapterConfig: async function (newVal, oldVal) {
@@ -51,13 +56,17 @@ export default Vue.extend({
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
       await this.initSolanaAuth();
     },
+    openloginNetwork: async function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      await this.initEthAuth();
+    },
   },
   data() {
     return {
       modalConfig: {},
       loading: false,
       loginButtonStatus: "",
-      connected: false,
       provider: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: config.clientId }),
     };
@@ -97,8 +106,21 @@ export default Vue.extend({
 
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        const openloginAdapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: this.openloginNetwork,
+            clientId: config.clientId,
+          },
+        });
+
+        this.web3auth.configureAdapter(openloginAdapter);
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({
+          modalConfig: {
+            name: "google",
+            showOnModal: true,
+          },
+        });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
@@ -111,7 +133,6 @@ export default Vue.extend({
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
-        this.connected = true;
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
         this.console("connecting");
@@ -120,7 +141,7 @@ export default Vue.extend({
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.console("disconnected");
         this.loginButtonStatus = "";
-        this.connected = false;
+        this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
@@ -128,9 +149,9 @@ export default Vue.extend({
         this.loginButtonStatus = "";
       });
     },
-    connect() {
+    async connect() {
       try {
-        this.web3auth.connect();
+        await this.web3auth.connect();
       } catch (error) {
         console.error(error);
         this.console("error", error);

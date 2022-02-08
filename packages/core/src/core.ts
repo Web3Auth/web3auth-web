@@ -1,5 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
+  ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
@@ -35,8 +36,6 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public provider: SafeEventEmitterProvider | null = null;
-
   public cachedAdapter: string | null = null;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
@@ -45,9 +44,29 @@ export class Web3AuthCore extends SafeEventEmitter {
     super();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
+
     this.cachedAdapter = storageAvailable("sessionStorage") ? window.sessionStorage.getItem(ADAPTER_CACHE_KEY) : null;
-    this.coreOptions = options;
+
+    this.coreOptions = {
+      ...options,
+      chainConfig: {
+        ...getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId),
+        ...options.chainConfig,
+      },
+    };
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      const adapter = this.walletAdapters[this.connectedAdapterName];
+      return adapter.provider;
+    }
+    return null;
+  }
+
+  set provider(_: SafeEventEmitterProvider | null) {
+    throw new Error("Not implemented");
   }
 
   public async init(): Promise<void> {
@@ -100,10 +119,11 @@ export class Web3AuthCore extends SafeEventEmitter {
       adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
       adapter.currentChainNamespace &&
       providedChainConfig.chainNamespace !== adapter.currentChainNamespace
-    )
-      throw WalletInitializationError.incompatibleChainNameSpace(
-        `${adapter.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
-      );
+    ) {
+      // chainConfig checks are already validated in constructor so using typecast is safe here.
+      adapter.setChainConfig(providedChainConfig as CustomChainConfig);
+    }
+
     this.walletAdapters[adapter.name] = adapter;
     return this;
   }
@@ -118,15 +138,15 @@ export class Web3AuthCore extends SafeEventEmitter {
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<void> {
+  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
     if (!this.walletAdapters[walletName])
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    await this.walletAdapters[walletName].connect(loginParams);
+    return this.walletAdapters[walletName].connect(loginParams);
   }
 
-  async logout(): Promise<void> {
+  async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    await this.walletAdapters[this.connectedAdapterName].disconnect();
+    await this.walletAdapters[this.connectedAdapterName].disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -136,33 +156,36 @@ export class Web3AuthCore extends SafeEventEmitter {
   }
 
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
-    walletAdapter.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.status = ADAPTER_STATUS.CONNECTED;
-      const connectedAd = this.walletAdapters[data.adapter];
-      this.provider = connectedAd.provider as SafeEventEmitterProvider;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
-      this.emit(ADAPTER_STATUS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.DISCONNECTED, (data) => {
+
+    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      this.provider = null;
       this.clearCache();
-      this.emit(ADAPTER_STATUS.DISCONNECTED, data);
+      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
       log.debug("disconnected", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.CONNECTING, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(ADAPTER_STATUS.CONNECTING, data);
+      this.emit(ADAPTER_EVENTS.CONNECTING, data);
       log.debug("connecting", this.status, this.connectedAdapterName);
     });
-    walletAdapter.on(ADAPTER_STATUS.ERRORED, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.ERRORED, (data) => {
       this.status = ADAPTER_STATUS.ERRORED;
       this.clearCache();
-      this.emit(ADAPTER_STATUS.ERRORED, data);
+      this.emit(ADAPTER_EVENTS.ERRORED, data);
       log.debug("errored", this.status, this.connectedAdapterName);
+    });
+
+    walletAdapter.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (data) => {
+      log.debug("adapter data updated", data);
+      this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, data);
     });
   }
 
