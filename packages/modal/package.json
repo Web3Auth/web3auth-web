@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/web3auth",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/web3auth.cjs.js",
@@ -26,11 +26,11 @@
     "@web3auth/customauth-adapter": "^0.2.2",
     "@web3auth/metamask-adapter": "^0.2.3",
     "@web3auth/openlogin-adapter": "^0.2.3",
-    "@web3auth/phantom-adapter": "^0.2.2",
+    "@web3auth/phantom-adapter": "^0.2.4",
     "@web3auth/torus-evm-adapter": "^0.2.2",
     "@web3auth/torus-solana-adapter": "^0.2.2",
     "@web3auth/ui": "^0.2.3",
-    "@web3auth/wallet-connect-v1-adapter": "^0.2.2",
+    "@web3auth/wallet-connect-v1-adapter": "^0.2.4",
     "loglevel": "^1.8.0"
   },
   "devDependencies": {
