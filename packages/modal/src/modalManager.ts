@@ -102,14 +102,12 @@ export class Web3Auth extends Web3AuthCore {
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,
-      loginMethodsOrder: this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
     });
     this.subscribeToLoginModalEvents();
   }
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
-    this.loginModal.init();
     const providedChainConfig = this.options.chainConfig;
 
     // merge default adapters with the custom configured adapters.
@@ -223,10 +221,10 @@ export class Web3Auth extends Web3AuthCore {
   }
 
   public async connect(): Promise<SafeEventEmitterProvider | null> {
-    if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
     if (this.provider) return this.provider;
-    this.loginModal.toggleModal();
+    this.loginModal.open();
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, () => {
         return resolve(this.provider);
@@ -262,13 +260,13 @@ export class Web3Auth extends Web3AuthCore {
     });
 
     const adapterInitResults = await Promise.all(adapterPromises);
-    const finalAdaptersConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {};
+    const finalAdaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig> = {};
     adapterInitResults.forEach((result: string | undefined) => {
       if (result) {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
   }
 
   private initializeInAppWallet(adapterName: string): void {
@@ -276,12 +274,12 @@ export class Web3Auth extends Web3AuthCore {
     if (this.walletAdapters[adapterName].type === ADAPTER_CATEGORY.IN_APP) {
       this.loginModal.addSocialLogins(
         adapterName,
-        (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName],
         getAdapterSocialLogins(
           adapterName,
           this.walletAdapters[adapterName],
           (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
-        )
+        ),
+        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
       );
     }
   }

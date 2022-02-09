@@ -14,6 +14,7 @@
     "@maticnetwork/maticjs-web3": "^1.0.0",
     "@toruslabs/openlogin-ed25519": "^1.2.0",
     "@web3auth/web3auth": "file:./.yalc/@web3auth/web3auth",
+    "@web3auth/ui": "file:./.yalc/@web3auth/ui",
     "@web3auth/openlogin-adapter": "file:./.yalc/@web3auth/openlogin-adapter",
     "ts-custom-error": "^3.2.0",
     "vue": "^2.6.14",

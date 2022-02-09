@@ -1,24 +1,33 @@
-import { LoginMethodConfig } from "@web3auth/base";
 import classNames from "classnames";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
-import AllImages from "../../assets";
+import { ThemedContext } from "../context/ThemeContext";
+import { SocialLoginsConfig } from "../interfaces";
+import Image from "./Image";
 const hasLightIcons = ["apple", "github"];
 
 interface SocialLoginProps {
-  isDark: boolean;
-  loginMethods: LoginMethodConfig;
+  socialLoginsConfig: SocialLoginsConfig;
+  handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string } }) => void;
 }
 
 export default function SocialLogins(props: SocialLoginProps) {
-  const { isDark, loginMethods = {} } = props;
+  const {
+    socialLoginsConfig = {
+      loginMethods: {},
+      loginMethodsOrder: [],
+      adapter: "",
+    },
+    handleSocialLoginClick,
+  } = props;
+  const { isDark } = useContext(ThemedContext);
+
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // const { isDark } = props;
-  // const expandIcon = AllImages[`expand${isDark ? "-light" : ""}`].image;
+  const expandIcon = <Image imageId={`expand${isDark ? "-light" : ""}`} />;
 
   // Too small a function to use `useCallback`
-  const clickHandler = () => {
+  const expandClickHandler = () => {
     setIsExpanded(!isExpanded);
   };
 
@@ -34,19 +43,38 @@ export default function SocialLogins(props: SocialLoginProps) {
     <div className="w3ajs-social-logins w3a-group">
       <h6 className="w3a-group__title">CONTINUE WITH</h6>
       <ul className={adapterListClass}>
-        {Object.keys(loginMethods).map((method) => {
-          const providerIcon = AllImages[`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`].image;
+        {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
+          const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;
+
+          if (
+            socialLoginsConfig.loginMethods[method].showOnModal === false ||
+            method === "webauthn" ||
+            method === "jwt" ||
+            method === "email_passwordless"
+          ) {
+            return <></>;
+          }
+          const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
+          const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
           return (
-            <li className="w3a-adapter-item">
-              {/* TODO: add icon */}
-              <button className="w3a-button w3a-button--icon">{method.substring(0, 2)}</button>
+            <li className="w3a-adapter-item" key={method} style={{ order }}>
+              <button
+                onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
+                className="w3a-button w3a-button--icon"
+              >
+                {providerIcon}
+              </button>
             </li>
           );
         })}
       </ul>
-      <button className={adapterButtonClass} style={{ display: "none" }} onClick={clickHandler}>
-        {/* ${expandIcon} */}
+      <button
+        className={adapterButtonClass}
+        style={{ display: Object.keys(socialLoginsConfig.loginMethods).length > 5 ? "flex" : "none" }}
+        onClick={expandClickHandler}
+      >
+        {expandIcon}
         <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
       </button>
     </div>

@@ -1,21 +1,41 @@
-import React from "react";
+import React, { useContext } from "react";
+
+import { ThemedContext } from "../context/ThemeContext";
+import Image from "./Image";
 
 interface HeaderProps {
-  appLogo: string;
+  appLogo?: string;
+  onClose: () => void;
 }
 
-export default function Header(props: HeaderProps) {
-  const { appLogo } = props;
+const closeIcon = <Image imageId="close" />;
+
+function Header(props: HeaderProps) {
+  const { appLogo, onClose } = props;
+  const { isDark } = useContext(ThemedContext);
+
+  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
+
   return (
     <div className="w3a-modal__header">
       <div className="w3a-header">
-        <img className="w3a-header__logo" src={appLogo} alt="" />
+        {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : web3authIcon}
+
         <div>
           <h1 className="w3a-header__title">Sign in</h1>
           <p className="w3a-header__subtitle">Select one of the following to continue</p>
         </div>
       </div>
-      {/* <button className="w3a-header__button w3ajs-close-btn">${closeIcon}</button> TODO: add button handlers here */}
+      <button onClick={() => onClose()} className="w3a-header__button w3ajs-close-btn">
+        {closeIcon}
+      </button>
     </div>
   );
 }
+
+export default React.memo(Header, (prevProps, nextProps) => {
+  if (prevProps.appLogo !== nextProps.appLogo) {
+    return true;
+  }
+  return false;
+});

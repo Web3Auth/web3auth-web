@@ -5,7 +5,7 @@ import svg from "rollup-plugin-svg";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 export default {
-  input: path.resolve(__dirname, "src/index.tsx"),
+  input: path.resolve(__dirname, "src/index.ts"),
   acornInjectPlugins: [jsx()],
 
   plugins: [

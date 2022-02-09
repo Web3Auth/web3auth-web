@@ -3,6 +3,6 @@
   "include": ["src", "test", "css", "assets"],
   "compilerOptions": {
     "jsx": "react",
-    "rootDir": ".",
+    // "rootDir": ".",
   }
 }

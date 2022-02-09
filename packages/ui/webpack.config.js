@@ -9,7 +9,7 @@ const currentPath = path.resolve(".");
 const config = generateWebpackConfig({
   pkgBaseConfig: {
     mode: "development", // only for testing
-    entry: path.resolve(__dirname, "src/index.tsx"),
+    entry: path.resolve(__dirname, "src/index.ts"),
     output: {
       libraryExport: "default",
     },
