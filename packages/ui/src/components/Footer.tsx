@@ -18,9 +18,9 @@ function Footer(props: FooterProps) {
       <div className="w3a-footer">
         <div>
           <div className="w3a-footer__links">
-            <a href="">Terms of use</a>
+            <a href="https://docs.web3auth.io/legal/terms-and-conditions">Terms of use</a>
             <span>|</span>
-            <a href="">Privacy policy</a>
+            <a href="https://docs.web3auth.io/legal/privacy-policy">Privacy policy</a>
           </div>
           <p>{version}</p>
         </div>

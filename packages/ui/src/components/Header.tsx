@@ -3,14 +3,20 @@ import React, { useContext } from "react";
 import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
 import Image from "./Image";
+
+const DEFAULT_LOGO_URL = {
+  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
+  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
+};
+
 interface HeaderProps {
   appLogo?: string;
   onClose: () => void;
 }
 
 function Header(props: HeaderProps) {
-  const { appLogo, onClose } = props;
   const { isDark } = useContext(ThemedContext);
+  const { appLogo = DEFAULT_LOGO_URL[isDark ? "dark" : "light"], onClose } = props;
 
   const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 
@@ -24,14 +30,14 @@ function Header(props: HeaderProps) {
           <p className="w3a-header__subtitle">Select one of the following to continue</p>
         </div>
       </div>
-      <button onClick={() => onClose()} className="w3a-header__button w3ajs-close-btn">
+      <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
         <Icon iconName="close" />
       </button>
     </div>
   );
 }
 
-export default React.memo(Header, (prevProps, nextProps) => {
+export default React.memo(Header, (prevProps: HeaderProps, nextProps: HeaderProps) => {
   if (prevProps.appLogo !== nextProps.appLogo) {
     return true;
   }

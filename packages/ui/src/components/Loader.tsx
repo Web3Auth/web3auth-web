@@ -10,7 +10,7 @@ interface LoaderProps {
   message?: string;
   modalStatus: ModalStatusType;
   label?: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const closeIcon = <Icon iconName="close" />;
@@ -23,7 +23,7 @@ export default function Loader(props: LoaderProps) {
   const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
+    if (modalStatus === MODAL_STATUS.CONNECTED && onClose) {
       setTimeout(() => {
         onClose();
       }, 3000);
@@ -36,10 +36,10 @@ export default function Loader(props: LoaderProps) {
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <div className="w3ajs-modal-loader__spinner w3a-spinner">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
+              <div />
+              <div />
+              <div />
+              <div />
             </div>
           )}
 
@@ -55,7 +55,7 @@ export default function Loader(props: LoaderProps) {
         </div>
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
-        <button className="w3a-header__button w3ajs-loader-close-btn" onClick={() => onClose()}>
+        <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
           {closeIcon}
         </button>
       )}

@@ -5,6 +5,7 @@ import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
+
 const hasLightIcons = ["apple", "github"];
 
 interface SocialLoginProps {
@@ -55,6 +56,7 @@ export default function SocialLogins(props: SocialLoginProps) {
           return (
             <li className="w3a-adapter-item" key={method} style={{ order }}>
               <button
+                type="button"
                 onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
                 className="w3a-button w3a-button--icon"
               >
@@ -65,9 +67,10 @@ export default function SocialLogins(props: SocialLoginProps) {
         })}
       </ul>
       <button
+        type="button"
         className={adapterButtonClass}
         style={{ display: Object.keys(socialLoginsConfig.loginMethods).length > 5 ? "flex" : "none" }}
-        onClick={() => expandClickHandler()}
+        onClick={expandClickHandler}
       >
         <Icon iconName={`expand${isDark ? "-light" : ""}`} />
         <span className="w3ajs-button-expand-text">{adapterExpandText}</span>

@@ -11,10 +11,9 @@ interface ExternalWalletsProps {
   handleExternalWalletClick: (params: { adapter: string }) => void;
   showWalletConnect: boolean;
   config: Record<string, BaseAdapterConfig>;
-  walletConnectUri: string;
+  walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
-  postLoadingMessage: string;
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, showWalletConnect, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
@@ -24,8 +23,6 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       if (walletConnectUri) {
         return <WalletConnect walletConnectUri={walletConnectUri} />;
       }
-
-      return <></>;
     }
     return <></>;
   };
@@ -33,7 +30,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
-          <button className="w3a-external-back w3ajs-external-back" onClick={() => hideExternalWallets()}>
+          <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
             <Icon iconName="arrow-left" />
             <h6 className="w3a-group__title">Back</h6>
           </button>
@@ -52,7 +49,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               return (
                 <li className="w3a-adapter-item" key={adapter}>
-                  <button onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
+                  <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
                     {providerIcon}
                   </button>
                   <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>

@@ -4,5 +4,6 @@
   "compilerOptions": {
     "jsx": "react",
     // "rootDir": ".",
+    "strict": true
   }
 }

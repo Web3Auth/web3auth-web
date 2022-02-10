@@ -8,7 +8,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
   const { handleSocialLoginClick, adapter } = props;
   const handleEmailSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = e.target[0].value;
+    const email = ((e.target as HTMLFormElement)[0] as HTMLInputElement).value;
     if (email) handleSocialLoginClick({ adapter, loginParams: { loginProvider: "email_passwordless", login_hint: email } });
   };
   return (
