@@ -70,24 +70,22 @@ export default function Modal(props: ModalProps) {
     }
   }, [modalState.status]);
 
-  const externalWalletButton = () => {
-    return (
-      <div className="w3ajs-external-wallet w3a-group">
-        <div className="w3a-external-toggle w3ajs-external-toggle">
-          <h6 className="w3a-group__title">EXTERNAL WALLET</h6>
-          <button
-            className="w3a-button w3ajs-external-toggle__button"
-            onClick={() => {
-              handleShowExternalWallets();
-              setExternalWalletsVisibility(true);
-            }}
-          >
-            Connect with Wallet
-          </button>
-        </div>
+  const externalWalletButton = (
+    <div className="w3ajs-external-wallet w3a-group">
+      <div className="w3a-external-toggle w3ajs-external-toggle">
+        <h6 className="w3a-group__title">EXTERNAL WALLET</h6>
+        <button
+          className="w3a-button w3ajs-external-toggle__button"
+          onClick={() => {
+            handleShowExternalWallets();
+            setExternalWalletsVisibility(true);
+          }}
+        >
+          Connect with Wallet
+        </button>
       </div>
-    );
-  };
+    </div>
+  );
 
   const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   return (
@@ -109,7 +107,7 @@ export default function Modal(props: ModalProps) {
                   </>
                 )}
                 {/* button to show external wallets */}
-                {hasExternalWallets && <>{externalWalletButton()}</>}
+                {hasExternalWallets && <>{externalWalletButton}</>}
               </>
             ) : (
               <>
