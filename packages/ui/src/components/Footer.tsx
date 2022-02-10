@@ -11,7 +11,7 @@ function Footer(props: FooterProps) {
   const { version } = props;
   const { isDark } = useContext(ThemedContext);
 
-  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
+  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} height="14px" width="auto" />;
 
   return (
     <div className="w3a-modal__footer">

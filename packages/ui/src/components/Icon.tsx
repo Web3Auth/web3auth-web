@@ -7,6 +7,8 @@ import ExpandLight from "../../assets/icons/expand-light.svg";
 
 interface IconProps {
   iconName: string;
+  width?: string;
+  height?: string;
 }
 
 const icons = {
@@ -25,6 +27,6 @@ const icons = {
 };
 
 export default function Icon(props: IconProps) {
-  const { iconName } = props;
-  return icons[iconName] ? <img src={icons[iconName].image} /> : <></>;
+  const { iconName, height = "auto", width = "auto" } = props;
+  return icons[iconName] ? <img height={height} width={width} src={icons[iconName].image} /> : <></>;
 }

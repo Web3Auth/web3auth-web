@@ -2,8 +2,10 @@ import React from "react";
 
 interface ImageProps {
   imageId: string;
+  height?: string;
+  width?: string;
 }
 export default function Image(props: ImageProps) {
-  const { imageId } = props;
-  return <img src={`https://images.web3auth.io/${imageId}.svg`} />;
+  const { imageId, height = "auto", width = "auto" } = props;
+  return <img src={`https://images.web3auth.io/${imageId}.svg`} height={height} width={width} />;
 }

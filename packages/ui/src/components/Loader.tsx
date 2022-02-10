@@ -3,6 +3,7 @@ import React, { useContext, useEffect } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import Icon from "./Icon";
 import Image from "./Image";
 
 interface LoaderProps {
@@ -12,7 +13,7 @@ interface LoaderProps {
   onClose: () => void;
 }
 
-const closeIcon = <Image imageId="close" />;
+const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose } = props;
