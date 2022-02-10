@@ -12,20 +12,15 @@
           <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
         </div>
         <div class="w3a-spinner-power">
-          <loaderSvg />
+          <img src="https://images.web3auth.io/web3auth.svg" />
         </div>
       </div>
-      <button class="w3a-header__button w3ajs-loader-close-btn">
-        <img src="${closeIcon}" alt="" />
-      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-
-import loader from "../assets/torus-power.svg";
 
 export default Vue.extend({
   name: "Loader",
@@ -37,9 +32,6 @@ export default Vue.extend({
   },
   data() {
     return {};
-  },
-  components: {
-    loaderSvg: loader,
   },
 });
 </script>

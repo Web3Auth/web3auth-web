@@ -31,7 +31,6 @@
   "files": [
     "dist",
     "src",
-    "assets/images",
     "assets/icons"
   ],
   "devDependencies": {
