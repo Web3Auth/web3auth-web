@@ -510,7 +510,8 @@
 
 .w3a-wallet-connect-qr {
     width: 200px;
-    margin: 16px 0;
+    margin: 16px 16px;
+    padding: inherit;
 }
 
 #w3a-modal .w3a-wallet-connect__logo > img {

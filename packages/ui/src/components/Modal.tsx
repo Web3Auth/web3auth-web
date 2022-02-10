@@ -126,7 +126,6 @@ export default function Modal(props: ModalProps) {
                   handleExternalWalletClick={handleExternalWalletClick}
                   walletConnectUri={modalState.walletConnectUri}
                   config={modalState.externalWalletsConfig}
-                  showWalletConnect
                   hideExternalWallets={() => setExternalWalletsVisibility(false)}
                 />
               </>

@@ -1,31 +1,32 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import React from "react";
+import React, { useCallback } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
+import Loader from "./Loader";
 import WalletConnect from "./WalletConnect";
 
 interface ExternalWalletsProps {
   hideExternalWallets: () => void;
   handleExternalWalletClick: (params: { adapter: string }) => void;
-  showWalletConnect: boolean;
   config: Record<string, BaseAdapterConfig>;
   walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
-  const { hideExternalWallets, handleExternalWalletClick, showWalletConnect, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
-  const renderWalletConnect = () => {
-    if (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]) {
-      if (showWalletConnect && !walletConnectUri) handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
-      if (walletConnectUri) {
-        return <WalletConnect walletConnectUri={walletConnectUri} />;
-      }
+  const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
+
+  const renderWalletConnect = useCallback(() => {
+    if (config[WALLET_ADAPTERS.WALLET_CONNECT_V1] && config[WALLET_ADAPTERS.WALLET_CONNECT_V1].showOnModal !== false) {
+      if (!walletConnectUri) handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
+      else return <WalletConnect walletConnectUri={walletConnectUri} />;
     }
-    return <></>;
-  };
+
+    return <Loader modalStatus={MODAL_STATUS.CONNECTING} />;
+  }, [walletConnectUri, config[WALLET_ADAPTERS.WALLET_CONNECT_V1]]);
+
   return (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
