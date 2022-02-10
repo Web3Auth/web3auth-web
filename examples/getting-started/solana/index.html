@@ -90,7 +90,7 @@ async function initWeb3() {
   console.log(address, "->", balance);
 
   $("#address").text("Address: " + address + ".");
-  $("#balance").text("Balance: " + balance + ".");
+  $("#balance").text("Balance: " + balance.value + ".");
 }
 
 $("#login").click(async function (event) {
