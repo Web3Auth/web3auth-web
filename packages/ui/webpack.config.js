@@ -30,14 +30,8 @@ const config = generateWebpackConfig({
       },
       {
         test: /\.svg$/,
-        use: [
-          {
-            loader: "svg-url-loader",
-            options: {
-              encoding: "none",
-            },
-          },
-        ],
+        exclude: /node_modules/,
+        use: ["@svgr/webpack", "url-loader"],
       },
     ],
   },

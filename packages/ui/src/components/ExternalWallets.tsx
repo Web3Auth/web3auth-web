@@ -2,10 +2,9 @@ import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
 import React from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import Icon from "./Icon";
 import Image from "./Image";
 import WalletConnect from "./WalletConnect";
-
-const arrowLeftIcon = <Image imageId="arrow-left" />;
 
 interface ExternalWalletsProps {
   hideExternalWallets: () => void;
@@ -35,7 +34,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
           <button className="w3a-external-back w3ajs-external-back" onClick={() => hideExternalWallets()}>
-            {arrowLeftIcon}
+            <Icon iconName="arrow-left" />
             <h6 className="w3a-group__title">Back</h6>
           </button>
         )}

@@ -1,6 +1,7 @@
+import svgr from "@svgr/rollup";
 import jsx from "acorn-jsx";
 import postcss from "rollup-plugin-postcss";
-import svg from "rollup-plugin-svg";
+import url from "rollup-plugin-url";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
@@ -12,8 +13,7 @@ export default {
     postcss({
       plugins: [],
     }),
-    svg({
-      // base64: true,
-    }),
+    url(),
+    svgr(),
   ],
 };

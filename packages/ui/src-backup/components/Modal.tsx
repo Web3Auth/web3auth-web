@@ -1,4 +1,4 @@
-import AllImages from "../../assets";
+import AllImages from "../../src/components/Icon";
 
 interface ModalProps {
   isDark: boolean;

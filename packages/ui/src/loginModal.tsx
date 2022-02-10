@@ -150,30 +150,27 @@ export default class LoginModal extends SafeEventEmitter {
 
   private renderModal(): void {
     ReactDOM.render(
-      this.state.modalVisibility ? (
-        <ThemedContext.Provider
-          value={{
-            isDark: this.isDark,
-          }}
-        >
-          <Modal
-            reinitializeModal={this.reinitializeModal}
-            closeModal={this.closeModal}
-            hasExternalWallets={this.state.hasExternalWallets || Object.keys(this.config.externalWalletsConfig || {}).length > 0}
-            handleShowExternalWallets={() => this.handleShowExternalWallets()}
-            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
-            modalState={this.state}
-            walletConnectUri={this.walletConnectUri}
-            externalWallets={this.config.externalWalletsConfig}
-            socialLoginsConfig={this.config.socialLoginsConfig}
-            appLogo={this.appLogo}
-            version={this.version}
-          />
-        </ThemedContext.Provider>
-      ) : (
-        <></>
-      ),
+      <ThemedContext.Provider
+        value={{
+          isDark: this.isDark,
+        }}
+      >
+        <Modal
+          modalVisibility={this.state.modalVisibility}
+          reinitializeModal={this.reinitializeModal}
+          closeModal={this.closeModal}
+          hasExternalWallets={this.state.hasExternalWallets || Object.keys(this.config.externalWalletsConfig || {}).length > 0}
+          handleShowExternalWallets={() => this.handleShowExternalWallets()}
+          handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
+          handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+          modalState={this.state}
+          walletConnectUri={this.walletConnectUri}
+          externalWallets={this.config.externalWalletsConfig}
+          socialLoginsConfig={this.config.socialLoginsConfig}
+          appLogo={this.appLogo}
+          version={this.version}
+        />
+      </ThemedContext.Provider>,
       this.wrapper
     );
   }
@@ -215,6 +212,7 @@ export default class LoginModal extends SafeEventEmitter {
         if (!data.reconnected) {
           this.setState({
             status: MODAL_STATUS.CONNECTED,
+            modalVisibility: true,
             postLoadingMessage: "You are connected with your account",
           });
         } else {

@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
+import Icon from "./Icon";
 import Image from "./Image";
 const hasLightIcons = ["apple", "github"];
 
@@ -24,19 +25,13 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const expandIcon = <Image imageId={`expand${isDark ? "-light" : ""}`} />;
-
   // Too small a function to use `useCallback`
   const expandClickHandler = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", {
-    " w3a-adapter-list--shrink": isExpanded,
-  });
-  const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", {
-    "w3a-button--rotate": !isExpanded,
-  });
+  const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
+  const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
   const adapterExpandText = isExpanded ? "View less options" : "View more options";
 
   return (
@@ -72,9 +67,9 @@ export default function SocialLogins(props: SocialLoginProps) {
       <button
         className={adapterButtonClass}
         style={{ display: Object.keys(socialLoginsConfig.loginMethods).length > 5 ? "flex" : "none" }}
-        onClick={expandClickHandler}
+        onClick={() => expandClickHandler()}
       >
-        {expandIcon}
+        <Icon iconName={`expand${isDark ? "-light" : ""}`} />
         <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
       </button>
     </div>

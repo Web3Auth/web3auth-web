@@ -17,7 +17,7 @@ import {
 import log from "loglevel";
 import QRCode from "qrcode";
 
-import AllImages from "../assets";
+import AllImages from "../src/components/Icon";
 import { LOGIN_MODAL_EVENTS, UIConfig } from "./interfaces";
 import { htmlToElement } from "./utils";
 const hasLightIcons = ["apple", "github"];

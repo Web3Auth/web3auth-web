@@ -7,19 +7,30 @@
 <body>
   <h1>Test web3auth app</h1>
   <div>
-    <button class="show-modal">Show Modal</button>
+    <button class="show-modal" onclick="showModal()">Show Modal</button>
   </div>
   <script src="./ui.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@toruslabs/openlogin-jrpc"></script>
   <script>
+    let modal = null;
+    let testEventEmitter = null;
+    function showModal() {
+      console.log("open")
+      modal.open();
+      testEventEmitter.emit("connecting", { adapter: "openlogin" })
+      // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
+      // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
+      // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
+
+    }
     (async function init() {
       try {
-        const testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
-        const modal = new Ui({
+        testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
+        modal = new Ui({
           adapterListener: testEventEmitter,
           theme: "dark",
           appLogo: "https://cryptologos.cc/logos/solana-sol-logo.svg",
-          version: "1",
+          // version: "1",
         });
         modal.addSocialLogins(
           "openlogin",
@@ -29,6 +40,18 @@
             },
             facebook: {
               name: "facebook",
+            },
+            twitter: {
+              name: "twitter",
+            },
+            reddit: {
+              name: "reddit",
+            },
+            twitch: {
+              name: "twitch",
+            },
+            github: {
+              name: "github",
             },
           },
           ["facebook"]
@@ -44,17 +67,13 @@
          },
          { showExternalWalletsOnly: false }
         );
-        modal.open();
         testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } })
-        testEventEmitter.emit("connecting", { adapter: "openlogin" })
-        // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
-        // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
-        // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
-
+    
       } catch (error) {
         console.log("error in ui", error);
       }
     })();
+    
   </script>
 </body>
 

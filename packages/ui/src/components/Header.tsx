@@ -1,14 +1,12 @@
 import React, { useContext } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
+import Icon from "./Icon";
 import Image from "./Image";
-
 interface HeaderProps {
   appLogo?: string;
   onClose: () => void;
 }
-
-const closeIcon = <Image imageId="close" />;
 
 function Header(props: HeaderProps) {
   const { appLogo, onClose } = props;
@@ -27,7 +25,7 @@ function Header(props: HeaderProps) {
         </div>
       </div>
       <button onClick={() => onClose()} className="w3a-header__button w3ajs-close-btn">
-        {closeIcon}
+        <Icon iconName="close" />
       </button>
     </div>
   );

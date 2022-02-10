@@ -2,9 +2,8 @@
 import { BaseAdapterConfig } from "@web3auth/base";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 
-import { MODAL_STATUS } from "..";
 import { ThemedContext } from "../context/ThemeContext";
-import { ModalState, SocialLoginsConfig } from "../interfaces";
+import { MODAL_STATUS, ModalState, SocialLoginsConfig } from "../interfaces";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -17,6 +16,7 @@ interface ModalProps {
   appLogo?: string;
   version: string;
   hasExternalWallets: boolean;
+  modalVisibility: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   externalWallets: Record<string, BaseAdapterConfig>;
   walletConnectUri?: string;
@@ -30,6 +30,8 @@ interface ModalProps {
 export default function Modal(props: ModalProps) {
   const [externalWalletsVisible, setExternalWalletsVisibility] = useState(false);
   const { isDark } = useContext(ThemedContext);
+  const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
+  const [showModal, setShowModal] = useState(false);
 
   const {
     appLogo,
@@ -39,6 +41,7 @@ export default function Modal(props: ModalProps) {
     externalWallets,
     walletConnectUri,
     hasExternalWallets,
+    modalVisibility,
     handleSocialLoginClick,
     handleExternalWalletClick,
     handleShowExternalWallets,
@@ -47,8 +50,11 @@ export default function Modal(props: ModalProps) {
   } = props;
 
   useEffect(() => {
-    console.log("modal rendered", props);
-  }, []);
+    setTimeout(() => {
+      setModalTransitionClasses(["w3a-modal__inner", modalVisibility ? "w3a-modal__inner--active" : ""]);
+      setShowModal(modalVisibility);
+    }, 100);
+  }, [modalVisibility]);
 
   useEffect(() => {
     console.log("externalWalletsVisibility", modalState.externalWalletsVisibility);
@@ -85,11 +91,13 @@ export default function Modal(props: ModalProps) {
 
   const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   return (
-    <div id="w3a-modal" className={modalClassName}>
-      <div className="w3a-modal__inner w3a-modal__inner--active">
+    <div id="w3a-modal" className={modalClassName} style={{ display: !showModal ? "none" : "flex" }}>
+      <div className={modalTransitionClasses.join(" ")}>
         <Header onClose={() => props.closeModal()} appLogo={appLogo} />
         {modalState.status !== MODAL_STATUS.INITIALIZED ? (
-          <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
+          <div className="w3a-modal__content w3ajs-content">
+            <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
+          </div>
         ) : (
           <div className="w3a-modal__content w3ajs-content">
             {!externalWalletsVisible && Object.keys(socialLoginsConfig.loginMethods).length > 0 ? (
