@@ -49,18 +49,18 @@ export default function Modal(props: ModalProps) {
     console.log("mounted");
     stateListener.emit("MOUNTED");
     stateListener.on("STATE_UPDATED", (newModalState: ModalState) => {
-      console.log("incoming state", newModalState);
       setModalState((prevState) => deepmerge(prevState, newModalState));
     });
   }, []);
 
-  console.log("modal state", modalState);
-
   useEffect(() => {
-    setTimeout(() => {
+    const timeOutId = setTimeout(() => {
       setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
       setShowModal(modalState.modalVisibility);
     }, 100);
+    return () => {
+      clearTimeout(timeOutId);
+    };
   }, [modalState.modalVisibility]);
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function Modal(props: ModalProps) {
   return (
     <div id="w3a-modal" className={modalClassName} style={{ display: !showModal ? "none" : "flex" }}>
       <div className={modalTransitionClasses.join(" ")}>
-        <Header onClose={() => setShowModal(false)} appLogo={appLogo} />
+        <Header onClose={closeModal} appLogo={appLogo} />
         {modalState.status !== MODAL_STATUS.INITIALIZED ? (
           <div className="w3a-modal__content w3ajs-content">
             <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
