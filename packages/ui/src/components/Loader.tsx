@@ -1,7 +1,6 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 
-import { ThemedContext } from "../context/ThemeContext";
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
@@ -17,10 +16,7 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose } = props;
-  const { isDark } = useContext(ThemedContext);
-  // eslint-disable-next-line no-console
-  console.log("isDark", isDark);
-  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
+  const web3authIcon = <Image imageId="web3auth" />;
 
   useEffect(() => {
     if (modalStatus === MODAL_STATUS.CONNECTED && onClose) {
