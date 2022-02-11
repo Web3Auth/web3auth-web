@@ -310,10 +310,13 @@
     overflow-y: hidden;
     flex-wrap: wrap;
     margin-bottom: 16px;
+    max-height: 500px;
+    transition: max-height 0.4s ease-in;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
-    height: 48px;
+    max-height: 48px;
+    transition: max-height 0.4s ease-out;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--hidden {
