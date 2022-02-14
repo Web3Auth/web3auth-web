@@ -1,13 +1,17 @@
-<div>
-  <div *ngIf="loaded && user; else elseBlock">
-    <button className="app-link" (click)="getUserInfo()">
-      Get User Info
-    </button>
-    <button className="app-link" (click)="logout()">
-      LOG OUT
-    </button>
-  </div>
-  <ng-template #elseBlock>
-    <button className="app-link" (click)="login()">Login</button>
-  </ng-template>
+<div class="content" >
+  <h1>Web3Auth & AngularJS Demo</h1>
+  <div class="card-container">
+    <ng-template  *ngIf="isModalLoaded && isLoggedIn; else elseBlock">
+      <button class="card card-small" (click)="getUserInfo()">
+        Get User Info
+      </button>
+      <button class="card card-small" (click)="logout()">
+        Log Out
+      </button>
+      <p>{{ userInfo }}</p>
+    </ng-template>
+    <ng-template #elseBlock>
+      <button class="card card-small" (click)="login()">Login</button>
+    </ng-template>
+</div>
 </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Web3Auth } from "@web3auth/web3auth";
-import { CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, ADAPTER_EVENTS } from "@web3auth/base";
+import { CHAIN_NAMESPACES, ADAPTER_EVENTS } from "@web3auth/base";
 import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 
 @Component({
@@ -15,14 +15,15 @@ export class AppComponent implements OnInit {
     chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155, chainId: "0x3" },
     authMode: "DAPP",
   });
-  user: any;
-  loaded: boolean = false;
+  isLoggedIn: boolean = false;
+  isModalLoaded: boolean = false;
+  userInfo: string = "";
 
   ngOnInit(): void {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data) => {
         console.log("Yeah!, you are successfully logged in", data);
-        this.user = data;
+        this.isLoggedIn = true;
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -31,7 +32,7 @@ export class AppComponent implements OnInit {
 
       web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
         console.log("disconnected");
-        this.user = null;
+        this.isLoggedIn = false;
       });
 
       web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
@@ -47,7 +48,7 @@ export class AppComponent implements OnInit {
       console.log("INIT MODAL");
       subscribeAuthEvents(this.web3auth);
       await this.web3auth.initModal();
-      this.loaded = true;
+      this.isModalLoaded = true;
     };
 
     initializeModal();
@@ -56,6 +57,7 @@ export class AppComponent implements OnInit {
   async login() {
     console.log("LOGGING IN");
     const provider = await this.web3auth.connect();
+    // returns a wallet provider which can be used with various chain libraries like web3.js, ethers js etc.
   }
 
   async logout() {
@@ -67,5 +69,6 @@ export class AppComponent implements OnInit {
     console.log("GETTING USER INFO");
     const userInfo = await this.web3auth.getUserInfo();
     console.log(userInfo);
+    this.userInfo = JSON.stringify(userInfo);
   }
 }
