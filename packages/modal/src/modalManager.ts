@@ -108,6 +108,7 @@ export class Web3Auth extends Web3AuthCore {
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
+    await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
 
     // merge default adapters with the custom configured adapters.

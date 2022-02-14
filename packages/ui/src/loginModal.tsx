@@ -19,7 +19,7 @@ import * as ReactDOM from "react-dom";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-import { LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginsConfig, UIConfig } from "./interfaces";
+import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = {
   light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
@@ -41,28 +41,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private wrapper: HTMLDivElement;
 
-  private walletConnectUri = "";
-
-  private config: {
-    socialLoginsConfig: SocialLoginsConfig;
-    externalWalletsConfig: Record<string, BaseAdapterConfig>;
-  } = {
-    socialLoginsConfig: {
-      loginMethods: {},
-      loginMethodsOrder: [],
-      adapter: "",
-    },
-    externalWalletsConfig: {},
-  };
-
-  private state: ModalState = {
-    externalWalletsVisibility: false,
-    status: undefined,
-    hasExternalWallets: false,
-    externalWalletsInitialized: false,
-    modalVisibility: false,
-    postLoadingMessage: "",
-  };
+  private stateEmitter: SafeEventEmitter;
 
   constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
     super();
@@ -70,31 +49,54 @@ export default class LoginModal extends SafeEventEmitter {
     this.version = version;
     this.isDark = theme === "dark";
     this.wrapper = createWrapper();
-    this.setState({
-      status: MODAL_STATUS.INITIALIZED,
-    });
+    this.stateEmitter = new SafeEventEmitter();
     this.subscribeCoreEvents(adapterListener);
   }
 
+  initModal = async (): Promise<void> => {
+    return new Promise((resolve) => {
+      this.stateEmitter.once("MOUNTED", () => {
+        console.log("rendered");
+        this.setState({
+          status: MODAL_STATUS.INITIALIZED,
+        });
+        return resolve();
+      });
+      ReactDOM.render(
+        <ThemedContext.Provider
+          value={{
+            isDark: this.isDark,
+          }}
+        >
+          <Modal
+            closeModal={this.closeModal}
+            stateListener={this.stateEmitter}
+            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
+            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
+            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+            appLogo={this.appLogo}
+            version={this.version}
+          />
+        </ThemedContext.Provider>,
+        this.wrapper
+      );
+    });
+  };
+
   addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, loginMethods: LoginMethodConfig, loginMethodsOrder: string[]): void => {
-    this.config = {
-      ...this.config,
+    this.setState({
       socialLoginsConfig: {
         adapter,
         loginMethods,
         loginMethodsOrder,
       },
-    };
+    });
+    console.log("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
-    this.config = {
-      ...this.config,
-      externalWalletsConfig: {
-        ...externalWalletsConfig,
-      },
-    };
     this.setState({
+      externalWalletsConfig,
       externalWalletsInitialized: true,
       externalWalletsVisibility: !!options.showExternalWalletsOnly,
     });
@@ -120,18 +122,11 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  private reinitializeModal = () => {
-    this.setState({
-      modalVisibility: true,
-      status: MODAL_STATUS.INITIALIZED,
-    });
+  private handleShowExternalWallets = (externalWalletsInitialized: boolean) => {
+    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized });
   };
 
-  private handleShowExternalWallets = () => {
-    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: this.state.externalWalletsInitialized });
-  };
-
-  private handleExternalWalletClick = (params) => {
+  private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     console.log("external wallet clicked", params);
     const { adapter } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
@@ -139,7 +134,7 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  private handleSocialLoginClick = (params) => {
+  private handleSocialLoginClick = (params: SocialLoginEventType) => {
     console.log("social login clicked", params);
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
@@ -148,43 +143,15 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  private renderModal(): void {
-    ReactDOM.render(
-      <ThemedContext.Provider
-        value={{
-          isDark: this.isDark,
-        }}
-      >
-        <Modal
-          modalVisibility={this.state.modalVisibility}
-          reinitializeModal={this.reinitializeModal}
-          closeModal={this.closeModal}
-          hasExternalWallets={this.state.hasExternalWallets || Object.keys(this.config.externalWalletsConfig || {}).length > 0}
-          handleShowExternalWallets={() => this.handleShowExternalWallets()}
-          handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-          handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
-          modalState={this.state}
-          walletConnectUri={this.walletConnectUri}
-          externalWallets={this.config.externalWalletsConfig}
-          socialLoginsConfig={this.config.socialLoginsConfig}
-          appLogo={this.appLogo}
-          version={this.version}
-        />
-      </ThemedContext.Provider>,
-      this.wrapper
-    );
-  }
-
   private setState = (newState: Partial<ModalState>) => {
-    this.state = { ...this.state, ...newState };
-
-    this.renderModal();
+    this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
   private updateWalletConnect = (walletConnectUri: string): void => {
     if (!walletConnectUri) return;
-    this.walletConnectUri = walletConnectUri;
-    this.renderModal();
+    this.setState({
+      walletConnectUri,
+    });
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
@@ -206,29 +173,34 @@ export default class LoginModal extends SafeEventEmitter {
       }
     });
     listener.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
-      log.debug("connected with adapter", this.state.status, data);
-      if (this.state.status !== "connected") {
-        // only show success if not being reconnected again.
-        if (!data.reconnected) {
-          this.setState({
-            status: MODAL_STATUS.CONNECTED,
-            modalVisibility: true,
-            postLoadingMessage: "You are connected with your account",
-          });
-        } else {
-          this.setState({
-            status: MODAL_STATUS.CONNECTED,
-          });
-        }
+      log.debug("connected with adapter", data);
+      // only show success if not being reconnected again.
+      if (!data.reconnected) {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+          modalVisibility: true,
+          postLoadingMessage: "You are connected with your account",
+        });
+      } else {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+        });
       }
     });
     listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
-      this.setState({
-        modalVisibility: true,
-        postLoadingMessage: error.message || "Something went wrong!",
-        status: MODAL_STATUS.ERRORED,
-      });
+      if (error.code === 5000) {
+        this.setState({
+          modalVisibility: true,
+          postLoadingMessage: error.message || "Something went wrong!",
+          status: MODAL_STATUS.ERRORED,
+        });
+      } else {
+        this.setState({
+          modalVisibility: true,
+          status: MODAL_STATUS.INITIALIZED,
+        });
+      }
     });
     listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
       this.setState({ status: MODAL_STATUS.INITIALIZED });

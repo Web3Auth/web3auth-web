@@ -17,7 +17,7 @@
     function showModal() {
       console.log("open")
       modal.open();
-      testEventEmitter.emit("connecting", { adapter: "openlogin" })
+      // testEventEmitter.emit("connecting", { adapter: "openlogin" })
       // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
       // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
       // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
@@ -29,9 +29,10 @@
         modal = new Ui({
           adapterListener: testEventEmitter,
           theme: "dark",
-          appLogo: "https://cryptologos.cc/logos/solana-sol-logo.svg",
           // version: "1",
         });
+        await modal.initModal();
+        console.log("modal init")
         modal.addSocialLogins(
           "openlogin",
           {
@@ -56,6 +57,7 @@
           },
           ["facebook"]
         );
+        modal.initExternalWalletContainer()
         modal.addWalletLogins(
          {
            "metamask": {
@@ -68,7 +70,7 @@
          { showExternalWalletsOnly: false }
         );
         testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } })
-    
+        // showModal()
       } catch (error) {
         console.log("error in ui", error);
       }

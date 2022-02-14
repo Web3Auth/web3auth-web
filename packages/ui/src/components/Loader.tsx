@@ -1,7 +1,6 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 
-import { ThemedContext } from "../context/ThemeContext";
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
@@ -10,20 +9,17 @@ interface LoaderProps {
   message?: string;
   modalStatus: ModalStatusType;
   label?: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose } = props;
-  const { isDark } = useContext(ThemedContext);
-  // eslint-disable-next-line no-console
-  console.log("isDark", isDark);
-  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
+  const web3authIcon = <Image imageId="web3auth" />;
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
+    if (modalStatus === MODAL_STATUS.CONNECTED && onClose) {
       setTimeout(() => {
         onClose();
       }, 3000);
@@ -36,10 +32,10 @@ export default function Loader(props: LoaderProps) {
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <div className="w3ajs-modal-loader__spinner w3a-spinner">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
+              <div />
+              <div />
+              <div />
+              <div />
             </div>
           )}
 
@@ -55,7 +51,7 @@ export default function Loader(props: LoaderProps) {
         </div>
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
-        <button className="w3a-header__button w3ajs-loader-close-btn" onClick={() => onClose()}>
+        <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
           {closeIcon}
         </button>
       )}

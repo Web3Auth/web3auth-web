@@ -11,7 +11,7 @@ interface IconProps {
   height?: string;
 }
 
-const icons = {
+const icons: Record<string, { image: string }> = {
   "arrow-left": {
     image: CircleArrowLeft,
   },
@@ -28,5 +28,5 @@ const icons = {
 
 export default function Icon(props: IconProps) {
   const { iconName, height = "auto", width = "auto" } = props;
-  return icons[iconName] ? <img height={height} width={width} src={icons[iconName].image} /> : <></>;
+  return icons[iconName] ? <img height={height} width={width} src={icons[iconName].image} alt={iconName} /> : <></>;
 }
