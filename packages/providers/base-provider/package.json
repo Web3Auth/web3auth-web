@@ -20,7 +20,7 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^1.6.1",
+    "@toruslabs/base-controllers": "^1.6.2",
     "@toruslabs/openlogin-jrpc": "^1.5.0",
     "@web3auth/base": "^0.2.2",
     "eth-rpc-errors": "^4.0.3",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",
-    "lint-staged": "^12.1.7"
+    "lint-staged": "^12.3.4"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

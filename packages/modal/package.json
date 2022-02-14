@@ -38,8 +38,8 @@
     "@types/webpack-env": "1.16.3",
     "css-loader": "^2.1.1",
     "file-loader": "^6.2.0",
-    "lint-staged": "^12.1.7",
-    "postcss": "^8.4.5",
+    "lint-staged": "^12.3.4",
+    "postcss": "^8.4.6",
     "style-loader": "^2.0.0",
     "svg-url-loader": "^7.1.1"
   },
