@@ -91,6 +91,7 @@
     opacity: 0;
     transition: 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
     transform-origin: center center;
+    min-height: 350px;
 }
 
 #w3a-modal .w3a-modal__inner.w3a-modal__inner--active {
@@ -125,6 +126,7 @@
     right: 0;
     bottom: 0;
     left: 0;
+    z-index: 10;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -184,7 +186,7 @@
     line-height: 1.2em;
     color: #b7b8bd;
 }
-#w3a-modal .w3a-spinner-power > svg {
+#w3a-modal .w3a-spinner-power > img {
     height: 32px;
     width: auto;
 }
@@ -307,10 +309,14 @@
     gap: 16px;
     overflow-y: hidden;
     flex-wrap: wrap;
+    margin-bottom: 16px;
+    max-height: 500px;
+    transition: max-height 0.4s ease-in;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
-    height: 48px;
+    max-height: 48px;
+    transition: max-height 0.4s ease-out;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--hidden {
@@ -379,13 +385,12 @@
     padding: 8px 16px;
 }
 
-#w3a-modal button.w3a-button--left > svg {
+#w3a-modal button.w3a-button--left > img {
     height: 30px;
     width: auto;
 }
 
 #w3a-modal button.w3a-button--left > div.w3a-button__name {
-    margin-left: 8px;
     max-width: 180px;
     white-space: nowrap;
     overflow: hidden;
@@ -394,16 +399,9 @@
 }
 
 #w3a-modal button.w3a-button--left > div.w3a-button__note {
+    margin-left: 8px;
     color: #b7b8bd;
-    font-size: 14px;
     margin-left: auto;
-}
-
-#w3a-modal button.w3a-button--left-alone > div {
-    max-width: 280px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 #w3a-modal .w3a-button__image {
@@ -416,8 +414,7 @@
     transform: rotate(180deg);
 }
 
-#w3a-modal .w3a-button--left .w3a-button__image,
-#w3a-modal .w3a-button--left-alone .w3a-button__image {
+#w3a-modal .w3a-button--left .w3a-button__image {
     margin-right: 12px;
 }
 
@@ -518,10 +515,11 @@
 
 .w3a-wallet-connect-qr {
     width: 200px;
-    margin: 16px 0;
+    margin: 16px 16px;
+    padding: inherit;
 }
 
-#w3a-modal .w3a-wallet-connect__logo > svg {
+#w3a-modal .w3a-wallet-connect__logo > img {
     text-align: center;
     width: 115px;
     margin-bottom: 16px;
@@ -584,7 +582,7 @@
     text-align: right;
     color: #b7b8bd;
 }
-#w3a-modal .w3a-footer__secured > svg {
+#w3a-modal .w3a-footer__secured > img {
     height: 14px;
     width: auto;
 }

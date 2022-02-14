@@ -25,7 +25,6 @@ import {
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 import log from "loglevel";
 
-import { defaultWalletConnectV1Options } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
 
 class WalletConnectV1Adapter extends BaseAdapter<void> {
@@ -53,7 +52,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
-    this.adapterOptions = { ...defaultWalletConnectV1Options, ...options };
+    this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig;
   }
 
@@ -62,10 +61,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.wcProvider) {
-      return this.wcProvider.isInitialized ? this.wcProvider : null;
-    }
-    return null;
+    return this.wcProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -153,6 +149,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (cleanup) {
       this.connector = null;
       this.status = ADAPTER_STATUS.NOT_READY;
+      this.wcProvider = null;
     } else {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;

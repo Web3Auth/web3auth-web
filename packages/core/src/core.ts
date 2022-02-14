@@ -44,8 +44,16 @@ export class Web3AuthCore extends SafeEventEmitter {
     super();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
+
     this.cachedAdapter = storageAvailable("sessionStorage") ? window.sessionStorage.getItem(ADAPTER_CACHE_KEY) : null;
-    this.coreOptions = options;
+
+    this.coreOptions = {
+      ...options,
+      chainConfig: {
+        ...getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId),
+        ...options.chainConfig,
+      },
+    };
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
@@ -111,10 +119,11 @@ export class Web3AuthCore extends SafeEventEmitter {
       adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
       adapter.currentChainNamespace &&
       providedChainConfig.chainNamespace !== adapter.currentChainNamespace
-    )
-      throw WalletInitializationError.incompatibleChainNameSpace(
-        `${adapter.name} wallet adapter belongs to ${adapter.currentChainNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
-      );
+    ) {
+      // chainConfig checks are already validated in constructor so using typecast is safe here.
+      adapter.setChainConfig(providedChainConfig as CustomChainConfig);
+    }
+
     this.walletAdapters[adapter.name] = adapter;
     return this;
   }

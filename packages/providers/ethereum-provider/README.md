@@ -38,3 +38,10 @@ const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<strin
   const signedMessage = await signEthMessage(provider);
 })();
 ```
+
+All providers must implement interface of IBaseProvider
+Must implement chain functionality of addChain & switchChain
+Handlers must be in a separate file
+no reassigning of \_providerEngineProxy
+use request instead of sendAsync
+emit from state

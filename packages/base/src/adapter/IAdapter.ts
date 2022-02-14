@@ -186,11 +186,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
-  public abstract provider: SafeEventEmitterProvider | null;
-
   get chainConfigProxy(): CustomChainConfig | undefined {
     return this.chainConfig ? { ...this.chainConfig } : undefined;
   }
+
+  public abstract get provider(): SafeEventEmitterProvider | null;
 
   setChainConfig(customChainConfig: CustomChainConfig): void {
     if (this.status === ADAPTER_STATUS.READY) return;

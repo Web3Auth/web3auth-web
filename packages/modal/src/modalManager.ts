@@ -29,6 +29,13 @@ export interface UIConfig {
    * @defaultValue `light`
    */
   theme?: "light" | "dark";
+
+  /**
+   * order of how login methods are shown
+   *
+   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
+   */
+  loginMethodsOrder?: string[];
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
@@ -75,7 +82,7 @@ export class Web3Auth extends Web3AuthCore {
 
   public async initModal(params?: { adaptersConfig?: Record<WALLET_ADAPTER_TYPE, AdapterConfig> }): Promise<void> {
     super.checkInitRequirements();
-    this.loginModal.init();
+    await this.loginModal.initModal();
     const adapterFactoryConfig: AdapterFactoryConfig = {};
     Object.keys(this.walletAdapters).forEach((adapterName) => {
       // don't initialize adapters in factory which are custom configured here.
@@ -174,10 +181,10 @@ export class Web3Auth extends Web3AuthCore {
   }
 
   public async connect(): Promise<SafeEventEmitterProvider | null> {
-    if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
     if (this.provider) return this.provider;
-    this.loginModal.toggleModal();
+    this.loginModal.open();
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, () => {
         return resolve(this.provider);
@@ -219,7 +226,7 @@ export class Web3Auth extends Web3AuthCore {
         finalAdaptersConfig[result] = adaptersConfig[result];
       }
     });
-    this.loginModal.addWalletLogins(finalAdaptersConfig, adaptersData, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+    this.loginModal.addWalletLogins(finalAdaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
   }
 
   private initializeInAppWallet(adapterName: string): void {
@@ -228,7 +235,9 @@ export class Web3Auth extends Web3AuthCore {
       this.loginModal.addSocialLogins(
         adapterName,
         this.adaptersConfig[adapterName],
-        getAdapterSocialLogins(adapterName, this.walletAdapters[adapterName], this.adaptersConfig[adapterName]?.loginMethods)
+        getAdapterSocialLogins(adapterName, this.walletAdapters[adapterName],
+        this.adaptersConfig[adapterName]?.loginMethods,
+      )
       );
     }
   }
@@ -246,7 +255,8 @@ export class Web3Auth extends Web3AuthCore {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      if (visibility && this.status !== ADAPTER_STATUS.CONNECTING && this.status !== ADAPTER_STATUS.CONNECTED) {
+      const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.status;
+      if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
         // refreshing session for wallet connect whenever modal is opened.
         this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
       }

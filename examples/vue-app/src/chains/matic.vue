@@ -11,7 +11,7 @@
       <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <PolygonRpc v-if="provider" :provider="provider" :console="console"></PolygonRpc>
+      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -28,9 +28,9 @@ import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";
+import EthRpc from "@/rpc/ethRpc.vue";
 
 import config from "../config";
-import PolygonRpc from "../rpc/polygonRpc.vue";
 const polygonMumbaiConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc-mumbai.maticvigil.com",
@@ -47,6 +47,10 @@ export default Vue.extend({
     adapterConfig: {
       type: Object,
     },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
+    },
   },
   watch: {
     adapterConfig: async function (newVal, oldVal) {
@@ -54,20 +58,24 @@ export default Vue.extend({
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
       await this.initPolygonWeb3Auth();
     },
+    openloginNetwork: async function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      await this.initEthAuth();
+    },
   },
   data() {
     return {
       modalConfig: {},
       loading: false,
       loginButtonStatus: "",
-      connected: false,
       provider: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
     };
   },
   components: {
-    PolygonRpc,
     Loader,
+    EthRpc,
   },
   async mounted() {
     console.log("polygon");
@@ -118,7 +126,6 @@ export default Vue.extend({
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
-        this.connected = true;
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
         this.console("connecting");
@@ -127,7 +134,7 @@ export default Vue.extend({
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.console("disconnected");
         this.loginButtonStatus = "";
-        this.connected = false;
+        this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);

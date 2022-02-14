@@ -65,7 +65,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   get provider(): SafeEventEmitterProvider | null {
     if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProvider) {
-      return this.solanaProvider?.isInitialized ? this.solanaProvider : null;
+      return this.solanaProvider?.provider || null;
     }
     return null;
   }

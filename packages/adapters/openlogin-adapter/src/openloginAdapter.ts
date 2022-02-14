@@ -80,7 +80,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.privKeyProvider?.isInitialized ? this.privKeyProvider : null;
+    return this.privKeyProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -120,11 +120,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     try {
       await this.connectWithProvider(params);
       return this.provider;
-    } catch (error) {
+    } catch (error: unknown) {
       log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if ((error as Error)?.message.includes("user closed popup")) {
+        throw WalletLoginError.popupClosed();
+      }
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
   }
@@ -156,7 +159,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   setAdapterSettings(adapterSettings: OpenLoginOptions): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     const defaultOptions = getOpenloginDefaultOptions();
-    this.openloginOptions = { ...defaultOptions.adapterSettings, ...adapterSettings };
+    this.openloginOptions = { ...defaultOptions.adapterSettings, ...(this.openloginOptions || {}), ...adapterSettings };
   }
 
   // should be called only before initialization.

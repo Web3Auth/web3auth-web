@@ -20,7 +20,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import { PhantomInjectedProvider, PhantomWallet } from "@web3auth/solana-provider";
+import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solana-provider";
 import log from "loglevel";
 
 import { detectProvider } from "./utils";
@@ -39,7 +39,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public _wallet: PhantomWallet | null = null;
+  public _wallet: IPhantomWalletProvider | null = null;
 
   private phantomProvider: PhantomInjectedProvider | null = null;
 
@@ -55,7 +55,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?.isInitialized ? this.phantomProvider : null;
+    return this.phantomProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -99,13 +99,13 @@ export class PhantomAdapter extends BaseAdapter<void> {
         try {
           await new Promise<SafeEventEmitterProvider | null>((resolve, reject) => {
             const connect = async () => {
-              await this.connectWithProvider(this._wallet as PhantomWallet);
+              await this.connectWithProvider(this._wallet as IPhantomWalletProvider);
               resolve(this.provider);
             };
             if (!this._wallet) return reject(WalletInitializationError.notInstalled());
             this._wallet.once("connect", connect);
             // Raise an issue on phantom that if window is closed, disconnect event is not fired
-            (this._wallet as PhantomWallet)._handleDisconnect = (...args: unknown[]) => {
+            (this._wallet as IPhantomWalletProvider)._handleDisconnect = (...args: unknown[]) => {
               reject(WalletInitializationError.windowClosed());
               return handleDisconnect.apply(this._wallet, args);
             };
@@ -157,7 +157,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
     return {};
   }
 
-  private async connectWithProvider(injectedProvider: PhantomWallet): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<SafeEventEmitterProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;

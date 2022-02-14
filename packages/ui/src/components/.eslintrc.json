@@ -1,0 +1,62 @@
+{
+  "root": true,
+  "extends": [
+    "airbnb",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["react", "react-hooks",  "jsx-a11y", "simple-import-sort","prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 11,
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      },
+      "eslint-import-resolver-typescript": true
+    }
+  },
+  "rules": {
+    "promise/always-return": "off",
+    "react/jsx-filename-extension": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "react/state-in-constructor": [2, "never"],
+    "react/jsx-no-useless-fragment": "off",
+    "react/require-default-props":"off",
+    "no-param-reassign": [2, { "props": false }],
+    "no-restricted-syntax": 0,
+    "quotes": [2, "double"],
+    "max-len": [2, { "code": 150, "ignoreComments": true }],
+    "prettier/prettier": ["error", { "printWidth": 150, "jsxSingleQuote": false, "endOfLine": "auto" }],
+    "@typescript-eslint/no-unused-vars": "error"
+  }
+}

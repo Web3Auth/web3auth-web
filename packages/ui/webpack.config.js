@@ -2,35 +2,13 @@
 const path = require("path");
 const generateWebpackConfig = require("../../webpack.config");
 
-const defaultConfig = {
-  presets: ["@babel/env", "@babel/typescript"],
-  plugins: [
-    "@babel/plugin-syntax-bigint",
-    "@babel/plugin-proposal-object-rest-spread",
-    "@babel/plugin-proposal-class-properties",
-    "@babel/transform-runtime",
-  ],
-  sourceType: "unambiguous",
-};
-const babelLoader = {
-  test: /\.(ts|js)x?$/,
-  exclude: /(node_modules|bower_components)/,
-  use: {
-    loader: "babel-loader",
-    options: {
-      ...defaultConfig,
-      babelrc: false,
-      configFile: false,
-      cacheDirectory: true,
-    },
-  },
-};
 const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");
 
 const config = generateWebpackConfig({
   pkgBaseConfig: {
+    mode: "development", // only for testing
     output: {
       libraryExport: "default",
     },
@@ -40,7 +18,7 @@ const config = generateWebpackConfig({
   alias: {},
   module: {
     rules: [
-      babelLoader,
+      { test: /\.tsx?$/, loader: "ts-loader" },
       {
         test: /\.css$/i,
         use: { loader: "style-loader", options: {} },
@@ -51,14 +29,8 @@ const config = generateWebpackConfig({
       },
       {
         test: /\.svg$/,
-        use: [
-          {
-            loader: "svg-url-loader",
-            options: {
-              encoding: "none",
-            },
-          },
-        ],
+        exclude: /node_modules/,
+        use: ["@svgr/webpack", "url-loader"],
       },
     ],
   },

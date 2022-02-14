@@ -10,7 +10,17 @@
     "project": "./tsconfig.json"
   },
   "rules": {
-    "@typescript-eslint/no-throw-literal": 0
+    "@typescript-eslint/no-throw-literal": 0,
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+   ]
   },
   "env": {
     "es2020": true,

@@ -29,11 +29,11 @@
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
 import { CustomAuthAdapter } from "@web3auth/customauth-adapter";
+import { OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import Vue from "vue";
 
 import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
-import { OpenloginLoginParams } from ".yalc/@web3auth/openlogin-adapter/dist/types";
 
 export default Vue.extend({
   name: "BeginnerExampleMode",

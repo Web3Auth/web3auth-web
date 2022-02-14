@@ -1,0 +1,213 @@
+/* eslint-disable no-console */
+import "../css/web3auth.css";
+
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import {
+  ADAPTER_EVENTS,
+  BaseAdapterConfig,
+  CONNECTED_EVENT_DATA,
+  IAdapterDataEvent,
+  LoginMethodConfig,
+  WALLET_ADAPTER_TYPE,
+  WALLET_ADAPTERS,
+  WalletConnectV1Data,
+  Web3AuthError,
+} from "@web3auth/base";
+import log from "loglevel";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+
+import Modal from "./components/Modal";
+import { ThemedContext } from "./context/ThemeContext";
+import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+
+const DEFAULT_LOGO_URL = {
+  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
+  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
+};
+function createWrapper(): HTMLDivElement {
+  const wrapper = document.createElement("div");
+  wrapper.setAttribute("id", "w3a-container");
+  document.body.appendChild(wrapper);
+  return wrapper;
+}
+
+export default class LoginModal extends SafeEventEmitter {
+  private appLogo: string;
+
+  private version: string;
+
+  private isDark: boolean;
+
+  private wrapper: HTMLDivElement;
+
+  private stateEmitter: SafeEventEmitter;
+
+  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
+    super();
+    this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
+    this.version = version;
+    this.isDark = theme === "dark";
+    this.wrapper = createWrapper();
+    this.stateEmitter = new SafeEventEmitter();
+    this.subscribeCoreEvents(adapterListener);
+  }
+
+  initModal = async (): Promise<void> => {
+    return new Promise((resolve) => {
+      this.stateEmitter.once("MOUNTED", () => {
+        console.log("rendered");
+        this.setState({
+          status: MODAL_STATUS.INITIALIZED,
+        });
+        return resolve();
+      });
+      ReactDOM.render(
+        <ThemedContext.Provider
+          value={{
+            isDark: this.isDark,
+          }}
+        >
+          <Modal
+            closeModal={this.closeModal}
+            stateListener={this.stateEmitter}
+            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
+            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
+            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+            appLogo={this.appLogo}
+            version={this.version}
+          />
+        </ThemedContext.Provider>,
+        this.wrapper
+      );
+    });
+  };
+
+  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, loginMethods: LoginMethodConfig, loginMethodsOrder: string[]): void => {
+    this.setState({
+      socialLoginsConfig: {
+        adapter,
+        loginMethods,
+        loginMethodsOrder,
+      },
+    });
+    console.log("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
+  };
+
+  addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
+    this.setState({
+      externalWalletsConfig,
+      externalWalletsInitialized: true,
+      externalWalletsVisibility: !!options.showExternalWalletsOnly,
+    });
+  };
+
+  open = () => {
+    this.setState({
+      modalVisibility: true,
+    });
+    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, true);
+  };
+
+  closeModal = () => {
+    this.setState({
+      modalVisibility: false,
+    });
+    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
+  };
+
+  initExternalWalletContainer = () => {
+    this.setState({
+      hasExternalWallets: true,
+    });
+  };
+
+  private handleShowExternalWallets = (externalWalletsInitialized: boolean) => {
+    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized });
+  };
+
+  private handleExternalWalletClick = (params: ExternalWalletEventType) => {
+    console.log("external wallet clicked", params);
+    const { adapter } = params;
+    this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
+      adapter,
+    });
+  };
+
+  private handleSocialLoginClick = (params: SocialLoginEventType) => {
+    console.log("social login clicked", params);
+    const { adapter, loginParams } = params;
+    this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
+      adapter,
+      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint },
+    });
+  };
+
+  private setState = (newState: Partial<ModalState>) => {
+    this.stateEmitter.emit("STATE_UPDATED", newState);
+  };
+
+  private updateWalletConnect = (walletConnectUri: string): void => {
+    if (!walletConnectUri) return;
+    this.setState({
+      walletConnectUri,
+    });
+  };
+
+  private handleAdapterData = (adapterData: IAdapterDataEvent) => {
+    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
+      const walletConnectData = adapterData.data as WalletConnectV1Data;
+      this.updateWalletConnect(walletConnectData.uri);
+    }
+  };
+
+  private subscribeCoreEvents = (listener: SafeEventEmitter) => {
+    listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
+      console.log("connecting with adapter", data);
+      // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
+      // connections without any user interaction.
+      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+        // const provider = data?.loginProvider || "";
+
+        this.setState({ status: MODAL_STATUS.CONNECTING });
+      }
+    });
+    listener.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      log.debug("connected with adapter", data);
+      // only show success if not being reconnected again.
+      if (!data.reconnected) {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+          modalVisibility: true,
+          postLoadingMessage: "You are connected with your account",
+        });
+      } else {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+        });
+      }
+    });
+    listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
+      log.error("error", error, error.message);
+      if (error.code === 5000) {
+        this.setState({
+          modalVisibility: true,
+          postLoadingMessage: error.message || "Something went wrong!",
+          status: MODAL_STATUS.ERRORED,
+        });
+      } else {
+        this.setState({
+          modalVisibility: true,
+          status: MODAL_STATUS.INITIALIZED,
+        });
+      }
+    });
+    listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
+      this.setState({ status: MODAL_STATUS.INITIALIZED });
+      // this.toggleMessage("");
+    });
+    listener.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (adapterData: IAdapterDataEvent) => {
+      this.handleAdapterData(adapterData);
+    });
+  };
+}

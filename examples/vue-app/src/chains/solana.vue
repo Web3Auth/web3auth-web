@@ -45,6 +45,10 @@ export default Vue.extend({
     adapterConfig: {
       type: Object,
     },
+    openloginNetwork: {
+      type: String,
+      default: "testnet",
+    },
   },
   watch: {
     adapterConfig: async function (newVal, oldVal) {
@@ -52,13 +56,17 @@ export default Vue.extend({
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
       await this.initSolanaAuth();
     },
+    openloginNetwork: async function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      await this.initEthAuth();
+    },
   },
   data() {
     return {
       modalConfig: {},
       loading: false,
       loginButtonStatus: "",
-      connected: false,
       provider: undefined,
       web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: config.clientId }),
     };
@@ -113,7 +121,6 @@ export default Vue.extend({
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
-        this.connected = true;
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
         this.console("connecting");
@@ -122,7 +129,7 @@ export default Vue.extend({
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.console("disconnected");
         this.loginButtonStatus = "";
-        this.connected = false;
+        this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
