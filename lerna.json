@@ -3,12 +3,10 @@
     "packages/base",
     "packages/core",
     "packages/modal",
-    "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
-    "packages/adapterFactories/*",
-    "packages/adapters/*"
-    
+    "packages/adapters/*",
+    "packages/defaultAdapters/*"
   ],
   "version": "0.2.4",
   "npmClient": "yarn"

@@ -235,9 +235,7 @@ export class Web3Auth extends Web3AuthCore {
       this.loginModal.addSocialLogins(
         adapterName,
         this.adaptersConfig[adapterName],
-        getAdapterSocialLogins(adapterName, this.walletAdapters[adapterName],
-        this.adaptersConfig[adapterName]?.loginMethods,
-      )
+        getAdapterSocialLogins(adapterName, this.walletAdapters[adapterName], this.adaptersConfig[adapterName]?.loginMethods)
       );
     }
   }
