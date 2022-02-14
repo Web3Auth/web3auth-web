@@ -234,10 +234,10 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-ed25519@^1.3.3":
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-ed25519/-/openlogin-ed25519-1.3.4.tgz#ad6cdb8fe01b18809b977f4136a16a73d54d09e2"
-  integrity sha512-5jIWSPoWmbPS/k0mqsukiLeN1lH00aOI7kJ/LlTfgBhlPrzAFDdicoks6+B/VtLlNcTeOob6ochC/abNvxuN+A==
+"@toruslabs/openlogin-ed25519@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-ed25519/-/openlogin-ed25519-1.5.0.tgz#de6f251ecec9c97017176a454735aecf684929dc"
+  integrity sha512-jXrcmnzeUzaI73XkvvQsuoptuXYGBH37x7WKEURak9JBrEizsSKmHvfYtv/P2Q5lIUUcBfEBhAFRVcGOkorIaw==
   dependencies:
     "@toruslabs/tweetnacl-js" "^1.0.3"
 
