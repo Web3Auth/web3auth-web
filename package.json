@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@toruslabs/eslint-config-typescript": "^0.2.0",
-    "@toruslabs/torus-scripts": "^0.3.0",
+    "@toruslabs/torus-scripts": "^0.3.1",
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "cross-env": "^7.0.3",

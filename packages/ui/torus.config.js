@@ -2,7 +2,6 @@ const defaultConfig = {
   cjsBundled: false,
   bundledDeps: [],
   analyzerMode: "disabled",
-  cjs: false,
 };
 
 module.exports = defaultConfig;
