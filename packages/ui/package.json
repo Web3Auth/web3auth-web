@@ -27,7 +27,7 @@
     "start": "rimraf dist/ && cross-env NODE_ENV=production torus-scripts start",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
-    "pre-commit": "lint-staged",
+    "pre-commit": "lint-staged --cwd .",
     "serve:ui": "live-server public/",
     "start:ui": "watch 'yarn run dev && bash startTestApp.sh' ./src"
   },
