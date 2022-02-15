@@ -1,5 +1,5 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -25,7 +25,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     }
 
     return <Loader modalStatus={MODAL_STATUS.CONNECTING} />;
-  }, [walletConnectUri, config[WALLET_ADAPTERS.WALLET_CONNECT_V1]]);
+  }, [config, handleExternalWalletClick, walletConnectUri]);
 
   return (
     <div className="w3ajs-external-wallet w3a-group">
@@ -44,7 +44,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
           <ul className="w3a-adapter-list w3ajs-wallet-adapters">
             {Object.keys(config).map((adapter) => {
               if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-                return <></>;
+                return null;
               }
               const providerIcon = <Image imageId={`login-${adapter}`} />;
 

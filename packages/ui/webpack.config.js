@@ -18,7 +18,6 @@ const config = generateWebpackConfig({
   alias: {},
   module: {
     rules: [
-      { test: /\.tsx?$/, loader: "ts-loader" },
       {
         test: /\.css$/i,
         use: { loader: "style-loader", options: {} },

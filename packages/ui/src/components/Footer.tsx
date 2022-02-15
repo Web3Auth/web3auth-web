@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 
 import Image from "./Image";
 
@@ -31,4 +31,4 @@ function Footer(props: FooterProps) {
   );
 }
 
-export default React.memo(Footer);
+export default memo(Footer);

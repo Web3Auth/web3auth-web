@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { memo, useContext } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
@@ -37,7 +37,7 @@ function Header(props: HeaderProps) {
   );
 }
 
-export default React.memo(Header, (prevProps: HeaderProps, nextProps: HeaderProps) => {
+export default memo(Header, (prevProps: HeaderProps, nextProps: HeaderProps) => {
   if (prevProps.appLogo !== nextProps.appLogo) {
     return true;
   }

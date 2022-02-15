@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import deepmerge from "deepmerge";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import deepmerge from "lodash.merge";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
@@ -51,7 +51,7 @@ export default function Modal(props: ModalProps) {
     stateListener.on("STATE_UPDATED", (newModalState: ModalState) => {
       setModalState((prevState) => deepmerge(prevState, newModalState));
     });
-  }, []);
+  }, [stateListener]);
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
@@ -76,7 +76,7 @@ export default function Modal(props: ModalProps) {
     if (modalState.status === MODAL_STATUS.ERRORED) {
       setModalState({ ...modalState, modalVisibility: true, status: MODAL_STATUS.INITIALIZED });
     }
-  }, [modalState.status]);
+  }, [closeModal, modalState]);
 
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
@@ -116,19 +116,17 @@ export default function Modal(props: ModalProps) {
                   </>
                 )}
                 {/* button to show external wallets */}
-                {modalState.hasExternalWallets && <>{externalWalletButton}</>}
+                {modalState.hasExternalWallets && externalWalletButton}
               </>
             ) : (
-              <>
-                <ExternalWallets
-                  modalStatus={modalState.status}
-                  showBackButton={Object.keys(modalState.socialLoginsConfig?.loginMethods).length > 0}
-                  handleExternalWalletClick={handleExternalWalletClick}
-                  walletConnectUri={modalState.walletConnectUri}
-                  config={modalState.externalWalletsConfig}
-                  hideExternalWallets={() => setExternalWalletsVisibility(false)}
-                />
-              </>
+              <ExternalWallets
+                modalStatus={modalState.status}
+                showBackButton={Object.keys(modalState.socialLoginsConfig?.loginMethods).length > 0}
+                handleExternalWalletClick={handleExternalWalletClick}
+                walletConnectUri={modalState.walletConnectUri}
+                config={modalState.externalWalletsConfig}
+                hideExternalWallets={() => setExternalWalletsVisibility(false)}
+              />
             )}
           </div>
         )}

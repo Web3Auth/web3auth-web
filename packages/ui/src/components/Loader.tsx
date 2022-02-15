@@ -1,5 +1,5 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -24,9 +24,9 @@ export default function Loader(props: LoaderProps) {
         onClose();
       }, 3000);
     }
-  }, [modalStatus]);
+  }, [modalStatus, onClose]);
 
-  return modalStatus && modalStatus !== MODAL_STATUS.INITIALIZED ? (
+  return modalStatus !== MODAL_STATUS.INITIALIZED ? (
     <div className="w3ajs-modal-loader w3a-modal__loader">
       <div className="w3a-modal__loader-content">
         <div className="w3a-modal__loader-info">
@@ -56,7 +56,5 @@ export default function Loader(props: LoaderProps) {
         </button>
       )}
     </div>
-  ) : (
-    <></>
-  );
+  ) : null;
 }

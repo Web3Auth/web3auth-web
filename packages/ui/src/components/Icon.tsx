@@ -1,5 +1,3 @@
-import React from "react";
-
 import CircleArrowLeft from "../../assets/icons/circle-arrow-left.svg";
 import Close from "../../assets/icons/close.svg";
 import Expand from "../../assets/icons/expand.svg";
@@ -28,5 +26,5 @@ const icons: Record<string, { image: string }> = {
 
 export default function Icon(props: IconProps) {
   const { iconName, height = "auto", width = "auto" } = props;
-  return icons[iconName] ? <img height={height} width={width} src={icons[iconName].image} alt={iconName} /> : <></>;
+  return icons[iconName] ? <img height={height} width={width} src={icons[iconName].image} alt={iconName} /> : null;
 }

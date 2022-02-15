@@ -14,8 +14,8 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import log from "loglevel";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import { useMemo } from "react";
+import { render } from "react-dom";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
@@ -54,6 +54,9 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
+    const darkState = this.isDark;
+    const theme = useMemo(() => ({ isDark: darkState }), [darkState]);
+
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
         console.log("rendered");
@@ -62,12 +65,9 @@ export default class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      ReactDOM.render(
-        <ThemedContext.Provider
-          value={{
-            isDark: this.isDark,
-          }}
-        >
+
+      render(
+        <ThemedContext.Provider value={theme}>
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
@@ -78,7 +78,10 @@ export default class LoginModal extends SafeEventEmitter {
             version={this.version}
           />
         </ThemedContext.Provider>,
-        this.wrapper
+        this.wrapper,
+        function (...rest) {
+          console.log(rest, "logged state");
+        }
       );
     });
   };
