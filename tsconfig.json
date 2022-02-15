@@ -15,9 +15,10 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@web3auth/*-adapter": ["packages/adapters/*-adapter/src"],
-      "@web3auth/*-provider": ["packages/providers/*-provider/src"],
-      "@web3auth/*": ["packages/*/src"]
+      "@web3auth/adapters/*-adapter": ["packages/adapters/*-adapter/src"],
+      "@web3auth/providers/*-provider": ["packages/providers/*-provider/src"],
+      "@web3auth/defaultAdapters/*-default-adapters": ["packages/defaultAdapters/*-default-adapters/src"],
+      "@web3auth/*": ["packages/*/src"],
     }
   }
 }

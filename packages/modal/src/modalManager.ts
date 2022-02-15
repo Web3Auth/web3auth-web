@@ -3,8 +3,9 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   BaseAdapterConfig,
-  CHAIN_NAMESPACES,
+  BaseDefaultAdapters,
   CustomChainConfig,
+  DefaultAdaptersInitConfig,
   getChainConfig,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
@@ -14,14 +15,7 @@ import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import log from "loglevel";
 
-import {
-  defaultEvmDappModalConfig,
-  defaultEvmWalletModalConfig,
-  defaultSolanaDappModalConfig,
-  defaultSolanaWalletModalConfig,
-  OPENLOGIN_PROVIDERS,
-} from "./config";
-import { getDefaultAdapterModule } from "./default";
+import { defaultEvmDappModalConfig, OPENLOGIN_PROVIDERS } from "./config";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
 
@@ -74,29 +68,13 @@ export class Web3Auth extends Web3AuthCore {
 
   private defaultModalConfig: AdaptersModalConfig = defaultEvmDappModalConfig;
 
+  private defaultAdapters: BaseDefaultAdapters | null = null;
+
+  private adaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig> = {};
+
   constructor(options: Web3AuthOptions) {
     super(options);
     this.options = { ...options };
-    const providedChainConfig = this.options.chainConfig;
-    if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      if (options.authMode === "WALLET") {
-        // default config for solana wallet modal
-        this.defaultModalConfig = defaultSolanaWalletModalConfig;
-      } else {
-        // default config for solana dapp modal
-        this.defaultModalConfig = defaultSolanaDappModalConfig;
-      }
-    } else if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      if (options.authMode === "WALLET") {
-        // default config for evm wallet modal
-        this.defaultModalConfig = defaultEvmWalletModalConfig;
-      } else {
-        // default config for evm dapp modal
-        this.defaultModalConfig = defaultEvmDappModalConfig;
-      }
-    } else {
-      throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
-    }
     this.loginModal = new LoginModal({
       theme: this.options.uiConfig?.theme,
       appLogo: this.options.uiConfig?.appLogo || "",
@@ -106,56 +84,46 @@ export class Web3Auth extends Web3AuthCore {
     this.subscribeToLoginModalEvents();
   }
 
-  public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
+  public async initModal(params?: { adaptersConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
     await this.loginModal.initModal();
+
+    const defaultAdaptersInitConfig: DefaultAdaptersInitConfig = {};
+    Object.keys(this.walletAdapters).forEach((adapterName) => {
+      // don't initialize adapters in default adapters which are custom configured here.
+      defaultAdaptersInitConfig[adapterName] = { initializeAdapter: false };
+    });
+    if (this.defaultAdapters)
+      await this.defaultAdapters.init({
+        chainConfig: this.options.chainConfig,
+        clientId: this.options.clientId,
+        initConfig: defaultAdaptersInitConfig,
+        adaptersConfig: params?.adaptersConfig || {},
+      });
+    const defaultAdapters = this.defaultAdapters?.walletAdapters || {};
+    Object.keys(defaultAdapters).forEach((adName) => {
+      if (!this.walletAdapters[adName]) this.walletAdapters[adName] = defaultAdapters[adName];
+    });
+
     const providedChainConfig = this.options.chainConfig;
 
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
-    const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
-      // start with the default config of adapter.
-      let adapterConfig = this.defaultModalConfig.adapters?.[adapterName] || {
+    const adapterConfigurationPromises = Object.keys(this.walletAdapters).map(async (adapterName: string) => {
+      const adapterConfig = params?.adaptersConfig?.[adapterName] || {
         label: adapterName,
         showOnModal: true,
         showOnMobile: true,
         showOnDesktop: true,
       };
-
-      // override the default config of adapter if some config is being provided by the user.
-      if (params?.modalConfig?.[adapterName]) {
-        adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
-      }
-      (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
-
-      // check if adapter is configured/added by user and exist in walletAdapters map.
+      this.adaptersConfig[adapterName] = adapterConfig;
       const adapter = this.walletAdapters[adapterName];
-      log.debug("adapter config", adapterName, this.defaultModalConfig.adapters?.[adapterName].showOnModal);
-
-      // if adapter is not custom configured then check if it is available in default adapters.
-      // and if adapter is not hidden by user
-      if (!adapter && this.defaultModalConfig.adapters?.[adapterName].showOnModal) {
-        // if custom auth is configured then no need to use default openlogin
-        if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          return;
-        }
-        // if adapter is not configured and some default configuration is available, use it.
-        const ad = await getDefaultAdapterModule({
-          name: adapterName,
-          customChainConfig: this.options.chainConfig,
-          clientId: this.options.clientId,
-        });
-
-        this.walletAdapters[adapterName] = ad;
-
-        return adapterName;
-      } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
-        if (!this.defaultModalConfig.adapters?.[adapterName].showOnModal) return;
+      if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
         // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
+          adapter.setAdapterSettings({ clientId: this.options.clientId });
         }
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
@@ -165,7 +133,7 @@ export class Web3Auth extends Web3AuthCore {
             ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
             ...this.coreOptions.chainConfig,
           } as CustomChainConfig;
-          this.walletAdapters[adapterName].setChainConfig(chainConfig);
+          adapter.setChainConfig(chainConfig);
         }
 
         return adapterName;
@@ -219,6 +187,11 @@ export class Web3Auth extends Web3AuthCore {
       // if no in app wallet is available then initialize external wallets in modal
       await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
     }
+  }
+
+  public addDefaultAdapters(defaultAdapters: BaseDefaultAdapters) {
+    if (this.defaultAdapters) throw new Error("Default adapters already exists");
+    this.defaultAdapters = defaultAdapters;
   }
 
   public async connect(): Promise<SafeEventEmitterProvider | null> {

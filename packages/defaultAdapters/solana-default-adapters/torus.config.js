@@ -1,5 +1,5 @@
 const defaultConfig = {
-  cjsBundled: false,
+  cjsBundled: true,
   bundledDeps: [],
   analyzerMode: "disabled",
 };
