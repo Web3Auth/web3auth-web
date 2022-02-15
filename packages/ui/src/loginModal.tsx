@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
@@ -14,13 +13,14 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import log from "loglevel";
-import { useMemo } from "react";
 import { render } from "react-dom";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
+log.enableAll();
+log.setLevel("DEBUG");
 const DEFAULT_LOGO_URL = {
   light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
   dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
@@ -54,12 +54,11 @@ export default class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
-    const darkState = this.isDark;
-    const theme = useMemo(() => ({ isDark: darkState }), [darkState]);
+    const darkState = { isDark: this.isDark };
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
-        console.log("rendered");
+        log.info("rendered");
         this.setState({
           status: MODAL_STATUS.INITIALIZED,
         });
@@ -67,7 +66,7 @@ export default class LoginModal extends SafeEventEmitter {
       });
 
       render(
-        <ThemedContext.Provider value={theme}>
+        <ThemedContext.Provider value={darkState}>
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
@@ -80,7 +79,7 @@ export default class LoginModal extends SafeEventEmitter {
         </ThemedContext.Provider>,
         this.wrapper,
         function (...rest) {
-          console.log(rest, "logged state");
+          log.info(rest, "logged state");
         }
       );
     });
@@ -94,7 +93,7 @@ export default class LoginModal extends SafeEventEmitter {
         loginMethodsOrder,
       },
     });
-    console.log("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
+    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
@@ -130,7 +129,7 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
-    console.log("external wallet clicked", params);
+    log.info("external wallet clicked", params);
     const { adapter } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
@@ -138,7 +137,7 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
-    console.log("social login clicked", params);
+    log.info("social login clicked", params);
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
@@ -166,7 +165,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private subscribeCoreEvents = (listener: SafeEventEmitter) => {
     listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
-      console.log("connecting with adapter", data);
+      log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
       if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {

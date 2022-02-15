@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
+import log from "loglevel";
 import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
@@ -48,8 +50,14 @@ export default function Modal(props: ModalProps) {
   useEffect(() => {
     console.log("mounted");
     stateListener.emit("MOUNTED");
-    stateListener.on("STATE_UPDATED", (newModalState: ModalState) => {
-      setModalState((prevState) => deepmerge(prevState, newModalState));
+    stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
+      log.info("state updated", newModalState);
+
+      setModalState((prevState) => {
+        const mergedState = cloneDeep(deepmerge(prevState, newModalState));
+        log.info(mergedState, "mergedState");
+        return mergedState;
+      });
     });
   }, [stateListener]);
 
