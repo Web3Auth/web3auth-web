@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 function App() {
   const [user, setUser] = useState(null);
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     console.log("useEffect");
@@ -58,7 +58,6 @@ function App() {
       console.log("initializeModal");
       subscribeAuthEvents(web3auth);
       await web3auth.initModal();
-      setLoaded(true);
     };
 
     initializeModal();
@@ -102,7 +101,7 @@ function App() {
     );
   };
 
-  return loaded ? (user ? renderAuthenticated() : renderUnauthenticated()): <h1>Loading....</h1>;
+  return loaded ? user ? renderAuthenticated() : renderUnauthenticated() : <h1>Loading....</h1>;
 }
 
 export default App;

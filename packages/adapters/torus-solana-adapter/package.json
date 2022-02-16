@@ -32,10 +32,10 @@
     "src"
   ],
   "devDependencies": {
-    "lint-staged": "^12.1.7"
+    "lint-staged": "^12.3.4"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.0.10",
+    "@toruslabs/solana-embed": "^0.1.0",
     "@web3auth/base": "^0.2.2",
     "@web3auth/base-provider": "^0.2.2",
     "@web3auth/solana-provider": "^0.2.2",

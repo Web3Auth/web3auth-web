@@ -32,11 +32,11 @@
     "src"
   ],
   "devDependencies": {
-    "lint-staged": "^12.1.7"
+    "lint-staged": "^12.3.4"
   },
   "dependencies": {
-    "@walletconnect/client": "~1.7.0",
-    "@walletconnect/types": "~1.7.0",
+    "@walletconnect/client": "~1.7.1",
+    "@walletconnect/types": "~1.7.1",
     "@web3auth/base": "^0.2.2",
     "@web3auth/ethereum-provider": "^0.2.2",
     "loglevel": "^1.8.0"
