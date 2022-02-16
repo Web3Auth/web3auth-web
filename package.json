@@ -4,7 +4,6 @@
   "description": "Monorepo for web3 auth packages",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "local-publish": "cross-env FORCE_COLOR=1 lerna run local-publish",
     "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
     "just:publish:lerna": "lerna publish",
     "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
@@ -15,16 +14,15 @@
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install",
-    "start:ui": "cross-env FORCE_COLOR=1 lerna run --stream start:ui --scope=@web3auth/ui"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-typescript": "^0.2.0",
-    "@toruslabs/torus-scripts": "^0.3.0",
+    "@toruslabs/torus-scripts": "^0.4.2",
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.8.0",
+    "eslint": "^8.9.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-mocha": "^10.0.3",
     "eslint-plugin-n": "^14.0.0",
@@ -35,15 +33,14 @@
     "eslint-plugin-tsdoc": "^0.2.14",
     "husky": "^7.0.4",
     "lerna": "^4.0.0",
-    "lint-staged": "^12.3.3",
+    "lint-staged": "^12.3.4",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.5.0",
     "tsconfig-paths": "^3.12.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.5",
-    "yalc": "^1.0.0-pre.53"
+    "typescript": "^4.5.5"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import QRCode from "react-qr-code";
 
 import Image from "./Image";
@@ -24,4 +24,4 @@ function WalletConnect(props: WalletConnectProps) {
   );
 }
 
-export default React.memo(WalletConnect);
+export default memo(WalletConnect);

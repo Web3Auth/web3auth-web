@@ -1,5 +1,3 @@
-import React from "react";
-
 interface ImageProps {
   imageId: string;
   height?: string;

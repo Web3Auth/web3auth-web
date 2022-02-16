@@ -1,10 +1,2 @@
-const defaultConfig = {
-  cjsBundled: false,
-  bundledDeps: [],
-  analyzerMode: "disabled",
-  cjs: false,
-  umd: false,
-};
-
-module.exports = defaultConfig;
+module.exports = require("../../torus.config");
 // TODO: Import this file into packages which need it

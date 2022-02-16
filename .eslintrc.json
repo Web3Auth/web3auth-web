@@ -1,8 +1,6 @@
 {
   "root": true,
-  "extends": [
-    "@toruslabs/eslint-config-typescript"
-  ],
+  "extends": ["@toruslabs/eslint-config-typescript"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
@@ -20,12 +18,11 @@
         "ts": "never",
         "tsx": "never"
       }
-   ]
+    ]
   },
   "env": {
     "es2020": true,
     "browser": true,
-    "node": true,
-    "serviceworker": true
+    "node": true
   }
 }

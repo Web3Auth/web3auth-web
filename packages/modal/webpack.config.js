@@ -7,24 +7,17 @@ const pkg = require("./package.json");
 const currentPath = path.resolve(".");
 
 const config = generateWebpackConfig({
-  pkgBaseConfig: {
-    output: {
-      // libraryExport: "default",
-    },
-  },
   currentPath,
   pkg,
   alias: {},
   module: {
     rules: [
-      { test: /\.tsx?$/, loader: "ts-loader" },
       {
         test: /\.css$/i,
-        use: { loader: "style-loader", options: {} },
-      },
-      {
-        test: /\.css$/i,
-        use: { loader: "css-loader", options: {} },
+        use: [
+          { loader: "style-loader", options: {} },
+          { loader: "css-loader", options: {} },
+        ],
       },
       {
         test: /\.svg$/,

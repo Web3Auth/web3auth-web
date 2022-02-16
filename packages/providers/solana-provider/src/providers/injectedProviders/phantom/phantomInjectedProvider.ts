@@ -9,7 +9,7 @@ import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy"
 import { getPhantomHandlers } from "./providerHandlers";
 
 export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, IPhantomWalletProvider> {
-  constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
+  constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 

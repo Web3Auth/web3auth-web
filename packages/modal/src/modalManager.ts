@@ -50,7 +50,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
-   * If you are a wallet and only want to use you own wallet implementations along with customAuth or openlogin,
+   * If you are a wallet and only want to use you own wallet implementations along with openlogin,
    * then you should use `WALLET` authMode.
    *
    * @defaultValue `DAPP`
@@ -260,13 +260,21 @@ export class Web3Auth extends Web3AuthCore {
 
   private subscribeToLoginModalEvents(): void {
     this.loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (params: { adapter: WALLET_ADAPTER_TYPE; loginParams: unknown }) => {
-      await this.connectTo<unknown>(params.adapter, params.loginParams);
+      try {
+        await this.connectTo<unknown>(params.adapter, params.loginParams);
+      } catch (error) {
+        log.error(`Error while connecting to adapter: ${params.adapter}`, error);
+      }
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
       await this.initExternalWalletAdapters(params.externalWalletsInitialized);
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
-      await this.logout();
+      try {
+        await this.logout();
+      } catch (error) {
+        log.error(`Error while disconnecting`, error);
+      }
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
@@ -274,7 +282,11 @@ export class Web3Auth extends Web3AuthCore {
       const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.status;
       if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
         // refreshing session for wallet connect whenever modal is opened.
-        this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
+        try {
+          this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
+        } catch (error) {
+          log.error(`Error while disconnecting to wallet connect in core`, error);
+        }
       }
     });
   }

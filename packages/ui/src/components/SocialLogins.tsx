@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
@@ -48,7 +48,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             method === "jwt" ||
             method === "email_passwordless"
           ) {
-            return <></>;
+            return null;
           }
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;

@@ -1,0 +1,37 @@
+{
+  "name": "web3auth-nextjs-example",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "install:local": "npm i ../../packages/modal ../../packages/providers/base-provider ../../packages/core ../../packages/base ../../packages/adapters/torus-evm-adapter ../../packages/adapters/torus-solana-adapter ../../packages/adapters/openlogin-adapter  ../../packages/adapters/metamask-adapter ../../packages/adapters/phantom-adapter ../../packages/adapters/wallet-connect-v1-adapter ../../packages/ui ../../packages/providers/solana-provider ../../packages/providers/ethereum-provider"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.17.2",
+    "@web3auth/base": "file:../../packages/base",
+    "@web3auth/base-provider": "file:../../packages/providers/base-provider",
+    "@web3auth/core": "file:../../packages/core",
+    "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
+    "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
+    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
+    "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
+    "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
+    "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
+    "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
+    "@web3auth/ui": "file:../../packages/ui",
+    "@web3auth/wallet-connect-v1-adapter": "file:../../packages/adapters/wallet-connect-v1-adapter",
+    "@web3auth/web3auth": "file:../../packages/modal",
+    "next": "12.0.10",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "17.0.17",
+    "@types/react": "17.0.39",
+    "eslint": "8.9.0",
+    "eslint-config-next": "12.0.10",
+    "typescript": "4.5.5"
+  }
+}
