@@ -1,4 +1,4 @@
-import { Web3Auth } from "@web3auth/web3auth";
+import type { Web3Auth } from "@web3auth/web3auth";
 import {
   createContext,
   ProviderProps,
@@ -14,7 +14,6 @@ import {
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -70,15 +69,12 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
         console.error("some error or user has cancelled login request", error);
       });
-
-      web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
-        console.log("modal visibility", isVisible);
-      });
     };
 
     const currentChainConfig = CHAIN_CONFIG[chain];
     async function init() {
       try {
+        const { Web3Auth } = await import("@web3auth/web3auth");
         setIsLoading(true);
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
