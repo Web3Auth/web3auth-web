@@ -48,14 +48,12 @@ export default function Modal(props: ModalProps) {
   const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
-    console.log("mounted");
     stateListener.emit("MOUNTED");
     stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
       log.info("state updated", newModalState);
 
       setModalState((prevState) => {
         const mergedState = cloneDeep(deepmerge(prevState, newModalState));
-        log.info(mergedState, "mergedState");
         return mergedState;
       });
     });
@@ -72,7 +70,6 @@ export default function Modal(props: ModalProps) {
   }, [modalState.modalVisibility]);
 
   useEffect(() => {
-    console.log("externalWalletsVisibility", modalState.externalWalletsVisibility);
     setExternalWalletsVisibility(modalState.externalWalletsVisibility);
   }, [modalState.externalWalletsVisibility]);
 

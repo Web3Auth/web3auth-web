@@ -1,82 +1,78 @@
 <html>
+  <head>
+    <title>Test web3auth app</title>
+  </head>
 
-<head>
-  <title>Test web3auth app</title>
-</head>
-
-<body>
-  <h1>Test web3auth app</h1>
-  <div>
-    <button class="show-modal" onclick="showModal()">Show Modal</button>
-  </div>
-  <script src="./ui.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@toruslabs/openlogin-jrpc"></script>
-  <script>
-    let modal = null;
-    let testEventEmitter = null;
-    function showModal() {
-      console.log("open")
-      modal.open();
-      // testEventEmitter.emit("connecting", { adapter: "openlogin" })
-      // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
-      // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
-      // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
-
-    }
-    (async function init() {
-      try {
-        testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
-        modal = new Ui({
-          adapterListener: testEventEmitter,
-          theme: "dark",
-          // version: "1",
-        });
-        await modal.initModal();
-        console.log("modal init")
-        modal.addSocialLogins(
-          "openlogin",
-          {
-            google: {
-              name: "google",
-            },
-            facebook: {
-              name: "facebook",
-            },
-            twitter: {
-              name: "twitter",
-            },
-            reddit: {
-              name: "reddit",
-            },
-            twitch: {
-              name: "twitch",
-            },
-            github: {
-              name: "github",
-            },
-          },
-          ["facebook"]
-        );
-        modal.initExternalWalletContainer()
-        modal.addWalletLogins(
-         {
-           "metamask": {
-             label: "metamask"
-           },
-           "wallet-connect-v1": {
-             label: "wallet-connect-v1"
-           }
-         },
-         { showExternalWalletsOnly: false }
-        );
-        testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } })
-        // showModal()
-      } catch (error) {
-        console.log("error in ui", error);
+  <body>
+    <h1>Test web3auth app</h1>
+    <div>
+      <button class="show-modal" onclick="showModal()">Show Modal</button>
+    </div>
+    <script src="../dist/ui.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@toruslabs/openlogin-jrpc"></script>
+    <script>
+      let modal = null;
+      let testEventEmitter = null;
+      function showModal() {
+        console.log("open");
+        modal.open();
+        // testEventEmitter.emit("connecting", { adapter: "openlogin" })
+        // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
+        // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
+        // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
       }
-    })();
-    
-  </script>
-</body>
-
+      (async function init() {
+        try {
+          testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
+          modal = new Ui({
+            adapterListener: testEventEmitter,
+            theme: "dark",
+            // version: "1",
+          });
+          await modal.initModal();
+          console.log("modal init");
+          modal.addSocialLogins(
+            "openlogin",
+            {
+              google: {
+                name: "google",
+              },
+              facebook: {
+                name: "facebook",
+              },
+              twitter: {
+                name: "twitter",
+              },
+              reddit: {
+                name: "reddit",
+              },
+              twitch: {
+                name: "twitch",
+              },
+              github: {
+                name: "github",
+              },
+            },
+            ["facebook"]
+          );
+          modal.initExternalWalletContainer();
+          modal.addWalletLogins(
+            {
+              metamask: {
+                label: "metamask",
+              },
+              "wallet-connect-v1": {
+                label: "wallet-connect-v1",
+              },
+            },
+            { showExternalWalletsOnly: false }
+          );
+          testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } });
+          // showModal()
+        } catch (error) {
+          console.log("error in ui", error);
+        }
+      })();
+    </script>
+  </body>
 </html>

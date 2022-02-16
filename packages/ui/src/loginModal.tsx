@@ -19,8 +19,6 @@ import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
-log.enableAll();
-log.setLevel("DEBUG");
 const DEFAULT_LOGO_URL = {
   light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
   dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
@@ -77,10 +75,7 @@ export default class LoginModal extends SafeEventEmitter {
             version={this.version}
           />
         </ThemedContext.Provider>,
-        this.wrapper,
-        function (...rest) {
-          log.info(rest, "logged state");
-        }
+        this.wrapper
       );
     });
   };

@@ -7,12 +7,6 @@ const pkg = require("./package.json");
 const currentPath = path.resolve(".");
 
 const config = generateWebpackConfig({
-  pkgBaseConfig: {
-    mode: "development", // only for testing
-    output: {
-      libraryExport: "default",
-    },
-  },
   currentPath,
   pkg,
   alias: {},
@@ -20,11 +14,10 @@ const config = generateWebpackConfig({
     rules: [
       {
         test: /\.css$/i,
-        use: { loader: "style-loader", options: {} },
-      },
-      {
-        test: /\.css$/i,
-        use: { loader: "css-loader", options: {} },
+        use: [
+          { loader: "style-loader", options: {} },
+          { loader: "css-loader", options: {} },
+        ],
       },
       {
         test: /\.svg$/,

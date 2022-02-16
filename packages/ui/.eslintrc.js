@@ -8,6 +8,7 @@ module.exports = {
     project: "./tsconfig.json",
   },
   rules: {
+    "no-console": 2,
     "@typescript-eslint/no-throw-literal": 0,
     "import/extensions": [
       "error",
