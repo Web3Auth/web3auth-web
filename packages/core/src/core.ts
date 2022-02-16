@@ -13,7 +13,6 @@ import {
   storageAvailable,
   UserInfo,
   WALLET_ADAPTER_TYPE,
-  WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
@@ -98,16 +97,6 @@ export class Web3AuthCore extends SafeEventEmitter {
 
     if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
 
-    if (this.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] && adapter.name === WALLET_ADAPTERS.CUSTOM_AUTH) {
-      throw new Error(
-        `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.OPENLOGIN} adapter already exists.`
-      );
-    }
-    if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapter.name === WALLET_ADAPTERS.OPENLOGIN) {
-      throw new Error(
-        `Either ${WALLET_ADAPTERS.OPENLOGIN} or ${WALLET_ADAPTERS.CUSTOM_AUTH} can be used, ${WALLET_ADAPTERS.CUSTOM_AUTH} adapter already exists.`
-      );
-    }
     const adapterAlreadyExists = this.walletAdapters[adapter.name];
     if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
     if (adapter.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.adapterNamespace !== providedChainConfig.chainNamespace)

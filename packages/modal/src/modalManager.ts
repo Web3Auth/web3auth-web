@@ -56,7 +56,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
-   * If you are a wallet and only want to use you own wallet implementations along with customAuth or openlogin,
+   * If you are a wallet and only want to use you own wallet implementations along with openlogin,
    * then you should use `WALLET` authMode.
    *
    * @defaultValue `DAPP`
@@ -136,10 +136,6 @@ export class Web3Auth extends Web3AuthCore {
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
       if (!adapter && this.defaultModalConfig.adapters?.[adapterName].showOnModal) {
-        // if custom auth is configured then no need to use default openlogin
-        if (this.walletAdapters[WALLET_ADAPTERS.CUSTOM_AUTH] && adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          return;
-        }
         // if adapter is not configured and some default configuration is available, use it.
         const ad = await getDefaultAdapterModule({
           name: adapterName,
