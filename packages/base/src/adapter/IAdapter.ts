@@ -70,7 +70,7 @@ export type CONNECTED_EVENT_DATA = {
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
-  chainConfigProxy: CustomChainConfig | undefined;
+  chainConfigProxy: CustomChainConfig | null;
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
   status: ADAPTER_STATUS_TYPE;
@@ -89,7 +89,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   // should be added in constructor or from setChainConfig function
   // before calling init function.
-  protected chainConfig: CustomChainConfig | undefined;
+  protected chainConfig: CustomChainConfig | null = null;
 
   public abstract adapterNamespace: AdapterNamespaceType;
 
@@ -101,8 +101,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
-  get chainConfigProxy(): CustomChainConfig | undefined {
-    return this.chainConfig ? { ...this.chainConfig } : undefined;
+  get chainConfigProxy(): CustomChainConfig | null {
+    return this.chainConfig ? { ...this.chainConfig } : null;
   }
 
   public abstract get provider(): SafeEventEmitterProvider | null;

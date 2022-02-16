@@ -4,7 +4,6 @@
   "description": "Monorepo for web3 auth packages",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "local-publish": "cross-env FORCE_COLOR=1 lerna run local-publish",
     "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
     "just:publish:lerna": "lerna publish",
     "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
@@ -19,7 +18,7 @@
   },
   "devDependencies": {
     "@toruslabs/eslint-config-typescript": "^0.2.0",
-    "@toruslabs/torus-scripts": "^0.3.0",
+    "@toruslabs/torus-scripts": "^0.4.2",
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "cross-env": "^7.0.3",
@@ -41,8 +40,7 @@
     "tsconfig-paths": "^3.12.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.5",
-    "yalc": "^1.0.0-pre.53"
+    "typescript": "^4.5.5"
   },
   "repository": {
     "type": "git",

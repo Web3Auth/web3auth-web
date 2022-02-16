@@ -1,14 +1,12 @@
 <template>
-  <!-- <Openlogin v-if="authType === 'customAuth'" /> -->
-  <CustomAuth />
+  <Openlogin v-if="authType === 'openlogin'" />
   <!-- <WalletConnect v-else-if="authType === 'walletConnect'" /> -->
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
-import CustomAuth from "./customAuth.vue";
-// import Openlogin from "./openlogin.vue";
+import Openlogin from "./openlogin.vue";
 // import WalletConnect from "./walletConnect.vue";
 
 export default Vue.extend({
@@ -23,8 +21,7 @@ export default Vue.extend({
     return {};
   },
   components: {
-    // Openlogin,
-    CustomAuth,
+    Openlogin,
     // WalletConnect,
   },
   async mounted() {

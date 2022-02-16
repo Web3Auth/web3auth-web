@@ -126,12 +126,6 @@
                 <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
                 <label for="openlogin">OpenLogin</label>
                 <br />
-                <input type="radio" id="customAuth" name="customAuth" value="customAuth" v-model="form.uiMode.customUi.type" />
-                <label for="customAuth">CustomAuth</label>
-                <br />
-                <!-- <input type="radio" id="walletConnect" name="walletConnect" value="walletConnect" v-model="form.uiMode.customUi.type" />
-              <label for="customAuth">Wallet Connect</label>
-              <br /> -->
               </span>
             </div>
             <br />
@@ -262,7 +256,7 @@ const defaultFormConfig = {
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
-      type: "customAuth",
+      type: "openlogin",
     },
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
@@ -283,7 +277,7 @@ const defaultComponentConfig = {
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
-      type: "customAuth",
+      type: "openlogin",
     },
     whitelabel: {
       logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
