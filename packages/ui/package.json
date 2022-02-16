@@ -19,7 +19,6 @@
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/ui#readme",
   "license": "ISC",
   "scripts": {
-    "local-publish": "yalc publish",
     "test": "mocha --config ../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
     "dev": "rimraf dist/ && torus-scripts start",

@@ -10,7 +10,6 @@
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
-    "local-publish": "yalc publish",
     "test": "mocha --config ../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
     "dev": "rimraf dist/ && torus-scripts start",

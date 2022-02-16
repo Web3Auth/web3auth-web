@@ -10,7 +10,6 @@
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
-    "local-publish": "yalc publish",
     "test": "mocha --config ../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
     "dev": "rimraf dist/ && torus-scripts start",
@@ -23,7 +22,6 @@
     "@toruslabs/openlogin": "^1.5.0",
     "@web3auth/base": "^0.2.2",
     "@web3auth/core": "^0.2.2",
-    "@web3auth/customauth-adapter": "^0.2.2",
     "@web3auth/metamask-adapter": "^0.2.3",
     "@web3auth/openlogin-adapter": "^0.2.3",
     "@web3auth/phantom-adapter": "^0.2.4",
