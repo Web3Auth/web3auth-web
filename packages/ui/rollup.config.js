@@ -1,13 +1,13 @@
+import svgr from "@svgr/rollup";
 import postcss from "rollup-plugin-postcss";
-import svg from "rollup-plugin-svg";
+import url from "rollup-plugin-url";
 
 export default {
   plugins: [
     postcss({
       plugins: [],
     }),
-    svg({
-      // base64: true,
-    }),
+    url(),
+    svgr(),
   ],
 };

@@ -60,7 +60,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
-    this.chainConfig = params.chainConfig;
+    this.chainConfig = params.chainConfig || null;
   }
 
   get provider(): SafeEventEmitterProvider | null {

@@ -10,7 +10,7 @@ import { InjectedProvider } from "../interface";
 import { getTorusHandlers } from "./providerHandlers";
 
 export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
-  constructor({ config, state }: { config?: BaseProviderConfig; state?: BaseProviderState }) {
+  constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 

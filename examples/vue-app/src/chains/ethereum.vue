@@ -25,7 +25,7 @@
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
+// import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -151,9 +151,9 @@ export default Vue.extend({
         this.console("errored", error);
         this.loginButtonStatus = "";
       });
-      web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
-        this.connecting = isVisible;
-      });
+      // web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
+      //   this.connecting = isVisible;
+      // });
     },
     async connect() {
       try {

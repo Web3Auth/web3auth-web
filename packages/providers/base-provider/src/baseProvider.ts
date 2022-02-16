@@ -20,7 +20,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   // should be Assigned in setupProvider
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
 
-  constructor({ config, state }: { config?: C; state?: S }) {
+  constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     if (!config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chainConfig");
@@ -51,7 +51,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     } as C);
   }
 
-  public getChainConfig(chainId: string): CustomChainConfig | undefined {
+  public getChainConfig(chainId: string): CustomChainConfig | null {
     const chainConfig = this.config.networks?.[chainId];
     if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
     return chainConfig;

@@ -75,8 +75,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  get chainConfigProxy(): CustomChainConfig | undefined {
-    return this.chainConfig ? { ...this.chainConfig } : undefined;
+  get chainConfigProxy(): CustomChainConfig | null {
+    return this.chainConfig ? { ...this.chainConfig } : null;
   }
 
   get provider(): SafeEventEmitterProvider | null {

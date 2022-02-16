@@ -18,7 +18,7 @@
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script
 src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0.2.2/dist/web3auth.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0.2.4/dist/web3auth.umd.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@0.2.2/dist/solanaProvider.umd.min.js"></script>
     <script>
       const web3authSdk = window.Web3auth;
@@ -31,7 +31,15 @@ console.log(solanaWeb3);
   $("#logout").hide();
 
   web3AuthInstance = new web3authSdk.Web3Auth({
-    chainConfig: { chainNamespace: "solana" },
+    chainConfig: { 
+        chainNamespace: "solana",
+        rpcTarget: "https://ssc-dao.genesysgo.net",
+        blockExplorer: "https://explorer.solana.com?cluster=mainnet",
+        chainId: "0x1",
+        displayName: "solana mainnet",
+        ticker: "SOL",
+        tickerName: "solana"
+    },
     clientId: "BEExcOSoQPOv159WU4H_DZ1A5yh9Gv68yHFp3t861W5niPawEPlXekYYOafDZke05_cTvGE1qC-oUNaqkDJQpbw",
   });
 
