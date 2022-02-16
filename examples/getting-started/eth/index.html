@@ -1,36 +1,53 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Ethereum Web3Auth Getting Started</title>
     <meta charset="UTF-8" />
-  </head>
+    <style>
+        body {
+            font-family: "Avenir", Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 50px;
+        }
+    </style>
+</head>
 
-  <body style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+<body>
+    <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/getting-started" target="_blank">
+        <img height="30" src="./img/github-logo.png" alt="">
+    </a>
     <h1>Web3Auth Integration Example</h1>
-    <div>
-      <p id="text">Loading...</p>
-      <p id="error"></p>
-      <p id="address"></p>
-      <p id="balance"></p>
-      <button id="login">Login</button>
-      <button id="logout">Logout</button>
+    <div style="text-align: center;">
+        <p id="text">Loading...</p>
+        <p id="error"></p>
+        <p id="address"></p>
+        <p id="balance"></p>
+
+        <button id="send-eth">Send Eth</button>
+        <button id="login">Login</button>
+        <button id="logout">Logout</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.7.0/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0.2.2/dist/web3auth.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0.2.4/dist/web3auth.umd.min.js"></script>
     <script>
         const web3authSdk = window.Web3auth
         let web3AuthInstance = null;
 
         (async function init() {
             $("#logout").hide();
+            $("#send-eth").hide();
 
             web3AuthInstance = new web3authSdk.Web3Auth({
                 chainConfig: { chainNamespace: "eip155" },
                 clientId: "YOUR_CLIENT_ID_HERE" // get your clientId from https://developer.web3auth.io
             });
-        
+
 
             subscribeAuthEvents(web3AuthInstance)
 
@@ -40,10 +57,14 @@
                 const user = await web3AuthInstance.getUserInfo();
                 $("#text").text("Logged in as " + user.name + ".");
                 $("#logout").show();
+                $("#send-eth").show();
+                $("#login").hide();
                 await initWeb3();
             } else {
                 $("#text").text("Didn't log in.");
                 $("#login").show();
+                $("#send-eth").hide();
+                $("#logout").hide();
             }
         })();
 
@@ -78,16 +99,17 @@
             $("#address").text("Address: " + address + ".");
             $("#balance").text("Balance: " + balance + ".");
         }
-        
+
         $("#login").click(async function (event) {
             try {
-                const provider = await  web3AuthInstance.connect()
+                const provider = await web3AuthInstance.connect()
                 console.log("provider after login", provider)
                 await initWeb3();
                 const user = await web3AuthInstance.getUserInfo();
                 $("#text").text("Logged in as " + user.name + ".");
                 $("#error").hide();
                 $("#logout").show();
+                $("#send-eth").show();
                 $("#login").hide();
             } catch (error) {
                 $("#error").text(error.message);
@@ -102,11 +124,25 @@
                 $("#balance").text("");
                 $("#login").show();
                 $("#logout").hide();
+                $("#send-eth").hide();
             } catch (error) {
                 $("#error").text(error.message);
             }
-                
+
+        });
+
+        $("#send-eth").click(async function (event) {
+            try {
+                const web3 = new Web3(web3AuthInstance.provider);
+                const accounts = await web3.eth.getAccounts();
+                console.log("pubKey", accounts);
+                const txRes = await web3.eth.sendTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+                $("#text").text("txRes");
+            } catch (error) {
+                $("#error").text(error.message);
+            }
         });
     </script>
-  </body>
+</body>
+
 </html>
