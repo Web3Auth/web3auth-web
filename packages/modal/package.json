@@ -20,7 +20,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.4.0",
+    "@toruslabs/openlogin": "^1.5.0",
     "@web3auth/base": "^0.2.2",
     "@web3auth/core": "^0.2.2",
     "@web3auth/customauth-adapter": "^0.2.2",

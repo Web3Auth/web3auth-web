@@ -1095,12 +1095,12 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-jrpc@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.4.0.tgz#67e3a3e70656ec40cc2905c4853985917b7980b2"
-  integrity sha512-3zR5mPVKwIRtH+U+COEYQDqD8rJoBUreRu/yFCcBsYIVT3VzAk3/RO1jtuCNn1NdiwvCCDzP3NmL0NnfDPuOUw==
+"@toruslabs/openlogin-jrpc@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.5.0.tgz#d264ff98492078cde52d26cc7fde61c24ca7bafb"
+  integrity sha512-jfcQdJg1pzI8xppgQu37Ys4D6vJG9hjDpNy8lKFnyxs8CAwsuvx5BXcK7oC5qyMLo3Afo4IC1sEVzqVoG7eCHg==
   dependencies:
-    "@toruslabs/openlogin-utils" "^1.4.0"
+    "@toruslabs/openlogin-utils" "^1.5.0"
     end-of-stream "^1.4.4"
     events "^3.3.0"
     fast-safe-stringify "^2.1.1"
@@ -1108,25 +1108,26 @@
     pump "^3.0.0"
     readable-stream "^3.6.0"
 
-"@toruslabs/openlogin-utils@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-utils/-/openlogin-utils-1.4.0.tgz#8bf02d29f93922fbe01beb5c722376a41972000c"
-  integrity sha512-4RT/bzjyXcLbvXCZ/PwFh9b43LXdZxuPZphG5CCFl6TslLxO3fqQfGEXTpPgAZB0iUkadWoIqCTciWYKlG+vYA==
+"@toruslabs/openlogin-utils@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-utils/-/openlogin-utils-1.5.0.tgz#912ede8862796e1fde129c208419c19f526ddd82"
+  integrity sha512-dKZKBJ7UHSwyO+T1SrCRAKRb1YwzzVznallFvTUSBp05wnUF+7oHaP/+YSAMsl/DwJOGO/2Qu3Gkhq9y7ggWxw==
   dependencies:
     base64url "^3.0.1"
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/openlogin@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.4.0.tgz#9f357d8ab7be838a7e3da846a5666ed5ba3c5242"
-  integrity sha512-GeaBxFTswQUj48v4bASbWPi8qBo+X1bY8IlN7GzwG0WF/FoTpvTAW4CpiN5CkFfTIzSmPqahMIodgD2URZiIXg==
+"@toruslabs/openlogin@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.5.0.tgz#d714d135c610b9dc8cca66345241ca4d491a3a2d"
+  integrity sha512-/OOPK0CbKSjYV6JTrqE3Z28N5l4U1YcQ5I0/ehy42qVyH9T288Kdqawt6FX8LdlfRM0fz6RaD2LYJAIlTIqOkA==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
     "@toruslabs/http-helpers" "^2.2.0"
-    "@toruslabs/openlogin-jrpc" "^1.4.0"
-    "@toruslabs/openlogin-utils" "^1.4.0"
+    "@toruslabs/openlogin-jrpc" "^1.5.0"
+    "@toruslabs/openlogin-utils" "^1.5.0"
     lodash.merge "^4.6.2"
+    loglevel "^1.8.0"
     pump "^3.0.0"
 
 "@types/json-schema@^7.0.8":
