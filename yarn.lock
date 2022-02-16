@@ -1949,10 +1949,10 @@
     eslint-config-problems "^6.0.0"
     eslint-config-standard "^17.0.0-1"
 
-"@toruslabs/torus-scripts@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-0.4.1.tgz#01598b197e80b9a0dc43307407fef4fcc4ca4c4a"
-  integrity sha512-s6J4yT2rtlE2HJVD1WTKhLLWIlhCMUoM0+gVGKX142fZGHOK76QTQTBrWzJGg33I/qNzeWChMtzDG4nCGjL1DQ==
+"@toruslabs/torus-scripts@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-0.4.2.tgz#db727f1d4dde6be8c5a830dd0fb23e5f738bf871"
+  integrity sha512-ew8tuJBfa73ZN9j2vxrtRlnYTZG/kXZN1QSABowBxNDrFnykDgXq7kMBYAiBzdg51Pthn9sMQ94MInr0nj6Daw==
   dependencies:
     "@babel/core" "~7.16.12"
     "@babel/plugin-proposal-class-properties" "^7.16.7"
