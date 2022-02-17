@@ -20,7 +20,8 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
     console.log("Settings", e.target.value);
     setChain(e.target.value as CHAIN_CONFIG_TYPE);
   };
-  const { isLoggedIn } = useContext(Web3AuthContext);
+  const { provider } = useContext(Web3AuthContext);
+  const isLoggedIn = provider !== null;
 
   return (
     <div className={styles.setting}>

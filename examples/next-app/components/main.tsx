@@ -3,7 +3,7 @@ import { Web3AuthContext } from "../services/web3auth";
 import styles from '../styles/Home.module.css'
 
 const Main = () => {
-  const { login, logout, isLoggedIn, getUserInfo, getAccounts, getBalance, signEthMessage } = useContext(Web3AuthContext);
+  const { login, logout, provider, getUserInfo, getAccounts, getBalance, signEthMessage } = useContext(Web3AuthContext);
   const loggedInView = (<>
       <a onClick={getUserInfo} className={styles.card}>Get User Info</a>
       <a onClick={getAccounts} className={styles.card}>Get Accounts</a>
@@ -20,7 +20,7 @@ const Main = () => {
   );
   return (
     <div className={styles.grid}>
-      {isLoggedIn ? loggedInView : unloggedInView}
+      {provider ? loggedInView : unloggedInView}
     </div>
   );
 };

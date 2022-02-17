@@ -8,7 +8,6 @@ export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
   provider: SafeEventEmitterProvider | null;
   isLoading: boolean;
-  isLoggedIn: boolean;
   user: unknown;
   login: () => Promise<void>;
   logout: () => Promise<void>;
@@ -23,7 +22,6 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   provider: null,
   isLoading: false,
   user: null,
-  isLoggedIn: false,
   login: async () => {},
   logout: async () => {},
   getUserInfo: async () => {},
@@ -48,7 +46,6 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
-  const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       // Can subscribe to all ADAPTER_EVENTS and LOGIN_MODAL_EVENTS
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
-        setLoggedIn(true);
+        setUser(data);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -65,7 +62,7 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
 
       web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
         console.log("disconnected");
-        setLoggedIn(false);
+        setUser(null);
       });
 
       web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
@@ -112,6 +109,7 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       return;
     }
     await web3Auth.logout();
+    setProvider(null);
   };
 
   const getUserInfo = async () => {
@@ -198,7 +196,6 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
     provider,
     user,
     isLoading,
-    isLoggedIn,
     login,
     logout,
     getUserInfo,
