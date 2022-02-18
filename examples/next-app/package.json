@@ -23,7 +23,7 @@
     "@web3auth/ui": "file:../../packages/ui",
     "@web3auth/wallet-connect-v1-adapter": "file:../../packages/adapters/wallet-connect-v1-adapter",
     "@web3auth/web3auth": "file:../../packages/modal",
-    "next": "12.0.10",
+    "next": "12.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
