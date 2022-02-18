@@ -53,7 +53,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
     this.adapterOptions = { ...options };
-    this.chainConfig = options.chainConfig;
+    this.chainConfig = options.chainConfig || null;
   }
 
   get connected(): boolean {
