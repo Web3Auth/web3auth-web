@@ -47,7 +47,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
-    this.chainConfig = adapterOptions.chainConfig;
+    this.chainConfig = adapterOptions.chainConfig || null;
   }
 
   get provider(): SafeEventEmitterProvider | null {

@@ -1,3 +1,4 @@
+import type { CUSTOM_LOGIN_PROVIDER_TYPE, LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { getChainConfig } from "../chain/config";
@@ -33,6 +34,13 @@ export type UserInfo = {
    * id for discord
    */
   verifierId: string;
+
+  aggregateVerifier?: string;
+
+  /**
+   * typeOfLogin of the logged in user (google, facebook etc)
+   */
+  typeOfLogin: LOGIN_PROVIDER_TYPE | CUSTOM_LOGIN_PROVIDER_TYPE;
 };
 
 export const ADAPTER_CATEGORY = {

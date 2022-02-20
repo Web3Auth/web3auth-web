@@ -47,7 +47,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   constructor(options: PhantomAdapterOptions = {}) {
     super();
-    this.chainConfig = options.chainConfig;
+    this.chainConfig = options.chainConfig || null;
   }
 
   get isWalletConnected(): boolean {

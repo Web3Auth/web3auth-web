@@ -19,12 +19,12 @@ export default function Loader(props: LoaderProps) {
   const web3authIcon = <Image imageId="web3auth" />;
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED && onClose) {
+    if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
       }, 3000);
     }
-  }, [modalStatus, onClose]);
+  }, [modalStatus]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
     <div className="w3ajs-modal-loader w3a-modal__loader">
