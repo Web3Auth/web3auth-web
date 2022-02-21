@@ -1,2 +1,2 @@
-export * from "./adapterFactory";
 export * from "./config";
+export * from "./default";

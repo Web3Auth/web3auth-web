@@ -1,6 +1,6 @@
 import { BaseAdapterConfig, EVM_ADAPTERS, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
-export const defaultEvmDappAdaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig> = {
+export const defaultEvmAdaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig> = {
   [EVM_ADAPTERS.TORUS_EVM]: {
     label: "Torus Eth Wallet",
     showOnModal: true,

@@ -22,10 +22,9 @@ export interface DefaultAdaptersInitOptions {
 }
 
 export interface IDefaultAdapters {
-  options: DefaultAdaptersOptions;
   status: ADAPTER_STATUS_TYPE;
   walletAdapters: Record<WALLET_ADAPTER_TYPE, IAdapter<unknown>>;
-  init(options: DefaultAdaptersInitOptions): Promise<void>;
+  _init(options: DefaultAdaptersInitOptions): Promise<void>;
 }
 
 export abstract class BaseDefaultAdapters implements IDefaultAdapters {
@@ -35,14 +34,12 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
 
   private chainNamespace: ChainNamespaceType;
 
-  abstract options: DefaultAdaptersOptions;
-
   constructor(options: { chainNamespace: ChainNamespaceType }) {
     if (!options.chainNamespace) throw DefaultAdaptersError.invalidParams("Please provide chainNamespace");
     this.chainNamespace = options.chainNamespace;
   }
 
-  public async init(options: DefaultAdaptersInitOptions): Promise<void> {
+  public async _init(options: DefaultAdaptersInitOptions): Promise<void> {
     if (this.status === ADAPTER_STATUS.READY) throw DefaultAdaptersError.alreadyInitialized();
     if (!options.clientId) throw DefaultAdaptersError.invalidParams("Please provide clientId");
     if (!options.chainConfig?.chainNamespace) throw DefaultAdaptersError.invalidParams("Please provide chainNamespace in chainConfig");
@@ -55,7 +52,7 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
       Object.keys(options.adaptersConfig).map(async (adapterName) => {
         try {
           if (!this.walletAdapters[adapterName] && options.initConfig?.[adapterName]?.initializeAdapter) {
-            const ad = await this.getDefaultAdapterModule({
+            const ad = await this._getDefaultAdapterModule({
               name: adapterName,
               customChainConfig: options.chainConfig,
               clientId: options.clientId,
@@ -70,7 +67,7 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
     this.status = ADAPTER_STATUS.READY;
   }
 
-  abstract getDefaultAdapterModule(params: {
+  abstract _getDefaultAdapterModule(params: {
     name: WALLET_ADAPTER_TYPE;
     clientId: string;
     customChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;

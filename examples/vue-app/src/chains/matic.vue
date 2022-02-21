@@ -23,6 +23,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { EvmDefaultAdapters } from "@web3auth/evm-default-adapters";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
@@ -110,16 +111,10 @@ export default Vue.extend({
         this.loading = true;
 
         this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: config.clientId, authMode: "DAPP" });
-        const openloginAdapter = new OpenloginAdapter({
-          adapterSettings: {
-            network: this.openloginNetwork,
-            clientId: config.clientId,
-          },
-        });
-
-        this.web3auth.configureAdapter(openloginAdapter);
+        const evmDefaultAdapters = new EvmDefaultAdapters();
+        this.web3auth.addDefaultAdapters(evmDefaultAdapters);
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({ adaptersConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

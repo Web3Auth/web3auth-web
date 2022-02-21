@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { SolanaDefaultAdapters } from "@web3auth/solana-default-adapters";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -106,21 +106,10 @@ export default Vue.extend({
 
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
-        const openloginAdapter = new OpenloginAdapter({
-          adapterSettings: {
-            network: this.openloginNetwork,
-            clientId: config.clientId,
-          },
-        });
-
-        this.web3auth.configureAdapter(openloginAdapter);
+        const solDefaultAdapters = new SolanaDefaultAdapters();
+        this.web3auth.addDefaultAdapters(solDefaultAdapters);
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({
-          modalConfig: {
-            name: "google",
-            showOnModal: true,
-          },
-        });
+        await this.web3auth.initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error", error);

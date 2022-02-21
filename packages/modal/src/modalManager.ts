@@ -86,20 +86,22 @@ export class Web3Auth extends Web3AuthCore {
 
   public async initModal(params?: { adaptersConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
-    await this.loginModal.initModal();
 
     const defaultAdaptersInitConfig: DefaultAdaptersInitConfig = {};
+
     Object.keys(this.walletAdapters).forEach((adapterName) => {
       // don't initialize adapters in default adapters which are custom configured here.
       defaultAdaptersInitConfig[adapterName] = { initializeAdapter: false };
     });
     if (this.defaultAdapters)
-      await this.defaultAdapters.init({
+      await this.defaultAdapters._init({
         chainConfig: this.options.chainConfig,
         clientId: this.options.clientId,
         initConfig: defaultAdaptersInitConfig,
         adaptersConfig: params?.adaptersConfig || {},
       });
+
+    await this.loginModal.initModal();
     const defaultAdapters = this.defaultAdapters?.walletAdapters || {};
     Object.keys(defaultAdapters).forEach((adName) => {
       if (!this.walletAdapters[adName]) this.walletAdapters[adName] = defaultAdapters[adName];
@@ -107,10 +109,10 @@ export class Web3Auth extends Web3AuthCore {
 
     const providedChainConfig = this.options.chainConfig;
 
-    // merge default adapters with the custom configured adapters.
-    const allAdapters = [...new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
+    // merge default adapters with the custom configure d adapters.
+    const allAdapters = [...Object.keys(this.walletAdapters || {})];
 
-    const adapterConfigurationPromises = Object.keys(this.walletAdapters).map(async (adapterName: string) => {
+    const adapterConfigurationPromises = allAdapters.map(async (adapterName: string) => {
       const adapterConfig = params?.adaptersConfig?.[adapterName] || {
         label: adapterName,
         showOnModal: true,
