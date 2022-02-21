@@ -3,7 +3,8 @@ import type { Web3Auth } from "@web3auth/web3auth";
 import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
-import Web3 from "web3";
+import { getWalletProvider, IWalletProvider } from "./walletProvider";
+
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
   provider: SafeEventEmitterProvider | null;
@@ -12,7 +13,7 @@ export interface IWeb3AuthContext {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   getUserInfo: () => Promise<any>;
-  signEthMessage: () => Promise<any>;
+  signMessage: () => Promise<any>;
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
 }
@@ -25,7 +26,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   login: async () => {},
   logout: async () => {},
   getUserInfo: async () => {},
-  signEthMessage: async () => {},
+  signMessage: async () => {},
   getAccounts: async () => {},
   getBalance: async () => {},
 });
@@ -46,7 +47,7 @@ interface IWeb3AuthProps {
 
 export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
-  const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(null);
+  const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,6 +74,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     };
 
     const currentChainConfig = CHAIN_CONFIG[chain];
+
     async function init() {
       try {
         const { Web3Auth } = await import("@web3auth/web3auth");
@@ -101,7 +103,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const localProvider = await web3Auth.connect();
-    setProvider(localProvider);
+    const walletProvider = getWalletProvider(chain, localProvider!, uiConsole); //TODO
+    setProvider(walletProvider);
   };
 
   const logout = async () => {
@@ -124,27 +127,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     uiConsole(user);
   };
 
-  const uiConsole = (...args: unknown[]): void => {
-    const el = document.querySelector("#console>p");
-    if (el) {
-      el.innerHTML = JSON.stringify(args || {}, null, 2);
-    }
-  };
-
   const getAccounts = async () => {
     if (!provider) {
       console.log("provider not initialized yet");
       uiConsole("provider not initialized yet");
       return;
     }
-    try {
-      const web3 = new Web3(provider as any);
-      const accounts = await web3.eth.getAccounts();
-      uiConsole("accounts", accounts);
-    } catch (error) {
-      console.error("Error", error);
-      uiConsole("error", error);
-    }
+    provider.getAccounts();
   };
 
   const getBalance = async () => {
@@ -153,43 +142,22 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    try {
-      const web3 = new Web3(provider as any);
-      const accounts = await web3.eth.getAccounts();
-      const balance = await web3.eth.getBalance(accounts[0]);
-      uiConsole("balance", balance);
-    } catch (error) {
-      console.error("Error", error);
-      uiConsole("error", error);
-    }
+    provider.getBalance();
   };
 
-  const signEthMessage = async () => {
+  const signMessage = async () => {
     if (!provider) {
       console.log("provider not initialized yet");
       uiConsole("provider not initialized yet");
       return;
     }
-    try {
-      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
-      const web3 = new Web3(provider as any);
-      const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-      (web3.currentProvider as any)?.send(
-        {
-          method: "eth_sign",
-          params: [pubKey[0], message],
-          from: pubKey[0],
-        },
-        (err: Error, result: any) => {
-          if (err) {
-            return uiConsole(err);
-          }
-          uiConsole("sign message => true", result);
-        }
-      );
-    } catch (error) {
-      console.log("error", error);
-      uiConsole("error", error);
+    provider.signMessage();
+  };
+
+  const uiConsole = (...args: unknown[]): void => {
+    const el = document.querySelector("#console>p");
+    if (el) {
+      el.innerHTML = JSON.stringify(args || {}, null, 2);
     }
   };
 
@@ -203,7 +171,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getUserInfo,
     getAccounts,
     getBalance,
-    signEthMessage,
+    signMessage,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

@@ -2,7 +2,7 @@ import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signEthMessage } = useWeb3Auth();
+  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage } = useWeb3Auth();
 
   const loggedInView = (
     <>
@@ -15,7 +15,7 @@ const Main = () => {
       <a onClick={getBalance} className={styles.card}>
         Get Balance
       </a>
-      <a onClick={signEthMessage} className={styles.card}>
+      <a onClick={signMessage} className={styles.card}>
         Sign Message
       </a>
       <a onClick={logout} className={styles.card}>
