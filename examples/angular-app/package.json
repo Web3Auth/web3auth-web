@@ -18,6 +18,7 @@
     "@angular/platform-browser": "~13.2.0",
     "@angular/platform-browser-dynamic": "~13.2.0",
     "@angular/router": "~13.2.0",
+    "@web3auth/solana-provider": "^0.3.0",
     "@web3auth/web3auth": "^0.2.4",
     "assert": "^2.0.0",
     "crypto-browserify": "^3.12.0",

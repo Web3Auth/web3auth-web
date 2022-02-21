@@ -15,7 +15,7 @@
   border: 1px solid #0070f3;
   color: #0070f3;
   height: 40px;
-  width: 200px;
+  width: 150px;
   margin: 0 8px 16px;
   padding: 16px;
   display: flex;
@@ -28,7 +28,7 @@
 
 .card.card-small {
   height: 16px;
-  width: 168px;
+  width: 128px;
   cursor: pointer;
 }
 

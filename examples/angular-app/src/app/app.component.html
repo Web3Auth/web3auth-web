@@ -2,7 +2,7 @@
   <h1 class="title">
     <a target="_blank" href="http://web3auth.io/">Web3Auth</a> & AngularJS Example
   </h1>
-  <app-setting (selectChainEvent)="selectChain($event)" (selectNetworkEvent)="selectNetwork($event)"></app-setting>
-  <app-main [chain]="chain" [network]="network"></app-main>
+  <app-setting (selectChainEvent)="selectChain($event)" (selectNetworkEvent)="selectNetwork($event)" [isLoggedIn]="isLoggedIn"></app-setting>
+  <app-main [chain]="chain" [network]="network" (loginStatusEvent)="setLoginStatus($event)"></app-main>
   <app-footer></app-footer>
 </div>

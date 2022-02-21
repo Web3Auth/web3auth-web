@@ -1,18 +1,5 @@
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 
-export const WEB3AUTH_NETWORK = {
-  mainnet: {
-    displayName: "Mainnet",
-  },
-  testnet: {
-    displayName: "Testnet",
-  },
-  cyan: {
-    displayName: "Cyan",
-  },
-} as const;
-
-
 export const CHAIN_CONFIG = {
   mainnet: {
     displayName: "Ethereum Mainnet",
@@ -44,5 +31,3 @@ export const CHAIN_CONFIG = {
 } as const;
 
 export type CHAIN_CONFIG_TYPE = keyof typeof CHAIN_CONFIG;
-export type WEB3AUTH_NETWORK_TYPE = keyof typeof WEB3AUTH_NETWORK;
-

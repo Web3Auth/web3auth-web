@@ -1,10 +1,13 @@
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable no-console */
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
+import { ADAPTER_EVENTS } from "@web3auth/base";
 import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
-import Web3 from 'web3';
-import { provider } from 'web3-core';
-import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE, WEB3AUTH_NETWORK_TYPE } from "../config";
+
+import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
+import { WEB3AUTH_NETWORK_TYPE } from "../../config/web3auth-networks";
+import { getWalletProvider, IWalletProvider } from "../../services/wallet-provider";
 
 @Component({
   selector: "app-main",
@@ -13,18 +16,30 @@ import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE, WEB3AUTH_NETWORK_TYPE } from "../confi
 })
 export class MainComponent implements OnChanges {
   @Input() chain: CHAIN_CONFIG_TYPE = "mainnet";
+
   @Input() network: WEB3AUTH_NETWORK_TYPE = "cyan";
+
+  @Output() loginStatusEvent = new EventEmitter<boolean>();
 
   web3auth: Web3Auth = new Web3Auth({
     clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
     chainConfig: CHAIN_CONFIG[this.chain],
     authMode: "DAPP",
   });
-  isLoggedIn: boolean = false;
-  isModalLoaded: boolean = false;
-  provider: SafeEventEmitterProvider | null = null;
+
+  isLoggedIn = false;
+
+  isModalLoaded = false;
+
+  provider: IWalletProvider | null = null;
+
+  setLoginStatus(status: boolean): void {
+    this.isLoggedIn = status;
+    this.loginStatusEvent.emit(status);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // eslint-disable-next-line dot-notation
     if (!changes["chain"]) {
       return;
     }
@@ -38,7 +53,7 @@ export class MainComponent implements OnChanges {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data) => {
         console.log("Yeah!, you are successfully logged in", data);
-        this.isLoggedIn = true;
+        this.setLoginStatus(true);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -47,7 +62,7 @@ export class MainComponent implements OnChanges {
 
       web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
         console.log("disconnected");
-        this.isLoggedIn = false;
+        this.setLoginStatus(false);
       });
 
       web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
@@ -66,7 +81,8 @@ export class MainComponent implements OnChanges {
       this.isModalLoaded = true;
 
       if (this.isLoggedIn && !this.provider) {
-        this.provider = await this.web3auth.connect();
+        const web3authProvider = await this.web3auth.connect();
+        this.provider = getWalletProvider(this.chain, web3authProvider!, this.uiConsole);
       }
     };
     initializeModal();
@@ -78,8 +94,8 @@ export class MainComponent implements OnChanges {
       console.log("Web3auth is not initialized");
       return;
     }
-    this.provider = await this.web3auth.connect();
-    // returns a wallet provider which can be used with various chain libraries like web3.js, ethers js etc.
+    const web3authProvider = await this.web3auth.connect();
+    this.provider = getWalletProvider(this.chain, web3authProvider!, this.uiConsole);
   }
 
   async logout() {
@@ -103,40 +119,36 @@ export class MainComponent implements OnChanges {
   }
 
   async getBalance() {
-    try {
-      console.log("GETTING ACCOUNT BALANCE");
-      if (!this.provider) {
-        this.uiConsole("provider is not initialized");
-        return;
-      }
-      const web3 = new Web3(this.provider as provider);
-      const accounts = await web3.eth.getAccounts();
-      const balance = await web3.eth.getBalance(accounts[0]);
-      this.uiConsole("Account Balance", balance);
-    } catch (error) {
-      this.uiConsole("Error getting Account Balance", error);
+    console.log("GETTING ACCOUNT BALANCE");
+    if (!this.provider) {
+      this.uiConsole("provider is not initialized");
+      return;
     }
+    this.provider.getBalance();
   }
 
   async getAccount() {
     console.log("GETTING ACCOUNT");
-    if (!this.web3auth) {
+    if (!this.provider) {
       this.uiConsole("provider is not initialized");
       return;
     }
-    try {
-      const web3 = new Web3(this.provider as provider);
-      const accounts = await web3.eth.getAccounts();
-      this.uiConsole("Account", accounts[0]);
-    } catch (error) {
-      this.uiConsole("Error getting Account", error);
-    }
+    this.provider.getAccounts();
   }
 
-   uiConsole(...args: unknown[]): void {
+  async signMessage() {
+    console.log("SIGNING MESSAGE");
+    if (!this.provider) {
+      this.uiConsole("provider is not initialized");
+      return;
+    }
+    this.provider.signMessage();
+  }
+
+  uiConsole(...args: unknown[]): void {
     const el = document.querySelector("#console-ui>p");
     if (el) {
       el.innerHTML = JSON.stringify(args || {}, null, 2);
     }
-  };
+  }
 }
