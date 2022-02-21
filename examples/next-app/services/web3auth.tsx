@@ -57,6 +57,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);
+        setWalletProvider(web3auth.provider!);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -103,9 +104,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const localProvider = await web3Auth.connect();
-    const walletProvider = getWalletProvider(chain, localProvider!, uiConsole); //TODO
-    setProvider(walletProvider);
+    setWalletProvider(localProvider!);
   };
+
+  const setWalletProvider = (web3authProvider: SafeEventEmitterProvider) => {
+    const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
+    setProvider(walletProvider);
+  }
 
   const logout = async () => {
     if (!web3Auth) {
