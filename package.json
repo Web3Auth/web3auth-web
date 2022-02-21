@@ -8,7 +8,7 @@
     "just:publish:lerna": "lerna publish",
     "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
     "build": "cross-env FORCE_COLOR=1 lerna run --stream build",
-    "dev": "lerna run dev",
+    "dev": "lerna run dev --parallel",
     "test": "cross-env FORCE_COLOR=1 lerna run test --parallel",
     "test-debugger": "cross-env FORCE_COLOR=1 lerna run test-debugger --parallel",
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",

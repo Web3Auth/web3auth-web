@@ -156,8 +156,14 @@ export class Web3AuthCore extends SafeEventEmitter {
     walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      this.clearCache();
       this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
+      if (storageAvailable("sessionStorage")) {
+        const cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
+        if (this.connectedAdapterName === cachedAdapter) {
+          this.clearCache();
+        }
+      }
+
       log.debug("disconnected", this.status, this.connectedAdapterName);
     });
     walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
