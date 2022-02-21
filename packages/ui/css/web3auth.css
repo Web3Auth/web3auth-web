@@ -141,7 +141,7 @@
     flex-direction: column;
 }
 
-.w3a-modal__loader-info {
+#w3a-modal .w3a-modal__loader-info {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -585,6 +585,77 @@
 #w3a-modal .w3a-footer__secured > img {
     height: 14px;
     width: auto;
+}
+
+/* Loader Bridge */
+#w3a-modal .w3a-modal__loader-bridge {
+    display: flex;
+    margin-bottom: 14px;
+}
+
+#w3a-modal .w3a-modal__loader-bridge-message span {
+    text-transform: capitalize;
+}
+
+#w3a-modal .w3a-modal__connector {
+    display: flex;
+    align-items: center;
+}
+
+#w3a-modal .w3a-modal__connector-line-container {
+    width: 110px;
+    display: flex;
+    justify-content: center;
+}
+
+#w3a-modal .w3a-modal__connector-line {
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    margin-top: -3px;
+    animation: expand 1.2s;
+    animation-iteration-count: infinite;
+}
+
+#w3a-modal .w3a-modal__connector-line::after {
+    content: "";
+    border-top: 2px dashed #808080;
+    width: 110px;
+}
+
+#w3a-modal .w3a-modal__connector-left img {
+    width: 24px;
+    margin-right: -8px;
+}
+
+#w3a-modal .w3a-modal__connector-right img {
+    width: 24px;
+    margin-left: -8px;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo {
+    display: flex;
+    padding: 8px;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo img {
+    width: 64px;
+    height: auto;
+}
+
+#w3a-modal .w3a-modal__loader-adapter img {
+    width: 84px;
+    height: auto;
+}
+
+@keyframes expand {
+    from {
+        width: 30%;
+    }
+
+    to {
+        width: 100%;
+    }
 }
 
 /* LIGHT MODE */

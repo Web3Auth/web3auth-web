@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import log from "loglevel";
@@ -7,6 +7,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
+import AdapterLoader from "./AdapterLoader";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -43,9 +44,11 @@ export default function Modal(props: ModalProps) {
       adapter: "",
     },
     externalWalletsConfig: {},
+    detailedLoaderAdapter: "",
   });
 
   const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -83,6 +86,12 @@ export default function Modal(props: ModalProps) {
     }
   }, [closeModal, modalState]);
 
+  const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
+    const { adapter } = params;
+    if (DETAILED_ADAPTERS.includes(adapter)) modalState.detailedLoaderAdapter = adapter;
+    handleExternalWalletClick(params);
+  };
+
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
@@ -108,7 +117,17 @@ export default function Modal(props: ModalProps) {
         <Header onClose={closeModal} appLogo={appLogo} />
         {modalState.status !== MODAL_STATUS.INITIALIZED ? (
           <div className="w3a-modal__content w3ajs-content">
-            <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
+            {modalState.detailedLoaderAdapter ? (
+              <AdapterLoader
+                onClose={onCloseLoader}
+                appLogo={appLogo}
+                modalStatus={modalState.status}
+                message={modalState.postLoadingMessage}
+                adapter={modalState.detailedLoaderAdapter}
+              />
+            ) : (
+              <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
+            )}
           </div>
         ) : (
           <div className="w3a-modal__content w3ajs-content">
@@ -127,7 +146,7 @@ export default function Modal(props: ModalProps) {
               <ExternalWallets
                 modalStatus={modalState.status}
                 showBackButton={Object.keys(modalState.socialLoginsConfig?.loginMethods).length > 0}
-                handleExternalWalletClick={handleExternalWalletClick}
+                handleExternalWalletClick={preHandleExternalWalletClick}
                 walletConnectUri={modalState.walletConnectUri}
                 config={modalState.externalWalletsConfig}
                 hideExternalWallets={() => setExternalWalletsVisibility(false)}
