@@ -3,7 +3,7 @@ import { WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import log from "loglevel";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
@@ -53,14 +53,14 @@ export default function Modal(props: ModalProps) {
   useEffect(() => {
     stateListener.emit("MOUNTED");
     stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
-      log.info("state updated", newModalState);
+      log.debug("state updated", newModalState);
 
       setModalState((prevState) => {
         const mergedState = cloneDeep(deepmerge(prevState, newModalState));
         return mergedState;
       });
     });
-  }, [stateListener]);
+  }, []);
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
@@ -76,7 +76,7 @@ export default function Modal(props: ModalProps) {
     setExternalWalletsVisibility(modalState.externalWalletsVisibility);
   }, [modalState.externalWalletsVisibility]);
 
-  const onCloseLoader = useCallback(() => {
+  const onCloseLoader = () => {
     if (modalState.status === MODAL_STATUS.CONNECTED) {
       setShowModal(false);
       closeModal();
@@ -84,7 +84,7 @@ export default function Modal(props: ModalProps) {
     if (modalState.status === MODAL_STATUS.ERRORED) {
       setModalState({ ...modalState, modalVisibility: true, status: MODAL_STATUS.INITIALIZED });
     }
-  }, [closeModal, modalState]);
+  };
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { adapter } = params;
