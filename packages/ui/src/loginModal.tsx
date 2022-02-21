@@ -106,6 +106,7 @@ export default class LoginModal extends SafeEventEmitter {
   closeModal = () => {
     this.setState({
       modalVisibility: false,
+      externalWalletsVisibility: false,
     });
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
   };
@@ -197,7 +198,7 @@ export default class LoginModal extends SafeEventEmitter {
       }
     });
     listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
-      this.setState({ status: MODAL_STATUS.INITIALIZED });
+      this.setState({ status: MODAL_STATUS.INITIALIZED, externalWalletsVisibility: false });
       // this.toggleMessage("");
     });
     listener.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (adapterData: IAdapterDataEvent) => {

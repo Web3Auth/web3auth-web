@@ -12,11 +12,12 @@ interface DetailedLoaderProps {
   appLogo?: string;
   adapter: string;
   modalStatus: ModalStatusType;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 const chevronLeftIcon = <Icon iconName="chevron-left" />;
 const chevronRightIcon = <Icon iconName="chevron-right" />;
+const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
@@ -24,7 +25,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const providerIcon = <Image imageId={`login-${adapter}`} />;
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED && onClose) {
+    if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
       }, 3000);
@@ -66,6 +67,11 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           <div>Secured by</div>
           {web3authIcon}
         </div>
+        {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
+          <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
+            {closeIcon}
+          </button>
+        )}
       </div>
     </div>
   ) : null;

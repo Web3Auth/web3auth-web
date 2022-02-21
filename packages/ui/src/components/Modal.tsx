@@ -65,6 +65,10 @@ export default function Modal(props: ModalProps) {
   useEffect(() => {
     const timeOutId = setTimeout(() => {
       setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
+      // hide external wallets, if modal is closing, so that it will show social login screen on reopen.
+      if (!modalState.modalVisibility) {
+        setExternalWalletsVisibility(false);
+      }
       setShowModal(modalState.modalVisibility);
     }, 100);
     return () => {
@@ -88,8 +92,13 @@ export default function Modal(props: ModalProps) {
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { adapter } = params;
-    if (DETAILED_ADAPTERS.includes(adapter)) modalState.detailedLoaderAdapter = adapter;
+    if (DETAILED_ADAPTERS.includes(adapter)) setModalState({ ...modalState, detailedLoaderAdapter: adapter });
+    else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1) setModalState({ ...modalState, detailedLoaderAdapter: "" });
     handleExternalWalletClick(params);
+  };
+  const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
+    setModalState({ ...modalState, detailedLoaderAdapter: "" });
+    handleSocialLoginClick(params);
   };
 
   const externalWalletButton = (
@@ -135,8 +144,14 @@ export default function Modal(props: ModalProps) {
               <>
                 {Object.keys(modalState.socialLoginsConfig?.loginMethods).length > 0 && (
                   <>
-                    <SocialLogins handleSocialLoginClick={handleSocialLoginClick} socialLoginsConfig={modalState.socialLoginsConfig} />
-                    <SocialLoginEmail adapter={modalState.socialLoginsConfig?.adapter} handleSocialLoginClick={handleSocialLoginClick} />
+                    <SocialLogins
+                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                      socialLoginsConfig={modalState.socialLoginsConfig}
+                    />
+                    <SocialLoginEmail
+                      adapter={modalState.socialLoginsConfig?.adapter}
+                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                    />
                   </>
                 )}
                 {/* button to show external wallets */}
@@ -146,7 +161,7 @@ export default function Modal(props: ModalProps) {
               <ExternalWallets
                 modalStatus={modalState.status}
                 showBackButton={Object.keys(modalState.socialLoginsConfig?.loginMethods).length > 0}
-                handleExternalWalletClick={preHandleExternalWalletClick}
+                handleExternalWalletClick={(params: ExternalWalletEventType) => preHandleExternalWalletClick(params)}
                 walletConnectUri={modalState.walletConnectUri}
                 config={modalState.externalWalletsConfig}
                 hideExternalWallets={() => setExternalWalletsVisibility(false)}
