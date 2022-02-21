@@ -50,9 +50,11 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  background: #fafafa;
   padding: 20px;
-  margin: 20px 0;
+  margin: 30px 0;
+  background: #f4f5f7;
+  border: 1px solid #ebecf0;
+  border-radius: 5px;
 }
 
 .card {
@@ -77,9 +79,10 @@
 .row {
   display: flex;
   margin-bottom: 0.5rem;
+  width: 100%;
 }
 .label {
-  flex: 1 0 50%;
+  flex-basis: 45%;
   padding-right: 10px;
   display: flex;
   align-items: center;
@@ -88,7 +91,7 @@
 }
 
 .select {
-  flex: 1 0 50%;
+  flex-basis: 30%;
   text-align: left;
   padding: 0.3rem 0.8rem;
   font-size: 1rem;

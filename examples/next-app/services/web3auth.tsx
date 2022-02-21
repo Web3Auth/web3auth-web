@@ -34,15 +34,17 @@ export function useWeb3Auth() {
   return useContext(Web3AuthContext);
 }
 
-export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NETWORK_TYPE; chain: CHAIN_CONFIG_TYPE }> = ({
-  children,
-  web3AuthNetwork,
-  chain,
-}: {
+interface IWeb3AuthState {
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
+  chain: CHAIN_CONFIG_TYPE;
+}
+interface IWeb3AuthProps {
   children?: ReactNode;
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
-}) => {
+}
+
+export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
@@ -134,7 +136,7 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       console.log("provider not initialized yet");
       uiConsole("provider not initialized yet");
       return;
-    } 
+    }
     try {
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
@@ -150,7 +152,7 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       console.log("provider not initialized yet");
       uiConsole("provider not initialized yet");
       return;
-    } 
+    }
     try {
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
@@ -167,9 +169,9 @@ export const Web3AuthProvider: FunctionComponent<{ web3AuthNetwork: WEB3AUTH_NET
       console.log("provider not initialized yet");
       uiConsole("provider not initialized yet");
       return;
-    } 
+    }
     try {
-      const pubKey = await provider.request({ method: "eth_accounts" }) as string[];
+      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
       const web3 = new Web3(provider as any);
       const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
       (web3.currentProvider as any)?.send(

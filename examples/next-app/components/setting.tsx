@@ -26,7 +26,7 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
   return (
     <div className={styles.setting}>
       <div className={styles.row}>
-        <label htmlFor="network" className={styles.label}>Network</label>
+        <label htmlFor="network" className={styles.label}>Web3Auth Network</label>
         <select id="network" onChange={networkChangeHandler} className={styles.select} disabled={isLoggedIn}>
           {Object.keys(WEB3AUTH_NETWORK).map((x: string) => {
             return (
