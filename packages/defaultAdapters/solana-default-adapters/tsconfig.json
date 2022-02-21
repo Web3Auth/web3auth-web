@@ -3,6 +3,7 @@
     "include": ["src", "test"],
     "compilerOptions": {
       "strict": true,
+      "module": "esnext"
     }
   }
   
