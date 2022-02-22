@@ -191,8 +191,7 @@ export class Web3Auth extends Web3AuthCore {
         // if adapter is configured thn only initialize in app or cached adapter.
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
         this.subscribeToAdapterEvents(adapter);
-
-        await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+        if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
         if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
@@ -252,7 +251,7 @@ export class Web3Auth extends Web3AuthCore {
           if (this.cachedAdapter === adapterName) {
             return;
           }
-          await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+          if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
           adaptersConfig[adapterName] = (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           adaptersData[adapterName] = adapter.adapterData || {};
           return adapterName;
