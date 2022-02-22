@@ -17,19 +17,21 @@ interface ExternalWalletsProps {
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
-  const [isLoading, setLoading] = useState(true);
+  const [isWalletConnectLoading, setWalletConnectLoading] = useState(false);
+  const [isOthersLoading, setOthersLoading] = useState(true);
 
   const renderWalletConnect = useCallback(() => {
     if (config[WALLET_ADAPTERS.WALLET_CONNECT_V1] && config[WALLET_ADAPTERS.WALLET_CONNECT_V1].showOnModal !== false) {
       if (!walletConnectUri) {
+        if (!isWalletConnectLoading) setWalletConnectLoading(true);
         handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
         return null;
       }
-      if (isLoading) setLoading(false);
+      if (isWalletConnectLoading) setWalletConnectLoading(false);
       return <WalletConnect walletConnectUri={walletConnectUri} />;
     }
     return null;
-  }, [isLoading, config, handleExternalWalletClick, walletConnectUri]);
+  }, [isWalletConnectLoading, config, handleExternalWalletClick, walletConnectUri]);
 
   return (
     <div className="w3ajs-external-wallet w3a-group">
@@ -40,7 +42,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             <h6 className="w3a-group__title">Back</h6>
           </button>
         )}
-        {isLoading && <Loader modalStatus={MODAL_STATUS.CONNECTING} />}
+        {(isWalletConnectLoading || isOthersLoading) && <Loader modalStatus={MODAL_STATUS.CONNECTING} />}
         {renderWalletConnect()}
         {/* <!-- Other Wallet --> */}
         {modalStatus === MODAL_STATUS.INITIALIZED && (
@@ -49,7 +51,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
                 return null;
               }
-              if (allKeys.length - 1 === index && isLoading) setLoading(false);
+              if (allKeys.length - 1 === index && isOthersLoading) setOthersLoading(false);
               const providerIcon = <Image imageId={`login-${adapter}`} />;
 
               return (
