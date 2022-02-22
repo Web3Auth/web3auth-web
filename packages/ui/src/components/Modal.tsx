@@ -130,10 +130,10 @@ export default function Modal(props: ModalProps) {
   const areSocialLoginsVisible = useMemo(() => {
     if (modalState.showExternalWalletsOnly) return false;
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
-    const isAnySocialLoginVisible = Object.values(modalState.socialLoginsConfig?.loginMethods).some((x) => x.showOnModal !== false);
+    const isAnySocialLoginVisible = Object.values(modalState.socialLoginsConfig?.loginMethods || {}).some((x) => x.showOnModal !== false);
     if (isAnySocialLoginVisible) return true;
     return false;
-  }, [modalState.showExternalWalletsOnly, modalState.socialLoginsConfig]);
+  }, [modalState.showExternalWalletsOnly, modalState.socialLoginsConfig?.loginMethods]);
   log.info("modal state", modalState, areSocialLoginsVisible);
 
   const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;

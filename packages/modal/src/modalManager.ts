@@ -171,7 +171,12 @@ export class Web3Auth extends Web3AuthCore {
     });
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
-    const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => adapter.type === ADAPTER_CATEGORY.IN_APP);
+    const hasInAppWallets = Object.values(this.walletAdapters).some(
+      (adapter) =>
+        adapter.type === ADAPTER_CATEGORY.IN_APP &&
+        this.defaultModalConfig.adapters[adapter.name].showOnModal &&
+        Object.values(this.defaultModalConfig.adapters[adapter.name].loginMethods).some((method) => method.showOnModal)
+    );
     log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
