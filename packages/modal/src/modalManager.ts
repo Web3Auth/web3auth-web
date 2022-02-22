@@ -170,7 +170,6 @@ export class Web3Auth extends Web3AuthCore {
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => adapter.type === ADAPTER_CATEGORY.IN_APP);
-
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
@@ -186,7 +185,6 @@ export class Web3Auth extends Web3AuthCore {
         this.subscribeToAdapterEvents(adapter);
 
         await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
         if (adapter.type === ADAPTER_CATEGORY.IN_APP) {

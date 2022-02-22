@@ -1,5 +1,5 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -17,15 +17,19 @@ interface ExternalWalletsProps {
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
+  const [isLoading, setLoading] = useState(true);
 
   const renderWalletConnect = useCallback(() => {
     if (config[WALLET_ADAPTERS.WALLET_CONNECT_V1] && config[WALLET_ADAPTERS.WALLET_CONNECT_V1].showOnModal !== false) {
-      if (!walletConnectUri) handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
-      else return <WalletConnect walletConnectUri={walletConnectUri} />;
+      if (!walletConnectUri) {
+        handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
+        return null;
+      }
+      if (isLoading) setLoading(false);
+      return <WalletConnect walletConnectUri={walletConnectUri} />;
     }
-
-    return <Loader modalStatus={MODAL_STATUS.CONNECTING} />;
-  }, [config, handleExternalWalletClick, walletConnectUri]);
+    return null;
+  }, [isLoading, config, handleExternalWalletClick, walletConnectUri]);
 
   return (
     <div className="w3ajs-external-wallet w3a-group">
@@ -36,16 +40,16 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             <h6 className="w3a-group__title">Back</h6>
           </button>
         )}
-
+        {isLoading && <Loader modalStatus={MODAL_STATUS.CONNECTING} />}
         {renderWalletConnect()}
-
         {/* <!-- Other Wallet --> */}
         {modalStatus === MODAL_STATUS.INITIALIZED && (
           <ul className="w3a-adapter-list w3ajs-wallet-adapters">
-            {Object.keys(config).map((adapter) => {
+            {Object.keys(config).map((adapter, index, allKeys) => {
               if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
                 return null;
               }
+              if (allKeys.length - 1 === index && isLoading) setLoading(false);
               const providerIcon = <Image imageId={`login-${adapter}`} />;
 
               return (
