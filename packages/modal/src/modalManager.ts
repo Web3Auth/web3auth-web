@@ -24,6 +24,8 @@ import {
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
+log.enableAll();
+log.setLevel("debug");
 
 export interface UIConfig {
   /**
@@ -170,6 +172,7 @@ export class Web3Auth extends Web3AuthCore {
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => adapter.type === ADAPTER_CATEGORY.IN_APP);
+    log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;

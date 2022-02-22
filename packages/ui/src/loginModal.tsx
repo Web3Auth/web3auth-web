@@ -92,7 +92,8 @@ export default class LoginModal extends SafeEventEmitter {
     this.setState({
       externalWalletsConfig,
       externalWalletsInitialized: true,
-      externalWalletsVisibility: !!options.showExternalWalletsOnly,
+      showExternalWalletsOnly: !!options?.showExternalWalletsOnly,
+      externalWalletsVisibility: true,
     });
   };
 
@@ -117,8 +118,8 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  private handleShowExternalWallets = (externalWalletsInitialized: boolean) => {
-    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized });
+  private handleShowExternalWallets = (status: boolean) => {
+    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: status });
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {

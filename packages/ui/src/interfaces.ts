@@ -41,6 +41,7 @@ export interface ModalState {
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseAdapterConfig>;
   detailedLoaderAdapter: string;
+  showExternalWalletsOnly: boolean;
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string } };

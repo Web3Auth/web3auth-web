@@ -1,4 +1,5 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import log from "loglevel";
 import { useEffect, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
@@ -20,6 +21,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    log.debug("loaded external wallets", config);
     const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
