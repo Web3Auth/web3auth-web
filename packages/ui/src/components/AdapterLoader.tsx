@@ -1,4 +1,5 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
+import log from "loglevel";
 import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
@@ -25,6 +26,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const providerIcon = <Image imageId={`login-${adapter}`} />;
 
   useEffect(() => {
+    log.debug("adapter loader re-rendering");
     if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
