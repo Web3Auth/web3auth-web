@@ -38,9 +38,9 @@
     buffer "~6.0.3"
 
 "@solana/web3.js@^1.34.0":
-  version "1.35.0"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.35.0.tgz#a2d09add241f48a370470a5c4db8596cb13f0dc6"
-  integrity sha512-eKf2rPoWEyVq7QsgAQKNqxODvPsb0vqSwwg2xRY1e49Fn5Qh29m2FiLcYHRS/xhPu/7b/5gsD+RzO3BWozOeZQ==
+  version "1.35.1"
+  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.35.1.tgz#777b039a3b51e63c347712a57c7db87c9d1db832"
+  integrity sha512-3bDawFFI0KcvgI8Ae4N4hdQ8+Bg9gu6q+IkhPrYxOF6RYnB3U+9A4u+DhHZWLvTvgoTyesi/m5HzlleKtFEqRQ==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@ethersproject/sha2" "^5.5.0"
@@ -58,9 +58,9 @@
     tweetnacl "^1.0.0"
 
 "@toruslabs/base-controllers@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.2.tgz#d51ed3898db25cb3143e6820148137e5380e8d79"
-  integrity sha512-1JcuGEuP7UEdlr+gfWfIvR2hUv53DfCQLi/ltRTg8v6TqphYHdABNL/hcqTgAnd0S40Lzc6LiBA4+sQGXZwkDQ==
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.3.tgz#c11746e38073b71972722111832a5ac6b9c47701"
+  integrity sha512-cj1c51Om+H2b0kkB0ewWiJDBxogf+qVM36TSFKQsH73rfptj50VKD3k5ukz2X7bEmMFil4VATkjLT7kWtUWSiQ==
   dependencies:
     "@toruslabs/http-helpers" "^2.2.0"
     "@toruslabs/openlogin-jrpc" "^1.5.0"
@@ -157,9 +157,9 @@
   integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
 "@types/node@*":
-  version "17.0.18"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.18.tgz#3b4fed5cfb58010e3a2be4b6e74615e4847f1074"
-  integrity sha512-eKj4f/BsN/qcculZiRSujogjvp5O/k4lOW5m35NopjZM/QwLOR075a8pJW5hD+Rtdm2DaCVPENS6KtSQnUD6BA==
+  version "17.0.19"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.19.tgz#726171367f404bfbe8512ba608a09ebad810c7e6"
+  integrity sha512-PfeQhvcMR4cPFVuYfBN4ifG7p9c+Dlh3yUZR6k+5yQK7wX3gDgVxBly4/WkBRs9x4dmcy1TVl08SY67wwtEvmA==
 
 "@types/node@^12.12.54":
   version "12.20.46"

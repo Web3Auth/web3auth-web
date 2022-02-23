@@ -18,6 +18,8 @@ import log from "loglevel";
 import { defaultEvmDappModalConfig, OPENLOGIN_PROVIDERS } from "./config";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
+log.enableAll();
+log.setLevel("debug");
 
 export interface UIConfig {
   /**
@@ -66,7 +68,7 @@ export class Web3Auth extends Web3AuthCore {
 
   readonly options: Web3AuthOptions;
 
-  private defaultModalConfig: AdaptersModalConfig = defaultEvmDappModalConfig;
+  private modalConfig: AdaptersModalConfig = defaultEvmDappModalConfig;
 
   private defaultAdapters: BaseDefaultAdapters | null = null;
 
@@ -143,8 +145,13 @@ export class Web3Auth extends Web3AuthCore {
     });
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
-    const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => adapter.type === ADAPTER_CATEGORY.IN_APP);
-
+    const hasInAppWallets = Object.values(this.walletAdapters).some(
+      (adapter) =>
+        adapter.type === ADAPTER_CATEGORY.IN_APP &&
+        this.modalConfig.adapters[adapter.name].showOnModal &&
+        Object.values(this.modalConfig.adapters[adapter.name].loginMethods || {}).some((method) => method.showOnModal)
+    );
+    log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
@@ -158,9 +165,7 @@ export class Web3Auth extends Web3AuthCore {
         // if adapter is configured thn only initialize in app or cached adapter.
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
         this.subscribeToAdapterEvents(adapter);
-
-        await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-
+        if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
         if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
@@ -172,11 +177,10 @@ export class Web3Auth extends Web3AuthCore {
     });
 
     this.status = ADAPTER_STATUS.READY;
-
     await Promise.all(initPromises);
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
-      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.defaultModalConfig.adapters?.[adapterName].showOnModal;
+      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
     if (hasExternalWallets) {
@@ -225,8 +229,8 @@ export class Web3Auth extends Web3AuthCore {
           if (this.cachedAdapter === adapterName) {
             return;
           }
-          await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-          adaptersConfig[adapterName] = (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+          if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           adaptersData[adapterName] = adapter.adapterData || {};
           return adapterName;
         }
@@ -253,7 +257,7 @@ export class Web3Auth extends Web3AuthCore {
         getAdapterSocialLogins(
           adapterName,
           this.walletAdapters[adapterName],
-          (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
+          (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
         ),
         this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
       );

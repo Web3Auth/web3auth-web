@@ -37,9 +37,9 @@
     tweetnacl-util "^0.15.1"
 
 "@toruslabs/base-controllers@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.2.tgz#d51ed3898db25cb3143e6820148137e5380e8d79"
-  integrity sha512-1JcuGEuP7UEdlr+gfWfIvR2hUv53DfCQLi/ltRTg8v6TqphYHdABNL/hcqTgAnd0S40Lzc6LiBA4+sQGXZwkDQ==
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.3.tgz#c11746e38073b71972722111832a5ac6b9c47701"
+  integrity sha512-cj1c51Om+H2b0kkB0ewWiJDBxogf+qVM36TSFKQsH73rfptj50VKD3k5ukz2X7bEmMFil4VATkjLT7kWtUWSiQ==
   dependencies:
     "@toruslabs/http-helpers" "^2.2.0"
     "@toruslabs/openlogin-jrpc" "^1.5.0"
@@ -103,9 +103,9 @@
   integrity sha512-pvZjgd9fif5/Ss+WqWoOSZIivLLvQqoluQZACPeLlIVh4T28TCS54P60KvO27NFuFxYjhJvz+SkuuwcXhiHhjA==
 
 "@types/node@*":
-  version "17.0.18"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.18.tgz#3b4fed5cfb58010e3a2be4b6e74615e4847f1074"
-  integrity sha512-eKj4f/BsN/qcculZiRSujogjvp5O/k4lOW5m35NopjZM/QwLOR075a8pJW5hD+Rtdm2DaCVPENS6KtSQnUD6BA==
+  version "17.0.19"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.19.tgz#726171367f404bfbe8512ba608a09ebad810c7e6"
+  integrity sha512-PfeQhvcMR4cPFVuYfBN4ifG7p9c+Dlh3yUZR6k+5yQK7wX3gDgVxBly4/WkBRs9x4dmcy1TVl08SY67wwtEvmA==
 
 "@types/node@^16":
   version "16.11.25"

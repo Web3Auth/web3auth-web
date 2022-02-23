@@ -19,10 +19,7 @@ import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
-const DEFAULT_LOGO_URL = {
-  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
-  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
-};
+const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(): HTMLDivElement {
   const wrapper = document.createElement("div");
   wrapper.setAttribute("id", "w3a-container");
@@ -43,7 +40,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
     super();
-    this.appLogo = appLogo || DEFAULT_LOGO_URL[theme];
+    this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
     this.isDark = theme === "dark";
     this.wrapper = createWrapper();
@@ -95,7 +92,8 @@ export default class LoginModal extends SafeEventEmitter {
     this.setState({
       externalWalletsConfig,
       externalWalletsInitialized: true,
-      externalWalletsVisibility: !!options.showExternalWalletsOnly,
+      showExternalWalletsOnly: !!options?.showExternalWalletsOnly,
+      externalWalletsVisibility: true,
     });
   };
 
@@ -109,6 +107,7 @@ export default class LoginModal extends SafeEventEmitter {
   closeModal = () => {
     this.setState({
       modalVisibility: false,
+      externalWalletsVisibility: false,
     });
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
   };
@@ -119,8 +118,8 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 
-  private handleShowExternalWallets = (externalWalletsInitialized: boolean) => {
-    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized });
+  private handleShowExternalWallets = (status: boolean) => {
+    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: status });
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
@@ -200,7 +199,7 @@ export default class LoginModal extends SafeEventEmitter {
       }
     });
     listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
-      this.setState({ status: MODAL_STATUS.INITIALIZED });
+      this.setState({ status: MODAL_STATUS.INITIALIZED, externalWalletsVisibility: false });
       // this.toggleMessage("");
     });
     listener.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (adapterData: IAdapterDataEvent) => {
