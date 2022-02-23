@@ -9,6 +9,7 @@ import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
 import { WEB3AUTH_NETWORK_TYPE } from "../../config/web3auth-networks";
 import { getWalletProvider, IWalletProvider } from "../../services/wallet-provider";
 
+const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
 @Component({
   selector: "app-main",
   templateUrl: "./main.component.html",
@@ -21,11 +22,7 @@ export class MainComponent implements OnChanges {
 
   @Output() loginStatusEvent = new EventEmitter<boolean>();
 
-  web3auth: Web3Auth = new Web3Auth({
-    clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
-    chainConfig: CHAIN_CONFIG[this.chain],
-    authMode: "DAPP",
-  });
+  web3auth: Web3Auth | null = null;
 
   isLoggedIn = false;
 
@@ -40,15 +37,10 @@ export class MainComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     // eslint-disable-next-line dot-notation
-    if (!changes["chain"]) {
+    if (!changes["chain"] && !changes["network"]) {
       return;
     }
     console.log("CHANGING CHAIN");
-    this.web3auth = new Web3Auth({
-      clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
-      chainConfig: CHAIN_CONFIG[this.chain],
-      authMode: "DAPP",
-    });
 
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data) => {
@@ -76,6 +68,14 @@ export class MainComponent implements OnChanges {
 
     const initializeModal = async () => {
       console.log("INIT MODAL");
+      this.web3auth = new Web3Auth({
+        clientId: clientId,
+        chainConfig: CHAIN_CONFIG[this.chain],
+      });
+      const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
+      const adapter = new OpenloginAdapter({ adapterSettings: { network: this.network, clientId } });
+      this.web3auth.configureAdapter(adapter);
+
       subscribeAuthEvents(this.web3auth);
       await this.web3auth.initModal();
       this.isModalLoaded = true;
