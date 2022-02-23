@@ -74,7 +74,7 @@ export class Web3Auth extends Web3AuthCore {
 
   readonly options: Web3AuthOptions;
 
-  private defaultModalConfig: AdaptersModalConfig = defaultEvmDappModalConfig;
+  private modalConfig: AdaptersModalConfig = defaultEvmDappModalConfig;
 
   constructor(options: Web3AuthOptions) {
     super(options);
@@ -83,18 +83,18 @@ export class Web3Auth extends Web3AuthCore {
     if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       if (options.authMode === "WALLET") {
         // default config for solana wallet modal
-        this.defaultModalConfig = defaultSolanaWalletModalConfig;
+        this.modalConfig = defaultSolanaWalletModalConfig;
       } else {
         // default config for solana dapp modal
-        this.defaultModalConfig = defaultSolanaDappModalConfig;
+        this.modalConfig = defaultSolanaDappModalConfig;
       }
     } else if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       if (options.authMode === "WALLET") {
         // default config for evm wallet modal
-        this.defaultModalConfig = defaultEvmWalletModalConfig;
+        this.modalConfig = defaultEvmWalletModalConfig;
       } else {
         // default config for evm dapp modal
-        this.defaultModalConfig = defaultEvmDappModalConfig;
+        this.modalConfig = defaultEvmDappModalConfig;
       }
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
@@ -114,11 +114,11 @@ export class Web3Auth extends Web3AuthCore {
     const providedChainConfig = this.options.chainConfig;
 
     // merge default adapters with the custom configured adapters.
-    const allAdapters = [...new Set([...Object.keys(this.defaultModalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
+    const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
     const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
       // start with the default config of adapter.
-      let adapterConfig = this.defaultModalConfig.adapters?.[adapterName] || {
+      let adapterConfig = this.modalConfig.adapters?.[adapterName] || {
         label: adapterName,
         showOnModal: true,
         showOnMobile: true,
@@ -129,15 +129,15 @@ export class Web3Auth extends Web3AuthCore {
       if (params?.modalConfig?.[adapterName]) {
         adapterConfig = { ...adapterConfig, ...params.modalConfig[adapterName] };
       }
-      (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
+      (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
 
       // check if adapter is configured/added by user and exist in walletAdapters map.
       const adapter = this.walletAdapters[adapterName];
-      log.debug("adapter config", adapterName, this.defaultModalConfig.adapters?.[adapterName].showOnModal);
+      log.debug("adapter config", adapterName, this.modalConfig.adapters?.[adapterName].showOnModal);
 
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
-      if (!adapter && this.defaultModalConfig.adapters?.[adapterName].showOnModal) {
+      if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
         // if adapter is not configured and some default configuration is available, use it.
         const ad = await getDefaultAdapterModule({
           name: adapterName,
@@ -149,7 +149,7 @@ export class Web3Auth extends Web3AuthCore {
 
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
-        if (!this.defaultModalConfig.adapters?.[adapterName].showOnModal) return;
+        if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
         // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
@@ -174,8 +174,8 @@ export class Web3Auth extends Web3AuthCore {
     const hasInAppWallets = Object.values(this.walletAdapters).some(
       (adapter) =>
         adapter.type === ADAPTER_CATEGORY.IN_APP &&
-        this.defaultModalConfig.adapters[adapter.name].showOnModal &&
-        Object.values(this.defaultModalConfig.adapters[adapter.name].loginMethods).some((method) => method.showOnModal)
+        this.modalConfig.adapters[adapter.name].showOnModal &&
+        Object.values(this.modalConfig.adapters[adapter.name].loginMethods || {}).some((method) => method.showOnModal)
     );
     log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
     // Now, initialize the adapters.
@@ -203,11 +203,10 @@ export class Web3Auth extends Web3AuthCore {
     });
 
     this.status = ADAPTER_STATUS.READY;
-
     await Promise.all(initPromises);
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
-      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.defaultModalConfig.adapters?.[adapterName].showOnModal;
+      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
     if (hasExternalWallets) {
@@ -252,7 +251,7 @@ export class Web3Auth extends Web3AuthCore {
             return;
           }
           if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-          adaptersConfig[adapterName] = (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           adaptersData[adapterName] = adapter.adapterData || {};
           return adapterName;
         }
@@ -279,7 +278,7 @@ export class Web3Auth extends Web3AuthCore {
         getAdapterSocialLogins(
           adapterName,
           this.walletAdapters[adapterName],
-          (this.defaultModalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
+          (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
         ),
         this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
       );
