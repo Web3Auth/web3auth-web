@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
 import { ADAPTER_EVENTS } from "@web3auth/base";
-import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
 
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
@@ -59,10 +58,6 @@ export class MainComponent implements OnChanges {
 
       web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
         console.log("some error or user have cancelled login request", error);
-      });
-
-      web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
-        console.log("modal visibility", isVisible);
       });
     };
 
