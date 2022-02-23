@@ -7,7 +7,7 @@ import { getWalletProvider, IWalletProvider } from "./walletProvider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
-  provider: SafeEventEmitterProvider | null;
+  provider: IWalletProvider | null;
   isLoading: boolean;
   user: unknown;
   login: () => Promise<void>;
@@ -79,12 +79,17 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         const { Web3Auth } = await import("@web3auth/web3auth");
+        const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
+        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
         setIsLoading(true);
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
-          clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
+          clientId,
         });
+
+        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal();
@@ -110,7 +115,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const setWalletProvider = (web3authProvider: SafeEventEmitterProvider) => {
     const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
     setProvider(walletProvider);
-  }
+  };
 
   const logout = async () => {
     if (!web3Auth) {
