@@ -6,43 +6,60 @@ import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
 
-interface LoaderProps {
+const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
+
+interface DetailedLoaderProps {
   message?: string;
+  appLogo?: string;
+  adapter: string;
   modalStatus: ModalStatusType;
-  label?: string;
-  onClose?: () => void;
-  canEmit?: boolean;
+  onClose: () => void;
 }
 
 const closeIcon = <Icon iconName="close" />;
 
-export default function Loader(props: LoaderProps) {
-  const { message, modalStatus, label, onClose, canEmit = true } = props;
+export default function DetailedLoader(props: DetailedLoaderProps) {
+  const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
+  const providerIcon = <Image imageId={`login-${adapter}`} />;
 
   useEffect(() => {
-    log.debug("loader re-rendering");
-    if (modalStatus === MODAL_STATUS.CONNECTED && canEmit) {
+    log.debug("adapter loader re-rendering");
+    if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
       }, 3000);
     }
-  }, [canEmit, modalStatus, onClose]);
+  }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
     <div className="w3ajs-modal-loader w3a-modal__loader">
       <div className="w3a-modal__loader-content">
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
-            <div className="w3ajs-modal-loader__spinner w3a-spinner">
-              <div />
-              <div />
-              <div />
-              <div />
-            </div>
+            <>
+              <div className="w3a-modal__loader-bridge">
+                <div className="w3a-modal__loader-app-logo">
+                  <img src={appLogo} alt="" />
+                </div>
+                <div className="w3a-modal__connector">
+                  <div className="w3a-modal__connector-beat">
+                    <div />
+                    <div />
+                    <div />
+                    <div />
+                    <div />
+                  </div>
+                </div>
+                <div className="w3a-modal__loader-adapter">{providerIcon}</div>
+              </div>
+              <div>
+                <div className="w3a-modal__loader-bridge-message">
+                  Verify on your <span>{adapter}</span> account to continue
+                </div>
+              </div>
+            </>
           )}
-
-          <div className="w3ajs-modal-loader__label w3a-spinner-label">{label}</div>
           {modalStatus === ADAPTER_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
           {modalStatus === ADAPTER_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
