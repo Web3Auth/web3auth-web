@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -23,9 +23,9 @@
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
+    "@toruslabs/openlogin": "^1.5.0",
     "@types/node": "^16",
-    "lint-staged": "^12.3.4",
-    "@toruslabs/openlogin": "^1.5.0"
+    "lint-staged": "^12.3.4"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
