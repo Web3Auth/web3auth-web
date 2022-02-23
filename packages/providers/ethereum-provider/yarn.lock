@@ -36,7 +36,7 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
-"@toruslabs/base-controllers@^1.6.2":
+"@toruslabs/base-controllers@^1.6.3":
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.3.tgz#c11746e38073b71972722111832a5ac6b9c47701"
   integrity sha512-cj1c51Om+H2b0kkB0ewWiJDBxogf+qVM36TSFKQsH73rfptj50VKD3k5ukz2X7bEmMFil4VATkjLT7kWtUWSiQ==
