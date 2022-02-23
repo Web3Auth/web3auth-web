@@ -82,17 +82,14 @@ export class Web3AuthCore extends SafeEventEmitter {
         } as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
-      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => e);
+      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
   }
 
   public configureAdapter(adapter: IAdapter<unknown>): Web3AuthCore {
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
-    if (this.status === ADAPTER_STATUS.READY)
-      throw WalletInitializationError.notReady("Adapter is already initialized, so no more adapters can be added");
+    this.checkInitRequirements();
     const providedChainConfig = this.coreOptions.chainConfig;
 
     if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
