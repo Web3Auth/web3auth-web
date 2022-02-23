@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/web3auth",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/web3auth.cjs.js",
