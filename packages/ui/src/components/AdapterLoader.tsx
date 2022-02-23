@@ -16,8 +16,6 @@ interface DetailedLoaderProps {
   onClose: () => void;
 }
 
-const chevronLeftIcon = <Icon iconName="chevron-left" />;
-const chevronRightIcon = <Icon iconName="chevron-right" />;
 const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
@@ -45,11 +43,13 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                   <img src={appLogo} alt="" />
                 </div>
                 <div className="w3a-modal__connector">
-                  <div className="w3a-modal__connector-left">{chevronLeftIcon}</div>
-                  <div className="w3a-modal__connector-line-container">
-                    <div className="w3a-modal__connector-line" />
+                  <div className="w3a-modal__connector-beat">
+                    <div />
+                    <div />
+                    <div />
+                    <div />
+                    <div />
                   </div>
-                  <div className="w3a-modal__connector-right">{chevronRightIcon}</div>
                 </div>
                 <div className="w3a-modal__loader-adapter">{providerIcon}</div>
               </div>
@@ -69,12 +69,12 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           <div>Secured by</div>
           {web3authIcon}
         </div>
-        {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
-          <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
-            {closeIcon}
-          </button>
-        )}
       </div>
+      {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
+        <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
+          {closeIcon}
+        </button>
+      )}
     </div>
   ) : null;
 }

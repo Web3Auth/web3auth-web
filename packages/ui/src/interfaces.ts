@@ -36,6 +36,7 @@ export interface ModalState {
   hasExternalWallets: boolean;
   externalWalletsVisibility: boolean;
   modalVisibility: boolean;
+  modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
   walletConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;

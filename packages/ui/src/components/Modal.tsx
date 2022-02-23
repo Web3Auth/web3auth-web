@@ -36,6 +36,7 @@ export default function Modal(props: ModalProps) {
     hasExternalWallets: false,
     externalWalletsInitialized: false,
     modalVisibility: false,
+    modalVisibilityDelayed: false,
     postLoadingMessage: "",
     walletConnectUri: "",
     socialLoginsConfig: {
@@ -64,10 +65,26 @@ export default function Modal(props: ModalProps) {
   }, [stateListener]);
 
   useEffect(() => {
-    const timeOutId = setTimeout(() => {
+    let timeOutId;
+    if (modalState.modalVisibility) {
+      setModalState((prevState) => {
+        return { ...prevState, modalVisibilityDelayed: modalState.modalVisibility };
+      });
+
+      timeOutId = setTimeout(() => {
+        setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
+        // hide external wallets, if modal is closing, so that it will show social login screen on reopen.
+      }, 100);
+    } else {
       setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
       // hide external wallets, if modal is closing, so that it will show social login screen on reopen.
-    }, 100);
+
+      timeOutId = setTimeout(() => {
+        setModalState((prevState) => {
+          return { ...prevState, modalVisibilityDelayed: modalState.modalVisibility };
+        });
+      }, 250);
+    }
     return () => {
       clearTimeout(timeOutId);
     };
@@ -138,7 +155,7 @@ export default function Modal(props: ModalProps) {
 
   const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   return (
-    <div id="w3a-modal" className={modalClassName} style={{ display: !modalState.modalVisibility ? "none" : "flex" }}>
+    <div id="w3a-modal" className={modalClassName} style={{ display: !modalState.modalVisibilityDelayed ? "none" : "flex" }}>
       <div className={modalTransitionClasses.join(" ")}>
         <Header onClose={closeModal} appLogo={appLogo} />
         {modalState.status !== MODAL_STATUS.INITIALIZED ? (
