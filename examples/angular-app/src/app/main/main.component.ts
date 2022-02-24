@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
 import { ADAPTER_EVENTS } from "@web3auth/base";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
@@ -64,10 +65,9 @@ export class MainComponent implements OnChanges {
     const initializeModal = async () => {
       console.log("INIT MODAL");
       this.web3auth = new Web3Auth({
-        clientId: clientId,
+        clientId,
         chainConfig: CHAIN_CONFIG[this.chain],
       });
-      const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
       const adapter = new OpenloginAdapter({ adapterSettings: { network: this.network, clientId } });
       this.web3auth.configureAdapter(adapter);
 
@@ -77,7 +77,7 @@ export class MainComponent implements OnChanges {
 
       if (this.isLoggedIn && !this.provider) {
         const web3authProvider = await this.web3auth.connect();
-        this.provider = getWalletProvider(this.chain, web3authProvider!, this.uiConsole);
+        if (web3authProvider) this.provider = getWalletProvider(this.chain, web3authProvider, this.uiConsole);
       }
     };
     initializeModal();
@@ -90,7 +90,7 @@ export class MainComponent implements OnChanges {
       return;
     }
     const web3authProvider = await this.web3auth.connect();
-    this.provider = getWalletProvider(this.chain, web3authProvider!, this.uiConsole);
+    if (web3authProvider) this.provider = getWalletProvider(this.chain, web3authProvider, this.uiConsole);
   }
 
   async logout() {
