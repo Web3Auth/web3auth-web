@@ -200,13 +200,16 @@
 <script lang="ts">
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
-import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
+import { defaultEvmAdaptersConfig } from "@web3auth/evm-default-adapters";
+import { defaultSolanaAdaptersConfig } from "@web3auth/solana-default-adapters";
 import merge from "lodash.merge";
 import Vue from "vue";
 
 import CustomUiContainer from "./customUi/customUiContainer.vue";
 import ConfigurableExample from "./default/configurableModal.vue";
 import WhitelabelExample from "./whitelabel/whitelabel.vue";
+
+console.log("defaultAdapters", defaultSolanaAdaptersConfig, defaultEvmAdaptersConfig);
 
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
@@ -235,8 +238,8 @@ const defaultLoginProviders = () => {
 };
 
 const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
-  const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappModalConfig : defaultEvmDappModalConfig;
-  return Object.keys(adaptersConfig.adapters).map((adapterName) => {
+  const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaAdaptersConfig : defaultEvmAdaptersConfig;
+  return Object.keys(adaptersConfig).map((adapterName) => {
     return {
       id: adapterName,
       name: adapterName.substring(0, 1).toUpperCase() + adapterName.substring(1),
