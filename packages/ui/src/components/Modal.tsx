@@ -19,6 +19,7 @@ interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
   version: string;
+  initialState: Partial<ModalState>;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -49,8 +50,16 @@ export default function Modal(props: ModalProps) {
     showExternalWalletsOnly: false,
   });
 
-  const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const { stateListener, appLogo, version, initialState, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } =
+    props;
   const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
+
+  useEffect(() => {
+    setModalState((prevState) => {
+      const mergedState = cloneDeep(deepmerge(prevState, initialState));
+      return mergedState;
+    });
+  }, []);
 
   useEffect(() => {
     stateListener.emit("MOUNTED");

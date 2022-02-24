@@ -153,3 +153,12 @@ export const getChainConfig = (chainNamespace: ChainNamespaceType, chainId?: num
 
   return null;
 };
+
+export const mergeChainConfig = (providedChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">): CustomChainConfig => {
+  const { chainNamespace, ...rest } = providedChainConfig;
+  const finalChainConfig = {
+    ...getChainConfig(chainNamespace, providedChainConfig.chainId),
+    ...rest,
+  };
+  return finalChainConfig;
+};

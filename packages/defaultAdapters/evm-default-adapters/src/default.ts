@@ -7,6 +7,7 @@ import {
   DefaultAdaptersInitOptions,
   getChainConfig,
   IAdapter,
+  mergeDefaultAdapterConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -24,27 +25,20 @@ export class EvmDefaultAdapters extends BaseDefaultAdapters {
     // eslint-disable-next-line no-console
     console.log("init opetions", options);
     const optCopy: DefaultAdaptersInitOptions = cloneDeep(options);
-    const defaultAdaptersConfig: Record<string, BaseAdapterConfig> = defaultEvmAdaptersConfig;
+    const defaultAdaptersConfig: Record<string, BaseAdapterConfig> = cloneDeep(defaultEvmAdaptersConfig);
 
     const allDefaultAdapters = [...Object.keys(defaultAdaptersConfig)];
     log.debug("allDefaultAdapters", allDefaultAdapters);
 
     allDefaultAdapters.forEach((adapterName) => {
       // merge default with passed adapter config.
-      optCopy.adaptersConfig[adapterName] = {
-        ...(defaultAdaptersConfig[adapterName] || {
-          label: adapterName,
-          showOnModal: true,
-          showOnMobile: true,
-          showOnDesktop: true,
-        }),
-        ...(optCopy.adaptersConfig[adapterName] || {}),
-      };
-      optCopy.initConfig[adapterName] = {
-        ...optCopy.initConfig[adapterName],
+      mergeDefaultAdapterConfig(adapterName, defaultAdaptersConfig, optCopy.adaptersConfig);
+
+      optCopy.skipAdapters[adapterName] = {
+        ...(optCopy.skipAdapters[adapterName] || {}),
         // no need to initialized adapter if it is already initialized by core.
-        initializeAdapter: optCopy.initConfig[adapterName]?.initializeAdapter !== false,
-      } || { initializeAdapter: true };
+        initializeAdapter: optCopy.skipAdapters[adapterName]?.initializeAdapter !== false,
+      };
     });
     log.debug("optCopy", optCopy);
 

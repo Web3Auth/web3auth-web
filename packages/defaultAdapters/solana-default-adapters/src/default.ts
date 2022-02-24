@@ -8,6 +8,7 @@ import {
   DefaultAdaptersOptions,
   getChainConfig,
   IAdapter,
+  mergeDefaultAdapterConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -26,24 +27,18 @@ export class SolanaDefaultAdapters extends BaseDefaultAdapters {
 
   async _init(options: DefaultAdaptersInitOptions): Promise<void> {
     const optCopy: DefaultAdaptersInitOptions = cloneDeep(options);
-    const defaultAdaptersConfig: Record<string, BaseAdapterConfig> = defaultSolanaAdaptersConfig;
+    const defaultAdaptersConfig: Record<string, BaseAdapterConfig> = cloneDeep(defaultSolanaAdaptersConfig);
 
     const allDefaultAdapters = [...Object.keys(defaultAdaptersConfig || {})];
-    log.debug("allDefaultAdapters", allDefaultAdapters);
+
     allDefaultAdapters.forEach((adapterName) => {
-      optCopy.adaptersConfig[adapterName] = {
-        ...(defaultAdaptersConfig[adapterName] || {
-          label: adapterName,
-          showOnModal: true,
-          showOnMobile: true,
-          showOnDesktop: true,
-        }),
-        ...(optCopy.adaptersConfig[adapterName] || {}),
+      // merge default with passed adapter config.
+      mergeDefaultAdapterConfig(adapterName, defaultAdaptersConfig, optCopy.adaptersConfig);
+
+      optCopy.skipAdapters[adapterName] = {
+        ...(optCopy.skipAdapters[adapterName] || {}),
+        initializeAdapter: optCopy.skipAdapters[adapterName].initializeAdapter !== false,
       };
-      optCopy.initConfig[adapterName] = {
-        ...optCopy.initConfig[adapterName],
-        initializeAdapter: optCopy.initConfig[adapterName].initializeAdapter !== false,
-      } || { initializeAdapter: true };
     });
     log.debug("optCopy", optCopy);
 

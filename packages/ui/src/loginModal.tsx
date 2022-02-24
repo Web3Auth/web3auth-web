@@ -48,7 +48,7 @@ export default class LoginModal extends SafeEventEmitter {
     this.subscribeCoreEvents(adapterListener);
   }
 
-  initModal = async (): Promise<void> => {
+  initModal = async (initialState: Partial<ModalState>): Promise<void> => {
     const darkState = { isDark: this.isDark };
 
     return new Promise((resolve) => {
@@ -63,6 +63,7 @@ export default class LoginModal extends SafeEventEmitter {
       render(
         <ThemedContext.Provider value={darkState}>
           <Modal
+            initialState={initialState}
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
             handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}

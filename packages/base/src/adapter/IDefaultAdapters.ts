@@ -7,17 +7,33 @@ import { ADAPTER_STATUS, ADAPTER_STATUS_TYPE, BaseAdapterConfig, IAdapter, WALLE
 export interface DefaultAdaptersOptions {
   factoryMode?: "DAPP" | "WALLET";
 }
-export type DefaultAdaptersInitConfig = Record<
+export type SkipAdaptersConfig = Record<
   WALLET_ADAPTER_TYPE,
   {
     initializeAdapter: boolean;
   }
 >;
 
+export const mergeDefaultAdapterConfig = (
+  adapterName: string,
+  sourceConfig: Record<string, BaseAdapterConfig>,
+  providedConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig>
+) => {
+  return {
+    ...(sourceConfig[adapterName] || {
+      label: adapterName,
+      showOnModal: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+    }),
+    ...(providedConfig[adapterName] || {}),
+  };
+};
+
 export interface DefaultAdaptersInitOptions {
   chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
   clientId: string;
-  initConfig: DefaultAdaptersInitConfig;
+  skipAdapters: SkipAdaptersConfig;
   adaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig>;
 }
 
@@ -51,7 +67,7 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
     await Promise.all(
       Object.keys(options.adaptersConfig).map(async (adapterName) => {
         try {
-          if (!this.walletAdapters[adapterName] && options.initConfig?.[adapterName]?.initializeAdapter) {
+          if (!this.walletAdapters[adapterName] && options.skipAdapters?.[adapterName]?.initializeAdapter) {
             const ad = await this._getDefaultAdapterModule({
               name: adapterName,
               customChainConfig: options.chainConfig,

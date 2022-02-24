@@ -7,8 +7,8 @@ import {
   CHAIN_NAMESPACES,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   IAdapter,
+  mergeChainConfig,
   SafeEventEmitterProvider,
   storageAvailable,
   UserInfo,
@@ -48,10 +48,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
     this.coreOptions = {
       ...options,
-      chainConfig: {
-        ...getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId),
-        ...options.chainConfig,
-      },
+      chainConfig: mergeChainConfig(options.chainConfig),
     };
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
@@ -74,17 +71,14 @@ export class Web3AuthCore extends SafeEventEmitter {
       // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
-        const providedChainConfig = this.coreOptions.chainConfig;
-        if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
-        const chainConfig = {
-          ...getChainConfig(providedChainConfig.chainNamespace, providedChainConfig.chainId),
-          ...providedChainConfig,
-        } as CustomChainConfig;
-        this.walletAdapters[adapterName].setChainConfig(chainConfig);
+        const { chainConfig } = this.coreOptions;
+        if (!chainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
+
+        // chainConfig is merged with default chainConfig in constructor, so its safer to cast here.
+        this.walletAdapters[adapterName].setChainConfig(chainConfig as CustomChainConfig);
       }
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
-    this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
   }
 
