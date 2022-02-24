@@ -110,7 +110,7 @@ export class Web3Auth extends Web3AuthCore {
       canShowSocialLogin = false;
     }
 
-    log.debug(hasSocialLoginAdapter, this.walletAdapters, "hasInAppWallets");
+    log.debug(hasSocialLoginAdapter, this.walletAdapters, this.adaptersConfig, "hasInAppWallets");
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
       return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.adaptersConfig?.[adapterName].showOnModal;
@@ -209,7 +209,7 @@ export class Web3Auth extends Web3AuthCore {
     const adapterPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
       try {
         const adapter = this.walletAdapters[adapterName];
-        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
+        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL && this.adaptersConfig[adapterName].showOnModal !== false) {
           log.debug("init external wallet", this.cachedAdapter, adapterName);
           this.subscribeToAdapterEvents(adapter);
           // we are not initializing cached adapter here as it is already being initialized in initModal before.
