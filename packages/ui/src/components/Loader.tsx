@@ -1,4 +1,5 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
+import log from "loglevel";
 import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
@@ -10,21 +11,23 @@ interface LoaderProps {
   modalStatus: ModalStatusType;
   label?: string;
   onClose?: () => void;
+  canEmit?: boolean;
 }
 
 const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
-  const { message, modalStatus, label, onClose } = props;
+  const { message, modalStatus, label, onClose, canEmit = true } = props;
   const web3authIcon = <Image imageId="web3auth" />;
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
+    log.debug("loader re-rendering");
+    if (modalStatus === MODAL_STATUS.CONNECTED && canEmit) {
       setTimeout(() => {
         onClose();
       }, 3000);
     }
-  }, [modalStatus]);
+  }, [canEmit, modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
     <div className="w3ajs-modal-loader w3a-modal__loader">
