@@ -6,21 +6,21 @@ const Main = () => {
 
   const loggedInView = (
     <>
-      <a onClick={getUserInfo} className={styles.card}>
+      <button onClick={getUserInfo} className={styles.card}>
         Get User Info
-      </a>
-      <a onClick={getAccounts} className={styles.card}>
+      </button>
+      <button onClick={getAccounts} className={styles.card}>
         Get Accounts
-      </a>
-      <a onClick={getBalance} className={styles.card}>
+      </button>
+      <button onClick={getBalance} className={styles.card}>
         Get Balance
-      </a>
-      <a onClick={signMessage} className={styles.card}>
+      </button>
+      <button onClick={signMessage} className={styles.card}>
         Sign Message
-      </a>
-      <a onClick={logout} className={styles.card}>
+      </button>
+      <button onClick={logout} className={styles.card}>
         Log Out
-      </a>
+      </button>
 
       <div className={styles.console} id="console">
         <p className={styles.code}></p>
@@ -29,9 +29,9 @@ const Main = () => {
   );
 
   const unloggedInView = (
-    <a onClick={login} className={styles.card}>
+    <button onClick={login} className={styles.card}>
       Login
-    </a>
+    </button>
   );
 
   return <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>;

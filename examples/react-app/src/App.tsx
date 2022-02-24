@@ -15,7 +15,7 @@ function App() {
     <div className={styles.container}>
       <Web3AuthProvider chain={chain} web3AuthNetwork={web3AuthNetwork}>
         <h1 className={styles.title}>
-          <a target="_blank" href="http://web3auth.io/">
+          <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
             Web3Auth
           </a>{" "}
           & ReactJS Example
@@ -26,7 +26,7 @@ function App() {
       <footer className={styles.footer}>
         <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/react-app" target="_blank" rel="noopener noreferrer">
           Source code {"  "}
-          <img className={styles.logo} src="/images/github-logo.png" />
+          <img className={styles.logo} src="/images/github-logo.png" alt="github-logo" />
         </a>
       </footer>
     </div>

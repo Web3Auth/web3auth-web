@@ -1,7 +1,7 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/web3auth";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
@@ -52,6 +52,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const setWalletProvider = useCallback(
+    (web3authProvider: SafeEventEmitterProvider) => {
+      const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
+      setProvider(walletProvider);
+    },
+    [chain]
+  );
+
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
       // Can subscribe to all ADAPTER_EVENTS and LOGIN_MODAL_EVENTS
@@ -98,7 +106,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       }
     }
     init();
-  }, [chain, web3AuthNetwork]);
+  }, [chain, web3AuthNetwork, setWalletProvider]);
 
   const login = async () => {
     if (!web3Auth) {
@@ -108,11 +116,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     const localProvider = await web3Auth.connect();
     setWalletProvider(localProvider!);
-  };
-
-  const setWalletProvider = (web3authProvider: SafeEventEmitterProvider) => {
-    const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
-    setProvider(walletProvider);
   };
 
   const logout = async () => {
