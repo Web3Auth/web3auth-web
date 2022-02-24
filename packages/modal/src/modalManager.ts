@@ -3,11 +3,10 @@ import {
   ADAPTER_CATEGORY,
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  AdapterConfig,
   BaseAdapterConfig,
-  BaseDefaultAdapters,
   CustomChainConfig,
   SafeEventEmitterProvider,
-  SkipAdaptersConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -15,7 +14,6 @@ import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS, ModalState } from "@web3auth/ui";
 import log from "loglevel";
 
-import { AdapterConfig } from "./interface";
 import { mergeOpenLoginConfig, OPENLOGIN_PROVIDERS } from "./utils";
 log.enableAll();
 log.setLevel("debug");
@@ -67,8 +65,6 @@ export class Web3Auth extends Web3AuthCore {
 
   readonly options: Web3AuthOptions;
 
-  private defaultAdapters: BaseDefaultAdapters | null = null;
-
   private adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig> = {};
 
   constructor(options: Web3AuthOptions) {
@@ -86,12 +82,9 @@ export class Web3Auth extends Web3AuthCore {
   public async initModal(params?: { adaptersConfig?: Record<WALLET_ADAPTER_TYPE, AdapterConfig> }): Promise<void> {
     super.checkInitRequirements();
 
-    // initialize default adapters if any.
-    await this.initializeDefaultAdapters(params?.adaptersConfig);
-
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...Object.keys(this.walletAdapters || {})];
-    await this.initializeAdaptersConfiguration(allAdapters, params.adaptersConfig || {});
+    await this.initializeAdaptersConfiguration(allAdapters, params?.adaptersConfig || {});
 
     // only initialize a external adapter before social login, if it is a cached adapter.
     if (this.cachedAdapter && this.cachedAdapter !== WALLET_ADAPTERS.OPENLOGIN) {
@@ -128,11 +121,6 @@ export class Web3Auth extends Web3AuthCore {
     this.status = ADAPTER_STATUS.READY;
   }
 
-  public addDefaultAdapters(defaultAdapters: BaseDefaultAdapters) {
-    if (this.defaultAdapters) throw new Error("Default adapters already exists");
-    this.defaultAdapters = defaultAdapters;
-  }
-
   public async connect(): Promise<SafeEventEmitterProvider | null> {
     // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
@@ -146,28 +134,6 @@ export class Web3Auth extends Web3AuthCore {
         return reject(err);
       });
     });
-  }
-
-  private async initializeDefaultAdapters(adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig>): Promise<void> {
-    if (this.defaultAdapters) {
-      const skipDefaultAdapters: SkipAdaptersConfig = {};
-
-      Object.keys(this.walletAdapters).forEach((adapterName) => {
-        // don't initialize adapters in default adapters which are custom configured here.
-        skipDefaultAdapters[adapterName] = { initializeAdapter: false };
-      });
-      await this.defaultAdapters._init({
-        chainConfig: this.options.chainConfig,
-        clientId: this.options.clientId,
-        skipAdapters: skipDefaultAdapters,
-        adaptersConfig: adaptersConfig || {},
-      });
-
-      const defaultAdaptersInstances = this.defaultAdapters?.walletAdapters || {};
-      Object.keys(defaultAdaptersInstances).forEach((adName) => {
-        if (!this.walletAdapters[adName]) this.walletAdapters[adName] = defaultAdaptersInstances[adName];
-      });
-    }
   }
 
   private async initializeAdaptersConfiguration(allAdapters: string[], adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig>): Promise<void> {
@@ -209,7 +175,7 @@ export class Web3Auth extends Web3AuthCore {
     const adapterPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
       try {
         const adapter = this.walletAdapters[adapterName];
-        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL && this.adaptersConfig[adapterName].showOnModal !== false) {
+        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL && this.adaptersConfig[adapterName]?.showOnModal !== false) {
           log.debug("init external wallet", this.cachedAdapter, adapterName);
           this.subscribeToAdapterEvents(adapter);
           // we are not initializing cached adapter here as it is already being initialized in initModal before.

@@ -108,6 +108,11 @@ export class Web3AuthCore extends SafeEventEmitter {
     return this;
   }
 
+  public configureAdapters(adapters: IAdapter<unknown>[]): Web3AuthCore {
+    adapters.forEach((adapter) => this.configureAdapter(adapter));
+    return this;
+  }
+
   public clearCache() {
     if (!storageAvailable("sessionStorage")) return;
     window.sessionStorage.removeItem(ADAPTER_CACHE_KEY);

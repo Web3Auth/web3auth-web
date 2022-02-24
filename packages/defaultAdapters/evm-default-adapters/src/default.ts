@@ -7,12 +7,10 @@ import {
   DefaultAdaptersInitOptions,
   getChainConfig,
   IAdapter,
-  mergeDefaultAdapterConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
-import log from "loglevel";
 
 import { defaultEvmAdaptersConfig } from "./config";
 
@@ -21,28 +19,12 @@ export class EvmDefaultAdapters extends BaseDefaultAdapters {
     super({ chainNamespace: CHAIN_NAMESPACES.EIP155 });
   }
 
-  async _init(options: DefaultAdaptersInitOptions): Promise<void> {
-    // eslint-disable-next-line no-console
-    console.log("init opetions", options);
+  async getDefaultAdapters(options: DefaultAdaptersInitOptions): Promise<IAdapter<unknown>[]> {
     const optCopy: DefaultAdaptersInitOptions = cloneDeep(options);
     const defaultAdaptersConfig: Record<string, BaseAdapterConfig> = cloneDeep(defaultEvmAdaptersConfig);
 
-    const allDefaultAdapters = [...Object.keys(defaultAdaptersConfig)];
-    log.debug("allDefaultAdapters", allDefaultAdapters);
-
-    allDefaultAdapters.forEach((adapterName) => {
-      // merge default with passed adapter config.
-      mergeDefaultAdapterConfig(adapterName, defaultAdaptersConfig, optCopy.adaptersConfig);
-
-      optCopy.skipAdapters[adapterName] = {
-        ...(optCopy.skipAdapters[adapterName] || {}),
-        // no need to initialized adapter if it is already initialized by core.
-        initializeAdapter: optCopy.skipAdapters[adapterName]?.initializeAdapter !== false,
-      };
-    });
-    log.debug("optCopy", optCopy);
-
-    return super._init(optCopy);
+    await super._init({ ...optCopy }, defaultAdaptersConfig);
+    return Object.values(this.walletAdapters);
   }
 
   _getDefaultAdapterModule = async (params: {

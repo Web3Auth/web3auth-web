@@ -140,6 +140,10 @@ export type LoginMethodConfig = Record<
   }
 >;
 
+export interface AdapterConfig extends BaseAdapterConfig {
+  loginMethods?: LoginMethodConfig;
+}
+
 export interface WalletConnectV1Data {
   uri: string;
 }

@@ -44,8 +44,8 @@ export const mergeOpenLoginConfig = (openloginInstance: OpenLogin, loginMethodsC
       showOnMobile: true,
       showOnModal: true,
       showOnDesktop: true,
-      ...(openloginInstance.state.loginConfig[loginMethod] || {}),
-      ...loginMethodsConfig[loginMethod],
+      ...(openloginInstance.state.loginConfig?.[loginMethod] || {}),
+      ...(loginMethodsConfig[loginMethod] || {}),
     };
     finalLoginMethodsConfig[loginMethod] = { ...finalLoginMethodConfig };
     log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);

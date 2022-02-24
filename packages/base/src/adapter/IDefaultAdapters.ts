@@ -1,46 +1,22 @@
 import log from "loglevel";
 
+import { AdapterConfig } from "..";
 import { ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { DefaultAdaptersError } from "../errors";
-import { ADAPTER_STATUS, ADAPTER_STATUS_TYPE, BaseAdapterConfig, IAdapter, WALLET_ADAPTER_TYPE } from "./IAdapter";
+import { ADAPTER_STATUS, ADAPTER_STATUS_TYPE, IAdapter, WALLET_ADAPTER_TYPE } from "./IAdapter";
 
 export interface DefaultAdaptersOptions {
   factoryMode?: "DAPP" | "WALLET";
 }
-export type SkipAdaptersConfig = Record<
-  WALLET_ADAPTER_TYPE,
-  {
-    initializeAdapter: boolean;
-  }
->;
-
-export const mergeDefaultAdapterConfig = (
-  adapterName: string,
-  sourceConfig: Record<string, BaseAdapterConfig>,
-  providedConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig>
-) => {
-  return {
-    ...(sourceConfig[adapterName] || {
-      label: adapterName,
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    }),
-    ...(providedConfig[adapterName] || {}),
-  };
-};
-
 export interface DefaultAdaptersInitOptions {
   chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
   clientId: string;
-  skipAdapters: SkipAdaptersConfig;
-  adaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig>;
 }
 
 export interface IDefaultAdapters {
   status: ADAPTER_STATUS_TYPE;
   walletAdapters: Record<WALLET_ADAPTER_TYPE, IAdapter<unknown>>;
-  _init(options: DefaultAdaptersInitOptions): Promise<void>;
+  _init(options: DefaultAdaptersInitOptions, adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig>): Promise<void>;
 }
 
 export abstract class BaseDefaultAdapters implements IDefaultAdapters {
@@ -55,7 +31,7 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
     this.chainNamespace = options.chainNamespace;
   }
 
-  public async _init(options: DefaultAdaptersInitOptions): Promise<void> {
+  public async _init(options: DefaultAdaptersInitOptions, adaptersConfig: Record<WALLET_ADAPTER_TYPE, AdapterConfig>): Promise<void> {
     if (this.status === ADAPTER_STATUS.READY) throw DefaultAdaptersError.alreadyInitialized();
     if (!options.clientId) throw DefaultAdaptersError.invalidParams("Please provide clientId");
     if (!options.chainConfig?.chainNamespace) throw DefaultAdaptersError.invalidParams("Please provide chainNamespace in chainConfig");
@@ -65,9 +41,9 @@ export abstract class BaseDefaultAdapters implements IDefaultAdapters {
       );
 
     await Promise.all(
-      Object.keys(options.adaptersConfig).map(async (adapterName) => {
+      Object.keys(adaptersConfig).map(async (adapterName) => {
         try {
-          if (!this.walletAdapters[adapterName] && options.skipAdapters?.[adapterName]?.initializeAdapter) {
+          if (!this.walletAdapters[adapterName]) {
             const ad = await this._getDefaultAdapterModule({
               name: adapterName,
               customChainConfig: options.chainConfig,
