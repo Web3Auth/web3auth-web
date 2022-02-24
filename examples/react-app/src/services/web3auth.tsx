@@ -1,5 +1,6 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import type { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/web3auth";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -7,7 +8,7 @@ import { getWalletProvider, IWalletProvider } from "./walletProvider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
-  provider: SafeEventEmitterProvider | null;
+  provider: IWalletProvider | null;
   isLoading: boolean;
   user: unknown;
   login: () => Promise<void>;
@@ -78,13 +79,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
     async function init() {
       try {
-        const { Web3Auth } = await import("@web3auth/web3auth");
         setIsLoading(true);
+        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
-          clientId: "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA",
+          clientId,
         });
+        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal();
