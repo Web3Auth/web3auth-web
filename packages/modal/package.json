@@ -19,19 +19,13 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.5.0",
     "@web3auth/base": "^0.3.1",
     "@web3auth/core": "^0.3.1",
-    "@web3auth/metamask-adapter": "^0.3.1",
-    "@web3auth/openlogin-adapter": "^0.3.1",
-    "@web3auth/phantom-adapter": "^0.3.1",
-    "@web3auth/torus-evm-adapter": "^0.3.1",
-    "@web3auth/torus-solana-adapter": "^0.3.1",
     "@web3auth/ui": "^0.3.1",
-    "@web3auth/wallet-connect-v1-adapter": "^0.3.1",
     "loglevel": "^1.8.0"
   },
   "devDependencies": {
+    "@toruslabs/openlogin": "^1.5.0",
     "@svgr/webpack": "^5.5.0",
     "@types/node": "^16",
     "css-loader": "^2.1.1",

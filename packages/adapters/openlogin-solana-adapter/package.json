@@ -1,7 +1,7 @@
 {
-  "name": "@web3auth/openlogin-adapter",
+  "name": "@web3auth/openlogin-solana-adapter",
   "version": "0.3.1",
-  "description": "openlogin adapter for web3auth",
+  "description": "openlogin solana adapter for web3auth",
   "keywords": [
     "web3Auth/core",
     "web3Auth",
@@ -10,13 +10,13 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/openloginAdapter.cjs.js",
-  "module": "dist/openloginAdapter.esm.js",
-  "unpkg": "dist/openloginAdapter.umd.min.js",
-  "jsdelivr": "dist/openloginAdapter.umd.min.js",
+  "main": "dist/openloginSolanaAdapter.cjs.js",
+  "module": "dist/openloginSolanaAdapter.esm.js",
+  "unpkg": "dist/openloginSolanaAdapter.umd.min.js",
+  "jsdelivr": "dist/openloginSolanaAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/openloginSolanaAdapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -37,11 +37,10 @@
   },
   "dependencies": {
     "@toruslabs/openlogin": "^1.5.0",
-    "@toruslabs/openlogin-ed25519": "^1.5.0",
+    "@web3auth/openlogin-base-adapter": "^0.3.1",
     "@web3auth/base": "^0.3.1",
-    "@web3auth/base-provider": "^0.3.1",
-    "@web3auth/ethereum-provider": "^0.3.1",
     "@web3auth/solana-provider": "^0.3.1",
+    "@toruslabs/openlogin-ed25519": "^1.5.0",
     "lodash.merge": "^4.6.2",
     "loglevel": "^1.8.0"
   },

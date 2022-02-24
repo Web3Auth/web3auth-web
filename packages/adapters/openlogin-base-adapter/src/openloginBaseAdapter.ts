@@ -9,9 +9,7 @@ import {
   AdapterInitOptions,
   AdapterNamespaceType,
   BaseAdapter,
-  CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   SafeEventEmitterProvider,
   UserInfo,
@@ -20,7 +18,6 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import merge from "lodash.merge";
 import log from "loglevel";
 
 import { getOpenloginDefaultOptions } from "./config";
@@ -33,7 +30,7 @@ export interface OpenloginLoginParams {
 
 type PrivateKeyProvider = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 
-export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
+export abstract class OpenloginBaseAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
@@ -44,13 +41,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+  protected privKeyProvider: PrivateKeyProvider | null = null;
+
+  protected loginSettings: LoginSettings = {};
 
   private openloginOptions: OpenLoginOptions;
 
-  private loginSettings: LoginSettings = {};
-
-  private privKeyProvider: PrivateKeyProvider | null = null;
+  abstract currentChainNamespace: ChainNamespaceType;
 
   constructor(params: OpenloginAdapterOptions) {
     super();
@@ -65,7 +62,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
     // if no chainNamespace is passed then chain config should be set before calling init
     if (params.chainConfig?.chainNamespace) {
-      this.currentChainNamespace = params.chainConfig?.chainNamespace;
       const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
       this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
       log.debug("const openlogin chainConfig", this.chainConfig);
@@ -168,34 +164,5 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
 
-  private async connectWithProvider(params?: OpenloginLoginParams): Promise<void> {
-    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
-    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
-    // if not logged in then login
-    if (!this.openloginInstance.privKey && params) {
-      await this.openloginInstance.login(
-        merge(this.loginSettings, { loginProvider: params.loginProvider }, { extraLoginOptions: { login_hint: params?.login_hint } })
-      );
-    }
-    let finalPrivKey = this.openloginInstance.privKey;
-    if (finalPrivKey) {
-      if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
-        finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
-      }
-      await this.privKeyProvider.setupProvider(finalPrivKey);
-      this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
-    }
-  }
+  abstract connectWithProvider(params?: OpenloginLoginParams): Promise<void>;
 }

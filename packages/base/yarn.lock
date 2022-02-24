@@ -22,11 +22,7 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-<<<<<<< HEAD
 "@toruslabs/openlogin-jrpc@^1.3.3", "@toruslabs/openlogin-jrpc@^1.5.0":
-=======
-"@toruslabs/openlogin-jrpc@^1.5.0":
->>>>>>> 558ecb31da2ac8fb58afef2dc9cde0d5fba05fb8
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.5.0.tgz#d264ff98492078cde52d26cc7fde61c24ca7bafb"
   integrity sha512-jfcQdJg1pzI8xppgQu37Ys4D6vJG9hjDpNy8lKFnyxs8CAwsuvx5BXcK7oC5qyMLo3Afo4IC1sEVzqVoG7eCHg==

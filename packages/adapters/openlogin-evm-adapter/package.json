@@ -1,0 +1,62 @@
+{
+  "name": "@web3auth/openlogin-evm-adapter",
+  "version": "0.3.1",
+  "description": "openlogin evm adapter for web3auth",
+  "keywords": [
+    "web3Auth/core",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "solana"
+  ],
+  "main": "dist/openloginEvmAdapter.cjs.js",
+  "module": "dist/openloginEvmAdapter.esm.js",
+  "unpkg": "dist/openloginEvmAdapter.umd.min.js",
+  "jsdelivr": "dist/openloginEvmAdapter.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/openloginEvmAdapter#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "rimraf dist/ && torus-scripts start",
+    "build": "rimraf dist/ && torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "yarn run build",
+    "pre-commit": "lint-staged --cwd ."
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "@types/lodash.merge": "^4.6.6",
+    "lint-staged": "^12.3.4"
+  },
+  "dependencies": {
+    "@toruslabs/openlogin": "^1.5.0",
+    "@web3auth/openlogin-base-adapter": "^0.3.1",
+    "@web3auth/base": "^0.3.1",
+    "@web3auth/ethereum-provider": "^0.3.1",
+    "lodash.merge": "^4.6.2",
+    "loglevel": "^1.8.0"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  }
+}
