@@ -1,3 +1,2 @@
-export * from "./config";
-export * from "./interface";
-export * from "./openloginAdapter";
+export * from "./openloginEvmAdapter";
+export { getOpenloginDefaultOptions } from "@web3auth/openlogin-base-adapter";

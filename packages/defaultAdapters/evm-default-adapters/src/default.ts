@@ -53,9 +53,9 @@ export class EvmDefaultAdapters extends BaseDefaultAdapters {
       const adapter = new WalletConnectV1Adapter({ chainConfig: finalChainConfig });
       return adapter;
     } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
-      const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
+      const { OpenloginEvmAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-evm-adapter");
       const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
-      const adapter = new OpenloginAdapter({
+      const adapter = new OpenloginEvmAdapter({
         ...defaultOptions,
         adapterSettings: { ...defaultOptions.adapterSettings, clientId } as OpenLoginOptions,
       });

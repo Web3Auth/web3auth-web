@@ -1,4 +1,3 @@
-import type { OpenLoginOptions } from "@toruslabs/openlogin";
 import {
   BaseAdapterConfig,
   BaseDefaultAdapters,
@@ -52,11 +51,11 @@ export class SolanaDefaultAdapters extends BaseDefaultAdapters {
       const adapter = new PhantomAdapter({ chainConfig: finalChainConfig });
       return adapter;
     } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
-      const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
+      const { OpenloginSolanaAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-solana-adapter");
       const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
-      const adapter = new OpenloginAdapter({
+      const adapter = new OpenloginSolanaAdapter({
         ...defaultOptions,
-        adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId },
+        adapterSettings: { ...defaultOptions.adapterSettings, clientId },
       });
       return adapter;
     }
