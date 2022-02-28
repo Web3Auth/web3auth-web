@@ -1,0 +1,59 @@
+{
+  "name": "@web3auth/torus-wallet-connector-plugin",
+  "version": "0.1.0",
+  "description": "Torus wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
+  "keywords": [
+    "web3Auth/core",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "metamask"
+  ],
+  "main": "dist/torusWalletConnectorPlugin.cjs.js",
+  "module": "dist/torusWalletConnectorPlugin.esm.js",
+  "unpkg": "dist/torusWalletConnectorPlugin.umd.min.js",
+  "jsdelivr": "dist/torusWalletConnectorPlugin.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/torusWalletConnectorPlugin#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "rimraf dist/ && torus-scripts start",
+    "build": "rimraf dist/ && torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "yarn run build",
+    "pre-commit": "lint-staged --cwd ."
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "lint-staged": "^12.3.4",
+    "@web3auth/core": "^0.3.1"
+  },
+  "dependencies": {
+    "@toruslabs/torus-embed": "^1.20.4",
+    "@web3auth/base": "^0.3.1",
+    "loglevel": "^1.8.0"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  }
+}
