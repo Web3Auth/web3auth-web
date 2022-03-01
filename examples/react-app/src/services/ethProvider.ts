@@ -50,7 +50,32 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
     }
   };
 
-  return { getAccounts, getBalance, signMessage };
+  const signAndSendTransaction = async () => {
+    try {
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      console.log("pubKey", accounts);
+      const txRes = await web3.eth.sendTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+      uiConsole("txRes", txRes);
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
+  
+  const signTransaction = async () => {
+    try {
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      console.log("pubKey", accounts);
+      const txRes = await web3.eth.signTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+      uiConsole("txRes", txRes);
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
+  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction };
 };
 
 export default ethProvider;

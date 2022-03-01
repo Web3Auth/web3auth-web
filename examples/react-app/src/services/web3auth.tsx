@@ -17,6 +17,8 @@ export interface IWeb3AuthContext {
   signMessage: () => Promise<any>;
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
+  signTransaction: () => Promise<void>;
+  signAndSendTransaction: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -30,9 +32,11 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   signMessage: async () => {},
   getAccounts: async () => {},
   getBalance: async () => {},
+  signTransaction: async () => {},
+  signAndSendTransaction: async () => {},
 });
 
-export function useWeb3Auth() {
+export function useWeb3Auth(): IWeb3AuthContext {
   return useContext(Web3AuthContext);
 }
 
@@ -165,6 +169,24 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     provider.signMessage();
   };
 
+  const signTransaction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    provider.signTransaction();
+  };
+
+  const signAndSendTransaction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    provider.signAndSendTransaction();
+  };
+
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -183,6 +205,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getAccounts,
     getBalance,
     signMessage,
+    signTransaction,
+    signAndSendTransaction,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };
