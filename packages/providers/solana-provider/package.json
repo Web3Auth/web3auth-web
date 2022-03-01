@@ -22,7 +22,7 @@
     "@toruslabs/base-controllers": "^1.6.4",
     "@toruslabs/openlogin-jrpc": "^1.5.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
-    "@solana/web3.js": "1.31.0",
+    "@solana/web3.js": "^1.35.1",
     "@web3auth/base": "^0.3.0",
     "@web3auth/base-provider": "^0.3.0",
     "bn.js": "^5.2.0",

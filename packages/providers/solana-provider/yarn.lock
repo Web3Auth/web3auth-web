@@ -37,10 +37,10 @@
   dependencies:
     buffer "~6.0.3"
 
-"@solana/web3.js@1.31.0":
-  version "1.31.0"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.31.0.tgz#7a313d4c1a90b77f27ddbfe845a10d6883e06452"
-  integrity sha512-7nHHx1JNFnrt15e9y8m38I/EJCbaB+bFC3KZVM1+QhybCikFxGMtGA5r7PDC3GEL1R2RZA8yKoLkDKo3vzzqnw==
+"@solana/web3.js@^1.34.0":
+  version "1.35.1"
+  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.35.1.tgz#777b039a3b51e63c347712a57c7db87c9d1db832"
+  integrity sha512-3bDawFFI0KcvgI8Ae4N4hdQ8+Bg9gu6q+IkhPrYxOF6RYnB3U+9A4u+DhHZWLvTvgoTyesi/m5HzlleKtFEqRQ==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@ethersproject/sha2" "^5.5.0"
@@ -57,7 +57,7 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@toruslabs/base-controllers@^1.6.2":
+"@toruslabs/base-controllers@^1.6.4":
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.4.tgz#aa10276bd62836b83245b9a5b3c7fd5946e53b27"
   integrity sha512-L+U+5maMliHSw76aYw9yRLIOZZL/BZ+lYD/OfE3vIuVzRb5O70PtbMoI4ejEIBxoCrndQou9jptKHllsF4cc4A==
