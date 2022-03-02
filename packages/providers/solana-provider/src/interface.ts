@@ -23,3 +23,8 @@ export interface IPhantomWalletProvider extends SafeEventEmitter {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
 }
+
+export interface SignedMessage {
+  pubkey: string;
+  signature: string;
+}

@@ -1,12 +1,14 @@
 import type { Transaction } from "@solana/web3.js";
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
 
+import { SignedMessage } from "..";
+
 export interface IProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
-  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
+  signTransaction: (req: JRPCRequest<{ message: string }>) => SignedMessage;
+  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => SignedMessage[];
   signAndSendTransaction: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
   signMessage: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
 }

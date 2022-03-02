@@ -5,6 +5,7 @@ import { SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/b
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
+import { SignedMessage } from "../../interface";
 import { IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 
 export async function getProviderHandlers({
@@ -19,9 +20,15 @@ export async function getProviderHandlers({
     const tx = Transaction.populate(Message.from(decodedTx));
     return tx;
   };
+
+  const getSignature = (msg: string, secretKey: Uint8Array): string => {
+    return bs58.encode(nacl.sign.detached(bs58.decode(msg), secretKey));
+  };
+
   const keyPairGenerator = (): Keypair => {
     return Keypair.fromSecretKey(Buffer.from(privKey, "hex"));
   };
+
   if (typeof privKey !== "string") throw WalletInitializationError.invalidParams("privKey must be a string");
   const keyPair = keyPairGenerator();
   const providerHandlers: IProviderHandlers = {
@@ -32,13 +39,13 @@ export async function getProviderHandlers({
 
     getPrivateKey: async () => privKey,
 
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+    signTransaction: (req: JRPCRequest<{ message: string }>): SignedMessage => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const transaction = transactionGenerator(req.params?.message as string);
-      transaction.partialSign(keyPair);
-      return transaction;
+      const message = req.params?.message;
+      const signature = getSignature(message, keyPair.secretKey);
+      return { pubkey: keyPair.publicKey.toBase58(), signature };
     },
 
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
@@ -66,15 +73,14 @@ export async function getProviderHandlers({
       return { signature: sig };
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: (req: JRPCRequest<{ message: string[] }>): SignedMessage[] => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const signedTransactions: Transaction[] = [];
+      const signedTransactions = [];
       for (const tx of req.params?.message || []) {
-        const transaction = transactionGenerator(tx);
-        transaction.partialSign(keyPair);
-        signedTransactions.push(transaction);
+        const signature = getSignature(tx, keyPair.secretKey);
+        signedTransactions.push({ pubkey: keyPair.publicKey.toBase58(), signature });
       }
       return signedTransactions;
     },
