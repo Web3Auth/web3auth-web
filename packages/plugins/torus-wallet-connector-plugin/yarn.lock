@@ -241,10 +241,9 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/torus-embed@^1.20.4":
-  version "1.20.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.20.4.tgz#d1ec55bd4071ab8dcd1809e63e09211fc5e6830d"
-  integrity sha512-s5mxLA2ZIY4YeadS4EQReXK1oKnJgVmdaZjJAprnDzSAIOLJnd5GRdbHgq5wNH1pBk+T5hrppv6fWBR1pXNlXw==
+"@toruslabs/torus-embed@file:./toruslabs-torus-embed-1.18.6.tgz":
+  version "1.18.6"
+  resolved "file:./toruslabs-torus-embed-1.18.6.tgz#b0cb7bea4b262ca7b1450517eb13219d74d40a91"
   dependencies:
     "@metamask/obs-store" "^7.0.0"
     "@toruslabs/fetch-node-details" "^4.0.2"

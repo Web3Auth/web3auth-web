@@ -15,7 +15,9 @@ import {
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
+import type { IPlugin } from "@web3auth/base-plugin";
 import log from "loglevel";
 
 export interface Web3AuthCoreOptions {
@@ -38,6 +40,8 @@ export class Web3AuthCore extends SafeEventEmitter {
   public cachedAdapter: string | null = null;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
+
+  private plugins: Record<string, IPlugin> = {};
 
   constructor(options: Web3AuthCoreOptions) {
     super();
@@ -130,7 +134,8 @@ export class Web3AuthCore extends SafeEventEmitter {
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
     if (!this.walletAdapters[walletName])
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    return this.walletAdapters[walletName].connect(loginParams);
+    const provider = await this.walletAdapters[walletName].connect(loginParams);
+    return provider;
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
@@ -144,16 +149,34 @@ export class Web3AuthCore extends SafeEventEmitter {
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
+  public async addPlugin(plugin: IPlugin): Promise<Web3AuthCore> {
+    if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
+    this.plugins[plugin.name] = plugin;
+    await plugin.initWithWeb3Auth(this);
+    return this;
+  }
+
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
-    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
+      await Promise.all(
+        Object.values(this.plugins).map((plugin) => {
+          return plugin.connect().catch((error: Web3AuthError) => {
+            // swallow error if connector adapter doesn't supports this plugin.
+            if (error.message.includes("unsupported adapter")) {
+              return;
+            }
+            throw error;
+          });
+        })
+      );
     });
 
-    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
@@ -165,6 +188,11 @@ export class Web3AuthCore extends SafeEventEmitter {
       }
 
       log.debug("disconnected", this.status, this.connectedAdapterName);
+      await Promise.all(
+        Object.values(this.plugins).map((plugin) => {
+          return plugin.disconnect();
+        })
+      );
     });
     walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;

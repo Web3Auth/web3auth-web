@@ -4,10 +4,11 @@ export class TorusWalletPluginError extends Web3AuthError {
   protected static messages: ErrorCodes = {
     5210: "Torus Wallet Plugin is not initialized",
     5211: "Web3Auth is connected to unsupported adapter. Torus wallet connector plugin requires web3auth connected to openlogin adapter.",
-    5212: "Torus Wallet Plugin requires a provider to be set in the contructor.",
-    5213: "Torus Wallet Plugin requires a provider or web3Auth instance passed in the constructor",
+    5212: "Provider is required..",
+    5213: "Web3Auth instance is required while initialization.",
     5214: "Web3Auth is not connected.",
-    5215: "Torus Wallet Plugin requires a userInfo object passed along with the provider in the constructor.",
+    5215: "UserInfo is required.",
+    5216: "Plugin is already initialized",
   };
 
   public constructor(code: number, message?: string) {
@@ -34,7 +35,7 @@ export class TorusWalletPluginError extends Web3AuthError {
     return TorusWalletPluginError.fromCode(5212, extraMessage);
   }
 
-  public static providerOrWeb3AuthRequired(extraMessage = ""): IWeb3AuthError {
+  public static web3authRequired(extraMessage = ""): IWeb3AuthError {
     return TorusWalletPluginError.fromCode(5213, extraMessage);
   }
 
@@ -44,5 +45,9 @@ export class TorusWalletPluginError extends Web3AuthError {
 
   public static userInfoRequired(extraMessage = ""): IWeb3AuthError {
     return TorusWalletPluginError.fromCode(5215, extraMessage);
+  }
+
+  public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
+    return TorusWalletPluginError.fromCode(5216, extraMessage);
   }
 }

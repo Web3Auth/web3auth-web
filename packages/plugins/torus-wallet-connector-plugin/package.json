@@ -36,7 +36,7 @@
     "@web3auth/core": "^0.3.1"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.20.4",
+    "@toruslabs/torus-embed": "file:./toruslabs-torus-embed-1.18.6.tgz",
     "@web3auth/base": "^0.3.1",
     "loglevel": "^1.8.0"
   },
