@@ -24,8 +24,6 @@ import {
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
-log.enableAll();
-log.setLevel("debug");
 
 export interface UIConfig {
   /**
@@ -78,6 +76,8 @@ export class Web3Auth extends Web3AuthCore {
 
   constructor(options: Web3AuthOptions) {
     super(options);
+    if (options.enableLogging) log.enableAll();
+    else log.disableAll();
     this.options = { ...options };
     const providedChainConfig = this.options.chainConfig;
     if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {

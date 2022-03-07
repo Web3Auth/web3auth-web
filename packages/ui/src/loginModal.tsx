@@ -38,7 +38,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private stateEmitter: SafeEventEmitter;
 
-  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "light", enableLogging }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
@@ -46,6 +46,8 @@ export default class LoginModal extends SafeEventEmitter {
     this.wrapper = createWrapper();
     this.stateEmitter = new SafeEventEmitter();
     this.subscribeCoreEvents(adapterListener);
+    if (enableLogging) log.enableAll();
+    else log.disableAll();
   }
 
   initModal = async (): Promise<void> => {
