@@ -1,3 +1,12 @@
 {
-  "extends": "next/core-web-vitals"
+  "root": true,
+  "extends": ["next/core-web-vitals", "eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended", "plugin:react/jsx-runtime"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "react/require-default-props": 0
+  }
 }

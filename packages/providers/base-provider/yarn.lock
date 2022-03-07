@@ -10,9 +10,9 @@
     regenerator-runtime "^0.13.4"
 
 "@toruslabs/base-controllers@^1.6.2":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.4.tgz#aa10276bd62836b83245b9a5b3c7fd5946e53b27"
-  integrity sha512-L+U+5maMliHSw76aYw9yRLIOZZL/BZ+lYD/OfE3vIuVzRb5O70PtbMoI4ejEIBxoCrndQou9jptKHllsF4cc4A==
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.3.tgz#c11746e38073b71972722111832a5ac6b9c47701"
+  integrity sha512-cj1c51Om+H2b0kkB0ewWiJDBxogf+qVM36TSFKQsH73rfptj50VKD3k5ukz2X7bEmMFil4VATkjLT7kWtUWSiQ==
   dependencies:
     "@toruslabs/http-helpers" "^2.2.0"
     "@toruslabs/openlogin-jrpc" "^1.5.0"
@@ -69,9 +69,9 @@
   integrity sha512-pvZjgd9fif5/Ss+WqWoOSZIivLLvQqoluQZACPeLlIVh4T28TCS54P60KvO27NFuFxYjhJvz+SkuuwcXhiHhjA==
 
 "@types/node@*":
-  version "17.0.21"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.21.tgz#864b987c0c68d07b4345845c3e63b75edd143644"
-  integrity sha512-DBZCJbhII3r90XbQxI8Y9IjjiiOGlZ0Hr32omXIZvwwZ7p4DMMXGrKXVyPfuoBOri9XNtL0UK69jYIBIsRX3QQ==
+  version "17.0.19"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.19.tgz#726171367f404bfbe8512ba608a09ebad810c7e6"
+  integrity sha512-PfeQhvcMR4cPFVuYfBN4ifG7p9c+Dlh3yUZR6k+5yQK7wX3gDgVxBly4/WkBRs9x4dmcy1TVl08SY67wwtEvmA==
 
 "@types/pbkdf2@^3.0.0":
   version "3.1.0"
