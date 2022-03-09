@@ -1,8 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
-import { ADAPTER_EVENTS } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
@@ -67,9 +68,47 @@ export class MainComponent implements OnChanges {
       this.web3auth = new Web3Auth({
         clientId,
         chainConfig: CHAIN_CONFIG[this.chain],
+        uiConfig: {
+          appLogo: "https://images.web3auth.io/web3auth-logo-w.svg",
+          theme: "dark",
+          loginMethodsOrder: ["facebook", "twitter"],
+        },
       });
-      const adapter = new OpenloginAdapter({ adapterSettings: { network: this.network, clientId } });
-      this.web3auth.configureAdapter(adapter);
+      const openloginAdapter = new OpenloginAdapter({
+        adapterSettings: {
+          network: this.network,
+          clientId,
+          whiteLabel: {
+            dark: true,
+            theme: {
+              primary: "#0364FF",
+            },
+            defaultLanguage: "en",
+          },
+        },
+      });
+
+      this.web3auth.configureAdapter(openloginAdapter);
+
+      if (CHAIN_CONFIG[this.chain].chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        const torusWalletAdapter = new TorusWalletAdapter({
+          initParams: {
+            whiteLabel: {
+              theme: {
+                isDark: true,
+                colors: {
+                  torusBrand1: "#0364FF",
+                },
+              },
+              logoDark: "https://images.web3auth.io/web3auth-logo-w.svg",
+              logoLight: "https://images.web3auth.io/web3auth-logo-w-light.svg",
+              defaultLanguage: "en",
+            },
+          },
+        });
+
+        this.web3auth.configureAdapter(torusWalletAdapter);
+      }
 
       subscribeAuthEvents(this.web3auth);
       await this.web3auth.initModal();

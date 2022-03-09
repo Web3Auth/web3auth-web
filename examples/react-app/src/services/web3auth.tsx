@@ -1,6 +1,7 @@
-import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/web3auth";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -93,9 +94,48 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
           clientId,
+          uiConfig: {
+            appLogo: "https://images.web3auth.io/web3auth-logo-w.svg",
+            theme: "dark",
+            loginMethodsOrder: ["facebook", "twitter"],
+          },
         });
-        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+
+        const adapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: web3AuthNetwork,
+            clientId,
+            whiteLabel: {
+              dark: true,
+              theme: {
+                primary: "#0364FF",
+              },
+              defaultLanguage: "en",
+            },
+          },
+        });
         web3AuthInstance.configureAdapter(adapter);
+
+        if (currentChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+          const torusWalletAdapter = new TorusWalletAdapter({
+            initParams: {
+              whiteLabel: {
+                theme: {
+                  isDark: true,
+                  colors: {
+                    torusBrand1: "#0364FF",
+                  },
+                },
+                logoDark: "https://images.web3auth.io/web3auth-logo-w.svg",
+                logoLight: "https://images.web3auth.io/web3auth-logo-w-light.svg",
+                defaultLanguage: "en",
+              },
+            },
+          });
+
+          web3AuthInstance.configureAdapter(torusWalletAdapter);
+        }
+
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal();

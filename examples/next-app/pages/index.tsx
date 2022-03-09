@@ -26,8 +26,8 @@ const Home: NextPage = () => {
       </Web3AuthProvider>
       <footer className={styles.footer}>
         <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/next-app" target="_blank" rel="noopener noreferrer">
-          Source code {"  "}
-          <Image className={styles.logo} src="/images/github-logo.png" alt="github logo" />
+          Source code &nbsp;
+          <Image width={24} height={24} className={styles.logo} src="/images/github-logo.png" alt="github logo" />
         </a>
       </footer>
     </div>

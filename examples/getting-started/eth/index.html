@@ -1,163 +1,212 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Ethereum Web3Auth Getting Started</title>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
 
-  <body>
-    <div class="container">
-      <h1 class="title"><a target="_blank" href="http://web3auth.io/">Web3Auth</a> ETH & JS Integration Example</h1>
-      <!-- Logged In -->
-      <div class="grid btn-logged-in">
-        <button id="get-user-info" class="btn">Get User Info</button>
-        <button id="get-accounts" class="btn">Get Accounts</button>
-        <button id="get-balance" class="btn">Get Balance</button>
-        <button id="sign-message" class="btn">Sign Message</button>
-        <button id="logout" class="btn">Logout</button>
+<head>
+  <title>Ethereum Web3Auth Getting Started</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-        <div class="console" id="console">
-          <p id="code" class="code"></p>
-        </div>
+<body>
+  <div class="container">
+    <h1 class="title"><a target="_blank" href="http://web3auth.io/">Web3Auth</a> ETH & JS Integration Example</h1>
+    <!-- Logged In -->
+    <div class="grid btn-logged-in">
+      <button id="get-user-info" class="btn">Get User Info</button>
+      <button id="get-accounts" class="btn">Get Accounts</button>
+      <button id="get-balance" class="btn">Get Balance</button>
+      <button id="sign-message" class="btn">Sign Message</button>
+      <button id="logout" class="btn">Logout</button>
+
+      <div class="console" id="console">
+        <p id="code" class="code"></p>
       </div>
-
-      <!-- Logged Logout -->
-      <div class="grid btn-logged-out">
-        <button id="login" class="btn">Login</button>
-      </div>
-      <footer class="footer">
-        <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/getting-started" target="_blank" rel="noopener noreferrer">
-          Source code
-          <img class="logo" src="/github-logo.png" />
-        </a>
-      </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0/dist/web3auth.umd.min.js"></script>
-    <script>
-      const web3authSdk = window.Web3auth;
-      let web3AuthInstance = null;
+    <!-- Logged Logout -->
+    <div class="grid btn-logged-out">
+      <button id="login" class="btn">Login</button>
+    </div>
+    <footer class="footer">
+      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/getting-started" target="_blank"
+        rel="noopener noreferrer">
+        Source code
+        <img class="logo" src="/github-logo.png" />
+      </a>
+    </footer>
+  </div>
 
-      (async function init() {
-        $(".btn-logged-in").hide();
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0/dist/web3auth.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@web3auth/openlogin-adapter@0.3.1/dist/openloginAdapter.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@web3auth/torus-evm-adapter@0.3.1/dist/torusEvmAdapter.umd.min.js"></script>
+  <script>
+    // get your clientId from https://developer.web3auth.io
+    const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+    const network = "testnet";
+    const web3authSdk = window.Web3auth;
+    const openloginSdk = window.OpenloginAdapter;
+    const torusWalletSdk = window.TorusEvmAdapter;
+    let web3AuthInstance = null;
 
-        web3AuthInstance = new web3authSdk.Web3Auth({
-          chainConfig: { chainNamespace: "eip155" },
-          clientId: "YOUR_CLIENT_ID_HERE", // get your clientId from https://developer.web3auth.io
-        });
+    (async function init() {
+      $(".btn-logged-in").hide();
 
-        subscribeAuthEvents(web3AuthInstance);
-
-        await web3AuthInstance.initModal();
-        console.log("web3AuthInstance", web3AuthInstance, web3AuthInstance.provider);
-        if (web3AuthInstance.provider) {
-          $(".btn-logged-in").show();
-          $(".btn-logged-out").hide();
-        } else {
-          $(".btn-logged-out").show();
-          $(".btn-logged-in").hide();
-        }
-      })();
-
-      function subscribeAuthEvents(web3auth) {
-        web3auth.on("connected", (data) => {
-          console.log("Yeah!, you are successfully logged in", data);
-        });
-
-        web3auth.on("connecting", () => {
-          console.log("connecting");
-        });
-
-        web3auth.on("disconnected", () => {
-          console.log("disconnected");
-        });
-
-        web3auth.on("errored", (error) => {
-          console.log("some error or user have cancelled login request", error);
-        });
-
-        web3auth.on("MODAL_VISIBILITY", (isVisible) => {
-          console.log("modal visibility", isVisible);
-        });
-      }
-
-      $("#login").click(async function (event) {
-        try {
-          const provider = await web3AuthInstance.connect();
-          console.log("provider after login", provider);
-          $(".btn-logged-out").hide();
-          $(".btn-logged-in").show();
-        } catch (error) {
-          console.error(error.message);
-        }
+      web3AuthInstance = new web3authSdk.Web3Auth({
+        chainConfig: { chainNamespace: "eip155" },
+        clientId,
+        uiConfig: {
+          appLogo: "https://images.web3auth.io/web3auth-logo-w.svg",
+          theme: "dark",
+          loginMethodsOrder: ["facebook", "twitter"],
+        },
       });
 
-      $("#logout").click(async function (event) {
-        try {
-          await web3AuthInstance.logout();
-          $(".btn-logged-in").hide();
-          $(".btn-logged-out").show();
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-
-      $("#get-user-info").click(async function (event) {
-        try {
-          const user = await web3AuthInstance.getUserInfo();
-          $("#code").text(JSON.stringify(user || {}, null, 2));
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-
-      $("#get-accounts").click(async function (event) {
-        try {
-          const web3 = new Web3(web3AuthInstance.provider);
-          const accounts = await web3.eth.getAccounts();
-          $("#code").text(JSON.stringify(["Eth accounts", accounts], null, 2));
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-
-      $("#get-balance").click(async function (event) {
-        try {
-          const web3 = new Web3(web3AuthInstance.provider);
-          const accounts = await web3.eth.getAccounts();
-          const balance = await web3.eth.getBalance(accounts[0]);
-          $("#code").text(JSON.stringify(["Eth balance", balance], null, 2));
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-
-      $("#sign-message").click(async function (event) {
-        try {
-          const provider = web3AuthInstance.provider;
-          const pubKey = await provider.request({ method: "eth_accounts" });
-          const web3 = new Web3(provider);
-          const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-          web3.currentProvider?.send(
-            {
-              method: "eth_sign",
-              params: [pubKey[0], message],
-              from: pubKey[0],
+      const openloginAdapter = new openloginSdk.OpenloginAdapter({
+        adapterSettings: {
+          network,
+          clientId,
+          whiteLabel: {
+            dark: true,
+            theme: {
+              primary: "#0364FF",
             },
-            (err, result) => {
-              if (err) {
-                return console.error(err);
-              }
-              $("#code").text(JSON.stringify(["Eth sign message => true", result], null, 2));
-            }
-          );
-        } catch (error) {
-          console.error(error.message);
-        }
+            defaultLanguage: "en",
+          },
+        },
       });
-    </script>
-  </body>
+
+      const torusWalletAdapter = new torusWalletSdk.TorusWalletAdapter({
+        initParams: {
+          whiteLabel: {
+            theme: {
+              isDark: true,
+              colors: {
+                torusBrand1: "#0364FF",
+              },
+            },
+            logoDark: "https://images.web3auth.io/web3auth-logo-w.svg",
+            logoLight: "https://images.web3auth.io/web3auth-logo-w-light.svg",
+            defaultLanguage: "en",
+          },
+        },
+      });
+
+      web3AuthInstance.configureAdapter(openloginAdapter);
+      web3AuthInstance.configureAdapter(torusWalletAdapter);
+
+      subscribeAuthEvents(web3AuthInstance);
+
+      await web3AuthInstance.initModal();
+      console.log("web3AuthInstance", web3AuthInstance, web3AuthInstance.provider);
+      if (web3AuthInstance.provider) {
+        $(".btn-logged-in").show();
+        $(".btn-logged-out").hide();
+      } else {
+        $(".btn-logged-out").show();
+        $(".btn-logged-in").hide();
+      }
+    })();
+
+    function subscribeAuthEvents(web3auth) {
+      web3auth.on("connected", (data) => {
+        console.log("Yeah!, you are successfully logged in", data);
+      });
+
+      web3auth.on("connecting", () => {
+        console.log("connecting");
+      });
+
+      web3auth.on("disconnected", () => {
+        console.log("disconnected");
+      });
+
+      web3auth.on("errored", (error) => {
+        console.log("some error or user have cancelled login request", error);
+      });
+
+      web3auth.on("MODAL_VISIBILITY", (isVisible) => {
+        console.log("modal visibility", isVisible);
+      });
+    }
+
+    $("#login").click(async function (event) {
+      try {
+        const provider = await web3AuthInstance.connect();
+        console.log("provider after login", provider);
+        $(".btn-logged-out").hide();
+        $(".btn-logged-in").show();
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+
+    $("#logout").click(async function (event) {
+      try {
+        await web3AuthInstance.logout();
+        $(".btn-logged-in").hide();
+        $(".btn-logged-out").show();
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+
+    $("#get-user-info").click(async function (event) {
+      try {
+        const user = await web3AuthInstance.getUserInfo();
+        $("#code").text(JSON.stringify(user || {}, null, 2));
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+
+    $("#get-accounts").click(async function (event) {
+      try {
+        const web3 = new Web3(web3AuthInstance.provider);
+        const accounts = await web3.eth.getAccounts();
+        $("#code").text(JSON.stringify(["Eth accounts", accounts], null, 2));
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+
+    $("#get-balance").click(async function (event) {
+      try {
+        const web3 = new Web3(web3AuthInstance.provider);
+        const accounts = await web3.eth.getAccounts();
+        const balance = await web3.eth.getBalance(accounts[0]);
+        $("#code").text(JSON.stringify(["Eth balance", balance], null, 2));
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+
+    $("#sign-message").click(async function (event) {
+      try {
+        const provider = web3AuthInstance.provider;
+        const pubKey = await provider.request({ method: "eth_accounts" });
+        const web3 = new Web3(provider);
+        const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+        web3.currentProvider?.send(
+          {
+            method: "eth_sign",
+            params: [pubKey[0], message],
+            from: pubKey[0],
+          },
+          (err, result) => {
+            if (err) {
+              return console.error(err);
+            }
+            $("#code").text(JSON.stringify(["Eth sign message => true", result], null, 2));
+          }
+        );
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+  </script>
+</body>
+
 </html>
