@@ -29,7 +29,7 @@ export const generateVueCode = (uiConfig: UIConfig): string => {
       } {
         return {
             uiConfig: {
-                appLogo: "https://images.web3auth.io/login-google.svg",
+                appLogo: "https://images.web3auth.io/web3auth-logo-w.svg",
                 theme: undefined,
                 loginMethodsOrder: undefined,
             },
