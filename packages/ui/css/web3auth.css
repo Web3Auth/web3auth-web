@@ -451,6 +451,7 @@
 
 #w3a-modal .w3a-external-container {
     display: block;
+    margin-bottom: 34px;
 }
 
 #w3a-modal .w3a-external-container.w3a-external-container--hidden {
@@ -504,7 +505,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-    padding: 10px 20px;
+    padding: 10px;
     background: #ffffff;
     border-radius: 10px;
     color: var(--text-color1);

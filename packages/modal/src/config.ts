@@ -31,7 +31,7 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   adapters: {
     [EVM_ADAPTERS.TORUS_EVM]: {
-      label: "Torus Eth Wallet",
+      label: "Torus Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
