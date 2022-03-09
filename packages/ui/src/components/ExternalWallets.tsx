@@ -1,8 +1,8 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import log from "loglevel";
 import { useEffect, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import log from "../loglevel";
 import Icon from "./Icon";
 import Image from "./Image";
 import Loader from "./Loader";

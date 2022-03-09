@@ -75,19 +75,16 @@ export function getProviderHandlers({
       return sig;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessage", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V1 });
       return sig;
     },
     processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessageV3", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V3 });
       return sig;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessageV4", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V4 });
       return sig;
@@ -97,7 +94,6 @@ export function getProviderHandlers({
       return getEncryptionPublicKey(privKey);
     },
     processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
-      log.info("processDecryptMessage", msgParams);
       const stripped = stripHexPrefix(msgParams.data);
       const buff = Buffer.from(stripped, "hex");
       const decrypted = decrypt({ encryptedData: JSON.parse(buff.toString("utf8")) as EthEncryptedData, privateKey: privKey });
