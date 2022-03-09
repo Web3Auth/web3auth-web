@@ -1,5 +1,4 @@
 # Web3Auth X Firebase Demo
-
 ## Firebase Prerequisites:-
 
 - Create a firebase project and configure a web app from [Firebase Console](https://firebase.google.com/console/).
@@ -14,13 +13,16 @@
 
 ## Web3Auth Pre-requisites
 
+- Create a project from plug and play section of [web3auth developer dashboard](https://dashboard.web3auth.io) and
+copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.development file.
+
 - Create a custom verifier from [web3auth developer dashboard](https://dashboard.web3auth.io) with following configuration:
 
-  - Use `sub` as `JWT Verifier ID` field in custom verifier window. JWT verifier id field will uniquely identify user. User wallets will be mapped to this field.
+- Use `sub` as `JWT Verifier ID` field in custom verifier window. JWT verifier id field will uniquely identify user. User wallets will be mapped to this field.
 
- - Use `https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com` as JWK Endpoint in custom verifier window
+- Use `https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com` as JWK Endpoint in custom verifier window
 
-  - Make sure to add a following JWT validation fields in custom verifier window ([here](https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients) is a related, helpful Firebase doc):-
+ - Make sure to add a following JWT validation fields in custom verifier window ([here](https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients) is a related, helpful Firebase doc):-
 
     - `aud`: firebase project id.
     - `iss`: `https://securetoken.google.com/<firebase-project-id>`
@@ -56,5 +58,5 @@ npm install
 Run:
 
 ```bash
-npm run install
+npm run start
 ```

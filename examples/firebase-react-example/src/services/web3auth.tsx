@@ -99,7 +99,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       try {
         setIsLoading(true);
         // get your client id from https://dashboard.web3auth.io by registering a plug and play application.
-        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = process.env.REACT_APP_CLIENT_ID ||  "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
 
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
@@ -136,10 +136,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         return;
       }
       const localProvider = await web3Auth.connectTo(adapter, { 
+        relogin: true,
         loginProvider, 
         extraLoginOptions: {
           id_token: jwtToken,
-          domain: "http://localhost:3000",
+          domain: process.env.REACT_APP_DOMAIN || "http://localhost:3000",
           verifierIdField: "sub",
         }
       });
