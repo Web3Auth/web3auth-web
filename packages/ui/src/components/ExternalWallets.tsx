@@ -1,5 +1,6 @@
 import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import { useCallback } from "react";
+import log from "loglevel";
+import { useEffect, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -17,14 +18,16 @@ interface ExternalWalletsProps {
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const renderWalletConnect = useCallback(() => {
-    if (config[WALLET_ADAPTERS.WALLET_CONNECT_V1] && config[WALLET_ADAPTERS.WALLET_CONNECT_V1].showOnModal !== false) {
-      if (!walletConnectUri) handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
-      else return <WalletConnect walletConnectUri={walletConnectUri} />;
+  useEffect(() => {
+    log.debug("loaded external wallets", config);
+    const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
+    if (wcAvailable && !walletConnectUri) {
+      handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
+    } else if (Object.keys(config).length > 0) {
+      setIsLoaded(true);
     }
-
-    return <Loader modalStatus={MODAL_STATUS.CONNECTING} />;
   }, [config, handleExternalWalletClick, walletConnectUri]);
 
   return (
@@ -36,16 +39,21 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             <h6 className="w3a-group__title">Back</h6>
           </button>
         )}
-
-        {renderWalletConnect()}
-
+        {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {/* <!-- Other Wallet --> */}
+        {Object.keys(config).map((adapter) => {
+          if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+            return <WalletConnect key={adapter} walletConnectUri={walletConnectUri} />;
+          }
+          return null;
+        })}
         {modalStatus === MODAL_STATUS.INITIALIZED && (
           <ul className="w3a-adapter-list w3ajs-wallet-adapters">
             {Object.keys(config).map((adapter) => {
               if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
                 return null;
               }
+              // if (allKeys.length - 1 === index && isOthersLoading) setOthersLoading(false);
               const providerIcon = <Image imageId={`login-${adapter}`} />;
 
               return (

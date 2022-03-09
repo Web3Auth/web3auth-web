@@ -141,7 +141,7 @@
     flex-direction: column;
 }
 
-.w3a-modal__loader-info {
+#w3a-modal .w3a-modal__loader-info {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -451,6 +451,7 @@
 
 #w3a-modal .w3a-external-container {
     display: block;
+    margin-bottom: 34px;
 }
 
 #w3a-modal .w3a-external-container.w3a-external-container--hidden {
@@ -504,7 +505,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-    padding: 10px 20px;
+    padding: 10px;
     background: #ffffff;
     border-radius: 10px;
     color: var(--text-color1);
@@ -585,6 +586,188 @@
 #w3a-modal .w3a-footer__secured > img {
     height: 14px;
     width: auto;
+}
+
+/* Loader Bridge */
+#w3a-modal .w3a-modal__loader-bridge {
+    display: flex;
+    margin-bottom: 14px;
+}
+
+#w3a-modal .w3a-modal__loader-bridge-message span {
+    text-transform: capitalize;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo {
+    display: flex;
+    padding: 8px;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo img {
+    width: 64px;
+    height: auto;
+}
+
+#w3a-modal .w3a-modal__loader-adapter img {
+    width: 84px;
+    height: auto;
+}
+
+#w3a-modal .w3a-modal__connector {
+    display: flex;
+    align-items: center;
+}
+
+.w3a-modal__connector-beat {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.w3a-modal__connector-beat div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #808080;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.w3a-modal__connector-beat div:nth-child(1) {
+    left: 8px;
+    animation: beat1 2.4s infinite;
+}
+
+.w3a-modal__connector-beat div:nth-child(2) {
+    left: 8px;
+    animation: beat2 2.4s infinite;
+}
+
+.w3a-modal__connector-beat div:nth-child(3) {
+    left: 8px;
+    animation: beat3 2.4s infinite;
+}
+
+.w3a-modal__connector-beat div:nth-child(4) {
+    left: 32px;
+    animation: beat4 2.4s infinite;
+}
+
+.w3a-modal__connector-beat div:nth-child(5) {
+    left: 56px;
+    animation: beat5 2.4s infinite;
+}
+
+@keyframes beat1 {
+    0% {
+        transform: scale(0);
+    }
+
+    25% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+
+    75% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes beat2 {
+    0% {
+        transform: scale(0);
+    }
+
+    25% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: translate(24px, 0);
+    }
+
+    75% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(0);
+    }
+}
+
+@keyframes beat3 {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(24px, 0);
+    }
+
+    50% {
+        transform: translate(48px, 0);
+    }
+
+    75% {
+        transform: translate(24px, 0);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes beat4 {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(24px, 0);
+    }
+
+    50% {
+        transform: translate(24px, 0) scale(0);
+    }
+
+    75% {
+        transform: translate(24px, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes beat5 {
+    0% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(0);
+    }
+
+    75% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* LIGHT MODE */

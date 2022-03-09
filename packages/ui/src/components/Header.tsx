@@ -4,10 +4,7 @@ import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
 import Image from "./Image";
 
-const DEFAULT_LOGO_URL = {
-  light: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
-  dark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
-};
+const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface HeaderProps {
   appLogo?: string;
@@ -16,7 +13,7 @@ interface HeaderProps {
 
 function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
-  const { appLogo = DEFAULT_LOGO_URL[isDark ? "dark" : "light"], onClose } = props;
+  const { appLogo = DEFAULT_LOGO_URL, onClose } = props;
 
   const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 
