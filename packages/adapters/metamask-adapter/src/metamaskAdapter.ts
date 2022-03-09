@@ -14,7 +14,6 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
-  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -29,7 +28,6 @@ interface EthereumProvider extends SafeEventEmitterProvider {
 }
 export interface MetamaskAdapterOptions {
   chainConfig?: CustomChainConfig;
-  enableLogging?: boolean;
 }
 
 class MetamaskAdapter extends BaseAdapter<void> {
@@ -49,8 +47,6 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
-    if (adapterOptions.enableLogging) log.enableAll();
-    else log.disableAll();
     this.chainConfig = adapterOptions.chainConfig || null;
   }
 

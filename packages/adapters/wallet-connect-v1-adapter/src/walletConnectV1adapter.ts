@@ -52,8 +52,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
-    if (options.enableLogging) log.enableAll();
-    else log.disableAll();
     this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig || null;
   }

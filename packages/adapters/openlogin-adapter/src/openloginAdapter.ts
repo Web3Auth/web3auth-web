@@ -54,8 +54,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   constructor(params: OpenloginAdapterOptions) {
     super();
-    if (params.enableLogging) log.enableAll();
-    else log.disableAll();
     log.debug("const openlogin adapter", params);
     const defaultOptions = getOpenloginDefaultOptions(params.chainConfig?.chainNamespace, params.chainConfig?.chainId);
     this.openloginOptions = {

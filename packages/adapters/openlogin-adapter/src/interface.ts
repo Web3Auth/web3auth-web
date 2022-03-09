@@ -7,5 +7,4 @@ export interface OpenloginAdapterOptions {
   chainConfig?: CustomChainConfig;
   adapterSettings?: OpenLoginOptions;
   loginSettings?: LoginSettings;
-  enableLogging?: boolean;
 }

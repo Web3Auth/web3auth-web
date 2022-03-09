@@ -7,12 +7,6 @@ export interface UIConfig {
   adapterListener: SafeEventEmitter;
   theme?: "light" | "dark";
   loginMethodsOrder?: string[];
-  /**
-   * setting to true will enable logs
-   *
-   * @defaultValue false
-   */
-  enableLogging?: boolean;
 }
 
 export const LOGIN_MODAL_EVENTS = {

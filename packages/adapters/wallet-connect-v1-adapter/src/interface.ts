@@ -4,5 +4,4 @@ import { CustomChainConfig } from "@web3auth/base";
 export interface WalletConnectV1AdapterOptions {
   adapterSettings?: IWalletConnectOptions;
   chainConfig?: CustomChainConfig;
-  enableLogging?: boolean;
 }

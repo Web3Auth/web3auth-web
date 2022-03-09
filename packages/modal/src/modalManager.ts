@@ -140,7 +140,6 @@ export class Web3Auth extends Web3AuthCore {
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
         // if adapter is not configured and some default configuration is available, use it.
         const ad = await getDefaultAdapterModule({
-          enableLogging: this.options.enableLogging,
           name: adapterName,
           customChainConfig: this.options.chainConfig,
           clientId: this.options.clientId,

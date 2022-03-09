@@ -26,7 +26,6 @@ import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solan
 import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
-  enableLogging?: boolean;
 }
 
 export class PhantomAdapter extends BaseAdapter<void> {
@@ -48,8 +47,6 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   constructor(options: PhantomAdapterOptions = {}) {
     super();
-    if (options.enableLogging) log.enableAll();
-    else log.disableAll();
     this.chainConfig = options.chainConfig || null;
   }
 
