@@ -6,6 +6,7 @@ import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
@@ -22,7 +23,6 @@ import {
 } from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
-import log from "./loglevel";
 import { getAdapterSocialLogins } from "./utils";
 
 export interface UIConfig {

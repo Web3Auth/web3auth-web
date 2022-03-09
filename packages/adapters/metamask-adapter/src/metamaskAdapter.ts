@@ -14,14 +14,13 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-
-import log from "./loglevel";
 
 interface EthereumProvider extends SafeEventEmitterProvider {
   isMetaMask?: boolean;

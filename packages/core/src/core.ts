@@ -9,6 +9,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  log,
   SafeEventEmitterProvider,
   storageAvailable,
   UserInfo,
@@ -16,8 +17,6 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-
-import log from "./loglevel";
 
 export interface Web3AuthCoreOptions {
   /**

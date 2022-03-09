@@ -14,6 +14,7 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -22,8 +23,6 @@ import {
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
-
-import log from "./loglevel";
 
 export interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;

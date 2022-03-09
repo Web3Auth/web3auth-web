@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^1.5.0",
-    "ts-custom-error": "^3.2.0"
+    "ts-custom-error": "^3.2.0",
+    "loglevel": "^1.8.0"
   },
   "devDependencies": {
     "@toruslabs/openlogin": "^1.5.0",

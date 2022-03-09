@@ -1,7 +1,6 @@
-import { IAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS } from "./config";
-import log from "./loglevel";
 
 export const getAdapterSocialLogins = (
   adapterName: string,

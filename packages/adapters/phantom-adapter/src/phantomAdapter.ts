@@ -13,6 +13,7 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -22,7 +23,6 @@ import {
 } from "@web3auth/base";
 import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solana-provider";
 
-import log from "./loglevel";
 import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;

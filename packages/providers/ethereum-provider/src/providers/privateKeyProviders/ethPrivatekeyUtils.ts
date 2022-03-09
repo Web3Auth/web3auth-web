@@ -13,10 +13,9 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig, log } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
-import log from "loglevel";
 
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";

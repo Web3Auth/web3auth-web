@@ -13,6 +13,7 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -24,7 +25,6 @@ import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
 import type { LoginSettings, OpenloginAdapterOptions } from "./interface";
-import log from "./loglevel";
 
 export interface OpenloginLoginParams {
   login_hint: string;

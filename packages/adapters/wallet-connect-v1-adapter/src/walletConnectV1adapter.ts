@@ -14,6 +14,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   isHexStrict,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -25,7 +26,6 @@ import {
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WalletConnectV1AdapterOptions } from "./interface";
-import log from "./loglevel";
 
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
