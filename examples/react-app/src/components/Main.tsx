@@ -1,8 +1,9 @@
+import { WALLET_ADAPTERS } from "@web3auth/base";
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction } = useWeb3Auth();
+  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
 
   const loggedInView = (
     <>
@@ -18,9 +19,12 @@ const Main = () => {
       <button onClick={signMessage} className={styles.card}>
         Sign Message
       </button>
-      <button onClick={signTransaction} className={styles.card}>
-        Sign Transaction
-      </button>
+      {
+        (web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") &&
+        (<button onClick={signTransaction} className={styles.card}>
+          Sign Transaction
+      </button>)
+      }
       <button onClick={signAndSendTransaction} className={styles.card}>
         Sign and Send Transaction
       </button>

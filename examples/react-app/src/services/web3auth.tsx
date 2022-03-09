@@ -11,6 +11,7 @@ export interface IWeb3AuthContext {
   provider: IWalletProvider | null;
   isLoading: boolean;
   user: unknown;
+  chain: string;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   getUserInfo: () => Promise<any>;
@@ -26,6 +27,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   provider: null,
   isLoading: false,
   user: null,
+  chain: "",
   login: async () => {},
   logout: async () => {},
   getUserInfo: async () => {},
@@ -148,7 +150,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.getAccounts();
+    await provider.getAccounts();
   };
 
   const getBalance = async () => {
@@ -157,7 +159,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.getBalance();
+    await provider.getBalance();
   };
 
   const signMessage = async () => {
@@ -166,7 +168,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.signMessage();
+    await provider.signMessage();
   };
 
   const signTransaction = async () => {
@@ -175,7 +177,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.signTransaction();
+    await provider.signTransaction();
   };
 
   const signAndSendTransaction = async () => {
@@ -184,7 +186,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.signAndSendTransaction();
+    await provider.signAndSendTransaction();
   };
 
   const uiConsole = (...args: unknown[]): void => {
@@ -196,6 +198,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   const contextProvider = {
     web3Auth,
+    chain,
     provider,
     user,
     isLoading,

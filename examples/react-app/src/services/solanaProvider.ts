@@ -1,10 +1,16 @@
-import { SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { SolanaWallet } from "@web3auth/solana-provider";
 import { IWalletProvider } from "./walletProvider";
 
 const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const solanaWallet = new SolanaWallet(provider);
+
+  const getConnection = async (): Promise<Connection> => {
+    const connectionConfig = await solanaWallet.request<CustomChainConfig>({ method: "solana_provider_config", params: [] });
+    const conn = new Connection(connectionConfig.rpcTarget);
+    return conn
+  }
 
   const getAccounts = async (): Promise<string[]> => {
     try {
@@ -20,8 +26,9 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
 
   const getBalance = async () => {
     try {
+      const conn = await getConnection();
       const accounts = await solanaWallet.requestAccounts();
-      const balance = await solanaWallet.request({ method: "getBalance", params: accounts });
+      const balance = await conn.getBalance(new PublicKey(accounts[0]));
       uiConsole("Solana balance", balance);
     } catch (error) {
       console.error("Error", error);
@@ -42,7 +49,7 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
 
   const signAndSendTransaction = async (): Promise<void> => {
     try {
-      const conn = new Connection("https://api.devnet.solana.com");
+      const conn = await getConnection();
       const solWeb3 = new SolanaWallet(provider);
       const pubKey = await solWeb3.requestAccounts();
       const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
@@ -62,7 +69,7 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
   
   const signTransaction = async ():  Promise<void> => {
     try {
-      const conn = new Connection("https://api.devnet.solana.com");
+      const conn = await getConnection();
       const solWeb3 = new SolanaWallet(provider);
       const pubKey = await solWeb3.requestAccounts();
       const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;

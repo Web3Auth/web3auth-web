@@ -73,3 +73,17 @@ export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: 
     uiConsole("error", error);
   }
 };
+
+export const signTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+  try {
+    const web3 = new Web3(provider as any);
+    const accounts = await web3.eth.getAccounts();
+    console.log("pubKey", accounts);
+    // only supported with social logins (openlogin adapter)
+    const txRes = await web3.eth.signTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+    uiConsole("txRes", txRes);
+  } catch (error) {
+    console.log("error", error);
+    uiConsole("error", error);
+  }
+};

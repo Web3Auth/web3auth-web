@@ -5,14 +5,14 @@
         fontSize: '12px',
       }"
     >
+      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin'" @click="onSignTx" style="cursor: pointer">Sign Transaction</button>
+
       <button class="rpcBtn" @click="onSendEth" style="cursor: pointer">Send Eth</button>
       <button class="rpcBtn" @click="onSignEthMessage" style="cursor: pointer">Sign eth message</button>
       <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
       <button class="rpcBtn" @click="getConnectedChainId" style="cursor: pointer">Get chainId</button>
       <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'custom-auth'" @click="addChain" style="cursor: pointer">
-        Add Chain
-      </button>
+      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin'" @click="addChain" style="cursor: pointer">Add Chain</button>
       <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'metamask'" @click="switchChain" style="cursor: pointer">
         Switch Chain
       </button>
@@ -38,7 +38,7 @@
 import { DEFAULT_INFURA_ID } from "@web3auth/base";
 import Vue from "vue";
 
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage } from "../lib/eth";
+import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../lib/eth";
 
 export default Vue.extend({
   name: "EthRpc",
@@ -54,6 +54,9 @@ export default Vue.extend({
   methods: {
     async onSendEth() {
       await sendEth(this.provider, this.console);
+    },
+    async onSignTx() {
+      await signTransaction(this.provider, this.console);
     },
     async onSignEthMessage() {
       await signEthMessage(this.provider, this.console);
