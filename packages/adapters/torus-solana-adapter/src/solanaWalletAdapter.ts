@@ -22,13 +22,15 @@ import {
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
-import log from "loglevel";
+
+import log from "./loglevel";
 
 export interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  enableLogging?: boolean;
 }
 type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
@@ -57,6 +59,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   constructor(params: SolanaWalletOptions = {}) {
     super();
+    if (params.enableLogging) log.enableAll();
+    else log.disableAll();
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};

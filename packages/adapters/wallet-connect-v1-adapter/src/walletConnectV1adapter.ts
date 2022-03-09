@@ -23,9 +23,9 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
-import log from "loglevel";
 
 import { WalletConnectV1AdapterOptions } from "./interface";
+import log from "./loglevel";
 
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
@@ -52,6 +52,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
+    if (options.enableLogging) log.enableAll();
+    else log.disableAll();
     this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig || null;
   }

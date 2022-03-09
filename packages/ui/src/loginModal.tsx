@@ -12,12 +12,12 @@ import {
   WalletConnectV1Data,
   Web3AuthError,
 } from "@web3auth/base";
-import log from "loglevel";
 import { render } from "react-dom";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+import log from "./loglevel";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(): HTMLDivElement {

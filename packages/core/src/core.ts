@@ -16,7 +16,8 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import log from "loglevel";
+
+import log from "./loglevel";
 
 export interface Web3AuthCoreOptions {
   /**

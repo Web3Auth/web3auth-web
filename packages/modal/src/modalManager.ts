@@ -12,7 +12,6 @@ import {
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import log from "loglevel";
 
 import {
   defaultEvmDappModalConfig,
@@ -23,6 +22,7 @@ import {
 } from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
+import log from "./loglevel";
 import { getAdapterSocialLogins } from "./utils";
 
 export interface UIConfig {
@@ -140,6 +140,7 @@ export class Web3Auth extends Web3AuthCore {
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
         // if adapter is not configured and some default configuration is available, use it.
         const ad = await getDefaultAdapterModule({
+          enableLogging: this.options.enableLogging,
           name: adapterName,
           customChainConfig: this.options.chainConfig,
           clientId: this.options.clientId,

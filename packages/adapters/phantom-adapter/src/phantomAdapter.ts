@@ -21,11 +21,12 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solana-provider";
-import log from "loglevel";
 
+import log from "./loglevel";
 import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
+  enableLogging?: boolean;
 }
 
 export class PhantomAdapter extends BaseAdapter<void> {
@@ -47,6 +48,8 @@ export class PhantomAdapter extends BaseAdapter<void> {
 
   constructor(options: PhantomAdapterOptions = {}) {
     super();
+    if (options.enableLogging) log.enableAll();
+    else log.disableAll();
     this.chainConfig = options.chainConfig || null;
   }
 

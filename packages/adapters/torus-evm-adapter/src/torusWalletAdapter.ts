@@ -21,13 +21,15 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import log from "loglevel";
+
+import log from "./loglevel";
 
 export interface TorusWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  enableLogging?: boolean;
 }
 
 export class TorusWalletAdapter extends BaseAdapter<never> {
@@ -53,6 +55,8 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
 
   constructor(params: TorusWalletOptions = {}) {
     super();
+    if (params.enableLogging) log.enableAll();
+    else log.disableAll();
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};

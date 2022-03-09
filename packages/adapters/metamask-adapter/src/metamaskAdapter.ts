@@ -21,6 +21,8 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 
+import log from "./loglevel";
+
 interface EthereumProvider extends SafeEventEmitterProvider {
   isMetaMask?: boolean;
   isConnected: () => boolean;
@@ -28,6 +30,7 @@ interface EthereumProvider extends SafeEventEmitterProvider {
 }
 export interface MetamaskAdapterOptions {
   chainConfig?: CustomChainConfig;
+  enableLogging?: boolean;
 }
 
 class MetamaskAdapter extends BaseAdapter<void> {
@@ -47,6 +50,8 @@ class MetamaskAdapter extends BaseAdapter<void> {
 
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
+    if (adapterOptions.enableLogging) log.enableAll();
+    else log.disableAll();
     this.chainConfig = adapterOptions.chainConfig || null;
   }
 
