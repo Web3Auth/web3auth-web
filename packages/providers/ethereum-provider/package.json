@@ -22,9 +22,9 @@
     "@ethereumjs/common": "^2.6.2",
     "@ethereumjs/tx": "^3.5.0",
     "@metamask/eth-sig-util": "^4.0.0",
-    "@toruslabs/base-controllers": "^1.6.3",
+    "@toruslabs/base-controllers": "^1.6.5",
     "@toruslabs/openlogin-jrpc": "^1.5.0",
-    "@walletconnect/types": "~1.7.1",
+    "@walletconnect/types": "~1.7.4",
     "@web3auth/base": "^0.3.1",
     "@web3auth/base-provider": "^0.3.1",
     "eth-rpc-errors": "^4.0.3",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",
     "@types/node": "^16",
-    "lint-staged": "^12.3.4"
+    "lint-staged": "^12.3.5"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

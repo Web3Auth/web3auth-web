@@ -31,9 +31,12 @@
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.6",
-    "lint-staged": "^12.3.4"
+    "lint-staged": "^12.3.5"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^1.5.0",
