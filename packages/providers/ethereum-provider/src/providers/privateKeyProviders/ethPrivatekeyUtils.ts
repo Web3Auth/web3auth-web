@@ -26,8 +26,8 @@ async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Par
 
   const customChainParams = {
     name,
-    chainId: chainId === "loading" ? 0 : parseInt(chainId, 16),
-    networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 10),
+    chainId: !chainId || chainId === "loading" ? 0 : parseInt(chainId, 16),
+    networkId: !chainId || chainId === "loading" ? 0 : Number.parseInt(chainId, 10),
     hardfork,
   };
 
@@ -56,7 +56,7 @@ export function getProviderHandlers({
         method: "eth_sendRawTransaction",
         params: [`0x${signedTx.toString("hex")}`],
       });
-      return txHash;
+      return txHash as string;
     },
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
       const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);

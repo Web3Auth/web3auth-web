@@ -9,13 +9,14 @@
     <button class="rpcBtn" @click="onSignMessage" style="cursor: pointer">Sign Message</button>
     <button class="rpcBtn" @click="onSignAllTransactions" style="cursor: pointer">Sign Multiple Transactions</button>
     <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
+    <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
   </section>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
-import { getAccounts, signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../lib/sol";
+import { getAccounts, getBalance, signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../lib/sol";
 
 export default Vue.extend({
   name: "SolanaRpc",
@@ -38,6 +39,9 @@ export default Vue.extend({
     },
     async onGetAccounts() {
       await getAccounts(this.provider, this.console);
+    },
+    async onGetBalance() {
+      return await getBalance(this.provider, this.console);
     },
   },
 });
