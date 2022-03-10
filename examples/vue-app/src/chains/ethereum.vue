@@ -11,7 +11,6 @@
       <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button class="rpcBtn" v-if="provider" @click="showWalletConnect" style="cursor: pointer">Show Wallet Connect</button>
       <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
       <span>{{ connecting }}</span>
 
@@ -26,7 +25,6 @@
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
@@ -45,15 +43,7 @@ const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chai
   ticker: "ETH",
   tickerName: "Ethereum",
 };
-const torusPlugin = new TorusWalletConnectorPlugin({
-  torusWalletOpts: {},
-  walletInitOptions: {
-    useWalletConnect: true,
-    buildEnv: "development",
-    enableLogging: true,
-    showTorusButton: true,
-  },
-});
+
 
 export default Vue.extend({
   name: "EthereumChain",
@@ -124,7 +114,6 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP" });
 
-        await this.web3auth.addPlugin(torusPlugin);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork,
@@ -146,7 +135,7 @@ export default Vue.extend({
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
-        this.provider = torusPlugin.torusWalletInstance?.provider || web3auth.provider;
+        this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
@@ -171,7 +160,7 @@ export default Vue.extend({
     async connect() {
       try {
         const web3authProvider = await this.web3auth.connect();
-        this.provider = torusPlugin.torusWalletInstance?.provider || web3authProvider;
+        this.provider = web3authProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
@@ -185,9 +174,6 @@ export default Vue.extend({
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
       this.console(userInfo);
-    },
-    async showWalletConnect() {
-      await torusPlugin.showWalletConnectScanner();
     },
     console(...args: unknown[]): void {
       const el = document.querySelector("#console>p");

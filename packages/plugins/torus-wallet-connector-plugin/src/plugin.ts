@@ -11,7 +11,7 @@ export type ProviderInfo = {
   userInfo?: Omit<UserInfo, "isNewUser">;
 };
 
-export class TorusWalletConnectorPlugin implements IPlugin {
+export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
   name = "TORUS_WALLET_CONNECTOR_PLUGIN";
 
   public torusWalletInstance: TorusEmbed | null = null;
@@ -24,8 +24,14 @@ export class TorusWalletConnectorPlugin implements IPlugin {
 
   private walletInitOptions: TorusParams | null = null;
 
-  constructor(options: { torusWalletOpts?: TorusCtorArgs; walletInitOptions?: TorusParams } = {}) {
-    const { torusWalletOpts = {}, walletInitOptions = {} } = options;
+  constructor(options: { torusWalletOpts?: TorusCtorArgs; walletInitOptions: Partial<TorusParams> & Required<Pick<TorusParams, "whiteLabel">> }) {
+    const { torusWalletOpts = {}, walletInitOptions } = options;
+    const whitelabel = walletInitOptions?.whiteLabel;
+
+    if (!whitelabel) throw new Error("whiteLabel is required");
+    const { logoDark, logoLight } = whitelabel;
+    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whitelabel config");
+
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
     this.walletInitOptions = walletInitOptions;
   }

@@ -41,7 +41,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
-  private plugins: Record<string, IPlugin> = {};
+  private plugins: Record<string, IPlugin<this>> = {};
 
   constructor(options: Web3AuthCoreOptions) {
     super();
@@ -146,7 +146,7 @@ export class Web3AuthCore extends SafeEventEmitter {
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
-  public async addPlugin(plugin: IPlugin): Promise<Web3AuthCore> {
+  public async addPlugin(plugin: IPlugin<this>): Promise<Web3AuthCore> {
     if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
     this.plugins[plugin.name] = plugin;
     await plugin.initWithWeb3Auth(this);

@@ -32,12 +32,13 @@
     "src"
   ],
   "devDependencies": {
-    "lint-staged": "^12.3.4",
-    "@web3auth/core": "^0.3.1"
+    "lint-staged": "^12.3.4"
   },
   "dependencies": {
     "@toruslabs/torus-embed": "file:./toruslabs-torus-embed-1.18.6.tgz",
     "@web3auth/base": "^0.3.1",
+    "@web3auth/base-plugin": "^0.1.0",
+    "@web3auth/core": "^0.3.1",
     "loglevel": "^1.8.0"
   },
   "lint-staged": {
