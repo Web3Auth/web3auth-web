@@ -28,8 +28,7 @@
     "@web3auth/torus-evm-adapter": "^0.3.1",
     "@web3auth/torus-solana-adapter": "^0.3.1",
     "@web3auth/ui": "^0.3.3",
-    "@web3auth/wallet-connect-v1-adapter": "^0.3.1",
-    "loglevel": "^1.8.0"
+    "@web3auth/wallet-connect-v1-adapter": "^0.3.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^5.5.0",
