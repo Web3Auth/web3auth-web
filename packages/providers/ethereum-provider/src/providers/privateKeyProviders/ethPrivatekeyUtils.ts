@@ -43,16 +43,16 @@ async function signTx(
   providerEngineProxy: SafeEventEmitterProvider,
   chainConfig: Partial<CustomChainConfig>
 ): Promise<Buffer> {
-  if (txParams.nonce === undefined) throw ethErrors.rpc.invalidInput("Missing nonce in txParams");
-  if (txParams.gas === undefined && txParams.gasLimit === undefined) throw ethErrors.rpc.invalidInput("Missing gas/gasLimit in txParams");
-  if (txParams.gasPrice === undefined && txParams.maxFeePerGas === undefined)
-    throw ethErrors.rpc.invalidInput("Either gasPrice or maxFeePerGas is required in txParams");
-
   if (!providerEngineProxy)
     throw ethErrors.provider.custom({
       message: "Provider is not initialized",
       code: 4902,
     });
+
+  if (txParams.nonce === undefined) throw ethErrors.rpc.invalidInput("Missing nonce in txParams");
+  if (txParams.gas === undefined && txParams.gasLimit === undefined) throw ethErrors.rpc.invalidInput("Missing gas/gasLimit in txParams");
+  if (txParams.gasPrice === undefined && txParams.maxFeePerGas === undefined)
+    throw ethErrors.rpc.invalidInput("Either gasPrice or maxFeePerGas is required in txParams");
 
   if (txParams.maxFeePerGas && !txParams.maxPriorityFeePerGas) {
     txParams.maxPriorityFeePerGas = txParams.maxFeePerGas;
