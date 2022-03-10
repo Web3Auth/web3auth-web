@@ -27,11 +27,15 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
     - `aud`: firebase project id.
     - `iss`: `https://securetoken.google.com/<firebase-project-id>`
 
-
 - Add your verifier name as a env variable named `REACT_APP_VERIFIER` in env.development file.
 
 
 - To know how above configuration is being used in this example repo, refer to `init()` and `login()` functions in `src/services/web3auth.tsx` file
+
+
+- Your custom verifer configuration should look like the config given in the image below:-
+
+- <img src="https://i.ibb.co/1Jrzph5/Screenshot-2022-03-10-at-1-46-03-AM.png"/>
 
 
 ## How it works?
