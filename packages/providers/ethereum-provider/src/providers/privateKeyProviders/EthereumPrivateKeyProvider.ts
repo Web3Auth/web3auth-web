@@ -3,7 +3,6 @@ import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
-import log from "loglevel";
 
 import {
   AddEthereumChainParameter,
@@ -96,8 +95,6 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     });
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
-    log.debug("this provider", this.provider, chainId, this.state.chainId);
-
     if (this.state.chainId !== chainId) {
       this.provider.emit("chainChanged", chainId);
       this.provider.emit("connect", { chainId });

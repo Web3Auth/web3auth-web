@@ -6,13 +6,13 @@ import {
   BaseAdapterConfig,
   CONNECTED_EVENT_DATA,
   IAdapterDataEvent,
+  log,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletConnectV1Data,
   Web3AuthError,
 } from "@web3auth/base";
-import log from "loglevel";
 import { render } from "react-dom";
 
 import Modal from "./components/Modal";

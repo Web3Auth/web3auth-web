@@ -2,7 +2,6 @@ import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util"
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { IConnector, ITxData } from "@walletconnect/types";
 import { ethErrors } from "eth-rpc-errors";
-import log from "loglevel";
 
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
@@ -36,7 +35,6 @@ export function getProviderHandlers({ connector }: { connector: IConnector }): I
       return result;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessage", msgParams);
       const result = await connector.signTypedData([msgParams.from, msgParams.data]);
       return result;
     },

@@ -1,5 +1,4 @@
-import { ADAPTER_STATUS } from "@web3auth/base";
-import log from "loglevel";
+import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
