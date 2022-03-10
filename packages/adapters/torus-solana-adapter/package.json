@@ -31,11 +31,14 @@
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "devDependencies": {
-    "lint-staged": "^12.3.4"
+    "lint-staged": "^12.3.5"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.1.4",
+    "@toruslabs/solana-embed": "^0.1.5",
     "@web3auth/base": "^0.3.1",
     "@web3auth/base-provider": "^0.3.1",
     "@web3auth/solana-provider": "^0.3.1"
