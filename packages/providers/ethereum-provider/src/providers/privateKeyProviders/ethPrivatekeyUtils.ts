@@ -20,18 +20,56 @@ import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
 
-async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Partial<CustomChainConfig>) {
+const TRANSACTION_ENVELOPE_TYPES = {
+  LEGACY: "0x0",
+  ACCESS_LIST: "0x1",
+  FEE_MARKET: "0x2",
+};
+async function getCommonConfiguration(supportsEIP1559, chainConfig) {
   const { displayName: name, chainId } = chainConfig;
   const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
-
   const customChainParams = {
     name,
-    chainId: !chainId || chainId === "loading" ? 0 : parseInt(chainId, 16),
-    networkId: !chainId || chainId === "loading" ? 0 : Number.parseInt(chainId, 10),
-    hardfork,
+    chainId: chainId === "loading" ? 0 : parseInt(chainId, 16),
+    networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
+    defaultHardfork: hardfork,
   };
-
   return Common.custom(customChainParams);
+}
+
+async function signTx(
+  txParams: TransactionParams & { gas?: string },
+  privKey: string,
+  providerEngineProxy: SafeEventEmitterProvider,
+  chainConfig: Partial<CustomChainConfig>
+): Promise<Buffer> {
+  if (txParams.nonce === undefined) throw ethErrors.rpc.invalidInput("Missing nonce in txParams");
+  if (txParams.gas === undefined && txParams.gasLimit === undefined) throw ethErrors.rpc.invalidInput("Missing gas/gasLimit in txParams");
+  if (txParams.gasPrice === undefined && txParams.maxFeePerGas === undefined)
+    throw ethErrors.rpc.invalidInput("Either gasPrice or maxFeePerGas is required in txParams");
+
+  if (!providerEngineProxy)
+    throw ethErrors.provider.custom({
+      message: "Provider is not initialized",
+      code: 4902,
+    });
+
+  if (txParams.maxFeePerGas && !txParams.maxPriorityFeePerGas) {
+    txParams.maxPriorityFeePerGas = txParams.maxFeePerGas;
+  }
+
+  // ethereumjs-tx expects gasLimit field but web3js sends gas field. :/
+  if (txParams.gas) txParams.gasLimit = txParams.gas;
+
+  const eip1559Compatibility = !!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas;
+  txParams.type = eip1559Compatibility ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY;
+  const common = await getCommonConfiguration(eip1559Compatibility, chainConfig);
+
+  const unsignedEthTx = TransactionFactory.fromTxData(txParams, {
+    common,
+  });
+  const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+  return signedTx;
 }
 
 export function getProviderHandlers({
@@ -46,22 +84,18 @@ export function getProviderHandlers({
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
     getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
-    processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
+    processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-      const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
-      const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
-      const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+      const signedTx = await signTx(txParams, privKey, providerEngineProxy, chainConfig);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
-        params: [`0x${signedTx.toString("hex")}`],
+        params: ["0x".concat(signedTx.toString("hex"))],
       });
-      return txHash as string;
+      return txHash;
     },
-    processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
-      const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
-      const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+    processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+      const providerEngineProxy = getProviderEngineProxy();
+      const signedTx = await signTx(txParams, privKey, providerEngineProxy, chainConfig);
       return `0x${signedTx.toString("hex")}`;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
@@ -74,16 +108,19 @@ export function getProviderHandlers({
       return sig;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessage", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V1 });
       return sig;
     },
     processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessageV3", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V3 });
       return sig;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessageV4", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V4 });
       return sig;
@@ -93,6 +130,7 @@ export function getProviderHandlers({
       return getEncryptionPublicKey(privKey);
     },
     processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
+      log.info("processDecryptMessage", msgParams);
       const stripped = stripHexPrefix(msgParams.data);
       const buff = Buffer.from(stripped, "hex");
       const decrypted = decrypt({ encryptedData: JSON.parse(buff.toString("utf8")) as EthEncryptedData, privateKey: privKey });
