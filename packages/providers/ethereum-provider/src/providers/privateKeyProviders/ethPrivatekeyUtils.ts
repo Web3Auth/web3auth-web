@@ -25,7 +25,7 @@ const TRANSACTION_ENVELOPE_TYPES = {
   ACCESS_LIST: "0x1",
   FEE_MARKET: "0x2",
 };
-async function getCommonConfiguration(supportsEIP1559, chainConfig) {
+async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Partial<CustomChainConfig>): Promise<Common> {
   const { displayName: name, chainId } = chainConfig;
   const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
   const customChainParams = {
