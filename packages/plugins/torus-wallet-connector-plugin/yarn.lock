@@ -219,7 +219,7 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-jrpc@^1.5.0", "@toruslabs/openlogin-jrpc@^1.6.0":
+"@toruslabs/openlogin-jrpc@^1.5.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.6.0.tgz#579307a97d7a9d173863c6dcd4dc178e83d4a663"
   integrity sha512-lUpzGhmg1x0TwAxS1FE9y7dDbqNCACi2cXyNEaQdvHRQYLQnN46cq75nAAbLKCjKwM5ThhrRpO+p/iH9ESjgYQ==
@@ -312,23 +312,6 @@
   integrity sha512-Da66lEIFeIz9ltsdMZcpQvmrmmoqrfju8pm1BH8WbYjZSwUgCwXLb9C+9XYogwBITnbsSaMdVPb2ekf7TV+03w==
   dependencies:
     "@types/node" "*"
-
-"@web3auth/base@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/base/-/base-0.5.0.tgz#ca8bd253dca21246a32575204954eb17a0f45fa6"
-  integrity sha512-eIhMp5HlnWljT0j6Os0Q1NOCLZUpOQdvJosQaG3w7u2iSnV9Q6O2Fsi7znEse9zI6+BPnc8b1hVJvBipgIeQ4Q==
-  dependencies:
-    "@toruslabs/openlogin-jrpc" "^1.6.0"
-    loglevel "^1.8.0"
-    ts-custom-error "^3.2.0"
-
-"@web3auth/core@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/core/-/core-0.5.0.tgz#28e7fba6c7078ee0c5a705154edb9701e44bc855"
-  integrity sha512-CD70cwUf+aKN0GHS9du0Lk53nODuG1ATMI3yYPYjQZ7oD1fDZN4g3RljU5XCTh1jnN+fIiHzm0tzqOFpNqKJWQ==
-  dependencies:
-    "@toruslabs/openlogin-jrpc" "^1.6.0"
-    "@web3auth/base" "^0.5.0"
 
 acorn@^8.4.1:
   version "8.7.0"
@@ -702,9 +685,9 @@ es-to-primitive@^1.2.1:
     is-symbol "^1.0.2"
 
 es5-ext@^0.10.35, es5-ext@^0.10.50:
-  version "0.10.57"
-  resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.57.tgz#440574256186e2bf22223d673087caae83edabd2"
-  integrity sha512-L7cCNoPwTkAp7IBHxrKLsh7NKiVFkcdxlP9vbVw9QUvb7gF0Mz9bEBN0WY9xqdTjGF907EMT/iG013vnbqwu1Q==
+  version "0.10.58"
+  resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.58.tgz#5b97d94236285fb87c8ffc782cf42eb0a25d2ae0"
+  integrity sha512-LHO+KBBaHGwjy32ibSaMY+ZzjpC4K4I5bPoijICMBL7gXEXfrEUrzssmNP+KigbQEp1dRUnGkry/vUnxOqptLQ==
   dependencies:
     es6-iterator "^2.0.3"
     es6-symbol "^3.1.3"
@@ -1626,11 +1609,6 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
-
-ts-custom-error@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ts-custom-error/-/ts-custom-error-3.2.0.tgz#ff8f80a3812bab9dc448536312da52dce1b720fb"
-  integrity sha512-cBvC2QjtvJ9JfWLvstVnI45Y46Y5dMxIaG1TDMGAD/R87hpvqFL+7LhvUDhnRCfOnx/xitollFWWvUKKKhbN0A==
 
 tslib@^2.1.0:
   version "2.3.1"

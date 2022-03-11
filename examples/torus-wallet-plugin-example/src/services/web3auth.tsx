@@ -86,7 +86,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setUser(null);
       });
 
-      web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
+      web3auth.on(ADAPTER_EVENTS.ERRORED, (error: unknown) => {
         console.error("some error or user has cancelled login request", error);
       });
     };
@@ -111,7 +111,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
             },
             useWalletConnect: true,
-            buildEnv: "development",
+            buildEnv: "lrc",
             enableLogging: true,
             showTorusButton: true,
           },
@@ -120,7 +120,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         setTorusPlugin(torusPlugin);
 
-        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        const adapter = new OpenloginAdapter({ chainConfig: null, adapterSettings: { network: web3AuthNetwork, clientId } });
         web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance, torusPlugin);
         setWeb3Auth(web3AuthInstance);
