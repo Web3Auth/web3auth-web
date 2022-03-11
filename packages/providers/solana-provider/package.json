@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/solana-provider",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/solanaProvider.cjs.js",
@@ -19,32 +19,31 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@solana/web3.js": "^1.35.1",
-    "@toruslabs/base-controllers": "^1.6.3",
+    "@solana/web3.js": "^1.36.0",
+    "@toruslabs/base-controllers": "^1.6.5",
     "@toruslabs/openlogin-jrpc": "^1.5.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
-    "@web3auth/base": "^0.3.1",
-    "@web3auth/base-provider": "^0.3.1",
+    "@web3auth/base": "^0.4.0",
+    "@web3auth/base-provider": "^0.4.0",
     "bn.js": "^5.2.0",
     "bs58": "^4.0.1",
     "eth-rpc-errors": "^4.0.3",
-    "json-rpc-random-id": "^1.0.1",
-    "loglevel": "^1.8.0"
+    "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
     "@types/bs58": "^4.0.1",
     "@types/json-rpc-random-id": "^1.0.1",
     "@types/node": "^16",
-    "lint-staged": "^12.3.4"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "lint-staged": "^12.3.5"
   },
   "files": [
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

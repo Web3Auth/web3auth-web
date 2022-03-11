@@ -6,13 +6,13 @@ import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import log from "loglevel";
 
 import {
   defaultEvmDappModalConfig,
@@ -24,8 +24,6 @@ import {
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 import { getAdapterSocialLogins } from "./utils";
-log.enableAll();
-log.setLevel("debug");
 
 export interface UIConfig {
   /**

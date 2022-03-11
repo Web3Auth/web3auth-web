@@ -1,5 +1,4 @@
-import { BaseAdapterConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import log from "loglevel";
+import { BaseAdapterConfig, log, WALLET_ADAPTERS } from "@web3auth/base";
 import { useEffect, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";

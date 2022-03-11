@@ -31,10 +31,10 @@ import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
 const solanaChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  rpcTarget: "https://api.testnet.solana.com",
-  blockExplorer: "https://explorer.solana.com?cluster=testnet",
-  chainId: "0x2",
-  displayName: "testnet",
+  rpcTarget: "https://api.devnet.solana.com",
+  blockExplorer: "https://explorer.solana.com?cluster=devnet",
+  chainId: "0x3",
+  displayName: "devnet",
   ticker: "SOL",
   tickerName: "solana",
 };

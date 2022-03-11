@@ -13,6 +13,7 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -21,7 +22,6 @@ import {
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import merge from "lodash.merge";
-import log from "loglevel";
 
 import { getOpenloginDefaultOptions } from "./config";
 import type { LoginSettings, OpenloginAdapterOptions } from "./interface";

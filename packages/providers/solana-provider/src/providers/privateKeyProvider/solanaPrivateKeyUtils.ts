@@ -1,4 +1,4 @@
-import { Keypair, Message, Transaction } from "@solana/web3.js";
+import { Keypair, Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
 import { SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
@@ -16,7 +16,7 @@ export async function getProviderHandlers({
 }): Promise<IProviderHandlers> {
   const transactionGenerator = (serializedTx: string): Transaction => {
     const decodedTx = bs58.decode(serializedTx);
-    const tx = Transaction.populate(Message.from(decodedTx));
+    const tx = Transaction.from(decodedTx);
     return tx;
   };
   const keyPairGenerator = (): Keypair => {

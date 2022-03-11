@@ -4,12 +4,14 @@ import ethProvider from "./eth-provider";
 import solanaProvider from "./solana-provider";
 
 export interface IWalletProvider {
-  getAccounts: () => Promise<void>;
-  getBalance: () => Promise<void>;
+  getAccounts: () => Promise<any>;
+  getBalance: () => Promise<any>;
+  signAndSendTransaction: () => Promise<void>;
+  signTransaction: () => Promise<void>;
   signMessage: () => Promise<void>;
 }
 
-export const getWalletProvider = (chain: string, provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+export const getWalletProvider = (chain: string, provider: SafeEventEmitterProvider, uiConsole: any): IWalletProvider => {
   if (chain === "solana") {
     return solanaProvider(provider, uiConsole);
   }

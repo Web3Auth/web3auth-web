@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-evm-adapter",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -31,13 +31,15 @@
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "devDependencies": {
-    "lint-staged": "^12.3.4"
+    "lint-staged": "^12.3.5"
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^1.20.4",
-    "@web3auth/base": "^0.3.1",
-    "loglevel": "^1.8.0"
+    "@web3auth/base": "^0.4.0"
   },
   "lint-staged": {
     "!(*d).ts": [
