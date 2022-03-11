@@ -23,7 +23,7 @@
     "@ethereumjs/tx": "^3.5.0",
     "@metamask/eth-sig-util": "^4.0.0",
     "@toruslabs/base-controllers": "^1.6.5",
-    "@toruslabs/openlogin-jrpc": "^1.5.0",
+    "@toruslabs/openlogin-jrpc": "^1.6.0",
     "@walletconnect/types": "~1.7.4",
     "@web3auth/base": "^0.4.0",
     "@web3auth/base-provider": "^0.4.0",

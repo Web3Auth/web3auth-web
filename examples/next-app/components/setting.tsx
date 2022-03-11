@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import styles from "../styles/Home.module.css";
@@ -6,8 +6,8 @@ import { Web3AuthContext } from "../services/web3auth";
 import { useContext } from "react";
 
 interface IProps {
-  setNetwork: (network: WEB3AUTH_NETWORK_TYPE) => void;
-  setChain: (chain: CHAIN_CONFIG_TYPE) => void;
+  setNetwork: Dispatch<SetStateAction<WEB3AUTH_NETWORK_TYPE>>;
+  setChain: Dispatch<SetStateAction<CHAIN_CONFIG_TYPE>>;
 }
 
 const Setting = ({ setNetwork, setChain }: IProps) => {

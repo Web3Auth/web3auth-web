@@ -58,7 +58,7 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.5.0",
+    "@toruslabs/openlogin-jrpc": "^1.6.0",
     "@web3auth/base": "^0.4.0",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
