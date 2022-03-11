@@ -18,7 +18,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import type { IPlugin } from "@web3auth/base-plugin";
+import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
 export interface Web3AuthCoreOptions {
   /**
@@ -157,6 +157,11 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   public async addPlugin(plugin: IPlugin<this>): Promise<Web3AuthCore> {
     if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
+    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
+      throw new Error(
+        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.coreOptions.chainConfig.chainNamespace}`
+      );
+
     this.plugins[plugin.name] = plugin;
     await plugin.initWithWeb3Auth(this);
     return this;

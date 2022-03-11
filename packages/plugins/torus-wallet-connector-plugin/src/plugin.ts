@@ -1,6 +1,6 @@
 import TorusEmbed, { LOGIN_TYPE, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import type { IPlugin } from "@web3auth/base-plugin";
+import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthCore } from "@web3auth/core";
 import log from "loglevel";
 
@@ -13,6 +13,8 @@ export type ProviderInfo = {
 
 export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
   name = "TORUS_WALLET_CONNECTOR_PLUGIN";
+
+  readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
   public torusWalletInstance: TorusEmbed | null = null;
 
