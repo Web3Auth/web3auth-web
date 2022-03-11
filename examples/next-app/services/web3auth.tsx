@@ -1,5 +1,5 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import type { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/web3auth";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -9,6 +9,7 @@ export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
   provider: IWalletProvider | null;
   isLoading: boolean;
+  chain: string;
   user: unknown;
   login: () => Promise<void>;
   logout: () => Promise<void>;
@@ -16,12 +17,15 @@ export interface IWeb3AuthContext {
   signMessage: () => Promise<any>;
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
+  signTransaction: () => Promise<void>;
+  signAndSendTransaction: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
   web3Auth: null,
   provider: null,
   isLoading: false,
+  chain: "",
   user: null,
   login: async () => {},
   logout: async () => {},
@@ -29,9 +33,11 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   signMessage: async () => {},
   getAccounts: async () => {},
   getBalance: async () => {},
+  signTransaction: async () => {},
+  signAndSendTransaction: async () => {},
 });
 
-export function useWeb3Auth() {
+export function useWeb3Auth(): IWeb3AuthContext {
   return useContext(Web3AuthContext);
 }
 
@@ -146,7 +152,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.getAccounts();
+    await provider.getAccounts();
   };
 
   const getBalance = async () => {
@@ -155,7 +161,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.getBalance();
+    await provider.getBalance();
   };
 
   const signMessage = async () => {
@@ -164,7 +170,25 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    provider.signMessage();
+    await provider.signMessage();
+  };
+
+  const signTransaction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.signTransaction();
+  };
+
+  const signAndSendTransaction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.signAndSendTransaction();
   };
 
   const uiConsole = (...args: unknown[]): void => {
@@ -176,6 +200,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   const contextProvider = {
     web3Auth,
+    chain,
     provider,
     user,
     isLoading,
@@ -185,6 +210,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getAccounts,
     getBalance,
     signMessage,
+    signTransaction,
+    signAndSendTransaction,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

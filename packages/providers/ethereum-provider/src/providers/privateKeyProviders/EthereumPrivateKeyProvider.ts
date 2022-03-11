@@ -3,7 +3,6 @@ import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
-import log from "loglevel";
 
 import {
   AddEthereumChainParameter,
@@ -87,7 +86,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
     if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
     const network = await this._providerEngineProxy.request<string[], string>({
@@ -96,11 +95,9 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     });
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
-    log.debug("this provider", this.provider, chainId, this.state.chainId);
-
     if (this.state.chainId !== chainId) {
-      this.provider.emit("chainChanged", chainId);
-      this.provider.emit("connect", { chainId });
+      this._providerEngineProxy.emit("chainChanged", chainId);
+      this._providerEngineProxy.emit("connect", { chainId });
     }
     this.update({ chainId });
     return network;

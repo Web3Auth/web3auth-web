@@ -9,6 +9,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  log,
   SafeEventEmitterProvider,
   storageAvailable,
   UserInfo,
@@ -18,7 +19,6 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import type { IPlugin } from "@web3auth/base-plugin";
-import log from "loglevel";
 
 export interface Web3AuthCoreOptions {
   /**
@@ -27,6 +27,13 @@ export interface Web3AuthCoreOptions {
    * @defaultValue mainnet config of provided chainNamespace
    */
   chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
+
+  /**
+   * setting to true will enable logs
+   *
+   * @defaultValue false
+   */
+  enableLogging?: boolean;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -45,6 +52,8 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   constructor(options: Web3AuthCoreOptions) {
     super();
+    if (options.enableLogging) log.enableAll();
+    else log.disableAll();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
 

@@ -119,7 +119,7 @@ export class MainComponent implements OnChanges {
       this.uiConsole("provider is not initialized");
       return;
     }
-    this.provider.getBalance();
+    await this.provider.getBalance();
   }
 
   async getAccount() {
@@ -128,7 +128,7 @@ export class MainComponent implements OnChanges {
       this.uiConsole("provider is not initialized");
       return;
     }
-    this.provider.getAccounts();
+    await this.provider.getAccounts();
   }
 
   async signMessage() {
@@ -137,7 +137,25 @@ export class MainComponent implements OnChanges {
       this.uiConsole("provider is not initialized");
       return;
     }
-    this.provider.signMessage();
+    await this.provider.signMessage();
+  }
+
+  async signTransaction() {
+    console.log("SIGNING MESSAGE");
+    if (!this.provider) {
+      this.uiConsole("provider is not initialized");
+      return;
+    }
+    await this.provider.signTransaction();
+  }
+
+  async signAndSendTransaction() {
+    console.log("SIGNING MESSAGE");
+    if (!this.provider) {
+      this.uiConsole("provider is not initialized");
+      return;
+    }
+    await this.provider.signAndSendTransaction();
   }
 
   uiConsole(...args: unknown[]): void {

@@ -104,7 +104,11 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
+<<<<<<< HEAD
 "@toruslabs/solana-embed@^0.1.4":
+=======
+"@toruslabs/solana-embed@^0.1.5":
+>>>>>>> 7d8c4d062a44d0b2ae0beaa9ccfb77c5395fbbf3
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@toruslabs/solana-embed/-/solana-embed-0.1.5.tgz#3b65090c056e9b6d8552d88bb407f82551a2c5ef"
   integrity sha512-EVqOwqGGDwC1xgfgNv51y+xTy7tsSoZ3DXaCC2lFqWGnKWJ6W17dV4uD7/mBjMmHYUKaq3yJ+EDpnSSZ3xy6Dg==
@@ -841,7 +845,11 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
+<<<<<<< HEAD
 lint-staged@^12.3.4:
+=======
+lint-staged@^12.3.5:
+>>>>>>> 7d8c4d062a44d0b2ae0beaa9ccfb77c5395fbbf3
   version "12.3.5"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.5.tgz#8048ce048c3cac12f57200a06344a54dc91c8fa9"
   integrity sha512-oOH36RUs1It7b9U/C7Nl/a0sLfoIBcMB8ramiB3nuJ6brBqzsWiUAFSR5DQ3yyP/OR7XKMpijtgKl2DV1lQ3lA==

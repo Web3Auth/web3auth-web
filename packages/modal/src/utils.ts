@@ -1,5 +1,4 @@
-import { IAdapter, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
-import log from "loglevel";
+import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS } from "./config";
 

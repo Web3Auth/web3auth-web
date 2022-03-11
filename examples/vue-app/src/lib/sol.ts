@@ -1,6 +1,14 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
+
+const getConnection = async (provider: SafeEventEmitterProvider): Promise<Connection> => {
+  const solanaWallet = new SolanaWallet(provider);
+
+  const connectionConfig = await solanaWallet.request<CustomChainConfig>({ method: "solana_provider_config", params: [] });
+  const conn = new Connection(connectionConfig.rpcTarget);
+  return conn;
+};
 
 function getNewTx(publicKeys, blockhash) {
   const inst = SystemProgram.transfer({
@@ -24,8 +32,10 @@ export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole:
 };
 export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<void> => {
   try {
-    const accounts = await getAccounts(provider, uiConsole);
-    const balance = await provider.request({ method: "getBalance", params: accounts });
+    const conn = await getConnection(provider);
+    const solanaWallet = new SolanaWallet(provider);
+    const accounts = await solanaWallet.requestAccounts();
+    const balance = await conn.getBalance(new PublicKey(accounts[0]));
     uiConsole("balance", balance);
     return;
   } catch (error) {
@@ -36,7 +46,7 @@ export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: 
 
 export const signAndSendTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
   try {
-    const conn = new Connection("https://api.devnet.solana.com");
+    const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const pubKey = await solWeb3.requestAccounts();
     const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
@@ -56,7 +66,7 @@ export const signAndSendTransaction = async (provider: SafeEventEmitterProvider,
 
 export const signTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
   try {
-    const conn = new Connection("https://api.devnet.solana.com");
+    const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const pubKey = await solWeb3.requestAccounts();
     const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
@@ -67,7 +77,6 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
     });
     const transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
     const signedTx = await solWeb3.signTransaction(transaction);
-    signedTx.serialize();
     uiConsole("signature", signedTx);
   } catch (error) {
     console.error("Error", error);
@@ -89,7 +98,7 @@ export const signMessage = async (provider: SafeEventEmitterProvider, uiConsole:
 
 export const signAllTransactions = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
   try {
-    const conn = new Connection("https://api.devnet.solana.com");
+    const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const publicKeys = await solWeb3.requestAccounts();
     const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;

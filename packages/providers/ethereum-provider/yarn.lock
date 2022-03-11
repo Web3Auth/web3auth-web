@@ -36,7 +36,11 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
+<<<<<<< HEAD
 "@toruslabs/base-controllers@^1.6.3":
+=======
+"@toruslabs/base-controllers@^1.6.5":
+>>>>>>> 7d8c4d062a44d0b2ae0beaa9ccfb77c5395fbbf3
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.5.tgz#b61c7f007bf7a3f75bad4265a4aeb73f42ac8884"
   integrity sha512-Ug+Opob+QXK62KLcD+g+UR8GvCJO7NvRzie1RLWQf+3bj3uhJZ/FFtEPC9pYKP+XaYUZNUvazcaRYYDl5JC5gg==
@@ -126,7 +130,11 @@
   dependencies:
     "@types/node" "*"
 
+<<<<<<< HEAD
 "@walletconnect/types@~1.7.1":
+=======
+"@walletconnect/types@~1.7.4":
+>>>>>>> 7d8c4d062a44d0b2ae0beaa9ccfb77c5395fbbf3
   version "1.7.4"
   resolved "https://registry.yarnpkg.com/@walletconnect/types/-/types-1.7.4.tgz#429c0ab88771ca39f085757c189ffc704acaf813"
   integrity sha512-jvdW1/7z16dCC3i2uwPSgXjUXkmvJH0M2PbYD8ZETyEj/oSiLd32nPAUZVU0IVqQk4XAZHUTKhlRgxTch1W4Qg==
@@ -682,7 +690,11 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
+<<<<<<< HEAD
 lint-staged@^12.3.4:
+=======
+lint-staged@^12.3.5:
+>>>>>>> 7d8c4d062a44d0b2ae0beaa9ccfb77c5395fbbf3
   version "12.3.5"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.5.tgz#8048ce048c3cac12f57200a06344a54dc91c8fa9"
   integrity sha512-oOH36RUs1It7b9U/C7Nl/a0sLfoIBcMB8ramiB3nuJ6brBqzsWiUAFSR5DQ3yyP/OR7XKMpijtgKl2DV1lQ3lA==
