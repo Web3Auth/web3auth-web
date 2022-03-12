@@ -6,16 +6,10 @@ export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
     console.log("pubKey", accounts);
-    const txCount = await web3.eth.getTransactionCount(accounts[0]);
-    // gasPrice should be dynamic in production dapp.
-    const gasPrice = web3.utils.toWei("10", "gwei");
     const txRes = await web3.eth.sendTransaction({
       from: accounts[0],
-      gasPrice,
-      gas: 21000,
       to: accounts[0],
       value: web3.utils.toWei("0.01"),
-      nonce: txCount,
     });
     uiConsole("txRes", txRes);
   } catch (error) {
@@ -88,18 +82,12 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
   try {
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
-    const txCount = await web3.eth.getTransactionCount(accounts[0]);
-    // gasPrice should be dynamic in production dapp.
-    const gasPrice = web3.utils.toWei("10", "gwei");
 
     // only supported with social logins (openlogin adapter)
     const txRes = await web3.eth.signTransaction({
       from: accounts[0],
-      gasPrice,
-      gas: 21000,
       to: accounts[0],
       value: web3.utils.toWei("0.01"),
-      nonce: txCount,
     });
     uiConsole("txRes", txRes);
   } catch (error) {

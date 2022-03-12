@@ -48,7 +48,7 @@ export class TransactionFormatter {
     };
 
     if (clonedTxParams.nonce === undefined)
-      clonedTxParams.nonce = await this.providerProxy.request<number>({ method: "eth_getTransactionCount", params: [] });
+      clonedTxParams.nonce = await this.providerProxy.request<number>({ method: "eth_getTransactionCount", params: [txParams.from, "latest"] });
 
     if (!this.isEIP1559Compatible && clonedTxParams.gasPrice) {
       if (clonedTxParams.maxFeePerGas) delete clonedTxParams.maxFeePerGas;
@@ -74,6 +74,7 @@ export class TransactionFormatter {
       //  then we set maxFeePerGas and maxPriorityFeePerGas to the suggested gasPrice.
       if (clonedTxParams.gasPrice && !clonedTxParams.maxFeePerGas && !clonedTxParams.maxPriorityFeePerGas) {
         clonedTxParams.maxFeePerGas = clonedTxParams.gasPrice;
+
         clonedTxParams.maxPriorityFeePerGas = bnLessThan(
           typeof defaultMaxPriorityFeePerGas === "string" ? stripHexPrefix(defaultMaxPriorityFeePerGas) : defaultMaxPriorityFeePerGas,
           typeof clonedTxParams.gasPrice === "string" ? stripHexPrefix(clonedTxParams.gasPrice) : clonedTxParams.gasPrice
@@ -141,8 +142,9 @@ export class TransactionFormatter {
   }
 
   private async getEIP1559Compatibility(): Promise<boolean> {
-    const latestBlock = await this.providerProxy.request<Block>({ method: "eth_getTransactionCount", params: [] });
+    const latestBlock = await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
     const supportsEIP1559 = latestBlock && latestBlock.baseFeePerGas !== undefined;
+
     return supportsEIP1559;
   }
 
@@ -170,7 +172,7 @@ export class TransactionFormatter {
       } else {
         throw new Error("Main gas fee/price estimation failed. Use fallback");
       }
-    } catch {
+    } catch (e: unknown) {
       try {
         const estimates = await this.fetchEthGasPriceEstimate();
         gasData = {
@@ -193,13 +195,13 @@ export class TransactionFormatter {
 
     try {
       const { gasFeeEstimates, gasEstimateType } = await this.fetchGasFeeEstimateData();
-      if (this.isEIP1559Compatible && gasEstimateType === TRANSACTION_ENVELOPE_TYPES.FEE_MARKET) {
+      if (this.isEIP1559Compatible && gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
         const { medium: { suggestedMaxPriorityFeePerGas, suggestedMaxFeePerGas } = {} } = gasFeeEstimates as EIP1159GasData;
 
         if (suggestedMaxPriorityFeePerGas && suggestedMaxFeePerGas) {
           return {
-            maxFeePerGas: decGWEIToHexWEI(suggestedMaxFeePerGas),
-            maxPriorityFeePerGas: decGWEIToHexWEI(suggestedMaxPriorityFeePerGas),
+            maxFeePerGas: addHexPrefix(decGWEIToHexWEI(suggestedMaxFeePerGas)),
+            maxPriorityFeePerGas: addHexPrefix(decGWEIToHexWEI(suggestedMaxPriorityFeePerGas)),
           };
         }
       } else if (gasEstimateType === GAS_ESTIMATE_TYPES.LEGACY) {
@@ -212,7 +214,7 @@ export class TransactionFormatter {
         // The ETH_GASPRICE type just includes a single gas price property,
         // which we can assume was retrieved from eth_gasPrice
         return {
-          gasPrice: decGWEIToHexWEI((gasFeeEstimates as FallbackGasData).gasPrice),
+          gasPrice: addHexPrefix(decGWEIToHexWEI((gasFeeEstimates as FallbackGasData).gasPrice)),
         };
       }
     } catch (error) {
@@ -221,7 +223,7 @@ export class TransactionFormatter {
 
     const { gasPrice } = await this.fetchEthGasPriceEstimate();
 
-    return { gasPrice };
+    return { gasPrice: addHexPrefix(decGWEIToHexWEI(gasPrice)) };
   }
 
   private async estimateTxGas(txMeta: TransactionParams) {
@@ -281,7 +283,7 @@ export class TransactionFormatter {
       txCategory = TRANSACTION_TYPES.DEPLOY_CONTRACT;
     } else {
       try {
-        code = await this.providerProxy.request<string>({ method: "eth_getCode", params: [] });
+        code = await this.providerProxy.request<string>({ method: "eth_getCode", params: [to, "latest"] });
       } catch (error) {
         txCategory = null;
         log.warn(error);
