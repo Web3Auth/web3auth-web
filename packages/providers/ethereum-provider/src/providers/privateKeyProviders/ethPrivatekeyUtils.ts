@@ -1,4 +1,3 @@
-import Common, { Hardfork } from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import {
   decrypt,
@@ -13,59 +12,18 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, log } from "@web3auth/base";
+import { log } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
+import { TransactionFormatter } from "./TransactionFormatter";
 
-const TRANSACTION_ENVELOPE_TYPES = {
-  LEGACY: "0x0",
-  ACCESS_LIST: "0x1",
-  FEE_MARKET: "0x2",
-};
-async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Partial<CustomChainConfig>): Promise<Common> {
-  const { displayName: name, chainId } = chainConfig;
-  const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
-  const customChainParams = {
-    name,
-    chainId: chainId === "loading" ? 0 : parseInt(chainId, 16),
-    networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
-    defaultHardfork: hardfork,
-  };
-  return Common.custom(customChainParams);
-}
-
-async function signTx(
-  txParams: TransactionParams & { gas?: string },
-  privKey: string,
-  providerEngineProxy: SafeEventEmitterProvider,
-  chainConfig: Partial<CustomChainConfig>
-): Promise<Buffer> {
-  if (!providerEngineProxy)
-    throw ethErrors.provider.custom({
-      message: "Provider is not initialized",
-      code: 4902,
-    });
-
-  if (txParams.nonce === undefined) throw ethErrors.rpc.invalidInput("Missing nonce in txParams");
-  if (txParams.gas === undefined && txParams.gasLimit === undefined) throw ethErrors.rpc.invalidInput("Missing gas/gasLimit in txParams");
-  if (txParams.gasPrice === undefined && txParams.maxFeePerGas === undefined)
-    throw ethErrors.rpc.invalidInput("Either gasPrice or maxFeePerGas is required in txParams");
-
-  if (txParams.maxFeePerGas && !txParams.maxPriorityFeePerGas) {
-    txParams.maxPriorityFeePerGas = txParams.maxFeePerGas;
-  }
-
-  // ethereumjs-tx expects gasLimit field but web3js sends gas field. :/
-  if (txParams.gas) txParams.gasLimit = txParams.gas;
-
-  const eip1559Compatibility = !!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas;
-  txParams.type = eip1559Compatibility ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY;
-  const common = await getCommonConfiguration(eip1559Compatibility, chainConfig);
-
-  const unsignedEthTx = TransactionFactory.fromTxData(txParams, {
+async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
+  const finalTxParams = await txFormatter.formatTransaction(txParams);
+  const common = await txFormatter.getCommonConfiguration();
+  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
     common,
   });
   const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
@@ -73,12 +31,12 @@ async function signTx(
 }
 
 export function getProviderHandlers({
+  txFormatter,
   privKey,
-  chainConfig,
   getProviderEngineProxy,
 }: {
+  txFormatter: TransactionFormatter;
   privKey: string;
-  chainConfig: Partial<CustomChainConfig>;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): IProviderHandlers {
   return {
@@ -86,7 +44,12 @@ export function getProviderHandlers({
     getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
-      const signedTx = await signTx(txParams, privKey, providerEngineProxy, chainConfig);
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
         params: ["0x".concat(signedTx.toString("hex"))],
@@ -95,7 +58,12 @@ export function getProviderHandlers({
     },
     processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
-      const signedTx = await signTx(txParams, privKey, providerEngineProxy, chainConfig);
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signTx(txParams, privKey, txFormatter);
       return `0x${signedTx.toString("hex")}`;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
