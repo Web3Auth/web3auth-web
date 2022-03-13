@@ -171,16 +171,10 @@
           const provider = web3AuthInstance.provider;
           const web3 = new Web3(provider);      
           const accounts = await web3.eth.getAccounts();
-          const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-          // gasPrice should be dynamic in production dapp.
-          const gasPrice = web3.utils.toWei("10", "gwei");
           const txRes = await web3.eth.signTransaction({
             from: accounts[0],
-            gasPrice,
-            gas: 21000,
             to: accounts[0],
             value: web3.utils.toWei("0.01"),
-            nonce: txCount,
           });
           $("#code").text(JSON.stringify(txRes));
 
@@ -196,16 +190,10 @@
           const accounts = await web3.eth.getAccounts();
 
           const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-          const txCount = await web3.eth.getTransactionCount(accounts[0]);
-          // gasPrice should be dynamic in production dapp.
-          const gasPrice = web3.utils.toWei("10", "gwei");
           const txRes = await web3.eth.sendTransaction({
             from: accounts[0],
-            gasPrice,
-            gas: 21000,
             to: accounts[0],
             value: web3.utils.toWei("0.01"),
-            nonce: txCount,
           });
           $("#code").text(JSON.stringify(txRes));
 

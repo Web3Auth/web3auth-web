@@ -59,8 +59,10 @@ export class TransactionFormatter {
     if (!clonedTxParams.gas) {
       const defaultGasLimit = await this.getDefaultGasLimit(clonedTxParams);
       if (defaultGasLimit) {
-        clonedTxParams.gas = defaultGasLimit;
+        clonedTxParams.gasLimit = defaultGasLimit;
       }
+    } else {
+      clonedTxParams.gasLimit = clonedTxParams.gas;
     }
 
     const {
@@ -130,7 +132,7 @@ export class TransactionFormatter {
     }
 
     clonedTxParams.type = this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY;
-
+    clonedTxParams.chainId = this.chainConfig.chainId;
     return clonedTxParams;
   }
 
@@ -256,11 +258,11 @@ export class TransactionFormatter {
     return { blockGasLimit: block.gasLimit, estimatedGasHex };
   }
 
-  private addGasBuffer(initialGasLimitHex, blockGasLimitHex, multiplier = 1.5) {
+  private addGasBuffer(initialGasLimitHex: string, blockGasLimitHex: string, multiplier = 1.5): string {
     const initialGasLimitBn = hexToBn(initialGasLimitHex);
     const blockGasLimitBn = hexToBn(blockGasLimitHex);
-    const upperGasLimitBn = blockGasLimitBn.multipliedBy(0.9);
-    const bufferedGasLimitBn = initialGasLimitBn.multipliedBy(multiplier);
+    const upperGasLimitBn = blockGasLimitBn.multipliedBy(0.9).dp(0, 1);
+    const bufferedGasLimitBn = initialGasLimitBn.multipliedBy(multiplier).dp(0, 1);
 
     // if initialGasLimit is above blockGasLimit, dont modify it
     if (initialGasLimitBn.gt(upperGasLimitBn)) return bnToHex(initialGasLimitBn);
@@ -317,7 +319,7 @@ export class TransactionFormatter {
     const { blockGasLimit, estimatedGasHex } = await this.analyzeGasUsage(txParams);
 
     // add additional gas buffer to our estimation for safety
-    const gasLimit = this.addGasBuffer(addHexPrefix(estimatedGasHex), blockGasLimit);
+    const gasLimit = this.addGasBuffer(addHexPrefix(estimatedGasHex), blockGasLimit as string);
     return gasLimit;
   }
 }
