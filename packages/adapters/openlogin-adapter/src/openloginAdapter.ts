@@ -1,4 +1,4 @@
-import OpenLogin, { getHashQueryParams, OPENLOGIN_NETWORK, OpenLoginOptions } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions } from "@toruslabs/openlogin";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -26,10 +26,10 @@ import merge from "lodash.merge";
 import { getOpenloginDefaultOptions } from "./config";
 import type { LoginSettings, OpenloginAdapterOptions } from "./interface";
 
-export interface OpenloginLoginParams {
-  login_hint: string;
-  loginProvider: string;
-}
+export type OpenloginLoginParams = LoginParams & {
+  // to maintain backward compatibility
+  login_hint?: string;
+};
 
 type PrivateKeyProvider = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
 
@@ -184,7 +184,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     // if not logged in then login
     if (!this.openloginInstance.privKey && params) {
       await this.openloginInstance.login(
-        merge(this.loginSettings, { loginProvider: params.loginProvider }, { extraLoginOptions: { login_hint: params?.login_hint } })
+        merge(
+          this.loginSettings,
+          { loginProvider: params.loginProvider },
+          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } }
+        )
       );
     }
     let finalPrivKey = this.openloginInstance.privKey;

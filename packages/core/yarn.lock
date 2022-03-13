@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@toruslabs/openlogin-jrpc@^1.5.0":
+"@toruslabs/openlogin-jrpc@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.6.0.tgz#579307a97d7a9d173863c6dcd4dc178e83d4a663"
   integrity sha512-lUpzGhmg1x0TwAxS1FE9y7dDbqNCACi2cXyNEaQdvHRQYLQnN46cq75nAAbLKCjKwM5ThhrRpO+p/iH9ESjgYQ==
