@@ -72,7 +72,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);        
-        setWalletProvider(torusPlugin?.proxyProvider as unknown as SafeEventEmitterProvider || web3auth?.provider);
+        setWalletProvider(torusPlugin?.proxyProvider as SafeEventEmitterProvider || web3auth?.provider);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -138,7 +138,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const provider = await web3Auth.connect();
-    console.log("provider", torusPlugin?.proxyProvider, provider);
     setWalletProvider(torusPlugin?.proxyProvider as SafeEventEmitterProvider || provider);
   };
 
