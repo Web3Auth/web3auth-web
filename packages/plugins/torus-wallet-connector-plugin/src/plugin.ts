@@ -118,6 +118,12 @@ export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
     provider.on("chainChanged", (data: { chainId: string }) => {
       this.setChainID(parseInt(data.chainId, 16));
     });
+    provider.on("disconnect", () => {
+      this.torusWalletInstance?.hideTorusButton();
+    });
+    provider.on("connect", () => {
+      this.torusWalletInstance?.showTorusButton();
+    });
   }
 
   private subscribeToWeb3AuthCoreEvents(web3Auth: Web3AuthCore) {
