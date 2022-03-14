@@ -32,7 +32,8 @@
     "src"
   ],
   "devDependencies": {
-    "lint-staged": "^12.3.4"
+    "lint-staged": "^12.3.4",
+    "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^1.21.0",

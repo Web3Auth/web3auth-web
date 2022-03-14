@@ -9,6 +9,7 @@ export class TorusWalletPluginError extends Web3AuthError {
     5214: "Web3Auth is not connected.",
     5215: "UserInfo is required.",
     5216: "Plugin is already initialized",
+    5217: "Torus wallet instance is not set.",
   };
 
   public constructor(code: number, message?: string) {
@@ -49,5 +50,9 @@ export class TorusWalletPluginError extends Web3AuthError {
 
   public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
     return TorusWalletPluginError.fromCode(5216, extraMessage);
+  }
+
+  public static torusWalletNotSet(extraMessage = ""): IWeb3AuthError {
+    return TorusWalletPluginError.fromCode(5217, extraMessage);
   }
 }

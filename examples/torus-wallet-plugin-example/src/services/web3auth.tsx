@@ -71,10 +71,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       // Can subscribe to all ADAPTER_EVENTS and LOGIN_MODAL_EVENTS
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
-        setUser(data);
-        
-
-        setWalletProvider(torusPlugin?.torusWalletInstance?.provider as unknown as SafeEventEmitterProvider);
+        setUser(data);        
+        setWalletProvider(torusPlugin?.proxyProvider as unknown as SafeEventEmitterProvider || web3auth?.provider);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -139,8 +137,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3auth not initialized yet");
       return;
     }
-    await web3Auth.connect();
-    setWalletProvider(torusPlugin?.torusWalletInstance?.provider as unknown as SafeEventEmitterProvider);
+    const provider = await web3Auth.connect();
+    console.log("provider", torusPlugin?.proxyProvider, provider);
+    setWalletProvider(torusPlugin?.proxyProvider as SafeEventEmitterProvider || provider);
   };
 
   const logout = async () => {

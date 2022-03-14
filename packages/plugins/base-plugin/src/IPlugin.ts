@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IWeb3Auth, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
 
 export const PLUGIN_NAMESPACES = {
   ...CHAIN_NAMESPACES,
@@ -7,11 +7,11 @@ export const PLUGIN_NAMESPACES = {
 
 export type PluginNamespace = typeof PLUGIN_NAMESPACES[keyof typeof PLUGIN_NAMESPACES];
 
-export interface IPlugin<T> {
+export interface IPlugin {
   name: string;
   pluginNamespace: PluginNamespace;
   initWithProvider(provider: SafeEventEmitterProvider, userInfo: UserInfo): Promise<void>;
-  initWithWeb3Auth(web3auth: T): Promise<void>;
+  initWithWeb3Auth(web3auth: IWeb3Auth): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
 }

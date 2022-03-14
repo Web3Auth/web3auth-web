@@ -9,6 +9,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  IWeb3Auth,
   log,
   SafeEventEmitterProvider,
   storageAvailable,
@@ -37,7 +38,7 @@ export interface Web3AuthCoreOptions {
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
-export class Web3AuthCore extends SafeEventEmitter {
+export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
   readonly coreOptions: Web3AuthCoreOptions;
 
   public connectedAdapterName: string | null = null;
@@ -48,7 +49,7 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
-  private plugins: Record<string, IPlugin<unknown>> = {};
+  private plugins: Record<string, IPlugin> = {};
 
   constructor(options: Web3AuthCoreOptions) {
     super();
@@ -155,7 +156,7 @@ export class Web3AuthCore extends SafeEventEmitter {
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
-  public async addPlugin(plugin: IPlugin<Web3AuthCore>): Promise<Web3AuthCore> {
+  public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {
     if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
     if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
       throw new Error(
@@ -172,25 +173,24 @@ export class Web3AuthCore extends SafeEventEmitter {
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
-      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
       await Promise.all(
         Object.values(this.plugins).map((plugin) => {
           return plugin.connect().catch((error: Web3AuthError) => {
             // swallow error if connector adapter doesn't supports this plugin.
-            if (error.message.includes("unsupported adapter")) {
+            if (error.code === 5211) {
               return;
             }
             throw error;
           });
         })
       );
+      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
     walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
       if (storageAvailable("sessionStorage")) {
         const cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
         if (this.connectedAdapterName === cachedAdapter) {
@@ -201,9 +201,17 @@ export class Web3AuthCore extends SafeEventEmitter {
       log.debug("disconnected", this.status, this.connectedAdapterName);
       await Promise.all(
         Object.values(this.plugins).map((plugin) => {
-          return plugin.disconnect();
+          return plugin.disconnect().catch((error: Web3AuthError) => {
+            // swallow error if adapter doesn't supports this plugin.
+            if (error.code === 5211) {
+              return;
+            }
+            throw error;
+          });
         })
       );
+      this.connectedAdapterName = null;
+      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
     });
     walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -225,7 +233,6 @@ export class Web3AuthCore extends SafeEventEmitter {
 
   protected checkInitRequirements(): void {
     if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }
 
