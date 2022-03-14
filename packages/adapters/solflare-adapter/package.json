@@ -1,9 +1,9 @@
 {
-  "name": "@web3auth/phantom-adapter",
+  "name": "@web3auth/solflare-adapter",
   "version": "0.5.0",
-  "description": "phantom wallet adapter for web3auth",
+  "description": "solflare wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/phantom-wallet-adapter",
+    "web3Auth/solflare-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -11,13 +11,13 @@
     "solana",
     "phantom"
   ],
-  "main": "dist/phantomAdapter.cjs.js",
-  "module": "dist/phantomAdapter.esm.js",
-  "unpkg": "dist/phantomAdapter.umd.min.js",
-  "jsdelivr": "dist/phantomAdapter.umd.min.js",
+  "main": "dist/solflareAdapter.cjs.js",
+  "module": "dist/solflareAdapter.esm.js",
+  "unpkg": "dist/solflareAdapter.umd.min.js",
+  "jsdelivr": "dist/solflareAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/phantom-adapter/README.md",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/solflareAdapter/README.md",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -42,6 +42,7 @@
     "@web3auth/base": "^0.5.0",
     "@web3auth/base-provider": "^0.5.0",
     "@web3auth/solana-provider": "^0.5.0",
+    "@solflare-wallet/sdk": "^1.0.11",
     "bn.js": "^5.2.0"
   },
   "lint-staged": {

@@ -1,3 +1,3 @@
-# `@web3auth/phantom-wallet-adapter`
+# `@web3auth/phantom-adapter`
 
 > TODO: description

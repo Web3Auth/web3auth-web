@@ -1,9 +1,9 @@
 {
-  "name": "@web3auth/phantom-adapter",
+  "name": "@web3auth/slope-adapter",
   "version": "0.5.0",
-  "description": "phantom wallet adapter for web3auth",
+  "description": "slope wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/phantom-wallet-adapter",
+    "web3Auth/slope-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -11,13 +11,13 @@
     "solana",
     "phantom"
   ],
-  "main": "dist/phantomAdapter.cjs.js",
-  "module": "dist/phantomAdapter.esm.js",
-  "unpkg": "dist/phantomAdapter.umd.min.js",
-  "jsdelivr": "dist/phantomAdapter.umd.min.js",
+  "main": "dist/slopeAdapter.cjs.js",
+  "module": "dist/slopeAdapter.esm.js",
+  "unpkg": "dist/slopeAdapter.umd.min.js",
+  "jsdelivr": "dist/slopeAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/phantom-adapter/README.md",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/slope-adapter/README.md",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
