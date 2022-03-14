@@ -25,12 +25,13 @@ export class TransactionFormatter {
     return this.getProviderEngineProxy();
   }
 
-  async init() {
+  async init(): Promise<void> {
     this.chainConfig = (await this.providerProxy.request<CustomChainConfig>({ method: "eth_provider_config", params: [] })) as CustomChainConfig;
     this.isEIP1559Compatible = await this.getEIP1559Compatibility();
   }
 
   async getCommonConfiguration(): Promise<Common> {
+    if (!this.chainConfig) throw new Error("Chain config not initialized");
     const { displayName: name, chainId } = this.chainConfig;
     const hardfork = this.isEIP1559Compatible ? Hardfork.London : Hardfork.Berlin;
     const customChainParams = {
@@ -43,12 +44,17 @@ export class TransactionFormatter {
   }
 
   async formatTransaction(txParams: TransactionParams & { gas?: string }): Promise<TransactionParams & { gas?: string }> {
+    if (!this.chainConfig) throw new Error("Chain config not initialized");
+
     const clonedTxParams = {
       ...txParams,
     };
 
     if (clonedTxParams.nonce === undefined)
-      clonedTxParams.nonce = await this.providerProxy.request<number>({ method: "eth_getTransactionCount", params: [txParams.from, "latest"] });
+      clonedTxParams.nonce = (await this.providerProxy.request<number>({
+        method: "eth_getTransactionCount",
+        params: [txParams.from, "latest"],
+      })) as number;
 
     if (!this.isEIP1559Compatible && clonedTxParams.gasPrice) {
       if (clonedTxParams.maxFeePerGas) delete clonedTxParams.maxFeePerGas;
@@ -137,7 +143,7 @@ export class TransactionFormatter {
   }
 
   private async fetchEthGasPriceEstimate(): Promise<{ gasPrice: string }> {
-    const gasPrice = await this.providerProxy.request<string>({ method: "eth_gasPrice", params: [] });
+    const gasPrice = (await this.providerProxy.request<string>({ method: "eth_gasPrice", params: [] })) as string;
     return {
       gasPrice: hexWEIToDecGWEI(gasPrice).toString(),
     };
@@ -147,10 +153,11 @@ export class TransactionFormatter {
     const latestBlock = await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
     const supportsEIP1559 = latestBlock && latestBlock.baseFeePerGas !== undefined;
 
-    return supportsEIP1559;
+    return !!supportsEIP1559;
   }
 
   private async fetchGasFeeEstimateData(): Promise<GasData> {
+    if (!this.chainConfig) throw new Error("Chain config not initialized");
     const isLegacyGasAPICompatible = this.chainConfig.chainId === "0x1";
 
     const chainId = Number.parseInt(this.chainConfig.chainId, 16);
@@ -181,8 +188,8 @@ export class TransactionFormatter {
           gasFeeEstimates: estimates,
           gasEstimateType: GAS_ESTIMATE_TYPES.ETH_GASPRICE,
         };
-      } catch (error) {
-        throw new Error(`Gas fee/price estimation failed. Message: ${error.message}`);
+      } catch (error: unknown) {
+        throw new Error(`Gas fee/price estimation failed. Message: ${(error as Error).message}`);
       }
     }
     return gasData;
@@ -228,7 +235,7 @@ export class TransactionFormatter {
     return { gasPrice: addHexPrefix(decGWEIToHexWEI(gasPrice)) };
   }
 
-  private async estimateTxGas(txMeta: TransactionParams) {
+  private async estimateTxGas(txMeta: TransactionParams): Promise<string> {
     const txParams = { ...txMeta };
 
     // `eth_estimateGas` can fail if the user has insufficient balance for the
@@ -239,12 +246,15 @@ export class TransactionFormatter {
     delete txParams.gasPrice;
     delete txParams.maxFeePerGas;
     delete txParams.maxPriorityFeePerGas;
-
-    return this.providerProxy.request<string>({ method: "eth_estimateGas", params: [txParams] });
+    const gas = (await this.providerProxy.request<string>({ method: "eth_estimateGas", params: [txParams] })) as string;
+    return gas;
   }
 
-  private async analyzeGasUsage(txMeta: TransactionParams) {
-    const block = await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
+  private async analyzeGasUsage(txMeta: TransactionParams): Promise<{
+    blockGasLimit: string;
+    estimatedGasHex: string;
+  }> {
+    const block = (await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] })) as Block;
     // fallback to block gasLimit
     const blockGasLimitBN = hexToBn(block.gasLimit as string);
     const saferGasLimitBN = BnMultiplyByFraction(blockGasLimitBN, 19, 20);
@@ -252,10 +262,10 @@ export class TransactionFormatter {
 
     try {
       estimatedGasHex = await this.estimateTxGas(txMeta);
-    } catch (error) {
+    } catch (error: unknown) {
       log.warn(error);
     }
-    return { blockGasLimit: block.gasLimit, estimatedGasHex };
+    return { blockGasLimit: block.gasLimit as string, estimatedGasHex };
   }
 
   private addGasBuffer(initialGasLimitHex: string, blockGasLimitHex: string, multiplier = 1.5): string {
@@ -273,19 +283,19 @@ export class TransactionFormatter {
   }
 
   private async determineTransactionCategory(txParameters: TransactionParams & { gas?: string }): Promise<{
-    transactionCategory: TxType;
+    transactionCategory: TxType | null;
     code?: string;
   }> {
     const { data, to } = txParameters;
-    let code: string;
+    let code = "";
 
-    let txCategory: TxType;
+    let txCategory: TxType | null;
 
     if (data && !to) {
       txCategory = TRANSACTION_TYPES.DEPLOY_CONTRACT;
     } else {
       try {
-        code = await this.providerProxy.request<string>({ method: "eth_getCode", params: [to, "latest"] });
+        code = (await this.providerProxy.request<string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
       } catch (error) {
         txCategory = null;
         log.warn(error);

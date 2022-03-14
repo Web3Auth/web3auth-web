@@ -6,7 +6,7 @@ type NumericBaseType = "hex" | "dec";
 
 type ConverterInput = {
   value: string | BigNumber;
-  fromNumericBase?: NumericBaseType;
+  fromNumericBase: NumericBaseType;
   fromDenomination?: DenominationType;
   toNumericBase?: NumericBaseType;
   toDenomination?: DenominationType;
@@ -18,8 +18,8 @@ const BIG_NUMBER_GWEI_MULTIPLIER = new BigNumber("1000000000");
 const BIG_NUMBER_ETH_MULTIPLIER = new BigNumber("1");
 
 // Setter Maps
-const toBigNumber: Record<string, (n: string | number | BigNumber) => BigNumber> = {
-  hex: (n: string) => new BigNumber(stripHexPrefix(n), 16),
+const toBigNumber: Record<NumericBaseType, (n: string | BigNumber) => BigNumber> = {
+  hex: (n: string | BigNumber) => (typeof n === "string" ? new BigNumber(stripHexPrefix(n), 16) : new BigNumber(n, 16)),
   dec: (n: string | BigNumber) => new BigNumber(String(n), 10),
 };
 const toNormalizedDenomination: Record<string, (n: BigNumber) => BigNumber> = {
@@ -61,7 +61,7 @@ const converter = (params: ConverterInput): string | BigNumber => {
 
 const conversionUtil = (
   value: string | BigNumber,
-  { fromNumericBase, toNumericBase, fromDenomination, toDenomination, numberOfDecimals }: Partial<ConverterInput>
+  { fromNumericBase = "hex", toNumericBase, fromDenomination, toDenomination, numberOfDecimals }: Partial<ConverterInput>
 ): BigNumber | string => {
   return converter({
     fromNumericBase,
