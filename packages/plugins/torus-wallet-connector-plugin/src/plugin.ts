@@ -48,7 +48,12 @@ export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
       this.provider = web3auth.provider;
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
     }
-    await (this.torusWalletInstance as TorusEmbed).init(this.walletInitOptions || undefined);
+    await (this.torusWalletInstance as TorusEmbed).init(
+      {
+        ...this.walletInitOptions,
+        showTorusButton: false,
+      } || undefined
+    );
     this.isInitialized = true;
   }
 
@@ -84,6 +89,7 @@ export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
+      this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
     } catch (error) {
       log.error(error);
@@ -98,6 +104,7 @@ export class TorusWalletConnectorPlugin implements IPlugin<Web3AuthCore> {
   async disconnect(): Promise<void> {
     if (this.torusWalletInstance?.isLoggedIn) {
       await this.torusWalletInstance.logout();
+      this.torusWalletInstance.hideTorusButton();
     } else {
       throw new Error("Torus Wallet plugin is not connected");
     }

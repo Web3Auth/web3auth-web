@@ -112,8 +112,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             },
             useWalletConnect: true,
             buildEnv: "lrc",
-            enableLogging: true,
-            showTorusButton: true,
+            enableLogging: true
           },
         });
         await web3AuthInstance.addPlugin(torusPlugin);
