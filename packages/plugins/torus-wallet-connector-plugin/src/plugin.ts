@@ -17,7 +17,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
-  public torusWalletInstance: TorusEmbed | null = null;
+  public torusWalletInstance: TorusEmbed;
 
   private provider: SafeEventEmitterProvider | null = null;
 
@@ -42,7 +42,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   }
 
   get proxyProvider(): SafeEventEmitterProvider | null {
-    return this.torusWalletInstance?.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
+    return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
   async initWithWeb3Auth(web3auth: Web3AuthCore): Promise<void> {
@@ -57,7 +57,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     this.web3auth = web3auth;
     this.subscribeToWeb3AuthCoreEvents(web3auth);
 
-    await (this.torusWalletInstance as TorusEmbed).init({
+    await this.torusWalletInstance.init({
       ...(this.walletInitOptions || {}),
       showTorusButton: false,
     });
@@ -72,18 +72,19 @@ export class TorusWalletConnectorPlugin implements IPlugin {
 
     this.provider = provider;
     this.userInfo = userInfo;
-    await (this.torusWalletInstance as TorusEmbed).init(this.walletInitOptions || {});
+    await this.torusWalletInstance.init(this.walletInitOptions || {});
     this.isInitialized = true;
   }
 
   async connect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
     if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw TorusWalletPluginError.unsupportedAdapter();
-    if (!this.isInitialized || !this.torusWalletInstance) throw TorusWalletPluginError.notInitialized();
+    if (!this.isInitialized) throw TorusWalletPluginError.notInitialized();
     // Not connected yet to openlogin
     if (!this.provider) {
-      if (this.web3auth && this.web3auth.provider) {
+      if (this.web3auth?.provider) {
         this.provider = this.web3auth.provider;
+        this.userInfo = (await this.web3auth.getUserInfo()) as UserInfo;
       } else if (this.web3auth) {
         throw TorusWalletPluginError.web3AuthNotConnected();
       } else {
@@ -116,13 +117,11 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   }
 
   async showWalletConnectScanner(): Promise<void> {
-    if (!this.torusWalletInstance) throw TorusWalletPluginError.torusWalletNotSet();
     if (!this.torusWalletInstance.isLoggedIn) throw TorusWalletPluginError.web3AuthNotConnected();
     await this.torusWalletInstance.showWalletConnectScanner();
   }
 
   async initiateTopup(provider: PAYMENT_PROVIDER_TYPE, params: PaymentParams): Promise<void> {
-    if (!this.torusWalletInstance) throw TorusWalletPluginError.torusWalletNotSet();
     if (!this.torusWalletInstance.isLoggedIn) throw TorusWalletPluginError.web3AuthNotConnected();
     await this.torusWalletInstance.initiateTopup(provider, params);
   }
@@ -130,7 +129,6 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
     if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw TorusWalletPluginError.unsupportedAdapter();
-    if (!this.torusWalletInstance) throw TorusWalletPluginError.torusWalletNotSet();
     if (this.torusWalletInstance.isLoggedIn) {
       await this.torusWalletInstance.logout();
     } else {
@@ -147,10 +145,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.setChainID(parseInt(data.chainId, 16));
     });
     provider.on("disconnect", () => {
-      this.torusWalletInstance?.hideTorusButton();
+      this.torusWalletInstance.hideTorusButton();
     });
     provider.on("connect", () => {
-      this.torusWalletInstance?.showTorusButton();
+      this.torusWalletInstance.showTorusButton();
     });
   }
 
@@ -169,12 +167,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, async () => {
       this.provider = null;
       this.userInfo = null;
-      if (this.torusWalletInstance) {
-        if (this.torusWalletInstance.isLoggedIn) {
-          await this.torusWalletInstance.logout();
-        }
-        this.torusWalletInstance.hideTorusButton();
+      if (this.torusWalletInstance.isLoggedIn) {
+        await this.torusWalletInstance.logout();
       }
+      this.torusWalletInstance.hideTorusButton();
     });
   }
 
@@ -195,7 +191,6 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   }
 
   private async setSelectedAddress(address: string): Promise<void> {
-    if (!this.torusWalletInstance) throw TorusWalletPluginError.torusWalletNotSet();
     if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw TorusWalletPluginError.web3AuthNotConnected();
     const sessionConfig = await this.sessionConfig();
     if (address !== sessionConfig.accounts?.[0]) {
@@ -210,7 +205,6 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   }
 
   private async setChainID(chainId: number): Promise<void> {
-    if (!this.torusWalletInstance) throw TorusWalletPluginError.torusWalletNotSet();
     const sessionConfig = await this.sessionConfig();
     const { chainConfig } = sessionConfig || {};
     if (chainId !== sessionConfig.chainId && chainConfig) {

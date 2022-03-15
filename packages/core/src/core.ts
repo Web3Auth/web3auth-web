@@ -181,7 +181,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
             if (error.code === 5211) {
               return;
             }
-            throw error;
+            // throw error;
+            log.error(error);
           });
         })
       );
@@ -206,7 +207,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
             if (error.code === 5211) {
               return;
             }
-            throw error;
+            // throw error;
+            log.error(error);
           });
         })
       );

@@ -56,8 +56,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
-
   const setWalletProvider = useCallback(
     (web3authProvider: SafeEventEmitterProvider) => {
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
@@ -71,8 +69,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       // Can subscribe to all ADAPTER_EVENTS and LOGIN_MODAL_EVENTS
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
-        setUser(data);        
-        setWalletProvider(torusPlugin?.proxyProvider as SafeEventEmitterProvider || web3auth?.provider);
+        setUser(data);
+        setWalletProvider((torusPlugin?.proxyProvider as SafeEventEmitterProvider) || web3auth?.provider);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -109,8 +107,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
             },
             useWalletConnect: true,
-            buildEnv: "lrc",
-            enableLogging: true
+            enableLogging: true,
           },
         });
         await web3AuthInstance.addPlugin(torusPlugin);
@@ -138,7 +135,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const provider = await web3Auth.connect();
-    setWalletProvider(torusPlugin?.proxyProvider as SafeEventEmitterProvider || provider);
+    setWalletProvider((torusPlugin?.proxyProvider as SafeEventEmitterProvider) || provider);
   };
 
   const logout = async () => {
