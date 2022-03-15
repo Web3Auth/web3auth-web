@@ -233,6 +233,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   protected checkInitRequirements(): void {
     if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
+    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
   }
 
