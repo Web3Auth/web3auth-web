@@ -28,7 +28,9 @@
     "@web3auth/base": "^0.6.1",
     "@web3auth/base-provider": "^0.6.1",
     "eth-rpc-errors": "^4.0.3",
-    "ethereumjs-util": "^7.1.4"
+    "ethereumjs-util": "^7.1.4",
+    "bignumber.js": "^9.0.2",
+    "@toruslabs/http-helpers": "^2.2.0"
   },
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",

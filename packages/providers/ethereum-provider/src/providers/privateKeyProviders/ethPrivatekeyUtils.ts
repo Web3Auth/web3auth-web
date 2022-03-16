@@ -1,4 +1,3 @@
-import Common, { Hardfork } from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import {
   decrypt,
@@ -13,55 +12,58 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, log } from "@web3auth/base";
+import { log } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
+import { TransactionFormatter } from "./TransactionFormatter";
 
-async function getCommonConfiguration(supportsEIP1559: boolean, chainConfig: Partial<CustomChainConfig>) {
-  const { displayName: name, chainId } = chainConfig;
-  const hardfork = supportsEIP1559 ? Hardfork.London : Hardfork.Berlin;
-
-  const customChainParams = {
-    name,
-    chainId: !chainId || chainId === "loading" ? 0 : parseInt(chainId, 16),
-    networkId: !chainId || chainId === "loading" ? 0 : Number.parseInt(chainId, 10),
-    hardfork,
-  };
-
-  return Common.custom(customChainParams);
+async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
+  const finalTxParams = await txFormatter.formatTransaction(txParams);
+  const common = await txFormatter.getCommonConfiguration();
+  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
+    common,
+  });
+  const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+  return signedTx;
 }
 
 export function getProviderHandlers({
+  txFormatter,
   privKey,
-  chainConfig,
   getProviderEngineProxy,
 }: {
+  txFormatter: TransactionFormatter;
   privKey: string;
-  chainConfig: Partial<CustomChainConfig>;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${privateToAddress(Buffer.from(privKey, "hex")).toString("hex")}`],
     getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
-    processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
+    processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-      const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
-      const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
-      const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
-        params: [`0x${signedTx.toString("hex")}`],
+        params: ["0x".concat(signedTx.toString("hex"))],
       });
-      return txHash as string;
+      return txHash;
     },
-    processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const common = await getCommonConfiguration(!!txParams.maxFeePerGas && !!txParams.maxPriorityFeePerGas, chainConfig);
-      const unsignedEthTx = TransactionFactory.fromTxData(txParams, { common });
-      const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
+    processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signTx(txParams, privKey, txFormatter);
       return `0x${signedTx.toString("hex")}`;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
@@ -74,16 +76,19 @@ export function getProviderHandlers({
       return sig;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessage", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V1 });
       return sig;
     },
     processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessageV3", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V3 });
       return sig;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+      log.debug("processTypedMessageV4", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V4 });
       return sig;
@@ -93,6 +98,7 @@ export function getProviderHandlers({
       return getEncryptionPublicKey(privKey);
     },
     processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
+      log.info("processDecryptMessage", msgParams);
       const stripped = stripHexPrefix(msgParams.data);
       const buff = Buffer.from(stripped, "hex");
       const decrypted = decrypt({ encryptedData: JSON.parse(buff.toString("utf8")) as EthEncryptedData, privateKey: privKey });

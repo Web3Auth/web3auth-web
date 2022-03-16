@@ -14,6 +14,7 @@ import {
 } from "../../rpc/ethRpcMiddlewares";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { getProviderHandlers } from "./ethPrivatekeyUtils";
+import { TransactionFormatter } from "./TransactionFormatter";
 
 export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -44,9 +45,12 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   public async setupProvider(privKey: string): Promise<void> {
+    const txFormatter = new TransactionFormatter({
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+    });
     const providerHandlers = getProviderHandlers({
+      txFormatter,
       privKey,
-      chainConfig: this.config.chainConfig,
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
@@ -60,6 +64,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
+    await txFormatter.init();
     await this.lookupNetwork();
   }
 

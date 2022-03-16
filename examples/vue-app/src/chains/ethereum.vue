@@ -33,17 +33,17 @@ import Loader from "@/components/loader.vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0x1",
+  chainId: "0x4",
   // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
   // displayName: "ropsten",
   // blockExplorer: "https://ropsten.etherscan.io/",
   ticker: "ETH",
   tickerName: "Ethereum",
 };
-
 
 export default Vue.extend({
   name: "EthereumChain",
@@ -115,7 +115,7 @@ export default Vue.extend({
         this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP", enableLogging: true });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
-            network: this.openloginNetwork,
+            network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId,
           },
         });
