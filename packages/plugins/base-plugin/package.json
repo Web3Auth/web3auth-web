@@ -1,0 +1,56 @@
+{
+  "name": "@web3auth/base-plugin",
+  "version": "0.6.1",
+  "description": "Base plugin for web3auth plugins",
+  "keywords": [
+    "web3Auth/base-plugin",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "metamask"
+  ],
+  "main": "dist/basePlugin.cjs.js",
+  "module": "dist/basePlugin.esm.js",
+  "unpkg": "dist/basePlugin.umd.min.js",
+  "jsdelivr": "dist/basePlugin.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/basePlugin#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "rimraf dist/ && torus-scripts start",
+    "build": "rimraf dist/ && torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "yarn run build",
+    "pre-commit": "lint-staged --cwd ."
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "lint-staged": "^12.3.4"
+  },
+  "dependencies": {
+    "@web3auth/base": "^0.6.1"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  }
+}

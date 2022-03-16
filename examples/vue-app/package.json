@@ -18,6 +18,7 @@
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/base-provider": "file:../../packages/providers/base-provider",
     "@web3auth/core": "file:../../packages/core",
+    "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",

@@ -44,6 +44,7 @@ const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chai
   tickerName: "Ethereum",
 };
 
+
 export default Vue.extend({
   name: "EthereumChain",
   props: {
@@ -131,7 +132,7 @@ export default Vue.extend({
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
@@ -157,7 +158,8 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        this.provider = await this.web3auth.connect();
+        const web3authProvider = await this.web3auth.connect();
+        this.provider = web3authProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
