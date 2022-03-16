@@ -297,7 +297,6 @@ export class TransactionFormatter {
       try {
         code = (await this.providerProxy.request<string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
       } catch (error) {
-        txCategory = null;
         log.warn(error);
       }
       const codeIsEmpty = !code || code === "0x" || code === "0x0";
