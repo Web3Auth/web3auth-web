@@ -11,7 +11,7 @@ export function normalizeGWEIDecimalNumbers(n: string | BigNumber): string {
 }
 
 export async function fetchEip1159GasEstimates(url: string): Promise<EIP1159GasData> {
-  const estimates: EIP1159GasData = await get(url);
+  const estimates = await get<EIP1159GasData>(url);
   const normalizedEstimates = {
     ...estimates,
     estimatedBaseFee: normalizeGWEIDecimalNumbers(estimates.estimatedBaseFee),
@@ -39,16 +39,16 @@ export async function fetchEip1159GasEstimates(url: string): Promise<EIP1159GasD
  * high values from that API.
  */
 export async function fetchLegacyGasPriceEstimates(url: string): Promise<LegacyGasData> {
-  const result = (await get(url, {
+  const result = await get<{
+    SafeGasPrice: string;
+    ProposeGasPrice: string;
+    FastGasPrice: string;
+  }>(url, {
     referrer: url,
     referrerPolicy: "no-referrer-when-downgrade",
     method: "GET",
     mode: "cors",
-  })) as {
-    SafeGasPrice: string;
-    ProposeGasPrice: string;
-    FastGasPrice: string;
-  };
+  });
   return {
     low: result.SafeGasPrice,
     medium: result.ProposeGasPrice,

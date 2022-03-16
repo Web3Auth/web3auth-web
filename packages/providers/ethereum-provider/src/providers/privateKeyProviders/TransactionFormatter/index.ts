@@ -36,7 +36,7 @@ export class TransactionFormatter {
     const hardfork = this.isEIP1559Compatible ? Hardfork.London : Hardfork.Berlin;
     const customChainParams = {
       name,
-      chainId: chainId === "loading" ? 0 : parseInt(chainId, 16),
+      chainId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
       networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
       defaultHardfork: hardfork,
     };
@@ -313,6 +313,7 @@ export class TransactionFormatter {
     if (txParams.gas) {
       return txParams.gas;
     }
+
     if (txParams.to && transactionCategory === TRANSACTION_TYPES.SENT_ETHER) {
       // if there's data in the params, but there's no contract code, it's not a valid transaction
       if (txParams.data) {

@@ -13,14 +13,14 @@ type ConverterInput = {
   numberOfDecimals?: number;
 };
 // Big Number Constants
-const BIG_NUMBER_WEI_MULTIPLIER = new BigNumber("1000000000000000000");
-const BIG_NUMBER_GWEI_MULTIPLIER = new BigNumber("1000000000");
+const BIG_NUMBER_WEI_MULTIPLIER = new BigNumber("1e18");
+const BIG_NUMBER_GWEI_MULTIPLIER = new BigNumber("1e9");
 const BIG_NUMBER_ETH_MULTIPLIER = new BigNumber("1");
 
 // Setter Maps
 const toBigNumber: Record<NumericBaseType, (n: string | BigNumber) => BigNumber> = {
   hex: (n: string | BigNumber) => (typeof n === "string" ? new BigNumber(stripHexPrefix(n), 16) : new BigNumber(n, 16)),
-  dec: (n: string | BigNumber) => new BigNumber(String(n), 10),
+  dec: (n: string | BigNumber) => new BigNumber(n, 10),
 };
 const toNormalizedDenomination: Record<string, (n: BigNumber) => BigNumber> = {
   WEI: (bigNumber) => bigNumber.div(BIG_NUMBER_WEI_MULTIPLIER),
@@ -32,7 +32,7 @@ const toSpecifiedDenomination: Record<string, (n: BigNumber) => BigNumber> = {
   GWEI: (bigNumber) => bigNumber.times(BIG_NUMBER_GWEI_MULTIPLIER).dp(9, BigNumber.ROUND_HALF_UP),
   ETH: (bigNumber) => bigNumber.times(BIG_NUMBER_ETH_MULTIPLIER).dp(9, BigNumber.ROUND_HALF_UP),
 };
-const baseChange: Record<string, (n: BigNumber) => BigNumber | string> = {
+const baseChange: Record<string, (n: BigNumber) => string> = {
   hex: (n) => n.toString(16),
   dec: (n) => new BigNumber(n).toString(10),
 };

@@ -6,25 +6,17 @@ export type LegacyGasData = {
   high: string;
 };
 
+export type EIP1559GasDataItem = {
+  suggestedMaxPriorityFeePerGas: string;
+  suggestedMaxFeePerGas: string;
+  minWaitTimeEstimate: number;
+  maxWaitTimeEstimate: number;
+};
+
 export type EIP1159GasData = {
-  low: {
-    suggestedMaxPriorityFeePerGas: string;
-    suggestedMaxFeePerGas: string;
-    minWaitTimeEstimate: number;
-    maxWaitTimeEstimate: number;
-  };
-  medium: {
-    suggestedMaxPriorityFeePerGas: string;
-    suggestedMaxFeePerGas: string;
-    minWaitTimeEstimate: number;
-    maxWaitTimeEstimate: number;
-  };
-  high: {
-    suggestedMaxPriorityFeePerGas: string;
-    suggestedMaxFeePerGas: string;
-    minWaitTimeEstimate: number;
-    maxWaitTimeEstimate: number;
-  };
+  low: EIP1559GasDataItem;
+  medium: EIP1559GasDataItem;
+  high: EIP1559GasDataItem;
   estimatedBaseFee: string;
   networkCongestion: number;
   latestPriorityFeeRange: string[];
