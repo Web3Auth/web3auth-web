@@ -19,7 +19,6 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.6.0",
     "@web3auth/base": "^0.5.0",
     "@web3auth/core": "^0.5.0",
     "@web3auth/metamask-adapter": "^0.5.0",

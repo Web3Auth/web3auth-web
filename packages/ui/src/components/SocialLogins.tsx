@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
@@ -14,6 +14,7 @@ interface SocialLoginProps {
 }
 
 export default function SocialLogins(props: SocialLoginProps) {
+  const [canShowMore, setCanShowMore] = useState(false);
   const {
     socialLoginsConfig = {
       loginMethods: {},
@@ -30,6 +31,13 @@ export default function SocialLogins(props: SocialLoginProps) {
   const expandClickHandler = () => {
     setIsExpanded(!isExpanded);
   };
+
+  useEffect(() => {
+    const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
+      return socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
+    });
+    setCanShowMore(maxOptions.length > 5);
+  }, [socialLoginsConfig.loginMethods]);
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
@@ -66,12 +74,7 @@ export default function SocialLogins(props: SocialLoginProps) {
           );
         })}
       </ul>
-      <button
-        type="button"
-        className={adapterButtonClass}
-        style={{ display: Object.keys(socialLoginsConfig.loginMethods).length > 5 ? "flex" : "none" }}
-        onClick={expandClickHandler}
-      >
+      <button type="button" className={adapterButtonClass} style={{ display: canShowMore ? "flex" : "none" }} onClick={expandClickHandler}>
         <Icon iconName={`expand${isDark ? "-light" : ""}`} />
         <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
       </button>

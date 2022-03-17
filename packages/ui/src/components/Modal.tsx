@@ -1,3 +1,4 @@
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { log, WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
@@ -179,10 +180,13 @@ export default function Modal(props: ModalProps) {
                   handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                   socialLoginsConfig={modalState.socialLoginsConfig}
                 />
-                <SocialLoginEmail
-                  adapter={modalState.socialLoginsConfig?.adapter}
-                  handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                />
+
+                {modalState.socialLoginsConfig.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS].showOnModal && (
+                  <SocialLoginEmail
+                    adapter={modalState.socialLoginsConfig?.adapter}
+                    handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                  />
+                )}
 
                 {/* button to show external wallets */}
                 {modalState.hasExternalWallets && externalWalletButton}

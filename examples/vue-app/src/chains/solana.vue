@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
@@ -117,8 +117,15 @@ export default Vue.extend({
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({
           modalConfig: {
-            name: "google",
-            showOnModal: true,
+            // to hide social login methods
+            [WALLET_ADAPTERS.OPENLOGIN]: {
+              loginMethods: {
+                twitter: {
+                  name: "twitter",
+                  showOnModal: false,
+                },
+              },
+            },
           },
         });
       } catch (error) {
