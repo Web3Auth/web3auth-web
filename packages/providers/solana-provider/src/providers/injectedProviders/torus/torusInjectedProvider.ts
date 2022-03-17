@@ -1,9 +1,10 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, isHexStrict, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
+import { createConfigMiddleware } from "../../../rpc/JrpcClient";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
 import { InjectedProvider } from "../interface";
@@ -45,8 +46,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     const providerHandlers = getTorusHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
+    const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);
+    engine.push(configMiddleware);
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
