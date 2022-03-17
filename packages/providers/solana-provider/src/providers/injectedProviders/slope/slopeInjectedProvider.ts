@@ -1,9 +1,10 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { ISlopeProvider } from "../../../interface";
+import { createConfigMiddleware } from "../../../rpc/JrpcClient";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 import { getSlopeHandlers } from "./providerHandlers";
 
@@ -19,8 +20,12 @@ export class SlopeInjectedProxyProvider extends BaseProvider<BaseProviderConfig,
   public async setupProvider(injectedProvider: ISlopeProvider): Promise<void> {
     const providerHandlers = getSlopeHandlers(injectedProvider, this.getProviderEngineProxy.bind(this));
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
+    const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
+
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);
+    engine.push(configMiddleware);
+
     const provider = providerFromEngine(engine);
 
     this.updateProviderEngineProxy(provider);

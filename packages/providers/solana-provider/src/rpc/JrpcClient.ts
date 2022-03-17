@@ -27,12 +27,18 @@ export function createProviderConfigMiddleware(providerConfig: Omit<CustomChainC
   };
 }
 
+export function createConfigMiddleware(providerConfig: Omit<CustomChainConfig, "chainNamespace">): JRPCMiddleware<unknown, unknown> {
+  const { chainId } = providerConfig;
+
+  return mergeMiddleware([createChainIdMiddleware(chainId), createProviderConfigMiddleware(providerConfig)]);
+}
+
 export function createJsonRpcClient(providerConfig: Omit<CustomChainConfig, "chainNamespace">): {
   networkMiddleware: JRPCMiddleware<unknown, unknown>;
   fetchMiddleware: JRPCMiddleware<unknown, unknown>;
 } {
-  const { chainId, rpcTarget } = providerConfig;
+  const { rpcTarget } = providerConfig;
   const fetchMiddleware = createFetchMiddleware({ rpcTarget });
-  const networkMiddleware = mergeMiddleware([createChainIdMiddleware(chainId), createProviderConfigMiddleware(providerConfig), fetchMiddleware]);
+  const networkMiddleware = mergeMiddleware([createConfigMiddleware(providerConfig), fetchMiddleware]);
   return { networkMiddleware, fetchMiddleware };
 }

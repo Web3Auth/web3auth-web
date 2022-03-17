@@ -22,6 +22,8 @@
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { SlopeAdapter } from "@web3auth/slope-adapter";
+import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -112,7 +114,10 @@ export default Vue.extend({
             clientId: config.clientId,
           },
         });
-
+        const slopeAdapter = new SlopeAdapter();
+        const solflareAdapter = new SolflareAdapter();
+        this.web3auth.configureAdapter(solflareAdapter);
+        this.web3auth.configureAdapter(slopeAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({

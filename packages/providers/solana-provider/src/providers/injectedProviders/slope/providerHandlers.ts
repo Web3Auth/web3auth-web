@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
@@ -21,6 +22,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       throw ethErrors.rpc.methodNotSupported();
     },
     signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+      console.log("signTransaction", req);
       const { data } = await injectedProvider.signTransaction(req.params.message);
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
@@ -45,10 +47,12 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const decodedTx = bs58.decode(req.params.message);
       const transaction = Transaction.from(decodedTx);
       transaction.addSignature(publicKey, signature);
-
+      console.log("signature", signature);
       const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
       const conn = new Connection(chainConfig.rpcTarget);
-      const res = await conn.sendRawTransaction(transaction.serialize());
+      console.log("sending tx");
+      console.log("serialized tx", transaction.serialize({ requireAllSignatures: false }));
+      const res = await conn.sendRawTransaction(transaction.serialize({ requireAllSignatures: false }));
       return { signature: res };
     },
     signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {

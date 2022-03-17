@@ -203,15 +203,15 @@
   optionalDependencies:
     secp256k1 "^3.8.0"
 
-"@toruslabs/fetch-node-details@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@toruslabs/fetch-node-details/-/fetch-node-details-4.0.2.tgz#8c6862110bbfafa5e2af475a4cd91d5e18fe20dc"
-  integrity sha512-xzWvfY93mE/FP4yqYdhLcFGUE4bHyvbfLvQrC/Ujja958Zh+BxWdE6nfVqPP6O/424cm+f3vNixRkl680R+9ig==
+"@toruslabs/fetch-node-details@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/fetch-node-details/-/fetch-node-details-5.0.1.tgz#65132921ec3bc3cb78579b03a0c6b0abbf14cc50"
+  integrity sha512-d7JlzX+Cp9wEXdW4xvj2qClrgPYOKJqaWTzVJJ5gK+KBISaGywrHz1xYSTviHK98SMGoywOLrVAPcHJ1lhqrMQ==
   dependencies:
-    web3-eth-contract "^1.6.1"
-    web3-utils "^1.6.1"
+    web3-eth-contract "^1.7.0"
+    web3-utils "^1.7.0"
 
-"@toruslabs/http-helpers@^2.1.4":
+"@toruslabs/http-helpers@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-2.2.0.tgz#c494984701ff60eb93c0eaef279daa93b5bcea81"
   integrity sha512-xkzZZuE+DmWmJBTYneCrMJY24izNQCOdoJMpsXKQx20Va/rTQvNPbdkpx9LBf/pisk8jOwETNAfFQ8YTBc/bZw==
@@ -219,12 +219,12 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-jrpc@^1.3.3":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.5.0.tgz#d264ff98492078cde52d26cc7fde61c24ca7bafb"
-  integrity sha512-jfcQdJg1pzI8xppgQu37Ys4D6vJG9hjDpNy8lKFnyxs8CAwsuvx5BXcK7oC5qyMLo3Afo4IC1sEVzqVoG7eCHg==
+"@toruslabs/openlogin-jrpc@^1.5.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.6.0.tgz#579307a97d7a9d173863c6dcd4dc178e83d4a663"
+  integrity sha512-lUpzGhmg1x0TwAxS1FE9y7dDbqNCACi2cXyNEaQdvHRQYLQnN46cq75nAAbLKCjKwM5ThhrRpO+p/iH9ESjgYQ==
   dependencies:
-    "@toruslabs/openlogin-utils" "^1.5.0"
+    "@toruslabs/openlogin-utils" "^1.6.0"
     end-of-stream "^1.4.4"
     events "^3.3.0"
     fast-safe-stringify "^2.1.1"
@@ -232,25 +232,25 @@
     pump "^3.0.0"
     readable-stream "^3.6.0"
 
-"@toruslabs/openlogin-utils@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-utils/-/openlogin-utils-1.5.0.tgz#912ede8862796e1fde129c208419c19f526ddd82"
-  integrity sha512-dKZKBJ7UHSwyO+T1SrCRAKRb1YwzzVznallFvTUSBp05wnUF+7oHaP/+YSAMsl/DwJOGO/2Qu3Gkhq9y7ggWxw==
+"@toruslabs/openlogin-utils@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-utils/-/openlogin-utils-1.6.0.tgz#dd0b65d47e89d741c58506c1119a0390a3fdf1ba"
+  integrity sha512-CeIrizKgpoD6p95bOxjm4ZJ/5qNl+3i5dH8pczp6v3k8LHUAm2pDZFGXLPeK1DAdTnRU99/YOnipkjxPR1bvoA==
   dependencies:
     base64url "^3.0.1"
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
 "@toruslabs/torus-embed@^1.20.4":
-  version "1.20.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.20.4.tgz#d1ec55bd4071ab8dcd1809e63e09211fc5e6830d"
-  integrity sha512-s5mxLA2ZIY4YeadS4EQReXK1oKnJgVmdaZjJAprnDzSAIOLJnd5GRdbHgq5wNH1pBk+T5hrppv6fWBR1pXNlXw==
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.21.0.tgz#6b0e78b2b5247c161734f3570642a594f3fd3c45"
+  integrity sha512-INvHYal3dvCZk1WCR3BI2015D/TDPqlH5ysAYKmovT7qIl2AKfW44ZeQxpCaMHlADvTk0reN8b+JqY6Ys6PzbA==
   dependencies:
     "@metamask/obs-store" "^7.0.0"
-    "@toruslabs/fetch-node-details" "^4.0.2"
-    "@toruslabs/http-helpers" "^2.1.4"
-    "@toruslabs/openlogin-jrpc" "^1.3.3"
-    "@toruslabs/torus.js" "^4.2.3"
+    "@toruslabs/fetch-node-details" "^5.0.1"
+    "@toruslabs/http-helpers" "^2.2.0"
+    "@toruslabs/openlogin-jrpc" "^1.5.0"
+    "@toruslabs/torus.js" "^5.0.1"
     create-hash "^1.2.0"
     end-of-stream "^1.4.4"
     eth-rpc-errors "^4.0.3"
@@ -262,18 +262,18 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@toruslabs/torus.js@^4.2.3":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus.js/-/torus.js-4.2.6.tgz#c206f53357541f45b94579abc27572e9482adb7e"
-  integrity sha512-DN84qHN+maIO5ZlblcIivKQwONibGKJg9vTifb3G7cr5QmTkWpnzwEcLT+w7fRnj7BhbzBeEhjeYzLOBpiE+6Q==
+"@toruslabs/torus.js@^5.0.1":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus.js/-/torus.js-5.1.0.tgz#f021383b0a0cc6a5a29806f0f6333a4ab437544e"
+  integrity sha512-5R9mz6ULwlW8rS+ocjq+2P4BYB/+2cSeHwTyDwA31ZTbreB3ugcUzX5+r+zlx9BTgJC2LdBkCNBJVfDMmzA4iA==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
-    "@toruslabs/http-helpers" "^2.1.4"
+    "@toruslabs/http-helpers" "^2.2.0"
     bn.js "^5.2.0"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
     loglevel "^1.8.0"
-    web3-utils "^1.6.1"
+    web3-utils "^1.7.0"
 
 "@types/bn.js@^4.11.5":
   version "4.11.6"
@@ -685,9 +685,9 @@ es-to-primitive@^1.2.1:
     is-symbol "^1.0.2"
 
 es5-ext@^0.10.35, es5-ext@^0.10.50:
-  version "0.10.57"
-  resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.57.tgz#440574256186e2bf22223d673087caae83edabd2"
-  integrity sha512-L7cCNoPwTkAp7IBHxrKLsh7NKiVFkcdxlP9vbVw9QUvb7gF0Mz9bEBN0WY9xqdTjGF907EMT/iG013vnbqwu1Q==
+  version "0.10.58"
+  resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.58.tgz#5b97d94236285fb87c8ffc782cf42eb0a25d2ae0"
+  integrity sha512-LHO+KBBaHGwjy32ibSaMY+ZzjpC4K4I5bPoijICMBL7gXEXfrEUrzssmNP+KigbQEp1dRUnGkry/vUnxOqptLQ==
   dependencies:
     es6-iterator "^2.0.3"
     es6-symbol "^3.1.3"
@@ -1118,9 +1118,9 @@ lilconfig@2.0.4:
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
 lint-staged@^12.3.5:
-  version "12.3.5"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.5.tgz#8048ce048c3cac12f57200a06344a54dc91c8fa9"
-  integrity sha512-oOH36RUs1It7b9U/C7Nl/a0sLfoIBcMB8ramiB3nuJ6brBqzsWiUAFSR5DQ3yyP/OR7XKMpijtgKl2DV1lQ3lA==
+  version "12.3.6"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.6.tgz#7b999ebe041c07f241537a17c49969027b4d26f0"
+  integrity sha512-tVNyl/HsAnplKh4oaoRNzyZLm0PE/6VaBUXvd/gA9zhYCC/+ivZwiwpoT6jOxcLzuIOjP19wW+mfOi7/Bw4c1A==
   dependencies:
     cli-truncate "^3.1.0"
     colorette "^2.0.16"
@@ -1132,6 +1132,7 @@ lint-staged@^12.3.5:
     micromatch "^4.0.4"
     normalize-path "^3.0.0"
     object-inspect "^1.12.0"
+    pidtree "^0.5.0"
     string-argv "^0.3.1"
     supports-color "^9.2.1"
     yaml "^1.10.2"
@@ -1325,6 +1326,11 @@ picomatch@^2.2.3:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+
+pidtree@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/pidtree/-/pidtree-0.5.0.tgz#ad5fbc1de78b8a5f99d6fbdd4f6e4eee21d1aca1"
+  integrity sha512-9nxspIM7OpZuhBxPg73Zvyq7j1QMPMPsGKTqRc2XOaFQauDvoNz9fM1Wdkjmeo7l9GXOZiRs97sPkuayl39wjA==
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
@@ -1742,7 +1748,7 @@ web3-eth-abi@1.7.1:
     "@ethersproject/abi" "5.0.7"
     web3-utils "1.7.1"
 
-web3-eth-contract@^1.6.1:
+web3-eth-contract@^1.7.0:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-1.7.1.tgz#3f5147e5f1441ae388c985ba95023d02503378ae"
   integrity sha512-HpnbkPYkVK3lOyos2SaUjCleKfbF0SP3yjw7l551rAAi5sIz/vwlEzdPWd0IHL7ouxXbO0tDn7jzWBRcD3sTbA==
@@ -1789,7 +1795,7 @@ web3-providers-ws@1.7.1:
     web3-core-helpers "1.7.1"
     websocket "^1.0.32"
 
-web3-utils@1.7.1, web3-utils@^1.6.1:
+web3-utils@1.7.1, web3-utils@^1.7.0:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.7.1.tgz#77d8bacaf426c66027d8aa4864d77f0ed211aacd"
   integrity sha512-fef0EsqMGJUgiHPdX+KN9okVWshbIumyJPmR+btnD1HgvoXijKEkuKBv0OmUqjbeqmLKP2/N9EiXKJel5+E1Dw==

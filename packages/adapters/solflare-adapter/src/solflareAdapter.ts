@@ -27,8 +27,8 @@ export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class PhantomAdapter extends BaseAdapter<void> {
-  readonly name: string = WALLET_ADAPTERS.PHANTOM;
+export class SolflareAdapter extends BaseAdapter<void> {
+  readonly name: string = WALLET_ADAPTERS.SOLFLARE;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
 
