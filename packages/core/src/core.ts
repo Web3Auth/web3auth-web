@@ -9,6 +9,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  IWeb3Auth,
   log,
   SafeEventEmitterProvider,
   storageAvailable,
@@ -16,7 +17,9 @@ import {
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
+import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
 export interface Web3AuthCoreOptions {
   /**
@@ -35,7 +38,7 @@ export interface Web3AuthCoreOptions {
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
-export class Web3AuthCore extends SafeEventEmitter {
+export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
   readonly coreOptions: Web3AuthCoreOptions;
 
   public connectedAdapterName: string | null = null;
@@ -45,6 +48,8 @@ export class Web3AuthCore extends SafeEventEmitter {
   public cachedAdapter: string | null = null;
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
+
+  private plugins: Record<string, IPlugin> = {};
 
   constructor(options: Web3AuthCoreOptions) {
     super();
@@ -136,7 +141,8 @@ export class Web3AuthCore extends SafeEventEmitter {
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
     if (!this.walletAdapters[walletName])
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    return this.walletAdapters[walletName].connect(loginParams);
+    const provider = await this.walletAdapters[walletName].connect(loginParams);
+    return provider;
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
@@ -150,19 +156,42 @@ export class Web3AuthCore extends SafeEventEmitter {
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
+  public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {
+    if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
+    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
+      throw new Error(
+        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.coreOptions.chainConfig.chainNamespace}`
+      );
+
+    this.plugins[plugin.name] = plugin;
+    await plugin.initWithWeb3Auth(this);
+    return this;
+  }
+
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
-    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
-      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
       log.debug("connected", this.status, this.connectedAdapterName);
+      await Promise.all(
+        Object.values(this.plugins).map((plugin) => {
+          return plugin.connect().catch((error: Web3AuthError) => {
+            // swallow error if connector adapter doesn't supports this plugin.
+            if (error.code === 5211) {
+              return;
+            }
+            // throw error;
+            log.error(error);
+          });
+        })
+      );
+      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
-    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
       if (storageAvailable("sessionStorage")) {
         const cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
         if (this.connectedAdapterName === cachedAdapter) {
@@ -171,6 +200,20 @@ export class Web3AuthCore extends SafeEventEmitter {
       }
 
       log.debug("disconnected", this.status, this.connectedAdapterName);
+      await Promise.all(
+        Object.values(this.plugins).map((plugin) => {
+          return plugin.disconnect().catch((error: Web3AuthError) => {
+            // swallow error if adapter doesn't supports this plugin.
+            if (error.code === 5211) {
+              return;
+            }
+            // throw error;
+            log.error(error);
+          });
+        })
+      );
+      this.connectedAdapterName = null;
+      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
     });
     walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;

@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "0.5.0",
+  "version": "0.6.1",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -14,7 +14,7 @@
   "module": "dist/ui.esm.js",
   "unpkg": "dist/ui.umd.min.js",
   "jsdelivr": "dist/ui.umd.min.js",
-  "types": "dist/types/src/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/ui#readme",
   "license": "ISC",
@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^1.6.0",
-    "@web3auth/base": "^0.5.0",
+    "@web3auth/base": "^0.6.1",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",

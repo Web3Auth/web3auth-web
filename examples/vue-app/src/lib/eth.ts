@@ -6,7 +6,11 @@ export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
     console.log("pubKey", accounts);
-    const txRes = await web3.eth.sendTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+    const txRes = await web3.eth.sendTransaction({
+      from: accounts[0],
+      to: accounts[0],
+      value: web3.utils.toWei("0.01"),
+    });
     uiConsole("txRes", txRes);
   } catch (error) {
     console.log("error", error);
@@ -78,9 +82,13 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
   try {
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
-    console.log("pubKey", accounts);
+
     // only supported with social logins (openlogin adapter)
-    const txRes = await web3.eth.signTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+    const txRes = await web3.eth.signTransaction({
+      from: accounts[0],
+      to: accounts[0],
+      value: web3.utils.toWei("0.01"),
+    });
     uiConsole("txRes", txRes);
   } catch (error) {
     console.log("error", error);
