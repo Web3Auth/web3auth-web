@@ -14,11 +14,6 @@ export async function getProviderHandlers({
   privKey: string;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): Promise<IProviderHandlers> {
-  const transactionGenerator = (serializedTx: string): Transaction => {
-    const decodedTx = bs58.decode(serializedTx);
-    const tx = Transaction.from(decodedTx);
-    return tx;
-  };
   const keyPairGenerator = (): Keypair => {
     return Keypair.fromSecretKey(Buffer.from(privKey, "hex"));
   };
@@ -32,11 +27,11 @@ export async function getProviderHandlers({
 
     getPrivateKey: async () => privKey,
 
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const transaction = transactionGenerator(req.params?.message as string);
+      const transaction = req.params.message;
       transaction.partialSign(keyPair);
       return transaction;
     },
@@ -49,14 +44,14 @@ export async function getProviderHandlers({
       return signedMsg;
     },
 
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
       const _providerEngineProxy = getProviderEngineProxy();
       if (!_providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
 
-      const transaction = transactionGenerator(req.params?.message as string);
+      const transaction = req.params.message;
       transaction.sign(keyPair);
 
       const sig = await _providerEngineProxy.request<string>({
@@ -66,17 +61,17 @@ export async function getProviderHandlers({
       return { signature: sig };
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const signedTransactions: Transaction[] = [];
-      for (const tx of req.params?.message || []) {
-        const transaction = transactionGenerator(tx);
+
+      const txns = req.params?.message;
+      for (const tx of txns || []) {
+        const transaction = tx;
         transaction.partialSign(keyPair);
-        signedTransactions.push(transaction);
       }
-      return signedTransactions;
+      return txns;
     },
   };
 

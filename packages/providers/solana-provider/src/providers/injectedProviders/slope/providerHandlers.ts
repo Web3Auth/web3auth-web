@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
@@ -21,63 +20,60 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-      console.log("signTransaction", req);
-      const { data } = await injectedProvider.signTransaction(req.params.message);
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
+      const txMessage = req.params.message;
+      if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
+      const { data } = await injectedProvider.signTransaction(bs58.encode(txMessage.serializeMessage()));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
-      const decodedTx = bs58.decode(req.params.message);
-      const transaction = Transaction.from(decodedTx);
-      transaction.addSignature(publicKey, signature);
-      return transaction;
+      txMessage.addSignature(publicKey, signature);
+      return txMessage;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
       const response = await injectedProvider.signMessage(req.params.message);
       return bs58.decode(response.data.signature);
     },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
       const provider = getProviderEngineProxy();
       if (!provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-
-      const { data } = await injectedProvider.signTransaction(req.params.message);
+      const txMessage = req.params.message;
+      if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
+      const { data } = await injectedProvider.signTransaction(bs58.encode(txMessage.serializeMessage()));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
-      const decodedTx = bs58.decode(req.params.message);
-      const transaction = Transaction.from(decodedTx);
-      transaction.addSignature(publicKey, signature);
-      console.log("signature", signature);
+      txMessage.addSignature(publicKey, signature);
       const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
       const conn = new Connection(chainConfig.rpcTarget);
-      console.log("sending tx");
-      console.log("serialized tx", transaction.serialize({ requireAllSignatures: false }));
-      const res = await conn.sendRawTransaction(transaction.serialize({ requireAllSignatures: false }));
+      const res = await conn.sendRawTransaction(txMessage.serialize());
       return { signature: res };
     },
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const { msg, data } = await injectedProvider.signAllTransactions(req.params.message);
 
-      const { length } = req.params.message;
+      const allTxns = req.params.message;
+      const { length } = allTxns;
+
+      const unsignedTx = [];
+
+      for (let i = 0; i < length; i++) {
+        unsignedTx.push(bs58.encode(req.params.message[i].serializeMessage()));
+      }
+      const { msg, data } = await injectedProvider.signAllTransactions(unsignedTx);
+
       if (!data.publicKey || data.signatures?.length !== length) throw new Error(msg);
 
       const publicKey = new PublicKey(data.publicKey);
 
-      const transactions = [];
-
       for (let i = 0; i < length; i++) {
         const signature = bs58.decode(data.signatures[i]);
-        const decodedTx = bs58.decode(req.params.message[i]);
-        const transaction = Transaction.from(decodedTx);
-        transaction.addSignature(publicKey, signature);
-        transactions[i].addSignature(publicKey, bs58.decode(data.signatures[i]));
-        transactions.push(transaction);
+        allTxns[i].addSignature(publicKey, signature);
       }
 
-      return transactions;
+      return allTxns;
     },
   };
   return providerHandlers;

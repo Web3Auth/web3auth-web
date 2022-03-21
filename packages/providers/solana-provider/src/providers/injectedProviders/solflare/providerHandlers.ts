@@ -18,37 +18,31 @@ export const getSolflareHandlers = (injectedProvider: Solflare, getProviderEngin
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-      const message = bs58.decode(req.params.message);
-      const txn = Transaction.from(message);
-      const transaction = await injectedProvider.signTransaction(txn);
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
+      const transaction = await injectedProvider.signTransaction(req.params.message);
       return transaction;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
       const message = await injectedProvider.signMessage(req.params.message);
       return message;
     },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
+      if (!req.params?.message || !req.params?.message.length) {
+        throw ethErrors.rpc.invalidParams("message");
+      }
+      const transaction = await injectedProvider.signAllTransactions(req.params.message);
+      return transaction;
+    },
+
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
       const provider = getProviderEngineProxy();
       if (!provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-      const message = bs58.decode(req.params.message);
-      const txn = Transaction.from(message);
-      const transaction = await injectedProvider.signTransaction(txn);
+      const transaction = await injectedProvider.signTransaction(req.params.message);
       const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
       const conn = new Connection(chainConfig.rpcTarget);
       const res = await conn.sendRawTransaction(transaction.serialize());
       return { signature: res };
-    },
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
-      if (!req.params?.message || !req.params?.message.length) {
-        throw ethErrors.rpc.invalidParams("message");
-      }
-      const txns = req.params.message.map((msg) => {
-        const decodedMsg = bs58.decode(msg);
-        return Transaction.from(decodedMsg);
-      });
-      const transaction = await injectedProvider.signAllTransactions(txns);
-      return transaction;
     },
   };
   return providerHandlers;

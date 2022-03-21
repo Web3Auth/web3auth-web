@@ -1,6 +1,5 @@
-import { Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
@@ -38,48 +37,57 @@ export const getTorusHandlers = (injectedProvider: InjectedProvider): IProviderH
       return message;
     },
 
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const message = bs58.decode(req.params.message).toString("hex");
+      const txMessage = req.params.message;
       const response = await injectedProvider.request<string>({
         method: "sign_transaction",
-        params: { message },
+        params: { message: txMessage.serializeMessage(), messageOnly: true },
       });
 
-      const buf = Buffer.from(response, "hex");
-      const sendTx = Transaction.from(buf);
-      return sendTx;
+      const parsed = JSON.parse(response);
+
+      const signature = { publicKey: new PublicKey(parsed.publicKey), signature: Buffer.from(parsed.signature, "hex") };
+      txMessage.addSignature(signature.publicKey, signature.signature);
+      return txMessage;
     },
 
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const message = bs58.decode(req.params.message).toString("hex");
-
+      const txMessage = req.params.message;
       const response = await injectedProvider.request<string>({
         method: "send_transaction",
-        params: { message },
+        params: { message: txMessage, messageOnly: true },
       });
       return { signature: response };
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const messages: string[] = [];
-      for (const transaction of req.params.message) {
-        const message = bs58.decode(transaction).toString("hex");
-        messages.push(message);
-      }
-      const response = await injectedProvider.request<Transaction[]>({
-        method: "sign_all_transactions",
-        params: { message: messages },
+      const transactions = req.params.message;
+      const encodedMessages: string[] = transactions.map((tx) => {
+        return tx.serializeMessage().toString("hex");
       });
-      return response;
+      const response = await injectedProvider.request<string[]>({
+        method: "sign_all_transactions",
+        params: { message: encodedMessages, messageOnly: true },
+      });
+
+      // reconstruct signature pairs
+      const signatures = response.map((sig) => {
+        const parsed = JSON.parse(sig);
+        return { publicKey: new PublicKey(parsed.publicKey), signature: Buffer.from(parsed.signature, "hex") };
+      });
+      transactions.forEach((tx, idx) => {
+        tx.addSignature(signatures[idx].publicKey, signatures[idx].signature);
+      });
+      return transactions;
     },
   };
   return providerHandlers;

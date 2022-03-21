@@ -107,9 +107,8 @@ export class SolflareAdapter extends BaseAdapter<void> {
           if (error instanceof Web3AuthError) throw error;
           throw WalletLoginError.connectionError((error as Error)?.message);
         }
-      } else {
-        await this.connectWithProvider(wallet);
       }
+      await this.connectWithProvider(wallet);
 
       this._wallet = wallet;
 
@@ -150,7 +149,7 @@ export class SolflareAdapter extends BaseAdapter<void> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.SOLFLARE, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 

@@ -19,8 +19,6 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
   }
 
   public async setupProvider(injectedProvider: IPhantomWalletProvider): Promise<void> {
-    // eslint-disable-next-line no-console
-    console.log("setting up provider");
     const providerHandlers = getPhantomHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
