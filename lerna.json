@@ -6,8 +6,9 @@
     "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
-    "packages/adapters/*"
+    "packages/adapters/*",
+    "packages/plugins/*"
   ],
-  "version": "0.5.1",
+  "version": "0.6.2",
   "npmClient": "yarn"
 }

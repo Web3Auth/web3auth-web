@@ -33,10 +33,11 @@ import Loader from "@/components/loader.vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0x1",
+  chainId: "0x4",
   // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
   // displayName: "ropsten",
   // blockExplorer: "https://ropsten.etherscan.io/",
@@ -114,7 +115,7 @@ export default Vue.extend({
         this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP", enableLogging: true });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
-            network: this.openloginNetwork,
+            network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId,
           },
         });
@@ -131,7 +132,7 @@ export default Vue.extend({
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
@@ -157,7 +158,8 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        this.provider = await this.web3auth.connect();
+        const web3authProvider = await this.web3auth.connect();
+        this.provider = web3authProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
