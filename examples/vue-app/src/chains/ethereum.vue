@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts">
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
@@ -33,7 +34,6 @@ import Loader from "@/components/loader.vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,

@@ -1,9 +1,10 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { IPhantomWalletProvider } from "../../../interface";
+import { createConfigMiddleware } from "../../../rpc/JrpcClient";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
 import { getPhantomHandlers } from "./providerHandlers";
@@ -20,9 +21,11 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
   public async setupProvider(injectedProvider: IPhantomWalletProvider): Promise<void> {
     const providerHandlers = getPhantomHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
+    const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);
+    engine.push(configMiddleware);
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
 

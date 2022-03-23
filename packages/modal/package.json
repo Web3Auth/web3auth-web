@@ -19,7 +19,6 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.6.0",
     "@web3auth/base": "^0.6.1",
     "@web3auth/core": "^0.6.1",
     "@web3auth/metamask-adapter": "^0.6.1",
@@ -36,7 +35,8 @@
     "css-loader": "^2.1.1",
     "lint-staged": "^12.3.5",
     "style-loader": "^2.0.0",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "@toruslabs/openlogin": "^1.6.0"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

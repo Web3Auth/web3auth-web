@@ -12,18 +12,11 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
-import LoginModal, { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
+import LoginModal, { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
 
-import {
-  defaultEvmDappModalConfig,
-  defaultEvmWalletModalConfig,
-  defaultSolanaDappModalConfig,
-  defaultSolanaWalletModalConfig,
-  OPENLOGIN_PROVIDERS,
-} from "./config";
+import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
-import { getAdapterSocialLogins } from "./utils";
 
 export interface UIConfig {
   /**
@@ -173,7 +166,12 @@ export class Web3Auth extends Web3AuthCore {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
       if (this.modalConfig.adapters[adapter.name].showOnModal !== true) return false;
       if (!this.modalConfig.adapters[adapter.name].loginMethods) return true;
-      if (Object.values(this.modalConfig.adapters[adapter.name].loginMethods).some((method) => method.showOnModal)) return true;
+      const mergedLoginMethods = getAdapterSocialLogins(
+        adapter.name,
+        this.walletAdapters[adapter.name],
+        (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
+      );
+      if (Object.values(mergedLoginMethods).some((method) => method.showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");

@@ -1,4 +1,4 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, UX_MODE } from "@toruslabs/openlogin";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -91,12 +91,20 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     super.checkInitializationRequirements();
     if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
-    this.openloginInstance = new OpenLogin(this.openloginOptions);
-    const redirectResult = getHashQueryParams();
-    let isRedirectResult = true;
-    if (Object.keys(redirectResult).length > 0 && redirectResult.result) {
-      isRedirectResult = true;
+    let isRedirectResult = false;
+
+    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
+      const redirectResult = getHashQueryParams();
+      if (Object.keys(redirectResult).length > 0 && redirectResult._pid) {
+        isRedirectResult = true;
+      }
     }
+    this.openloginOptions = {
+      ...this.openloginOptions,
+      replaceUrlOnRedirect: isRedirectResult,
+    };
+    this.openloginInstance = new OpenLogin(this.openloginOptions);
+
     await this.openloginInstance.init();
 
     this.status = ADAPTER_STATUS.READY;
