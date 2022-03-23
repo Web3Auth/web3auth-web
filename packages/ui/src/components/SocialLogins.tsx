@@ -74,10 +74,12 @@ export default function SocialLogins(props: SocialLoginProps) {
           );
         })}
       </ul>
-      <button type="button" className={adapterButtonClass} style={{ display: canShowMore ? "flex" : "none" }} onClick={expandClickHandler}>
-        <Icon iconName={`expand${isDark ? "-light" : ""}`} />
-        <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
-      </button>
+      {canShowMore && (
+        <button type="button" className={adapterButtonClass} style={{ display: "flex" }} onClick={expandClickHandler}>
+          <Icon iconName={`expand${isDark ? "-light" : ""}`} />
+          <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
+        </button>
+      )}
     </div>
   );
 }
