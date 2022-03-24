@@ -6,7 +6,7 @@ import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
 import { ec as elliptic } from "elliptic";
-import { grindKey, starkEc } from "@toruslabs/openlogin-starkkey";
+import { grindKey, ec as starkEc } from "@toruslabs/starkware-crypto";
 import StarkExAPI from "@starkware-industries/starkex-js/dist/browser";
 import BN from "bn.js";
 

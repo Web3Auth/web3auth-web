@@ -5,10 +5,9 @@
   "dependencies": {
     "@solana/web3.js": "^1.36.0",
     "@starkware-industries/starkex-js": "0.0.6",
-    "@toruslabs/openlogin-starkkey": "file:../../../OpenLoginSdk/packages/openlogin-starkkey/toruslabs-openlogin-starkkey-v1.6.0.tgz",
+    "@toruslabs/starkware-crypto": "^1.1.0",
     "@web3auth/base": "^0.6.3",
     "@web3auth/openlogin-adapter": "^0.6.3",
-    "@web3auth/solana-provider": "^0.6.3",
     "@web3auth/web3auth": "^0.6.3",
     "bn.js": "^5.2.0",
     "elliptic": "^6.5.4",
