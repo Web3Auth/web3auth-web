@@ -1,0 +1,127 @@
+.container {
+  width: 60%;
+  margin: auto;
+  padding: 0 2rem;
+}
+
+.main {
+  min-height: 100vh;
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  line-height: 1.15;
+  font-size: 3rem;
+  text-align: center;
+  margin: 50px;
+}
+
+.title a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.console {
+  max-width: 100%;
+}
+
+.code {
+  background: #fafafa;
+  border-radius: 5px;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+  overflow-wrap: break-word;
+}
+
+.grid {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  margin: 30px 0;
+  background: #f4f5f7;
+  border: 1px solid #ebecf0;
+  border-radius: 5px;
+}
+
+.card {
+  margin: 0.5rem;
+  padding: 0.7rem;
+  text-align: center;
+  color: #0070f3;
+  text-decoration: none;
+  border: 1px solid #0070f3;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  width: 100%;
+}
+
+.card:hover,
+.card:focus,
+.card:active {
+  cursor: pointer;
+  background-color: #fafafa;
+}
+
+.row {
+  display: flex;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+.label {
+  flex-basis: 45%;
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  font-weight: bold;
+}
+
+.select {
+  flex-basis: 30%;
+  text-align: left;
+  padding: 0.3rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+.footer {
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  border-top: 1px solid #eaeaea;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10rem;
+}
+
+.footer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.logo {
+  height: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    width: 100%;
+  }
+}
