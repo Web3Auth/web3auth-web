@@ -124,7 +124,7 @@ export default function Modal(props: ModalProps) {
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
-        <h6 className="w3a-group__title">EXTERNAL WALLET</h6>
+        <div className="w3a-group__title">EXTERNAL WALLET</div>
         <button
           type="button"
           className="w3a-button w3ajs-external-toggle__button"

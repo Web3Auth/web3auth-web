@@ -23,7 +23,7 @@ function Header(props: HeaderProps) {
         {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : web3authIcon}
 
         <div>
-          <h1 className="w3a-header__title">Sign in</h1>
+          <div className="w3a-header__title">Sign in</div>
           <p className="w3a-header__subtitle">Select one of the following to continue</p>
         </div>
       </div>

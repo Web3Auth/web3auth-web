@@ -73,8 +73,6 @@
 
 #w3a-modal p,
 #w3a-modal form,
-#w3a-modal h1,
-#w3a-modal h6,
 #w3a-modal button {
     margin: 0;
     padding: 0;
@@ -248,7 +246,7 @@
     width: 40px;
     margin-right: 16px;
 }
-#w3a-modal h1.w3a-header__title {
+#w3a-modal .w3a-header__title {
     font-family: var(--text-header);
     font-weight: 600;
     font-size: 20px;
@@ -292,7 +290,7 @@
     padding-bottom: 24px;
 }
 
-#w3a-modal h6.w3a-group__title {
+#w3a-modal div.w3a-group__title {
     font-family: var(--text-header);
     font-weight: 400;
     font-size: 14px;
