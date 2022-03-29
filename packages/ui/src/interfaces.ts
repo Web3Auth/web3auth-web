@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BaseAdapterConfig, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
   appLogo: string;
@@ -43,6 +43,7 @@ export interface ModalState {
   externalWalletsConfig: Record<string, BaseAdapterConfig>;
   detailedLoaderAdapter: string;
   showExternalWalletsOnly: boolean;
+  wcAdapters: IWalletConnectExtensionAdapter[];
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string } };

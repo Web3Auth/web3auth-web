@@ -25,6 +25,7 @@ import {
 } from "@web3auth/base";
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
+import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
 
 class WalletConnectV1Adapter extends BaseAdapter<void> {
@@ -42,6 +43,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public adapterData: WalletConnectV1Data = {
     uri: "",
+    extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS,
   };
 
   public connector: WalletConnect | null = null;

@@ -47,6 +47,7 @@ export default function Modal(props: ModalProps) {
     externalWalletsConfig: {},
     detailedLoaderAdapter: "",
     showExternalWalletsOnly: false,
+    wcAdapters: [],
   });
 
   const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
@@ -198,6 +199,7 @@ export default function Modal(props: ModalProps) {
                   showBackButton={areSocialLoginsVisible}
                   handleExternalWalletClick={(params: ExternalWalletEventType) => preHandleExternalWalletClick(params)}
                   walletConnectUri={modalState.walletConnectUri}
+                  wcAdapters={modalState.wcAdapters}
                   config={modalState.externalWalletsConfig}
                   hideExternalWallets={() =>
                     setModalState((prevState) => {

@@ -66,7 +66,8 @@
     "lodash.merge": "^4.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-qr-code": "^2.0.3"
+    "react-qr-code": "^2.0.3",
+    "bowser": "^2.11.0"
   },
   "lint-staged": {
     "!(*d).ts": [
