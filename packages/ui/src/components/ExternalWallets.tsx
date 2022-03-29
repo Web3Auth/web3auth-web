@@ -35,7 +35,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
             <Icon iconName="arrow-left" />
-            <h6 className="w3a-group__title">Back</h6>
+            <div className="w3a-group__title">Back</div>
           </button>
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}

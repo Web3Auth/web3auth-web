@@ -45,7 +45,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   return (
     <div className="w3ajs-social-logins w3a-group">
-      <h6 className="w3a-group__title">CONTINUE WITH</h6>
+      <div className="w3a-group__title">CONTINUE WITH</div>
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;

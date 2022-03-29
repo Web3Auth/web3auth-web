@@ -20,8 +20,8 @@ import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
-function createWrapper(): HTMLDivElement {
-  const wrapper = document.createElement("div");
+function createWrapper(): HTMLElement {
+  const wrapper = document.createElement("section");
   wrapper.setAttribute("id", "w3a-container");
   document.body.appendChild(wrapper);
   return wrapper;
@@ -34,7 +34,7 @@ export default class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
-  private wrapper: HTMLDivElement;
+  private wrapper: HTMLElement;
 
   private stateEmitter: SafeEventEmitter;
 
