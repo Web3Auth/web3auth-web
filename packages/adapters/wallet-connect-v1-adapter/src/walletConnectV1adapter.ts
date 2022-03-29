@@ -180,7 +180,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
           return reject(err);
         }
         const uri = payload.params[0];
-        this.updateAdapterData({ uri } as WalletConnectV1Data);
+        this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV1Data);
 
         this.connector?.off("display_uri");
         return resolve();
