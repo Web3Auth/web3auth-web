@@ -90,11 +90,10 @@ class CoinbaseAdapter extends BaseAdapter<void> {
 
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
-    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not able to connect with coinbase");
+    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Adapter is not initialized");
     try {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.coinbaseProvider;
-      // TODO: check chainID is 0x
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
         await this.switchChain(this.chainConfig as CustomChainConfig);
       }

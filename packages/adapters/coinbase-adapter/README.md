@@ -1,3 +1,3 @@
-# `@web3auth/torus-wallet-adapter`
+# `@web3auth/coinbase-adapter`
 
 > TODO: description
