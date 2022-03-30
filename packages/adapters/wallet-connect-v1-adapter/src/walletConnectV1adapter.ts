@@ -13,7 +13,6 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
-  isHexStrict,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -25,6 +24,7 @@ import {
 } from "@web3auth/base";
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
+import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
 
 class WalletConnectV1Adapter extends BaseAdapter<void> {
@@ -42,6 +42,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   public adapterData: WalletConnectV1Data = {
     uri: "",
+    extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS,
   };
 
   public connector: WalletConnect | null = null;
@@ -75,13 +76,13 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     }
     // Create a connector
     this.connector = this.getWalletConnectInstance();
-    this.wcProvider = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
+    this.wcProvider = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
     if (this.connector.connected) {
       this.rehydrated = true;
-      await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId.toString() });
+      await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
     }
   }
 
@@ -90,7 +91,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
 
     if (this.connected) {
-      await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId.toString() });
+      await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
       return this.provider;
     }
 
@@ -114,7 +115,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       });
       try {
         // Subscribe to session connection
-        this.connector.on("connect", async (error: Error | null, payload: { params: { accounts: string[]; chainId: string }[] }) => {
+        this.connector.on("connect", async (error: Error | null, payload: { params: { accounts: string[]; chainId: number }[] }) => {
           if (error) {
             this.emit(ADAPTER_EVENTS.ERRORED, error);
           }
@@ -178,7 +179,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
           return reject(err);
         }
         const uri = payload.params[0];
-        this.updateAdapterData({ uri } as WalletConnectV1Data);
+        this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV1Data);
 
         this.connector?.off("display_uri");
         return resolve();
@@ -192,25 +193,34 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     });
   }
 
-  private async onConnectHandler(params: { accounts: string[]; chainId: string }) {
+  private async onConnectHandler(params: { accounts: string[]; chainId: number }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
 
     const { chainId } = params;
-    log.debug("connected chainId", chainId);
-    const connectedChainId = parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-    if (connectedChainId !== parseInt(this.chainConfig.chainId, 16)) {
-      // we need to create a new session since old session is already used and
-      // user needs to login again with correct chain with new qr code.
-      await this.createNewSession({ forceNewSession: true });
-      this.emit(
-        ADAPTER_EVENTS.ERRORED,
-        WalletInitializationError.fromCode(
-          5000,
-          `Not connected to correct chainId. Expected: ${this.chainConfig.chainId}, Current: ${connectedChainId}, Please switch to correct chain from wallet`
-        )
-      );
-      return;
+    log.debug("connected chainId in hex", chainId);
+    if (chainId !== parseInt(this.chainConfig.chainId, 16)) {
+      try {
+        await this.wcProvider.switchChain({ chainId: this.chainConfig.chainId, lookup: false });
+      } catch (error) {
+        log.error(error);
+        // we need to create a new session since old session is already used and
+        // user needs to login again with correct chain with new qr code.
+        await this.createNewSession({ forceNewSession: true });
+        const connectedChainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, chainId);
+        this.emit(
+          ADAPTER_EVENTS.ERRORED,
+          WalletInitializationError.fromCode(
+            5000,
+            `Not connected to correct network. Expected: ${this.chainConfig.displayName}, Current: ${
+              connectedChainConfig?.displayName || chainId
+            }, Please switch to correct network from wallet`
+          )
+        );
+        this.status = ADAPTER_STATUS.READY;
+        this.rehydrated = true;
+        return;
+      }
     }
     await this.wcProvider.setupProvider(this.connector);
     this.subscribeEvents(this.connector);

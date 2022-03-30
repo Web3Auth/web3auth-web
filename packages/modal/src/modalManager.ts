@@ -59,6 +59,13 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: UIConfig;
+
+  /**
+   * Whether to show errors on Web3Auth modal.
+   *
+   * @defaultValue `true`
+   */
+  displayErrorsOnModal?: boolean;
 }
 export class Web3Auth extends Web3AuthCore {
   public loginModal: LoginModal;
@@ -95,6 +102,7 @@ export class Web3Auth extends Web3AuthCore {
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,
+      displayErrorsOnModal: this.options.displayErrorsOnModal,
     });
     this.subscribeToLoginModalEvents();
   }

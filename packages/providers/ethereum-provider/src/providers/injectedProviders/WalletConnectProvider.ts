@@ -1,7 +1,7 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 import type { IConnector } from "@walletconnect/types";
-import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError, WalletLoginError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, isHexStrict, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
@@ -49,23 +49,39 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     await this.setupEngine(connector);
   }
 
-  public async switchChain({ chainId }: { chainId: string }): Promise<void> {
+  public async switchChain({ chainId, lookup = true }: { chainId: string; lookup?: boolean }): Promise<void> {
+    if (!this.connector)
+      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
-    const { ticker, tickerName, rpcTarget } = currentChainConfig;
+    const { rpcTarget, displayName } = currentChainConfig;
     this.update({
       chainId: "loading",
     });
-    await this.connector.updateChain({
-      chainId: Number.parseInt(chainId, 16),
-      nativeCurrency: {
-        name: tickerName,
-        symbol: ticker,
-      },
-      networkId: Number.parseInt(chainId, 10),
-      rpcUrl: rpcTarget,
-    });
+    try {
+      await this.connector.sendCustomRequest({
+        method: "wallet_addEthereumChain",
+        params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+      });
+    } catch (error) {
+      log.error(error);
+    }
+
+    try {
+      await this.connector.sendCustomRequest({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId }],
+      });
+    } catch (error) {
+      log.error(error);
+      // ignore this error because metamask & others return provider.result as null
+      // wallet connect thinks this is wrong
+      if (error.message !== "JSON RPC response format is invalid") {
+        throw error;
+      }
+    }
+
     this.configure({ chainConfig: currentChainConfig });
-    await this.lookupNetwork(this.connector);
+    if (lookup) await this.lookupNetwork(this.connector);
   }
 
   protected async lookupNetwork(connector: IConnector): Promise<string> {
@@ -104,7 +120,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
         this.provider.emit("error", error);
         return;
       }
-      const { accounts, chainId: connectedChainId, rpcUrl } = payload;
+      const { accounts, chainId: connectedChainId, rpcUrl }: { accounts?: string[]; chainId?: number; rpcUrl?: string } = payload.params[0];
       // Check if accounts changed and trigger event
       if (accounts?.length && this.state.accounts[0] !== accounts[0]) {
         this.update({
@@ -113,12 +129,13 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
         // await this.setupEngine(connector);
         this.provider.emit("accountsChanged", accounts);
       }
-      const connectedHexChainId = isHexStrict(connectedChainId) ? connectedChainId : `0x${connectedChainId.toString(16)}`;
+      const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
       // Check if chainId changed and trigger event
       if (connectedChainId && this.state.chainId !== connectedHexChainId) {
+        const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedChainId) || {};
         // Handle rpcUrl update
         this.configure({
-          chainConfig: { ...this.config.chainConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl },
+          chainConfig: { ...maybeConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl, chainNamespace: CHAIN_NAMESPACES.EIP155 },
         });
         await this.setupEngine(connector);
       }

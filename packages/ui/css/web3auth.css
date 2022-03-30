@@ -503,19 +503,46 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-    padding: 10px;
     background: #ffffff;
     border-radius: 10px;
     color: var(--text-color1);
     font-size: 10px;
     width: fit-content;
     margin: auto;
+    min-width: 250px;
+    padding: 16px 12px;
 }
 
-.w3a-wallet-connect-qr {
-    width: 200px;
+#w3a-modal .w3a-wallet-connect__container-desktop,
+#w3a-modal .w3a-wallet-connect__container-android {
+    margin: auto;
+}
+
+#w3a-modal .w3a-wallet-connect__container-ios {
+    display: flex;
+    grid-gap: 30px 20px;
+    padding: 0 0 28px;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+#w3a-modal .w3a-wallet-connect-qr {
     margin: 16px 16px;
     padding: inherit;
+}
+
+#w3a-modal .w3a-wallet-connect__container-android a {
+    text-decoration: none;
+}
+
+#w3a-modal .w3a-wallet-connect__container-android .w3a-button {
+    background-color: rgb(64, 153, 255) !important;
+    color: #ffffff !important;
+    height: auto;
+    font-size: 14px;
+    padding: 8px 16px;
+    width: auto;
+    margin: auto;
 }
 
 #w3a-modal .w3a-wallet-connect__logo > img {

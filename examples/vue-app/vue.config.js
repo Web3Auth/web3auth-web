@@ -29,7 +29,13 @@ module.exports = {
   },
   chainWebpack: (config) => {
     if (process.env.NODE_ENV !== "production") {
-      config.module.rule("sourcemap").test(/\.js$/).enforce("pre").use("source-map-loader").loader("source-map-loader").end();
+      config.module
+        .rule("sourcemap")
+        .test(/\.${js,ts}$/)
+        .enforce("pre")
+        .use("source-map-loader")
+        .loader("source-map-loader")
+        .end();
     }
     const svgRule = config.module.rule("svg");
 
