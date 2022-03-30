@@ -81,15 +81,19 @@ function WalletConnect(props: WalletConnectProps) {
   // TODO: show only wcAdapters of current chain
   return (
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
-      <i className="w3a-wallet-connect__logo">{walletConnectIcon}</i>
-      <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">
+      <div
+        className={`w3ajs-wallet-connect__container w3a-wallet-connect__container${
+          deviceDetails.os === OS_MAP.Android ? " w3a-wallet-connect__container--android" : ""
+        }`}
+      >
+        <div className="w3a-wallet-connect__logo">{walletConnectIcon}</div>
         {deviceDetails.platform === PLATFORMS_MAP.desktop ? (
-          <>
+          <div className="w3a-wallet-connect__container-desktop">
             <div>Scan QR code with a WalletConnect-compatible wallet</div>
             <div className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr">
               <QRCode size={200} value={walletConnectUri} />
             </div>
-          </>
+          </div>
         ) : (
           <>
             {links.map((link) => {
@@ -97,18 +101,22 @@ function WalletConnect(props: WalletConnectProps) {
               // https://github.com/WalletConnect/walletconnect-monorepo/blob/54f3ca0b1cd1ac24e8992a5a812fdfad01769abb/packages/helpers/browser-utils/src/registry.ts#L24
               // format and show
               return deviceDetails.os === OS_MAP.iOS ? (
-                <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
-                  <button type="button" className="w3a-button w3a-button--icon">
-                    {link.logo}
-                  </button>
-                  <p className="w3a-adapter-item__label">{link.name}</p>
-                </a>
+                <div className="w3a-wallet-connect__container-ios">
+                  <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
+                    <button type="button" className="w3a-button w3a-button--icon">
+                      <img src={link.logo} height="auto" width="auto" alt={`login-${link.name}`} />
+                    </button>
+                    <p className="w3a-adapter-item__label">{link.name}</p>
+                  </a>
+                </div>
               ) : (
-                <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
-                  <button type="button" className="w3a-button w3a-button--icon">
-                    Connect
-                  </button>
-                </a>
+                <div className="w3a-wallet-connect__container-android">
+                  <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
+                    <button type="button" className="w3a-button">
+                      Connect
+                    </button>
+                  </a>
+                </div>
               );
             })}
           </>
