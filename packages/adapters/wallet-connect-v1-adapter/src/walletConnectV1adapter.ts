@@ -217,6 +217,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
             }, Please switch to correct network from wallet`
           )
         );
+        this.status = ADAPTER_STATUS.READY;
+        this.rehydrated = true;
         return;
       }
     }
