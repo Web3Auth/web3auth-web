@@ -1518,6 +1518,15 @@
     "@typescript-eslint/types" "5.15.0"
     eslint-visitor-keys "^3.0.0"
 
+"@web3auth/base@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@web3auth/base/-/base-0.6.3.tgz#d609bc676074b76d54eeba80cd9de6a9ab779e85"
+  integrity sha512-X2mpYSgkBw6EvHvS/ec3qDoyTOFqxKyQazexuFlnlCWRICxqUJw66Ewyh1j9JR2ZbJd08O6ZT1jmRBvi6UOOew==
+  dependencies:
+    "@toruslabs/openlogin-jrpc" "^1.6.0"
+    loglevel "^1.8.0"
+    ts-custom-error "^3.2.0"
+
 accepts@~1.3.4:
   version "1.3.8"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.8.tgz#0bf0be125b67014adcb0b0921e62db7bffe16b2e"
@@ -3979,9 +3988,9 @@ minimatch@^3.0.4, minimatch@^3.1.2:
     brace-expansion "^1.1.7"
 
 minimist@^1.2.0, minimist@^1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
-  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
+  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
 mixin-deep@^1.2.0:
   version "1.3.2"
@@ -5488,6 +5497,11 @@ toidentifier@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.1.tgz#3be34321a88a820ed1bd80dfaa33e479fbb8dd35"
   integrity sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==
+
+ts-custom-error@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/ts-custom-error/-/ts-custom-error-3.2.0.tgz#ff8f80a3812bab9dc448536312da52dce1b720fb"
+  integrity sha512-cBvC2QjtvJ9JfWLvstVnI45Y46Y5dMxIaG1TDMGAD/R87hpvqFL+7LhvUDhnRCfOnx/xitollFWWvUKKKhbN0A==
 
 tsconfig-paths@^3.12.0:
   version "3.14.0"
