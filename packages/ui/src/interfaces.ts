@@ -7,6 +7,7 @@ export interface UIConfig {
   adapterListener: SafeEventEmitter;
   theme?: "light" | "dark";
   loginMethodsOrder?: string[];
+  displayErrorsOnModal?: boolean;
 }
 
 export const LOGIN_MODAL_EVENTS = {
