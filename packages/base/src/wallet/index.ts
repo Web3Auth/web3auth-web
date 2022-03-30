@@ -13,6 +13,7 @@ export const SOLANA_ADAPTERS = {
 export const EVM_ADAPTERS = {
   TORUS_EVM: "torus-evm",
   METAMASK: "metamask",
+  COINBASE: "coinbase",
   ...MULTI_CHAIN_ADAPTERS,
 };
 

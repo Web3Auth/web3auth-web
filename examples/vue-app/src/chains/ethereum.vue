@@ -25,6 +25,7 @@
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
@@ -120,7 +121,12 @@ export default Vue.extend({
           },
         });
 
+        const coinbaseAdapter = new CoinbaseAdapter({
+          adapterSettings: { appName: "Web3Auth Example" },
+        });
+
         this.web3auth.configureAdapter(openloginAdapter);
+        this.web3auth.configureAdapter(coinbaseAdapter);
         this.subscribeAuthEvents(this.web3auth);
 
         await this.web3auth.initModal({ modalConfig: this.modalConfig });

@@ -124,7 +124,7 @@ export class Web3Auth extends Web3AuthCore {
 
       // check if adapter is configured/added by user and exist in walletAdapters map.
       const adapter = this.walletAdapters[adapterName];
-      log.debug("adapter config", adapterName, this.modalConfig.adapters?.[adapterName].showOnModal);
+      log.debug("adapter config", adapterName, this.modalConfig.adapters?.[adapterName].showOnModal, adapter);
 
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
