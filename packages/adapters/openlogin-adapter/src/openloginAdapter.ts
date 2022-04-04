@@ -20,7 +20,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
 import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
@@ -31,7 +31,7 @@ export type OpenloginLoginParams = LoginParams & {
   login_hint?: string;
 };
 
-type PrivateKeyProvider = BaseProvider<BaseProviderConfig, BaseProviderState, string>;
+type PrivateKeyProvider = IBaseProvider<string>;
 
 export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
@@ -90,7 +90,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
     if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
-    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!this.chainConfig && this.currentChainNamespace !== CHAIN_NAMESPACES.OTHER)
+      throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     let isRedirectResult = false;
 
     if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
@@ -186,6 +187,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
+      this.privKeyProvider = new CommonPrivateKeyProvider();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }

@@ -144,12 +144,12 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
 };
 
 export const getChainConfig = (chainNamespace: ChainNamespaceType, chainId?: number | string): CustomChainConfig | null => {
+  if (chainNamespace === CHAIN_NAMESPACES.OTHER) return null;
   const finalChainId = chainId ? (typeof chainId === "number" ? chainId : parseInt(chainId, 16)) : getDefaultNetworkId(chainNamespace);
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return getEvmChainConfig(finalChainId);
   } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
     return getSolanaChainConfig(finalChainId);
   }
-
   return null;
 };

@@ -14,7 +14,13 @@ import {
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
 import LoginModal, { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
 
-import { defaultEvmDappModalConfig, defaultEvmWalletModalConfig, defaultSolanaDappModalConfig, defaultSolanaWalletModalConfig } from "./config";
+import {
+  defaultEvmDappModalConfig,
+  defaultEvmWalletModalConfig,
+  defaultOtherModalConfig,
+  defaultSolanaDappModalConfig,
+  defaultSolanaWalletModalConfig,
+} from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
 
@@ -94,6 +100,8 @@ export class Web3Auth extends Web3AuthCore {
         // default config for evm dapp modal
         this.modalConfig = defaultEvmDappModalConfig;
       }
+    } else if (providedChainConfig.chainNamespace === CHAIN_NAMESPACES.OTHER) {
+      this.modalConfig = defaultOtherModalConfig;
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }

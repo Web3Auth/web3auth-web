@@ -63,7 +63,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     this.coreOptions = {
       ...options,
       chainConfig: {
-        ...getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId),
+        ...(getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId) || {}),
         ...options.chainConfig,
       },
     };
