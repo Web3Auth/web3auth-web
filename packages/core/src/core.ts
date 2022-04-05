@@ -35,6 +35,12 @@ export interface Web3AuthCoreOptions {
    * @defaultValue false
    */
   enableLogging?: boolean;
+  /**
+   * setting to "local" will persist social login session accross browser tabs.
+   *
+   * @defaultValue "session"
+   */
+  storageKey?: "session" | "local";
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -51,14 +57,16 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   private plugins: Record<string, IPlugin> = {};
 
+  private storage: "sessionStorage" | "localStorage" = "sessionStorage";
+
   constructor(options: Web3AuthCoreOptions) {
     super();
     if (options.enableLogging) log.enableAll();
     else log.disableAll();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
-
-    this.cachedAdapter = storageAvailable("sessionStorage") ? window.sessionStorage.getItem(ADAPTER_CACHE_KEY) : null;
+    if (options.storageKey === "local") this.storage = "localStorage";
+    this.cachedAdapter = storageAvailable(this.storage) ? window[this.storage].getItem(ADAPTER_CACHE_KEY) : null;
 
     this.coreOptions = {
       ...options,
@@ -129,8 +137,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public clearCache() {
-    if (!storageAvailable("sessionStorage")) return;
-    window.sessionStorage.removeItem(ADAPTER_CACHE_KEY);
+    if (!storageAvailable(this.storage)) return;
+    window[this.storage].removeItem(ADAPTER_CACHE_KEY);
     this.cachedAdapter = null;
   }
 
@@ -192,8 +200,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async (data) => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
-      if (storageAvailable("sessionStorage")) {
-        const cachedAdapter = window.sessionStorage.getItem(ADAPTER_CACHE_KEY);
+      if (storageAvailable(this.storage)) {
+        const cachedAdapter = window[this.storage].getItem(ADAPTER_CACHE_KEY);
         if (this.connectedAdapterName === cachedAdapter) {
           this.clearCache();
         }
@@ -240,8 +248,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
   }
 
   private cacheWallet(walletName: string) {
-    if (!storageAvailable("sessionStorage")) return;
-    window.sessionStorage.setItem(ADAPTER_CACHE_KEY, walletName);
+    if (!storageAvailable(this.storage)) return;
+    window[this.storage].setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
   }
 }
