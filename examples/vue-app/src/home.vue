@@ -199,7 +199,7 @@
 
 <script lang="ts">
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
-import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
 import merge from "lodash.merge";
 import Vue from "vue";
@@ -236,6 +236,14 @@ const defaultLoginProviders = () => {
 
 const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappModalConfig : defaultEvmDappModalConfig;
+  if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    adaptersConfig.adapters[EVM_ADAPTERS.COINBASE] = {
+      label: "Coinbase",
+      showOnModal: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+    };
+  }
   return Object.keys(adaptersConfig.adapters).map((adapterName) => {
     return {
       id: adapterName,

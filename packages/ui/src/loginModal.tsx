@@ -6,6 +6,7 @@ import {
   BaseAdapterConfig,
   CONNECTED_EVENT_DATA,
   IAdapterDataEvent,
+  IWalletConnectExtensionAdapter,
   log,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
@@ -20,8 +21,8 @@ import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
-function createWrapper(): HTMLDivElement {
-  const wrapper = document.createElement("div");
+function createWrapper(): HTMLElement {
+  const wrapper = document.createElement("section");
   wrapper.setAttribute("id", "w3a-container");
   document.body.appendChild(wrapper);
   return wrapper;
@@ -34,17 +35,20 @@ export default class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
-  private wrapper: HTMLDivElement;
+  private wrapper: HTMLElement;
 
   private stateEmitter: SafeEventEmitter;
 
-  constructor({ appLogo, version, adapterListener, theme = "light" }: UIConfig) {
+  private displayErrorsOnModal = true;
+
+  constructor({ appLogo, version, adapterListener, theme = "light", displayErrorsOnModal = true }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
     this.isDark = theme === "dark";
     this.wrapper = createWrapper();
     this.stateEmitter = new SafeEventEmitter();
+    this.displayErrorsOnModal = displayErrorsOnModal;
     this.subscribeCoreEvents(adapterListener);
   }
 
@@ -143,17 +147,18 @@ export default class LoginModal extends SafeEventEmitter {
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
-  private updateWalletConnect = (walletConnectUri: string): void => {
+  private updateWalletConnect = (walletConnectUri: string, wcAdapters: IWalletConnectExtensionAdapter[]): void => {
     if (!walletConnectUri) return;
     this.setState({
       walletConnectUri,
+      wcAdapters,
     });
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
       const walletConnectData = adapterData.data as WalletConnectV1Data;
-      this.updateWalletConnect(walletConnectData.uri);
+      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     }
   };
 
@@ -186,11 +191,16 @@ export default class LoginModal extends SafeEventEmitter {
     listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
       if (error.code === 5000) {
-        this.setState({
-          modalVisibility: true,
-          postLoadingMessage: error.message || "Something went wrong!",
-          status: MODAL_STATUS.ERRORED,
-        });
+        if (this.displayErrorsOnModal)
+          this.setState({
+            modalVisibility: true,
+            postLoadingMessage: error.message || "Something went wrong!",
+            status: MODAL_STATUS.ERRORED,
+          });
+        else
+          this.setState({
+            modalVisibility: false,
+          });
       } else {
         this.setState({
           modalVisibility: true,

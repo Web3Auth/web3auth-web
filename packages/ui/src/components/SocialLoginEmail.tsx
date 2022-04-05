@@ -13,7 +13,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
   };
   return (
     <div className="w3ajs-email-passwordless w3a-group w3a-group--email">
-      <h6 className="w3a-group__title">EMAIL</h6>
+      <div className="w3a-group__title">EMAIL</div>
       <form className="w3ajs-email-passwordless-form" onSubmit={(e) => handleEmailSubmit(e)}>
         <input className="w3a-text-field" type="email" name="email" required placeholder="Email" />
         <button className="w3a-button" type="submit">

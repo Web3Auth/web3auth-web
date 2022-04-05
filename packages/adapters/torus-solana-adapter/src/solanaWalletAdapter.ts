@@ -20,6 +20,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
@@ -116,7 +117,19 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_SOLANA });
     try {
       await this.torusInstance.login(this.loginSettings);
-      await this.solanaProvider.setupProvider(this.torusInstance.provider as InjectedProvider);
+      try {
+        await this.solanaProvider.setupProvider(this.torusInstance.provider as InjectedProvider);
+      } catch (error: unknown) {
+        // some issue in solana wallet, always connecting to mainnet on init.
+        // fallback to change network if not connected to correct one on login.
+        if (error instanceof Web3AuthError && error.code === 5010) {
+          const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+          const network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+          await this.torusInstance.setProvider(network);
+        } else {
+          throw error;
+        }
+      }
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
       this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_SOLANA, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);

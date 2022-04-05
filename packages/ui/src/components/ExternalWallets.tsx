@@ -1,4 +1,4 @@
-import { BaseAdapterConfig, log, WALLET_ADAPTERS } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
 import { useEffect, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
@@ -14,9 +14,10 @@ interface ExternalWalletsProps {
   walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
+  wcAdapters: IWalletConnectExtensionAdapter[];
 }
 export default function ExternalWallet(props: ExternalWalletsProps) {
-  const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus } = props;
+  const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcAdapters } = props;
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -35,14 +36,14 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
             <Icon iconName="arrow-left" />
-            <h6 className="w3a-group__title">Back</h6>
+            <div className="w3a-group__title">Back</div>
           </button>
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {/* <!-- Other Wallet --> */}
         {Object.keys(config).map((adapter) => {
           if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-            return <WalletConnect key={adapter} walletConnectUri={walletConnectUri} />;
+            return <WalletConnect key={adapter} walletConnectUri={walletConnectUri} wcAdapters={wcAdapters} />;
           }
           return null;
         })}

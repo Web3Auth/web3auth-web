@@ -23,7 +23,9 @@
 </template>
 
 <script lang="ts">
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/web3auth";
@@ -33,7 +35,6 @@ import Loader from "@/components/loader.vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -112,7 +113,12 @@ export default Vue.extend({
       try {
         this.parseConfig();
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: ethChainConfig, clientId: config.clientId, authMode: "DAPP", enableLogging: true });
+        this.web3auth = new Web3Auth({
+          chainConfig: ethChainConfig,
+          clientId: config.clientId,
+          authMode: "DAPP",
+          enableLogging: true,
+        });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
@@ -120,7 +126,12 @@ export default Vue.extend({
           },
         });
 
+        const coinbaseAdapter = new CoinbaseAdapter({
+          adapterSettings: { appName: "Web3Auth Example" },
+        });
+
         this.web3auth.configureAdapter(openloginAdapter);
+        this.web3auth.configureAdapter(coinbaseAdapter);
         this.subscribeAuthEvents(this.web3auth);
 
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
