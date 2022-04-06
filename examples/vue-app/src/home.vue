@@ -295,7 +295,7 @@ const defaultComponentConfig = {
   selectedUiMode: "default",
   openloginNetwork: "testnet",
   plugins: {
-    torusWallet: false,
+    torusWallet: true,
   },
   uiMode: {
     default: {
