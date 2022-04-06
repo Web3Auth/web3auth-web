@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ChainContainer :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
+    <ChainContainer :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
     <div id="console" style="white-space: pre-line">
       <code style="white-space: pre-line"></code>
     </div>
@@ -18,6 +18,9 @@ export default Vue.extend({
     chain: {
       type: String,
       default: "ethereum",
+    },
+    plugins: {
+      type: Object,
     },
     adapterConfig: {
       type: Object,

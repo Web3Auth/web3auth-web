@@ -9,7 +9,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@ethereumjs/common@^2.6.2", "@ethereumjs/common@^2.6.3":
+"@ethereumjs/common@^2.6.3":
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/@ethereumjs/common/-/common-2.6.3.tgz#39ddece7300b336276bad6c02f6a9f1a082caa05"
   integrity sha512-mQwPucDL7FDYIg9XQ8DL31CnIYZwGhU5hyOO5E+BMmT71G0+RHvIT5rIkLBirJEKxV6+Rcf9aEIY0kXInxUWpQ==
@@ -17,7 +17,7 @@
     crc-32 "^1.2.0"
     ethereumjs-util "^7.1.4"
 
-"@ethereumjs/tx@^3.5.0":
+"@ethereumjs/tx@^3.5.1":
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/@ethereumjs/tx/-/tx-3.5.1.tgz#8d941b83a602b4a89949c879615f7ea9a90e6671"
   integrity sha512-xzDrTiu4sqZXUcaBxJ4n4W5FrppwxLxZB4ZDGVLtxSQR4lVuOnFR6RcUHdg1mpUhAPVrmnzLJpxaeXnPxIyhWA==
@@ -36,7 +36,7 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
-"@toruslabs/base-controllers@^1.6.6":
+"@toruslabs/base-controllers@^1.6.13":
   version "1.6.13"
   resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.13.tgz#1d0fb3bf2c82a268cfede202e1f70ebe6068b805"
   integrity sha512-LJ8wAh6elTWgWvT3BbS3pAAywKxvre+RY2cw/cmEDa9Mh1UZxsC4MdLu8GpFmEdMRvfOq9joeskdzYbAi5eXtw==
@@ -61,7 +61,7 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-jrpc@^1.6.0", "@toruslabs/openlogin-jrpc@^1.7.0":
+"@toruslabs/openlogin-jrpc@^1.7.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.7.0.tgz#c0b1b0aadd205c1a200331120ff4d1b777e7671b"
   integrity sha512-9RLJldRol35gsynRjDhFnhGh9QMiNuwr/qGPnQB3xyHWfZi9jlHoVRNYOOHngEMF1ZtfwCo3ksC9VqEFD0giZw==
@@ -126,7 +126,7 @@
   dependencies:
     "@types/node" "*"
 
-"@walletconnect/types@~1.7.4":
+"@walletconnect/types@~1.7.7":
   version "1.7.7"
   resolved "https://registry.yarnpkg.com/@walletconnect/types/-/types-1.7.7.tgz#71c623b36a93e373370b1772e82fea2d801adf54"
   integrity sha512-yXJrLxwLLCXtWgd/e8FjfY9v5DKds12Z7EEPzUrPSq6v7WtXpqate577KwlFQ6UYzioQzIEDE8+98j+0aiZbsw==
@@ -674,7 +674,7 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
-lint-staged@^12.3.5:
+lint-staged@^12.3.7:
   version "12.3.7"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.7.tgz#ad0e2014302f704f9cf2c0ebdb97ac63d0f17be0"
   integrity sha512-/S4D726e2GIsDVWIk1XGvheCaDm1SJRQp8efamZFWJxQMVEbOwSysp7xb49Oo73KYCdy97mIWinhlxcoNqIfIQ==
