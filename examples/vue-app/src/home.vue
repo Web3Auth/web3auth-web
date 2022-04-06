@@ -21,6 +21,17 @@
           </label>
         </span>
       </div>
+      <div class="flex-vertical-center plugins">
+        <!-- <label class="form-label" for="chain">Chain</label> -->
+
+        <span class="form-label">Plugins</span>
+        <span class="form-control radio-group">
+          <label for="torusWallet" class="radio-button">
+            <input type="checkbox" id="torusWallet" value="torus wallet plugin" v-model="form.plugins.torusWallet" />
+            Torus Wallet UI Plugin
+          </label>
+        </span>
+      </div>
 
       <hr />
 
@@ -178,6 +189,7 @@
       <section>
         <!-- hosted auth -->
         <ConfigurableExample
+          :plugins="config.plugins"
           :openloginNetwork="config.openloginNetwork"
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
@@ -258,6 +270,9 @@ const defaultFormConfig = {
   authMode: "hosted",
   selectedUiMode: "default",
   openloginNetwork: "testnet",
+  plugins: {
+    torusWallet: false,
+  },
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
@@ -279,6 +294,9 @@ const defaultComponentConfig = {
   authMode: "hosted",
   selectedUiMode: "default",
   openloginNetwork: "testnet",
+  plugins: {
+    torusWallet: false,
+  },
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
