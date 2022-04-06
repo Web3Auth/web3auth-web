@@ -219,7 +219,7 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
-"@toruslabs/openlogin-jrpc@^1.5.0", "@toruslabs/openlogin-jrpc@^1.6.0":
+"@toruslabs/openlogin-jrpc@^1.5.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.7.0.tgz#c0b1b0aadd205c1a200331120ff4d1b777e7671b"
   integrity sha512-9RLJldRol35gsynRjDhFnhGh9QMiNuwr/qGPnQB3xyHWfZi9jlHoVRNYOOHngEMF1ZtfwCo3ksC9VqEFD0giZw==
@@ -312,23 +312,6 @@
   integrity sha512-Da66lEIFeIz9ltsdMZcpQvmrmmoqrfju8pm1BH8WbYjZSwUgCwXLb9C+9XYogwBITnbsSaMdVPb2ekf7TV+03w==
   dependencies:
     "@types/node" "*"
-
-"@web3auth/base@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/base/-/base-0.5.0.tgz#ca8bd253dca21246a32575204954eb17a0f45fa6"
-  integrity sha512-eIhMp5HlnWljT0j6Os0Q1NOCLZUpOQdvJosQaG3w7u2iSnV9Q6O2Fsi7znEse9zI6+BPnc8b1hVJvBipgIeQ4Q==
-  dependencies:
-    "@toruslabs/openlogin-jrpc" "^1.6.0"
-    loglevel "^1.8.0"
-    ts-custom-error "^3.2.0"
-
-"@web3auth/core@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/core/-/core-0.5.0.tgz#28e7fba6c7078ee0c5a705154edb9701e44bc855"
-  integrity sha512-CD70cwUf+aKN0GHS9du0Lk53nODuG1ATMI3yYPYjQZ7oD1fDZN4g3RljU5XCTh1jnN+fIiHzm0tzqOFpNqKJWQ==
-  dependencies:
-    "@toruslabs/openlogin-jrpc" "^1.6.0"
-    "@web3auth/base" "^0.5.0"
 
 acorn@^8.4.1:
   version "8.7.0"
@@ -1136,7 +1119,7 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
-lint-staged@^12.3.4:
+lint-staged@^12.3.7:
   version "12.3.7"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.3.7.tgz#ad0e2014302f704f9cf2c0ebdb97ac63d0f17be0"
   integrity sha512-/S4D726e2GIsDVWIk1XGvheCaDm1SJRQp8efamZFWJxQMVEbOwSysp7xb49Oo73KYCdy97mIWinhlxcoNqIfIQ==
@@ -1634,11 +1617,6 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
-
-ts-custom-error@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ts-custom-error/-/ts-custom-error-3.2.0.tgz#ff8f80a3812bab9dc448536312da52dce1b720fb"
-  integrity sha512-cBvC2QjtvJ9JfWLvstVnI45Y46Y5dMxIaG1TDMGAD/R87hpvqFL+7LhvUDhnRCfOnx/xitollFWWvUKKKhbN0A==
 
 tslib@^2.1.0:
   version "2.3.1"

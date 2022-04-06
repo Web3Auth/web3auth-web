@@ -35,11 +35,11 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "lint-staged": "^12.3.5"
+    "lint-staged": "^12.3.7"
   },
   "dependencies": {
-    "@walletconnect/client": "~1.7.4",
-    "@walletconnect/types": "~1.7.4",
+    "@walletconnect/client": "~1.7.7",
+    "@walletconnect/types": "~1.7.7",
     "@web3auth/base": "^0.8.0",
     "@web3auth/ethereum-provider": "^0.8.0"
   },

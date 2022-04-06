@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "lint-staged": "^12.3.5"
+    "lint-staged": "^12.3.7"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.0.5",

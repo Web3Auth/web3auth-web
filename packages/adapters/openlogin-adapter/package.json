@@ -36,11 +36,11 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.6",
-    "lint-staged": "^12.3.5"
+    "lint-staged": "^12.3.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.6.0",
-    "@toruslabs/openlogin-ed25519": "^1.6.0",
+    "@toruslabs/openlogin": "^1.7.1",
+    "@toruslabs/openlogin-ed25519": "^1.7.0",
     "@web3auth/base": "^0.8.0",
     "@web3auth/base-provider": "^0.8.0",
     "@web3auth/ethereum-provider": "^0.8.0",
