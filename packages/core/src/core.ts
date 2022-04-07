@@ -38,7 +38,7 @@ export interface Web3AuthCoreOptions {
   /**
    * setting to "local" will persist social login session accross browser tabs.
    *
-   * @defaultValue "session"
+   * @defaultValue "local"
    */
   storageKey?: "session" | "local";
 }
@@ -57,7 +57,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   private plugins: Record<string, IPlugin> = {};
 
-  private storage: "sessionStorage" | "localStorage" = "sessionStorage";
+  private storage: "sessionStorage" | "localStorage" = "localStorage";
 
   constructor(options: Web3AuthCoreOptions) {
     super();
@@ -65,7 +65,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     else log.disableAll();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
-    if (options.storageKey === "local") this.storage = "localStorage";
+    if (options.storageKey === "session") this.storage = "sessionStorage";
     this.cachedAdapter = storageAvailable(this.storage) ? window[this.storage].getItem(ADAPTER_CACHE_KEY) : null;
 
     this.coreOptions = {
