@@ -7,6 +7,8 @@ export const MULTI_CHAIN_ADAPTERS = {
 export const SOLANA_ADAPTERS = {
   TORUS_SOLANA: "torus-solana",
   PHANTOM: "phantom",
+  SOLLET: "sollet",
+  SOLLET_EXTENSION: "sollet-extension",
   ...MULTI_CHAIN_ADAPTERS,
 };
 

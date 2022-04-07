@@ -25,6 +25,7 @@
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
+    "@web3auth/sollet-adapter": "file:../../packages/adapters/sollet-adapter",
     "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",

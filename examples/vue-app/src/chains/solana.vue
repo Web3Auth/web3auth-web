@@ -32,6 +32,7 @@ import {
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
+import { SolletAdapter, SolletExtensionAdapter } from "@web3auth/sollet-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -126,7 +127,10 @@ export default Vue.extend({
             clientId: config.clientId,
           },
         });
-
+        const solletAdapter = new SolletAdapter();
+        const solletExtensionAdapter = new SolletExtensionAdapter();
+        this.web3auth.configureAdapter(solletAdapter);
+        this.web3auth.configureAdapter(solletExtensionAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new SolanaWalletConnectorPlugin({
