@@ -126,21 +126,25 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   }, [chain, web3AuthNetwork, setWalletProvider]);
 
   const login = async (loginProvider: string, jwtToken: string) => {
-    if (!web3Auth) {
-      console.log("web3auth not initialized yet");
-      uiConsole("web3auth not initialized yet");
-      return;
-    }
-    const localProvider = await web3Auth.connectTo("openlogin", { 
-      relogin: true,
-      loginProvider, 
-      extraLoginOptions: {
-        id_token: jwtToken,
-        domain: process.env.REACT_APP_DOMAIN || "http://localhost:3000",
-        verifierIdField: "sub",
+    setIsLoading(true)
+    try {
+      if (!web3Auth) {
+        console.log("web3auth not initialized yet");
+        uiConsole("web3auth not initialized yet");
+        return;
       }
-    });
-    setWalletProvider(localProvider!);
+      await web3Auth.connectTo("openlogin", { 
+        relogin: true,
+        loginProvider, 
+        extraLoginOptions: {
+          id_token: jwtToken,
+          domain: process.env.REACT_APP_DOMAIN || "http://localhost:3000",
+          verifierIdField: "sub",
+        }
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {

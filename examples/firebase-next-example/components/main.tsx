@@ -6,11 +6,20 @@ import { useState } from "react";
 import { UserCredential } from "firebase/auth";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
+  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain, isLoading } = useWeb3Auth();
   const [userCreds, setUserCredentials] = useState<UserCredential | null>(null);
+  const [localLoading, setLoading] = useState<boolean>(false);
+
   const loginWithFirebase = async () => {
-    const loginRes = await signInWithGoogle();
-    setUserCredentials(loginRes);
+    setLoading(true)
+    try {
+      const loginRes = await signInWithGoogle();
+      setUserCredentials(loginRes);
+    } catch(err) {
+      console.log(err);
+    } finally {
+      setLoading(false)
+    }
     
   }
   const connectOpenlogin = async () => {
@@ -67,7 +76,16 @@ const Main = () => {
     </div>
   );
 
-  return <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>;
+  return <div className={styles.grid}>
+     {
+       isLoading || localLoading ? 
+       <h2>Connecting......</h2> :
+       <>
+        {provider ? loggedInView : unloggedInView}
+        </>
+     }
+   
+    </div>;
 };
 
 
