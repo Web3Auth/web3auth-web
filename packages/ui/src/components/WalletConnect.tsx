@@ -69,7 +69,7 @@ function WalletConnect(props: WalletConnectProps) {
   const deviceDetails = useMemo<{ platform: platform; os: os }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
     return { platform: browser.getPlatformType() as platform, os: browser.getOSName() as os };
-  }, []);
+  }, [window.navigator.userAgent]);
 
   useEffect(() => {
     if (deviceDetails.platform === PLATFORMS_MAP.mobile) {
@@ -97,9 +97,6 @@ function WalletConnect(props: WalletConnectProps) {
         ) : (
           <>
             {links.map((link) => {
-              // TODO: render logo and on click,
-              // https://github.com/WalletConnect/walletconnect-monorepo/blob/54f3ca0b1cd1ac24e8992a5a812fdfad01769abb/packages/helpers/browser-utils/src/registry.ts#L24
-              // format and show
               return deviceDetails.os === OS_MAP.iOS ? (
                 <div className="w3a-wallet-connect__container-ios">
                   <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">

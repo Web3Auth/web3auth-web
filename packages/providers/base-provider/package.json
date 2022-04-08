@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-provider",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseProvider.cjs.js",
@@ -19,15 +19,15 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^1.6.6",
-    "@toruslabs/openlogin-jrpc": "^1.6.0",
-    "@web3auth/base": "^0.7.0",
+    "@toruslabs/base-controllers": "^1.6.13",
+    "@toruslabs/openlogin-jrpc": "^1.7.0",
+    "@web3auth/base": "^0.8.2",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",
-    "lint-staged": "^12.3.5"
+    "lint-staged": "^12.3.7"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
