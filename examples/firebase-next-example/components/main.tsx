@@ -2,17 +2,22 @@ import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 import { WALLET_ADAPTERS } from "@web3auth/base";
 import { signInWithGoogle } from "../services/firebaseAuth";
+import { useState } from "react";
+import { UserCredential } from "firebase/auth";
 
 const Main = () => {
   const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
-
+  const [userCreds, setUserCredentials] = useState<UserCredential | null>(null);
   const loginWithFirebase = async () => {
     const loginRes = await signInWithGoogle();
-    console.log("login details", loginRes);
-    const idToken = await loginRes.user.getIdToken(true);
+    setUserCredentials(loginRes);
+    
+  }
+  const connectOpenlogin = async () => {
+    if (!userCreds)  throw new Error("login with firebase first");
+    const idToken = await userCreds.user.getIdToken(true);
     console.log("idToken", idToken);
     await login("jwt", idToken)
-    
   }
   const loggedInView = (
     <>
@@ -50,9 +55,15 @@ const Main = () => {
 
   const unloggedInView = (
     <div className={styles.grid}>
-    <button onClick={loginWithFirebase} className={styles.card}>
-      Login With Firebase
-    </button>
+    {
+      userCreds ?  <button onClick={connectOpenlogin} className={styles.card}>
+       Connect Openlogin
+    </button> :
+     <button onClick={loginWithFirebase} className={styles.card}>
+     Login With Firebase
+     </button>
+    }
+
     </div>
   );
 

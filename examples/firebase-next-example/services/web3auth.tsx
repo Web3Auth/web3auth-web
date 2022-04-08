@@ -99,7 +99,19 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           chainConfig: currentChainConfig,
         });
 
-        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        const adapter = new OpenloginAdapter({ adapterSettings: { 
+          network: web3AuthNetwork, 
+          clientId, 
+          uxMode: "redirect",
+          loginConfig: {
+            jwt: {
+              name: "Custom Firebase Login",
+              verifier: process.env.REACT_APP_VERIFIER || "web3auth-firebase-demo",
+              typeOfLogin: "jwt",
+              clientId,
+            },
+          },
+        }});
         web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
