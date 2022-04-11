@@ -32,6 +32,8 @@ export async function getProviderHandlers({
 
     getPrivateKey: async () => privKey,
 
+    getSecretKey: async () => bs58.encode(keyPair.secretKey),
+
     signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");

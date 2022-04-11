@@ -1,6 +1,6 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
-import { PrivateKeyWallet as SolanaWallet } from "@web3auth/solana-provider";
+import {  SolanaWallet } from "@web3auth/solana-provider";
 
 const getConnection = async (provider: SafeEventEmitterProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);

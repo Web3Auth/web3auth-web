@@ -36,7 +36,7 @@
     "lint-staged": "^12.3.4"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.1.5",
+    "@toruslabs/solana-embed": "^0.1.6",
     "@web3auth/base": "^0.5.0",
     "@web3auth/base-plugin": "^0.7.0",
     "@web3auth/core": "^0.5.0",

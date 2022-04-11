@@ -1,4 +1,4 @@
-import TorusEmbed, { LOGIN_PROVIDER_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import TorusEmbed, { PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthCore } from "@web3auth/core";
@@ -15,7 +15,7 @@ export type ProviderInfo = {
 export class SolanaWalletConnectorPlugin implements IPlugin {
   name = "SOLANA_WALLET_CONNECTOR_PLUGIN";
 
-  readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
+  readonly pluginNamespace = PLUGIN_NAMESPACES.SOLANA;
 
   public torusWalletInstance: TorusEmbed;
 
@@ -57,8 +57,18 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     this.web3auth = web3auth;
     this.subscribeToWeb3AuthCoreEvents(web3auth);
 
+    const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
+
     await this.torusWalletInstance.init({
       ...(this.walletInitOptions || {}),
+      network: {
+        ...connectedChainConfig,
+        blockExplorerUrl: connectedChainConfig.blockExplorer,
+        logo: "",
+        chainId: connectedChainConfig.chainId,
+        rpcTarget: connectedChainConfig.rpcTarget,
+        displayName: connectedChainConfig.displayName,
+      },
       showTorusButton: false,
     });
     this.isInitialized = true;
@@ -92,9 +102,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       }
     }
     let privateKey: string | undefined;
+
     try {
-      // it should throw if provider doesn't support `eth_private_key` function
-      privateKey = (await this.provider.request<string>({ method: "eth_private_key" })) as string;
+      // it should throw if provider doesn't support `solanaSecretKey` function
+      privateKey = (await this.provider.request<string>({ method: "solanaSecretKey" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, TorusWalletPluginError.unsupportedAdapter());
       if ((error as EthereumRpcError<unknown>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
@@ -106,7 +117,6 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
         privateKey,
         userInfo: {
           ...(this.userInfo as Omit<UserInfo, "isNewUser">),
-          typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_PROVIDER_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
       this.torusWalletInstance.showTorusButton();
@@ -193,7 +203,6 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
         privateKey: sessionConfig.privateKey,
         userInfo: {
           ...this.userInfo,
-          typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_PROVIDER_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
     }
