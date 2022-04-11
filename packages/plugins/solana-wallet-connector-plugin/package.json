@@ -1,0 +1,61 @@
+{
+  "name": "@web3auth/solana-wallet-connector-plugin",
+  "version": "0.7.0",
+  "description": "Torus Solana wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
+  "keywords": [
+    "web3Auth/core",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "metamask"
+  ],
+  "main": "dist/solanaWalletConnectorPlugin.cjs.js",
+  "module": "dist/solanaWalletConnectorPlugin.esm.js",
+  "unpkg": "dist/solanaWalletConnectorPlugin.umd.min.js",
+  "jsdelivr": "dist/solanaWalletConnectorPlugin.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/solanaWalletConnectorPlugin#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "rimraf dist/ && torus-scripts start",
+    "build": "rimraf dist/ && torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "yarn run build",
+    "pre-commit": "lint-staged --cwd ."
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "eth-rpc-errors": "^4.0.3",
+    "lint-staged": "^12.3.4"
+  },
+  "dependencies": {
+    "@toruslabs/solana-embed": "^0.1.6",
+    "@web3auth/base": "^0.8.2",
+    "@web3auth/base-plugin": "^0.8.2",
+    "@web3auth/core": "^0.8.2",
+    "loglevel": "^1.8.0"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  }
+}
