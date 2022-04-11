@@ -1,6 +1,6 @@
 import { ErrorCodes, IWeb3AuthError, Web3AuthError } from "@web3auth/base";
 
-export class TorusWalletPluginError extends Web3AuthError {
+export class SolanaWalletPluginError extends Web3AuthError {
   protected static messages: ErrorCodes = {
     5210: "Torus Wallet Plugin is not initialized",
     5211: "Web3Auth is connected to unsupported adapter. Torus wallet connector plugin requires web3auth connected to openlogin adapter.",
@@ -17,42 +17,42 @@ export class TorusWalletPluginError extends Web3AuthError {
     super(code, message);
 
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "TorusWalletPluginError" });
+    Object.defineProperty(this, "name", { value: "SolanaWalletPluginError" });
   }
 
   public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new TorusWalletPluginError(code, `${TorusWalletPluginError.messages[code]}${extraMessage}`);
+    return new SolanaWalletPluginError(code, `${SolanaWalletPluginError.messages[code]}${extraMessage}`);
   }
 
   public static notInitialized(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5210, extraMessage);
+    return SolanaWalletPluginError.fromCode(5210, extraMessage);
   }
 
   public static unsupportedAdapter(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5211, extraMessage);
+    return SolanaWalletPluginError.fromCode(5211, extraMessage);
   }
 
   public static providerRequired(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5212, extraMessage);
+    return SolanaWalletPluginError.fromCode(5212, extraMessage);
   }
 
   public static web3authRequired(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5213, extraMessage);
+    return SolanaWalletPluginError.fromCode(5213, extraMessage);
   }
 
   public static web3AuthNotConnected(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5214, extraMessage);
+    return SolanaWalletPluginError.fromCode(5214, extraMessage);
   }
 
   public static userInfoRequired(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5215, extraMessage);
+    return SolanaWalletPluginError.fromCode(5215, extraMessage);
   }
 
   public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5216, extraMessage);
+    return SolanaWalletPluginError.fromCode(5216, extraMessage);
   }
 
   public static torusWalletNotSet(extraMessage = ""): IWeb3AuthError {
-    return TorusWalletPluginError.fromCode(5217, extraMessage);
+    return SolanaWalletPluginError.fromCode(5217, extraMessage);
   }
 }
