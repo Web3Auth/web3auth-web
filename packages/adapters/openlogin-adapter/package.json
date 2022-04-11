@@ -39,7 +39,7 @@
     "lint-staged": "^12.3.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.7.2",
+    "@toruslabs/openlogin": "^1.7.3",
     "@toruslabs/openlogin-ed25519": "^1.7.0",
     "@web3auth/base": "^0.8.2",
     "@web3auth/base-provider": "^0.8.2",

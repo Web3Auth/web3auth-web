@@ -38,7 +38,7 @@
     "lint-staged": "^12.3.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.7.0",
+    "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@web3auth/base": "^0.8.2",
     "@web3auth/base-plugin": "^0.8.2"
   },
