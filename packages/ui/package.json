@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -38,36 +38,36 @@
   "devDependencies": {
     "@svgr/rollup": "^6.2.1",
     "@svgr/webpack": "^5.5.0",
-    "@toruslabs/eslint-config-react": "^0.4.0",
+    "@toruslabs/eslint-config-react": "^0.4.1",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/lodash.merge": "^4.6.6",
-    "@types/react": "^17.0.40",
-    "@types/react-dom": "^17.0.13",
+    "@types/react": "^17.0.43",
+    "@types/react-dom": "^17.0.14",
     "css-loader": "^5.2.7",
-    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-import": "~2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-react": "^7.29.3",
-    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "lint-staged": "^12.3.5",
+    "lint-staged": "^12.3.7",
     "live-server": "^1.2.1",
-    "postcss": "^8.4.8",
+    "postcss": "^8.4.12",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-url": "^3.0.1",
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.6.0",
-    "@toruslabs/openlogin-jrpc": "^1.6.0",
-    "@web3auth/base": "^0.7.0",
+    "@toruslabs/openlogin": "^1.7.2",
+    "@toruslabs/openlogin-jrpc": "^1.7.0",
+    "@web3auth/base": "^0.8.2",
     "bowser": "^2.11.0",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-qr-code": "^2.0.3"
+    "react-qr-code": "^2.0.5"
   },
   "lint-staged": {
     "!(*d).ts": [

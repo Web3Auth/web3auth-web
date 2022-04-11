@@ -35,8 +35,6 @@ export default class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
-  private wrapper: HTMLElement;
-
   private stateEmitter: SafeEventEmitter;
 
   private displayErrorsOnModal = true;
@@ -46,7 +44,6 @@ export default class LoginModal extends SafeEventEmitter {
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
     this.isDark = theme === "dark";
-    this.wrapper = createWrapper();
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;
     this.subscribeCoreEvents(adapterListener);
@@ -76,7 +73,7 @@ export default class LoginModal extends SafeEventEmitter {
             version={this.version}
           />
         </ThemedContext.Provider>,
-        this.wrapper
+        createWrapper()
       );
     });
   };

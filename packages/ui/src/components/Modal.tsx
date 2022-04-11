@@ -66,13 +66,13 @@ export default function Modal(props: ModalProps) {
   }, [stateListener]);
 
   useEffect(() => {
-    let timeOutId;
+    let timeOutId: number;
     if (modalState.modalVisibility) {
       setModalState((prevState) => {
         return { ...prevState, modalVisibilityDelayed: modalState.modalVisibility };
       });
 
-      timeOutId = setTimeout(() => {
+      timeOutId = window.setTimeout(() => {
         setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
         // hide external wallets, if modal is closing, so that it will show social login screen on reopen.
       }, 100);
@@ -80,7 +80,7 @@ export default function Modal(props: ModalProps) {
       setModalTransitionClasses(["w3a-modal__inner", modalState.modalVisibility ? "w3a-modal__inner--active" : ""]);
       // hide external wallets, if modal is closing, so that it will show social login screen on reopen.
 
-      timeOutId = setTimeout(() => {
+      timeOutId = window.setTimeout(() => {
         setModalState((prevState) => {
           return { ...prevState, modalVisibilityDelayed: modalState.modalVisibility };
         });

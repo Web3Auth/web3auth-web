@@ -79,3 +79,15 @@ export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
     },
   },
 };
+
+export const defaultOtherModalConfig: AdaptersModalConfig = {
+  chainNamespace: CHAIN_NAMESPACES.OTHER,
+  adapters: {
+    [EVM_ADAPTERS.OPENLOGIN]: {
+      label: "OpenLogin",
+      showOnModal: true,
+      showOnMobile: true,
+      showOnDesktop: true,
+    },
+  },
+};
