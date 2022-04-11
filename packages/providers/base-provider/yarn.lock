@@ -9,13 +9,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@toruslabs/base-controllers@^1.6.13":
-  version "1.6.13"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.13.tgz#1d0fb3bf2c82a268cfede202e1f70ebe6068b805"
-  integrity sha512-LJ8wAh6elTWgWvT3BbS3pAAywKxvre+RY2cw/cmEDa9Mh1UZxsC4MdLu8GpFmEdMRvfOq9joeskdzYbAi5eXtw==
+"@toruslabs/base-controllers@^1.6.14":
+  version "1.6.14"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.14.tgz#5061a10bdb6b4e2038d99535d4641317bd52d81f"
+  integrity sha512-GYBaI/f2o6kEl1bJtlBhYTJvWONJJjZaKUKMsjGMYWDljWpsTrsvqgh29WI/7fh8n0VMKSS8z2Rn3+GTeygB4g==
   dependencies:
     "@toruslabs/http-helpers" "^2.2.0"
-    "@toruslabs/openlogin-jrpc" "^1.7.0"
+    "@toruslabs/openlogin-jrpc" "^1.7.3"
     async-mutex "^0.3.2"
     bignumber.js "^9.0.2"
     bowser "^2.11.0"
@@ -33,19 +33,6 @@
   dependencies:
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
-
-"@toruslabs/openlogin-jrpc@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin-jrpc/-/openlogin-jrpc-1.7.0.tgz#c0b1b0aadd205c1a200331120ff4d1b777e7671b"
-  integrity sha512-9RLJldRol35gsynRjDhFnhGh9QMiNuwr/qGPnQB3xyHWfZi9jlHoVRNYOOHngEMF1ZtfwCo3ksC9VqEFD0giZw==
-  dependencies:
-    "@toruslabs/openlogin-utils" "^1.7.0"
-    end-of-stream "^1.4.4"
-    events "^3.3.0"
-    fast-safe-stringify "^2.1.1"
-    once "^1.4.0"
-    pump "^3.0.0"
-    readable-stream "^3.6.0"
 
 "@toruslabs/openlogin-jrpc@^1.7.3":
   version "1.7.3"
