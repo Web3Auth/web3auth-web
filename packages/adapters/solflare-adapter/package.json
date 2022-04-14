@@ -39,9 +39,9 @@
     "lint-staged": "^12.3.5"
   },
   "dependencies": {
-    "@web3auth/base": "^0.7.0",
-    "@web3auth/base-provider": "^0.7.0",
-    "@web3auth/solana-provider": "^0.7.0",
+    "@web3auth/base": "^0.9.0",
+    "@web3auth/base-provider": "^0.9.0",
+    "@web3auth/solana-provider": "^0.9.0",
     "@solflare-wallet/sdk": "^1.0.11",
     "@solana/web3.js": "^1.36.0",
     "bn.js": "^5.2.0"
