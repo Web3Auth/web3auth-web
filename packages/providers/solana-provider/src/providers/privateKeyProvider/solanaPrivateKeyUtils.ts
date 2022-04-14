@@ -26,6 +26,7 @@ export async function getProviderHandlers({
     getAccounts: async () => [keyPair.publicKey.toBase58()],
 
     getPrivateKey: async () => privKey,
+    getSecretKey: async () => bs58.encode(keyPair.secretKey),
 
     signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       if (!req.params?.message) {

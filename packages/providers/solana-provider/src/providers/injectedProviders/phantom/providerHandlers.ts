@@ -15,8 +15,12 @@ export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IP
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
+    getSecretKey: async () => {
+      throw ethErrors.rpc.methodNotSupported();
+    },
     signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       const transaction = await injectedProvider.signTransaction(req.params.message);
+
       return transaction;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {

@@ -26,7 +26,9 @@ export const getTorusHandlers = (injectedProvider: InjectedProvider): IProviderH
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
-
+    getSecretKey: async () => {
+      throw ethErrors.rpc.methodNotSupported();
+    },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
       const message = await injectedProvider.request<Uint8Array>({
         method: "sign_message",

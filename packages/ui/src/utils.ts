@@ -17,8 +17,8 @@ export const getAdapterSocialLogins = (
         showOnDesktop: true,
       };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
-      log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);
     });
+    log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);
   } else {
     throw new Error(`${adapterName} is not a valid adapter`);
   }

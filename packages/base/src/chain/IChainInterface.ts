@@ -1,12 +1,14 @@
 export const CHAIN_NAMESPACES = {
   EIP155: "eip155",
   SOLANA: "solana",
+  OTHER: "other",
 } as const;
 // eip155 for all evm chains
 export type ChainNamespaceType = typeof CHAIN_NAMESPACES[keyof typeof CHAIN_NAMESPACES];
 
 export const ADAPTER_NAMESPACES = {
-  ...CHAIN_NAMESPACES,
+  EIP155: "eip155",
+  SOLANA: "solana",
   MULTICHAIN: "multichain",
 } as const;
 // eip155 for all evm chains

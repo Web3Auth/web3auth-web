@@ -1,8 +1,8 @@
 <template>
-  <Ethereum :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-if="chain === 'ethereum'" />
-  <Solana :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'solana'" />
-  <Matic :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'polygon'" />
-  <Binance :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'binance'" />
+  <Ethereum :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-if="chain === 'ethereum'" />
+  <Solana :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'solana'" />
+  <Matic :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'polygon'" />
+  <Binance :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" v-else-if="chain === 'binance'" />
 </template>
 
 <script lang="ts">
@@ -16,6 +16,9 @@ import Solana from "./solana.vue";
 export default Vue.extend({
   name: "ChainContainer",
   props: {
+    plugins: {
+      type: Object,
+    },
     chain: {
       type: String,
       default: "ethereum",

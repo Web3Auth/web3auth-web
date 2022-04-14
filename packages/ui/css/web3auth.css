@@ -369,6 +369,11 @@
     background: #6f717a;
 }
 
+#w3a-modal button.w3a-button:disabled {
+    background: #27282D;
+    color: #6F717A;
+}
+
 #w3a-modal button.w3a-button:focus-visible {
     outline: 1px solid #daf0ff;
     outline-offset: -1px;
@@ -815,6 +820,10 @@
     background-color: #ffffff;
     border: 1px solid #f3f3f4;
     box-shadow: none;
+    color: #595857;
+}
+
+#w3a-modal.w3a-modal--light button.w3a-button:disabled {
     color: #b7b8bd;
 }
 

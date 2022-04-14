@@ -8,6 +8,7 @@ export interface IProviderHandlers {
   signTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<Transaction>;
   signAllTransactions: (req: JRPCRequest<{ message: Transaction[] }>) => Promise<Transaction[]>;
   signAndSendTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<{ signature: string }>;
+  getSecretKey: (req: JRPCRequest<unknown>) => Promise<string>;
   signMessage: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
 }
 
@@ -59,7 +60,8 @@ export function createGenericJRPCMiddleware<T, U>(
 }
 
 export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getPrivateKey } = providerHandlers;
+  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getPrivateKey, getSecretKey } =
+    providerHandlers;
 
   return mergeMiddleware([
     createRequestAccountsMiddleware({ requestAccounts }),
@@ -69,6 +71,7 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     createGenericJRPCMiddleware<{ message: Transaction[] }, Transaction[]>("signAllTransactions", signAllTransactions),
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey),
+    createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey),
   ]);
 }
 export interface AddSolanaChainParameter {

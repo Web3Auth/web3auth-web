@@ -20,11 +20,21 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import {
+  ADAPTER_STATUS,
+  CHAIN_NAMESPACES,
+  CONNECTED_EVENT_DATA,
+  CustomChainConfig,
+  LoginMethodConfig,
+  SafeEventEmitterProvider,
+  WALLET_ADAPTERS,
+} from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter"
+import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
+import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -42,9 +52,22 @@ const solanaChainConfig: CustomChainConfig = {
   tickerName: "solana",
 };
 
+const pluginStore = {
+  plugins: {},
+  addPlugin(name: string, instance: unknown): void {
+    this.plugins[name] = instance;
+  },
+  getPlugin(name: string) {
+    return this.plugins[name];
+  },
+};
 export default Vue.extend({
   name: "SolanaChain",
   props: {
+    plugins: {
+      type: Object,
+      default: () => ({}),
+    },
     adapterConfig: {
       type: Object,
     },
@@ -122,6 +145,16 @@ export default Vue.extend({
         this.web3auth.configureAdapter(solAdapter);
         this.web3auth.configureAdapter(slopeAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
+        if (this.plugins["torusWallet"]) {
+          const torusPlugin = new SolanaWalletConnectorPlugin({
+            torusWalletOpts: {},
+            walletInitOptions: {
+              enableLogging: true,
+            },
+          });
+          await this.web3auth.addPlugin(torusPlugin);
+          pluginStore.addPlugin("torusWallet", torusPlugin);
+        }
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({
           modalConfig: {
@@ -143,10 +176,20 @@ export default Vue.extend({
         this.loading = false;
       }
     },
+    async setupProvider(provider: SafeEventEmitterProvider) {
+      const walletUiPlugin = pluginStore.getPlugin("torusWallet");
+      if (walletUiPlugin && walletUiPlugin?.proxyProvider) {
+        const providerProxy = new TorusInjectedProvider({ config: { chainConfig: solanaChainConfig } });
+        await providerProxy.setupProvider(walletUiPlugin?.proxyProvider as InjectedProvider);
+        this.provider = providerProxy.provider;
+      } else {
+        this.provider = provider;
+      }
+    },
     subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
-        this.provider = web3auth.provider;
+        await this.setupProvider(web3auth.provider);
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
@@ -166,7 +209,8 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        await this.web3auth.connect();
+        const provider = await this.web3auth.connect();
+        await this.setupProvider(provider);
       } catch (error) {
         console.error(error);
         this.console("error", error);
