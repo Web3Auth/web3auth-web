@@ -18,6 +18,9 @@ export const getSolflareHandlers = (injectedProvider: Solflare, getProviderEngin
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
+    getSecretKey: async () => {
+      throw ethErrors.rpc.methodNotSupported();
+    },
     signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       const transaction = await injectedProvider.signTransaction(req.params.message);
       return transaction;

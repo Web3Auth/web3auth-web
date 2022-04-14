@@ -31,10 +31,10 @@ import {
 } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { SlopeAdapter } from "@web3auth/slope-adapter";
-import { SolflareAdapter } from "@web3auth/solflare-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter"
 import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
+import { SolflareAdapter } from "@web3auth/solflare-adapter";
+import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -140,7 +140,7 @@ export default Vue.extend({
         });
         const slopeAdapter = new SlopeAdapter();
         const solflareAdapter = new SolflareAdapter();
-        const solAdapter = new SolanaWalletAdapter({ initParams: { buildEnv: "testing"}});
+        const solAdapter = new SolanaWalletAdapter({ initParams: { buildEnv: "testing" } });
         this.web3auth.configureAdapter(solflareAdapter);
         this.web3auth.configureAdapter(solAdapter);
         this.web3auth.configureAdapter(slopeAdapter);

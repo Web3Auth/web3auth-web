@@ -20,6 +20,9 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
+    getSecretKey: async () => {
+      throw ethErrors.rpc.methodNotSupported();
+    },
     signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       const txMessage = req.params.message;
       if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
