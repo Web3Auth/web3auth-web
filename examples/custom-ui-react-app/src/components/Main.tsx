@@ -5,7 +5,7 @@ import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading } = useWeb3Auth();
+  const { provider, login, loginWithWalletConnect, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading } = useWeb3Auth();
   const handleLoginWithEmail = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = (e.target as any)[0].value
@@ -50,7 +50,10 @@ const Main = () => {
       <button onClick={()=>login(WALLET_ADAPTERS.OPENLOGIN,"twitter")} className={styles.card}>
         Twitter
       </button>
-   
+      
+      <button onClick={()=>loginWithWalletConnect()} className={styles.card}>
+        Wallet Connect
+      </button>
       <form onSubmit={(e)=>handleLoginWithEmail(e)}  className={styles.centerFlex}>
       <hr/>
         <input type={'email'} placeholder={'Enter your email'} className={styles.input} />
