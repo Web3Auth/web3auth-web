@@ -47,16 +47,6 @@ const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chai
   tickerName: "Ethereum",
 };
 
-const pluginStore = {
-  plugins: {},
-  addPlugin(name: string, instance: unknown): void {
-    this.plugins[name] = instance;
-  },
-  getPlugin(name: string) {
-    return this.plugins[name];
-  },
-};
-
 export default Vue.extend({
   name: "EthereumChain",
   props: {
@@ -161,7 +151,6 @@ export default Vue.extend({
             },
           });
           await this.web3auth.addPlugin(torusPlugin);
-          pluginStore.addPlugin("torusWallet", torusPlugin);
         }
         this.subscribeAuthEvents(this.web3auth);
 
@@ -176,8 +165,7 @@ export default Vue.extend({
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
-        const torusPlugin = pluginStore.getPlugin("torusWallet") as TorusWalletConnectorPlugin;
-        this.provider = torusPlugin?.proxyProvider || web3auth.provider;
+        this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
@@ -202,8 +190,7 @@ export default Vue.extend({
     async connect() {
       try {
         const web3authProvider = await this.web3auth.connect();
-        const torusPlugin = pluginStore.getPlugin("torusWallet") as TorusWalletConnectorPlugin;
-        this.provider = torusPlugin?.proxyProvider || web3authProvider;
+        this.provider = web3authProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
