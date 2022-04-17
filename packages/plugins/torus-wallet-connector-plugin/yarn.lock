@@ -242,10 +242,10 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/torus-embed@^1.22.0":
-  version "1.22.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.22.0.tgz#1096e0c85b37c2623d948150745e2c78a8b88969"
-  integrity sha512-SvEZ7Rx8lf/d93PjD96uq1nRf7AWkD986ETr67UAIoo6RDj//awTHADziMzS1xB9N7ye3LPqKje7+kC9Qc4aIw==
+"@toruslabs/torus-embed@^1.22.1":
+  version "1.22.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.22.1.tgz#0702a5f379ec08c62234dd742981c3fe4294dd25"
+  integrity sha512-b21DLAasl29ggGob8w51a/3zGd3y4Dc7M5Dft7oWpOH4s4FFRSfsfYNRb19gljBQ1F9Rwm6Ld6eM2JelRCm4nA==
   dependencies:
     "@metamask/obs-store" "^7.0.0"
     "@toruslabs/fetch-node-details" "^5.0.1"
@@ -257,7 +257,7 @@
     eth-rpc-errors "^4.0.3"
     events "^3.3.0"
     fast-deep-equal "^3.1.3"
-    is-stream "^3.0.0"
+    is-stream "^2.0.1"
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
     once "^1.4.0"
@@ -1032,15 +1032,10 @@ is-shared-array-buffer@^1.0.1:
   dependencies:
     call-bind "^1.0.2"
 
-is-stream@^2.0.0:
+is-stream@^2.0.0, is-stream@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-2.0.1.tgz#fac1e3d53b97ad5a9d0ae9cef2389f5810a5c077"
   integrity sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg==
-
-is-stream@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-3.0.0.tgz#e6bfd7aa6bef69f4f472ce9bb681e3e57b4319ac"
-  integrity sha512-LnQR4bZ9IADDRSkvpqMGvt/tEJWclzklNgSw48V5EAaAeDd6qGvN8ei6k5p0tvxSR171VmGyHuTiAOfxAbr8kA==
 
 is-string@^1.0.5, is-string@^1.0.7:
   version "1.0.7"
