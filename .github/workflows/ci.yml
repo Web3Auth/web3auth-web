@@ -22,7 +22,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install yarn
-        run: npm install -g yarn yalc
+        run: npm install -g yarn
 
       - name: Set output of cache
         id: yarn-cache
