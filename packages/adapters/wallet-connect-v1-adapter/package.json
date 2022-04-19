@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v1-adapter",
-  "version": "0.9.0",
+  "version": "0.9.2",
   "description": "wallet connect v1 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v1-adapter",
