@@ -523,6 +523,11 @@
     margin: auto;
 }
 
+#w3a-modal .w3a-wallet-connect__container-btn-group {
+    display: flex;
+    gap: 18px;
+}
+
 #w3a-modal .w3a-wallet-connect__container-ios {
     display: flex;
     grid-gap: 30px 20px;

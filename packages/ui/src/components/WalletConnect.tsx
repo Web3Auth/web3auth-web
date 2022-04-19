@@ -95,7 +95,7 @@ function WalletConnect(props: WalletConnectProps) {
             </div>
           </div>
         ) : (
-          <>
+          <div className="w3a-wallet-connect__container-btn-group">
             {links.map((link) => {
               return deviceDetails.os === OS_MAP.iOS ? (
                 <div className="w3a-wallet-connect__container-ios">
@@ -116,7 +116,7 @@ function WalletConnect(props: WalletConnectProps) {
                 </div>
               );
             })}
-          </>
+          </div>
         )}
       </div>
     </div>
