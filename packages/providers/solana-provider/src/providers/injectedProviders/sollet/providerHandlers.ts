@@ -52,6 +52,9 @@ export const getSolletHandlers = (injectedProvider: SolletWallet, getProviderEng
       const res = await conn.sendRawTransaction(transaction.serialize());
       return { signature: res };
     },
+    getSecretKey: async () => {
+      throw ethErrors.rpc.methodNotSupported();
+    },
   };
   return providerHandlers;
 };

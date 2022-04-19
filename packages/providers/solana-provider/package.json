@@ -36,7 +36,7 @@
     "@types/json-rpc-random-id": "^1.0.1",
     "@types/node": "^16",
     "lint-staged": "^12.4.0",
-    "@project-serum/sol-wallet-adapter": "^0.2.6",
+    "@project-serum/sol-wallet-adapter": "^0.2.6"
   },
   "files": [
     "dist",
