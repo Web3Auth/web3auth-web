@@ -22,7 +22,6 @@
     "@solana/web3.js": "^1.37.1",
     "@toruslabs/base-controllers": "^1.6.17",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
-    "@project-serum/sol-wallet-adapter": "^0.2.6",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^0.9.4",
     "@web3auth/base-provider": "^0.9.4",
@@ -36,7 +35,8 @@
     "@types/bs58": "^4.0.1",
     "@types/json-rpc-random-id": "^1.0.1",
     "@types/node": "^16",
-    "lint-staged": "^12.4.0"
+    "lint-staged": "^12.4.0",
+    "@project-serum/sol-wallet-adapter": "^0.2.6",
   },
   "files": [
     "dist",

@@ -3,7 +3,7 @@
   "version": "0.7.0",
   "description": "sollet wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/sollet-wallet-adapter",
+    "web3Auth/sollet-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
