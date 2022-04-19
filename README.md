@@ -25,7 +25,23 @@ This package provides main class for using default web3auth modal. It is a child
 functions available in the `@web3auth/core` api reference. The package includes all of our packages and gives you a simple way of implementing
 Web3Auth within your interface.
 
-Head on to the [Plug n Play API Reference](https://docs.web3auth.io/api-reference/web/plugnplay) to get started.
+### Installation
+
+---
+
+#### npm
+
+```shell
+npm i --save @web3auth/web3auth
+```
+
+#### yarn
+
+```shell
+yarn add @web3auth/web3auth
+```
+
+#### Head on to the [Plug n Play API Reference](https://docs.web3auth.io/api-reference/web/plugnplay) to get started.
 
 ## Custom Login UI SDK
 
@@ -36,7 +52,23 @@ Head on to the [Plug n Play API Reference](https://docs.web3auth.io/api-referenc
 This package provides the core logic for handling adapters within web3auth. This package acts as a manager for all the adapters. You should use this
 package to build your custom login UI on top of web3auth.
 
-Head on to the [Custom Login UI API Reference](https://docs.web3auth.io/api-reference/web/customloginui) to get started.
+### Installation
+
+---
+
+#### npm
+
+```shell
+npm i --save @web3auth/core
+```
+
+#### yarn
+
+```shell
+yarn add @web3auth/core
+```
+
+#### Head on to the [Custom Login UI API Reference](https://docs.web3auth.io/api-reference/web/customloginui) to get started.
 
 ## Other packages included in our SDK
 
