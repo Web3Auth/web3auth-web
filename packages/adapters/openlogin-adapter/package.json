@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.6",
-    "lint-staged": "^12.3.7"
+    "lint-staged": "^12.4.0"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^1.7.3",

@@ -34,7 +34,7 @@
     "@toruslabs/openlogin": "^1.7.3",
     "@types/node": "^16",
     "css-loader": "^5.2.7",
-    "lint-staged": "^12.3.7",
+    "lint-staged": "^12.4.0",
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1"
   },

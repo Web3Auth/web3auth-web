@@ -33,10 +33,10 @@
   ],
   "devDependencies": {
     "eth-rpc-errors": "^4.0.3",
-    "lint-staged": "^12.3.7"
+    "lint-staged": "^12.4.0"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.22.1",
+    "@toruslabs/torus-embed": "^1.22.2",
     "@web3auth/base": "^0.9.0",
     "@web3auth/base-plugin": "^0.9.0",
     "@web3auth/core": "^0.9.0",

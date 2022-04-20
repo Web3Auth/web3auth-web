@@ -26,7 +26,7 @@
   "devDependencies": {
     "@toruslabs/openlogin": "^1.7.3",
     "@types/node": "^16",
-    "lint-staged": "^12.3.7"
+    "lint-staged": "^12.4.0"
   },
   "files": [
     "dist",
