@@ -1,12 +1,18 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
-
+import { ethers } from "ethers";
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
-    try {
+    try { 
+      const eth = new ethers.providers.Web3Provider(provider);
+      const signer = eth.getSigner();
+      const acc = await signer.getAddress();
+      console.log("account using ethers signer", acc);
+      
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
+      console.log("account using web3", accounts);
       uiConsole("Eth accounts", accounts);
     } catch (error) {
       console.error("Error", error);
