@@ -30,9 +30,8 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
-import { SolletWebAdapter, SolletExtensionAdapter } from "@web3auth/sollet-adapter";
+import { SolletExtensionAdapter, SolletWebAdapter } from "@web3auth/sollet-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 

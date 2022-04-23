@@ -262,26 +262,6 @@
   dependencies:
     "@types/node" "*"
 
-"@web3auth/base-provider@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/base-provider/-/base-provider-0.9.0.tgz#a5f72fadc9010cb4711d7646673ed886c4d23675"
-  integrity sha512-z8JiF/p6SzlIaYtkdkMq8hfpymb6Hr7HO8e9p0e2/cAX/FrOVGb7HSHxREgeQAALsklXR4qMdsdxy+PzzKPCDQ==
-  dependencies:
-    "@toruslabs/base-controllers" "^1.6.14"
-    "@toruslabs/openlogin-jrpc" "^1.7.3"
-    "@web3auth/base" "^0.9.0"
-    eth-rpc-errors "^4.0.3"
-    json-rpc-random-id "^1.0.1"
-
-"@web3auth/base@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@web3auth/base/-/base-0.9.0.tgz#30866415041fc7bb8e46451b734a572e02a74d3d"
-  integrity sha512-xcgkfVyicdov++6RjQgYtQ/ph1lOgqZ78h88B2yR9X81XtZXe+wHHgAoWMHZy68pyq0Y9KR3TmBj6bNaLRzS5g==
-  dependencies:
-    "@toruslabs/openlogin-jrpc" "^1.7.3"
-    loglevel "^1.8.0"
-    ts-custom-error "^3.2.0"
-
 JSONStream@^1.3.5:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"
@@ -1474,11 +1454,6 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
-
-ts-custom-error@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ts-custom-error/-/ts-custom-error-3.2.0.tgz#ff8f80a3812bab9dc448536312da52dce1b720fb"
-  integrity sha512-cBvC2QjtvJ9JfWLvstVnI45Y46Y5dMxIaG1TDMGAD/R87hpvqFL+7LhvUDhnRCfOnx/xitollFWWvUKKKhbN0A==
 
 tslib@^2.1.0, tslib@^2.3.1:
   version "2.3.1"
