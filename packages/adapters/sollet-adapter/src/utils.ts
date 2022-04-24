@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface SolletProvider {
   postMessage(...args: unknown[]): unknown;
 }
@@ -23,15 +22,21 @@ export function poll(callback: () => boolean | Promise<boolean>, interval: numbe
   });
 }
 
+declare global {
+  interface Window {
+    sollet: SolletProvider;
+  }
+}
+
 export const detectProvider = async (
   options: { interval: number; count: number } = { interval: 1000, count: 3 }
 ): Promise<SolletProvider | undefined> => {
-  const isSolletAvailable = typeof window !== "undefined" && !!(window as any).solana;
+  const isSolletAvailable = typeof window !== "undefined" && !!window.sollet;
   if (isSolletAvailable) {
-    return (window as any).sollet;
+    return window.sollet;
   }
-  const isAvailable = await poll(() => (window as any).sollet, options.interval, options.count);
-  if (isAvailable) return (window as any).sollet;
+  const isAvailable = await poll(() => !!window.sollet, options.interval, options.count);
+  if (isAvailable) return window.sollet;
   return undefined;
 };
 

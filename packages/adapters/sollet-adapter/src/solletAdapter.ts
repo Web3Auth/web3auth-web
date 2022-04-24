@@ -1,6 +1,6 @@
 import { WALLET_ADAPTERS } from "@web3auth/base";
 
-import { BaseSolletAdapter, SolletAdapterOptions } from "./baseAdapter";
+import { BaseSolletAdapter, SolletAdapterOptions } from "./baseSolletAdapter";
 
 export class SolletWebAdapter extends BaseSolletAdapter {
   readonly name: string = WALLET_ADAPTERS.SOLLET;

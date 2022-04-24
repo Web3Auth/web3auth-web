@@ -199,6 +199,8 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
         this.status = ADAPTER_STATUS.NOT_READY;
         this.solletProvider = null;
         this._wallet = null;
+      } else {
+        this.status = ADAPTER_STATUS.READY;
       }
       this.emit(ADAPTER_EVENTS.DISCONNECTED);
     } catch (error: unknown) {
