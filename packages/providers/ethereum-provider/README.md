@@ -1,7 +1,7 @@
 ## `@web3auth/ethereum-provider`
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider/latest.svg)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider/latest.svg)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)
 
 EIP-1193 compatible JRPC provider
 
