@@ -22,7 +22,7 @@
     "@ethereumjs/common": "2.6.3",
     "@ethereumjs/tx": "^3.5.1",
     "@metamask/eth-sig-util": "^4.0.0",
-    "@toruslabs/base-controllers": "^1.6.15",
+    "@toruslabs/base-controllers": "^1.6.16",
     "@toruslabs/http-helpers": "^2.2.0",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@walletconnect/types": "~1.7.7",
