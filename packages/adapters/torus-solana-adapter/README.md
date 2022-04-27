@@ -1,3 +1,6 @@
 # `@web3auth/torus-wallet-adapter`
 
-> TODO: description
+[![npm version](https://img.shields.io/npm/v/@web3auth/torus-solana-adapter/latest.svg)](https://www.npmjs.com/package/@web3auth/torus-solana-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-solana-adapter/latest.svg)](https://bundlephobia.com/result?p=@web3auth/torus-solana-adapter@latest)
+
+Adds Solana Torus Wallet login functionality (https://solana.tor.us)

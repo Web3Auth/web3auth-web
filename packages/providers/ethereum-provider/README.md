@@ -1,6 +1,9 @@
 ## `@web3auth/ethereum-provider`
 
----
+[![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider/latest.svg)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider/latest.svg)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)
+
+EIP-1193 compatible JRPC provider
 
 ## Introduction:-
 
@@ -38,10 +41,3 @@ const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<strin
   const signedMessage = await signEthMessage(provider);
 })();
 ```
-
-All providers must implement interface of IBaseProvider
-Must implement chain functionality of addChain & switchChain
-Handlers must be in a separate file
-no reassigning of \_providerEngineProxy
-use request instead of sendAsync
-emit from state

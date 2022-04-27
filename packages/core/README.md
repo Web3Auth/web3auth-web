@@ -1,11 +1,8 @@
 # `@web3auth/core`
 
-> TODO: description
+[![npm version](https://img.shields.io/npm/v/@web3auth/core/latest.svg)](https://www.npmjs.com/package/@web3auth/core/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/core/latest.svg)](https://bundlephobia.com/result?p=@web3auth/core@latest)
 
-## Usage
-
-```
-const core = require('@web3auth/core');
-
-// TODO: DEMONSTRATE API
-```
+Provides the core logic for handling adapters within web3auth.
+This package acts as a manager for all the adapters.
+You should use this package to build your custom login UI on top of web3auth.
