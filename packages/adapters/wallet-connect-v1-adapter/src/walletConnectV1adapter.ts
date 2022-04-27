@@ -26,7 +26,21 @@ import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
+// import { isMobile } from "./utils";
 
+function createWrapper(): HTMLElement {
+  const wrapper = document.createElement("section");
+  wrapper.setAttribute("id", "w3a-container");
+  document.body.appendChild(wrapper);
+  return wrapper;
+}
+
+const htmlToElement = <T extends Element>(html: string): T => {
+  const template = window.document.createElement("template");
+  const trimmedHtml = html.trim(); // Never return a text node of whitespace as the result
+  template.innerHTML = trimmedHtml;
+  return template.content.firstChild as T;
+};
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -50,6 +64,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   private wcProvider: WalletConnectProvider | null = null;
 
   private rehydrated = false;
+
+  private modal: HTMLElement | null = null;
 
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
@@ -80,6 +96,15 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
+    this.modal = createWrapper();
+    const header = htmlToElement(
+      `<div id="wc-connector">
+        <button class="wc-test-button-connect">Connect</button>
+        <button class="wc-test-button-cancel">Cancel</button>
+      </div>`
+    );
+    this.modal.appendChild(header);
+
     if (this.connector.connected) {
       this.rehydrated = true;
       await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
@@ -100,6 +125,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       // modal again on existing instance if connection is pending.
       if (this.adapterOptions.adapterSettings?.qrcodeModal) {
         this.connector = this.getWalletConnectInstance();
+        this.wcProvider = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
       }
       await this.createNewSession();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -119,6 +145,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
           if (error) {
             this.emit(ADAPTER_EVENTS.ERRORED, error);
           }
+          log.debug("connected event emitted by web3auth");
           await this.onConnectHandler(payload.params[0]);
           return resolve(this.provider);
         });
@@ -156,6 +183,28 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
     }
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
+  }
+
+  private showSwitchChainModal() {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.modal) return reject(new Error("Chain switch modal is not initialized"));
+        this.modal.getElementsByClassName("wc-test-button-connect")[0].addEventListener("click", async () => {
+          // eslint-disable-next-line no-console
+          console.log("clicked on connect");
+          await (this.wcProvider as WalletConnectProvider).switchChain({ chainId: this.chainConfig?.chainId as string, lookup: false });
+          return resolve(null);
+        });
+        this.modal.getElementsByClassName("wc-test-button-cancel")[0].addEventListener("click", async () => {
+          // eslint-disable-next-line no-console
+          console.log("clicked on cancel");
+          return reject(new Error("User cancelled chain switch"));
+        });
+      } catch (error) {
+        log.error("error while chain switch", error);
+        return reject(error);
+      }
+    });
   }
 
   private async createNewSession(opts: { forceNewSession: boolean } = { forceNewSession: false }): Promise<void> {
@@ -198,12 +247,14 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
 
     const { chainId } = params;
-    log.debug("connected chainId in hex", chainId);
+    log.debug("connected chainId in hex");
     if (chainId !== parseInt(this.chainConfig.chainId, 16)) {
       try {
-        await this.wcProvider.switchChain({ chainId: this.chainConfig.chainId, lookup: false });
+        log.debug("added events");
+        await this.showSwitchChainModal();
+        log.debug("switched chainId in hex");
       } catch (error) {
-        log.error(error);
+        log.error("error while chain switching", error);
         // we need to create a new session since old session is already used and
         // user needs to login again with correct chain with new qr code.
         await this.createNewSession({ forceNewSession: true });
