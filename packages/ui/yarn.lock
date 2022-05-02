@@ -1349,10 +1349,10 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/openlogin@^1.7.3":
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.7.3.tgz#aef3633bb512708618de1257d51860155639b245"
-  integrity sha512-wIwTG1voyZis5OU18HNhBeHHDBfQJA9nhRSkv/lkmenD9cqEzAPZQxOmbCIgBqRcksXF+ycdFrEzqVyYdJpRnA==
+"@toruslabs/openlogin@^1.7.4":
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.7.4.tgz#64f3a0b9ca0e2db16e2501235d9123d116b6335c"
+  integrity sha512-o0+c8huljUAXNW+jWNSnngoggHQsYXwjW8Eu9Bvtr5AQudNXXqT7uvZ2RGvgcXbcMcnuO2TR6+P+HytXlwmKDA==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
     "@toruslabs/http-helpers" "^2.2.0"

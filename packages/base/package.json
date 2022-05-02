@@ -24,7 +24,7 @@
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
-    "@toruslabs/openlogin": "^1.7.3",
+    "@toruslabs/openlogin": "^1.7.4",
     "@types/node": "^16",
     "lint-staged": "^12.4.0"
   },

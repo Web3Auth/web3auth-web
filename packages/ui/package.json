@@ -58,7 +58,7 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.7.3",
+    "@toruslabs/openlogin": "^1.7.4",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@web3auth/base": "^0.9.3",
     "bowser": "^2.11.0",
