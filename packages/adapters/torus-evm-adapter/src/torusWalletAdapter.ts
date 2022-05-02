@@ -111,10 +111,29 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       await this.torusInstance.login(this.loginSettings);
       const { chainId } = this.torusInstance.provider;
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
-        throw WalletInitializationError.fromCode(
-          5000,
-          `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${chainId}`
-        );
+        const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+        const network = {
+          chainId: _chainId,
+          host: rpcTarget,
+          blockExplorerUrl: blockExplorer,
+          networkName: displayName,
+          tickerName,
+          ticker,
+          logo: "",
+        };
+        // in some cases when user manually switches chain and relogin then adapter will not connect to initially passed
+        // chainConfig but will connect to the one that user switched to.
+        // So here trying to switch network to the one that was initially passed in chainConfig.
+        await this.torusInstance.setProvider({
+          ...network,
+        });
+        const updatedChainID = await this.torusInstance.ethereum.request<string>({ method: "eth_chainId" });
+        if (updatedChainID && parseInt(updatedChainID) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
+          throw WalletInitializationError.fromCode(
+            5000,
+            `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${updatedChainID}`
+          );
+        }
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
