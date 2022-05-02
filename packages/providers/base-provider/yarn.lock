@@ -26,12 +26,12 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
   integrity sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==
 
-"@toruslabs/base-controllers@^1.6.16":
-  version "1.6.16"
-  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.16.tgz#e40444e18150d0874ba3a3e48768878d18f3de8e"
-  integrity sha512-gMmfp5p9H3MQWs9qLnnPus3slKthynocfz6F3VDIEGXoQkXfB+BU9pBPA2gox5AhgDDmNsIJ68fkB/KgFUWNqA==
+"@toruslabs/base-controllers@^1.6.17":
+  version "1.6.17"
+  resolved "https://registry.yarnpkg.com/@toruslabs/base-controllers/-/base-controllers-1.6.17.tgz#0137a0f281c2214dcba2e03812dad25b6dbc5be2"
+  integrity sha512-C9p4/vWni9NMaXX5RRA2PVTsGhAWZZWKwz7OW3ZmlYnL6xH2d4XeO3TIKgXYis7reclUBu0GpjC3FS/s46Rqeg==
   dependencies:
-    "@toruslabs/broadcast-channel" "^4.12.1"
+    "@toruslabs/broadcast-channel" "^4.12.3"
     "@toruslabs/http-helpers" "^2.2.0"
     "@toruslabs/openlogin-jrpc" "^1.7.3"
     async-mutex "^0.3.2"
@@ -43,10 +43,10 @@
     lodash "^4.17.21"
     loglevel "^1.8.0"
 
-"@toruslabs/broadcast-channel@^4.12.1":
-  version "4.12.1"
-  resolved "https://registry.yarnpkg.com/@toruslabs/broadcast-channel/-/broadcast-channel-4.12.1.tgz#b5ab3a4bff81644799a606ab0b196472d20e80f5"
-  integrity sha512-+7HaGe51t/XXfzNJSIJPudChLItnm2F6Pzoq+EKlK3ePRbvzToZdZW4yup85gsECT01izzeH7j/nUU3mOXaSkw==
+"@toruslabs/broadcast-channel@^4.12.3":
+  version "4.12.3"
+  resolved "https://registry.yarnpkg.com/@toruslabs/broadcast-channel/-/broadcast-channel-4.12.3.tgz#e0cc1c869919b43790e7a5ec17e607af09d595dd"
+  integrity sha512-I/OkxkmjVVq/jt/En6mv0z/AIe862zO8zOeK/ICulcZY5VqMl9KRiHNLFBVJrDsUg77tCDGDnDfME8la/pXAww==
   dependencies:
     "@babel/runtime" "^7.17.9"
     "@toruslabs/eccrypto" "^1.1.8"
