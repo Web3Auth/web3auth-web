@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-solana-adapter",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "torus solana wallet adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -39,9 +39,9 @@
   },
   "dependencies": {
     "@toruslabs/solana-embed": "^0.1.6",
-    "@web3auth/base": "^0.9.3",
-    "@web3auth/base-provider": "^0.9.3",
-    "@web3auth/solana-provider": "^0.9.3"
+    "@web3auth/base": "^0.9.4",
+    "@web3auth/base-provider": "^0.9.4",
+    "@web3auth/solana-provider": "^0.9.4"
   },
   "lint-staged": {
     "!(*d).ts": [
