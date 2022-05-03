@@ -1,11 +1,6 @@
 # `@web3auth/ui`
 
-> TODO: description
+[![npm version](https://img.shields.io/npm/v/@web3auth/ui?label=%22%22)](https://www.npmjs.com/package/@web3auth/ui/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ui?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ui@latest)
 
-## Usage
-
-```
-const core = require('@web3auth/ui');
-
-// TODO: DEMONSTRATE API
-```
+Provides the UI used for creating the modal
