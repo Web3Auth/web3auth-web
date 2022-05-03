@@ -26,21 +26,7 @@ import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
-// import { isMobile } from "./utils";
 
-function createWrapper(): HTMLElement {
-  const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-container");
-  document.body.appendChild(wrapper);
-  return wrapper;
-}
-
-const htmlToElement = <T extends Element>(html: string): T => {
-  const template = window.document.createElement("template");
-  const trimmedHtml = html.trim(); // Never return a text node of whitespace as the result
-  template.innerHTML = trimmedHtml;
-  return template.content.firstChild as T;
-};
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -96,14 +82,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
-    this.modal = createWrapper();
-    const header = htmlToElement(
-      `<div id="wc-connector">
-        <button class="wc-test-button-connect">Connect</button>
-        <button class="wc-test-button-cancel">Cancel</button>
-      </div>`
-    );
-    this.modal.appendChild(header);
 
     if (this.connector.connected) {
       this.rehydrated = true;
@@ -185,28 +163,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
-  private showSwitchChainModal() {
-    return new Promise((resolve, reject) => {
-      try {
-        if (!this.modal) return reject(new Error("Chain switch modal is not initialized"));
-        this.modal.getElementsByClassName("wc-test-button-connect")[0].addEventListener("click", async () => {
-          // eslint-disable-next-line no-console
-          console.log("clicked on connect");
-          await (this.wcProvider as WalletConnectProvider).switchChain({ chainId: this.chainConfig?.chainId as string, lookup: false });
-          return resolve(null);
-        });
-        this.modal.getElementsByClassName("wc-test-button-cancel")[0].addEventListener("click", async () => {
-          // eslint-disable-next-line no-console
-          console.log("clicked on cancel");
-          return reject(new Error("User cancelled chain switch"));
-        });
-      } catch (error) {
-        log.error("error while chain switch", error);
-        return reject(error);
-      }
-    });
-  }
-
   private async createNewSession(opts: { forceNewSession: boolean } = { forceNewSession: false }): Promise<void> {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (opts.forceNewSession && this.connector.pending) {
@@ -248,11 +204,10 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
     const { chainId } = params;
     log.debug("connected chainId in hex");
-    if (chainId !== parseInt(this.chainConfig.chainId, 16)) {
+    if (chainId !== parseInt(this.chainConfig.chainId, 16) && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching) {
       try {
         log.debug("added events");
-        await this.showSwitchChainModal();
-        log.debug("switched chainId in hex");
+        await this.wcProvider.switchChain({ chainId: this.chainConfig?.chainId as string, lookup: false });
       } catch (error) {
         log.error("error while chain switching", error);
         // we need to create a new session since old session is already used and

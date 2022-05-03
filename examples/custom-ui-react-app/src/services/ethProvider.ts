@@ -1,5 +1,6 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import Web3 from "web3";
+import { getV4TypedData } from "./data";
 import { IWalletProvider } from "./walletProvider";
 
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
@@ -49,8 +50,32 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       uiConsole("error", error);
     }
   };
+  const signV4Message = async () => {
+    try {
+      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
+      const web3 = new Web3(provider as any);
+      const chainId = await web3.eth.getChainId()
+      const typedData = getV4TypedData(chainId.toString());
+      (web3.currentProvider as any)?.send(
+        {
+          method: "eth_signTypedData_v4",
+          params: [pubKey[0], JSON.stringify(typedData)],
+          from: pubKey[0],
+        },
+        (err: Error, result: any) => {
+          if (err) {
+            return uiConsole(err);
+          }
+          uiConsole("Eth sign message => true", result);
+        }
+      );
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
 
-  return { getAccounts, getBalance, signMessage };
+  return { getAccounts, getBalance, signMessage, signV4Message };
 };
 
 export default ethProvider;
