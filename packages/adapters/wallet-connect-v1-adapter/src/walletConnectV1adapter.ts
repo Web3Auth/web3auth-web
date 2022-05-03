@@ -51,8 +51,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  private modal: HTMLElement | null = null;
-
   constructor(options: WalletConnectV1AdapterOptions = {}) {
     super();
     this.adapterOptions = { ...options };
@@ -207,7 +205,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     if (chainId !== parseInt(this.chainConfig.chainId, 16) && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching) {
       try {
         log.debug("added events");
-        await this.wcProvider.switchChain({ chainId: this.chainConfig?.chainId as string, lookup: false });
+        await this.wcProvider.switchChain({ chainId: this.chainConfig.chainId as string, lookup: false });
       } catch (error) {
         log.error("error while chain switching", error);
         // we need to create a new session since old session is already used and
