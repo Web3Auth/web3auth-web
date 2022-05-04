@@ -247,6 +247,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
         try {
           await this.addChain(this.chainConfig);
           await this.switchChain(connectedChainConfig, this.chainConfig);
+          this.connector = this.getWalletConnectInstance();
         } catch (error) {
           log.error("error while chain switching", error);
           // we need to create a new session since old session is already used and
