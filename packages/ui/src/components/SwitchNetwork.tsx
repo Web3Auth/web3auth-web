@@ -1,21 +1,36 @@
-import { useState } from "react";
+import { CustomChainConfig } from "@web3auth/base";
+import { useEffect, useState } from "react";
 
+import { getNetworkIconId } from "../utils";
 import Image from "./Image";
 
 interface SwitchNetworkProps {
-  currentChainName: string;
-  newChainName: string;
-  currentChainId: string;
-  newChainId: string;
+  currentChainConfig: CustomChainConfig;
+  newChainConfig: CustomChainConfig;
   appOrigin: string;
   onSwitchNetwork: (currentChainId: string, newChainId: string) => void;
   onCancelNetwork: () => void;
 }
 
 function SwitchNetwork(props: SwitchNetworkProps) {
-  const { currentChainId, newChainId, appOrigin, currentChainName, newChainName, onSwitchNetwork, onCancelNetwork } = props;
+  const { currentChainConfig, newChainConfig, appOrigin, onSwitchNetwork, onCancelNetwork } = props;
   const [showModal, setShowModal] = useState(true);
 
+  const [fromNetworkIconId, setFromNetworkIconId] = useState("network-default");
+  const [toNetworkIconId, setToNetworkIconId] = useState("network-default");
+
+  useEffect(() => {
+    getNetworkIconId(currentChainConfig.ticker)
+      .then((id) => {
+        return setFromNetworkIconId(id);
+      })
+      .catch(() => {});
+    getNetworkIconId(newChainConfig.ticker)
+      .then((id) => {
+        return setToNetworkIconId(id);
+      })
+      .catch(() => {});
+  }, [currentChainConfig.chainId, newChainConfig.chainId]);
   return (
     showModal && (
       <div id="w3a-modal">
@@ -29,11 +44,11 @@ function SwitchNetwork(props: SwitchNetworkProps) {
           <div className="w3a-switch-network__connect">
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId="network-default" />
+                <Image imageId={fromNetworkIconId} />
               </div>
               <div>
                 <div>From:</div>
-                <div>{currentChainName}</div>
+                <div>{currentChainConfig.displayName}</div>
               </div>
             </div>
             <div>
@@ -43,11 +58,11 @@ function SwitchNetwork(props: SwitchNetworkProps) {
             </div>
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId="network-default" />
+                <Image imageId={toNetworkIconId} />
               </div>
               <div>
                 <div>To:</div>
-                <div>{newChainName}</div>
+                <div>{newChainConfig.displayName}</div>
               </div>
             </div>
           </div>
@@ -67,7 +82,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
               className="w3a-button w3a-button--primary"
               onClick={() => {
                 setShowModal(false);
-                onSwitchNetwork(currentChainId, newChainId);
+                onSwitchNetwork(currentChainConfig.chainId, newChainConfig.chainId);
               }}
             >
               Proceed

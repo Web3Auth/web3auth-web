@@ -56,22 +56,14 @@ export interface INetworkSwitchProvider {
 }
 export interface INetworkSwitch {
   addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
-  switchNetwork(params: {
-    currentChainId: string;
-    newChainId: string;
-    appOrigin: string;
-    currentChainName: string;
-    newChainName: string;
-  }): Promise<boolean>;
+  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: Partial<CustomChainConfig>; appOrigin: string }): Promise<boolean>;
 }
 
 export abstract class BaseNetworkSwitch implements INetworkSwitch {
   abstract switchNetwork(params: {
-    currentChainId: string;
-    newChainId: string;
+    currentChainConfig: CustomChainConfig;
+    newChainConfig: Partial<CustomChainConfig>;
     appOrigin: string;
-    currentChainName: string;
-    newChainName: string;
   }): Promise<boolean>;
 
   abstract addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;

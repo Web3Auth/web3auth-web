@@ -26,26 +26,18 @@ export class NetworkSwitch extends BaseNetworkSwitch {
         return reject(new Error("User cancelled request for adding new network"));
       };
       render(
-        <AddNetwork
-          appOrigin={appOrigin}
-          chainName={chainConfig.displayName}
-          onAddNetwork={addNetworkCallback}
-          onCancelNetwork={cancelCallback}
-          chainId={chainConfig.chainId}
-        />,
+        <AddNetwork appOrigin={appOrigin} chainConfig={chainConfig} onAddNetwork={addNetworkCallback} onCancelNetwork={cancelCallback} />,
         createWrapper()
       );
     });
   }
 
   public async switchNetwork(params: {
-    currentChainId: string;
-    newChainId: string;
+    currentChainConfig: CustomChainConfig;
+    newChainConfig: CustomChainConfig;
     appOrigin: string;
-    currentChainName: string;
-    newChainName: string;
   }): Promise<boolean> {
-    const { currentChainId, newChainId, appOrigin, currentChainName, newChainName } = params;
+    const { currentChainConfig, appOrigin, newChainConfig } = params;
 
     return new Promise((resolve, reject) => {
       const switchNetworkCallback = async (): Promise<void> => {
@@ -57,12 +49,10 @@ export class NetworkSwitch extends BaseNetworkSwitch {
       render(
         <SwitchNetwork
           appOrigin={appOrigin}
-          currentChainName={currentChainName}
-          newChainName={newChainName}
+          currentChainConfig={currentChainConfig}
+          newChainConfig={newChainConfig}
           onSwitchNetwork={switchNetworkCallback}
           onCancelNetwork={cancelCallback}
-          currentChainId={currentChainId}
-          newChainId={newChainId}
         />,
         createWrapper()
       );

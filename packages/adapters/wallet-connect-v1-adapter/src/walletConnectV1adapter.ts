@@ -180,17 +180,15 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     }
   }
 
-  private async switchChain(connectedChainConfig: { chainId: string; displayName: string }, chainConfig: CustomChainConfig): Promise<void> {
+  private async switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
     if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
 
     if (networkSwitch) {
       await networkSwitch.switchNetwork({
-        newChainId: chainConfig?.chainId as string,
-        currentChainId: connectedChainConfig.chainId,
+        currentChainConfig: chainConfig,
+        newChainConfig: connectedChainConfig,
         appOrigin: window.location.hostname,
-        currentChainName: connectedChainConfig.displayName,
-        newChainName: chainConfig.displayName,
       });
     }
     await this.wcProvider.switchChain({ chainId: chainConfig.chainId, lookup: false, addChain: false });

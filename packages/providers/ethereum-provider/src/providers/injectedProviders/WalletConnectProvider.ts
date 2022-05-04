@@ -47,6 +47,8 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
   public async setupProvider(connector: IConnector): Promise<void> {
     this.onConnectorStateUpdate(connector);
+    // eslint-disable-next-line no-console
+    console.log("this.config while setup", this.config.chainConfig);
     await this.setupEngine(connector);
   }
 
@@ -64,10 +66,8 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
           method: "wallet_addEthereumChain",
           params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
         });
-        this.configure({ chainConfig: currentChainConfig });
       } catch (error) {
         log.error(error);
-        throw error;
       }
     }
 
@@ -86,6 +86,8 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     }
 
     this.configure({ chainConfig: currentChainConfig });
+    // eslint-disable-next-line no-console
+    console.log("this.config", this.config.chainConfig);
     if (lookup) await this.lookupNetwork(this.connector);
   }
 

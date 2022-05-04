@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { CustomChainConfig } from "@web3auth/base";
+import { useEffect, useState } from "react";
 
+import { getNetworkIconId } from "../utils";
 import Image from "./Image";
 
 interface AddNetworkProps {
-  chainId: string;
-  chainName: string;
+  chainConfig: CustomChainConfig;
   appOrigin: string;
   onAddNetwork: (chainId: string) => void;
   onCancelNetwork: () => void;
 }
 
 function AddNetwork(props: AddNetworkProps) {
-  const { chainName, chainId, appOrigin, onAddNetwork, onCancelNetwork } = props;
+  const { chainConfig, appOrigin, onAddNetwork, onCancelNetwork } = props;
   const [showModal, setShowModal] = useState(true);
+  const [networkIconId, setNetworkIconId] = useState("network-default");
+
+  useEffect(() => {
+    getNetworkIconId(chainConfig.ticker)
+      .then((id) => {
+        return setNetworkIconId(id);
+      })
+      .catch(() => {});
+  }, [chainConfig.chainId]);
+
   return (
     showModal && (
       <div id="w3a-modal">
@@ -26,10 +37,10 @@ function AddNetwork(props: AddNetworkProps) {
           <div className="w3a-switch-network__connect">
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId="network-default" />
+                <Image imageId={networkIconId} />
               </div>
               <div>
-                <div>{chainName}</div>
+                <div>{chainConfig.displayName}</div>
               </div>
             </div>
           </div>
@@ -49,7 +60,7 @@ function AddNetwork(props: AddNetworkProps) {
               className="w3a-button w3a-button--primary"
               onClick={() => {
                 setShowModal(false);
-                onAddNetwork(chainId);
+                onAddNetwork(chainConfig.chainId);
               }}
             >
               Proceed
