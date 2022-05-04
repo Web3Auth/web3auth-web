@@ -4,7 +4,7 @@ import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-
+// import { NetworkSwitch } from "@web3auth/ui"
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -97,15 +97,17 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         setIsLoading(true);
-        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = "BLf14uwUA_rcPyy5b8ED1zVcOVZGL0SwwIGTRIOplUQ6Vp4H7QfEDcX4o9qTEeR8uqDyXSrxXLOZ4RVhBSRyb7A";
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
           enableLogging: true
         });
         subscribeAuthEvents(web3AuthInstance);
+        // const networkUi = new NetworkSwitch()
 
         const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
-        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal  }, chainConfig: currentChainConfig })
+        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal }, chainConfig: currentChainConfig,  })
+
         web3AuthInstance.configureAdapter(adapter);
         web3AuthInstance.configureAdapter(wcAdapter);
 

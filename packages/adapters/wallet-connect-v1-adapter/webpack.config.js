@@ -6,26 +6,6 @@ const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");
 
-const config = generateWebpackConfig({
-  currentPath,
-  pkg,
-  alias: {},
-  module: {
-    rules: [
-      {
-        test: /\.css$/i,
-        use: [
-          { loader: "style-loader", options: {} },
-          { loader: "css-loader", options: {} },
-        ],
-      },
-      {
-        test: /\.svg$/,
-        exclude: /node_modules/,
-        use: ["@svgr/webpack", "url-loader"],
-      },
-    ],
-  },
-});
+const config = generateWebpackConfig({ currentPath, pkg });
 
 module.exports = config;

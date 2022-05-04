@@ -26,7 +26,6 @@ import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
-import { NetworkSwitch } from "./networkSwitch";
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -81,8 +80,6 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
 
-    const networkSwitcher = new NetworkSwitch(this.wcProvider);
-    await networkSwitcher.addNetwork(this.chainConfig.chainId);
     if (this.connector.connected) {
       this.rehydrated = true;
       await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
@@ -103,7 +100,14 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
       // modal again on existing instance if connection is pending.
       if (this.adapterOptions.adapterSettings?.qrcodeModal) {
         this.connector = this.getWalletConnectInstance();
-        this.wcProvider = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
+        this.wcProvider = new WalletConnectProvider({
+          config: {
+            chainConfig: this.chainConfig as CustomChainConfig,
+            // network switching can be skipped with custom ui
+            skipLookupNetwork: this.adapterOptions.adapterSettings?.skipNetworkSwitching,
+          },
+          connector: this.connector,
+        });
       }
       await this.createNewSession();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -163,6 +167,35 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
+  private async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    try {
+      if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+      const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
+      if (networkSwitch) {
+        await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
+      }
+      await this.wcProvider.addChain(chainConfig);
+    } catch (error) {
+      log.error(error);
+    }
+  }
+
+  private async switchChain(connectedChainConfig: { chainId: string; displayName: string }, chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
+
+    if (networkSwitch) {
+      await networkSwitch.switchNetwork({
+        newChainId: chainConfig?.chainId as string,
+        currentChainId: connectedChainConfig.chainId,
+        appOrigin: window.location.hostname,
+        currentChainName: connectedChainConfig.displayName,
+        newChainName: chainConfig.displayName,
+      });
+    }
+    await this.wcProvider.switchChain({ chainId: chainConfig.chainId, lookup: false, addChain: false });
+  }
+
   private async createNewSession(opts: { forceNewSession: boolean } = { forceNewSession: false }): Promise<void> {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (opts.forceNewSession && this.connector.pending) {
@@ -204,31 +237,36 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
     const { chainId } = params;
     log.debug("connected chainId in hex");
-    if (chainId !== parseInt(this.chainConfig.chainId, 16) && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching) {
-      try {
-        const networkSwitcher = new NetworkSwitch(this.wcProvider);
-        await networkSwitcher.addNetwork(this.chainConfig.chainId);
-        await networkSwitcher.switchNetwork(`0x${chainId.toString(16)}`, this.chainConfig.chainId);
-        log.debug("added events");
-        await this.wcProvider.switchChain({ chainId: this.chainConfig.chainId as string, lookup: false });
-      } catch (error) {
-        log.error("error while chain switching", error);
-        // we need to create a new session since old session is already used and
-        // user needs to login again with correct chain with new qr code.
-        await this.createNewSession({ forceNewSession: true });
-        const connectedChainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, chainId);
-        this.emit(
-          ADAPTER_EVENTS.ERRORED,
-          WalletInitializationError.fromCode(
-            5000,
-            `Not connected to correct network. Expected: ${this.chainConfig.displayName}, Current: ${
-              connectedChainConfig?.displayName || chainId
-            }, Please switch to correct network from wallet`
-          )
-        );
-        this.status = ADAPTER_STATUS.READY;
-        this.rehydrated = true;
-        return;
+    if (chainId !== parseInt(this.chainConfig.chainId, 16)) {
+      const connectedChainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, chainId) || {
+        chainId: `0x${chainId.toString(16)}`,
+        displayName: "Unknown Network",
+      };
+
+      const isCustomUi = this.adapterOptions.adapterSettings?.qrcodeModal;
+      // skipping network is not allowed in default ui. We are use network switching modal for default ui.
+      if (!isCustomUi || (isCustomUi && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching)) {
+        try {
+          await this.addChain(this.chainConfig);
+          await this.switchChain(connectedChainConfig, this.chainConfig);
+        } catch (error) {
+          log.error("error while chain switching", error);
+          // we need to create a new session since old session is already used and
+          // user needs to login again with correct chain with new qr code.
+          await this.createNewSession({ forceNewSession: true });
+          this.emit(
+            ADAPTER_EVENTS.ERRORED,
+            WalletInitializationError.fromCode(
+              5000,
+              `Not connected to correct network. Expected: ${this.chainConfig.displayName}, Current: ${
+                connectedChainConfig?.displayName || chainId
+              }, Please switch to correct network from wallet`
+            )
+          );
+          this.status = ADAPTER_STATUS.READY;
+          this.rehydrated = true;
+          return;
+        }
       }
     }
     await this.wcProvider.setupProvider(this.connector);

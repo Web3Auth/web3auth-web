@@ -22,7 +22,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
   constructor({ config, state, connector }: { config: WalletConnectProviderConfig; state?: BaseProviderState; connector?: IConnector }) {
     super({
-      config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } },
+      config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 }, skipLookupNetwork: !!config.skipLookupNetwork },
       state: { ...(state || {}), chainId: "loading", accounts: [] },
     });
     this.connector = connector || null;
@@ -31,8 +31,9 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
   public static getProviderInstance = async (params: {
     connector: IConnector;
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+    skipLookupNetwork: boolean;
   }): Promise<WalletConnectProvider> => {
-    const providerFactory = new WalletConnectProvider({ config: { chainConfig: params.chainConfig } });
+    const providerFactory = new WalletConnectProvider({ config: { chainConfig: params.chainConfig, skipLookupNetwork: params.skipLookupNetwork } });
     await providerFactory.setupProvider(params.connector);
     return providerFactory;
   };
@@ -49,13 +50,27 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     await this.setupEngine(connector);
   }
 
-  public async switchChain({ chainId, lookup = true }: { chainId: string; lookup?: boolean }): Promise<void> {
+  public async switchChain({ chainId, addChain = true, lookup = true }: { chainId: string; addChain?: boolean; lookup?: boolean }): Promise<void> {
     if (!this.connector)
       throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
     this.update({
       chainId: "loading",
     });
+    const { rpcTarget, displayName } = currentChainConfig;
+    if (addChain) {
+      try {
+        await this.connector.sendCustomRequest({
+          method: "wallet_addEthereumChain",
+          params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+        });
+        this.configure({ chainConfig: currentChainConfig });
+      } catch (error) {
+        log.error(error);
+        throw error;
+      }
+    }
+
     try {
       await this.connector.sendCustomRequest({
         method: "wallet_switchEthereumChain",
@@ -74,18 +89,16 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     if (lookup) await this.lookupNetwork(this.connector);
   }
 
-  public async addChain({ chainId }: { chainId: string; lookup?: boolean }): Promise<void> {
-    if (!this.connector)
-      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    const currentChainConfig = this.getChainConfig(chainId);
-    const { rpcTarget, displayName } = currentChainConfig;
+  async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    const { rpcTarget, displayName } = chainConfig;
 
     try {
       await this.connector.sendCustomRequest({
         method: "wallet_addEthereumChain",
-        params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+        params: [{ chainId: chainConfig.chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
       });
-      this.configure({ chainConfig: currentChainConfig });
+      super.addChain(chainConfig);
     } catch (error) {
       log.error(error);
       throw error;
@@ -100,7 +113,6 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     if (chainId !== connectedHexChainId)
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
-    this.update({ chainId: connectedHexChainId });
     this.provider.emit("connect", { chainId });
     this.provider.emit("chainChanged", this.state.chainId);
     return connectedHexChainId;
@@ -118,7 +130,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-    await this.lookupNetwork(connector);
+    if (!this.config.skipLookupNetwork) await this.lookupNetwork(connector);
   }
 
   private async onConnectorStateUpdate(connector: IConnector) {
