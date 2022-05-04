@@ -59,7 +59,9 @@
     "@walletconnect/client": "~1.7.7",
     "@walletconnect/types": "~1.7.7",
     "@web3auth/base": "^0.9.4",
-    "@web3auth/ethereum-provider": "^0.9.4"
+    "@web3auth/ethereum-provider": "^0.9.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   },
   "lint-staged": {
     "!(*d).ts": [

@@ -53,19 +53,9 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     if (!this.connector)
       throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
-    const { rpcTarget, displayName } = currentChainConfig;
     this.update({
       chainId: "loading",
     });
-    try {
-      await this.connector.sendCustomRequest({
-        method: "wallet_addEthereumChain",
-        params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
-      });
-    } catch (error) {
-      log.error(error);
-    }
-
     try {
       await this.connector.sendCustomRequest({
         method: "wallet_switchEthereumChain",
@@ -82,6 +72,24 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
 
     this.configure({ chainConfig: currentChainConfig });
     if (lookup) await this.lookupNetwork(this.connector);
+  }
+
+  public async addChain({ chainId }: { chainId: string; lookup?: boolean }): Promise<void> {
+    if (!this.connector)
+      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
+    const currentChainConfig = this.getChainConfig(chainId);
+    const { rpcTarget, displayName } = currentChainConfig;
+
+    try {
+      await this.connector.sendCustomRequest({
+        method: "wallet_addEthereumChain",
+        params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+      });
+      this.configure({ chainConfig: currentChainConfig });
+    } catch (error) {
+      log.error(error);
+      throw error;
+    }
   }
 
   protected async lookupNetwork(connector: IConnector): Promise<string> {

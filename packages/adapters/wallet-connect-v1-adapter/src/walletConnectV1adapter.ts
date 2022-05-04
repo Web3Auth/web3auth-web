@@ -26,7 +26,7 @@ import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
-
+import { NetworkSwitch } from "./networkSwitch";
 class WalletConnectV1Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
@@ -204,6 +204,9 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     log.debug("connected chainId in hex");
     if (chainId !== parseInt(this.chainConfig.chainId, 16) && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching) {
       try {
+        const networkSwitcher = new NetworkSwitch(this.wcProvider);
+        await networkSwitcher.addNetwork(this.chainConfig.chainId);
+        await networkSwitcher.switchNetwork(`0x${chainId.toString(16)}`, this.chainConfig.chainId);
         log.debug("added events");
         await this.wcProvider.switchChain({ chainId: this.chainConfig.chainId as string, lookup: false });
       } catch (error) {
