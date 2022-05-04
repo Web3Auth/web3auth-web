@@ -4,7 +4,7 @@ import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-// import { NetworkSwitch } from "@web3auth/ui"
+import { NetworkSwitch } from "@web3auth/ui"
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -103,10 +103,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           enableLogging: true
         });
         subscribeAuthEvents(web3AuthInstance);
-        // const networkUi = new NetworkSwitch()
+        const networkUi = new NetworkSwitch()
 
         const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
-        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal }, chainConfig: currentChainConfig,  })
+        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal, networkSwitchModal: networkUi }, chainConfig: currentChainConfig,  })
 
         web3AuthInstance.configureAdapter(adapter);
         web3AuthInstance.configureAdapter(wcAdapter);
