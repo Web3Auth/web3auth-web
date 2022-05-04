@@ -1,8 +1,10 @@
 {
-    "extends": "../../../tsconfig.json",
-    "include": ["src","test"],
+    "extends": "../../tsconfig.json",
+    "include": ["src", "test", "css", "assets"],
     "compilerOptions": {
-        "strict": true,
-    },
-}
+      "jsx": "react-jsx"
+      // "rootDir": ".",
+      // "strict": true
+    }
+  }
   
