@@ -5,6 +5,7 @@
   "dependencies": {
     "@web3auth/base": "^0.9.3",
     "@web3auth/wallet-connect-v1-adapter": "file:../../packages/adapters/wallet-connect-v1-adapter",
+    "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/core": "^0.9.3",
     "@web3auth/solana-provider": "^0.9.3",
     "@web3auth/openlogin-adapter": "^0.9.3",

@@ -1,3 +1,5 @@
+import "../css/web3auth.css";
+
 import type { WalletConnectProvider } from "@web3auth/ethereum-provider";
 import { render } from "react-dom";
 
@@ -28,6 +30,7 @@ class NetworkSwitch {
         return reject(new Error("User cancelled request for adding new network"));
       };
       render(<AddNetwork onAddNetwork={addNetworkCallback} onCancelNetwork={cancelCallback} chainId={chainId} />, createWrapper());
+      return resolve();
     });
   }
 

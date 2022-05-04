@@ -81,6 +81,8 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
 
+    const networkSwitcher = new NetworkSwitch(this.wcProvider);
+    await networkSwitcher.addNetwork(this.chainConfig.chainId);
     if (this.connector.connected) {
       this.rehydrated = true;
       await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
