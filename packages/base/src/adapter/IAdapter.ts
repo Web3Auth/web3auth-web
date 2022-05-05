@@ -222,3 +222,22 @@ export interface IAdapterDataEvent {
   adapterName: string;
   data: unknown;
 }
+
+export interface INetworkSwitchProvider {
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
+  switchChain(chainId: string): Promise<void>;
+}
+export interface INetworkSwitch {
+  addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
+  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: Partial<CustomChainConfig>; appOrigin: string }): Promise<boolean>;
+}
+
+export abstract class BaseNetworkSwitch implements INetworkSwitch {
+  abstract switchNetwork(params: {
+    currentChainConfig: CustomChainConfig;
+    newChainConfig: Partial<CustomChainConfig>;
+    appOrigin: string;
+  }): Promise<boolean>;
+
+  abstract addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
+}

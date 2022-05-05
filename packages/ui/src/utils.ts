@@ -24,3 +24,35 @@ export const getAdapterSocialLogins = (
   }
   return finalLoginMethodsConfig;
 };
+
+export async function validateImageUrl(url: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = url;
+    if (img.complete) {
+      resolve(true);
+    } else {
+      img.addEventListener("load", () => {
+        resolve(true);
+      });
+      img.addEventListener("error", () => {
+        reject();
+      });
+    }
+  });
+}
+
+export async function getNetworkIconId(ticker: string): Promise<string> {
+  const fallbackId = "network-default";
+  if (!ticker) return fallbackId;
+  try {
+    const url = `https://images.web3auth.io/network-${ticker.toLowerCase()}.svg`;
+    const isValid = await validateImageUrl(url);
+    if (isValid) {
+      return `network-${ticker.toLowerCase()}`;
+    }
+    return fallbackId;
+  } catch {
+    return fallbackId;
+  }
+}

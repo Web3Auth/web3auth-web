@@ -4,7 +4,7 @@ import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-
+import { NetworkSwitch } from "@web3auth/ui"
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -21,6 +21,7 @@ export interface IWeb3AuthContext {
   logout: () => Promise<void>;
   getUserInfo: () => Promise<any>;
   signMessage: () => Promise<any>;
+  signV4Message: () => Promise<any>;
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
 }
@@ -35,6 +36,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   logout: async () => {},
   getUserInfo: async () => {},
   signMessage: async () => {},
+  signV4Message: async () => {},
   getAccounts: async () => {},
   getBalance: async () => {},
 });
@@ -95,14 +97,17 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         setIsLoading(true);
-        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = "BLf14uwUA_rcPyy5b8ED1zVcOVZGL0SwwIGTRIOplUQ6Vp4H7QfEDcX4o9qTEeR8uqDyXSrxXLOZ4RVhBSRyb7A";
         const web3AuthInstance = new Web3AuthCore({
-          chainConfig: currentChainConfig
+          chainConfig: currentChainConfig,
+          enableLogging: true
         });
         subscribeAuthEvents(web3AuthInstance);
+        const networkUi = new NetworkSwitch()
 
         const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
-        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal  }, chainConfig: currentChainConfig })
+        const wcAdapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal, networkSwitchModal: networkUi }, chainConfig: currentChainConfig,  })
+
         web3AuthInstance.configureAdapter(adapter);
         web3AuthInstance.configureAdapter(wcAdapter);
 
@@ -196,6 +201,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     provider.signMessage();
   };
+  const signV4Message = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    provider.signV4Message();
+  };
 
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
@@ -216,6 +229,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getAccounts,
     getBalance,
     signMessage,
+    signV4Message,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };
