@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "0.9.4",
+  "version": "0.10.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -60,7 +60,7 @@
   "dependencies": {
     "@toruslabs/openlogin": "^1.7.4",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
-    "@web3auth/base": "^0.9.4",
+    "@web3auth/base": "^0.10.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
