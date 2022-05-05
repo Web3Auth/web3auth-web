@@ -22,7 +22,7 @@ function AddNetwork(props: AddNetworkProps) {
         return setNetworkIconId(id);
       })
       .catch(() => {});
-  }, [chainConfig.chainId]);
+  }, [chainConfig.ticker]);
 
   return (
     showModal && (

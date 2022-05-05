@@ -7,9 +7,11 @@ import { render } from "react-dom";
 import AddNetwork from "./components/AddNetwork";
 import SwitchNetwork from "./components/SwitchNetwork";
 
-function createWrapper(): HTMLElement {
+function createWrapper(id?: string): HTMLElement {
+  const element = document.getElementById(id || "w3a-network-container");
+  if (element) return element;
   const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-network-container");
+  wrapper.setAttribute("id", id || "w3a-network-container");
   document.body.appendChild(wrapper);
   return wrapper;
 }
@@ -18,7 +20,7 @@ export class NetworkSwitch extends BaseNetworkSwitch {
   public async addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean> {
     const { chainConfig, appOrigin } = params;
     return new Promise((resolve, reject) => {
-      const addNetworkCallback = async (): Promise<void> => {
+      const addNetworkCallback = (): void => {
         return resolve(true);
       };
       const cancelCallback = (): void => {
@@ -26,7 +28,7 @@ export class NetworkSwitch extends BaseNetworkSwitch {
       };
       render(
         <AddNetwork appOrigin={appOrigin} chainConfig={chainConfig} onAddNetwork={addNetworkCallback} onCancelNetwork={cancelCallback} />,
-        createWrapper()
+        createWrapper("w3a-add-network-container")
       );
     });
   }
@@ -39,7 +41,7 @@ export class NetworkSwitch extends BaseNetworkSwitch {
     const { currentChainConfig, appOrigin, newChainConfig } = params;
 
     return new Promise((resolve, reject) => {
-      const switchNetworkCallback = async (): Promise<void> => {
+      const switchNetworkCallback = (): void => {
         return resolve(true);
       };
       const cancelCallback = (): void => {
@@ -53,7 +55,7 @@ export class NetworkSwitch extends BaseNetworkSwitch {
           onSwitchNetwork={switchNetworkCallback}
           onCancelNetwork={cancelCallback}
         />,
-        createWrapper()
+        createWrapper("w3a-switch-network-container")
       );
     });
   }

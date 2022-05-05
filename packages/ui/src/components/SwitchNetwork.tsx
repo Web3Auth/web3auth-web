@@ -30,7 +30,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
         return setToNetworkIconId(id);
       })
       .catch(() => {});
-  }, [currentChainConfig.chainId, newChainConfig.chainId]);
+  }, [currentChainConfig.chainId, currentChainConfig.ticker, newChainConfig.chainId, newChainConfig.ticker]);
   return (
     showModal && (
       <div id="w3a-modal">
