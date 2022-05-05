@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BaseAdapterConfig, CustomChainConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
   appLogo: string;
@@ -49,22 +49,3 @@ export interface ModalState {
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string } };
 export type ExternalWalletEventType = { adapter: string };
-
-export interface INetworkSwitchProvider {
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
-  switchChain(chainId: string): Promise<void>;
-}
-export interface INetworkSwitch {
-  addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
-  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: Partial<CustomChainConfig>; appOrigin: string }): Promise<boolean>;
-}
-
-export abstract class BaseNetworkSwitch implements INetworkSwitch {
-  abstract switchNetwork(params: {
-    currentChainConfig: CustomChainConfig;
-    newChainConfig: Partial<CustomChainConfig>;
-    appOrigin: string;
-  }): Promise<boolean>;
-
-  abstract addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
-}
