@@ -38,11 +38,13 @@ export function getProviderHandlers({ connector }: { connector: IConnector }): I
       const result = await connector.signTypedData([msgParams.from, msgParams.data]);
       return result;
     },
-    processTypedMessageV3: async (_: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-      throw ethErrors.rpc.methodNotSupported();
+    processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
+      const result = await connector.signTypedData([msgParams.from, msgParams.data]);
+      return result;
     },
-    processTypedMessageV4: async (_: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-      throw ethErrors.rpc.methodNotSupported();
+    processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
+      const result = await connector.signTypedData([msgParams.from, msgParams.data]);
+      return result;
     },
     processEncryptionPublicKey: async (_: string): Promise<string> => {
       throw ethErrors.rpc.methodNotSupported();

@@ -6,6 +6,8 @@ export interface IWalletProvider {
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
   signMessage: () => Promise<any>;
+  signV4Message: () => Promise<any>;
+
 }
 
 export const getWalletProvider = (chain: string, provider: SafeEventEmitterProvider, uiConsole: any): IWalletProvider => {

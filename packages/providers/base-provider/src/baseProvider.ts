@@ -11,6 +11,7 @@ export interface BaseProviderState extends BaseState {
 export interface BaseProviderConfig extends BaseConfig {
   chainConfig: Partial<CustomChainConfig>;
   networks?: Record<string, CustomChainConfig>;
+  skipLookupNetwork?: boolean;
 }
 
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
