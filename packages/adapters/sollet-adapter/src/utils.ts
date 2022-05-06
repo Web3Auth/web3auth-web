@@ -5,7 +5,7 @@ export interface SolletProvider {
 export function poll(callback: () => boolean | Promise<boolean>, interval: number, count: number): Promise<boolean> {
   return new Promise((resolve, reject) => {
     if (count > 0) {
-      setTimeout(async () => {
+      window.setTimeout(async () => {
         const done = await callback();
         if (done) resolve(done);
         if (!done)
