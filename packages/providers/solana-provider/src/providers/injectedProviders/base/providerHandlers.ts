@@ -3,10 +3,10 @@ import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { IPhantomWalletProvider } from "../../../interface";
+import { IBaseWalletProvider } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
 
-export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IProviderHandlers => {
+export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {
     requestAccounts: async () => {
       return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
@@ -20,21 +20,11 @@ export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IP
     },
     signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       const transaction = await injectedProvider.signTransaction(req.params.message);
-
       return transaction;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      const message = await injectedProvider.request<Uint8Array>({
-        method: "signMessage",
-        params: {
-          message: req.params?.message,
-        },
-      });
+      const message = await injectedProvider.signMessage(req.params.message);
       return message;
-    },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
-      const txRes = await injectedProvider.signAndSendTransaction(req.params.message);
-      return { signature: txRes.signature };
     },
     signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
@@ -42,6 +32,10 @@ export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IP
       }
       const transaction = await injectedProvider.signAllTransactions(req.params.message);
       return transaction;
+    },
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
+      const txRes = await injectedProvider.signAndSendTransaction(req.params.message);
+      return { signature: txRes.signature };
     },
   };
   return providerHandlers;
