@@ -129,16 +129,16 @@ export default Vue.extend({
             clientId: config.clientId,
           },
         });
-        const solletAdapter = new SolletWebAdapter();
-        const solletExtensionAdapter = new SolletExtensionAdapter();
-        this.web3auth.configureAdapter(solletAdapter);
-        this.web3auth.configureAdapter(solletExtensionAdapter);
         const slopeAdapter = new SlopeAdapter();
         const solflareAdapter = new SolflareAdapter();
         const solAdapter = new SolanaWalletAdapter({ initParams: { buildEnv: "testing" } });
-        this.web3auth.configureAdapter(solflareAdapter);
+        const solletAdapter = new SolletWebAdapter();
+        const solletExtensionAdapter = new SolletExtensionAdapter();
         this.web3auth.configureAdapter(solAdapter);
+        this.web3auth.configureAdapter(solflareAdapter);
         this.web3auth.configureAdapter(slopeAdapter);
+        this.web3auth.configureAdapter(solletAdapter);
+        this.web3auth.configureAdapter(solletExtensionAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new SolanaWalletConnectorPlugin({
