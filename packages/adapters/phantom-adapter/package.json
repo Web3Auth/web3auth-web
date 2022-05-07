@@ -17,7 +17,7 @@
   "jsdelivr": "dist/phantomAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/phantomWalletAdapter#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/phantom-adapter/README.md",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",

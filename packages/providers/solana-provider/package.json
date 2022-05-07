@@ -34,6 +34,7 @@
     "@types/bn.js": "^5.1.0",
     "@types/bs58": "^4.0.1",
     "@types/json-rpc-random-id": "^1.0.1",
+    "@solflare-wallet/sdk": "^1.0.11",
     "@types/node": "^16",
     "lint-staged": "^12.4.0",
     "@project-serum/sol-wallet-adapter": "^0.2.6"

@@ -9,6 +9,8 @@ export const SOLANA_ADAPTERS = {
   PHANTOM: "phantom",
   SOLLET: "sollet",
   SOLLET_EXTENSION: "sollet-extension",
+  SOLFLARE: "solflare",
+  SLOPE: "slope",
   ...MULTI_CHAIN_ADAPTERS,
 };
 

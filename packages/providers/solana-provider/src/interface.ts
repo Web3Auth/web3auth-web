@@ -23,3 +23,28 @@ export interface IPhantomWalletProvider extends SafeEventEmitter {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
 }
+
+export interface ISlopeProvider extends SafeEventEmitter {
+  connect(): Promise<{
+    msg: string;
+    data: {
+      publicKey?: string;
+    };
+  }>;
+  disconnect(): Promise<{ msg: string }>;
+  signTransaction(message: string): Promise<{
+    msg: string;
+    data: {
+      publicKey?: string;
+      signature?: string;
+    };
+  }>;
+  signAllTransactions(messages: string[]): Promise<{
+    msg: string;
+    data: {
+      publicKey?: string;
+      signatures?: string[];
+    };
+  }>;
+  signMessage(message: Uint8Array): Promise<{ data: { signature: string } }>;
+}

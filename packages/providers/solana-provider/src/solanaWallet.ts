@@ -1,6 +1,5 @@
-import type { Transaction } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 import { RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
-import bs58 from "bs58";
 
 import { ISolanaWallet } from "./interface";
 
@@ -23,7 +22,7 @@ export class SolanaWallet implements ISolanaWallet {
     const { signature } = await this.provider.request<{ signature: string }>({
       method: "signAndSendTransaction",
       params: {
-        message: bs58.encode(transaction.serialize({ requireAllSignatures: false })),
+        message: transaction,
       },
     });
     return { signature };
@@ -33,23 +32,20 @@ export class SolanaWallet implements ISolanaWallet {
     const signedTransaction = (await this.provider.request({
       method: "signTransaction",
       params: {
-        message: bs58.encode(transaction.serialize({ requireAllSignatures: false })),
+        message: transaction,
       },
     })) as Transaction;
     return signedTransaction;
   }
 
   public async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
-    const messages = transactions.map((transaction) => {
-      return bs58.encode(transaction.serialize({ requireAllSignatures: false }));
-    });
-    const signedTransaction = (await this.provider.request({
+    const signedTransactions = (await this.provider.request({
       method: "signAllTransactions",
       params: {
-        message: messages,
+        message: transactions,
       },
     })) as Transaction[];
-    return signedTransaction;
+    return signedTransactions;
   }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {

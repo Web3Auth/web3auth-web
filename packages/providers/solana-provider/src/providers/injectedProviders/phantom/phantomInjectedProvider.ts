@@ -22,6 +22,7 @@ export class PhantomInjectedProvider extends BaseProvider<BaseProviderConfig, Ba
     const providerHandlers = getPhantomHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
+
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
     const engine = new JRPCEngine();
     engine.push(solanaMiddleware);

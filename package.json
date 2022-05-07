@@ -23,7 +23,7 @@
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.13.0",
-    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-import": "~2.25.3",
     "eslint-plugin-mocha": "^10.0.4",
     "eslint-plugin-n": "^15.1.0",
     "eslint-plugin-node": "^11.1.0",

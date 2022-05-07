@@ -18,10 +18,9 @@ export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IP
     getSecretKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
-      const message = bs58.decode(req.params.message);
-      const txn = Transaction.from(message);
-      const transaction = await injectedProvider.signTransaction(txn);
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
+      const transaction = await injectedProvider.signTransaction(req.params.message);
+
       return transaction;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
@@ -33,21 +32,15 @@ export const getPhantomHandlers = (injectedProvider: IPhantomWalletProvider): IP
       });
       return message;
     },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
-      const message = bs58.decode(req.params.message);
-      const txn = Transaction.from(message);
-      const txRes = await injectedProvider.signAndSendTransaction(txn);
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
+      const txRes = await injectedProvider.signAndSendTransaction(req.params.message);
       return { signature: txRes.signature };
     },
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const txns = req.params.message.map((msg) => {
-        const decodedMsg = bs58.decode(msg);
-        return Transaction.from(decodedMsg);
-      });
-      const transaction = await injectedProvider.signAllTransactions(txns);
+      const transaction = await injectedProvider.signAllTransactions(req.params.message);
       return transaction;
     },
   };
