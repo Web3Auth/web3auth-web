@@ -63,7 +63,7 @@ export const getTorusHandlers = (injectedProvider: InjectedProvider): IProviderH
       const txMessage = req.params.message;
       const response = await injectedProvider.request<string>({
         method: "send_transaction",
-        params: { message: txMessage, messageOnly: true },
+        params: { message: txMessage.serialize({ requireAllSignatures: false }).toString("hex") },
       });
       return { signature: response };
     },
