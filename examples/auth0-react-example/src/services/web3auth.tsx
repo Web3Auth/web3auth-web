@@ -64,8 +64,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   const setWalletProvider = useCallback(
     (web3authProvider: SafeEventEmitterProvider) => {
-      const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
-      setProvider(walletProvider);
+      const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole); 
+      setTimeout(function(){
+        setProvider(walletProvider);
+      }.bind(this),1000); 
     },
     [chain]
   );
@@ -132,7 +134,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   const login = async (adapter: WALLET_ADAPTER_TYPE, loginProvider: LOGIN_PROVIDER_TYPE) => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       if (!web3Auth) {
         console.log("web3auth not initialized yet");
         uiConsole("web3auth not initialized yet");
@@ -150,7 +152,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     } catch (error) {
       console.log("error", error);
     } finally {
-      setIsLoading(false)
+      // setIsLoading(false)
+      
     }
   };
 
