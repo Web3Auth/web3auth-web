@@ -101,7 +101,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       try {
         setIsLoading(true);
         // get your client id from https://dashboard.web3auth.io by registering a plug and play application.
-        const clientId = process.env.REACT_APP_CLIENT_ID ||  "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = "BO_dM1tCUmSJxl4IXUlaN4Fvnjc6DBrfr55aontGwSi4RZPrN09hl0hWw1GN3zzfyd077eIsvNLsP8NgSzNmx6I";
 
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
