@@ -38,8 +38,12 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
       uiConsole("error", error);
     }
   };
-
-  return { getAccounts, getBalance, signMessage };
+  const signV4Message = async () => {
+    
+    uiConsole("error, method not supported ");
+  
+};
+  return { getAccounts, getBalance, signMessage, signV4Message };
 };
 
 export default solanaProvider;
