@@ -1,7 +1,6 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
-import { getV4TypedData } from "./data";
 
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
@@ -51,32 +50,33 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
     }
   };
 
-  const signV4Message = async () => {
+  const signAndSendTransaction = async () => {
     try {
-      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
       const web3 = new Web3(provider as any);
-      const chainId = await web3.eth.getChainId()
-      const typedData = getV4TypedData(chainId.toString());
-      (web3.currentProvider as any)?.send(
-        {
-          method: "eth_signTypedData_v4",
-          params: [pubKey[0], JSON.stringify(typedData)],
-          from: pubKey[0],
-        },
-        (err: Error, result: any) => {
-          if (err) {
-            return uiConsole(err);
-          }
-          uiConsole("Eth sign message => true", result);
-        }
-      );
+      const accounts = await web3.eth.getAccounts();
+      console.log("pubKey", accounts);
+      const txRes = await web3.eth.sendTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+      uiConsole("txRes", txRes);
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
     }
   };
-
-  return { getAccounts, getBalance, signMessage, signV4Message };
+  
+  const signTransaction = async () => {
+    try {
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      console.log("pubKey", accounts);
+      // only supported with social logins (openlogin adapter)
+      const txRes = await web3.eth.signTransaction({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.01") });
+      uiConsole("txRes", txRes);
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
+  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction };
 };
 
 export default ethProvider;
