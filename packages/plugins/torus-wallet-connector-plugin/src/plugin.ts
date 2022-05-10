@@ -59,6 +59,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
     const network = {
       ...web3auth.coreOptions.chainConfig,
+      networkName: connectedChainConfig.displayName,
       host: connectedChainConfig.rpcTarget,
       chainId: parseInt(connectedChainConfig.chainId, 16),
     };
