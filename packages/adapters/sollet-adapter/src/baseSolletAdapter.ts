@@ -129,7 +129,7 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
             });
             if (typeof this._provider === "string") {
               let count = 0;
-              setInterval(() => {
+              window.setInterval(() => {
                 const popup = (wallet as any)._popup;
                 if (popup) {
                   if (popup.closed) reject(WalletLoginError.connectionError("close error"));
@@ -137,7 +137,7 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
                 count++;
               }, 100);
             } else {
-              setTimeout(() => reject(WalletLoginError.connectionError("timeout error")), 10000);
+              window.setTimeout(() => reject(WalletLoginError.connectionError("timeout error")), 10000);
             }
           });
         } catch (error: unknown) {
