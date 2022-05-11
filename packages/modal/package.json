@@ -35,7 +35,8 @@
     "@types/node": "^16",
     "css-loader": "^6.7.1",
     "lint-staged": "^12.4.1",
-    "style-loader": "^3.3.1"
+    "style-loader": "^3.3.1",
+    "url-loader": "^4.1.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
