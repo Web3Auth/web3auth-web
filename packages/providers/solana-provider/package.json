@@ -12,15 +12,15 @@
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@solana/web3.js": "^1.37.1",
-    "@toruslabs/base-controllers": "^1.6.17",
+    "@solana/web3.js": "^1.41.4",
+    "@toruslabs/base-controllers": "^1.6.18",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^0.11.0-alpha.0",
@@ -32,12 +32,12 @@
   },
   "devDependencies": {
     "@project-serum/sol-wallet-adapter": "^0.2.6",
-    "@solflare-wallet/sdk": "^1.0.11",
+    "@solflare-wallet/sdk": "^1.0.12",
     "@types/bn.js": "^5.1.0",
     "@types/bs58": "^4.0.1",
     "@types/json-rpc-random-id": "^1.0.1",
     "@types/node": "^16",
-    "lint-staged": "^12.4.0"
+    "lint-staged": "^12.4.1"
   },
   "files": [
     "dist",

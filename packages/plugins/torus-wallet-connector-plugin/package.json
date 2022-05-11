@@ -21,8 +21,8 @@
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd ."
@@ -33,10 +33,10 @@
   ],
   "devDependencies": {
     "eth-rpc-errors": "^4.0.3",
-    "lint-staged": "^12.4.0"
+    "lint-staged": "^12.4.1"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.22.2",
+    "@toruslabs/torus-embed": "^1.22.6",
     "@web3auth/base": "^0.11.0-alpha.0",
     "@web3auth/base-plugin": "^0.11.0-alpha.0",
     "@web3auth/core": "^0.11.0-alpha.0",

@@ -21,7 +21,7 @@ const config = generateWebpackConfig({
       },
       {
         test: /\.svg$/,
-        use: ["@svgr/webpack", "url-loader"],
+        use: ["@svgr/webpack"],
       },
     ],
   },
