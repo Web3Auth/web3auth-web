@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "0.9.4",
+  "version": "0.10.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
@@ -19,15 +19,15 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "2.6.3",
+    "@ethereumjs/common": "^2.6.3",
     "@ethereumjs/tx": "^3.5.1",
     "@metamask/eth-sig-util": "^4.0.0",
     "@toruslabs/base-controllers": "^1.6.17",
     "@toruslabs/http-helpers": "^2.2.0",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@walletconnect/types": "~1.7.7",
-    "@web3auth/base": "^0.9.4",
-    "@web3auth/base-provider": "^0.9.4",
+    "@web3auth/base": "^0.10.0",
+    "@web3auth/base-provider": "^0.10.0",
     "bignumber.js": "^9.0.2",
     "eth-rpc-errors": "^4.0.3",
     "ethereumjs-util": "^7.1.4"
