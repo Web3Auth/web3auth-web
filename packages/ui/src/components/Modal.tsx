@@ -148,11 +148,17 @@ export default function Modal(props: ModalProps) {
   const areSocialLoginsVisible = useMemo(() => {
     if (modalState.showExternalWalletsOnly) return false;
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
-    const isAnySocialLoginVisible = Object.values(modalState.socialLoginsConfig?.loginMethods || {}).some((x) => x.showOnModal !== false);
+    const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
+      ([k, v]) => k !== LOGIN_PROVIDER.EMAIL_PASSWORDLESS && v.showOnModal !== false
+    );
     if (isAnySocialLoginVisible) return true;
     return false;
   }, [modalState.showExternalWalletsOnly, modalState.socialLoginsConfig?.loginMethods]);
   log.info("modal state", modalState, areSocialLoginsVisible);
+
+  const isEmailPassworedlessLoginVisible = useMemo(() => {
+    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
+  }, [modalState.socialLoginsConfig?.loginMethods]);
 
   const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   return (
@@ -176,14 +182,16 @@ export default function Modal(props: ModalProps) {
             </div>
           ) : (
             <div className="w3a-modal__content w3ajs-content">
-              {areSocialLoginsVisible && !modalState.externalWalletsVisibility ? (
+              {(areSocialLoginsVisible || isEmailPassworedlessLoginVisible) && !modalState.externalWalletsVisibility ? (
                 <>
-                  <SocialLogins
-                    handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                    socialLoginsConfig={modalState.socialLoginsConfig}
-                  />
+                  {areSocialLoginsVisible ? (
+                    <SocialLogins
+                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                      socialLoginsConfig={modalState.socialLoginsConfig}
+                    />
+                  ) : null}
 
-                  {modalState.socialLoginsConfig.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS].showOnModal && (
+                  {isEmailPassworedlessLoginVisible && (
                     <SocialLoginEmail
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
