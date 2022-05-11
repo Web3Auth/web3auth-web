@@ -1,7 +1,6 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
-
 const getConnection = async (provider: SafeEventEmitterProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
@@ -77,7 +76,10 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
     });
     const transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
     const signedTx = await solWeb3.signTransaction(transaction);
+
+    // const res = await conn.sendRawTransaction(signedTx.serialize());
     uiConsole("signature", signedTx);
+    return { signature: signedTx };
   } catch (error) {
     console.error("Error", error);
     uiConsole("error", error);

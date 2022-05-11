@@ -22,8 +22,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { InjectedProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
+import { ITorusWalletProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 
 export interface SolanaWalletOptions {
   adapterSettings?: TorusCtorArgs;
@@ -31,7 +30,6 @@ export interface SolanaWalletOptions {
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
 }
-type ProviderFactory = BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider>;
 
 export class SolanaWalletAdapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
@@ -52,7 +50,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private loginSettings?: TorusLoginParams = {};
 
-  private solanaProvider: ProviderFactory | null = null;
+  private solanaProvider: TorusInjectedProvider | null = null;
 
   private rehydrated = false;
 
@@ -118,7 +116,12 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     try {
       await this.torusInstance.login(this.loginSettings);
       try {
-        await this.solanaProvider.setupProvider(this.torusInstance.provider as InjectedProvider);
+        const torusInpageProvider = this.torusInstance.provider as unknown as ITorusWalletProvider;
+        torusInpageProvider.sendTransaction = this.torusInstance.sendTransaction.bind(this.torusInstance);
+        torusInpageProvider.signAllTransactions = this.torusInstance.signAllTransactions.bind(this.torusInstance);
+        torusInpageProvider.signMessage = this.torusInstance.signMessage.bind(this.torusInstance);
+        torusInpageProvider.signTransaction = this.torusInstance.signTransaction.bind(this.torusInstance);
+        await this.solanaProvider.setupProvider(torusInpageProvider);
       } catch (error: unknown) {
         // some issue in solana wallet, always connecting to mainnet on init.
         // fallback to change network if not connected to correct one on login.

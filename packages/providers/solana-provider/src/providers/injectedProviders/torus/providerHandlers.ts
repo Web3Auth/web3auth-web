@@ -1,12 +1,11 @@
 import { Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
+import { ITorusWalletProvider } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
-import { InjectedProvider } from "../interface";
 
-export const getTorusHandlers = (injectedProvider: InjectedProvider): IProviderHandlers => {
+export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {
     requestAccounts: async () => {
       const accounts = await injectedProvider.request<string[]>({
@@ -31,56 +30,37 @@ export const getTorusHandlers = (injectedProvider: InjectedProvider): IProviderH
       throw ethErrors.rpc.methodNotSupported();
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      const message = await injectedProvider.request<Uint8Array>({
-        method: "sign_message",
-        params: {
-          data: req.params?.message,
-        },
-      });
+      if (!req.params?.message) {
+        throw ethErrors.rpc.invalidParams("message");
+      }
+      const message = await injectedProvider.signMessage(req.params.message);
       return message;
     },
 
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<Transaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const message = bs58.decode(req.params.message).toString("hex");
-      const response = await injectedProvider.request<string>({
-        method: "sign_transaction",
-        params: { message },
-      });
-
-      const buf = Buffer.from(response, "hex");
-      const sendTx = Transaction.from(buf);
-      return sendTx;
+      const txMessage = req.params.message;
+      const response = await injectedProvider.signTransaction(txMessage);
+      return response;
     },
 
-    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const message = bs58.decode(req.params.message).toString("hex");
-
-      const response = await injectedProvider.request<string>({
-        method: "send_transaction",
-        params: { message },
-      });
+      const txMessage = req.params.message;
+      const response = await injectedProvider.sendTransaction(txMessage);
       return { signature: response };
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
-      const messages: string[] = [];
-      for (const transaction of req.params.message) {
-        const message = bs58.decode(transaction).toString("hex");
-        messages.push(message);
-      }
-      const response = await injectedProvider.request<Transaction[]>({
-        method: "sign_all_transactions",
-        params: { message: messages },
-      });
+      const transactions = req.params.message;
+      const response = await injectedProvider.signAllTransactions(transactions);
       return response;
     },
   };

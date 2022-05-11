@@ -5,10 +5,10 @@ export interface IProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
+  signTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<Transaction>;
+  signAllTransactions: (req: JRPCRequest<{ message: Transaction[] }>) => Promise<Transaction[]>;
+  signAndSendTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<{ signature: string }>;
   getSecretKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signTransaction: (req: JRPCRequest<{ message: string }>) => Promise<Transaction>;
-  signAllTransactions: (req: JRPCRequest<{ message: string[] }>) => Promise<Transaction[]>;
-  signAndSendTransaction: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
   signMessage: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
 }
 
@@ -66,9 +66,9 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
   return mergeMiddleware([
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ message: string }, Transaction>("signTransaction", signTransaction),
-    createGenericJRPCMiddleware<{ message: string }, { signature: string }>("signAndSendTransaction", signAndSendTransaction),
-    createGenericJRPCMiddleware<{ message: string[] }, Transaction[]>("signAllTransactions", signAllTransactions),
+    createGenericJRPCMiddleware<{ message: Transaction }, Transaction>("signTransaction", signTransaction),
+    createGenericJRPCMiddleware<{ message: Transaction }, { signature: string }>("signAndSendTransaction", signAndSendTransaction),
+    createGenericJRPCMiddleware<{ message: Transaction[] }, Transaction[]>("signAllTransactions", signAllTransactions),
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey),
     createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey),
