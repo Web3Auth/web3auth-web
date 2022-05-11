@@ -29,11 +29,7 @@ export interface IBaseWalletProvider {
   signMessage?(message: Uint8Array): Promise<Uint8Array>;
   signTransaction?(transaction: Transaction): Promise<Transaction>;
   signAllTransactions?(transactions: Transaction[]): Promise<Transaction[]>;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
   signAndSendTransaction?(transaction: Transaction): Promise<{ signature: string }>;
-  request?<T>(args: RequestArguments): Promise<T>;
-  _handleDisconnect?(...args: unknown[]): void;
 }
 
 export interface ISlopeProvider extends SafeEventEmitter {
