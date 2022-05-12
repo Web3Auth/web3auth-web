@@ -323,7 +323,7 @@
 
 #w3a-modal li.w3a-adapter-item {
   list-style: none;
-  /* margin-bottom: 30px; */
+  margin-bottom: 30px;
 }
 
 #w3a-modal .w3a-adapter-item--hide {

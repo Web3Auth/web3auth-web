@@ -6,7 +6,7 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   adapters: {
     [SOLANA_ADAPTERS.TORUS_SOLANA]: {
-      label: "Torus Solana Wallet",
+      label: "Torus Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
