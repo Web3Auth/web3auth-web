@@ -1,5 +1,5 @@
 import { IWalletConnectExtensionAdapter } from "@web3auth/base";
-import bowser, { OS_MAP, PLATFORMS_MAP } from "bowser";
+import bowser from "bowser";
 import { memo, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 
@@ -47,7 +47,7 @@ function formatMobileRegistryEntry(
     logo: entry.logo || "",
     universalLink,
     deepLink,
-    href: os === OS_MAP.iOS ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri,
+    href: os === bowser.OS_MAP.iOS ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri,
   };
 }
 
@@ -72,7 +72,7 @@ function WalletConnect(props: WalletConnectProps) {
   }, [window.navigator.userAgent]);
 
   useEffect(() => {
-    if (deviceDetails.platform === PLATFORMS_MAP.mobile) {
+    if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile) {
       const mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform);
       setLinks(mobileLinks);
     }
@@ -83,11 +83,11 @@ function WalletConnect(props: WalletConnectProps) {
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
       <div
         className={`w3ajs-wallet-connect__container w3a-wallet-connect__container${
-          deviceDetails.os === OS_MAP.Android ? " w3a-wallet-connect__container--android" : ""
+          deviceDetails.os === bowser.OS_MAP.Android ? " w3a-wallet-connect__container--android" : ""
         }`}
       >
         <div className="w3a-wallet-connect__logo">{walletConnectIcon}</div>
-        {deviceDetails.platform === PLATFORMS_MAP.desktop ? (
+        {deviceDetails.platform === bowser.PLATFORMS_MAP.desktop ? (
           <div className="w3a-wallet-connect__container-desktop">
             <div>Scan QR code with a WalletConnect-compatible wallet</div>
             <div className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr">
@@ -97,7 +97,7 @@ function WalletConnect(props: WalletConnectProps) {
         ) : (
           <div className="w3a-wallet-connect__container-btn-group">
             {links.map((link) => {
-              return deviceDetails.os === OS_MAP.iOS ? (
+              return deviceDetails.os === bowser.OS_MAP.iOS ? (
                 <div className="w3a-wallet-connect__container-ios">
                   <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
                     <button type="button" className="w3a-button w3a-button--icon">

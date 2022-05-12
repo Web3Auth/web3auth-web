@@ -2,6 +2,8 @@ import type { Transaction } from "@solana/web3.js";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { RequestArguments } from "@web3auth/base";
 
+import { InjectedProvider } from "./providers";
+
 export interface ISolanaWallet {
   publicKey?: { toBytes(): Uint8Array };
   signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }>;
@@ -29,11 +31,7 @@ export interface IBaseWalletProvider {
   signMessage?(message: Uint8Array): Promise<Uint8Array>;
   signTransaction?(transaction: Transaction): Promise<Transaction>;
   signAllTransactions?(transactions: Transaction[]): Promise<Transaction[]>;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
   signAndSendTransaction?(transaction: Transaction): Promise<{ signature: string }>;
-  request?<T>(args: RequestArguments): Promise<T>;
-  _handleDisconnect?(...args: unknown[]): void;
 }
 
 export interface ISlopeProvider extends SafeEventEmitter {
@@ -59,4 +57,11 @@ export interface ISlopeProvider extends SafeEventEmitter {
     };
   }>;
   signMessage(message: Uint8Array): Promise<{ data: { signature: string } }>;
+}
+
+export interface ITorusWalletProvider extends InjectedProvider {
+  sendTransaction(transaction: Transaction): Promise<string>;
+  signTransaction(transaction: Transaction): Promise<Transaction>;
+  signAllTransactions(transactions: Transaction[]): Promise<Transaction[]>;
+  signMessage(data: Uint8Array): Promise<Uint8Array>;
 }
