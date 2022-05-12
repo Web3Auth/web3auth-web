@@ -13,7 +13,7 @@ function getNewTx(publicKeys, blockhash) {
   const inst = SystemProgram.transfer({
     fromPubkey: new PublicKey(publicKeys[0]),
     toPubkey: new PublicKey(publicKeys[0]),
-    lamports: 0.1 * Math.random() * LAMPORTS_PER_SOL,
+    lamports: 0.1 * LAMPORTS_PER_SOL,
   });
   return new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(publicKeys![0]) }).add(inst);
 }

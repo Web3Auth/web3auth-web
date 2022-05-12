@@ -78,6 +78,7 @@ export class SlopeAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.SLOPE);
 
     try {
+      log.debug("initializing slope adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();

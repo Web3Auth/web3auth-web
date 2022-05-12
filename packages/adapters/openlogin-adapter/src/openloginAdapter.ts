@@ -105,6 +105,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       replaceUrlOnRedirect: isRedirectResult,
     };
     this.openloginInstance = new OpenLogin(this.openloginOptions);
+    log.debug("initializing openlogin adapter init");
 
     await this.openloginInstance.init();
 
@@ -112,6 +113,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN);
 
     try {
+      log.debug("initializing openlogin adapter");
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
       if (this.openloginInstance.privKey && (options.autoConnect || isRedirectResult)) {
         await this.connect();

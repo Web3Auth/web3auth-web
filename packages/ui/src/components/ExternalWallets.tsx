@@ -21,7 +21,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    log.debug("loaded external wallets", config);
+    log.debug("loaded external wallets", config, walletConnectUri);
     const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });

@@ -21,8 +21,8 @@
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd .",
@@ -37,28 +37,28 @@
   },
   "devDependencies": {
     "@svgr/rollup": "^6.2.1",
-    "@svgr/webpack": "^5.5.0",
-    "@toruslabs/eslint-config-react": "^0.4.1",
+    "@svgr/webpack": "^6.2.1",
+    "@toruslabs/eslint-config-react": "^1.0.0",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.merge": "^4.6.7",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
-    "css-loader": "^5.2.7",
+    "css-loader": "^6.7.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-hooks": "^4.4.0",
+    "eslint-plugin-react-hooks": "^4.5.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "lint-staged": "^12.4.0",
-    "live-server": "^1.2.1",
-    "postcss": "^8.4.12",
+    "lint-staged": "^12.4.1",
+    "live-server": "^1.2.2",
+    "postcss": "^8.4.13",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-url": "^3.0.1",
-    "style-loader": "^2.0.0",
+    "style-loader": "^3.3.1",
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.7.4",
+    "@toruslabs/openlogin": "^1.7.5",
     "@toruslabs/openlogin-jrpc": "^1.7.3",
     "@web3auth/base": "^0.11.0-alpha.0",
     "bowser": "^2.11.0",
@@ -67,7 +67,7 @@
     "lodash.merge": "^4.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-qr-code": "^2.0.5"
+    "react-qr-code": "^2.0.7"
   },
   "lint-staged": {
     "!(*d).ts": [

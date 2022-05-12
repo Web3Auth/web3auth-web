@@ -21,8 +21,8 @@
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd ."
@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "lint-staged": "^12.4.0"
+    "lint-staged": "^12.4.1"
   },
   "dependencies": {
     "@toruslabs/solana-embed": "^0.1.6",

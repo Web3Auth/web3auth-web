@@ -45,10 +45,10 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/openlogin@^1.7.4":
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.7.4.tgz#64f3a0b9ca0e2db16e2501235d9123d116b6335c"
-  integrity sha512-o0+c8huljUAXNW+jWNSnngoggHQsYXwjW8Eu9Bvtr5AQudNXXqT7uvZ2RGvgcXbcMcnuO2TR6+P+HytXlwmKDA==
+"@toruslabs/openlogin@^1.7.5":
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-1.7.5.tgz#59e05c8e0bf7bfbab7c459d7fd4a28ba36f84c5d"
+  integrity sha512-QKAf829LSjKiAUfuqQALY+SCP8oPlKsGiNwO9wj1lJHeLQLfPnXh2wtfjBwMS2WSo7G+ZPpe2dU59B9LGiylmQ==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
     "@toruslabs/http-helpers" "^2.2.0"
@@ -59,9 +59,9 @@
     pump "^3.0.0"
 
 "@types/node@^16":
-  version "16.11.33"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.33.tgz#566713b1b626f781c5c58fe3531307283e00720c"
-  integrity sha512-0PJ0vg+JyU0MIan58IOIFRtSvsb7Ri+7Wltx2qAg94eMOrpg4+uuP3aUHCpxXc1i0jCXiC+zIamSZh3l9AbcQA==
+  version "16.11.34"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.34.tgz#520224e4be4448c279ecad09639ab460cc441a50"
+  integrity sha512-UrWGDyLAlQ2Z8bNOGWTsqbP9ZcBeTYBVuTRNxXTztBy5KhWUFI3BaeDWoCP/CzV/EVGgO1NTYzv9ZytBI9GAEw==
 
 acorn@^8.4.1:
   version "8.7.1"
@@ -446,7 +446,7 @@ lilconfig@2.0.4:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.4.tgz#f4507d043d7058b380b6a8f5cb7bcd4b34cee082"
   integrity sha512-bfTIN7lEsiooCocSISTWXkiWJkRqtL9wYtYy+8EK3Y41qh3mpwPU0ycTOgjdY9ErwXCc8QyrQp82bdL0Xkm9yA==
 
-lint-staged@^12.4.0:
+lint-staged@^12.4.1:
   version "12.4.1"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-12.4.1.tgz#63fa27bfc8a33515f6902f63f6670864f1fb233c"
   integrity sha512-PTXgzpflrQ+pODQTG116QNB+Q6uUTDg5B5HqGvNhoQSGt8Qy+MA/6zSnR8n38+sxP5TapzeQGTvoKni0KRS8Vg==

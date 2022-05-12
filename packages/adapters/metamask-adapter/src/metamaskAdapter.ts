@@ -14,6 +14,7 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   getChainConfig,
+  log,
   SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
@@ -68,6 +69,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.METAMASK);
     try {
+      log.debug("initializing metamask adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();

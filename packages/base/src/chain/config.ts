@@ -15,7 +15,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
     return {
       chainNamespace,
       chainId: "0x1",
-      rpcTarget: `https://mainnet.infura.io/v3/${DEFAULT_INFURA_ID}`,
+      rpcTarget: `https://broken-blue-forest.quiknode.pro/60023510ffcb97e58b168c479c0a48bcf2f84729`,
       displayName: "Ethereum Mainnet",
       blockExplorer: "https://etherscan.io/",
       ticker: "ETH",

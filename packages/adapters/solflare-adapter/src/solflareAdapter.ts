@@ -74,6 +74,7 @@ export class SolflareAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.SOLFLARE);
 
     try {
+      log.debug("initializing solflare adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();

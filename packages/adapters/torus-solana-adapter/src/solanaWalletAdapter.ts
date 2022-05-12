@@ -86,6 +86,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
       network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
     }
     this.torusInstance = new Torus(this.torusWalletOptions);
+    log.debug("initializing torus solana adapter init");
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
 
     this.solanaProvider = new TorusInjectedProvider({
@@ -97,6 +98,7 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_SOLANA);
 
     try {
+      log.debug("initializing torus solana adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();
