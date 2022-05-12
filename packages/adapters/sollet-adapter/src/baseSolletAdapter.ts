@@ -81,6 +81,7 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, this.name);
 
     try {
+      log.debug("initializing sollet adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();

@@ -77,6 +77,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.PHANTOM);
 
     try {
+      log.debug("initializing phantom adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();

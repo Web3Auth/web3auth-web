@@ -83,6 +83,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       network = { chainId: parseInt(chainId as string, 16), host: rpcTarget, blockExplorer, networkName: displayName };
     }
     this.torusInstance = new Torus(this.torusWalletOptions);
+    log.debug("initializing torus evm adapter init");
     await this.torusInstance.init({
       showTorusButton: false,
       ...this.initParams,
@@ -92,6 +93,7 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.TORUS_EVM);
 
     try {
+      log.debug("initializing torus evm adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();
