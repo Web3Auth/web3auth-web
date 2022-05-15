@@ -67,7 +67,7 @@ Your JWK endpoint endpoint for aws cognito will look like this - `https://cognit
 
 Enter JWT validation fields:-
 
-`iss`: It shoudl be `https://cognito-idp.{region}.amazonaws.com/{userPoolId}`, replace `region` and `userPoolId  that we noted earlier while creating cognito user pool.
+`iss`: It shoudl be `https://cognito-idp.{region}.amazonaws.com/{userPoolId}`, replace `region` and `userPoolId  that we noted earlier while creating cognito user pool.`
 
 `aud`: It should be your client id that your noted earlier while creating app client in aws cognito console.
 
