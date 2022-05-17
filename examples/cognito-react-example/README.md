@@ -18,7 +18,7 @@ You can take inspiration from [here](https://docs.tor.us/guides/customAuth-aws-c
 
 - Note down the `clientId` for this app client.
 
-- Add a domain to your app's hosted ui in from `App integration's domain name section`
+- Add a domain to your app's hosted ui from `App integration's domain name section`
 
 - Update app client settings for the new app client under `App client settings` tab to set desired oauth flows and redirect endpoints.
 
@@ -27,15 +27,13 @@ You can take inspiration from [here](https://docs.tor.us/guides/customAuth-aws-c
 ## Configuring google login/identity provider in AWS Cognito
 
 - Go to identity providers tab under federation tab and select google. It will require you to enter your google's app client id and secret which you can obtain [here](https://console.cloud.google.com/apis/dashboard).
-NOTE: For creating google's app client id you need to select any one service from availabel services [Guide](https://aws.amazon.com/premiumsupport/knowledge-center/cognito-google-social-identity-provider/)
+NOTE: For creating google's app client id you need to select any one service from available services [Guide](https://aws.amazon.com/premiumsupport/knowledge-center/cognito-google-social-identity-provider/)
 
 - While configuring your google app oauth client for web, make sure to enter your `cognito hosted ui domain` in the `Authorized Javascript Origins list` and `<AWS_COGNITO_HOSTED_UI_DOMAIN>/oauth2/idpresponse` end point in the `Authorized redirect URIs list`.
 
 - Go back to your aws console and enter your google app client id and secret key.
 
-- Now your google login provider is configured, you can enable it in your App client settings in aws console.
-
-- Now go to your hosted app domain , it should show you hosted ui with google login button.
+- Your google login provider is configured, you can enable it in your App client settings in aws console.
 
 - Now lets move to configure Web3Auth and AWS Cognito app.
 
@@ -52,26 +50,26 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
 
 - Enter your custom verifier information as follows:-
 
-- Enter your unique verifier identifier, it will represent your application on torus network. You will need to use this value later while initializing your sdk.
+    1. Enter your unique verifier identifier, it will represent your application on torus network. You will need to use this value later while initializing your sdk.
 
-- Select network option:-
+    2. Select network option:-
 
-- `Testnet`:- Select testnet for development mode. Your verifier will be deployed on ropsten testnet and torus test network.
-- `Mainnet`:- Select mainnet for production mode. Your verifier will be deployed on ethereum mainnet and torus main network.
+    - `Testnet`:- Select testnet for development mode. Your verifier will be deployed on ropsten testnet and torus test network.
+    - `Mainnet`:- Select mainnet for production mode. Your verifier will be deployed on ethereum mainnet and torus main network.
 
-- Select Verifier type as: `Custom`
+    3. Select Verifier type as: `Custom`
 
-`Enter JWT Verifier ID` as : "email". You can also use `sub` as your jwt verifier id but if you are using multiple login providers then your users will get diffrent private keys accross diffrent login providers even if they use same email address as they will be assigned different ids by aws cognito. You can set this field based on your application needs provided that it should be a unique identifier for user.
+    4. `Enter JWT Verifier ID` as : "email". You can also use `sub` as your jwt verifier id but if you are using multiple login providers then your users will get diffrent private keys accross diffrent login providers even if they use same email address as they will be assigned different ids by aws cognito. You can set this field based on your application needs provided that it should be a unique identifier for user.
 
-Your JWK endpoint endpoint for aws cognito will look like this - `https://cognito-idp.{region}.amazonaws.com/{userPoolId}/.well-known/jwks.json` , get values of `region` and `userPoolId` from your `aws cognito console`.
+    5. Your JWK endpoint endpoint for aws cognito will look like this - `https://cognito-idp.{region}.amazonaws.com/{userPoolId}/.well-known/jwks.json` , get values of `region` and `userPoolId` from your `aws cognito console`.
 
-Enter JWT validation fields:-
+    6. Enter JWT validation fields:-
 
-`iss`: It should be `https://cognito-idp.{region}.amazonaws.com/{userPoolId}`, replace `region` and `userPoolId  that we noted earlier while creating cognito user pool.`
+        -`iss`: It should be `https://cognito-idp.{region}.amazonaws.com/{userPoolId}`, replace `region` and `userPoolId`  that we noted earlier while creating cognito user pool.
 
-`aud`: It should be your client id that your noted earlier while creating app client in aws cognito console.
+        -`aud`: It should be your client id that your noted earlier while creating app client in aws cognito console.
 
-Save you verifier and it will be deployed in 5-10 minutes.
+    7. Save you verifier and it will be deployed in 5-10 minutes.
 
 - To know how above configuration is being used in this example repo, refer to `init()` and `login()` functions in `src/services/web3auth.tsx` file
 

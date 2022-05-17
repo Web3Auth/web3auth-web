@@ -117,7 +117,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               name: "Custom cognito Login",
               verifier: "cognito-demo",
               typeOfLogin: "jwt",
-              clientId: "29343gi24opt30vsa5s7u8gfvg",
+              //use your app client id you will get from aws cognito app
+              clientId: "29343gi24opt30vsa5s7u8gfvg", 
             },
           },
         }});
@@ -145,9 +146,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         relogin: true,
         loginProvider,
         extraLoginOptions: {
+          //this is domain of your app created in aws
           domain: "https://web3auth.auth.us-west-2.amazoncognito.com/oauth2",
+          //the param/field which you are going to verify from aws cognito
           verifierIdField: "email",
+          // response you want from cognito i.e jwt token
           response_type: "token",
+          // scope params are those which are enabled in cognito app's "Allowed OAuth Scopes" settings
           scope: "email openid profile",
         }
       });
@@ -156,7 +161,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       console.log("error", error);
     } finally {
       // setIsLoading(false)
-      
     }
   };
 

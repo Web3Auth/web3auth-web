@@ -5,14 +5,14 @@ import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
+  const { user, provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
 
   const handleGoogleLogin = async () => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       await login(WALLET_ADAPTERS.OPENLOGIN,"jwt")
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   }
   const loggedInView = (
@@ -69,7 +69,7 @@ const Main = () => {
         <Loader></Loader>
       </div>
     ): (
-      <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>
+      <div className={styles.grid}>{user ? loggedInView : unloggedInView}</div>
     )
 };
 
