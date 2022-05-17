@@ -61,6 +61,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const currentChainConfig = CHAIN_CONFIG[chain];
+
 
   const setWalletProvider = useCallback(
     (web3authProvider: SafeEventEmitterProvider) => {
@@ -95,7 +97,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       });
     };
 
-    const currentChainConfig = CHAIN_CONFIG[chain];
 
     async function init() {
       try {
