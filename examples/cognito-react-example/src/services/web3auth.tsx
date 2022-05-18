@@ -67,9 +67,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const setWalletProvider = useCallback(
     (web3authProvider: SafeEventEmitterProvider) => {
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole); 
-      setTimeout(function(){
-        setProvider(walletProvider);
-      }.bind(this),1000); 
+      setProvider(walletProvider);
     },
     [chain]
   );
