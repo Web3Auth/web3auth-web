@@ -18,7 +18,7 @@ You can take inspiration from [here](https://docs.tor.us/guides/customAuth-aws-c
 
 - Note down the `clientId` for this app client.
 
-- Add a domain to your app's hosted ui from `App integration's domain name section`
+- Add a domain to your aws cognito app from `App integration's domain name section`
 
 - Update app client settings for the new app client under `App client settings` tab to set desired oauth flows and redirect endpoints.
 
