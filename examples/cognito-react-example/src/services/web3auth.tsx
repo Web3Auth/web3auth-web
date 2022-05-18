@@ -134,7 +134,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   const login = async (adapter: WALLET_ADAPTER_TYPE, loginProvider: LOGIN_PROVIDER_TYPE) => {
     try {
-      // setIsLoading(true);
       if (!web3Auth) {
         console.log("web3auth not initialized yet");
         uiConsole("web3auth not initialized yet");
@@ -157,8 +156,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       setWalletProvider(localProvider!);
     } catch (error) {
       console.log("error", error);
-    } finally {
-      // setIsLoading(false)
     }
   };
 
