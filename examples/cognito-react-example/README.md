@@ -29,7 +29,7 @@ You can take inspiration from [here](https://docs.tor.us/guides/customAuth-aws-c
 - Go to identity providers tab under federation tab and select google. It will require you to enter your google's app client id and secret which you can obtain [here](https://console.cloud.google.com/apis/dashboard).
 NOTE: For creating google's app client id you need to select any one service from available services [Guide](https://aws.amazon.com/premiumsupport/knowledge-center/cognito-google-social-identity-provider/)
 
-- While configuring your google app oauth client for web, make sure to enter your `cognito hosted ui domain` in the `Authorized Javascript Origins list` and `<AWS_COGNITO_HOSTED_UI_DOMAIN>/oauth2/idpresponse` end point in the `Authorized redirect URIs list`.
+- While configuring your google app oauth client for web, make sure to enter your `cognito domain` in the `Authorized Javascript Origins list` and `<AWS_COGNITO_DOMAIN>/oauth2/idpresponse` end point in the `Authorized redirect URIs list`.
 
 - Go back to your aws console and enter your google app client id and secret key.
 
