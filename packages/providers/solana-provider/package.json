@@ -26,7 +26,7 @@
     "@web3auth/base": "^1.0.0-alpha.0",
     "@web3auth/base-provider": "^1.0.0-alpha.0",
     "bn.js": "^5.2.0",
-    "bs58": "^4.0.1",
+    "bs58": "^5.0.0",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
   },
