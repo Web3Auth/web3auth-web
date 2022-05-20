@@ -1,5 +1,5 @@
 const defaultConfig = {
-  analyzerMode: "static",
+  analyzerMode: "disabled",
 };
 
 module.exports = defaultConfig;
