@@ -19,9 +19,9 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@solana/web3.js": "^1.41.4",
-    "@toruslabs/base-controllers": "^1.6.18",
-    "@toruslabs/openlogin-jrpc": "^1.7.3",
+    "@solana/web3.js": "^1.43.1",
+    "@toruslabs/base-controllers": "^2.0.0",
+    "@toruslabs/openlogin-jrpc": "^2.0.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^1.0.0-alpha.0",
     "@web3auth/base-provider": "^1.0.0-alpha.0",
@@ -35,9 +35,7 @@
     "@solflare-wallet/sdk": "^1.0.12",
     "@types/bn.js": "^5.1.0",
     "@types/bs58": "^4.0.1",
-    "@types/json-rpc-random-id": "^1.0.1",
-    "@types/node": "^16",
-    "lint-staged": "^12.4.1"
+    "@types/json-rpc-random-id": "^1.0.1"
   },
   "files": [
     "dist",

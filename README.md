@@ -186,4 +186,4 @@ Hosted Example for testing
 ## Requirements
 
 - All packages require a peer dependency of `@babel/runtime`
-- Node 12+
+- Node 14+

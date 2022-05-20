@@ -34,10 +34,10 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@solana/web3.js": "^1.41.4"
+    "@solana/web3.js": "^1.x"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.41.4",
+    "@solana/web3.js": "^1.43.1",
     "lint-staged": "^12.4.1"
   },
   "dependencies": {

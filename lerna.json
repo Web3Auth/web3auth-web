@@ -10,5 +10,6 @@
     "packages/plugins/*"
   ],
   "version": "1.0.0-alpha.0",
-  "npmClient": "yarn"
+  "npmClient": "yarn",
+  "useWorkspaces": true
 }

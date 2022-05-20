@@ -34,9 +34,6 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.1"
-  },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
     "@web3auth/base": "^1.0.0-alpha.0"

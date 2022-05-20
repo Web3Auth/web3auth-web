@@ -35,11 +35,8 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.1"
-  },
   "dependencies": {
-    "@solana/web3.js": "^1.41.4",
+    "@solana/web3.js": "^1.43.1",
     "@solflare-wallet/sdk": "^1.0.12",
     "@web3auth/base": "^1.0.0-alpha.0",
     "@web3auth/base-provider": "^1.0.0-alpha.0",

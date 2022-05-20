@@ -10,7 +10,11 @@ function generateWebpackConfig({ pkg, currentPath, alias, module = {}, pkgBaseCo
       plugins: [new TsconfigPathsPlugin()],
       alias: {
         ...(depsList.includes("bn.js") && { "bn.js": path.resolve(currentPath, "node_modules/bn.js") }),
+        lodash: path.resolve(__dirname, "node_modules/lodash-es"),
         ...alias,
+      },
+      fallback: {
+        "bn.js": require.resolve("bn.js"),
       },
     },
     module,

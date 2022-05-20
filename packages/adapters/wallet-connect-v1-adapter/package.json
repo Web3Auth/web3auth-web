@@ -34,9 +34,6 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.1"
-  },
   "dependencies": {
     "@walletconnect/client": "~1.7.8",
     "@walletconnect/types": "~1.7.8",
