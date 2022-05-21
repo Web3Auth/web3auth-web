@@ -59,6 +59,15 @@ export class TransactionFormatter {
     if (!this.isEIP1559Compatible && clonedTxParams.gasPrice) {
       if (clonedTxParams.maxFeePerGas) delete clonedTxParams.maxFeePerGas;
       if (clonedTxParams.maxPriorityFeePerGas) delete clonedTxParams.maxPriorityFeePerGas;
+      // if gas is not provided explicitly, estimate it.
+      if (!clonedTxParams.gas) {
+        const defaultGasLimit = await this.getDefaultGasLimit(clonedTxParams);
+        if (defaultGasLimit) {
+          clonedTxParams.gasLimit = defaultGasLimit;
+        }
+      } else {
+        clonedTxParams.gasLimit = clonedTxParams.gas;
+      }
       return clonedTxParams;
     }
 
