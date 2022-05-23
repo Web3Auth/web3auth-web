@@ -2679,9 +2679,9 @@
     randombytes "^2.1.0"
 
 "@toruslabs/openlogin@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-2.0.0.tgz#b303acec84953673e7603f0379b4f6dea9e51005"
-  integrity sha512-S6YYDzikMIv0+4ExaTlqIlwl2gVeYA5CrDQ3gW+vd6fJU+KnEGPZiDsBHGJ+WDbFEO6S1aIe1hLK8j3rSXXRRQ==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-2.0.1.tgz#369315cd4e1fb344501443d35901e8935c46cf56"
+  integrity sha512-D9wWE+wMlL4Wh4f2JAau0xHOXfZebigvi02cRWJy5mGNF61tU7WxEa0p5B5fERBMq0IyuYfKqJBWeJRoqrMB2A==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
     "@toruslabs/http-helpers" "^3.0.0"
