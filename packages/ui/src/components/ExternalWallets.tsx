@@ -35,8 +35,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
-            <Icon iconName="arrow-left" />
-            <div className="w3a-group__title">Back</div>
+            <Icon iconName="arrow-left-new" cls="back-button-arrow"/>
+            <div className="w3a-footer__secured">Back</div>
           </button>
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
@@ -48,7 +48,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
           return null;
         })}
         {modalStatus === MODAL_STATUS.INITIALIZED && (
-          <ul className="w3a-adapter-list w3ajs-wallet-adapters">
+          <div className="w3a-external__container">
+          <div className="w3a-wallet__subtitle">Other popular wallets</div>
+          <ul className="w3a-adapter-list w3ajs-wallet-adapters ">
             {Object.keys(config).map((adapter) => {
               if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
                 return null;
@@ -58,7 +60,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               return (
                 <li className="w3a-adapter-item" key={adapter}>
-                  <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
+                  <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--wallet">
                     {providerIcon}
                   </button>
                   <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
@@ -66,6 +68,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               );
             })}
           </ul>
+          </div>
         )}
       </div>
     </div>

@@ -42,9 +42,11 @@ export interface ModalState {
   walletConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseAdapterConfig>;
+  externalWalletList: string[];
   detailedLoaderAdapter: string;
   showExternalWalletsOnly: boolean;
   wcAdapters: IWalletConnectExtensionAdapter[];
+  hiddenSocialLogin: boolean;
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string } };

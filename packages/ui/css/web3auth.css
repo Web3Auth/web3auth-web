@@ -271,6 +271,12 @@
 #w3a-modal .w3a-group {
   margin-bottom: 24px;
 }
+
+#w3a-modal .w3a-social-button{
+  margin-bottom: 24px;
+}
+
+
 #w3a-modal .w3a-group:last-child {
   margin-bottom: 0;
 }
@@ -325,6 +331,18 @@
   list-style: none;
   margin-bottom: 30px;
 }
+
+#w3a-modal .w3a-wallet__subtitle {
+  font-size: 14px;
+  line-height: 1.5em;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 21px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #5C6C7F;
+}
+
 
 #w3a-modal .w3a-adapter-item--hide {
   display: none;
@@ -382,6 +400,30 @@
 
 #w3a-modal button.w3a-button--icon {
   width: 48px;
+}
+
+#w3a-modal .w3a-button--wallet {
+  width: 84px;
+}
+
+.w3a-button--icon-background{
+  background-color: #F3F3F4;
+  width: 30px;
+  height: 30px;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  margin-left: 5px;
+}
+.w3a-button--icon-overlap{
+  background-color: #F3F3F4;
+  width: 30px;
+  height: 30px;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  margin-left: -5px;
+}
+#w3a-modal .back-button-arrow{
+  margin: 5px;
 }
 
 #w3a-modal button.w3a-button--left {
@@ -510,7 +552,18 @@
 
 #w3a-modal .w3a-wallet-connect__container {
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 32px;
+  color: var(--text-color1);
+  font-size: 10px;
+  width: fit-content;
+  margin: auto;
+  min-width: 250px;
+  padding: 16px 12px;
+}
+
+#w3a-modal .w3a-external__container {
+  background: #ffffff;
+  border-radius: 32px;
   color: var(--text-color1);
   font-size: 10px;
   width: fit-content;
@@ -590,7 +643,7 @@
 /* Footer Components */
 #w3a-modal .w3a-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   font-size: 10px;
   line-height: 150%;
@@ -616,12 +669,16 @@
 }
 
 #w3a-modal .w3a-footer__secured {
-  text-align: right;
-  color: #b7b8bd;
+  color: #5C6C7F;
 }
+
+
 #w3a-modal .w3a-footer__secured > img {
   height: 14px;
   width: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Loader Bridge */
@@ -826,7 +883,7 @@
   background-color: #ffffff;
   border: 1px solid #f3f3f4;
   box-shadow: none;
-  color: #595857;
+  color: #0F1222;
 }
 
 #w3a-modal.w3a-modal--light button.w3a-button:disabled {

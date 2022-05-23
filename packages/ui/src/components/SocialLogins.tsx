@@ -41,11 +41,10 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
-  const adapterExpandText = isExpanded ? "View less options" : "View more options";
+  const adapterExpandText = isExpanded ? "" : "";
 
   return (
     <div className="w3ajs-social-logins w3a-group">
-      <div className="w3a-group__title">CONTINUE WITH</div>
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;

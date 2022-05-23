@@ -218,17 +218,17 @@ export class Web3Auth extends Web3AuthCore {
     this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
 
-    const hasExternalWallets = allAdapters.some((adapterName) => {
+    const externalWalletList = allAdapters.filter((adapterName) => {
       return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
-    if (hasExternalWallets) {
-      this.loginModal.initExternalWalletContainer();
+    if (externalWalletList.length > 0) {
+      this.loginModal.initExternalWalletContainer(externalWalletList);
     }
 
     // variable to check if we have any in app wallets
     // currently all default in app and external wallets can be hidden or shown based on config.
-    if (!hasInAppWallets && hasExternalWallets) {
+    if (!hasInAppWallets && externalWalletList.length > 0) {
       // if no in app wallet is available then initialize external wallets in modal
       await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
     }
