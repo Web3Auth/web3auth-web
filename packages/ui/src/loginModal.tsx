@@ -73,7 +73,6 @@ export default class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
             appLogo={this.appLogo}
             version={this.version}
-            externalWalletList={this.externalWalletList}
           />
         </ThemedContext.Provider>,
         createWrapper()
@@ -117,10 +116,10 @@ export default class LoginModal extends SafeEventEmitter {
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
   };
 
-  initExternalWalletContainer = (params : string[]) => {
+  initExternalWalletContainer = (params: string[]) => {
     this.setState({
       hasExternalWallets: true,
-      externalWalletList: params
+      externalWalletList: params,
     });
   };
 

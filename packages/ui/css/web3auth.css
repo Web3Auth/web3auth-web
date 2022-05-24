@@ -307,7 +307,7 @@
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
   display: flex;
-  align-items: center;
+  justify-content: center;
   padding: 0;
   margin: 0;
   gap: 16px;
@@ -406,18 +406,26 @@
   width: 84px;
 }
 
+#w3a-modal .w3a-button-group{
+  margin: 3px 0px 2px 0px;
+}
+
+#w3a-modal .w3a-button--text{
+  margin-left: 10px;
+}
 .w3a-button--icon-background{
   background-color: #F3F3F4;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   -moz-border-radius: 50%;
   -webkit-border-radius: 50%;
   margin-left: 5px;
+  margin-top: 5px;
 }
 .w3a-button--icon-overlap{
   background-color: #F3F3F4;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   -moz-border-radius: 50%;
   -webkit-border-radius: 50%;
   margin-left: -5px;

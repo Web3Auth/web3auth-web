@@ -35,7 +35,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
-            <Icon iconName="arrow-left-new" cls="back-button-arrow"/>
+            <Icon iconName="arrow-left-new" cls="back-button-arrow" />
             <div className="w3a-footer__secured">Back</div>
           </button>
         )}
@@ -49,25 +49,24 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         })}
         {modalStatus === MODAL_STATUS.INITIALIZED && (
           <div className="w3a-external__container">
-          <div className="w3a-wallet__subtitle">Other popular wallets</div>
-          <ul className="w3a-adapter-list w3ajs-wallet-adapters ">
-            {Object.keys(config).map((adapter) => {
-              if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-                return null;
-              }
-              // if (allKeys.length - 1 === index && isOthersLoading) setOthersLoading(false);
-              const providerIcon = <Image imageId={`login-${adapter}`} />;
+            <div className="w3a-wallet__subtitle">Other popular wallets</div>
+            <ul className="w3a-adapter-list w3ajs-wallet-adapters ">
+              {Object.keys(config).map((adapter) => {
+                if (adapter === WALLET_ADAPTERS.WALLET_CONNECT_V1 || adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+                  return null;
+                }
+                const providerIcon = <Image imageId={`login-${adapter}`} />;
 
-              return (
-                <li className="w3a-adapter-item" key={adapter}>
-                  <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--wallet">
-                    {providerIcon}
-                  </button>
-                  <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <li className="w3a-adapter-item" key={adapter}>
+                    <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--wallet">
+                      {providerIcon}
+                    </button>
+                    <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
       </div>
