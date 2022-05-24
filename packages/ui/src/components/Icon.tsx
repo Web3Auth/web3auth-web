@@ -1,5 +1,5 @@
-import CircleArrowLeft from "../../assets/icons/circle-arrow-left.svg";
 import ArrowLeftNew from "../../assets/icons/arrow-left.svg";
+import CircleArrowLeft from "../../assets/icons/circle-arrow-left.svg";
 import Close from "../../assets/icons/close.svg";
 import Expand from "../../assets/icons/expand.svg";
 import ExpandLight from "../../assets/icons/expand-light.svg";

@@ -20,7 +20,6 @@ import SocialLogins from "./SocialLogins";
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
-  version: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -56,7 +55,7 @@ export default function Modal(props: ModalProps) {
     wcAdapters: [],
   });
 
-  const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
   const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
   const hasLightIcons = ["apple", "github"];
 
@@ -315,7 +314,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer version={version} />
+          <Footer />
         </div>
       </div>
     )

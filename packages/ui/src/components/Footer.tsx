@@ -2,13 +2,7 @@ import { memo } from "react";
 
 import Image from "./Image";
 
-interface FooterProps {
-  version: string;
-}
-
-function Footer(props: FooterProps) {
-  const { version } = props;
-
+function Footer() {
   const web3authIcon = <Image imageId="web3auth-dark" height="14px" width="auto" />;
 
   return (
