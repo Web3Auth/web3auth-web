@@ -41,7 +41,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
-  const adapterExpandText = isExpanded ? "" : "";
+  // const adapterExpandText = isExpanded ? "" : "";
 
   return (
     <div className="w3ajs-social-logins w3a-group">
@@ -76,7 +76,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       {canShowMore && (
         <button type="button" className={adapterButtonClass} style={{ display: "flex" }} onClick={expandClickHandler}>
           <Icon iconName={`expand${isDark ? "-light" : ""}`} />
-          <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
+          {/* <span className="w3ajs-button-expand-text">{adapterExpandText}</span> */}
         </button>
       )}
     </div>
