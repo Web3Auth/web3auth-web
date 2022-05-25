@@ -86,16 +86,14 @@ export default function Modal(props: ModalProps) {
   }, [modalState.externalWalletList]);
 
   useEffect(() => {
-    const tempIconList = [];
     const loginsList = Object.keys(modalState.socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
       return modalState.socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
     });
     if (loginsList.length > 3) {
-      for (let i = 0; i < loginsList.length; i += 1) {
-        if (loginsList[i] !== "facebook") tempIconList.push(loginsList[i]);
-        if (tempIconList.length === 3) break;
-      }
-      setIcons(tempIconList);
+      const tempIconList = loginsList.filter((item) => {
+        return item !== "facebook";
+      });
+      setIcons(tempIconList.slice(0, 3));
     } else if (loginsList.length <= 3) {
       setIcons(loginsList);
     }

@@ -29,6 +29,8 @@ function createWrapper(): HTMLElement {
 }
 
 export default class LoginModal extends SafeEventEmitter {
+  public externalWalletList: string[];
+
   private appLogo: string;
 
   private version: string;
@@ -38,8 +40,6 @@ export default class LoginModal extends SafeEventEmitter {
   private stateEmitter: SafeEventEmitter;
 
   private displayErrorsOnModal = true;
-
-  public externalWalletList: string[];
 
   constructor({ appLogo, version, adapterListener, theme = "light", displayErrorsOnModal = true }: UIConfig) {
     super();
