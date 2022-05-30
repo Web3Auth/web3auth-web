@@ -34,9 +34,13 @@ function Header(props: HeaderProps) {
   );
 }
 
-export default memo(Header, (prevProps: HeaderProps, nextProps: HeaderProps) => {
+const memoizedHeader = memo(Header, (prevProps: HeaderProps, nextProps: HeaderProps) => {
   if (prevProps.appLogo !== nextProps.appLogo) {
     return true;
   }
   return false;
 });
+
+memoizedHeader.displayName = "Header";
+
+export default memoizedHeader;

@@ -29,8 +29,8 @@ export function createProviderConfigMiddleware(providerConfig: Omit<CustomChainC
 
 export function createConfigMiddleware(providerConfig: Omit<CustomChainConfig, "chainNamespace">): JRPCMiddleware<unknown, unknown> {
   const { chainId } = providerConfig;
-  const configMiddleware = mergeMiddleware([createChainIdMiddleware(chainId), createProviderConfigMiddleware(providerConfig)]);
-  return configMiddleware;
+
+  return mergeMiddleware([createChainIdMiddleware(chainId), createProviderConfigMiddleware(providerConfig)]);
 }
 
 export function createJsonRpcClient(providerConfig: Omit<CustomChainConfig, "chainNamespace">): {

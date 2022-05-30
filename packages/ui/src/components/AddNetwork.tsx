@@ -26,7 +26,7 @@ function AddNetwork(props: AddNetworkProps) {
 
   return (
     showModal && (
-      <div id="w3a-modal">
+      <div id="w3a-modal-network">
         <div className="w3a-switch-network">
           <div className="w3a-switch-network__title">This site is requesting to add Network</div>
           <div>

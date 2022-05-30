@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/coinbase-adapter",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "coinbase adapter for web3auth",
   "keywords": [
     "web3Auth/coinbase-adapter",
@@ -21,8 +21,8 @@
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd ."
@@ -34,12 +34,9 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.0"
-  },
   "dependencies": {
-    "@coinbase/wallet-sdk": "^3.0.8",
-    "@web3auth/base": "^0.10.0"
+    "@coinbase/wallet-sdk": "^3.1.0",
+    "@web3auth/base": "^1.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [

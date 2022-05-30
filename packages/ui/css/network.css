@@ -43,7 +43,7 @@
 }
 
 /* Modal */
-#w3a-modal {
+#w3a-network-modal {
     --bg1: #ffffff;
     --bg2: #f9f9fb;
     --text-color1: #a2a5b5;
@@ -67,7 +67,7 @@
     background: black;
 }
 
-#w3a-modal button.w3a-button {
+#w3a-network-modal button.w3a-button {
     background-color: #ffffff;
     border: 1px solid #f3f3f4;
     box-shadow: none;
@@ -87,7 +87,7 @@
     cursor: pointer;
 }
 
-#w3a-modal .w3a-switch-network {
+#w3a-network-modal .w3a-switch-network {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -99,7 +99,7 @@
     font-family: var(--text-body);
 }
 
-#w3a-modal .w3a-switch-network__title {
+#w3a-network-modal .w3a-switch-network__title {
     font-family: var(--text-header);
     font-size: 20px;
     color: var(--text-color2);
@@ -107,7 +107,7 @@
     text-align: center;
 }
 
-#w3a-modal .w3a-switch-network__link {
+#w3a-network-modal .w3a-switch-network__link {
     font-size: 12px;
     color: #b7b8bd;
     background-color: #fff;
@@ -116,12 +116,12 @@
     padding: 4px 16px;
 }
 
-#w3a-modal .w3a-switch-network__connect {
+#w3a-network-modal .w3a-switch-network__connect {
     display: flex;
     margin: 40px auto 0;
 }
 
-#w3a-modal .w3a-switch-network__connect > div {
+#w3a-network-modal .w3a-switch-network__connect > div {
     text-align: center;
     font-size: 10px;
     color: var(--text-color2);
@@ -131,7 +131,7 @@
     margin-top: 20px;
 }
 
-#w3a-modal .w3a-switch-network__logo {
+#w3a-network-modal .w3a-switch-network__logo {
     background: #ffffff;
     box-shadow: 2px 2px 12px rgba(3, 100, 255, 0.05);
     border-radius: 50%;
@@ -143,19 +143,19 @@
     margin: 0 auto 6px;
 }
 
-#w3a-modal .w3a-switch-network__logo img {
+#w3a-network-modal .w3a-switch-network__logo img {
     width: 34px;
     height: 34px;
 }
 
-#w3a-modal .w3a-switch-network__buttons {
+#w3a-network-modal .w3a-switch-network__buttons {
     display: flex;
     column-gap: 16px;
     width: 100%;
     margin-top: 60px;
 }
 
-#w3a-modal .w3a-button.w3a-button--primary {
+#w3a-network-modal .w3a-button.w3a-button--primary {
     background-color: #0364ff;
     color: #fff;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -21,8 +21,8 @@
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
     "test-debugger": "mocha --config ../../../.mocharc.json --inspect-brk test/**.ts",
-    "dev": "rimraf dist/ && torus-scripts start",
-    "build": "rimraf dist/ && torus-scripts build",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "yarn run build",
     "pre-commit": "lint-staged --cwd ."
@@ -35,16 +35,15 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "@types/lodash.merge": "^4.6.6",
-    "lint-staged": "^12.4.0"
+    "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^1.7.4",
-    "@toruslabs/openlogin-ed25519": "^1.7.0",
-    "@web3auth/base": "^0.10.0",
-    "@web3auth/base-provider": "^0.10.0",
-    "@web3auth/ethereum-provider": "^0.10.0",
-    "@web3auth/solana-provider": "^0.10.0",
+    "@toruslabs/openlogin": "^2.0.0",
+    "@toruslabs/openlogin-ed25519": "^2.0.0",
+    "@web3auth/base": "^1.0.0",
+    "@web3auth/base-provider": "^1.0.0",
+    "@web3auth/ethereum-provider": "^1.0.0",
+    "@web3auth/solana-provider": "^1.0.0",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {

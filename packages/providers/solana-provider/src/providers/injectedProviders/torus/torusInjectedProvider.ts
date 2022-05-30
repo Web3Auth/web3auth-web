@@ -4,12 +4,12 @@ import { CHAIN_NAMESPACES, isHexStrict, WalletInitializationError } from "@web3a
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
+import { ITorusWalletProvider } from "../../../interface";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy";
-import { InjectedProvider } from "../interface";
 import { getTorusHandlers } from "./providerHandlers";
 
-export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, InjectedProvider> {
+export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, ITorusWalletProvider> {
   constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
@@ -18,7 +18,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     return Promise.resolve();
   }
 
-  public async setupProvider(injectedProvider: InjectedProvider): Promise<void> {
+  public async setupProvider(injectedProvider: ITorusWalletProvider): Promise<void> {
     this.handleInjectedProviderUpdate(injectedProvider);
     await this.setupEngine(injectedProvider);
   }
@@ -41,7 +41,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     return this.state.chainId;
   }
 
-  private async setupEngine(injectedProvider: InjectedProvider): Promise<void> {
+  private async setupEngine(injectedProvider: ITorusWalletProvider): Promise<void> {
     const providerHandlers = getTorusHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
@@ -53,7 +53,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     await this.lookupNetwork();
   }
 
-  private async handleInjectedProviderUpdate(injectedProvider: InjectedProvider): Promise<void> {
+  private async handleInjectedProviderUpdate(injectedProvider: ITorusWalletProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
       this.provider.emit("accountsChanged", accounts);
     });

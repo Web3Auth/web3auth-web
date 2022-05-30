@@ -15,6 +15,9 @@ export interface IWeb3AuthContext {
   user: unknown;
   signV4Message: () => Promise<any>;
   login: () => Promise<void>;
+  showDapp: (url: string) => Promise<void>;
+  showTopup: () => Promise<void>;
+  showWalletConnectScanner: () => Promise<void>;
   logout: () => Promise<void>;
   getUserInfo: () => Promise<any>;
   signMessage: () => Promise<any>;
@@ -29,6 +32,9 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   user: null,
   login: async () => {},
   logout: async () => {},
+  showDapp: async (url: string) => {},
+  showWalletConnectScanner: async () => {},
+  showTopup: async () => {},
   getUserInfo: async () => {},
   signMessage: async () => {},
   signV4Message: async () => {},
@@ -72,7 +78,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);
-        setWalletProvider((torusPlugin?.proxyProvider as SafeEventEmitterProvider) || web3auth?.provider);
+        setWalletProvider(web3auth?.provider as SafeEventEmitterProvider);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -99,6 +105,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
           clientId,
+          uiConfig: {
+            theme: "dark",
+            loginMethodsOrder: ["facebook", "google", "github", "discord"],
+          },
         });
         const torusPlugin = new TorusWalletConnectorPlugin({
           torusWalletOpts: {},
@@ -137,7 +147,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const provider = await web3Auth.connect();
-    setWalletProvider((torusPlugin?.proxyProvider as SafeEventEmitterProvider) || provider);
+    setWalletProvider(provider as SafeEventEmitterProvider);
   };
 
   const logout = async () => {
@@ -157,6 +167,34 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const user = await web3Auth.getUserInfo();
+    uiConsole(user);
+  };
+  const showTopup = async () => {
+    if (!web3Auth || !provider) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const accounts = await provider.getAccounts()
+    const user = await torusPlugin?.initiateTopup("moonpay", { selectedAddress: accounts[0] })
+    uiConsole(user);
+  };
+  const showWalletConnectScanner = async () => {
+    if (!web3Auth || !provider) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const user = await torusPlugin?.showWalletConnectScanner()
+    uiConsole(user);
+  };
+  const showDapp = async (url: string) => {
+    if (!web3Auth || !provider) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const user = torusPlugin?.torusWalletInstance.showWallet("discover", { url })
     uiConsole(user);
   };
 
@@ -214,6 +252,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getBalance,
     signMessage,
     signV4Message,
+    showTopup,
+    showDapp,
+    showWalletConnectScanner,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

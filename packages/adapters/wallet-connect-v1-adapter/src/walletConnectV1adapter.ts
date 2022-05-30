@@ -80,7 +80,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
-
+    log.debug("initializing wallet connect v1 adapter");
     if (this.connector.connected) {
       this.rehydrated = true;
       await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
