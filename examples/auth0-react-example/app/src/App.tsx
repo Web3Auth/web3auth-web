@@ -4,26 +4,38 @@ import { WEB3AUTH_NETWORK_TYPE } from "./config/web3AuthNetwork";
 import { CHAIN_CONFIG_TYPE } from "./config/chainConfig";
 import styles from "./styles/Home.module.css";
 import { Web3AuthProvider } from "./services/web3auth";
+import { Web3AuthProviderRWA } from "./services/web3authRWA";
 import Setting from "./components/Setting";
 import Main from "./components/Main";
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import Loader from "./components/Loader";
+import MainRWA from "./components/MainRWA";
+import { APP_CONFIG_TYPE } from "./config/appConfig";
 
 
 
 function App() {
   const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("testnet");
   const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("mainnet");
+  const [app, setApp] = useState<APP_CONFIG_TYPE>("SPA");
+  
 
   return (
     <div className={styles.container}>
-      <Web3AuthProvider chain={chain} web3AuthNetwork={web3AuthNetwork}>
+      <Web3AuthProvider chain={chain} web3AuthNetwork={web3AuthNetwork} app={app}>
         <h1 className={styles.title}>
           <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
             Web3Auth
           </a>{" "}
-          & Auth0(Passwordless)
+          & Auth0 Example
         </h1>
-        <Setting setNetwork={setWeb3AuthNetwork} setChain={setChain} />
-        <Main />
+        <Setting setNetwork={setWeb3AuthNetwork} setChain={setChain} setApp={setApp}/>
+        <Router>
+          <Routes>
+            <Route  path="/" element={<Main appType={app}/>} />
+            <Route path="/rwa" element={<MainRWA/>}/>
+          </Routes>
+        </Router>
       </Web3AuthProvider>
       <footer className={styles.footer}>
         <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/auth0-react-example" target="_blank" rel="noopener noreferrer">

@@ -1,6 +1,7 @@
 import { ChangeEvent } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
+import { APP_CONFIG, APP_CONFIG_TYPE } from "../config/appConfig";
 import styles from "../styles/Home.module.css";
 import { Web3AuthContext } from "../services/web3auth";
 import { useContext } from "react";
@@ -8,9 +9,10 @@ import { useContext } from "react";
 interface IProps {
   setNetwork: (network: WEB3AUTH_NETWORK_TYPE) => void;
   setChain: (chain: CHAIN_CONFIG_TYPE) => void;
+  setApp: (App: APP_CONFIG_TYPE) => void;
 }
 
-const Setting = ({ setNetwork, setChain }: IProps) => {
+const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
   const networkChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setNetwork(e.target.value as WEB3AUTH_NETWORK_TYPE);
@@ -19,6 +21,11 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
   const chainChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setChain(e.target.value as CHAIN_CONFIG_TYPE);
+  };
+
+  const appChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log("Settings", e.target.value);
+    setApp(e.target.value as APP_CONFIG_TYPE);
   };
   const { provider } = useContext(Web3AuthContext);
   const isLoggedIn = provider !== null;
@@ -48,6 +55,20 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
             return (
               <option key={x} value={x}>
                 {CHAIN_CONFIG[x as CHAIN_CONFIG_TYPE].displayName}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+      <div className={styles.row}>
+        <label htmlFor="network" className={styles.label}>
+          App Type
+        </label>
+        <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn}>
+          {Object.keys(APP_CONFIG).map((x: string) => {
+            return (
+              <option key={x} value={x}>
+                {APP_CONFIG[x as APP_CONFIG_TYPE].displayName}
               </option>
             );
           })}

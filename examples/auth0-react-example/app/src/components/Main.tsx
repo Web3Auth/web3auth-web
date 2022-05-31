@@ -3,17 +3,26 @@ import { useWeb3Auth } from "../services/web3auth";
 
 import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
+import { useLocation } from "react-router-dom";
 
-const Main = () => {
+const Main = ({appType}:{appType:string}) => {
   const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
-
-  const handleGoogleLogin = async () => {
+  const search = useLocation().search;
+  const jwt = new URLSearchParams(search).get('token');
+  const token = jwt === null ? "" : jwt.toString();
+  // alert(typeof token);
+  
+  const handleImplicitLogin = async () => {
     try {
       setIsLoading(true);
-      await login(WALLET_ADAPTERS.OPENLOGIN,"jwt")
+      await login(WALLET_ADAPTERS.OPENLOGIN,"jwt");
     } finally {
       setIsLoading(false);
     }
+  }
+  if(token !== ""){
+    handleImplicitLogin();
+  // await login(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
   }
   const loggedInView = (
     <>
@@ -50,15 +59,24 @@ const Main = () => {
   );
 
   const unloggedInView = (
+    
     <div className={styles.centerFlex}>
        <div>
           <img src="https://images.web3auth.io/web3auth.svg" />
         </div>
       <h3>Login With</h3>
-      <button onClick={()=> handleGoogleLogin()} className={styles.card}>
-        Email Passwordless
-      </button>
+      {appType==="SPA"?
+      <button onClick={()=> handleImplicitLogin()} className={styles.card}>
+        Implicit Flow(SPA)
+      </button>:
+      <button onClick={(e) => {
+      e.preventDefault();
+      window.location.href="https://torus-test.auth0.com/authorize?scope=openid&response_type=code&client_id=FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR&redirect_uri=http://localhost:3001/callback&state=STATE"
+      }} className={styles.card}>
+        Auth Code Flow(RWA)
+      </button>}
     </div>
+    
 
 
   );
