@@ -182,16 +182,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       setWalletProvider(localProvider!);
     } catch (error) {
       console.log("error", error);
-    } finally {
-      // setIsLoading(false)
-      
     }
   };
   const loginRWA = async (adapter: WALLET_ADAPTER_TYPE, loginProvider: LOGIN_PROVIDER_TYPE, jwt_token: string) => {
-    // console.log(jwt_token);
-    // debugger;
     try {
-      // setIsLoading(true);
       if (!web3Auth) {
         console.log("web3auth not initialized yet");
         uiConsole("web3auth not initialized yet");

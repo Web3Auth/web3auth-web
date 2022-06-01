@@ -11,7 +11,6 @@ const Main = () => {
   const search = useLocation().search;
   const jwt = new URLSearchParams(search).get('token');
   const token = jwt == null ? "" : jwt.toString();
-  // const btnRef = useRef(document.createElement("button"));
 
   const handleAuthLogin = async () => {
     try {

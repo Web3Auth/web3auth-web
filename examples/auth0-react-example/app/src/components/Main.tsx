@@ -3,21 +3,14 @@ import { useWeb3Auth } from "../services/web3auth";
 
 import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
 const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
-  const { provider, login, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
-  const search = useLocation().search;
-  const jwt = new URLSearchParams(search).get('token');
-  const token = jwt === null ? "" : jwt.toString();
+  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
   
   const handleImplicitLogin = async () => {
     try {
-      // setIsLoading(true);
       await login(WALLET_ADAPTERS.OPENLOGIN,"jwt");
     } finally {
-      // setIsLoading(false);
     }
   }
 
