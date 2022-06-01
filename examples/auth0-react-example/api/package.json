@@ -1,17 +1,17 @@
 {
   "name": "auth0-express-webapp-sample",
-  "scripts": {},
+  "scripts": {
+    "lint": "eslint"
+  },
   "dependencies": {
     "debug": "~2.6.9",
-    "dotenv": "^6.1.0",
-    "ejs": "^3.1.8",
+    "dotenv": "^6.2.0",
     "express": "^4.18.1",
-    "express-openid-connect": "^2.7.2",
     "http-errors": "~1.8.1",
-    "morgan": "~1.10.0",
     "request": "^2.88.2"
   },
   "devDependencies": {
+    "eslint": "^8.16.0",
     "nodemon": "^2.0.16"
   }
 }

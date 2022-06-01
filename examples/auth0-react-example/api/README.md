@@ -8,7 +8,7 @@ npm install
 ```
 
 
-2. Rename `.env.example` to `.env` and replace or check the following values. 
+2. Rename `.env.example` to `.env` and replace or check the values. 
 
 3. Run server
 

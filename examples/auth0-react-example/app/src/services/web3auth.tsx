@@ -1,7 +1,6 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider , WALLET_ADAPTER_TYPE} from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
 import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
-
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
@@ -15,6 +14,7 @@ export interface IWeb3AuthContext {
   isLoading: boolean;
   user: unknown;
   chain: string;
+  isWeb3AuthInit: boolean;
   loginRWA: (adapter: WALLET_ADAPTER_TYPE,provider: LOGIN_PROVIDER_TYPE, jwtToken: string) => Promise<void>;
   login: (adapter: WALLET_ADAPTER_TYPE,provider: LOGIN_PROVIDER_TYPE) => Promise<void>;
   logout: () => Promise<void>;
@@ -33,6 +33,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   isLoading: false,
   user: null,
   chain: "",
+  isWeb3AuthInit: false,
   setIsLoading:(loading: boolean)=>{},
   loginRWA: async (adapter: WALLET_ADAPTER_TYPE, provider: LOGIN_PROVIDER_TYPE, jwtToken: string) => {},
   login: async (adapter: WALLET_ADAPTER_TYPE, provider: LOGIN_PROVIDER_TYPE) => {},
@@ -66,6 +67,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWeb3AuthInit, setweb3authinit] = useState(false);
   const setWalletProvider = useCallback(
     (web3authProvider: SafeEventEmitterProvider) => {
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole); 
@@ -126,7 +128,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                 name: "Custom Auth0 Login",
             verifier: "passwordless-auth0",
             typeOfLogin: "jwt",
-            clientId: "PqTu6oE6V3jFSSfdaT4smoXgbOyThsga",
+            clientId: process.env.REACT_APP_SPA_CLIENTID || "PqTu6oE6V3jFSSfdaT4smoXgbOyThsga",
               },
             },
           }});
@@ -145,13 +147,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                 name: "rwa Auth0 Login",
                 verifier: "auth0-rwa-web3auth",
                 typeOfLogin: "jwt",
-                clientId: "FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR",
+                clientId: process.env.REACT_APP_RWA_CLIENTID || "FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR",
               },
             },
           }});
           web3AuthInstance.configureAdapter(adapter);
           await web3AuthInstance.init();
           setWeb3Auth(web3AuthInstance);
+          setweb3authinit(true);
         }
         
       } catch (error) {
@@ -161,6 +164,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       }
     }
     init();
+  
   }, [chain, web3AuthNetwork, setWalletProvider]);
 
   const login = async (adapter: WALLET_ADAPTER_TYPE, loginProvider: LOGIN_PROVIDER_TYPE) => {
@@ -175,7 +179,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         relogin: true,
         loginProvider, 
         extraLoginOptions: {
-          domain: "https://torus-test.auth0.com",
+          domain: process.env.REACT_APP_AUTH0_DOMAIN || "https://torus-test.auth0.com",
           verifierIdField: "email",
         }
       });
@@ -289,6 +293,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     provider,
     user,
     isLoading,
+    isWeb3AuthInit,
     setIsLoading,
     loginRWA,
     login,

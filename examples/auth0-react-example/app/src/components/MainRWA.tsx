@@ -4,13 +4,14 @@ import { useWeb3Auth } from "../services/web3auth";
 import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 import {useLocation} from "react-router-dom";
+import { useEffect } from "react";
 
 
 const Main = () => {
-  const { provider, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, chain, web3Auth, setIsLoading } = useWeb3Auth();
+  const { provider, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, chain, web3Auth, setIsLoading, isWeb3AuthInit } = useWeb3Auth();
   const search = useLocation().search;
   const jwt = new URLSearchParams(search).get('token');
-  const token = jwt == null ? "" : jwt.toString();
+  const token = jwt == null ? "" : jwt;
 
   const handleAuthLogin = async () => {
     try {
@@ -20,8 +21,12 @@ const Main = () => {
       setIsLoading(false);
     }
   }
-  document.getElementById("rwaLogin")?.click();
+  // document.getElementById("rwaLogin")?.click();
 
+useEffect(()=>{
+  // debugger;
+  handleAuthLogin();
+}, [isWeb3AuthInit]);
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className={styles.card}>
