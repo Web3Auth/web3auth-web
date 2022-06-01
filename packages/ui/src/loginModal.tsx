@@ -1,5 +1,4 @@
 import "../css/web3auth.css";
-
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_EVENTS,

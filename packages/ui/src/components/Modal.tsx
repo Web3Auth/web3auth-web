@@ -9,13 +9,13 @@ import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import AdapterLoader from "./AdapterLoader";
 import ExternalWallets from "./ExternalWallets";
+import SocialLoginButton from "./SocialLoginButton";
 import Footer from "./Footer";
 import Header from "./Header";
 import Icon from "./Icon";
 import Image from "./Image";
 import Loader from "./Loader";
-import SocialLoginEmail from "./SocialLoginEmail";
-import SocialLogins from "./SocialLogins";
+
 
 interface ModalProps {
   stateListener: SafeEventEmitter;
@@ -196,7 +196,7 @@ export default function Modal(props: ModalProps) {
     </div>
   );
 
-  const socialLoginButton = (
+  const socialLoginButtonGroup = (
     <div className="w3ajs-external-wallet w3a-social-button">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         <button
@@ -254,47 +254,25 @@ export default function Modal(props: ModalProps) {
             <div className="w3a-modal__content w3ajs-content">
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible) && !modalState.externalWalletsVisibility ? (
                 // eslint-disable-next-line react/jsx-no-useless-fragment
-                <>
-                  {modalState.hiddenSocialLogin ? (
-                    <>
-                      {/* button to show social logins */}
-                      {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible) && socialLoginButton}
-                      {/* button to show external wallets */}
-                      {modalState.hasExternalWallets && externalWalletButton}
-                    </>
-                  ) : (
-                    <>
-                      {!modalState.hiddenSocialLogin && (
-                        <button
-                          type="button"
-                          className="w3a-external-back w3ajs-external-back"
-                          onClick={() => {
-                            setModalState((prevState) => {
-                              return { ...prevState, hiddenSocialLogin: !modalState.hiddenSocialLogin };
-                            });
-                          }}
-                        >
-                          <Icon iconName="arrow-left-new" cls="back-button-arrow" />
-                          <div className="w3a-footer__secured">Back</div>
-                        </button>
+                  <>
+                    {modalState.hiddenSocialLogin ? (
+                      <>
+                        {/* button to show social logins */}
+                        {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible) && socialLoginButtonGroup}
+                        {/* button to show external wallets */}
+                        {modalState.hasExternalWallets && externalWalletButton}
+                      </>
+                    ) : (
+                      <SocialLoginButton
+                        modalState={modalState as ModalState}
+                        setModalState={setModalState}
+                        areSocialLoginsVisible={areSocialLoginsVisible}
+                        preHandleSocialWalletClick={preHandleSocialWalletClick}
+                        isEmailPasswordlessLoginVisible={isEmailPasswordlessLoginVisible}
+                       />
                       )}
-                      {areSocialLoginsVisible ? (
-                        <SocialLogins
-                          handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                          socialLoginsConfig={modalState.socialLoginsConfig}
-                        />
-                      ) : null}
-
-                      {isEmailPasswordlessLoginVisible && (
-                        <SocialLoginEmail
-                          adapter={modalState.socialLoginsConfig?.adapter}
-                          handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                        />
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
+                  </>
+                ) : (
                 <ExternalWallets
                   modalStatus={modalState.status}
                   showBackButton={areSocialLoginsVisible}

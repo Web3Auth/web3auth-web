@@ -105,7 +105,7 @@
   position: relative;
 }
 #w3a-modal .w3a-modal__content {
-  padding: 30px 34px;
+  padding: 10px 30px;
   background: var(--bg2);
 }
 #w3a-modal .w3a-modal__footer {
@@ -529,7 +529,7 @@
   padding: 0;
   display: inline-flex;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   cursor: pointer;
   color: var(--text-color1);
 }
