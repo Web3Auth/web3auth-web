@@ -4,13 +4,13 @@ import { useWeb3Auth } from "../services/web3auth";
 import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
-const Main = ({appType}:{appType:string}) => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
+const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
+  const { provider, login, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
   const search = useLocation().search;
   const jwt = new URLSearchParams(search).get('token');
   const token = jwt === null ? "" : jwt.toString();
-  // alert(typeof token);
   
   const handleImplicitLogin = async () => {
     try {
@@ -20,10 +20,22 @@ const Main = ({appType}:{appType:string}) => {
       setIsLoading(false);
     }
   }
-  if(token !== ""){
-    handleImplicitLogin();
-  // await login(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
+  const handleAuthLogin = async () => {
+    try {
+      setIsLoading(true);
+      await loginRWA(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
+    } finally {
+      setIsLoading(false);
+    }
   }
+  // useEffect(()=>{
+  //   if(isJWT){
+    
+  //   handleAuthLogin();
+  //   }
+    
+  //   }, [isJWT]);
+  
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className={styles.card}>
@@ -65,20 +77,18 @@ const Main = ({appType}:{appType:string}) => {
           <img src="https://images.web3auth.io/web3auth.svg" />
         </div>
       <h3>Login With</h3>
-      {appType==="SPA"?
+      {appType === "SPA"?
       <button onClick={()=> handleImplicitLogin()} className={styles.card}>
         Implicit Flow(SPA)
       </button>:
       <button onClick={(e) => {
       e.preventDefault();
-      window.location.href="https://torus-test.auth0.com/authorize?scope=openid&response_type=code&client_id=FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR&redirect_uri=http://localhost:3001/callback&state=STATE"
+      window.location.href="https://torus-test.auth0.com/authorize?scope=openid&response_type=code&client_id=FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR&redirect_uri=http://localhost:3001/callback&state=STATE&connection=github"
       }} className={styles.card}>
         Auth Code Flow(RWA)
-      </button>}
+      </button>
+      }
     </div>
-    
-
-
   );
 
   return isLoading ?

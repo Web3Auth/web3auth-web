@@ -107,6 +107,9 @@
   align-items: center;
   margin-top: 10rem;
 }
+.rwabtn{
+  visibility: hidden;
+}
 
 .footer a {
   display: flex;

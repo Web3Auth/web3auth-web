@@ -112,7 +112,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           chainConfig: currentChainConfig,
         });
         subscribeAuthEvents(web3AuthInstance);
-        if(app !== "SPA"){
+        if(sessionStorage.getItem('app') === null){
+          sessionStorage.setItem('app', 'SPA');
+        }
+        if(sessionStorage.getItem('app') === "SPA"){
+          // alert("spa");
           const adapter = new OpenloginAdapter({ adapterSettings: { 
             network: web3AuthNetwork, 
             clientId, 
@@ -131,6 +135,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           setWeb3Auth(web3AuthInstance);
           
         }else{
+          // alert(sessionStorage.getItem('app'))
           const adapter = new OpenloginAdapter({ adapterSettings: { 
             network: web3AuthNetwork, 
             clientId, 
@@ -218,6 +223,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     await web3Auth.logout();
     setProvider(null);
+    window.location.href = '/';
+    window.sessionStorage.clear();
   };
 
   const getUserInfo = async () => {

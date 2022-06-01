@@ -1,38 +1,32 @@
 const express = require('express')
-const app = express()
-const port = 3001
+require("dotenv").config();
+const app = express();
 var request = require("request");
 
+port = process.env.PORT;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
-
-app.get('/profile', (req, res) =>{
-  console.log(req.body);
-  res.send("logged in!")
-})
+//api to which your server listen for the requests coming from auth0
 app.get('/callback', (req, res) => {
-  console.log('=================');
-  console.log(req.query);
+  //when a request from auth0 is received we get auth code as query param
+  authCode = req.query.code;
   var options = { method: 'POST',
-  url: 'https://torus-test.auth0.com/oauth/token',
+  url: process.env.AUTH_URL,
   headers: { 'content-type': 'application/x-www-form-urlencoded' },
   form:
-   { grant_type: 'authorization_code',
-     client_id: 'FX0BwYwDtD6p0yTOjjIykjLbtxXszfkR', //auth0 tenant clientID
-     client_secret: 'TgwKmD3Jd9iXQu_Fhj0w1smrm32NSgHQ3gzKBY_K6YTU3klQemME7UGxpbr3DlC3', //auth0 tenant secret
-     code: req.query.code, //we are sending this code 
-     redirect_uri: 'http://localhost:3001', //url mentioned in auth0 tenant
-     scope: "openid profile email"
+   { grant_type: 'authorization_code', //need to send authcode to grant our access to auth0
+     client_id: process.env.CLIENT_ID, //auth0 clientID
+     client_secret: process.env.CLIENT_SECRET, //auth0 client secret
+     code: authCode, //we will be sending this code to get the id_token from auth0
+     redirect_uri: process.env.REDIRECT_URI, //url mentioned in auth0 client
+     scope: "openid profile email" 
     }
    };
-   var jwt_token = "";
+
+//to get id_token we need to send post req to auth0
   request(options, function (error, response, data) {
   if (error) throw new Error(error);
-  jwt_token = JSON.parse(data)["id_token"];
-  console.log(jwt_token);
-  redirect_url = "http://localhost:3000/rwa?token="+jwt_token;
+  id_token = JSON.parse(data)["id_token"];
+  redirect_url = process.env.FRONT_ENDPOINT+id_token;
   res.redirect(redirect_url);
 });
 

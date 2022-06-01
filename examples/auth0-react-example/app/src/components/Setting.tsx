@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { APP_CONFIG, APP_CONFIG_TYPE } from "../config/appConfig";
@@ -13,6 +13,9 @@ interface IProps {
 }
 
 const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
+  useEffect(()=>{
+  setApp(sessionStorage.getItem('app') as APP_CONFIG_TYPE);
+  });
   const networkChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setNetwork(e.target.value as WEB3AUTH_NETWORK_TYPE);
@@ -26,6 +29,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
   const appChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setApp(e.target.value as APP_CONFIG_TYPE);
+    sessionStorage.setItem('app', e.target.value);
   };
   const { provider } = useContext(Web3AuthContext);
   const isLoggedIn = provider !== null;
@@ -61,10 +65,10 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
         </select>
       </div>
       <div className={styles.row}>
-        <label htmlFor="network" className={styles.label}>
+        <label htmlFor="app" className={styles.label}>
           App Type
         </label>
-        <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn}>
+        <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn} value={window.sessionStorage.getItem("app") as string}>
           {Object.keys(APP_CONFIG).map((x: string) => {
             return (
               <option key={x} value={x}>

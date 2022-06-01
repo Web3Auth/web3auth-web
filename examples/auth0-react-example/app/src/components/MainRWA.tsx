@@ -5,22 +5,24 @@ import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 import {useLocation} from "react-router-dom";
 
+
 const Main = () => {
   const { provider, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, chain, web3Auth, setIsLoading } = useWeb3Auth();
   const search = useLocation().search;
   const jwt = new URLSearchParams(search).get('token');
   const token = jwt == null ? "" : jwt.toString();
+  // const btnRef = useRef(document.createElement("button"));
 
   const handleAuthLogin = async () => {
     try {
       setIsLoading(true);
-      // alert(token);
       await loginRWA(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
     } finally {
       setIsLoading(false);
     }
   }
-  // handleAuthLogin();
+  document.getElementById("rwaLogin")?.click();
+
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className={styles.card}>
@@ -57,15 +59,14 @@ const Main = () => {
  
   const unloggedInView = (
     <div className={styles.centerFlex}>
-       {/* <Loader/> */}
-       <button onClick={handleAuthLogin} className={styles.card}>
-        Log in
+       <Loader/>
+       <button onClick={handleAuthLogin} className={styles.rwabtn} id="rwaLogin">
+        Verify Token with web3auth
       </button>
     </div>
 
 
   );
-
   return isLoading ?
     (
       <div className={styles.centerFlex}>
@@ -74,6 +75,7 @@ const Main = () => {
     ): (
       <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>
     )
+    
 };
 
 export default Main;
