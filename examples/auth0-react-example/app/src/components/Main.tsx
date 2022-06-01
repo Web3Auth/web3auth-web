@@ -14,27 +14,13 @@ const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
   
   const handleImplicitLogin = async () => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       await login(WALLET_ADAPTERS.OPENLOGIN,"jwt");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   }
-  const handleAuthLogin = async () => {
-    try {
-      setIsLoading(true);
-      await loginRWA(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-  // useEffect(()=>{
-  //   if(isJWT){
-    
-  //   handleAuthLogin();
-  //   }
-    
-  //   }, [isJWT]);
+
   
   const loggedInView = (
     <>

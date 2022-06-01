@@ -103,7 +103,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
     async function init() {
       try {
-        setIsLoading(true);
+        // setIsLoading(true);
         // get your client id from https://dashboard.web3auth.io by registering a plug and play application.
         const clientId = process.env.REACT_APP_CLIENT_ID ||  "BMuAPXdFXaK94pUgfNluIEBPMTiwWKQz0h8AkCtf4Rzxv4bNLwsTRXSlt5OlB6KSpP_jYFhzloMf2XhUYADB3JE";
         // const clientId = process.env.REACT_APP_CLIENT_ID ||  "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
@@ -157,7 +157,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
     init();
