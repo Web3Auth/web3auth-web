@@ -1,7 +1,7 @@
-import SocialLoginEmail from "./SocialLoginEmail";
-import SocialLogins from "./SocialLogins";
 import { ModalState, SocialLoginEventType } from "../interfaces";
 import Icon from "./Icon";
+import SocialLoginEmail from "./SocialLoginEmail";
+import SocialLogins from "./SocialLogins";
 
 interface SocialLoginButtonProps {
   modalState: ModalState;
