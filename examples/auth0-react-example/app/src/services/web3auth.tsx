@@ -179,7 +179,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         relogin: true,
         loginProvider, 
         extraLoginOptions: {
-          domain: process.env.REACT_APP_AUTH0_DOMAIN || "https://torus-test.auth0.com",
+          domain: process.env.REACT_APP_AUTH0_DOMAIN,
           verifierIdField: "email",
         }
       });
@@ -200,7 +200,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         loginProvider, 
         extraLoginOptions: {
           id_token: jwt_token,
-          domain: "https://torus-test.auth0.com",
+          domain: process.env.REACT_APP_AUTH0_DOMAIN,
           verifierIdField: "sub",
         }
       });
@@ -221,8 +221,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     await web3Auth.logout();
     setProvider(null);
-    window.location.href = '/';
     window.sessionStorage.clear();
+    window.location.href = '/';
   };
 
   const getUserInfo = async () => {

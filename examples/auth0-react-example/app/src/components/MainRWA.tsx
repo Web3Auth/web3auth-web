@@ -21,12 +21,11 @@ const Main = () => {
       setIsLoading(false);
     }
   }
-  // document.getElementById("rwaLogin")?.click();
 
 useEffect(()=>{
-  // debugger;
   handleAuthLogin();
 }, [isWeb3AuthInit]);
+
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className={styles.card}>
