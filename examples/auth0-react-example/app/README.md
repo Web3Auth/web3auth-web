@@ -41,7 +41,7 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
 
 config:
 ```bash
-Copy .env.developement to .env(if not present create new file) and change configuration of app accordingly in .env.
+Copy .env.developement to .env(if not present create new file) and change configuration of app accordingly using .env file.
 ```
 
 Run:
