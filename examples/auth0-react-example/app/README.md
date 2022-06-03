@@ -39,6 +39,11 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
 2. Your server endpoint for login button
 ## Installation
 
+config:
+```bash
+Copy .env.developement to .env(if not present create new file) and change configuration of app accordingly in .env.
+```
+
 Run:
 
 ```bash
