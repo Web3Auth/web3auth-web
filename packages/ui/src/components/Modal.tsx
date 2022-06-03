@@ -1,6 +1,6 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { log, WALLET_ADAPTERS } from "@web3auth/base";
+import { EVM_ADAPTERS, log, MULTI_CHAIN_ADAPTERS, WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -73,10 +73,10 @@ export default function Modal(props: ModalProps) {
   useEffect(() => {
     const tempExternalWalletList = modalState.externalWalletList;
     if (tempExternalWalletList.length > 0) {
-      if (tempExternalWalletList.includes("metamask")) {
-        setWalletIcon("metamask");
-      } else if (tempExternalWalletList.includes("wallet-connect-v1")) {
-        setWalletIcon("wallet-connect");
+      if (tempExternalWalletList.includes(EVM_ADAPTERS.METAMASK)) {
+        setWalletIcon(EVM_ADAPTERS.METAMASK);
+      } else if (tempExternalWalletList.includes(MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V1)) {
+        setWalletIcon(MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V1);
       } else {
         setWalletIcon(tempExternalWalletList[0]);
       }
@@ -89,7 +89,7 @@ export default function Modal(props: ModalProps) {
     });
     if (loginsList.length > 3) {
       const tempIconList = loginsList.filter((item) => {
-        return item !== "facebook";
+        return item !== LOGIN_PROVIDER.FACEBOOK;
       });
       setIcons(tempIconList.slice(0, 3));
     } else if (loginsList.length <= 3) {
