@@ -1,8 +1,8 @@
 <template>
-  <div id="w3a-modal" class="w3a-modal" v-if="isLoading">
-    <div class="w3ajs-modal-loader w3a-modal__loader">
-      <div class="w3a-modal__loader-content">
-        <div class="w3a-modal__loader-info">
+  <div id="w3a-example-modal" class="w3a-example-modal" v-if="isLoading">
+    <div class="w3ajs-modal-loader w3a-example-modal__loader">
+      <div class="w3a-example-modal__loader-content">
+        <div class="w3a-example-modal__loader-info">
           <div class="w3ajs-modal-loader__spinner w3a-spinner">
             <div class="w3a-spinner__body"></div>
             <div class="w3a-spinner__cover"></div>

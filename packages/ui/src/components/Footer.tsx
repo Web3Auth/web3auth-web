@@ -23,7 +23,7 @@ function Footer(props: FooterProps) {
           <p>{version}</p>
         </div>
         <div className="w3a-footer__secured">
-          <div>Secured by</div>
+          <div>Self-custodial login by</div>
           {web3authIcon}
         </div>
       </div>
