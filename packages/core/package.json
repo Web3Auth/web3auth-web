@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/core",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0",
   "description": "Multi chain wallet aggregator core for web3Auth",
   "keywords": [
     "web3Auth/core",
@@ -34,13 +34,10 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.1"
-  },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^1.7.3",
-    "@web3auth/base": "^1.0.0-alpha.0",
-    "@web3auth/base-plugin": "^1.0.0-alpha.0"
+    "@toruslabs/openlogin-jrpc": "^2.0.0",
+    "@web3auth/base": "^1.0.0",
+    "@web3auth/base-plugin": "^1.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [

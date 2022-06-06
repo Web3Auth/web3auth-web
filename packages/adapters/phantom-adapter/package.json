@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/phantom-adapter",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0",
   "description": "phantom wallet adapter for web3auth",
   "keywords": [
     "web3Auth/phantom-wallet-adapter",
@@ -35,13 +35,10 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x"
   },
-  "devDependencies": {
-    "lint-staged": "^12.4.1"
-  },
   "dependencies": {
-    "@web3auth/base": "^1.0.0-alpha.0",
-    "@web3auth/base-provider": "^1.0.0-alpha.0",
-    "@web3auth/solana-provider": "^1.0.0-alpha.0",
+    "@web3auth/base": "^1.0.0",
+    "@web3auth/base-provider": "^1.0.0",
+    "@web3auth/solana-provider": "^1.0.0",
     "bn.js": "^5.2.0"
   },
   "lint-staged": {

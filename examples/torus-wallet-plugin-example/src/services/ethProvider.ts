@@ -9,6 +9,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
       uiConsole("Eth accounts", accounts);
+      return accounts;
     } catch (error) {
       console.error("Error", error);
       uiConsole("error", error);
