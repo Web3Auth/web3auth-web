@@ -61,7 +61,7 @@ export default function SocialLogins(props: SocialLoginProps) {
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
           return (
-            <li className="w3a-adapter-item" key={method} style={{ order }}>
+            <li className="w3a-adapter-item w3a-adapter-item--socials" key={method} style={{ order }}>
               <button
                 type="button"
                 onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}

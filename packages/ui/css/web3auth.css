@@ -105,7 +105,7 @@
   position: relative;
 }
 #w3a-modal .w3a-modal__content {
-  padding: 10px 30px;
+  padding: 24px 30px;
   background: var(--bg2);
 }
 #w3a-modal .w3a-modal__footer {
@@ -272,10 +272,9 @@
   margin-bottom: 24px;
 }
 
-#w3a-modal .w3a-social-button{
-  margin-bottom: 24px;
+#w3a-modal .w3a-social-button {
+  margin-bottom: 16px;
 }
-
 
 #w3a-modal .w3a-group:last-child {
   margin-bottom: 0;
@@ -332,6 +331,10 @@
   margin-bottom: 30px;
 }
 
+#w3a-modal li.w3a-adapter-item.w3a-adapter-item--socials {
+  margin-bottom: 0;
+}
+
 #w3a-modal .w3a-wallet__subtitle {
   font-size: 14px;
   line-height: 1.5em;
@@ -340,9 +343,8 @@
   line-height: 21px;
   text-align: center;
   margin-bottom: 20px;
-  color: #5C6C7F;
+  color: #5c6c7f;
 }
-
 
 #w3a-modal .w3a-adapter-item--hide {
   display: none;
@@ -406,15 +408,15 @@
   width: 84px;
 }
 
-#w3a-modal .w3a-button-group{
+#w3a-modal .w3a-button-group {
   margin: 3px 0px 2px 0px;
 }
 
-#w3a-modal .w3a-button--text{
+#w3a-modal .w3a-button--text {
   margin-left: 10px;
 }
-.w3a-button--icon-background{
-  background-color: #F3F3F4;
+.w3a-button--icon-background {
+  background-color: #f3f3f4;
   width: 35px;
   height: 35px;
   -moz-border-radius: 50%;
@@ -422,15 +424,15 @@
   margin-left: 5px;
   margin-top: 5px;
 }
-.w3a-button--icon-overlap{
-  background-color: #F3F3F4;
+.w3a-button--icon-overlap {
+  background-color: #f3f3f4;
   width: 35px;
   height: 35px;
   -moz-border-radius: 50%;
   -webkit-border-radius: 50%;
   margin-left: -5px;
 }
-#w3a-modal .back-button-arrow{
+#w3a-modal .back-button-arrow {
   margin: 5px;
 }
 
@@ -677,9 +679,8 @@
 }
 
 #w3a-modal .w3a-footer__secured {
-  color: #5C6C7F;
+  color: #5c6c7f;
 }
-
 
 #w3a-modal .w3a-footer__secured > img {
   height: 14px;
@@ -891,7 +892,7 @@
   background-color: #ffffff;
   border: 1px solid #f3f3f4;
   box-shadow: none;
-  color: #0F1222;
+  color: #0f1222;
 }
 
 #w3a-modal.w3a-modal--light button.w3a-button:disabled {
