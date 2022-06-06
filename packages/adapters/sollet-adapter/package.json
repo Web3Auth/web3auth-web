@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@solana/web3.js": "^1.43.1",
-    "lint-staged": "^12.4.1"
+    "lint-staged": "^13.0.0"
   },
   "dependencies": {
     "@project-serum/sol-wallet-adapter": "^0.2.6",
