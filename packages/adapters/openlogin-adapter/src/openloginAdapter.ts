@@ -64,7 +64,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     };
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
     // if no chainNamespace is passed then chain config should be set before calling init
-    if (params.chainConfig?.chainNamespace) {
+    if (params.chainConfig?.chainNamespace && params.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       this.currentChainNamespace = params.chainConfig?.chainNamespace;
       const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
       this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
