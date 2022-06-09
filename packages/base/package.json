@@ -19,12 +19,12 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^2.0.0",
+    "@toruslabs/openlogin-jrpc": "^2.1.0",
     "loglevel": "^1.8.0",
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
-    "@toruslabs/openlogin": "^2.0.0"
+    "@toruslabs/openlogin": "^2.1.0"
   },
   "files": [
     "dist",

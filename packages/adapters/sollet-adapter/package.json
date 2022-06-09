@@ -37,15 +37,14 @@
     "@solana/web3.js": "^1.x"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.43.1",
-    "lint-staged": "^12.4.1"
+    "@solana/web3.js": "^1.43.6"
   },
   "dependencies": {
     "@project-serum/sol-wallet-adapter": "^0.2.6",
     "@web3auth/base": "^1.0.0",
     "@web3auth/base-provider": "^1.0.0",
     "@web3auth/solana-provider": "^1.0.0",
-    "bn.js": "^5.2.0"
+    "bn.js": "^5.2.1"
   },
   "lint-staged": {
     "!(*d).ts": [

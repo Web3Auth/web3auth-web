@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.23.0",
+    "@toruslabs/torus-embed": "^1.24.0",
     "@web3auth/base": "^1.0.0"
   },
   "lint-staged": {
