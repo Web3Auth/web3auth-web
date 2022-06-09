@@ -11,8 +11,6 @@ export const getOpenloginDefaultOptions = (chainNamespace?: ChainNamespaceType, 
       uxMode: UX_MODE.POPUP,
     },
     chainConfig: chainNamespace ? getChainConfig(chainNamespace, chainId) : null,
-    loginSettings: {
-      relogin: true,
-    },
+    loginSettings: {},
   };
 };
