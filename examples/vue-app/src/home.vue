@@ -127,7 +127,6 @@
               </div>
             </div>
           </div>
-          <hr />
 
           <!-- UI MODE YOUR OWN MODAL -->
           <div v-if="form.selectedUiMode == 'customUi'">
