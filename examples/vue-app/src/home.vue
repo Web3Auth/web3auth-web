@@ -389,6 +389,7 @@ body {
   border-right: 1px solid #ebecf0;
   background-color: #f4f5f7;
   padding: 20px;
+  padding-bottom: 60px;
 }
 
 .content {
