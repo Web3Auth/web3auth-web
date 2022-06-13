@@ -212,6 +212,7 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
+import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
 import Vue from "vue";
 
@@ -264,7 +265,7 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   });
 };
 
-const defaultFormConfig = {
+const initialFormConfig = {
   chain: "ethereum",
   authMode: "hosted",
   selectedUiMode: "default",
@@ -288,37 +289,15 @@ const defaultFormConfig = {
   },
 };
 
-const defaultComponentConfig = {
-  chain: "ethereum",
-  authMode: "hosted",
-  selectedUiMode: "default",
-  openloginNetwork: "testnet",
-  plugins: {
-    torusWallet: true,
-  },
-  uiMode: {
-    default: {
-      login: [...defaultLoginProviders()],
-      adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
-    },
-    customUi: {
-      type: "openlogin",
-    },
-    whitelabel: {
-      logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
-      theme: "light",
-      loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
-    },
-  },
-};
+const initialComponentConfig = cloneDeep(initialFormConfig);
 export default Vue.extend({
   name: "home",
   data() {
     return {
       // storing config collected from user input.
-      form: { ...defaultFormConfig },
+      form: { ...initialFormConfig },
       // sending to other components
-      config: { ...defaultComponentConfig },
+      config: { ...initialComponentConfig },
       tempLoginMethodsOrder: "",
     };
   },
@@ -328,10 +307,9 @@ export default Vue.extend({
     CustomUiContainer,
   },
   mounted() {
-    const storedConfig = sessionStorage.getItem("web3AuthExampleConfig");
-    const finalStoredConfig = JSON.parse(storedConfig || "{}");
-    this.config = merge(this.config, finalStoredConfig);
-    if (finalStoredConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = finalStoredConfig.uiMode.whitelabel.loginMethodsOrder;
+    const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig") ?? "{}");
+    this.config = merge(this.config, storedConfig);
+    if (storedConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = storedConfig.uiMode.whitelabel.loginMethodsOrder;
     this.form = merge({}, this.config);
     // this.config.uiMode.default.login.push({
     //   id: "facebook",
