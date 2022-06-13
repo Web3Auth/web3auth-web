@@ -2677,9 +2677,9 @@
     pump "^3.0.0"
 
 "@toruslabs/torus-embed@^1.24.0":
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.24.0.tgz#bcdb37c03f6305b407be1fdaf43a33ce4f5277fd"
-  integrity sha512-lMkxTXMuftB/UMIQxrD/VGkGdfkmWTjV8JyPY7K41bceVRyb/yBP6RkGztH9O14eRB2hutib68EZnjj+cwiocw==
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-embed/-/torus-embed-1.24.1.tgz#93a6d7ed8f3497a7e346c49af0a07b2f3ea22930"
+  integrity sha512-SusjFkMhyjSYluCxtTA/uVxKYkegNWNEq7dexuCQ3qqeGrQdUVAPVC5y2lJ91m0U6ehty07RjncHahYl2lf5pQ==
   dependencies:
     "@metamask/obs-store" "^7.0.0"
     "@toruslabs/fetch-node-details" "^6.0.1"
