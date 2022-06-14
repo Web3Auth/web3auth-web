@@ -265,6 +265,24 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   });
 };
 
+const configFromSessionStorage = () => {
+  const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig")) ?? {};
+  return storedConfig;
+};
+
+const configFromURL = () => {
+  const params = new URLSearchParams(document.location.search);
+  const chainParams = params.get("chain");
+  const authModeParams = params.get("auth");
+  const whitelabelParams = params.get("whitelabel");
+
+  return {
+    chain: ["ethereum", "solana", "binance", "polygon"].includes(chainParams) ? chainParams : "ethereum",
+    authMode: authModeParams === "custom" ? "ownAuth" : "hosted",
+    selectedUiMode: whitelabelParams === "yes" ? "whitelabel" : "default",
+  };
+};
+
 const initialFormConfig = {
   chain: "ethereum",
   authMode: "hosted",
@@ -287,9 +305,10 @@ const initialFormConfig = {
       loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
     },
   },
+  ...configFromSessionStorage(),
+  ...configFromURL(),
 };
 
-const initialComponentConfig = cloneDeep(initialFormConfig);
 export default Vue.extend({
   name: "home",
   data() {
@@ -297,7 +316,7 @@ export default Vue.extend({
       // storing config collected from user input.
       form: { ...initialFormConfig },
       // sending to other components
-      config: { ...initialComponentConfig },
+      config: { ...cloneDeep(initialFormConfig) },
       tempLoginMethodsOrder: "",
     };
   },
