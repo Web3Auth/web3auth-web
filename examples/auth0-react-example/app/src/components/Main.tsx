@@ -6,7 +6,7 @@ import styles from "../styles/Home.module.css";
 
 const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
   const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
-  const rwaURL = `${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?scope=openid&response_type=code&client_id=${process.env.REACT_APP_RWA_CLIENTID}&redirect_uri=${process.env.REACT_APP_BACKEND_SERVER_API}&state=STATE&connection=github`;
+  const rwaURL = `${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?scope=openid&response_type=code&client_id=${process.env.REACT_APP_RWA_CLIENTID}&redirect_uri=${process.env.REACT_APP_BACKEND_SERVER_API}&state=STATE&connection=twitter`;
   const handleImplicitLogin = async () => {
     try {
       await login(WALLET_ADAPTERS.OPENLOGIN,"jwt");
