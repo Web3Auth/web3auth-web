@@ -325,16 +325,18 @@ export default Vue.extend({
     WhitelabelExample: WhitelabelExample,
     CustomUiContainer,
   },
-  mounted() {
-    const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig") ?? "{}");
-    this.config = merge(this.config, storedConfig);
-    if (storedConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = storedConfig.uiMode.whitelabel.loginMethodsOrder;
-    this.form = merge({}, this.config);
-    // this.config.uiMode.default.login.push({
-    //   id: "facebook",
-    //   name: "Facebook",
-    //   checked: false,
-    // });
+  watch: {
+    "form.authMode"(val) {
+      const formValURLSearchParamMap = { ownAuth: "custom", hosted: "default" };
+      this.updateURL("auth", formValURLSearchParamMap[val]);
+    },
+    "form.chain"(val) {
+      this.updateURL("chain", val);
+    },
+    "form.selectedUiMode"(val) {
+      const formValURLSearchParamMap = { whitelabel: "yes", default: "no" };
+      this.updateURL("whitelabel", formValURLSearchParamMap[val]);
+    },
   },
   methods: {
     saveConfig: function () {
@@ -356,6 +358,11 @@ export default Vue.extend({
     },
     setDefaultLoginMethodsOrder: function () {
       this.tempLoginMethodsOrder = DEFAULT_LOGIN_PROVIDERS.join(",");
+    },
+    updateURL(searchParamKey, searchParamValue) {
+      const url = new URL(window.location.href);
+      url.searchParams.set(searchParamKey, searchParamValue);
+      window.history.replaceState(null, null, url.toString());
     },
   },
 });
