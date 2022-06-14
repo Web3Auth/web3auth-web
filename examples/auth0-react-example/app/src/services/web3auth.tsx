@@ -118,7 +118,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           sessionStorage.setItem('app', 'SPA');
         }
         if(sessionStorage.getItem('app') === "SPA"){
-          // alert("spa");
           const adapter = new OpenloginAdapter({ adapterSettings: { 
             network: web3AuthNetwork, 
             clientId, 
@@ -126,9 +125,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             loginConfig: {
               jwt: {
                 name: "Custom Auth0 Login",
-            verifier: "passwordless-auth0",
-            typeOfLogin: "jwt",
-            clientId: process.env.REACT_APP_SPA_CLIENTID || "PqTu6oE6V3jFSSfdaT4smoXgbOyThsga",
+                verifier: "twitter-auth0-verifier",
+                typeOfLogin: "jwt",
+                clientId: "6dK1xI4qhocs1AwBa3pAeJM4muMY1RSb",
               },
             },
           }});
@@ -180,7 +179,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         loginProvider, 
         extraLoginOptions: {
           domain: process.env.REACT_APP_AUTH0_DOMAIN,
-          verifierIdField: "email",
+          verifierIdField: "sub",
         }
       });
       setWalletProvider(localProvider!);
