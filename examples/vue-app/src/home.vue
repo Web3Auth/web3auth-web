@@ -193,13 +193,13 @@
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
           v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
-        ></ConfigurableExample>
+        />
 
         <WhitelabelExample
           :uiConfig="config.uiMode.whitelabel"
           :chain="config.chain"
           v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
-        ></WhitelabelExample>
+        />
 
         <!-- Custom auth -->
         <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
