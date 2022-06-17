@@ -300,10 +300,11 @@ const configFromURL = () => {
   const authModeParams = params.get("auth");
   const whitelabelParams = params.get("whitelabel");
 
+  // prettier-ignore
   return {
-    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams) && { chain: chainParams }),
-    ...(authModeParams === "custom" && { authMode: "ownAuth" }),
-    ...(whitelabelParams === "yes" && { selectedUiMode: "whitelabel" }),
+    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams)  && { chain: chainParams }),
+    ...(authModeParams === "custom"                                         && { authMode: "ownAuth" }),
+    ...(whitelabelParams === "yes"                                          && { selectedUiMode: "whitelabel" }),
   };
 };
 
