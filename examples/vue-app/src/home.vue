@@ -277,9 +277,9 @@ const configFromURL = () => {
   const whitelabelParams = params.get("whitelabel");
 
   return {
-    chain: ["ethereum", "solana", "binance", "polygon"].includes(chainParams) ? chainParams : "ethereum",
-    authMode: authModeParams === "custom" ? "ownAuth" : "hosted",
-    selectedUiMode: whitelabelParams === "yes" ? "whitelabel" : "default",
+    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams) && { chain: chainParams }),
+    ...(authModeParams === "custom" && { authMode: "ownAuth" }),
+    ...(whitelabelParams === "yes" && { selectedUiMode: "whitelabel" }),
   };
 };
 
