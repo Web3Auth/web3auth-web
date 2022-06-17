@@ -317,7 +317,7 @@ export default Vue.extend({
       form: { ...initialFormConfig },
       // sending to other components
       config: { ...cloneDeep(initialFormConfig) },
-      tempLoginMethodsOrder: "",
+      tempLoginMethodsOrder: initialFormConfig.uiMode?.whitelabel.loginMethodsOrder.join(",") ?? "",
     };
   },
   components: {
