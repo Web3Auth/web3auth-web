@@ -265,25 +265,7 @@ const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   });
 };
 
-const configFromSessionStorage = () => {
-  const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig")) ?? {};
-  return storedConfig;
-};
-
-const configFromURL = () => {
-  const params = new URLSearchParams(document.location.search);
-  const chainParams = params.get("chain");
-  const authModeParams = params.get("auth");
-  const whitelabelParams = params.get("whitelabel");
-
-  return {
-    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams) && { chain: chainParams }),
-    ...(authModeParams === "custom" && { authMode: "ownAuth" }),
-    ...(whitelabelParams === "yes" && { selectedUiMode: "whitelabel" }),
-  };
-};
-
-const initialFormConfig = {
+const defaultFormConfig = {
   chain: "ethereum",
   authMode: "hosted",
   selectedUiMode: "default",
@@ -305,6 +287,28 @@ const initialFormConfig = {
       loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
     },
   },
+};
+
+const configFromSessionStorage = () => {
+  const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig")) ?? {};
+  return storedConfig;
+};
+
+const configFromURL = () => {
+  const params = new URLSearchParams(document.location.search);
+  const chainParams = params.get("chain");
+  const authModeParams = params.get("auth");
+  const whitelabelParams = params.get("whitelabel");
+
+  return {
+    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams) && { chain: chainParams }),
+    ...(authModeParams === "custom" && { authMode: "ownAuth" }),
+    ...(whitelabelParams === "yes" && { selectedUiMode: "whitelabel" }),
+  };
+};
+
+const initialFormConfig = {
+  ...defaultFormConfig,
   ...configFromSessionStorage(),
   ...configFromURL(),
 };
