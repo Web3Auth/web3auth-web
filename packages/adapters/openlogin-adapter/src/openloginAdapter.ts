@@ -1,4 +1,4 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -196,6 +196,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
     // if not logged in then login
     if (!this.openloginInstance.privKey && params) {
+      if (!this.loginSettings.curve) {
+        this.loginSettings.curve =
+          this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
+      }
       await this.openloginInstance.login(
         merge(
           this.loginSettings,

@@ -24,7 +24,7 @@
     "ts-custom-error": "^3.2.0"
   },
   "devDependencies": {
-    "@toruslabs/openlogin": "^2.1.0"
+    "@toruslabs/openlogin": "^2.2.0"
   },
   "files": [
     "dist",
