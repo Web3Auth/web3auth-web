@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@svgr/webpack": "^6.2.1",
-    "@toruslabs/openlogin": "^2.1.0",
+    "@toruslabs/openlogin": "^2.2.0",
     "@types/node": "^16",
     "css-loader": "^6.7.1",
     "style-loader": "^3.3.1",

@@ -1,4 +1,4 @@
-import type { CUSTOM_LOGIN_PROVIDER_TYPE, LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
+import type { OpenloginUserInfo } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { getChainConfig } from "../chain/config";
@@ -7,41 +7,7 @@ import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTERS } from "../wallet";
 
-export type UserInfo = {
-  /**
-   * Email of the logged in user
-   */
-  email: string;
-  /**
-   * Full name of the logged in user
-   */
-  name: string;
-  /**
-   * Profile image of the logged in user
-   */
-  profileImage: string;
-  /**
-   * verifier of the logged in user (google, facebook etc)
-   */
-  verifier: string;
-  /**
-   * Verifier Id of the logged in user
-   *
-   * email for google,
-   * id for facebook,
-   * username for reddit,
-   * id for twitch,
-   * id for discord
-   */
-  verifierId: string;
-
-  aggregateVerifier?: string;
-
-  /**
-   * typeOfLogin of the logged in user (google, facebook etc)
-   */
-  typeOfLogin: LOGIN_PROVIDER_TYPE | CUSTOM_LOGIN_PROVIDER_TYPE;
-};
+export type UserInfo = OpenloginUserInfo;
 
 export const ADAPTER_CATEGORY = {
   EXTERNAL: "external",

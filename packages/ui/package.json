@@ -39,7 +39,7 @@
     "@babel/preset-react": "^7.17.12",
     "@svgr/rollup": "^6.2.1",
     "@svgr/webpack": "^6.2.1",
-    "@toruslabs/eslint-config-react": "^1.0.2",
+    "@toruslabs/eslint-config-react": "^1.0.3",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.merge": "^4.6.7",
     "@types/react": "^17.0.43",
@@ -48,7 +48,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.30.0",
-    "eslint-plugin-react-hooks": "^4.5.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "live-server": "^1.2.2",
     "postcss": "^8.4.14",
@@ -58,7 +58,7 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^2.1.0",
+    "@toruslabs/openlogin": "^2.2.0",
     "@toruslabs/openlogin-jrpc": "^2.1.0",
     "@web3auth/base": "^1.0.1",
     "bowser": "^2.11.0",
