@@ -7,6 +7,7 @@ import { InMemorySigner } from '@taquito/signer';
 import { IWalletProvider } from "./walletProvider";
 
 const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+  // List of available RPC Nodes -- https://tezostaquito.io/docs/rpc_nodes
   const tezos = new TezosToolkit('https://ithacanet.ecadinfra.com');
 
   const getTezosKeyPair = async () => {
@@ -15,14 +16,16 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
       const keyPair = tezosCrypto.utils.seedToKeyPair(hex2buf(privateKey));
       return keyPair;
     } catch (error) {
-      return error;
+      console.error(error);
+      return null;
     }
   }
 
   const setProvider = async () => {
     const keyPair = await getTezosKeyPair();
+    // Storing private keys in memory is suitable for development workflows but risky for production use-cases! Use the InMemorySigner appropriately given your risk profile
     // use TacoInfra's RemoteSigner for better security on mainnet..
-    tezos.setSignerProvider(await InMemorySigner.fromSecretKey(keyPair.sk));
+    tezos.setSignerProvider(await InMemorySigner.fromSecretKey(keyPair?.sk as string));
   }
 
   const getAccounts = async () => {
@@ -37,7 +40,8 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
   const getBalance = async () => {
     try {
       const keyPair = await getTezosKeyPair();
-      const balance = await tezos.tz.getBalance(keyPair.pkh);
+      // keyPair.pkh is the account address.
+      const balance = await tezos.tz.getBalance(keyPair?.pkh as string);
       uiConsole("Tezos balance", balance);
     } catch (error) {
       console.error("Error", error);
@@ -60,9 +64,16 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
       // example address.
       const address = 'tz1dHzQTA4PGBk2igZ3kBrDsVXuvHdN8kvTQ';
 
+      // NOTE: The account which is used to send tezos shoudld have some balance for this transaction to go through.
+      // If there is no balance, then we will receive an error - "implicit.empty_implicit_contract"
+      // To solve this error, use a faucet account to send some tzs to the account.
+      // Alternate solution:
+      // 1. Use this link: https://tezostaquito.io/docs/making_transfers#transfer-from-an-implicit-tz1-address-to-a-tz1-address
+      // 2. Modify the address and use the pkh key extracted from web3auth seed in the live code editor and click run code.
+      // 3. Check balance in the account and have some fun.
       const op = await tezos.wallet.transfer({
         to: address,
-        amount: 0.000005,
+        amount: 0.00005,
       }).send();
 
       const txRes = await op.confirmation();
