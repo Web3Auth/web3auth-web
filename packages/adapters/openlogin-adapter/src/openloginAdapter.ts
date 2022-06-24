@@ -64,12 +64,12 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     };
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
     // if no chainNamespace is passed then chain config should be set before calling init
-    if (params.chainConfig?.chainNamespace && params.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+    if (params.chainConfig?.chainNamespace) {
       this.currentChainNamespace = params.chainConfig?.chainNamespace;
       const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
       this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
       log.debug("const openlogin chainConfig", this.chainConfig);
-      if (!this.chainConfig.rpcTarget) {
+      if (!this.chainConfig.rpcTarget && params.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
         throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
       }
     }
@@ -90,8 +90,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
     if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
-    if (!this.chainConfig && this.currentChainNamespace !== CHAIN_NAMESPACES.OTHER)
-      throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     let isRedirectResult = false;
 
     if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
