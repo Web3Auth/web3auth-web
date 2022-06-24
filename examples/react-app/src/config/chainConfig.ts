@@ -30,7 +30,7 @@ export const CHAIN_CONFIG = {
   } as CustomChainConfig,
   tezos: {
     chainNamespace: CHAIN_NAMESPACES.OTHER,
-    displayName: "Tezos Mainnet",
+    displayName: "Tezos Ithacanet",
   } as CustomChainConfig,
 } as const;
 

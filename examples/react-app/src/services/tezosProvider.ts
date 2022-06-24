@@ -29,7 +29,8 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
 
   const getAccounts = async () => {
     try {
-      uiConsole("Method not implemented.")
+      const keyPair = await getTezosKeyPair();
+      uiConsole("Tezos Account", keyPair?.pkh);
     } catch (error) {
       console.error("Error", error);
       uiConsole("error", error);
@@ -50,7 +51,12 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
 
   const signMessage = async () => {
     try {
-      uiConsole("Method not implemented.")
+      // Reference: https://tezostaquito.io/docs/signing
+      const keyPair = await getTezosKeyPair();
+      const signer = new InMemorySigner(keyPair.sk);
+      const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+      const signature = await signer.sign(message);
+      uiConsole("Message", signature);
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
