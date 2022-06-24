@@ -23,7 +23,6 @@ const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: 
 
   const setProvider = async () => {
     const keyPair = await getTezosKeyPair();
-    // Storing private keys in memory is suitable for development workflows but risky for production use-cases! Use the InMemorySigner appropriately given your risk profile
     // use TacoInfra's RemoteSigner for better security on mainnet..
     tezos.setSignerProvider(await InMemorySigner.fromSecretKey(keyPair?.sk as string));
   }
