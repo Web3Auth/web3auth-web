@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@types/json-rpc-random-id": "^1.0.1",
-    "@types/node": "^16"
+    "@types/node": "^18"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
