@@ -1,10 +1,9 @@
 <template>
   <div class="container">
     <div class="sidebar">
-      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/vue-app" target="blank">
-        <img src="./assets/github-logo.png" width="30px" />
-      </a>
-      <h2>Demo Settings</h2>
+      <img src="./assets/web3auth.svg" />
+      <!-- <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/vue-app" target="blank">link</a> -->
+      <!-- <h2>Demo Settings</h2> -->
 
       <div class="flex-vertical-center authMode">
         <!-- <label class="form-label" for="chain">Chain</label> -->
@@ -389,6 +388,7 @@ body {
   flex-wrap: wrap;
   align-items: stretch;
   height: 100%;
+  background-color: #e3e3e3;
 }
 
 .sidebar {
@@ -398,6 +398,13 @@ body {
   background-color: #f4f5f7;
   padding: 20px;
   padding-bottom: 60px;
+  background: linear-gradient(0deg, #ffffff, #ffffff), #f3f3f4;
+  border: 1px solid #f3f3f4;
+  box-shadow: 4px 4px 20px rgba(46, 91, 255, 0.1);
+  border-radius: 20px;
+  margin: 20px;
+  max-height: 85%;
+  overflow: scroll;
 }
 
 .content {
@@ -452,7 +459,7 @@ body {
 .btn-group {
   text-align: center;
   position: fixed;
-  bottom: 0;
+  bottom: 2.5rem;
 }
 
 .btn {
