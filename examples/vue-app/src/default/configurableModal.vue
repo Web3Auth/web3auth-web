@@ -1,9 +1,6 @@
 <template>
   <div id="app">
     <ChainContainer :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
-    <div id="console" style="white-space: pre-line">
-      <code style="white-space: pre-line"></code>
-    </div>
   </div>
 </template>
 
