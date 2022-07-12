@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -36,18 +36,18 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.17.12",
+    "@babel/preset-react": "^7.18.6",
     "@svgr/rollup": "^6.2.1",
     "@svgr/webpack": "^6.2.1",
     "@toruslabs/eslint-config-react": "^1.0.3",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.merge": "^4.6.7",
-    "@types/react": "^17.0.43",
-    "@types/react-dom": "^17.0.14",
+    "@types/react": "^17",
+    "@types/react-dom": "^17",
     "css-loader": "^6.7.1",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-react": "^7.30.0",
+    "eslint-plugin-jsx-a11y": "^6.6.0",
+    "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "live-server": "^1.2.2",
@@ -58,15 +58,15 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^2.2.0",
+    "@toruslabs/openlogin": "^2.3.0",
     "@toruslabs/openlogin-jrpc": "^2.1.0",
-    "@web3auth/base": "^1.1.0",
+    "@web3auth/base": "^1.1.1",
     "bowser": "^2.11.0",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^17",
+    "react-dom": "^17",
     "react-qr-code": "^2.0.7"
   },
   "lint-staged": {
