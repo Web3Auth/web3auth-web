@@ -2608,6 +2608,14 @@
     lodash.merge "^4.6.2"
     loglevel "^1.8.0"
 
+"@toruslabs/http-helpers@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/http-helpers/-/http-helpers-3.1.0.tgz#076fabea993dc9fb2ef50f514f9d9f3d5b43cc07"
+  integrity sha512-BBr+NBYjNTrR0F9ROFdc26P0Ccrprsnl51dJwcfBA7FkcW8442KNj1CnTyiztUyJxW3sXl9l2N+fZ5SRKbEaBA==
+  dependencies:
+    lodash.merge "^4.6.2"
+    loglevel "^1.8.0"
+
 "@toruslabs/metadata-helpers@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/metadata-helpers/-/metadata-helpers-3.0.0.tgz#ebc613bcd05ed7cfcf4ac1eb01e9558500a2e590"
@@ -2649,13 +2657,13 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/openlogin@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-2.2.0.tgz#1d0cc83e0e4e6704691972297b0d657381c23163"
-  integrity sha512-lxRli6VV6Yp6bIb2GZFQTzLXrLmfVpp2qCIEOP1kt9zf+/3weIWL/YL0MGv65PjUv8DWKR7DcIx+AMeL47TtpA==
+"@toruslabs/openlogin@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/openlogin/-/openlogin-2.3.0.tgz#0ef23281a9c021df5a6d987dd39eab98bc8dc601"
+  integrity sha512-r401FppsPI0Yb4fEloixe/2swBhcQaZeI49rSIB8nGyi+IJ7WNUFrcpOJE8rN4AluNwJGefztt+BXkpif55FfA==
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
-    "@toruslabs/http-helpers" "^3.0.0"
+    "@toruslabs/http-helpers" "^3.1.0"
     "@toruslabs/openlogin-jrpc" "^2.1.0"
     "@toruslabs/openlogin-utils" "^2.1.0"
     lodash.merge "^4.6.2"
@@ -8088,9 +8096,9 @@ lines-and-columns@^1.1.6:
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
 lint-staged@^13.0.2:
-  version "13.0.2"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-13.0.2.tgz#35a1c57130e9ad5b1dea784972a40777ba433dd5"
-  integrity sha512-qQLfLTh9z34eMzfEHENC+QBskZfxjomrf+snF3xJ4BzilORbD989NLqQ00ughsF/A+PT41e87+WsMFabf9++pQ==
+  version "13.0.3"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-13.0.3.tgz#d7cdf03a3830b327a2b63c6aec953d71d9dc48c6"
+  integrity sha512-9hmrwSCFroTSYLjflGI8Uk+GWAwMB4OlpU4bMJEAT5d/llQwtYKoim4bLOyLCuWFAhWEupE0vkIFqtw/WIsPug==
   dependencies:
     cli-truncate "^3.1.0"
     colorette "^2.0.17"
