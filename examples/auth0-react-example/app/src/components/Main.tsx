@@ -63,7 +63,7 @@ const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
       </button>:
       <button onClick={(e) => {
       e.preventDefault();
-      window.location.href= rwaURL
+      window.location.href= rwaURL;
       }} className={styles.card}>
         Auth Code Flow(RWA)
       </button>

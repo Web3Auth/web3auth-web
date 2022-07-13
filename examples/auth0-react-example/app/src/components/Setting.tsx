@@ -4,8 +4,8 @@ import { WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwo
 import { APP_CONFIG, APP_CONFIG_TYPE } from "../config/appConfig";
 import styles from "../styles/Home.module.css";
 import { Web3AuthContext } from "../services/web3auth";
-import { useContext } from "react";
-
+import { useContext, useState } from "react";
+import Switch from "react-switch";
 interface IProps {
   setNetwork: (network: WEB3AUTH_NETWORK_TYPE) => void;
   setChain: (chain: CHAIN_CONFIG_TYPE) => void;
@@ -13,8 +13,13 @@ interface IProps {
 }
 
 const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
-  useEffect(()=>{
-  setApp(sessionStorage.getItem('app') as APP_CONFIG_TYPE);
+  useEffect(() => {
+    setApp(sessionStorage.getItem("app") as APP_CONFIG_TYPE);
+    if(sessionStorage.getItem("app") === "SPA"){
+      setChecked(false);
+    }else{
+      setChecked(true);
+    }
   });
   const networkChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
@@ -26,17 +31,26 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
     setChain(e.target.value as CHAIN_CONFIG_TYPE);
   };
 
-  const appChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log("Settings", e.target.value);
-    setApp(e.target.value as APP_CONFIG_TYPE);
-    sessionStorage.setItem('app', e.target.value);
+  const appChangeHandler = (appType:  string) => {
+    console.log("Settings", appType);
+    // setChecked(!checked);
+    setApp(appType as APP_CONFIG_TYPE);
+    sessionStorage.setItem("app", appType);
+  };
+  const handleChange = (nextChecked: boolean) => {
+    setChecked(nextChecked);
+    if(checked)
+      appChangeHandler('SPA')
+    else
+      appChangeHandler('RWA')
+
   };
   const { provider } = useContext(Web3AuthContext);
   const isLoggedIn = provider !== null;
-
+  const [checked, setChecked] = useState(false);
   return (
     <div className={styles.setting}>
-      <div className={styles.row}>
+      <div className={styles.hide}>
         <label htmlFor="network" className={styles.label}>
           Web3Auth Network
         </label>
@@ -50,7 +64,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
           })}
         </select>
       </div>
-      <div className={styles.row}>
+      <div className={styles.hide}>
         <label htmlFor="network" className={styles.label}>
           Blockchain
         </label>
@@ -65,10 +79,26 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
         </select>
       </div>
       <div className={styles.row}>
+        <Switch
+          onChange={handleChange}
+          checked={checked}
+          onColor="#86d3ff"
+          onHandleColor="#2693e6"
+          handleDiameter={30}
+          uncheckedIcon={false}
+          checkedIcon={false}
+          height={20}
+          width={48}
+          disabled={isLoggedIn}
+        />
+      </div>
+      <div className={styles.row}>
         <label htmlFor="app" className={styles.label}>
-          App Type
+        App Type: { !checked?"SPA": "RWA"}
         </label>
-        <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn} value={window.sessionStorage.getItem("app") as string}>
+      </div>
+
+      {/* <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn} value={window.sessionStorage.getItem("app") as string}>
           {Object.keys(APP_CONFIG).map((x: string) => {
             return (
               <option key={x} value={x}>
@@ -76,8 +106,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
               </option>
             );
           })}
-        </select>
-      </div>
+        </select> */}
     </div>
   );
 };

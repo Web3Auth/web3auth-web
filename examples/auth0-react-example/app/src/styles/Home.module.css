@@ -18,7 +18,11 @@
   line-height: 1.15;
   font-size: 2rem;
   text-align: center;
-  margin: 50px;
+  margin: 30px;
+  height: 3.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
 }
 
 .title a {
@@ -54,7 +58,7 @@
   margin: 30px 0;
   background: #f4f5f7;
   border: 1px solid #ebecf0;
-  border-radius: 5px;
+  border-radius: 4rem;
 }
 
 .card {
@@ -80,9 +84,9 @@
   display: flex;
   margin-bottom: 0.5rem;
   width: 100%;
+  justify-content: space-evenly;
 }
 .label {
-  flex-basis: 45%;
   padding-right: 10px;
   display: flex;
   align-items: center;
@@ -101,11 +105,16 @@
 .footer {
   display: flex;
   flex: 1;
-  padding: 2rem 0;
+  margin: 2rem 0;
   border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
-  margin-top: 10rem;
+  /* margin-top: 10rem; */
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translate(-50%, -50%);
+  margin: 0 auto;
 }
 .rwabtn{
   visibility: hidden;
@@ -134,4 +143,16 @@
   .container {
     width: 100%;
   }
+}
+
+.hide{
+  display: none;
+}
+
+.walogo{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 4rem;
+  margin-top: 10px;
 }

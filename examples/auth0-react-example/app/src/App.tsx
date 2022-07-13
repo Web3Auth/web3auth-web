@@ -22,12 +22,13 @@ function App() {
   return (
     <div className={styles.container}>
       <Web3AuthProvider chain={chain} web3AuthNetwork={web3AuthNetwork} app={app}>
-        <h1 className={styles.title}>
+        {/* <h1 className={styles.title}>
           <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
             Web3Auth
           </a>{" "}
           & Auth0 Example
-        </h1>
+        </h1> */}
+        <img src="/images/web3authxauth0.png" className={styles.title} alt="" />
         <Setting setNetwork={setWeb3AuthNetwork} setChain={setChain} setApp={setApp}/>
         <Router>
           <Routes>
