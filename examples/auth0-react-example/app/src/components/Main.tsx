@@ -53,19 +53,19 @@ const Main = ({isJWT, appType}:{isJWT:boolean, appType: string}) => {
   const unloggedInView = (
     
     <div className={styles.centerFlex}>
-       <div>
+       {/* <div>
           <img src="https://images.web3auth.io/web3auth.svg" />
-        </div>
+        </div> */}
       <h3>Login With</h3>
       {appType === "SPA"?
       <button onClick={()=> handleImplicitLogin()} className={styles.card}>
-        Implicit Flow(SPA)
+        Implicit Flow (SPA)
       </button>:
       <button onClick={(e) => {
       e.preventDefault();
       window.location.href= rwaURL;
       }} className={styles.card}>
-        Auth Code Flow(RWA)
+        Auth Code Flow (RWA)
       </button>
       }
     </div>

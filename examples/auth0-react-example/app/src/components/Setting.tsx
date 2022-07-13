@@ -79,6 +79,12 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
         </select>
       </div>
       <div className={styles.row}>
+        <label htmlFor="app" className={styles.label}>
+         Choose your Auth0 application type
+        </label>
+      </div>
+      <div className={styles.toggleRow}>
+        <span className={styles.appMargin}>Single-Page App</span>
         <Switch
           onChange={handleChange}
           checked={checked}
@@ -93,11 +99,8 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
           width={48}
           disabled={isLoggedIn}
         />
-      </div>
-      <div className={styles.row}>
-        <label htmlFor="app" className={styles.label}>
-        App Type: { !checked?"SPA": "RWA"}
-        </label>
+        <span className={styles.appMargin}>Regular Web App</span>
+        
       </div>
 
       {/* <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn} value={window.sessionStorage.getItem("app") as string}>
