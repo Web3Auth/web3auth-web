@@ -82,8 +82,10 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
         <Switch
           onChange={handleChange}
           checked={checked}
-          onColor="#86d3ff"
-          onHandleColor="#2693e6"
+          offColor="#86d3ff"
+          offHandleColor="#2693e6"
+          onColor="#AFE1AF"
+          onHandleColor="#93C572"
           handleDiameter={30}
           uncheckedIcon={false}
           checkedIcon={false}
