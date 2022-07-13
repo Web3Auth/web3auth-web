@@ -16,6 +16,7 @@
     "react-loader-spinner": "^6.0.0-0",
     "react-router-dom": "^6.3.0",
     "react-switch": "^7.0.0",
+    "start": "^5.1.0",
     "web3": "^1.7.0"
   },
   "scripts": {

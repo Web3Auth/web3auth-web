@@ -1,7 +1,9 @@
 .container {
-  width: 60%;
   margin: auto;
   padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .main {
@@ -31,7 +33,9 @@
 }
 
 .console {
-  max-width: 100%;
+  max-width: 80%;
+  overflow: scroll;
+  max-height: 400px;
 }
 
 .code {
@@ -53,12 +57,14 @@
 .setting {
   display: flex;
   align-items: center;
+  align-self: center;
   flex-direction: column;
   padding: 20px;
   margin: 30px 0;
   background: #f4f5f7;
   border: 1px solid #ebecf0;
   border-radius: 4rem;
+  width: 80%;
 }
 
 .card {
@@ -70,7 +76,7 @@
   border: 1px solid #0070f3;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
-  width: 100%;
+  width: 80%;
 }
 
 .card:hover,
@@ -109,12 +115,7 @@
   border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
-  /* margin-top: 10rem; */
-  position: fixed;
-  left: 50%;
-  bottom: 20px;
-  transform: translate(-50%, -50%);
-  margin: 0 auto;
+  margin: 10 auto;
 }
 .rwabtn{
   visibility: hidden;
