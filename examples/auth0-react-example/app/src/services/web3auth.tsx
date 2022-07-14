@@ -220,7 +220,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     await web3Auth.logout();
     if(sessionStorage.getItem('app') === "RWA"){
-      window.open('https://torus-test.auth0.com/v2/logout?federated')
+      window.open(process.env.REACT_APP_AUTH0_DOMAIN+'/v2/logout?federated')
     }
     setProvider(null);
     window.sessionStorage.clear();
