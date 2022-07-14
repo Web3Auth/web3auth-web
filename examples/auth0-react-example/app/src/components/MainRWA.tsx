@@ -3,28 +3,42 @@ import { useWeb3Auth } from "../services/web3auth";
 
 import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
-
 const Main = () => {
-  const { provider, loginRWA, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, chain, web3Auth, setIsLoading, isWeb3AuthInit } = useWeb3Auth();
+  const {
+    provider,
+    loginRWA,
+    logout,
+    getUserInfo,
+    getAccounts,
+    getBalance,
+    signMessage,
+    isLoading,
+    signTransaction,
+    signAndSendTransaction,
+    chain,
+    web3Auth,
+    setIsLoading,
+    isWeb3AuthInit,
+  } = useWeb3Auth();
   const search = useLocation().search;
-  const jwt = new URLSearchParams(search).get('token');
+  const jwt = new URLSearchParams(search).get("token");
   const token = jwt == null ? "" : jwt;
 
   const handleAuthLogin = async () => {
     try {
       setIsLoading(true);
-      await loginRWA(WALLET_ADAPTERS.OPENLOGIN,"jwt", token);
+      await loginRWA(WALLET_ADAPTERS.OPENLOGIN, "jwt", token);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
-useEffect(()=>{
-  handleAuthLogin();
-}, [isWeb3AuthInit]);
+  useEffect(() => {
+    handleAuthLogin();
+  }, [isWeb3AuthInit]);
 
   const loggedInView = (
     <>
@@ -41,12 +55,11 @@ useEffect(()=>{
         Sign Message
       </button>
 
-      {
-        (web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") &&
-        (<button onClick={signTransaction} className={styles.card}>
+      {(web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") && (
+        <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
-      </button>)
-      }
+        </button>
+      )}
       <button onClick={signAndSendTransaction} className={styles.card}>
         Sign and Send Transaction
       </button>
@@ -59,27 +72,22 @@ useEffect(()=>{
       </div>
     </>
   );
- 
+
   const unloggedInView = (
     <div className={styles.centerFlex}>
-       <Loader/>
-       <button onClick={handleAuthLogin} className={styles.rwabtn} id="rwaLogin">
+      <Loader />
+      <button onClick={handleAuthLogin} className={styles.rwabtn} id="rwaLogin">
         Verify Token with web3auth
       </button>
     </div>
-
-
   );
-  return isLoading ?
-    (
-      <div className={styles.centerFlex}>
-        <Loader></Loader>
-      </div>
-    ): (
-      <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>
-    )
-    
+  return isLoading ? (
+    <div className={styles.centerFlex}>
+      <Loader></Loader>
+    </div>
+  ) : (
+    <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>
+  );
 };
 
 export default Main;
-

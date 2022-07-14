@@ -9,8 +9,8 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
   const getConnection = async (): Promise<Connection> => {
     const connectionConfig = await solanaWallet.request<CustomChainConfig>({ method: "solana_provider_config", params: [] });
     const conn = new Connection(connectionConfig.rpcTarget);
-    return conn
-  }
+    return conn;
+  };
 
   const getAccounts = async (): Promise<string[]> => {
     try {
@@ -66,8 +66,8 @@ const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args:
       uiConsole("error", error);
     }
   };
-  
-  const signTransaction = async ():  Promise<void> => {
+
+  const signTransaction = async (): Promise<void> => {
     try {
       const conn = await getConnection();
       const solWeb3 = new SolanaWallet(provider);

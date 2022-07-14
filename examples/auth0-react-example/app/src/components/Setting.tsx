@@ -15,9 +15,9 @@ interface IProps {
 const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
   useEffect(() => {
     setApp(sessionStorage.getItem("app") as APP_CONFIG_TYPE);
-    if(sessionStorage.getItem("app") === "SPA"){
+    if (sessionStorage.getItem("app") === "SPA") {
       setChecked(false);
-    }else{
+    } else {
       setChecked(true);
     }
   });
@@ -31,7 +31,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
     setChain(e.target.value as CHAIN_CONFIG_TYPE);
   };
 
-  const appChangeHandler = (appType:  string) => {
+  const appChangeHandler = (appType: string) => {
     console.log("Settings", appType);
     // setChecked(!checked);
     setApp(appType as APP_CONFIG_TYPE);
@@ -39,11 +39,8 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
   };
   const handleChange = (nextChecked: boolean) => {
     setChecked(nextChecked);
-    if(checked)
-      appChangeHandler('SPA')
-    else
-      appChangeHandler('RWA')
-
+    if (checked) appChangeHandler("SPA");
+    else appChangeHandler("RWA");
   };
   const { provider } = useContext(Web3AuthContext);
   const isLoggedIn = provider !== null;
@@ -80,7 +77,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
       </div>
       <div className={styles.row}>
         <label htmlFor="app" className={styles.label}>
-         Choose your Auth0 application type
+          Choose your Auth0 application type
         </label>
       </div>
       <div className={styles.toggleRow}>
@@ -100,7 +97,6 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
           disabled={isLoggedIn}
         />
         <span className={styles.appMargin}>Regular Web App</span>
-        
       </div>
 
       {/* <select onChange={appChangeHandler} className={styles.select} disabled={isLoggedIn} value={window.sessionStorage.getItem("app") as string}>
