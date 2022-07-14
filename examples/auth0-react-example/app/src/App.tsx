@@ -12,7 +12,7 @@ import { APP_CONFIG_TYPE } from "./config/appConfig";
 import MainRWA from "./components/MainRWA";
 
 function App() {
-  const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("testnet");
+  const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("cyan");
   const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("mainnet");
   const [app, setApp] = useState<APP_CONFIG_TYPE>("SPA");
   useEffect(() => {
