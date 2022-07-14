@@ -62,7 +62,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       uiConsole("error", error);
     }
   };
-  
+
   const signTransaction = async () => {
     try {
       const web3 = new Web3(provider as any);

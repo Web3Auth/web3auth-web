@@ -34,7 +34,15 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
 
 - Information about validating JWT token is already added while creating a custom verifier from [web3auth developer dashboard](https://dashboard.web3auth.io). So we just need to specify our verifier name while adding Openlogin Adapter to web3auth. Refer to `init()` function in `src/services/web3auth.tsx` file.
 
+## For RWA example you need to load it from .env file :
+1. Your domain name in loginRWA method
+2. Your server endpoint for login button
 ## Installation
+
+config:
+```bash
+Copy .env.developement to .env(if not present create new file) and change configuration of app accordingly using .env file.
+```
 
 Run:
 
