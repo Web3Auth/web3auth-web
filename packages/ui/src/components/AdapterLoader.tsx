@@ -65,7 +65,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           )}
         </div>
         <div className="w3a-spinner-power">
-          <div>Secured by</div>
+          <div>Self-custodial login by</div>
           {web3authIcon}
         </div>
       </div>

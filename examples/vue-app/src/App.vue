@@ -57,7 +57,7 @@ export default Vue.extend({
 }
 
 /* Modal */
-#w3a-modal {
+#w3a-example-modal {
   --bg1: #0f1222;
   --bg2: #24262e;
   --text-color1: #d3d3d4;
@@ -81,7 +81,7 @@ export default Vue.extend({
   font-family: var(--text-body);
 }
 
-#w3a-modal .w3a-modal__loader {
+#w3a-example-modal .w3a-example-modal__loader {
   background: var(--bg1);
   position: absolute;
   display: flex;
@@ -91,7 +91,7 @@ export default Vue.extend({
   bottom: 0;
   left: 0;
 }
-#w3a-modal .w3a-modal__loader-content {
+#w3a-example-modal .w3a-example-modal__loader-content {
   text-align: center;
   margin-bottom: 80px;
   position: relative;
@@ -99,7 +99,7 @@ export default Vue.extend({
   flex-direction: column;
 }
 
-.w3a-modal__loader-info {
+.w3a-example-modal__loader-info {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -108,21 +108,21 @@ export default Vue.extend({
   padding: 0 30px;
 }
 
-#w3a-modal .w3a-spinner-label {
+#w3a-example-modal .w3a-spinner-label {
   margin-top: 10px;
   font-size: 16px;
   font-weight: 500;
   color: #0364ff;
 }
 
-#w3a-modal .w3a-spinner-message {
+#w3a-example-modal .w3a-spinner-message {
   margin-top: 10px;
   font-size: 16px;
 }
-#w3a-modal .w3a-spinner-message:first-letter {
+#w3a-example-modal .w3a-spinner-message:first-letter {
   text-transform: capitalize;
 }
-#w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
+#w3a-example-modal .w3a-spinner-message.w3a-spinner-message--error {
   color: #fb4a61;
 }
 </style>

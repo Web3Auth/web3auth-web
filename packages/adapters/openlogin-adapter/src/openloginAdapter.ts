@@ -1,4 +1,4 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -69,7 +69,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       const defaultChainIdConfig = defaultOptions.chainConfig ? defaultOptions.chainConfig : {};
       this.chainConfig = { ...defaultChainIdConfig, ...params?.chainConfig };
       log.debug("const openlogin chainConfig", this.chainConfig);
-      if (!this.chainConfig.rpcTarget) {
+      if (!this.chainConfig.rpcTarget && params.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
         throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
       }
     }
@@ -90,8 +90,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
     if (!this.openloginOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
-    if (!this.chainConfig && this.currentChainNamespace !== CHAIN_NAMESPACES.OTHER)
-      throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     let isRedirectResult = false;
 
     if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
@@ -196,6 +195,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
     // if not logged in then login
     if (!this.openloginInstance.privKey && params) {
+      if (!this.loginSettings.curve) {
+        this.loginSettings.curve =
+          this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
+      }
       await this.openloginInstance.login(
         merge(
           this.loginSettings,

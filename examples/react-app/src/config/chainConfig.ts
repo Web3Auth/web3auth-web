@@ -28,6 +28,10 @@ export const CHAIN_CONFIG = {
     ticker: "matic",
     tickerName: "Matic",
   } as CustomChainConfig,
+  tezos: {
+    chainNamespace: CHAIN_NAMESPACES.OTHER,
+    displayName: "Tezos Ithacanet",
+  } as CustomChainConfig,
 } as const;
 
 export type CHAIN_CONFIG_TYPE = keyof typeof CHAIN_CONFIG;

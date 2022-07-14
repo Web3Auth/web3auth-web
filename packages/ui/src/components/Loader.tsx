@@ -34,10 +34,8 @@ export default function Loader(props: LoaderProps) {
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <div className="w3ajs-modal-loader__spinner w3a-spinner">
-              <div />
-              <div />
-              <div />
-              <div />
+              <div className="w3a-spinner__head" />
+              <div className="w3a-spinner__mask" />
             </div>
           )}
 
@@ -48,7 +46,7 @@ export default function Loader(props: LoaderProps) {
           )}
         </div>
         <div className="w3a-spinner-power">
-          <div>Secured by</div>
+          <div>Self-custodial login by</div>
           {web3authIcon}
         </div>
       </div>

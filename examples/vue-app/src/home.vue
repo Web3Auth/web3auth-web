@@ -127,7 +127,6 @@
               </div>
             </div>
           </div>
-          <hr />
 
           <!-- UI MODE YOUR OWN MODAL -->
           <div v-if="form.selectedUiMode == 'customUi'">
@@ -194,13 +193,13 @@
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
           v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
-        ></ConfigurableExample>
+        />
 
         <WhitelabelExample
           :uiConfig="config.uiMode.whitelabel"
           :chain="config.chain"
           v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
-        ></WhitelabelExample>
+        />
 
         <!-- Custom auth -->
         <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
@@ -213,6 +212,7 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
+import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
 import Vue from "vue";
 
@@ -289,38 +289,40 @@ const defaultFormConfig = {
   },
 };
 
-const defaultComponentConfig = {
-  chain: "ethereum",
-  authMode: "hosted",
-  selectedUiMode: "default",
-  openloginNetwork: "testnet",
-  plugins: {
-    torusWallet: true,
-  },
-  uiMode: {
-    default: {
-      login: [...defaultLoginProviders()],
-      adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
-    },
-    customUi: {
-      type: "openlogin",
-    },
-    whitelabel: {
-      logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
-      theme: "light",
-      loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
-    },
-  },
+const configFromSessionStorage = () => {
+  const storedConfig = JSON.parse(sessionStorage.getItem("web3AuthExampleConfig")) ?? {};
+  return storedConfig;
 };
+
+const configFromURL = () => {
+  const params = new URLSearchParams(document.location.search);
+  const chainParams = params.get("chain");
+  const authModeParams = params.get("auth");
+  const whitelabelParams = params.get("whitelabel");
+
+  // prettier-ignore
+  return {
+    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams)  && { chain: chainParams }),
+    ...(authModeParams === "custom"                                         && { authMode: "ownAuth" }),
+    ...(whitelabelParams === "yes"                                          && { selectedUiMode: "whitelabel" }),
+  };
+};
+
+const initialFormConfig = {
+  ...defaultFormConfig,
+  ...configFromSessionStorage(),
+  ...configFromURL(),
+};
+
 export default Vue.extend({
   name: "home",
   data() {
     return {
       // storing config collected from user input.
-      form: { ...defaultFormConfig },
+      form: { ...initialFormConfig },
       // sending to other components
-      config: { ...defaultComponentConfig },
-      tempLoginMethodsOrder: "",
+      config: { ...cloneDeep(initialFormConfig) },
+      tempLoginMethodsOrder: initialFormConfig.uiMode?.whitelabel.loginMethodsOrder.join(",") ?? "",
     };
   },
   components: {
@@ -328,17 +330,18 @@ export default Vue.extend({
     WhitelabelExample: WhitelabelExample,
     CustomUiContainer,
   },
-  mounted() {
-    const storedConfig = sessionStorage.getItem("web3AuthExampleConfig");
-    const finalStoredConfig = JSON.parse(storedConfig || "{}");
-    this.config = merge(this.config, finalStoredConfig);
-    if (finalStoredConfig.uiMode) this.config.uiMode.whitelabel.loginMethodsOrder = finalStoredConfig.uiMode.whitelabel.loginMethodsOrder;
-    this.form = merge({}, this.config);
-    // this.config.uiMode.default.login.push({
-    //   id: "facebook",
-    //   name: "Facebook",
-    //   checked: false,
-    // });
+  watch: {
+    "form.authMode"(val) {
+      const formValURLSearchParamMap = { ownAuth: "custom", hosted: "default" };
+      this.updateURL("auth", formValURLSearchParamMap[val]);
+    },
+    "form.chain"(val) {
+      this.updateURL("chain", val);
+    },
+    "form.selectedUiMode"(val) {
+      const formValURLSearchParamMap = { whitelabel: "yes", default: "no" };
+      this.updateURL("whitelabel", formValURLSearchParamMap[val]);
+    },
   },
   methods: {
     saveConfig: function () {
@@ -360,6 +363,11 @@ export default Vue.extend({
     },
     setDefaultLoginMethodsOrder: function () {
       this.tempLoginMethodsOrder = DEFAULT_LOGIN_PROVIDERS.join(",");
+    },
+    updateURL(searchParamKey, searchParamValue) {
+      const url = new URL(window.location.href);
+      url.searchParams.set(searchParamKey, searchParamValue);
+      window.history.replaceState(null, null, url.toString());
     },
   },
 });
@@ -389,6 +397,7 @@ body {
   border-right: 1px solid #ebecf0;
   background-color: #f4f5f7;
   padding: 20px;
+  padding-bottom: 60px;
 }
 
 .content {
