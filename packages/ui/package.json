@@ -42,9 +42,8 @@
     "@toruslabs/eslint-config-react": "^1.0.3",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.merge": "^4.6.7",
-    "@types/react": "^17",
-    "@types/react-dom": "^17",
-    "css-loader": "^6.7.1",
+    "@types/react": "^17.0.43",
+    "@types/react-dom": "^17.0.14",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.0",
     "eslint-plugin-react": "^7.30.1",
@@ -54,8 +53,9 @@
     "postcss": "^8.4.14",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-url": "^3.0.1",
-    "style-loader": "^3.3.1",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "css-loader": "^6.7.1",
+    "isomorphic-style-loader": "^5.3.2"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^2.3.0",

@@ -13,10 +13,12 @@ const config = generateWebpackConfig({
   module: {
     rules: [
       {
-        test: /\.css$/i,
+        test: /\.css$/,
         use: [
-          { loader: "style-loader", options: {} },
-          { loader: "css-loader", options: {} },
+          "isomorphic-style-loader",
+          {
+            loader: "css-loader",
+          },
         ],
       },
       {
