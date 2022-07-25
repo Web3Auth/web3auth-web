@@ -9,8 +9,9 @@
   },
   "dependencies": {
     "@tailwindcss/postcss7-compat": "^2.2.17",
-    "@toruslabs/openlogin": "^1.5.0",
-    "@web3auth/web3auth": "^0.3.2",
+    "@web3auth/web3auth": "^1.1.1",
+    "@web3auth/base": "^1.1.1",
+    "@web3auth/openlogin-adapter": "^1.1.1",
     "autoprefixer": "^9",
     "codemirror": "^5.65.2",
     "copy-to-clipboard": "^3.3.1",
