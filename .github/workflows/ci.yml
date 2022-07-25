@@ -45,10 +45,10 @@ jobs:
       - name: Build
         run: yarn run build
 
-      - name: Build example
+      - name: Build demo
         if: github.ref == 'refs/heads/master'
         run: |
-          cd examples/vue-app
+          cd demo/vue-app
           npm run install:local
           npm install
           npm run build
@@ -68,7 +68,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: jakejarvis/s3-sync-action@master
         env:
-          SOURCE_DIR: "./examples/vue-app/dist"
+          SOURCE_DIR: "./demo/vue-app/dist"
           AWS_REGION: "us-east-1"
           AWS_S3_BUCKET: "demo-app.web3auth.io"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
