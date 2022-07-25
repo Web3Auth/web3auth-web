@@ -12,6 +12,6 @@
 
   - Run the example:-
 
-    - Go to example: `cd examples/vue-app`
+    - Go to example: `cd demo/vue-app`
     - Install deps: `npm install`
     - Run example:- `npm run serve`
