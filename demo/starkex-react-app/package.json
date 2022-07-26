@@ -1,19 +1,18 @@
 {
-  "name": "react-test",
-  "version": "0.1.0",
+  "name": "react-starkex",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.36.0",
-    "@starkware-industries/starkex-js": "0.0.6",
-    "@toruslabs/starkware-crypto": "^1.1.0",
     "@web3auth/base": "^1.1.1",
-    "@web3auth/openlogin-adapter": "^1.1.1",
     "@web3auth/web3auth": "^1.1.1",
+    "@web3auth/openlogin-adapter": "^1.1.1",
+    "@starkware-industries/starkex-js": "0.0.6",
+    "@starkware-industries/starkware-crypto-utils": "^0.0.2",
     "bn.js": "^5.2.0",
     "elliptic": "^6.5.4",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "web3": "^1.7.0"
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
