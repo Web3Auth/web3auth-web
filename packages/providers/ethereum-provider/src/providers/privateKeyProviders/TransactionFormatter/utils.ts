@@ -84,9 +84,9 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
           // for backward compatiblity we validate for both string and object type.
           data = parameters.data;
         }
-        assert.ok(Array.isArray(parameters.data as unknown), "params.data must be an array.");
+        assert.ok(Array.isArray(data as unknown), "params.data must be an array.");
         assert.doesNotThrow(() => {
-          typedSignatureHash(parameters.data as TypedDataV1Field[]);
+          typedSignatureHash(data as TypedDataV1Field[]);
         }, "Signing data must be valid EIP-712 typed data.");
         break;
       case SignTypedDataVersion.V3:
