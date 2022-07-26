@@ -89,7 +89,7 @@ export function getProviderHandlers({
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
       const params = {
         ...msgParams,
-        version: "V1",
+        version: SignTypedDataVersion.V1,
       };
       validateTypedMessageParams(params, finalChainId);
       const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;

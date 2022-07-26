@@ -1,4 +1,4 @@
-import { TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
+import { SignTypedDataVersion, TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
@@ -75,14 +75,22 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
     let data = null;
     let chainId = null;
     switch ((parameters as TypedMessageParams<unknown>).version) {
-      case "V1":
+      case SignTypedDataVersion.V1:
+        if (typeof parameters.data === "string") {
+          assert.doesNotThrow(() => {
+            data = JSON.parse(parameters.data as string);
+          }, '"data" must be a valid JSON string.');
+        } else {
+          // for backward compatiblity we validate for both string and object type.
+          data = parameters.data;
+        }
         assert.ok(Array.isArray(parameters.data as unknown), "params.data must be an array.");
         assert.doesNotThrow(() => {
           typedSignatureHash(parameters.data as TypedDataV1Field[]);
         }, "Signing data must be valid EIP-712 typed data.");
         break;
-      case "V3":
-      case "V4":
+      case SignTypedDataVersion.V3:
+      case SignTypedDataVersion.V4:
         if (typeof parameters.data === "string") {
           assert.doesNotThrow(() => {
             data = JSON.parse(parameters.data as string);
@@ -97,7 +105,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
         assert.strictEqual(validation.errors.length, 0, "Signing data must conform to EIP-712 schema. See https://git.io/fNtcx.");
         chainId = data.domain?.chainId;
         if (chainId) {
-          assert.ok(!Number.isNaN(activeChainId), `Cannot sign messages for chainId "${chainId}", because Torus is switching networks.`);
+          assert.ok(!Number.isNaN(activeChainId), `Cannot sign messages for chainId "${chainId}", because Web3Auth is switching networks.`);
           if (typeof chainId === "string") {
             chainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
           }
