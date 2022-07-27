@@ -19,8 +19,8 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@solana/web3.js": "^1.47.3",
-    "@toruslabs/base-controllers": "^2.2.1",
+    "@solana/web3.js": "^1.50.1",
+    "@toruslabs/base-controllers": "^2.2.3",
     "@toruslabs/openlogin-jrpc": "^2.1.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^1.1.1",

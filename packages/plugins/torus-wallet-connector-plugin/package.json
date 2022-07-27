@@ -35,7 +35,7 @@
     "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.27.0",
+    "@toruslabs/torus-embed": "^1.27.2",
     "@web3auth/base": "^1.1.1",
     "@web3auth/base-plugin": "^1.1.1",
     "@web3auth/core": "^1.1.1",
