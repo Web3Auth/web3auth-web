@@ -49,6 +49,7 @@ export function useWeb3Auth() {
 interface IWeb3AuthState {
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
+  children?: React.ReactNode;
 }
 interface IWeb3AuthProps {
   children?: ReactNode;

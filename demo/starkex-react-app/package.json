@@ -3,16 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@web3auth/base": "^1.1.1",
-    "@web3auth/web3auth": "^1.1.1",
-    "@web3auth/openlogin-adapter": "^1.1.1",
-    "@starkware-industries/starkex-js": "0.0.6",
     "@starkware-industries/starkware-crypto-utils": "^0.0.2",
-    "bn.js": "^5.2.0",
+    "react-scripts": "5.0.1",
+    "@starkware-industries/starkex-js": "0.0.6",
+    "@toruslabs/starkware-crypto": "^1.1.0",
+    "@web3auth/base": "^1.1.2",
+    "@web3auth/openlogin-adapter": "^1.1.2",
+    "@web3auth/web3auth": "^1.1.2",
+    "bn.js": "^5.2.1",
     "elliptic": "^6.5.4",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "react-scripts": "5.0.1"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "web3": "^1.7.4"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -40,9 +42,9 @@
   },
   "devDependencies": {
     "@types/elliptic": "^6.4.14",
-    "@types/node": "^16.11.22",
-    "@types/react": "^17.0.39",
-    "@types/react-dom": "^17.0.11",
+    "@types/node": "^18.6.2",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
@@ -50,10 +52,10 @@
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
-    "react-scripts": "5.0.0",
+    "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^4.5.5",
+    "typescript": "^4.7.4",
     "url": "^0.11.0"
   }
 }

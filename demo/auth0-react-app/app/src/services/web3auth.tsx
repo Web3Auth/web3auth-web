@@ -54,6 +54,7 @@ interface IWeb3AuthState {
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
   app: APP_CONFIG_TYPE;
+  children?: React.ReactNode
 }
 interface IWeb3AuthProps {
   children?: ReactNode;
@@ -74,7 +75,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       setTimeout(
         function () {
           setProvider(walletProvider);
-        }.bind(this),
+        },
         1000
       );
     },

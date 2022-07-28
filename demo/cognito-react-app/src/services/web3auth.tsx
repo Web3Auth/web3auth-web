@@ -3,7 +3,7 @@ import { Web3AuthCore } from "@web3auth/core";
 import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
@@ -49,9 +49,10 @@ export function useWeb3Auth(): IWeb3AuthContext {
 interface IWeb3AuthState {
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
+  children?: React.ReactNode
 }
 interface IWeb3AuthProps {
-  children?: ReactNode;
+  children?: React.ReactNode | any,
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
 }
@@ -69,7 +70,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole); 
       setTimeout(function(){
         setProvider(walletProvider);
-      }.bind(this),1000); 
+      },1000); 
     },
     [chain]
   );
