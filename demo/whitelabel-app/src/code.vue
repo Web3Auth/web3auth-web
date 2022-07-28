@@ -1,14 +1,14 @@
 <template>
-    <div>
-      <textarea id="jsEditor"></textarea>
-      <div class="text-right">
-        <a class="text-sm cursor-pointer text-app-primary" @click="copyCode">Copy</a>
-      </div>
+  <div>
+    <textarea id="jsEditor"></textarea>
+    <div class="text-right">
+      <a class="text-sm cursor-pointer text-app-primary" @click="copyCode">Copy</a>
     </div>
-    <ul class="list-disc">
-       <li>Vue code generated above is dynamically updated based on the whitelabel settings.</li>
-      <li>You can copy/paste generated code in your vue app for a live working example.</li>
-    </ul>
+  </div>
+  <ul class="list-disc">
+    <li>Vue code generated above is dynamically updated based on the whitelabel settings.</li>
+    <li>You can copy/paste generated code in your vue app for a live working example.</li>
+  </ul>
 </template>
 
 <script lang="ts">
@@ -21,7 +21,7 @@ import "codemirror/mode/javascript/javascript.js";
 import { format } from "prettier/standalone";
 import parserHtml from "prettier/parser-html";
 
-import { generateVueCode } from "../src/templates/web3AuthVueTemplate"
+import { generateVueCode } from "../src/templates/web3AuthVueTemplate";
 import { defineComponent } from "vue";
 
 let jsEditor: CodeMirror.Editor;
@@ -45,7 +45,7 @@ export default defineComponent({
   watch: {
     uiConfig: function () {
       this.setCode();
-    }
+    },
   },
   methods: {
     async setCode() {
@@ -57,10 +57,10 @@ export default defineComponent({
     },
     getCode(): string {
       const uiConfig = {
-        ...this.uiConfig
+        ...this.uiConfig,
       };
       const renderCode = generateVueCode(uiConfig);
-     
+
       return format(renderCode, { plugins: [parserHtml], parser: "vue" });
     },
   },

@@ -3,7 +3,7 @@
   "env": {
     "node": true
   },
-  "extends": ["plugin:vue/essential", "eslint:recommended", "@vue/typescript/recommended", "@vue/prettier", "@vue/prettier/@typescript-eslint"],
+  "extends": ["plugin:vue/essential", "eslint:recommended", "@vue/typescript/recommended", "@vue/prettier"],
   "plugins": ["simple-import-sort"],
   "parserOptions": {
     "ecmaVersion": 2020
