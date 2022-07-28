@@ -2,15 +2,18 @@ import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getStarkHDAccount, onMintRequest, onDepositRequest, onWithdrawalRequest } = useWeb3Auth();
+  const { provider, login, logout, getUserInfo, getStarkAccount, getStarkKey, onMintRequest, onDepositRequest, onWithdrawalRequest } = useWeb3Auth();
 
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className={styles.card}>
         Get User Info
       </button>
-      <button onClick={getStarkHDAccount} className={styles.card}>
+      <button onClick={getStarkAccount} className={styles.card}>
         Get Stark Accounts
+      </button>
+      <button onClick={getStarkKey} className={styles.card}>
+        Get Stark Key
       </button>
       <button onClick={onMintRequest} className={styles.card}>
         Mint Request

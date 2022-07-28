@@ -2,13 +2,9 @@ import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 
 export const CHAIN_CONFIG = {
   mainnet: {
-    displayName: "Ethereum Mainnet",
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    chainId: "0x1",
-    rpcTarget: `https://mainnet.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-    blockExplorer: "https://etherscan.io/",
-    ticker: "ETH",
-    tickerName: "Ethereum",
+    displayName: "StarkEx",
+    chainNamespace: CHAIN_NAMESPACES.OTHER,
+    tickerName: "StarkEx",
   } as CustomChainConfig,
 } as const;
 
