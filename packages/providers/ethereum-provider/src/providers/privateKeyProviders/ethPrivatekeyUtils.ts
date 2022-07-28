@@ -12,13 +12,14 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { log } from "@web3auth/base";
+import { isHexStrict, log } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
 import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
 import { TransactionFormatter } from "./TransactionFormatter";
+import { validateTypedMessageParams } from "./TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
@@ -78,19 +79,53 @@ export function getProviderHandlers({
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
       log.debug("processTypedMessage", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
-      const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V1 });
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
+      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
+      const params = {
+        ...msgParams,
+        version: SignTypedDataVersion.V1,
+      };
+      validateTypedMessageParams(params, finalChainId);
+      const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
+      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V1 });
       return sig;
     },
     processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
       log.debug("processTypedMessageV3", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
-      const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V3 });
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
+      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
+      validateTypedMessageParams(msgParams, finalChainId);
+      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V3 });
       return sig;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
       log.debug("processTypedMessageV4", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
-      const sig = signTypedData({ privateKey: privKeyBuffer, data: msgParams.data, version: SignTypedDataVersion.V4 });
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
+      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
+      validateTypedMessageParams(msgParams, finalChainId);
+      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V4 });
       return sig;
     },
     processEncryptionPublicKey: async (address: string, _: JRPCRequest<unknown>): Promise<string> => {

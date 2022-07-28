@@ -1,0 +1,30 @@
+{
+  "name": "web3auth-nextjs-custom-example",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.18.9",
+    "@web3auth/solana-provider": "^1.1.2",
+    "@web3auth/core": "^1.1.2",
+    "@web3auth/openlogin-adapter": "^1.1.2",
+    "firebase": "^9.9.1",
+    "next": "12.2.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "web3": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "18.6.1",
+    "@types/react": "^18.0.15",
+    "eslint": "8.20.0",
+    "eslint-config-next": "12.2.3",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "typescript": "4.7.4"
+  }
+}

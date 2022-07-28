@@ -1,0 +1,171 @@
+.container {
+  margin: auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.main {
+  min-height: 100vh;
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  line-height: 1.15;
+  font-size: 2rem;
+  text-align: center;
+  margin: 30px;
+  height: 3.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.title a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.console {
+  max-width: 80%;
+  overflow: scroll;
+  max-height: 400px;
+}
+
+.code {
+  background: #fafafa;
+  border-radius: 5px;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+  overflow-wrap: break-word;
+}
+
+.grid {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex-direction: column;
+  padding: 20px;
+  margin: 30px 0;
+  background: #f4f5f7;
+  border: 1px solid #ebecf0;
+  border-radius: 4rem;
+  width: 80%;
+}
+
+.card {
+  margin: 0.5rem;
+  padding: 0.7rem;
+  text-align: center;
+  color: #0070f3;
+  text-decoration: none;
+  border: 1px solid #0070f3;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  width: 80%;
+}
+
+.card:hover,
+.card:focus,
+.card:active {
+  cursor: pointer;
+  background-color: #fafafa;
+}
+
+.row {
+  display: flex;
+  margin: 1rem;
+  width: 100%;
+  justify-content: space-evenly;
+}
+.label {
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  font-weight: bold;
+}
+
+.select {
+  flex-basis: 30%;
+  text-align: left;
+  padding: 0.3rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+.footer {
+  display: flex;
+  flex: 1;
+  margin: 2rem 0;
+  border-top: 1px solid #eaeaea;
+  justify-content: center;
+  align-items: center;
+  margin: 10 auto;
+}
+.rwabtn{
+  visibility: hidden;
+}
+
+.footer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.logo {
+  height: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.centerFlex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    width: 100%;
+  }
+}
+
+.hide{
+  display: none;
+}
+
+.walogo{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 4rem;
+  margin-top: 10px;
+}
+.appMargin{
+  margin-top: 0.3rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.toggleRow{
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  margin-bottom: 1rem;
+}
