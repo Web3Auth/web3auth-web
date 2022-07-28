@@ -315,7 +315,7 @@ const initialFormConfig = {
 };
 
 export default Vue.extend({
-  name: "home",
+  name: "HomeComponent",
   data() {
     return {
       // storing config collected from user input.

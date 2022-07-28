@@ -39,8 +39,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/@solana/web3.js@1/lib/index.iife.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@0/dist/web3auth.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@0/dist/solanaProvider.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/web3auth@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@1"></script>
     <script src="https://bundle.run/buffer@6"></script>
 
     <script>
@@ -106,7 +106,7 @@
         const connectionConfig = await solanaWallet.request({ method: "solana_provider_config", params: [] });
         const conn = new solanaWeb3.Connection(connectionConfig.rpcTarget);
         return conn;
-      };
+      }
 
       async function initWeb3() {
         const conn = await getConnection();
@@ -117,7 +117,6 @@
         console.log(address, "->", balance);
       }
 
-    
       $("#login").click(async function (event) {
         try {
           const provider = await web3AuthInstance.connect();
@@ -141,7 +140,7 @@
 
       $("#get-user-info").click(async function (event) {
         try {
-          console.log("flfl")
+          console.log("flfl");
           const user = await web3AuthInstance.getUserInfo();
           $("#code").text(JSON.stringify([user], null, 2));
         } catch (error) {
@@ -162,7 +161,7 @@
       $("#get-balance").click(async function (event) {
         try {
           const conn = await getConnection();
-          console.log("getBalance", conn)
+          console.log("getBalance", conn);
           const solWeb3 = new SolanaProvider.SolanaWallet(web3AuthInstance.provider);
           const accounts = await solWeb3.requestAccounts();
           const balance = await conn.getBalance(new solanaWeb3.PublicKey(accounts[0]));
@@ -174,11 +173,11 @@
 
       $("#sign-message").click(async function (event) {
         try {
-          const conn =  await getConnection();
+          const conn = await getConnection();
           const solanaWallet = new SolanaProvider.SolanaWallet(web3AuthInstance.provider);
 
           const Buffer = buffer.Buffer;
-          const msg = Buffer.from("Test Signing Message", "utf8");       
+          const msg = Buffer.from("Test Signing Message", "utf8");
           const res = await solanaWallet.signMessage(msg);
           $("#code").text(JSON.stringify(["Solana sign message", res], null, 2));
         } catch (error) {
@@ -187,17 +186,19 @@
       });
       $("#sign-tx").click(async function (event) {
         try {
-          const conn =  await getConnection();
+          const conn = await getConnection();
           const solanaWallet = new SolanaProvider.SolanaWallet(web3AuthInstance.provider);
-         
+
           const pubKey = await solanaWallet.requestAccounts();
           const { blockhash } = await conn.getRecentBlockhash("finalized");
           const TransactionInstruction = solanaWeb3.SystemProgram.transfer({
             fromPubkey: new solanaWeb3.PublicKey(pubKey[0]),
             toPubkey: new solanaWeb3.PublicKey(pubKey[0]),
-            lamports: 0.01 * solanaWeb3. LAMPORTS_PER_SOL,
+            lamports: 0.01 * solanaWeb3.LAMPORTS_PER_SOL,
           });
-          const transaction = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: new solanaWeb3.PublicKey(pubKey[0]) }).add(TransactionInstruction);
+          const transaction = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: new solanaWeb3.PublicKey(pubKey[0]) }).add(
+            TransactionInstruction
+          );
           const signedTx = await solanaWallet.signTransaction(transaction);
 
           $("#code").text(JSON.stringify(signedTx));
@@ -207,9 +208,9 @@
       });
       $("#send-tx").click(async function (event) {
         try {
-          const conn =  await getConnection();
+          const conn = await getConnection();
           const solanaWallet = new SolanaProvider.SolanaWallet(web3AuthInstance.provider);
-         
+
           const pubKey = await solanaWallet.requestAccounts();
           const { blockhash } = await conn.getRecentBlockhash("finalized");
           const TransactionInstruction = solanaWeb3.SystemProgram.transfer({
@@ -217,7 +218,9 @@
             toPubkey: new solanaWeb3.PublicKey(pubKey[0]),
             lamports: 0.01 * solanaWeb3.LAMPORTS_PER_SOL,
           });
-          const transaction = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: new solanaWeb3.PublicKey(pubKey[0]) }).add(TransactionInstruction);
+          const transaction = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: new solanaWeb3.PublicKey(pubKey[0]) }).add(
+            TransactionInstruction
+          );
           const signature = await solanaWallet.signAndSendTransaction(transaction);
 
           $("#code").text(JSON.stringify(signature));

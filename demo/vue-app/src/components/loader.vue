@@ -23,7 +23,7 @@
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "Loader",
+  name: "LoaderComponent",
   props: {
     isLoading: {
       type: Boolean,
