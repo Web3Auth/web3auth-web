@@ -24,20 +24,43 @@ export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConso
     const web3 = new Web3();
     web3.setProvider(provider as any);
     // hex message
-    const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-    (web3.currentProvider as any)?.send(
+    // const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+    // (web3.currentProvider as any)?.send(
+    //   {
+    //     method: "eth_sign",
+    //     params: [pubKey[0], message],
+    //     from: pubKey[0],
+    //   },
+    //   (err: Error, result: any) => {
+    //     if (err) {
+    //       return uiConsole(err);
+    //     }
+    //     uiConsole("sign message => true", result);
+    //   }
+    // );
+
+    const fromAddress = (await web3.eth.getAccounts())[0];
+
+    const originalMessage = [
       {
-        method: "eth_sign",
-        params: [pubKey[0], message],
-        from: pubKey[0],
+        type: "string",
+        name: "fullName",
+        value: "Satoshi Nakamoto",
       },
-      (err: Error, result: any) => {
-        if (err) {
-          return uiConsole(err);
-        }
-        uiConsole("sign message => true", result);
-      }
-    );
+      {
+        type: "uint32",
+        name: "userId",
+        value: "1212",
+      },
+    ];
+    const params = [JSON.stringify(originalMessage), fromAddress];
+    const method = "eth_signTypedData";
+
+    const signedMessage = await provider.request({
+      method,
+      params,
+    });
+    console.log("signedMessage orog", signedMessage);
   } catch (error) {
     console.log("error", error);
     uiConsole("error", error);
