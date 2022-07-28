@@ -4,6 +4,7 @@ import { createContext, FunctionComponent, ReactNode, useCallback, useContext, u
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3AuthCore | null;
@@ -11,7 +12,7 @@ export interface IWeb3AuthContext {
   isLoading: boolean;
   chain: string;
   user: unknown;
-  login: (loginProvider: string, jwtToken:string) => Promise<void>;
+  login: (loginProvider: string, jwtToken: string) => Promise<void>;
   logout: () => Promise<void>;
   getUserInfo: () => Promise<any>;
   signMessage: () => Promise<any>;
@@ -41,17 +42,13 @@ export function useWeb3Auth(): IWeb3AuthContext {
   return useContext(Web3AuthContext);
 }
 
-interface IWeb3AuthState {
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
-  chain: CHAIN_CONFIG_TYPE;
-}
 interface IWeb3AuthProps {
   children?: ReactNode;
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
 }
 
-export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
+export const Web3AuthProvider: FunctionComponent<IWeb3AuthProps> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
   const [web3Auth, setWeb3Auth] = useState<Web3AuthCore | null>(null);
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
@@ -92,26 +89,27 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
     async function init() {
       try {
-        const { OpenloginAdapter } = await import("@web3auth/openlogin-adapter");
         const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
         setIsLoading(true);
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
         });
 
-        const adapter = new OpenloginAdapter({ adapterSettings: { 
-          network: web3AuthNetwork, 
-          clientId, 
-          uxMode: "redirect",
-          loginConfig: {
-            jwt: {
-              name: "Custom Firebase Login",
-              verifier: process.env.REACT_APP_VERIFIER || "web3auth-firebase-demo",
-              typeOfLogin: "jwt",
-              clientId,
+        const adapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: web3AuthNetwork,
+            clientId,
+            uxMode: "redirect",
+            loginConfig: {
+              jwt: {
+                name: "Custom Firebase Login",
+                verifier: process.env.REACT_APP_VERIFIER || "web3auth-firebase-demo",
+                typeOfLogin: "jwt",
+                clientId,
+              },
             },
           },
-        }});
+        });
         web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
@@ -126,21 +124,21 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   }, [chain, web3AuthNetwork, setWalletProvider]);
 
   const login = async (loginProvider: string, jwtToken: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       if (!web3Auth) {
         console.log("web3auth not initialized yet");
         uiConsole("web3auth not initialized yet");
         return;
       }
-      await web3Auth.connectTo("openlogin", { 
+      await web3Auth.connectTo("openlogin", {
         relogin: true,
-        loginProvider, 
+        loginProvider,
         extraLoginOptions: {
           id_token: jwtToken,
           domain: process.env.REACT_APP_DOMAIN || "http://localhost:3000",
           verifierIdField: "sub",
-        }
+        },
       });
     } finally {
       setIsLoading(false);
