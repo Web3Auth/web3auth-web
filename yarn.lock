@@ -3346,10 +3346,10 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@toruslabs/torus-scripts@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-1.0.6.tgz#a5ddafab20839dd0e6762c90e5781380d7e8929a"
-  integrity sha512-PT1IP2tKInGTjDSNVWWNtGdH2BhbMvrQHVv9O48YihPGsECH3Wk8ePCbXBdLkW1dPfoRlRJj4TY5Hydj8MTAwg==
+"@toruslabs/torus-scripts@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-1.0.7.tgz#fbb97809d5c52b0754ead8a97bd15a68026c2d8c"
+  integrity sha512-fNuRw+Gjz7jnrG9aiWRYpMqIXGjMoWnRZalU5bIcTEwvt0JsBC3w7QEFhFBe5leVEn6rZ43ZxHBClC6UPY3hNA==
   dependencies:
     "@babel/core" "~7.18.9"
     "@babel/plugin-proposal-class-properties" "^7.18.6"
