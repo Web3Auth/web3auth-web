@@ -187,6 +187,7 @@
 #w3a-modal .w3a-spinner-power > img {
   height: 32px;
   width: auto;
+  display: inline;
 }
 
 #w3a-modal .w3a-spinner {
