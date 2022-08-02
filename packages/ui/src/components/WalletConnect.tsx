@@ -69,7 +69,7 @@ function WalletConnect(props: WalletConnectProps) {
   const deviceDetails = useMemo<{ platform: platform; os: os }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
     return { platform: browser.getPlatformType() as platform, os: browser.getOSName() as os };
-  }, [window.navigator.userAgent]);
+  }, []);
 
   useEffect(() => {
     if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile) {
