@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-
-function generateWebpackConfig({ pkg, currentPath, alias, module = {}, pkgBaseConfig = {}, pkgUmdConfig = null }) {
+function generateWebpackConfig({ pkg, currentPath, alias, module = {}, ssrModule = null, pkgBaseConfig = {} }) {
   const depsList = Object.keys(pkg.dependencies);
   const baseConfig = {
     ...pkgBaseConfig,
@@ -17,11 +16,16 @@ function generateWebpackConfig({ pkg, currentPath, alias, module = {}, pkgBaseCo
         "bn.js": require.resolve("bn.js"),
       },
     },
-    module,
   };
 
   const config = { baseConfig };
-  if (pkgUmdConfig) config.umdConfig = pkgUmdConfig;
+  config.umdConfig = {
+    module,
+  };
+
+  config.cjsConfig = {
+    module: ssrModule || module,
+  };
 
   return config;
 }
