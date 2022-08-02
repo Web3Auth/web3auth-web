@@ -5,7 +5,6 @@ import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import React from 'react';
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -46,7 +45,7 @@ export function useWeb3Auth(): IWeb3AuthContext {
 interface IWeb3AuthState {
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 interface IWeb3AuthProps {
   children?: ReactNode;
