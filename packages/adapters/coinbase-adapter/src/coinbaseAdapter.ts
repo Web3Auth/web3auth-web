@@ -8,7 +8,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -27,7 +27,7 @@ export interface CoinbaseAdapterOptions {
   adapterSettings?: CoinbaseWalletSDKOptions;
 }
 
-class CoinbaseAdapter extends BaseAdapter<void> {
+class CoinbaseAdapter extends BaseEvmAdapter<void> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;

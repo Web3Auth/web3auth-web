@@ -9,7 +9,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -27,7 +27,7 @@ export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class SolflareAdapter extends BaseAdapter<void> {
+export class SolflareAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SOLFLARE;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;

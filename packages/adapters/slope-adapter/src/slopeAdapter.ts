@@ -7,7 +7,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -29,7 +29,7 @@ export interface SlopeWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class SlopeAdapter extends BaseAdapter<void> {
+export class SlopeAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SLOPE;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;

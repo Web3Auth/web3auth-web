@@ -9,7 +9,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -31,7 +31,7 @@ export interface SolletAdapterOptions {
   provider?: string;
 }
 
-export class BaseSolletAdapter extends BaseAdapter<void> {
+export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = "";
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;

@@ -7,7 +7,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -28,7 +28,7 @@ export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class PhantomAdapter extends BaseAdapter<void> {
+export class PhantomAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.PHANTOM;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;

@@ -7,7 +7,7 @@ import {
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -27,7 +27,7 @@ import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
 
-class WalletConnectV1Adapter extends BaseAdapter<void> {
+class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;

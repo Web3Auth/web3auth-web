@@ -8,7 +8,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -31,7 +31,7 @@ export interface SolanaWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class SolanaWalletAdapter extends BaseAdapter<void> {
+export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;

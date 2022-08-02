@@ -158,6 +158,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
+  async authenticateUser(): Promise<{ idToken: string }> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    const userInfo = await this.getUserInfo();
+    return {
+      idToken: userInfo.idToken as string,
+    };
+  }
+
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");

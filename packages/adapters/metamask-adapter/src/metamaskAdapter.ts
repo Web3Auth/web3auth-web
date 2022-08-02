@@ -8,7 +8,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -31,7 +31,7 @@ export interface MetamaskAdapterOptions {
   chainConfig?: CustomChainConfig;
 }
 
-class MetamaskAdapter extends BaseAdapter<void> {
+class MetamaskAdapter extends BaseEvmAdapter<void> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;

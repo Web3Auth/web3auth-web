@@ -8,7 +8,7 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
+  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -30,7 +30,7 @@ export interface TorusWalletOptions {
   chainConfig?: CustomChainConfig;
 }
 
-export class TorusWalletAdapter extends BaseAdapter<never> {
+export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
