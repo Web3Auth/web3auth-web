@@ -123,7 +123,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    super.disconnect();
+    await super.disconnect();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {

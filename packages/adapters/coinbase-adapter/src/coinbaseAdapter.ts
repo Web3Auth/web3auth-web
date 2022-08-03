@@ -120,7 +120,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    super.disconnect();
+    await super.disconnect();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
