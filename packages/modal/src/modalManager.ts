@@ -72,14 +72,6 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    * @defaultValue `true`
    */
   displayErrorsOnModal?: boolean;
-
-  /**
-   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
-   * @defaultValue 86400
-   *
-   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
-   */
-  sessionTime: string;
 }
 export class Web3Auth extends Web3AuthCore {
   public loginModal: LoginModal;

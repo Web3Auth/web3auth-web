@@ -42,6 +42,14 @@ export interface Web3AuthCoreOptions {
    * @defaultValue "local"
    */
   storageKey?: "session" | "local";
+
+  /**
+   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
+   * @defaultValue 86400
+   *
+   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
+   */
+  sessionTime?: number;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
