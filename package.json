@@ -27,8 +27,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@toruslabs/eslint-config-typescript": "^1.0.5",
-    "@toruslabs/torus-scripts": "^1.0.8",
+    "@toruslabs/eslint-config-typescript": "^1.0.6",
+    "@toruslabs/torus-scripts": "^1.0.9",
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^5.32.0",
     "cross-env": "^7.0.3",
@@ -78,5 +78,8 @@
   "engines": {
     "node": ">=14.17.0",
     "npm": ">=6.x"
+  },
+  "resolutions": {
+    "@typescript-eslint/eslint-plugin": "^5.32.0"
   }
 }

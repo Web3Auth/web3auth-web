@@ -2952,7 +2952,7 @@
     eslint-config-react-app "^7.0.1"
     eslint-config-standard "^17.0.0"
 
-"@toruslabs/eslint-config-typescript@^1.0.5":
+"@toruslabs/eslint-config-typescript@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@toruslabs/eslint-config-typescript/-/eslint-config-typescript-1.0.6.tgz#bac937dfec1b1013f7b087d9373838e8e74afe01"
   integrity sha512-uElszTAqMRByXe0+LsWsrUMT7L4kpoIbzk0+bldIWb3nhq/QNeSslp+x2X1Mqv1s0YytwRoUE0uQHBAd3R1gag==
@@ -3071,7 +3071,7 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@toruslabs/torus-scripts@^1.0.8":
+"@toruslabs/torus-scripts@^1.0.9":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-1.0.9.tgz#f28916f157995dc49b72c860bea0686c4d9a1981"
   integrity sha512-rcKoFMUP/Nb4fW2MgceRBN4rn4sVHsqlrQt4HbpB89vwYp3oiyRTf8to/VFyYLHM4+UU0pisvWyQSvvz58SSMA==
