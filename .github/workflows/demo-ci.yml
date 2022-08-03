@@ -1,14 +1,15 @@
 name: Update and Build examples on release
 
-on:
-  release:
-    types: [published]
+on: [push]
+  # release:
+  #   types: [published]
 jobs:
-  angular-example:
+  demo:
     strategy:
       matrix:
         node: ["16.x"]
         os: [ubuntu-latest]
+        demo: [react-app, next-app, angular-app]
 
     runs-on: ${{ matrix.os }}
 
@@ -18,16 +19,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up node
-        if: github.ref == 'refs/heads/master'
+        # if: github.ref == 'refs/heads/master'
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
-      - name: Build react demo
-        if: github.ref == 'refs/heads/master'
+      - name: Build ${{ matrix.demo }} demo
+        # if: github.ref == 'refs/heads/master'
         run: |
           npm i -g npm-check-updates
-          cd demo/angular-app
+          cd demo/${{ matrix.demo }}
           ncu -u --target=minor
           ncu -u "/^@web3auth.*$/"
           npm install
