@@ -54,6 +54,7 @@ export const verifySignedChallenge = async (
     audience: window.location.hostname,
     timeout: sessionTime,
   };
+
   const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData);
   if (!idTokenRes.success) {
     log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
@@ -68,4 +69,8 @@ export const getSavedToken = (userAddress: string, issuer: string) => {
 
 export const saveToken = (userAddress: string, issuer: string, token: string) => {
   return localStorage.setItem(`${userAddress}_${issuer}`, token);
+};
+
+export const clearToken = (userAddress: string, issuer: string) => {
+  return localStorage.removeItem(`${userAddress}_${issuer}`);
 };

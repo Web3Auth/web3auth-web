@@ -120,7 +120,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    super.disconnect();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;

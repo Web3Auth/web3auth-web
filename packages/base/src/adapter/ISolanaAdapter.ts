@@ -1,6 +1,8 @@
+import bs58 from "bs58";
+
 import { WalletLoginError } from "../errors";
 import { ADAPTER_STATUS, BaseAdapter, UserAuthInfo } from "./IAdapter";
-import { checkIfTokenIsExpired, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
+import { checkIfTokenIsExpired, clearToken, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   async authenticateUser(): Promise<UserAuthInfo> {
@@ -32,29 +34,30 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace);
+      const encodedMessage = new TextEncoder().encode(challenge);
 
       const signedMessage = await this.provider.request<Uint8Array>({
         method: "signMessage",
         params: {
-          message: Buffer.from(challenge, "utf8"),
+          message: encodedMessage,
         },
       });
-
-      // eslint-disable-next-line no-console
-      console.log("signedMessage", Buffer.from(signedMessage as Uint8Array).toString("hex"));
-
-      const idToken = await verifySignedChallenge(
-        chainNamespace,
-        Buffer.from(signedMessage as Uint8Array).toString("hex"),
-        challenge,
-        this.name,
-        this.sessionTime
-      );
+      const idToken = await verifySignedChallenge(chainNamespace, bs58.encode(signedMessage as Uint8Array), challenge, this.name, this.sessionTime);
       saveToken(accounts[0] as string, this.name, idToken);
       return {
         idToken,
       };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    const accounts = await this.provider.request<string[]>({
+      method: "getAccounts",
+    });
+    if (accounts && accounts.length > 0) {
+      clearToken(accounts[0], this.name);
+    }
   }
 }

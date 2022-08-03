@@ -123,7 +123,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    super.disconnect();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {

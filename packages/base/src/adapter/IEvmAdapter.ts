@@ -1,6 +1,6 @@
 import { WalletLoginError } from "../errors";
 import { ADAPTER_STATUS, BaseAdapter, UserAuthInfo } from "./IAdapter";
-import { checkIfTokenIsExpired, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
+import { checkIfTokenIsExpired, clearToken, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   async authenticateUser(): Promise<UserAuthInfo> {
@@ -38,9 +38,6 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         params: [challenge, accounts[0]],
       });
 
-      // eslint-disable-next-line no-console
-      console.log("signedMessage", signedMessage);
-
       const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime);
       saveToken(accounts[0] as string, this.name, idToken);
       return {
@@ -48,5 +45,15 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
       };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    const accounts = await this.provider.request<string[]>({
+      method: "eth_accounts",
+    });
+    if (accounts && accounts.length > 0) {
+      clearToken(accounts[0], this.name);
+    }
   }
 }
