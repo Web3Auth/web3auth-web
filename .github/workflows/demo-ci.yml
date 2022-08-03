@@ -1,0 +1,44 @@
+name: Update and Build examples on release
+
+on: [push]
+  # release:
+  #   types: [published]
+jobs:
+  setup:
+    strategy:
+      matrix:
+        node: ["16.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: "https://registry.npmjs.org"
+      - name: install global deps
+        if: github.ref == 'refs/heads/master'
+        run: |
+          npm i -g npm-check-updates
+  react-example:
+    strategy:
+      matrix:
+        node: ["16.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    needs: [setup]
+    - name: Build react demo
+      # if: github.ref == 'refs/heads/master'
+      run: |
+        cd demo/react-app
+        ncu -u --target=minor
+        ncu -u "/^@web3auth.*$/"
+        npm install
+        npm run build
+      
