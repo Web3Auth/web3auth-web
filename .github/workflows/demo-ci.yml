@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        if: github.ref == 'refs/heads/master'
+        # if: github.ref == 'refs/heads/master'
         uses: actions/checkout@v2
 
       - name: Set up node
