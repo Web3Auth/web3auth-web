@@ -1,25 +1,26 @@
-import { post } from "@toruslabs/http-helpers";
-
-import { authServer } from "../constants";
 import { WalletLoginError } from "../errors";
-import log from "../loglevel";
-import { ADAPTER_STATUS, BaseAdapter } from "./IAdapter";
-import { checkIfTokenIsExpired, getSavedToken, saveToken, signChallenge } from "./utils";
+import { ADAPTER_STATUS, BaseAdapter, UserAuthInfo } from "./IAdapter";
+import { checkIfTokenIsExpired, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
-  async authenticateUser(): Promise<{ idToken: string }> {
+  async authenticateUser(): Promise<UserAuthInfo> {
+    if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
+
     const { chainNamespace, chainId } = this.chainConfig;
 
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
-    const accounts = await this.provider?.request<string[]>({
+    const accounts = await this.provider.request<string[]>({
       method: "eth_accounts",
     });
     if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0], this.name);
-      const isExpired = checkIfTokenIsExpired(existingToken);
-      if (!isExpired) {
-        return { idToken: existingToken };
+      const existingToken = getSavedToken(accounts[0] as string, this.name);
+      if (existingToken) {
+        const isExpired = checkIfTokenIsExpired(existingToken);
+        if (!isExpired) {
+          return { idToken: existingToken };
+        }
       }
+
       const payload = {
         domain: window.location.origin,
         uri: window.location.href,
@@ -33,29 +34,17 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
       const challenge = await signChallenge(payload, chainNamespace);
 
       const signedMessage = await this.provider.request<string>({
-        method: "eth_sign",
-        params: [challenge],
+        method: "personal_sign",
+        params: [challenge, accounts[0]],
       });
 
-      const sigData = {
-        signature: {
-          s: signedMessage,
-          t: "eip191",
-        },
-        message: challenge,
-        issuer: this.name,
-        audience: window.location.hostname,
-        timeout: 86400,
-      };
-      const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData);
-      if (!idTokenRes.success) {
-        log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
-        throw new Error("Failed to authenticate user, ,message verification failed");
-      }
+      // eslint-disable-next-line no-console
+      console.log("signedMessage", signedMessage);
 
-      saveToken(accounts[0], this.name, idTokenRes.token);
+      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime);
+      saveToken(accounts[0] as string, this.name, idToken);
       return {
-        idToken: idTokenRes.token,
+        idToken,
       };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");

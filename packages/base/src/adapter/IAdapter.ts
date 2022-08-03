@@ -41,12 +41,15 @@ export type CONNECTED_EVENT_DATA = {
   adapter: string;
   reconnected: boolean;
 };
+
+export type UserAuthInfo = { idToken: string };
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
   chainConfigProxy: CustomChainConfig | null;
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
+  sessionTime: number;
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
@@ -56,10 +59,13 @@ export interface IAdapter<T> extends SafeEventEmitter {
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
+  authenticateUser(): Promise<UserAuthInfo>;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public adapterData?: unknown = {};
+
+  public sessionTime = 86400;
 
   // should be added in constructor or from setChainConfig function
   // before calling init function.
@@ -114,6 +120,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
+  abstract authenticateUser(): Promise<UserAuthInfo>;
 }
 
 export interface BaseAdapterConfig {

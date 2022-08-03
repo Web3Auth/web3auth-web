@@ -3,6 +3,7 @@ import JwtDecode from "jwt-decode";
 
 import { ChainNamespaceType } from "../chain/IChainInterface";
 import { authServer } from "../constants";
+import log from "../loglevel";
 
 export const checkIfTokenIsExpired = (token: string) => {
   const decoded = JwtDecode<{ exp: number }>(token);
@@ -33,6 +34,32 @@ export const signChallenge = async (payload: Record<string, string | number>, ch
   }
 
   return res.challenge;
+};
+
+export const verifySignedChallenge = async (
+  chainNamespace: ChainNamespaceType,
+  signedMessage: string,
+  challenge: string,
+  issuer: string,
+  sessionTime: number
+): Promise<string> => {
+  const t = chainNamespace === "solana" ? "sip99" : "eip191";
+  const sigData = {
+    signature: {
+      s: signedMessage,
+      t,
+    },
+    message: challenge,
+    issuer,
+    audience: window.location.hostname,
+    timeout: sessionTime,
+  };
+  const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData);
+  if (!idTokenRes.success) {
+    log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
+    throw new Error("Failed to authenticate user, ,message verification failed");
+  }
+  return idTokenRes.token;
 };
 
 export const getSavedToken = (userAddress: string, issuer: string) => {

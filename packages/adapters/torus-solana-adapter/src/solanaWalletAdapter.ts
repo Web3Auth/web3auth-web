@@ -29,6 +29,7 @@ export interface SolanaWalletOptions {
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
 export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
@@ -60,6 +61,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig || null;
+    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -172,5 +174,10 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     return userInfo;
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 }

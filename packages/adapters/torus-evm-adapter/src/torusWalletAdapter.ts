@@ -28,6 +28,7 @@ export interface TorusWalletOptions {
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
 export class TorusWalletAdapter extends BaseEvmAdapter<never> {
@@ -57,6 +58,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig || null;
+    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -174,5 +176,10 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     return userInfo;
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 }

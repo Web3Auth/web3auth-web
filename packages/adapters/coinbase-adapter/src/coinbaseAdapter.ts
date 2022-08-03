@@ -81,7 +81,12 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();

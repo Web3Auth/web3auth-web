@@ -67,7 +67,7 @@ export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConso
   }
 };
 
-export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[]> => {
+export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[] | undefined> => {
   try {
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
@@ -78,7 +78,7 @@ export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole:
     uiConsole("error", error);
   }
 };
-export const getChainId = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string> => {
+export const getChainId = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string | undefined> => {
   try {
     const web3 = new Web3(provider as any);
     const chainId = await web3.eth.getChainId();

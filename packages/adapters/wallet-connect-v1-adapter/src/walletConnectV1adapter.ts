@@ -55,6 +55,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     super();
     this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get connected(): boolean {
@@ -145,6 +146,13 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
         );
       }
     });
+  }
+
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

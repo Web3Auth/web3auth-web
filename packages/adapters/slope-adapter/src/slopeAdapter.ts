@@ -27,6 +27,7 @@ import { detectProvider } from "./utils";
 
 export interface SlopeWalletOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
 export class SlopeAdapter extends BaseSolanaAdapter<void> {
@@ -49,6 +50,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   constructor(options: SlopeWalletOptions = {}) {
     super();
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -63,7 +65,12 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();

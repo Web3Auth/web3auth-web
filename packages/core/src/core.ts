@@ -13,6 +13,7 @@ import {
   log,
   SafeEventEmitterProvider,
   storageAvailable,
+  UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
@@ -162,6 +163,11 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     log.debug("Getting user info", this.status, this.connectedAdapterName);
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
   }
 
   public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {

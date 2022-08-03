@@ -25,6 +25,7 @@ import {
 import { SolflareInjectedProvider } from "@web3auth/solana-provider";
 export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
 export class SolflareAdapter extends BaseSolanaAdapter<void> {
@@ -47,6 +48,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   constructor(options: SolflareWalletOptions = {}) {
     super();
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -61,7 +63,12 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();

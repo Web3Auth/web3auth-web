@@ -29,6 +29,7 @@ interface EthereumProvider extends SafeEventEmitterProvider {
 }
 export interface MetamaskAdapterOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
 class MetamaskAdapter extends BaseEvmAdapter<void> {
@@ -49,6 +50,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
     this.chainConfig = adapterOptions.chainConfig || null;
+    this.sessionTime = adapterOptions.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -79,7 +81,12 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
