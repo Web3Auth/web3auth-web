@@ -55,9 +55,6 @@
     "type": "git",
     "url": "git+https://github.com/Web3Auth/Web3Auth.git"
   },
-  "resolutions": {
-    "@rollup/plugin-typescript": "8.3.3"
-  },
   "keywords": [
     "web3",
     "ethereum",
