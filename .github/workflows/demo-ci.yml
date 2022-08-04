@@ -1,41 +1,40 @@
 name: Update and Build examples on release
 
-on: [push]
-  # release:
-  #   types: [published]
+on:
+  release:
+    types: [published]
 jobs:
   demo:
     strategy:
       matrix:
         node: ["16.x"]
         os: [ubuntu-latest]
-        demo: [react-app]
-        # demo: [react-app, next-app, angular-app, torus-wallet-plugin-app, starkex-react-app, custom-ui-react-app]
+        demo: [react-app, next-app, angular-app, torus-wallet-plugin-app, starkex-react-app, custom-ui-react-app]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out Git repository
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: actions/checkout@v2
 
       - name: Set up node
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
       - name: Build ${{ matrix.demo }} demo
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           npm i -g npm-check-updates
           cd demo/${{ matrix.demo }}
           ncu -u --target=minor
           ncu -u "/^@web3auth.*$/"
-          npm instal
+          npm install
           npm run build
       - name: Commit Changes
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           # Determines the way the action fills missing author name and email. Three options are available:
