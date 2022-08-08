@@ -3,8 +3,8 @@ name: Update, Build and Deploy cognito react example
 on:
   release:
     types: [published]
-  push:
-    branches: [master]
+  # push:
+  #   branches: [master]
 jobs:
   cognito-react-app:
     strategy:
