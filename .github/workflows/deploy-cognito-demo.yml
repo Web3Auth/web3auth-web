@@ -1,4 +1,4 @@
-name: Update and Build examples on release
+name: Update, Build and Deploy cognito react example on release
 
 on: [push]
   # release: 

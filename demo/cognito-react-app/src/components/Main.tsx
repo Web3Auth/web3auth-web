@@ -5,7 +5,7 @@ import Loader from "./Loader";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { user, provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain, setIsLoading } = useWeb3Auth();
+  const { user, login, logout, getUserInfo, getAccounts, getBalance, signMessage, isLoading, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
 
   const handleGoogleLogin = async () => {
     try {
@@ -52,7 +52,7 @@ const Main = () => {
   const unloggedInView = (
     <div className={styles.centerFlex}>
        <div>
-          <img src="https://images.web3auth.io/web3auth.svg" />
+          <img alt="web3auth-logo" src="https://images.web3auth.io/web3auth.svg" />
         </div>
       <h3>Login With</h3>
       <button onClick={()=> handleGoogleLogin()} className={styles.card}>
