@@ -2,12 +2,12 @@ name: Update, Build and Deploy auth0 example
 
 on: [push]
 jobs:
-  cognito-react-app:
+  auth0-react-app:
     strategy:
       matrix:
         node: ["16.x"]
         os: [ubuntu-latest]
-        demo: [cognito-react-app]
+        demo: [auth0-react-app]
 
     runs-on: ${{ matrix.os }}
 
