@@ -17,17 +17,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: actions/checkout@v2
 
       - name: Set up node
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
       - name: Build ${{ matrix.demo }} demo
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         run: |
           npm i -g npm-check-updates
           cd demo/${{ matrix.demo }}
@@ -36,7 +36,7 @@ jobs:
           npm install
           npm run build
       - name: Commit Changes
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           # Determines the way the action fills missing author name and email. Three options are available:
@@ -55,7 +55,7 @@ jobs:
 
             # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -65,7 +65,7 @@ jobs:
       # Copy the files from build folder to the S3 bucket
       # Upload to S3
       - name: sync s3
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: jakejarvis/s3-sync-action@master
         env:
           SOURCE_DIR: "./demo/custom-ui-react-app/build"
@@ -76,7 +76,7 @@ jobs:
 
       # Invalidate Cloudfront (this action)
       - name: invalidate
-        if: ((github.ref == 'refs/heads/master' && github.event_name === 'release') || (github.ref != 'refs/heads/master' && github.event_name === 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        if: ((github.ref == 'refs/heads/master' && github.event_name == 'release') || (github.ref != 'refs/heads/master' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: chetan/invalidate-cloudfront-action@master
         env:
           DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_CORE_DEMO_DISTRIBUTION_ID }}
