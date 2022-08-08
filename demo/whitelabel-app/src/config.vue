@@ -1,6 +1,6 @@
 <template>
     <div>
-      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/whitelabel-app">
+      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/demo/whitelabel-app">
         <img class="mx-auto mb-2" src="@/assets/github-logo.png" width="30" />
       </a>
       <h1 class="mb-6 text-2xl font-bold">Whitelabel Settings</h1>
