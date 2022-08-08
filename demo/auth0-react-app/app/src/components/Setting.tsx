@@ -13,14 +13,19 @@ interface IProps {
 }
 
 const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
+
+  const { provider } = useContext(Web3AuthContext);
+  const isLoggedIn = provider !== null;
+  const [checked, setChecked] = useState(false);
+
   useEffect(() => {
-    setApp(sessionStorage.getItem("app") as APP_CONFIG_TYPE);
     if (sessionStorage.getItem("app") === "SPA") {
       setChecked(false);
     } else {
       setChecked(true);
     }
-  });
+  },[]);
+  
   const networkChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setNetwork(e.target.value as WEB3AUTH_NETWORK_TYPE);
@@ -42,9 +47,7 @@ const Setting = ({ setNetwork, setChain, setApp }: IProps) => {
     if (checked) appChangeHandler("SPA");
     else appChangeHandler("RWA");
   };
-  const { provider } = useContext(Web3AuthContext);
-  const isLoggedIn = provider !== null;
-  const [checked, setChecked] = useState(false);
+
   return (
     <div className={styles.setting}>
       <div className={styles.hide}>
