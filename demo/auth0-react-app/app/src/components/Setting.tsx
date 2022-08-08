@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
-import { APP_CONFIG, APP_CONFIG_TYPE } from "../config/appConfig";
+import { APP_CONFIG_TYPE } from "../config/appConfig";
 import styles from "../styles/Home.module.css";
 import { Web3AuthContext } from "../services/web3auth";
 import { useContext, useState } from "react";
