@@ -5,144 +5,62 @@
 ![npm](https://img.shields.io/npm/dw/@web3auth/core)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/web3auth/web3auth/Build%20&%20Release)
 
-Web3Auth is pluggable auth infrastructure for Web3 wallets and applications. It streamlines the onboarding of both mainstream and crypto native users under a minute by providing experiences that they're most comfortable with.
+Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-With support for all social logins, web & mobile native platforms, wallets and other key management methods, **Web3Auth results in a standard cryptographic key provider specific to the user and application.**
+## 📖 Documentation
 
-### Checkout the official [Web3Auth Documentation](https://docs.web3auth.io) and [API Reference](https://docs.web3auth.io/api-reference) to get started!
+Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SDK Reference](https://web3auth.io/docs/sdk/web/) to get started!
 
-## Choosing Between SDKs
+## 💭 Choosing Between SDKs
 
-For using Web3Auth you have multiple choices to get started with. If you're just starting up and want to experience how it will look like within your
-application, we recommend you to use our **Plug n Play SDK [`@web3auth/web3auth`](https://npmjs.com/package/@web3auth/web3auth)** which is a simple
-and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application.
+For using Web3Auth in the web, you have two choices of SDKs to get started with.
 
-For more customised usage, we
-have our **Custom Login UI Module [`@web3auth/core`](https://npmjs.com/package/@web3auth/core)**, which is the core module implementing the features
-you need and giving you the flexibilty of using your own UI with the Web3Auth SDK working in the backend.
+[Web3Auth Plug and Play UI SDK `@web3auth/web3auth`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
 
-### Plug n Play SDK
+[Web3Auth Plug and Play Core SDK `@web3auth/core`](https://web3auth.io/docs/sdk/web/core/): The core module implemeting all the Web3Auth features you need and giving you the flexibilty of using your own UI with the Web3Auth SDK working in the backend.
 
-### [`@web3auth/web3auth`](https://npmjs.com/package/@web3auth/web3auth)
+## ⚡ Quick Start
 
-This package provides main class for using default web3auth modal. It inherits `@web3auth/core` package. So you can still call all the
-functions available in the `@web3auth/core` api reference. The package includes all of our packages and gives you a simple way of implementing
-Web3Auth within your interface.
-
-### Installation
-
-#### npm
+### Installation (Web3Auth Plug and Play UI)
 
 ```shell
-npm i --save @web3auth/web3auth
+npm install --save @web3auth/web3auth
 ```
 
-#### yarn
+### Get your Client ID from Web3Auth Dashboard
 
-```shell
-yarn add @web3auth/web3auth
-```
+Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a new project. Use the Client ID of the project to start your integration.
 
-#### Head on to the [Plug n Play API Reference](https://docs.web3auth.io/api-reference/web/plugnplay) to get started.
+![Web3Auth Dashboard](https://web3auth.io/docs/assets/images/project_plug_n_play-89c39ec42ad993107bb2485b1ce64b89.png)
 
-### Custom Login UI SDK
+### Initialize Web3Auth for your preferred blockchain
 
-### [`@web3auth/core`](https://npmjs.com/package/@web3auth/core)
-
-This package provides the core logic for handling adapters within web3auth. This package acts as a manager for all the adapters. You should use this
-package to build your custom login UI on top of web3auth.
-
-### Installation
-
-#### npm
-
-```shell
-npm i --save @web3auth/core
-```
-
-#### yarn
-
-```shell
-yarn add @web3auth/core
-```
-
-#### Head on to the [Custom Login UI API Reference](https://docs.web3auth.io/api-reference/web/customloginui) to get started.
-
-## Other packages included in our SDK
-
-### [`@web3auth/base`](https://npmjs.com/package/@web3auth/base)
-
-This package gives access to common types and interfaces for web3auth. It is included as a dependency in both our Custom UI and Plug n Play SDKs.
-
-### [`@web3auth/ui`](https://npmjs.com/package/@web3auth/ui)
-
-This package includes the default Web3Auth modal UI for modular access within the Plug n Play SDK. It is included as a dependency in our Plug n Play
-SDK.
-
-## Adapter packages
-
-Adapter acts as a connector between the Web3Auth and underlying wallet provider. Every adapter follows a common interface which is required by
-Web3Auth to communicate with the wallet.
-
-To understand what they are and what they're for: Check out [Adapters](https://docs.web3auth.io/api-reference/web/adapters/)
-
-Currently we have the following adapters available for utilisation:
-
-- [`@web3auth/openlogin-adapter`](https://npmjs.com/package/@web3auth/openlogin-adapter)
-- [`@web3auth/phantom-adapter`](https://npmjs.com/package/@web3auth/phantom-adapter)
-- [`@web3auth/torus-evm-adapter`](https://npmjs.com/package/@web3auth/torus-evm-adapter)
-- [`@web3auth/torus-solana-adapter`](https://npmjs.com/package/@web3auth/torus-solana-adapter)
-- [`@web3auth/metamask-adapter`](https://npmjs.com/package/@web3auth/metamask-adapter)
-- [`@web3auth/wallet-connect-v1-adapter`](https://npmjs.com/package/@web3auth/wallet-connect-v1-adapter)
-
-## Provider packages
-
-Each adapter in web3auth exposes a provider on successful user authentication. This provider can be use to interact with wallet or connected chain
-using rpc calls. Currently web3auth supports providers for both EVM and Solana chains. For other chains, one can easily get the private key from the
-web3auth SDK. You can learn more about providers [here](https://docs.web3auth.io/api-reference/web/providers/).
-
-- [`@web3auth/ethereum-adapter`](https://www.npmjs.com/package/@web3auth/ethereum-provider)
-- [`@web3auth/solana-adapter`](https://www.npmjs.com/package/@web3auth/solana-provider)
-
-## Plugin packages
-
-Each plugin in web3auth enhances the functionality of web3auth sdk by providing additional features.
-Currently web3auth supports plugins for both EVM and Solana wallets.
-
-- [`@web3auth/torus-wallet-connector-plugin`](https://www.npmjs.com/package/@web3auth/torus-wallet-connector-plugin)
-- [`@web3auth/solana-wallet-connector-plugin`](https://www.npmjs.com/package/@web3auth/solana-wallet-connector-plugin)
-
-## Bundling
-
-This module is distributed in 4 formats
-
-- `esm` build `dist/package.esm.js` in es6 format
-- `commonjs` build `dist/package.cjs.js` in es5 format
-- `umd` build `dist/package.umd.min.js` in es5 format without polyfilling corejs minified
-
-By default, the appropriate format is used for your specified usecase
-You can use a different format (if you know what you're doing) by referencing the correct file
-
-The cjs build is not polyfilled with core-js.
-It is upto the user to polyfill based on the browserlist they target
-
-### Directly in Browser
-
-CDN's serve the non-core-js polyfilled version by default. You can use a different
-
-Please replace package and version with the appropriate package name
-
-jsdeliver
+Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
 ```js
-<script src="https://cdn.jsdelivr.net/npm/@web3auth/PACKAGE@VERSION"></script>
+import { Web3Auth } from "@web3auth/web3auth";
+
+//Initialize within your constructor
+const web3auth = new Web3Auth({
+  clientId: "", // Get your Client ID from Web3Auth Dashboard
+  chainConfig: {
+    chainNamespace: "eip155",
+    chainId: "0x1",
+  },
+});
+
+await web3auth.initModal();
 ```
 
-unpkg
+### Login your User
+
+Once you're done initialising, just create a button that triggers to open the login modal for the user on their request. Logging in is as easy as:
 
 ```js
-<script src="https://unpkg.com/@web3auth/PACKAGE@VERSION"></script>
+await web3auth.connect();
 ```
+
+## 📦 Packages within this repository
 
 | Packages                                   | `@latest` Version                                                                                                                                                                     | Size                                                                                                                                                                                             | Description                                                                                                                                                                                                                                                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -169,245 +87,54 @@ unpkg
 | `@web3auth/base`                           | [![npm version](https://img.shields.io/npm/v/@web3auth/base?label=%22%22)](https://www.npmjs.com/package/@web3auth/base/v/latest)                                                     | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base@latest)                                                     | Base reusable functionalities for creating a web3auth instance                                                                                                                                                                                                                                               |
 | `@web3auth/ui`                             | [![npm version](https://img.shields.io/npm/v/@web3auth/ui?label=%22%22)](https://www.npmjs.com/package/@web3auth/ui/v/latest)                                                         | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ui?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ui@latest)                                                         | Provides the UI used for creating the modal                                                                                                                                                                                                                                                                  |
 
-## Examples
-
-Please refer to examples
-
-- [vue](examples/vue-app)
-- [react](examples/react-app)
-- [nextjs](examples/next-app)
-- [angular](examples/angular-app)
-- [html](examples/getting-started)
-
-Hosted Example for testing
-
-- [Full fledged example](https://demo-app.web3auth.io)
-
-## Requirements
+## ⏪ Requirements
 
 - All packages require a peer dependency of `@babel/runtime`
 - Node 14+
 
-## Troubleshooting and known issues.
+## 🧳 Bundling
 
-### Web3Auth and Create-react-app
+This module is distributed in 4 formats
 
-If you are using create-react-app version >=5 you may run into issues building. This is because NodeJS polyfills are not included in the latest version of create-react-app.
+- `esm` build `dist/package.esm.js` in es6 format
+- `commonjs` build `dist/package.cjs.js` in es5 format
+- `umd` build `dist/package.umd.min.js` in es5 format without polyfilling corejs minified
 
-### Solution
+By default, the appropriate format is used for your specified usecase
+You can use a different format (if you know what you're doing) by referencing the correct file
 
-- Install react-app-rewired and the missing modules
+The cjs build is not polyfilled with core-js.
+It is upto the user to polyfill based on the browserlist they target
 
-If you are using yarn:
+### Directly in Browser
 
-```bash
-yarn add --dev react-app-rewired process crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer
-```
+CDN's serve the non-core-js polyfilled version by default. You can use a different
 
-If you are using npm:
+Please replace package and version with the appropriate package name
 
-```bash
-npm install --save-dev react-app-rewired crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer process
-```
-
-- Create `config-overrides.js` in the root of your project folder with the content:
+#### `jsdeliver`
 
 ```js
-const webpack = require("webpack");
-
-module.exports = function override(config) {
-  const fallback = config.resolve.fallback || {};
-  Object.assign(fallback, {
-    crypto: require.resolve("crypto-browserify"),
-    stream: require.resolve("stream-browserify"),
-    assert: require.resolve("assert"),
-    http: require.resolve("stream-http"),
-    https: require.resolve("https-browserify"),
-    os: require.resolve("os-browserify"),
-    url: require.resolve("url"),
-  });
-  config.resolve.fallback = fallback;
-  config.plugins = (config.plugins || []).concat([
-    new webpack.ProvidePlugin({
-      process: "process/browser",
-      Buffer: ["buffer", "Buffer"],
-    }),
-  ]);
-  return config;
-};
+<script src="https://cdn.jsdelivr.net/npm/@web3auth/PACKAGE@VERSION"></script>
 ```
-
-- Within `package.json` change the scripts field for start, build and test. Instead of `react-scripts` replace it with `react-app-rewired`
-
-before:
-
-```typescript
-"scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-},
-```
-
-after:
-
-```typescript
-"scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
-},
-```
-
-The missing Nodejs polyfills should be included now and your app should be functional with web3.
-
-- If you want to hide the warnings created by the console:
-
-In `config-overrides.js` within the `override` function, add:
-
-```javascript
-config.ignoreWarnings = [/Failed to parse source map/];
-```
-
-If you're using `craco`, similar changes need to be made to `craco.config.js`
-
-### Web3Auth and Angular
-
-If you are using Angular version >11, you may run into issues building. This is because polyfills are not included in the newest version of Angular.
-
-- Install the required dependencies within your angular project:
-
-```bash
-npm install --save-dev crypto-browserify stream-browserify assert stream-http https-browserify os-browserify process buffer url
-```
-
-- Within `tsconfig.json` add the following `paths` in `compilerOptions` so Webpack can get the correct dependencies
-
-```typescript
-{
-    "compilerOptions": {
-        "paths" : {
-        "crypto": ["./node_modules/crypto-browserify"],
-        "stream": ["./node_modules/stream-browserify"],
-        "assert": ["./node_modules/assert"],
-        "http": ["./node_modules/stream-http"],
-        "https": ["./node_modules/https-browserify"],
-        "os": ["./node_modules/os-browserify"],
-    }
-}
-```
-
-- Add the following lines to `polyfills.ts` file:
-
-```typescript
-import { Buffer } from "buffer";
-
-(window as any).global = window;
-global.Buffer = Buffer;
-global.process = {
-  env: { DEBUG: undefined },
-  version: "",
-  nextTick: require("next-tick"),
-} as any;
-```
-
-### Web3Auth and Vue
-
-If you are using vue.js you may run into issues building. This is because NodeJS polyfills are not included in the latest version of vue-cli (webpack 5).
-
-### Solution
-
-- Install the missing modules
-
-If you are using yarn:
-
-```bash
-yarn add --dev process crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer
-```
-
-If you are using npm:
-
-```bash
-npm install --save-dev crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer process
-```
-
-Add the following lines to `vue.config.js`
+#### `unpkg`
 
 ```js
-module.exports = {
-  configureWebpack: (config) => {
-    config.resolve.fallback = {
-      crypto: require.resolve("crypto-browserify"),
-      stream: require.resolve("stream-browserify"),
-      assert: require.resolve("assert"),
-      os: require.resolve("os-browserify/browser"),
-      https: require.resolve("https-browserify"),
-      http: require.resolve("stream-http"),
-    };
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
-    };
-    config.plugins.push(new ProvidePlugin({ Buffer: ["buffer", "Buffer"] }));
-    config.plugins.push(new ProvidePlugin({ process: ["process/browser"] }));
-  },
-};
+<script src="https://unpkg.com/@web3auth/PACKAGE@VERSION"></script>
 ```
 
-### Web3Auth and Vite/Svelte/Rollup
+## 🩹 Examples
 
-If you are using vite/svelte/rollup you may run into issues building. This is because NodeJS polyfills are not included.
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
 
-### Solution
+## 🌐 Demo
 
-- Install the missing modules
+Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
 
-If you are using yarn:
+Further checkout the [demo folder](https://github.com/Web3Auth/Web3Auth/tree/master/demo) within this repository, which contains other hosted demos for different usecases.
 
-```bash
-yarn add --dev process crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer
-```
+## 💬 Troubleshooting and Discussions
 
-If you are using npm:
-
-```bash
-npm install --save-dev crypto-browserify stream-browserify assert stream-http https-browserify os-browserify url buffer process
-```
-
-Add the following lines to `svelte.config.js` or `rollup.config.js` or `vite.config.js`
-
-```js
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
-import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
-import rollupNodePolyFill from "rollup-plugin-node-polyfills";
-import builtins from "rollup-plugin-node-builtins";
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  optimizeDeps: {
-    esbuildOptions: {
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          process: true,
-          buffer: true,
-        }),
-        NodeModulesPolyfillPlugin(),
-      ],
-    },
-  },
-  build: {
-    rollupOptions: {
-      plugins: [
-        // Enable rollup polyfills plugin
-        // used during production bundling
-        builtins(),
-        rollupNodePolyFill(),
-      ],
-    },
-  },
-});
-```
+- Have a look at our [GitHub Discussions](https://github.com/Web3Auth/Web3Auth/discussions?discussions_q=sort%3Atop) to see if anyone has any questions or issues you might be having.
+- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions
+- Join our [Discord](https://discord.gg/web3auth) to join our community and get private integration support or help with your integration.
