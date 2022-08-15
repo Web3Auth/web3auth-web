@@ -6,7 +6,7 @@
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
 
-This adapter is a wrapper around the [`openlogin`](https://github.com/torusresearch/openlogin) library from Web3Auth (previously Torus) and enables the main social login features of Web3Auth. By default, Web3Auth has
+This adapter is a wrapper around the [`openlogin`](https://www.npmjs.com/package/@toruslabs/openlogin) library from Web3Auth (previously Torus) and enables the main social login features of Web3Auth. By default, Web3Auth has
 certain configuration set to enable a quick integration, however, for customising features, like Whitelabel,
 Custom Authentication, etc. you need to customise the Openlogin Adapter. With the Openlogin Adapter package installed and
 instantiated, you can explore a number of options and can customise the login experience of the user as per your needs.
