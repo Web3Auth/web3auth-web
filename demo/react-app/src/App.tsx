@@ -24,7 +24,7 @@ function App() {
         <Main />
       </Web3AuthProvider>
       <footer className={styles.footer}>
-        <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/react-app" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/Web3Auth/Web3Auth/tree/master/demo/react-app" target="_blank" rel="noopener noreferrer">
           Source code {"  "}
           <img className={styles.logo} src="/images/github-logo.png" alt="github-logo" />
         </a>

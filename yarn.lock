@@ -2939,7 +2939,7 @@
   optionalDependencies:
     secp256k1 "^3.8.0"
 
-"@toruslabs/eslint-config-react@^1.0.5":
+"@toruslabs/eslint-config-react@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@toruslabs/eslint-config-react/-/eslint-config-react-1.0.6.tgz#0bfcf82f347415bc561d458163c1923bf5d6b5c1"
   integrity sha512-gGdYb5XhtJFQWHkuQ4BLB0VS89Refo2b0Nii7Wiay/dfvx6h8PjcawmE8UBCmtwVDCdIVedYdXamZjKE5YrzMg==

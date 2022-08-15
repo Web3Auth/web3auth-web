@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="sidebar">
-      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/vue-app" target="blank">
+      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/demo/vue-app" target="blank">
         <img src="./assets/github-logo.png" width="30px" />
       </a>
       <h2>Demo Settings</h2>
