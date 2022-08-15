@@ -9,7 +9,7 @@ export interface IProviderHandlers {
   signAllTransactions: (req: JRPCRequest<{ message: Transaction[] }>) => Promise<Transaction[]>;
   signAndSendTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<{ signature: string }>;
   getSecretKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signMessage: (req: JRPCRequest<{ message: Uint8Array }>) => Promise<Uint8Array>;
+  signMessage: (req: JRPCRequest<{ message: Uint8Array; display?: string }>) => Promise<Uint8Array>;
 }
 
 export function createGetAccountsMiddleware({ getAccounts }: { getAccounts: IProviderHandlers["getAccounts"] }): JRPCMiddleware<unknown, unknown> {

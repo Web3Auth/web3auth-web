@@ -9,7 +9,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseSolanaAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,7 +21,9 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { SolflareInjectedProvider } from "@web3auth/solana-provider";
+
 export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;
   sessionTime?: number;

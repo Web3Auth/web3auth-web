@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -21,6 +20,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
 interface EthereumProvider extends SafeEventEmitterProvider {
   isMetaMask?: boolean;

@@ -7,7 +7,6 @@ import {
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   AdapterNamespaceType,
-  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,6 +21,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";

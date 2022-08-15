@@ -1,14 +1,13 @@
 import { Connection, Transaction } from "@solana/web3.js";
-import type Solflare from "@solflare-wallet/sdk";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 
-import { IBaseWalletProvider } from "../../../interface";
+import { IBaseWalletProvider, SolflareWallet } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
 import { getBaseProviderHandlers } from "../base/providerHandlers";
 
-export const getSolflareHandlers = (injectedProvider: Solflare, getProviderEngineProxy: () => SafeEventEmitterProvider): IProviderHandlers => {
+export const getSolflareHandlers = (injectedProvider: SolflareWallet, getProviderEngineProxy: () => SafeEventEmitterProvider): IProviderHandlers => {
   const solflareProviderHandlers = getBaseProviderHandlers(injectedProvider as IBaseWalletProvider);
   solflareProviderHandlers.signAndSendTransaction = async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
     const provider = getProviderEngineProxy();

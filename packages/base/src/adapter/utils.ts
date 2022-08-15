@@ -4,6 +4,7 @@ import JwtDecode from "jwt-decode";
 import { ChainNamespaceType } from "../chain/IChainInterface";
 import { authServer } from "../constants";
 import log from "../loglevel";
+import { storageAvailable } from "../utils";
 
 export const checkIfTokenIsExpired = (token: string) => {
   const decoded = JwtDecode<{ exp: number }>(token);
@@ -64,13 +65,22 @@ export const verifySignedChallenge = async (
 };
 
 export const getSavedToken = (userAddress: string, issuer: string) => {
-  return localStorage.getItem(`${userAddress}_${issuer}`);
+  if (storageAvailable("localStorage")) {
+    return localStorage.getItem(`${userAddress.toLowerCase()}_${issuer}`);
+  }
+  return null;
 };
 
 export const saveToken = (userAddress: string, issuer: string, token: string) => {
-  return localStorage.setItem(`${userAddress}_${issuer}`, token);
+  if (storageAvailable("localStorage")) {
+    return localStorage.setItem(`${userAddress.toLowerCase()}_${issuer}`, token);
+  }
+  return null;
 };
 
 export const clearToken = (userAddress: string, issuer: string) => {
-  return localStorage.removeItem(`${userAddress}_${issuer}`);
+  if (storageAvailable("localStorage")) {
+    return localStorage.removeItem(`${userAddress.toLowerCase()}_${issuer}`);
+  }
+  return null;
 };

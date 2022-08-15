@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -19,6 +18,7 @@ import {
   WALLET_ADAPTERS,
   WalletLoginError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
 export type CoinbaseWalletSDKOptions = ConstructorParameters<typeof CoinbaseWalletSDK>[0];
 

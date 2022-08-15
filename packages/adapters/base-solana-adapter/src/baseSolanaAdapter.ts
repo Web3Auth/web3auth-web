@@ -1,8 +1,16 @@
+import {
+  ADAPTER_STATUS,
+  BaseAdapter,
+  checkIfTokenIsExpired,
+  clearToken,
+  getSavedToken,
+  saveToken,
+  signChallenge,
+  UserAuthInfo,
+  verifySignedChallenge,
+  WalletLoginError,
+} from "@web3auth/base";
 import bs58 from "bs58";
-
-import { WalletLoginError } from "../errors";
-import { ADAPTER_STATUS, BaseAdapter, UserAuthInfo } from "./IAdapter";
-import { checkIfTokenIsExpired, clearToken, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   async authenticateUser(): Promise<UserAuthInfo> {
@@ -35,11 +43,11 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
       const challenge = await signChallenge(payload, chainNamespace);
       const encodedMessage = new TextEncoder().encode(challenge);
-
       const signedMessage = await this.provider.request<Uint8Array>({
         method: "signMessage",
         params: {
           message: encodedMessage,
+          display: "utf8",
         },
       });
       const idToken = await verifySignedChallenge(chainNamespace, bs58.encode(signedMessage as Uint8Array), challenge, this.name, this.sessionTime);

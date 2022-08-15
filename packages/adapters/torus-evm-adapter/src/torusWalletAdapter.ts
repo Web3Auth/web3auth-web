@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseEvmAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,6 +21,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
 export interface TorusWalletOptions {
   adapterSettings?: TorusCtorArgs;

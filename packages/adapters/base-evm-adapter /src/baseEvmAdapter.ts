@@ -1,6 +1,15 @@
-import { WalletLoginError } from "../errors";
-import { ADAPTER_STATUS, BaseAdapter, UserAuthInfo } from "./IAdapter";
-import { checkIfTokenIsExpired, clearToken, getSavedToken, saveToken, signChallenge, verifySignedChallenge } from "./utils";
+import {
+  ADAPTER_STATUS,
+  BaseAdapter,
+  checkIfTokenIsExpired,
+  clearToken,
+  getSavedToken,
+  saveToken,
+  signChallenge,
+  UserAuthInfo,
+  verifySignedChallenge,
+  WalletLoginError,
+} from "@web3auth/base";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   async authenticateUser(): Promise<UserAuthInfo> {

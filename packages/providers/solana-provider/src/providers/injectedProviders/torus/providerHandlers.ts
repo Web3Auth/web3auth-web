@@ -17,7 +17,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
 
     getAccounts: async () => {
       const accounts = await injectedProvider.request<string[]>({
-        method: "solana_accounts",
+        method: "solana_requestAccounts",
         params: {},
       });
       return accounts;
