@@ -22,7 +22,7 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
-import { SolflareInjectedProvider } from "@web3auth/solana-provider";
+import { SolflareInjectedProvider, SolflareWallet } from "@web3auth/solana-provider";
 
 export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;
@@ -117,7 +117,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
           throw WalletLoginError.connectionError((error as Error)?.message);
         }
       }
-      await this.connectWithProvider(wallet);
+      await this.connectWithProvider(wallet as SolflareWallet);
 
       this._wallet = wallet;
 
@@ -154,7 +154,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
-  private async connectWithProvider(injectedProvider: SolflareClass): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(injectedProvider: SolflareWallet): Promise<SafeEventEmitterProvider | null> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
