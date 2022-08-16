@@ -9,7 +9,7 @@ jobs:
       matrix:
         node: ["16.x"]
         os: [ubuntu-latest]
-        demo: [react-app, next-app, angular-app, torus-wallet-plugin-app, starkex-react-app, custom-ui-react-app]
+        demo: [react-app, next-app, angular-app,firebase-next-app, firebase-react-app, whitelabel-app, starkex-react-app]
 
     runs-on: ${{ matrix.os }}
 
