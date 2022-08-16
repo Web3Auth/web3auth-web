@@ -3,7 +3,7 @@ import { Web3AuthCore } from "@web3auth/core";
 import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import React, { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, FunctionComponent, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
@@ -62,7 +62,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const currentChainConfig = CHAIN_CONFIG[chain];
 
 
   const setWalletProvider = useCallback(
@@ -104,6 +103,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setIsLoading(true);
         // get your client id from https://dashboard.web3auth.io by registering a plug and play application.
         const clientId =  "BE-nSVAJjuFSstTO_9wlA8MTZKdZ9bJaH8wWcnHKMUGLzYLg-cPPZ9v6Tm1snsi-Cv12XMHkFXX0ujRp3FtBnAc";
+        const currentChainConfig = CHAIN_CONFIG[chain];
 
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
