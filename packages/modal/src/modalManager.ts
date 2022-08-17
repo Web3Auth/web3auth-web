@@ -160,7 +160,9 @@ export class Web3Auth extends Web3AuthCore {
         // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
         // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
+          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId, sessionTime: this.options.sessionTime });
+        } else {
+          this.walletAdapters[adapterName].setAdapterSettings({ sessionTime: this.options.sessionTime });
         }
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace

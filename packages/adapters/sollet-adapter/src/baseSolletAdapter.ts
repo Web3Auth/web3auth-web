@@ -9,7 +9,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,6 +21,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { SolletInjectedProvider } from "@web3auth/solana-provider";
 
 import { detectProvider, getChainNameById, SolletProvider } from "./utils";
@@ -29,9 +29,10 @@ import { detectProvider, getChainNameById, SolletProvider } from "./utils";
 export interface SolletAdapterOptions {
   chainConfig?: CustomChainConfig;
   provider?: string;
+  sessionTime?: number;
 }
 
-export class BaseSolletAdapter extends BaseAdapter<void> {
+export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = "";
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -50,10 +51,11 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  constructor({ provider, chainConfig }: SolletAdapterOptions = {}) {
+  constructor({ provider, chainConfig, sessionTime }: SolletAdapterOptions = {}) {
     super();
     this.chainConfig = chainConfig || null;
     this._provider = provider;
+    this.sessionTime = sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -62,6 +64,13 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
 
   public get provider(): SafeEventEmitterProvider | null {
     return this.solletProvider?.provider || null;
+  }
+
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
@@ -168,6 +177,7 @@ export class BaseSolletAdapter extends BaseAdapter<void> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     const wallet = this._wallet;
     if (!wallet || !this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    await super.disconnect();
     wallet.off("disconnect", this._onDisconnect);
     this._wallet = null;
 

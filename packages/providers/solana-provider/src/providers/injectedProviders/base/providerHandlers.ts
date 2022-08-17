@@ -22,9 +22,9 @@ export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): 
       const transaction = await injectedProvider.signTransaction(req.params.message);
       return transaction;
     },
-    signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      const message = await injectedProvider.signMessage(req.params.message);
-      return message;
+    signMessage: async (req: JRPCRequest<{ message: Uint8Array; display?: "utf8" | "hex" }>): Promise<Uint8Array> => {
+      const sigData = await injectedProvider.signMessage(req.params.message, req.params.display);
+      return sigData.signature;
     },
     signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {

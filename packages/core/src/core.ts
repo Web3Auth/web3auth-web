@@ -13,6 +13,7 @@ import {
   log,
   SafeEventEmitterProvider,
   storageAvailable,
+  UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
@@ -41,6 +42,14 @@ export interface Web3AuthCoreOptions {
    * @defaultValue "local"
    */
   storageKey?: "session" | "local";
+
+  /**
+   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
+   * @defaultValue 86400
+   *
+   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
+   */
+  sessionTime?: number;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -162,6 +171,11 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     log.debug("Getting user info", this.status, this.connectedAdapterName);
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
   }
 
   public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {

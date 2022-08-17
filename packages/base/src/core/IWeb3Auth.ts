@@ -1,4 +1,4 @@
-import { ADAPTER_STATUS_TYPE, UserInfo } from "../adapter/IAdapter";
+import { ADAPTER_STATUS_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
@@ -15,4 +15,5 @@ export interface IWeb3Auth {
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null>;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
+  authenticateUser(): Promise<UserAuthInfo>;
 }

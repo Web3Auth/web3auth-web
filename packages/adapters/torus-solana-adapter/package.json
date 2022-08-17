@@ -38,7 +38,8 @@
     "@toruslabs/solana-embed": "^0.2.2",
     "@web3auth/base": "^1.1.4",
     "@web3auth/base-provider": "^1.1.4",
-    "@web3auth/solana-provider": "^1.1.4"
+    "@web3auth/solana-provider": "^1.1.4",
+    "@web3auth/base-solana-adapter": "^1.1.4"
   },
   "lint-staged": {
     "!(*d).ts": [

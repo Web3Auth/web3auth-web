@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^1.27.2",
-    "@web3auth/base": "^1.1.4"
+    "@web3auth/base": "^1.1.4",
+    "@web3auth/base-evm-adapter": "^1.1.4"
   },
   "lint-staged": {
     "!(*d).ts": [

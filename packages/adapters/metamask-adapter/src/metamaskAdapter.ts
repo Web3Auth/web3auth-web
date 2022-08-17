@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -21,6 +20,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
 interface EthereumProvider extends SafeEventEmitterProvider {
   isMetaMask?: boolean;
@@ -29,9 +29,10 @@ interface EthereumProvider extends SafeEventEmitterProvider {
 }
 export interface MetamaskAdapterOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
-class MetamaskAdapter extends BaseAdapter<void> {
+class MetamaskAdapter extends BaseEvmAdapter<void> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
@@ -49,6 +50,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
   constructor(adapterOptions: MetamaskAdapterOptions = {}) {
     super();
     this.chainConfig = adapterOptions.chainConfig || null;
+    this.sessionTime = adapterOptions.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -79,7 +81,12 @@ class MetamaskAdapter extends BaseAdapter<void> {
     }
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
@@ -113,7 +120,7 @@ class MetamaskAdapter extends BaseAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    await super.disconnect();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;

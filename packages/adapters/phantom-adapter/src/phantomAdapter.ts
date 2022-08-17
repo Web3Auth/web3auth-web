@@ -7,7 +7,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -21,14 +20,16 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solana-provider";
 
 import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
-export class PhantomAdapter extends BaseAdapter<void> {
+export class PhantomAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.PHANTOM;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -48,6 +49,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   constructor(options: PhantomAdapterOptions = {}) {
     super();
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -62,7 +64,12 @@ export class PhantomAdapter extends BaseAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
@@ -139,7 +146,7 @@ export class PhantomAdapter extends BaseAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    await super.disconnect();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {

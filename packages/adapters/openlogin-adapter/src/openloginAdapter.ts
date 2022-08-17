@@ -63,6 +63,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       ...(params.adapterSettings || {}),
     };
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
+    this.sessionTime = this.loginSettings.sessionTime || 86400;
     // if no chainNamespace is passed then chain config should be set before calling init
     if (params.chainConfig?.chainNamespace) {
       this.currentChainNamespace = params.chainConfig?.chainNamespace;
@@ -158,6 +159,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 
+  async authenticateUser(): Promise<{ idToken: string }> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    const userInfo = await this.getUserInfo();
+    return {
+      idToken: userInfo.idToken as string,
+    };
+  }
+
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
@@ -166,10 +175,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: OpenLoginOptions): void {
+  setAdapterSettings(adapterSettings: OpenLoginOptions & { sessionTime: number }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     const defaultOptions = getOpenloginDefaultOptions();
     this.openloginOptions = { ...defaultOptions.adapterSettings, ...(this.openloginOptions || {}), ...adapterSettings };
+    if (adapterSettings.sessionTime) {
+      this.loginSettings = { ...this.loginSettings, sessionTime: adapterSettings.sessionTime };
+    }
   }
 
   // should be called only before initialization.

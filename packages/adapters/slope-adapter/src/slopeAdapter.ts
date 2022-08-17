@@ -7,7 +7,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -21,15 +20,17 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { ISlopeProvider, SlopeInjectedProxyProvider } from "@web3auth/solana-provider";
 
 import { detectProvider } from "./utils";
 
 export interface SlopeWalletOptions {
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
 }
 
-export class SlopeAdapter extends BaseAdapter<void> {
+export class SlopeAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SLOPE;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -49,6 +50,7 @@ export class SlopeAdapter extends BaseAdapter<void> {
   constructor(options: SlopeWalletOptions = {}) {
     super();
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -63,7 +65,12 @@ export class SlopeAdapter extends BaseAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+  }
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
@@ -116,7 +123,7 @@ export class SlopeAdapter extends BaseAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    await super.disconnect();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
