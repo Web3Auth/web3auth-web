@@ -12,7 +12,7 @@ import {
 } from "@web3auth/base";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
-  async authenticateUser(): Promise<UserAuthInfo> {
+  async authenticateUser(params?: { clientId: string }): Promise<UserAuthInfo> {
     if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
 
     const { chainNamespace, chainId } = this.chainConfig;
@@ -47,7 +47,7 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         params: [challenge, accounts[0]],
       });
 
-      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime);
+      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime, params.clientId);
       saveToken(accounts[0] as string, this.name, idToken);
       return {
         idToken,

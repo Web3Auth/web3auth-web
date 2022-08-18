@@ -24,6 +24,12 @@ import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
 export interface Web3AuthCoreOptions {
   /**
+   * Client id for web3auth.
+   * You can obtain your client id from the web3auth developer dashboard.
+   * You can set any random string for this on localhost.
+   */
+  clientId: string;
+  /**
    * custom chain configuration for chainNamespace
    *
    * @defaultValue mainnet config of provided chainNamespace
@@ -175,7 +181,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
+    return this.walletAdapters[this.connectedAdapterName].authenticateUser({ clientId: this.coreOptions.clientId });
   }
 
   public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {

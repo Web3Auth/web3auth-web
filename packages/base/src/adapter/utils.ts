@@ -42,7 +42,8 @@ export const verifySignedChallenge = async (
   signedMessage: string,
   challenge: string,
   issuer: string,
-  sessionTime: number
+  sessionTime: number,
+  clientId?: string
 ): Promise<string> => {
   const t = chainNamespace === "solana" ? "sip99" : "eip191";
   const sigData = {
@@ -56,7 +57,12 @@ export const verifySignedChallenge = async (
     timeout: sessionTime,
   };
 
-  const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData);
+  const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData, {
+    headers: {
+      client_id: clientId,
+      wallet_provider: issuer,
+    },
+  });
   if (!idTokenRes.success) {
     log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
     throw new Error("Failed to authenticate user, ,message verification failed");

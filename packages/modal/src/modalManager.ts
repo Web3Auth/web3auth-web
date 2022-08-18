@@ -46,13 +46,6 @@ export interface UIConfig {
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
-   * Client id for web3auth.
-   * You can obtain your client id from the web3auth developer dashboard.
-   * You can set any random string for this on localhost.
-   */
-  clientId: string;
-
-  /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
    * If you are a wallet and only want to use you own wallet implementations along with openlogin,
