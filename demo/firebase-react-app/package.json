@@ -5,6 +5,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.50.1",
     "@web3auth/base": "^1.1.2",
+    "@web3auth/core": "^1.2.0",
     "@web3auth/metamask-adapter": "^1.1.2",
     "@web3auth/openlogin-adapter": "^1.1.2",
     "@web3auth/phantom-adapter": "^1.1.2",
