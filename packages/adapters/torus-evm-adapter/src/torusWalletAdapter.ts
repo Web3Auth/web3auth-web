@@ -78,11 +78,11 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     let network: NetworkInterface;
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-      const { blockExplorer, displayName } = this.chainConfig as CustomChainConfig;
-      network = { chainId: 1, host: "mainnet", blockExplorer, networkName: displayName };
+      const { blockExplorer, displayName, chainId, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId: Number.parseInt(chainId, 16), host: "mainnet", blockExplorer, networkName: displayName, ticker, tickerName };
     } else {
-      const { chainId, blockExplorer, displayName, rpcTarget } = this.chainConfig as CustomChainConfig;
-      network = { chainId: parseInt(chainId as string, 16), host: rpcTarget, blockExplorer, networkName: displayName };
+      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId: Number.parseInt(chainId, 16), host: rpcTarget, blockExplorer, networkName: displayName, ticker, tickerName };
     }
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus evm adapter init");
@@ -116,14 +116,13 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       const { chainId } = this.torusInstance.provider;
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-        const network = {
-          chainId: _chainId,
+        const network: NetworkInterface = {
+          chainId: Number.parseInt(_chainId, 16),
           host: rpcTarget,
-          blockExplorerUrl: blockExplorer,
+          blockExplorer,
           networkName: displayName,
           tickerName,
           ticker,
-          logo: "",
         };
         // in some cases when user manually switches chain and relogin then adapter will not connect to initially passed
         // chainConfig but will connect to the one that user switched to.
