@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-evm-adapter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
     "web3Auth/core",
