@@ -30,23 +30,23 @@
     "@toruslabs/eslint-config-typescript": "^1.0.6",
     "@toruslabs/torus-scripts": "^1.0.9",
     "@types/node": "^16",
-    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.34.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.21.0",
+    "eslint": "^8.22.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-mocha": "^10.1.0",
-    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-n": "^15.2.5",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-tsdoc": "^0.2.16",
     "husky": "^8.0.1",
-    "lerna": "^5.3.0",
+    "lerna": "^5.4.3",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.0.0",
+    "tsconfig-paths": "^4.1.0",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4"
@@ -80,6 +80,6 @@
     "npm": ">=6.x"
   },
   "resolutions": {
-    "@typescript-eslint/eslint-plugin": "^5.32.0"
+    "@typescript-eslint/eslint-plugin": "^5.34.0"
   }
 }
