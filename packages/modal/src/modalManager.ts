@@ -265,10 +265,19 @@ export class Web3Auth extends Web3AuthCore {
           if (this.cachedAdapter === adapterName) {
             return;
           }
-          if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
-          adaptersData[adapterName] = adapter.adapterData || {};
-          return adapterName;
+          if (adapter.status === ADAPTER_STATUS.NOT_READY)
+            return await Promise.race([
+              adapter.init({ autoConnect: this.cachedAdapter === adapterName }).then(() => {
+                adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+                adaptersData[adapterName] = adapter.adapterData || {};
+                return adapterName;
+              }),
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  return resolve(null);
+                }, 5000);
+              }),
+            ]);
         }
       } catch (error) {
         log.error(error, "error while initializing adapter");
