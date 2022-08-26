@@ -8,9 +8,11 @@ import {
 } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 
-import { createWalletMiddleware, WalletMiddlewareOptions } from "./walletMidddleware";
+import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, WalletMiddlewareOptions } from "./interfaces";
+import { createWalletMiddleware } from "./walletMidddleware";
 
 export type IProviderHandlers = WalletMiddlewareOptions;
+
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
     getAccounts,
@@ -46,23 +48,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
   return ethMiddleware;
 }
 
-export interface AddEthereumChainParameter {
-  chainId: string; // A 0x-prefixed hexadecimal string
-  chainName: string;
-  nativeCurrency: {
-    name: string;
-    symbol: string; // 2-6 characters long
-    decimals: 18;
-  };
-  rpcUrls: string[];
-  blockExplorerUrls?: string[];
-}
-
-export interface IChainSwitchHandlers {
-  addChain: (params: AddEthereumChainParameter) => Promise<void>;
-  switchChain: (params: { chainId: string }) => Promise<void>;
-}
-
 export function createChainSwitchMiddleware({ addChain, switchChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   async function addNewChain(req: JRPCRequest<AddEthereumChainParameter[]>, res: JRPCResponse<unknown>): Promise<void> {
     const chainParams = req.params?.length ? req.params[0] : undefined;
@@ -86,10 +71,6 @@ export function createChainSwitchMiddleware({ addChain, switchChain }: IChainSwi
 }
 
 // #region account middlewares
-export interface IAccountHandlers {
-  updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
-}
-
 export function createAccountMiddleware({ updatePrivatekey }: IAccountHandlers): JRPCMiddleware<unknown, unknown> {
   async function updateAccount(req: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
     const accountParams = req.params?.length ? req.params[0] : undefined;
