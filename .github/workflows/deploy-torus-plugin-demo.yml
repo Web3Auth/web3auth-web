@@ -39,6 +39,7 @@ jobs:
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
+          push: origin HEAD:master
           # Determines the way the action fills missing author name and email. Three options are available:
           # - github_actor -> UserName <UserName@users.noreply.github.com>
           # - user_info -> Your Display Name <your-actual@email.com>
