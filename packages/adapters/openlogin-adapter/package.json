@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -42,7 +42,7 @@
     "@toruslabs/openlogin-ed25519": "^2.0.0",
     "@web3auth/base": "^1.2.0",
     "@web3auth/base-provider": "^1.2.0",
-    "@web3auth/ethereum-provider": "^1.2.0",
+    "@web3auth/ethereum-provider": "^1.2.2",
     "@web3auth/solana-provider": "^1.2.0",
     "lodash.merge": "^4.6.2"
   },
