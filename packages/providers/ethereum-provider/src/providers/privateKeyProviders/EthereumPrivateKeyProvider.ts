@@ -4,14 +4,8 @@ import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
-import {
-  AddEthereumChainParameter,
-  createAccountMiddleware,
-  createChainSwitchMiddleware,
-  createEthMiddleware,
-  IAccountHandlers,
-  IChainSwitchHandlers,
-} from "../../rpc/ethRpcMiddlewares";
+import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
+import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers } from "../../rpc/interfaces";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { getProviderHandlers } from "./ethPrivatekeyUtils";
 import { TransactionFormatter } from "./TransactionFormatter";

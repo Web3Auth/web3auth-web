@@ -3,8 +3,7 @@ import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { IConnector, ITxData } from "@walletconnect/types";
 import { ethErrors } from "eth-rpc-errors";
 
-import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
-import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
+import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 
 export function getProviderHandlers({ connector }: { connector: IConnector }): IProviderHandlers {
   return {

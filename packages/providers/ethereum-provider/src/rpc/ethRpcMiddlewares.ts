@@ -8,10 +8,8 @@ import {
 } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 
-import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, WalletMiddlewareOptions } from "./interfaces";
+import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
-
-export type IProviderHandlers = WalletMiddlewareOptions;
 
 export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {

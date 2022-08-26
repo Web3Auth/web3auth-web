@@ -1,8 +1,8 @@
-import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
+import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 
-import { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
+import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
 
 function resemblesAddress(str: string): boolean {
   // hex prefix 2 + 20 bytes

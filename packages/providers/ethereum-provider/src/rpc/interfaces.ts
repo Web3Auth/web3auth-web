@@ -61,3 +61,5 @@ export interface WalletMiddlewareOptions {
   processTypedMessageV3?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
   processTypedMessageV4?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
 }
+
+export type IProviderHandlers = WalletMiddlewareOptions;
