@@ -16,8 +16,7 @@ import { isHexStrict, log } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
-import { IProviderHandlers } from "../../rpc/ethRpcMiddlewares";
-import { MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/walletMidddleware";
+import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter";
 import { validateTypedMessageParams } from "./TransactionFormatter/utils";
 

@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import { addHexPrefix, stripHexPrefix } from "ethereumjs-util";
+import { addHexPrefix, BN, stripHexPrefix } from "ethereumjs-util";
 
 export function bnLessThan(a, b) {
   if (a === null || a === undefined || b === null || b === undefined) {
@@ -8,17 +8,17 @@ export function bnLessThan(a, b) {
   return new BigNumber(a, 10).lt(b, 10);
 }
 
-export function bnToHex(inputBn: BigNumber) {
+export function bnToHex(inputBn: BN) {
   return addHexPrefix(inputBn.toString(16));
 }
 
-export function hexToBn(inputHex: string): BigNumber {
-  if (BigNumber.isBigNumber(inputHex)) return inputHex;
-  return new BigNumber(stripHexPrefix(inputHex), 16);
+export function hexToBn(inputHex: string): BN {
+  if (BN.isBN(inputHex)) return inputHex;
+  return new BN(stripHexPrefix(inputHex), 16);
 }
 
-export function BnMultiplyByFraction(targetBN: BigNumber, numerator: number | BigNumber, denominator: number | BigNumber): BigNumber {
-  const numberBN = new BigNumber(numerator);
-  const denomBN = new BigNumber(denominator);
-  return targetBN.multipliedBy(numberBN).dividedBy(denomBN);
+export function BnMultiplyByFraction(targetBN: BN, numerator: number | string, denominator: number | string): BN {
+  const numberBN = new BN(numerator);
+  const denomBN = new BN(denominator);
+  return targetBN.mul(numberBN).div(denomBN);
 }

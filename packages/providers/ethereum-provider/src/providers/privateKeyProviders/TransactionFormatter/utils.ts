@@ -7,7 +7,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { isValidAddress } from "ethereumjs-util";
 import jsonschema from "jsonschema";
 
-import { TypedMessageParams } from "../../../rpc/walletMidddleware";
+import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
 import { EIP1159GasData, LegacyGasData } from "./interfaces";
 
