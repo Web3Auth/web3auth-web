@@ -218,21 +218,21 @@ export class TransactionFormatter {
 
         if (suggestedMaxPriorityFeePerGas && suggestedMaxFeePerGas) {
           return {
-            maxFeePerGas: decGWEIToHexWEI(suggestedMaxFeePerGas),
-            maxPriorityFeePerGas: decGWEIToHexWEI(suggestedMaxPriorityFeePerGas),
+            maxFeePerGas: addHexPrefix(decGWEIToHexWEI(suggestedMaxFeePerGas)),
+            maxPriorityFeePerGas: addHexPrefix(decGWEIToHexWEI(suggestedMaxPriorityFeePerGas)),
           };
         }
       } else if (gasEstimateType === GAS_ESTIMATE_TYPES.LEGACY) {
         // The LEGACY type includes low, medium and high estimates of
         // gas price values.
         return {
-          gasPrice: decGWEIToHexWEI((gasFeeEstimates as LegacyGasData).medium),
+          gasPrice: addHexPrefix(decGWEIToHexWEI((gasFeeEstimates as LegacyGasData).medium)),
         };
       } else if (gasEstimateType === GAS_ESTIMATE_TYPES.ETH_GASPRICE) {
         // The ETH_GASPRICE type just includes a single gas price property,
         // which we can assume was retrieved from eth_gasPrice
         return {
-          gasPrice: decGWEIToHexWEI((gasFeeEstimates as FallbackGasData).gasPrice),
+          gasPrice: addHexPrefix(decGWEIToHexWEI((gasFeeEstimates as FallbackGasData).gasPrice)),
         };
       }
     } catch (error) {
