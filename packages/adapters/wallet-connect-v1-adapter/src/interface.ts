@@ -9,4 +9,5 @@ export interface WalletConnectV1AdapterOptions {
   adapterSettings?: IAdapterSettings;
   chainConfig?: CustomChainConfig;
   sessionTime?: number;
+  clientId?: string;
 }

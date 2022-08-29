@@ -13,6 +13,14 @@ import {
 import bs58 from "bs58";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
+  public clientId: string;
+
+  constructor(params: { clientId?: string }) {
+    super();
+    if (!this.clientId) throw new Error("Please pass a valid clientId in constructor params");
+    this.clientId = params.clientId;
+  }
+
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
 
@@ -50,7 +58,14 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
           display: "utf8",
         },
       });
-      const idToken = await verifySignedChallenge(chainNamespace, bs58.encode(signedMessage as Uint8Array), challenge, this.name, this.sessionTime);
+      const idToken = await verifySignedChallenge(
+        chainNamespace,
+        bs58.encode(signedMessage as Uint8Array),
+        challenge,
+        this.name,
+        this.sessionTime,
+        this.clientId
+      );
       saveToken(accounts[0] as string, this.name, idToken);
       return {
         idToken,

@@ -27,6 +27,7 @@ import { detectProvider } from "./utils";
 export interface PhantomAdapterOptions {
   chainConfig?: CustomChainConfig;
   sessionTime?: number;
+  clientId?: string;
 }
 
 export class PhantomAdapter extends BaseSolanaAdapter<void> {
@@ -46,10 +47,10 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: PhantomAdapterOptions = {}) {
-    super();
-    this.chainConfig = options.chainConfig || null;
-    this.sessionTime = options.sessionTime || 86400;
+  constructor(options: PhantomAdapterOptions) {
+    super(options);
+    this.chainConfig = options?.chainConfig || null;
+    this.sessionTime = options?.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -64,10 +65,13 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number }): void {
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     if (options?.sessionTime) {
       this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
     }
   }
 

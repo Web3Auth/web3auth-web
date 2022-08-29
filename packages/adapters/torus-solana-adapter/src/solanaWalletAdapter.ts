@@ -30,6 +30,7 @@ export interface SolanaWalletOptions {
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
   sessionTime?: number;
+  clientId?: string;
 }
 
 export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
@@ -55,8 +56,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(params: SolanaWalletOptions = {}) {
-    super();
+  constructor(params: SolanaWalletOptions) {
+    super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
@@ -174,10 +175,13 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     return userInfo;
   }
 
-  setAdapterSettings(options: { sessionTime?: number }): void {
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     if (options?.sessionTime) {
       this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
     }
   }
 }

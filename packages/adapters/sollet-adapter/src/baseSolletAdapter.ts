@@ -30,6 +30,7 @@ export interface SolletAdapterOptions {
   chainConfig?: CustomChainConfig;
   provider?: string;
   sessionTime?: number;
+  clientId?: string;
 }
 
 export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
@@ -51,11 +52,11 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor({ provider, chainConfig, sessionTime }: SolletAdapterOptions = {}) {
-    super();
-    this.chainConfig = chainConfig || null;
-    this._provider = provider;
-    this.sessionTime = sessionTime || 86400;
+  constructor(options: SolletAdapterOptions) {
+    super(options);
+    this.chainConfig = options?.chainConfig || null;
+    this._provider = options?.provider;
+    this.sessionTime = options?.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -66,10 +67,13 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
     return this.solletProvider?.provider || null;
   }
 
-  setAdapterSettings(options: { sessionTime?: number }): void {
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     if (options?.sessionTime) {
       this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
     }
   }
 

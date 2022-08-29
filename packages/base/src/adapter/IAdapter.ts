@@ -71,6 +71,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
 
+  public abstract clientId;
+
   public abstract adapterNamespace: AdapterNamespaceType;
 
   public abstract currentChainNamespace: ChainNamespaceType;
@@ -102,7 +104,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
-    if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
+    if (this.status !== ADAPTER_STATUS.READY)
+      throw WalletLoginError.connectionError(
+        "Wallet adapter is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
+      );
+    if (!this.clientId) throw WalletLoginError.connectionError("Please initialize Web3Auth with a valid clientId in constructor");
   }
 
   checkInitializationRequirements(): void {

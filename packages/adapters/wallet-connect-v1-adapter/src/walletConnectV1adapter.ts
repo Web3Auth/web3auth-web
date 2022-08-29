@@ -51,8 +51,8 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: WalletConnectV1AdapterOptions = {}) {
-    super();
+  constructor(options: WalletConnectV1AdapterOptions) {
+    super(options);
     this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig || null;
     this.sessionTime = options.sessionTime || 86400;
@@ -148,10 +148,13 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     });
   }
 
-  setAdapterSettings(options: { sessionTime?: number }): void {
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     if (options?.sessionTime) {
       this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
     }
   }
 

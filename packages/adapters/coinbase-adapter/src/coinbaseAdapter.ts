@@ -25,6 +25,7 @@ export type CoinbaseWalletSDKOptions = ConstructorParameters<typeof CoinbaseWall
 export interface CoinbaseAdapterOptions {
   chainConfig?: CustomChainConfig;
   adapterSettings?: CoinbaseWalletSDKOptions;
+  clientId?: string;
 }
 
 class CoinbaseAdapter extends BaseEvmAdapter<void> {
@@ -46,10 +47,10 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(adapterOptions: CoinbaseAdapterOptions = {}) {
-    super();
-    this.chainConfig = adapterOptions.chainConfig || null;
-    this.coinbaseOptions = adapterOptions.adapterSettings || { appName: "Web3Auth" };
+  constructor(adapterOptions: CoinbaseAdapterOptions) {
+    super(adapterOptions);
+    this.chainConfig = adapterOptions?.chainConfig || null;
+    this.coinbaseOptions = adapterOptions?.adapterSettings || { appName: "Web3Auth" };
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -81,10 +82,13 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  setAdapterSettings(options: { sessionTime?: number }): void {
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
     if (this.status === ADAPTER_STATUS.READY) return;
     if (options?.sessionTime) {
       this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
     }
   }
 
