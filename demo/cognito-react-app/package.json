@@ -4,10 +4,10 @@
   "private": true,
   "dependencies": {
     "@solana/web3.js": "^1.50.1",
-    "@web3auth/base": "^1.1.4",
-    "@web3auth/core": "^1.1.4",
-    "@web3auth/openlogin-adapter": "^1.1.4",
-    "@web3auth/solana-provider": "^1.1.4",
+    "@web3auth/base": "^2.0.0",
+    "@web3auth/core": "^2.0.0",
+    "@web3auth/openlogin-adapter": "^2.0.2",
+    "@web3auth/solana-provider": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-loader-spinner": "^5.1.7-beta.1",
@@ -51,7 +51,8 @@
     "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^4.7.4",
-    "url": "^0.11.0"
+    "typescript": "^4.8.2",
+    "url": "^0.11.0",
+    "webpack-bundle-analyzer": "^4.6.1"
   }
 }
