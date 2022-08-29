@@ -76,6 +76,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   constructor(options: Web3AuthCoreOptions) {
     super();
+    if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.disableAll();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
@@ -119,6 +120,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
         } as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
+      this.walletAdapters[adapterName].setAdapterSettings({ sessionTime: this.coreOptions.sessionTime, clientId: this.coreOptions.clientId });
+
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     this.status = ADAPTER_STATUS.READY;

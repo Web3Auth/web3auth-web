@@ -13,7 +13,15 @@ import {
 import bs58 from "bs58";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
-  async authenticateUser(params?: { clientId?: string }): Promise<UserAuthInfo> {
+  public clientId: string;
+
+  constructor(params: { clientId?: string }) {
+    super();
+    if (!this.clientId) throw new Error("Please pass a valid clientId in constructor params");
+    this.clientId = params.clientId;
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
 
     const { chainNamespace, chainId } = this.chainConfig;
@@ -56,7 +64,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
         challenge,
         this.name,
         this.sessionTime,
-        params.clientId
+        this.clientId
       );
       saveToken(accounts[0] as string, this.name, idToken);
       return {

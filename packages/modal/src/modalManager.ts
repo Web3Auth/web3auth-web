@@ -150,13 +150,9 @@ export class Web3Auth extends Web3AuthCore {
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
-        // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
-        // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
-        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId, sessionTime: this.options.sessionTime });
-        } else {
-          this.walletAdapters[adapterName].setAdapterSettings({ sessionTime: this.options.sessionTime });
-        }
+        // add client id to adapter, same web3auth client id can be used in adapter.
+        // this id is being overridden if user is also passing client id in adapter's constructor.
+        this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId, sessionTime: this.options.sessionTime });
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
         // and chainNamespace.

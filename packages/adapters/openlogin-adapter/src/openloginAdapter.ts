@@ -42,6 +42,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public openloginInstance: OpenLogin | null = null;
 
+  public clientId: string;
+
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
@@ -62,6 +64,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       ...defaultOptions.adapterSettings,
       ...(params.adapterSettings || {}),
     };
+    this.clientId = params.adapterSettings?.clientId as string;
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
     this.sessionTime = this.loginSettings.sessionTime || 86400;
     // if no chainNamespace is passed then chain config should be set before calling init
