@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@walletconnect/client": "~1.7.8",
+    "@walletconnect/client": "~1.8.0",
     "@walletconnect/types": "~1.7.8",
     "@web3auth/base": "^2.0.0",
     "@web3auth/base-evm-adapter": "^2.0.0",
