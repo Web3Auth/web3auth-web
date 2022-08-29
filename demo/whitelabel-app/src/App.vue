@@ -17,7 +17,9 @@
 
 <script lang="ts">
 import { UIConfig, Web3Auth } from "@web3auth/web3auth";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import type { SafeEventEmitterProvider } from "@web3auth/base";
+
 import CodeDisplay from "./code.vue";
 import Config from "./config.vue";
 
