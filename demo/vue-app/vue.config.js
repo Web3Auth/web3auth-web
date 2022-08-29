@@ -27,7 +27,7 @@ module.exports = {
     config.plugins.push(new ProvidePlugin({ Buffer: ["buffer", "Buffer"] }));
     config.plugins.push(new ProvidePlugin({ process: ["process/browser"] }));
     config.plugins.push(new BundleAnalyzerPlugin({
-      analyzerMode: "static"
+      analyzerMode: "disabled"
     }))
   },
   chainWebpack: (config) => {
