@@ -25,7 +25,7 @@
     "@toruslabs/base-controllers": "^2.2.3",
     "@toruslabs/http-helpers": "^3.1.0",
     "@toruslabs/openlogin-jrpc": "^2.1.0",
-    "@walletconnect/types": "~1.7.8",
+    "@walletconnect/types": "~1.8.0",
     "@web3auth/base": "^2.0.0",
     "@web3auth/base-provider": "^2.0.0",
     "assert": "^2.0.0",
