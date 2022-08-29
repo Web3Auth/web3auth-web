@@ -1,5 +1,4 @@
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
-export const DEFAULT_INFURA_ID = "776218ac4734478c90191dde8cae483c";
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;
@@ -21,37 +20,41 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 3) {
+  }
+  if (chainId === 3) {
     return {
       chainNamespace,
       chainId: "0x3",
       rpcTarget: `https://rpc.ankr.com/eth_ropsten`,
-      displayName: "ropsten",
+      displayName: "Ropsten Testnet",
       blockExplorer: "https://ropsten.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 4) {
+  }
+  if (chainId === 4) {
     return {
       chainNamespace,
       chainId: "0x4",
       rpcTarget: `https://rpc.ankr.com/eth_rinkeby`,
-      displayName: "rinkeby",
+      displayName: "Rinkeby Testnet",
       blockExplorer: "https://rinkeby.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 5) {
+  }
+  if (chainId === 5) {
     return {
       chainNamespace,
       chainId: "0x5",
       rpcTarget: `https://rpc.ankr.com/eth_goerli`,
-      displayName: "goerli",
+      displayName: "Goerli Testnet",
       blockExplorer: "https://goerli.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 137) {
+  }
+  if (chainId === 137) {
     return {
       chainNamespace,
       chainId: "0x89",
@@ -61,7 +64,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "MATIC",
       tickerName: "Polygon",
     };
-  } else if (chainId === 80001) {
+  }
+  if (chainId === 80001) {
     return {
       chainNamespace,
       chainId: "0x13881",
@@ -71,7 +75,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "MATIC",
       tickerName: "Polygon",
     };
-  } else if (chainId === 56) {
+  }
+  if (chainId === 56) {
     return {
       chainNamespace,
       chainId: "0x38",
@@ -81,7 +86,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "BNB",
       tickerName: "Binance SmartChain",
     };
-  } else if (chainId === 97) {
+  }
+  if (chainId === 97) {
     return {
       chainNamespace,
       chainId: "0x61",
@@ -91,67 +97,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "BNB",
       tickerName: "Binance SmartChain",
     };
-  } else if (chainId === 43114) {
-    return {
-      chainNamespace,
-      chainId: "0xA86A",
-      rpcTarget: "https://rpc.ankr.com/avalanche-c",
-      displayName: "Avalanche C-Chain Mainnet",
-      blockExplorer: "https://subnets.avax.network/c-chain",
-      ticker: "AVAX",
-      tickerName: "Avalanche C-Chain",
-    };
-  } else if (chainId === 43113) {
-    return {
-      chainNamespace,
-      chainId: "0xA869",
-      rpcTarget: "https://rpc.ankr.com/avalanche_fuji-c",
-      displayName: "Avalanche C-Chain Testnet",
-      blockExplorer: "https://subnets-test.avax.network/c-chain",
-      ticker: "AVAX",
-      tickerName: "Avalanche C-Chain",
-    };
-  } else if (chainId === 42161) {
-    return {
-      chainNamespace,
-      chainId: "0xA4B1",
-      rpcTarget: "https://rpc.ankr.com/arbitrum",
-      displayName: "Arbitrum Mainnet",
-      blockExplorer: "https://arbiscan.io",
-      ticker: "AETH",
-      tickerName: "Arbitrum",
-    };
-  } else if (chainId === 421611) {
-    return {
-      chainNamespace,
-      chainId: "0x66EEB",
-      rpcTarget: "https://rinkeby.arbitrum.io/rpc",
-      displayName: "Arbitrum Rinkeby Testnet",
-      blockExplorer: "https://testnet.arbiscan.io",
-      ticker: "AETH",
-      tickerName: "Arbitrum",
-    };
-  } else if (chainId === 10) {
-    return {
-      chainNamespace,
-      chainId: "0xA",
-      rpcTarget: "https://rpc.ankr.com/optimism",
-      displayName: "Optimism Mainnet",
-      blockExplorer: "https://optimistic.etherscan.io",
-      ticker: "OP",
-      tickerName: "Optimism",
-    };
-  } else if (chainId === 69) {
-    return {
-      chainNamespace,
-      chainId: "0x45",
-      rpcTarget: "https://rpc.ankr.com/optimism_testnet",
-      displayName: "Optimism Testnet",
-      blockExplorer: "https://kovan-optimistic.etherscan.io",
-      ticker: "OP",
-      tickerName: "Optimism",
-    };
-  } else if (chainId === 25) {
+  }
+  if (chainId === 25) {
     return {
       chainNamespace,
       chainId: "0x19",
@@ -161,7 +108,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "CRO",
       tickerName: "Cronos",
     };
-  } else if (chainId === 338) {
+  }
+  if (chainId === 338) {
     return {
       chainNamespace,
       chainId: "0x152",
@@ -171,57 +119,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "CRO",
       tickerName: "Cronos",
     };
-  } else if (chainId === 1666600000) {
-    return {
-      chainNamespace,
-      chainId: "0x63564c40",
-      rpcTarget: "https://rpc.ankr.com/harmony",
-      displayName: "Harmony Mainnet",
-      blockExplorer: "https://explorer.harmony.one",
-      ticker: "ONE",
-      tickerName: "Harmony",
-    };
-  } else if (chainId === 42220) {
-    return {
-      chainNamespace,
-      chainId: "0xa4ec",
-      rpcTarget: "https://rpc.ankr.com/celo",
-      displayName: "Celo Mainnet",
-      blockExplorer: "https://explorer.celo.org",
-      ticker: "CELO",
-      tickerName: "Celo",
-    };
-  } else if (chainId === 1284) {
-    return {
-      chainNamespace,
-      chainId: "0x504",
-      rpcTarget: "https://rpc.ankr.com/moonbeam",
-      displayName: "Moonbeam Mainnet",
-      blockExplorer: "https://moonbeam.moonscan.io",
-      ticker: "GLMR",
-      tickerName: "Moonbeam",
-    };
-  } else if (chainId === 1287) {
-    return {
-      chainNamespace,
-      chainId: "0x507",
-      rpcTarget: "https://rpc.api.moonriver.moonbeam.network",
-      displayName: "Moonbeam Testnet",
-      blockExplorer: "https://moonbase.moonscan.io",
-      ticker: "GLMR",
-      tickerName: "Moonbeam",
-    };
-  } else if (chainId === 1285) {
-    return {
-      chainNamespace,
-      chainId: "0x505",
-      rpcTarget: "https://rpc.api.moonriver.moonbeam.network",
-      displayName: "Moonriver Mainnet",
-      blockExplorer: "https://moonriver.moonscan.io",
-      ticker: "MOVR",
-      tickerName: "Moonriver",
-    };
-  } else if (chainId === 8217) {
+  }
+  if (chainId === 8217) {
     return {
       chainNamespace,
       chainId: "0x2019",
