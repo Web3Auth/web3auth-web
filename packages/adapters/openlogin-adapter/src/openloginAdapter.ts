@@ -185,6 +185,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.sessionTime) {
       this.loginSettings = { ...this.loginSettings, sessionTime: adapterSettings.sessionTime };
     }
+    if (adapterSettings.clientId) {
+      this.clientId = adapterSettings.clientId;
+    }
   }
 
   // should be called only before initialization.
