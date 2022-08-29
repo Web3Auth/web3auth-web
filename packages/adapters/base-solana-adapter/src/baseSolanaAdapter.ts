@@ -17,7 +17,6 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
   constructor(params: { clientId?: string }) {
     super();
-    if (!this.clientId) throw new Error("Please pass a valid clientId in constructor params");
     this.clientId = params.clientId;
   }
 
