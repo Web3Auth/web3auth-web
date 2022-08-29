@@ -184,7 +184,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].authenticateUser({ clientId: this.coreOptions.clientId });
+    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
   }
 
   public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {
