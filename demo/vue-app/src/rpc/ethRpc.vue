@@ -35,7 +35,6 @@
 </template>
 
 <script lang="ts">
-import { DEFAULT_INFURA_ID } from "@web3auth/base";
 import Vue from "vue";
 
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../lib/eth";
@@ -95,7 +94,7 @@ export default Vue.extend({
                 symbol: "ETH",
                 decimals: 18,
               },
-              rpcUrls: [`https://rinkeby.infura.io/v3/${DEFAULT_INFURA_ID}`],
+              rpcUrls: [`https://rpc.ankr.com/eth_rinkeby`],
               blockExplorerUrls: [`https://rinkeby.etherscan.io/`],
             },
           ],
