@@ -1,4 +1,5 @@
 const webpack = require("webpack");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 module.exports = function override(config) {
   const fallback = config.resolve.fallback || {};
@@ -13,6 +14,7 @@ module.exports = function override(config) {
     url: require.resolve("url"),
   });
   config.resolve.fallback = fallback;
+ 
   config.plugins = (config.plugins || []).concat([
     new webpack.ProvidePlugin({
       process: "process/browser",
@@ -20,5 +22,8 @@ module.exports = function override(config) {
     }),
   ]);
   config.ignoreWarnings = [/Failed to parse source map/];
+  config.plugins = (config.plugins || []).concat([
+    new BundleAnalyzerPlugin({ analyzerMode: "disabled" }),
+  ]);
   return config;
 };

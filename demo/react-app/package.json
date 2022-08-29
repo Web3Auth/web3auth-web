@@ -5,6 +5,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.50.1",
     "@taquito/signer": "^13.0.1",
+    "@taquito/taquito": "^13.0.1",
     "@taquito/utils": "^13.0.1",
     "@tezos-core-tools/crypto-utils": "^0.0.7",
     "@web3auth/base": "^1.1.4",
@@ -55,6 +56,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "typescript": "^4.7.4",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "webpack-bundle-analyzer": "^4.6.1"
   }
 }
