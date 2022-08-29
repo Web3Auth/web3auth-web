@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@starkware-industries/starkware-crypto-utils": "^0.0.2",
-    "react-scripts": "5.0.1",
     "@starkware-industries/starkex-js": "0.0.6",
+    "@starkware-industries/starkware-crypto-utils": "^0.0.2",
     "@toruslabs/starkware-crypto": "^1.1.0",
     "@web3auth/base": "^2.0.0",
     "@web3auth/openlogin-adapter": "^2.0.2",
@@ -14,6 +13,7 @@
     "elliptic": "^6.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
     "web3": "^1.7.5"
   },
   "scripts": {
@@ -56,6 +56,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "typescript": "^4.8.2",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "webpack-bundle-analyzer": "^4.6.1"
   }
 }
