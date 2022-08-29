@@ -118,6 +118,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       });
       this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
+      this.subscribeToWalletEvents();
     } catch (error) {
       log.error(error);
     }
@@ -143,8 +144,17 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     }
   }
 
+  private subscribeToWalletEvents() {
+    this.torusWalletInstance?.provider.on("accountsChanged", (accounts = []) => {
+      if ((accounts as string[]).length === 0) {
+        this.torusWalletInstance.hideTorusButton();
+        this.web3auth?.logout();
+      }
+    });
+  }
+
   private subscribeToProviderEvents(provider: SafeEventEmitterProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] }) => {
+    provider.on("accountsChanged", (data: { accounts: string[] } = { accounts: [] }) => {
       this.setSelectedAddress(data.accounts[0]);
     });
 
