@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v1-adapter",
-  "version": "1.2.4",
+  "version": "2.0.0",
   "description": "wallet connect v1 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v1-adapter",
@@ -37,9 +37,9 @@
   "dependencies": {
     "@walletconnect/client": "~1.7.8",
     "@walletconnect/types": "~1.7.8",
-    "@web3auth/base": "^1.2.0",
-    "@web3auth/base-evm-adapter": "^1.2.0",
-    "@web3auth/ethereum-provider": "^1.2.4"
+    "@web3auth/base": "^2.0.0",
+    "@web3auth/base-evm-adapter": "^2.0.0",
+    "@web3auth/ethereum-provider": "^2.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [
