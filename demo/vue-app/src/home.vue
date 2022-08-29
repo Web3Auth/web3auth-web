@@ -216,10 +216,6 @@ import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
 import Vue from "vue";
 
-import CustomUiContainer from "./customUi/customUiContainer.vue";
-import ConfigurableExample from "./default/configurableModal.vue";
-import WhitelabelExample from "./whitelabel/whitelabel.vue";
-
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
   LOGIN_PROVIDER.FACEBOOK,
@@ -326,9 +322,9 @@ export default Vue.extend({
     };
   },
   components: {
-    ConfigurableExample: ConfigurableExample,
-    WhitelabelExample: WhitelabelExample,
-    CustomUiContainer,
+    ConfigurableExample: () => import("./default/configurableModal.vue"),
+    WhitelabelExample: () => import("./whitelabel/whitelabel.vue"),
+    CustomUiContainer: () => import("./customUi/customUiContainer.vue"),
   },
   watch: {
     "form.authMode"(val) {

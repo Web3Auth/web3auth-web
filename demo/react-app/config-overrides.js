@@ -1,5 +1,6 @@
 const webpack = require("webpack");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const path = require("path");
 
 module.exports = function override(config) {
   const fallback = config.resolve.fallback || {};
@@ -14,6 +15,14 @@ module.exports = function override(config) {
     url: require.resolve("url"),
   });
   config.resolve.fallback = fallback;
+
+  const alias = config.resolve.alias || {};
+  Object.assign(alias, {
+    "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
+    lodash: path.resolve(__dirname, "node_modules/lodash"),
+  });
+
+  config.resolve.alias = alias;
  
   config.plugins = (config.plugins || []).concat([
     new webpack.ProvidePlugin({
@@ -23,7 +32,7 @@ module.exports = function override(config) {
   ]);
   config.ignoreWarnings = [/Failed to parse source map/];
   config.plugins = (config.plugins || []).concat([
-    new BundleAnalyzerPlugin({ analyzerMode: "disabled" }),
+    new BundleAnalyzerPlugin({ analyzerMode: "static" }),
   ]);
   return config;
 };
