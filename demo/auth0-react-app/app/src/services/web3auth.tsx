@@ -116,6 +116,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
+          clientId,
         });
         subscribeAuthEvents(web3AuthInstance);
         if (sessionStorage.getItem("app") === null) {
