@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/slope-adapter",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "slope wallet adapter for web3auth",
   "keywords": [
     "web3Auth/slope-adapter",
@@ -38,7 +38,7 @@
   "dependencies": {
     "@web3auth/base": "^2.0.0",
     "@web3auth/base-provider": "^2.0.0",
-    "@web3auth/base-solana-adapter": "^2.0.0",
+    "@web3auth/base-solana-adapter": "^2.0.1",
     "@web3auth/solana-provider": "^2.0.0",
     "bn.js": "^5.2.1"
   },
