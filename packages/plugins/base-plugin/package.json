@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-plugin",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Base plugin for web3auth plugins",
   "keywords": [
     "web3Auth/base-plugin",
@@ -32,7 +32,7 @@
     "src"
   ],
   "dependencies": {
-    "@web3auth/base": "^2.1.1"
+    "@web3auth/base": "^2.1.2"
   },
   "lint-staged": {
     "!(*d).ts": [
