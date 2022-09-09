@@ -2558,10 +2558,10 @@
     "@babel/helper-module-imports" "^7.10.4"
     "@rollup/pluginutils" "^3.1.0"
 
-"@rollup/plugin-typescript@8.5.0":
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-8.5.0.tgz#7ea11599a15b0a30fa7ea69ce3b791d41b862515"
-  integrity sha512-wMv1/scv0m/rXx21wD2IsBbJFba8wGF3ErJIr6IKRfRj49S85Lszbxb4DCo8iILpluTjk2GAAu9CoZt4G3ppgQ==
+"@rollup/plugin-typescript@8.3.3":
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-8.3.3.tgz#eee7edab9cfc064f1cfd16570492693cf1432215"
+  integrity sha512-55L9SyiYu3r/JtqdjhwcwaECXP7JeJ9h1Sg1VWRJKIutla2MdZQodTgcCNybXLMCnqpNLEhS2vGENww98L1npg==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     resolve "^1.17.0"
@@ -2971,10 +2971,10 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@toruslabs/torus-scripts@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-1.1.0.tgz#222504c1e328fcb5f14555df8c01fb01933ed38c"
-  integrity sha512-WjN11GriSM4X2kSlSRfB3Cpezowf0VaYI4qZCC4bTA1VHCTLqDx8f8ZDroNY2Afxp8c6CvDReCsk4vyCjHjcQg==
+"@toruslabs/torus-scripts@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@toruslabs/torus-scripts/-/torus-scripts-1.1.1.tgz#ac275b93f3c4c956440fd5679eb7dc0fc304fedc"
+  integrity sha512-HyXJ16ISWUjblNEFr56p9e6cDn6h5tMY+Nuyotk/zJfWjeSz9OGWbHvQmqRZ4tmwsMzKuB92HXP5Z6G8WS/3rA==
   dependencies:
     "@babel/core" "^7.19.0"
     "@babel/plugin-proposal-class-properties" "^7.18.6"
@@ -2985,7 +2985,7 @@
     "@babel/preset-typescript" "^7.18.6"
     "@babel/runtime" "^7.19.0"
     "@rollup/plugin-babel" "^5.3.1"
-    "@rollup/plugin-typescript" "8.5.0"
+    "@rollup/plugin-typescript" "8.3.3"
     assert "^2.0.0"
     babel-loader "^8.2.5"
     babel-merge "^3.0.0"
