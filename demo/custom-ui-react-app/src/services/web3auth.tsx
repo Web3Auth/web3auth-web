@@ -101,7 +101,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         const clientId = "BLf14uwUA_rcPyy5b8ED1zVcOVZGL0SwwIGTRIOplUQ6Vp4H7QfEDcX4o9qTEeR8uqDyXSrxXLOZ4RVhBSRyb7A";
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
-          enableLogging: true
+          enableLogging: true,
+          clientId
         });
         subscribeAuthEvents(web3AuthInstance);
         const networkUi = new NetworkSwitch()

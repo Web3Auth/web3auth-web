@@ -24,9 +24,6 @@ export default Vue.extend({
     Openlogin,
     // WalletConnect,
   },
-  async mounted() {
-    console.log("chain", this.chain);
-  },
   methods: {},
 });
 </script>

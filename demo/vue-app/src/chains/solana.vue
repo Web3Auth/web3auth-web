@@ -74,11 +74,6 @@ export default Vue.extend({
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
       await this.initSolanaAuth();
     },
-    openloginNetwork: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
-    },
   },
   data() {
     return {
