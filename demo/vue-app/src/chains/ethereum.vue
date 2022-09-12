@@ -12,11 +12,11 @@
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
-      <span>{{ connecting }}</span>
+      <!-- <span>{{ connecting }}</span> -->
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
-    <div id="console" style="white-space: pre-line">
+    <div id="console" style="white-space: pre-line" class="console-div">
       <p style="white-space: pre-line"></p>
     </div>
   </div>

@@ -43,16 +43,10 @@ export default Vue.extend({
   color: #2c3e50;
 }
 #console {
-  border: 0px solid black;
-  height: 40px;
-  padding: 2px;
-  text-align: left;
-  width: calc(100% - 20px);
-  border-radius: 5px;
-  margin-top: 20px;
-  margin-bottom: 80px;
+  @apply max-w-[1000px] h-[20%] max-h-[200px] text-left p-1 overflow-auto rounded-3xl;
 }
 #console > p {
+  @apply max-h-[20%];
   margin: 0.5em;
 }
 

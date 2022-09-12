@@ -1,6 +1,6 @@
 <template>
-  <div class="container gap-7 m-6">
-    <div class="sidebar box grid grid-rows-12 h-30">
+  <div class="container gap-7">
+    <div class="sidebar box grid grid-rows-12">
       <header class="row-span-1 p-6">
         <img src="./assets/web3auth.png" class="w3a-image" />
       </header>
@@ -9,7 +9,7 @@
       <div class="row-span-10 overflow-auto">
         <!-- <div class="flex-vertical-center authMode"> -->
         <!-- <label class="form-label" for="chain">Chain</label> -->
-        <div class="p-2">
+        <div class="p-2 text-left">
           <h3 class="font-semibold text-[#595857]">Auth Mode</h3>
           <select name="buildEnv" v-model="form.authMode" class="select-menu bg-dropdown">
             <option value="hosted">Hosted</option>
@@ -30,11 +30,11 @@
             </label>
           </span> -->
         <!-- </div> -->
-        <div class="flex-vertical-center plugins">
+        <div class="plugins text-left py-2">
           <!-- <label class="form-label" for="chain">Chain</label> -->
 
           <!-- <span class="form-label">Plugins</span> -->
-          <span class="form-control radio-group">
+          <span class="form-control radio-group text-left p-2">
             <label for="torusWallet" class="radio-button">
               <input type="checkbox" id="torusWallet" value="torus wallet plugin" v-model="form.plugins.torusWallet" />
               Torus Wallet UI Plugin
@@ -43,7 +43,7 @@
         </div>
 
         <div class="hosted" v-if="config.authMode === 'hosted'">
-          <div class="p-2">
+          <div class="p-2 text-left">
             <h3 class="font-semibold text-[#595857]">Openlogin network</h3>
             <select name="Network" v-model="form.openloginNetwork" class="select-menu bg-dropdown">
               <option value="mainnet">Mainnet</option>
@@ -71,9 +71,9 @@
             <br /> -->
           </div>
           <!-- <hr /> -->
-          <div class="flex-vertical-center chain">
+          <div class="chain">
             <!-- <label class="form-label" for="chain">Chain</label> -->
-            <div class="p-2">
+            <div class="p-2 text-left">
               <h3 class="font-semibold text-[#595857]">Select Chain</h3>
               <select name="chainConfig" v-model="form.chain" class="select-menu bg-dropdown">
                 <option value="ethereum">Ethereum</option>
@@ -118,7 +118,7 @@
                 </label>
               </span>
             </div> -->
-            <div class="p-2">
+            <div class="p-2 text-left">
               <h3 class="font-semibold text-[#595857]">Select UI</h3>
               <select name="uiMode" v-model="form.selectedUiMode" class="select-menu bg-dropdown">
                 <option value="default">Default</option>
@@ -129,8 +129,9 @@
 
             <!-- UI MODE DEFAULT -->
             <div v-if="form.selectedUiMode == 'default'">
-              <div class="">
-                <span class="form-label">Social Logins</span>
+              <div class="text-left p-[10px]">
+                <!-- <h3 class="form-label font-semibold text-[#595857]">Select UI</h3> -->
+                <span class="form-label text-[#595857]">Social Logins</span>
                 <div class="grid grid-cols-2 pl-4 text-center gap-2 form-control">
                   <!-- <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                     <label :for="loginType.id">
@@ -142,14 +143,16 @@
                   <div class="form-check inline-flex col-span-1" v-for="loginType in form.uiMode.default.login" :key="loginType.id">
                     <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
                     <img v-if="loginType.id !== 'email_passwordless'" :src="getImgUrl(loginType.id)" class="h-[22px] inline-block px-2" />
+                    <img v-else :src="getImgUrl('email')" class="h-[20px] inline-block px-2" />
                     <label class="form-check-label inline-block text-gray-800" :for="loginType.id">
-                      <span class="text-base">{{ loginType.name }}</span>
+                      <span v-if="loginType.id !== 'email_passwordless'" class="text-base">{{ loginType.name }}</span>
+                      <span v-else>Email</span>
                     </label>
                   </div>
                 </div>
               </div>
-              <div class="flex-vertical-center">
-                <span class="form-label">External Wallets</span>
+              <div class="text-left p-[10px]">
+                <span class="form-label text-[#595857]">External Wallets</span>
                 <div class="text-center form-control">
                   <!-- <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
                     <label :for="walletType.id">
@@ -157,7 +160,11 @@
                       <span>{{ walletType.name }}</span>
                     </label>
                   </li> -->
-                  <div class="form-check inline-flex col-span-1 pr-4" v-for="walletType in form.uiMode.default.adapter" :key="walletType.id">
+                  <div
+                    class="form-check inline-flex col-span-1 pl-4 pr-2 px-4 py-2 rounded-full text-gray-500 bg-gray-100 font-semibold text-sm flex align-center w-max cursor-pointer active:bg-gray-300 transition duration-300 ease m-1"
+                    v-for="walletType in form.uiMode.default.adapter"
+                    :key="walletType.id"
+                  >
                     <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
                     <img :src="getImgUrl(walletType.id)" class="h-[22px] inline-block px-2" />
                     <label class="form-check-label inline-block text-gray-800" :for="walletType.id">
@@ -182,16 +189,16 @@
             </div>
 
             <!-- UI MODE WHITELABEL -->
-            <div v-if="form.selectedUiMode == 'whitelabel'">
+            <div v-if="form.selectedUiMode == 'whitelabel'" class="bg-[#F9F9FB] p-4 rounded-3xl">
               <div class="flex-vertical-center">
                 <span class="form-label">Logo URL</span>
                 <!-- <span class="form-control"> -->
-                <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
+                <input type="text" class="text p-2" v-model="form.uiMode.whitelabel.logoUrl" />
                 <!-- </span> -->
               </div>
               <div class="p-2">
                 <h3 class="font-semibold text-[#595857]">Theme</h3>
-                <select name="uiMode" v-model="form.uiMode.whitelabel.theme" class="select-menu bg-dropdown">
+                <select name="uiMode" v-model="form.uiMode.whitelabel.theme" class="select-menu-whitelabel bg-dropdown">
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
                   <!-- <option value="development">Development</option> -->
@@ -440,7 +447,7 @@ body {
 }
 
 .container {
-  @apply grid grid-cols-6;
+  @apply grid grid-cols-6 h-[100vh];
   /* display: flex;
   flex-wrap: wrap;
   align-items: stretch;
@@ -449,7 +456,7 @@ body {
 }
 
 .sidebar {
-  @apply col-span-6 sm:col-span-3 md:col-span-3 lg:col-span-2 max-h-[95vh] min-h-[95vh];
+  @apply col-span-6 sm:col-span-3 md:col-span-3 lg:col-span-2 max-h-[90vh] min-h-[90vh] p-2 md:p-8 m-8;
   /* flex-grow: 1;
   flex-basis: 25rem;
   border-right: 1px solid #ebecf0;
@@ -467,20 +474,20 @@ body {
 }
 
 .content {
-  @apply col-span-6 sm:col-span-3 md:col-span-3 lg:col-span-4;
+  @apply col-span-6 sm:col-span-3 md:col-span-3 lg:col-span-4 flex h-screen justify-center items-center;
   /* flex-basis: 0;
   flex-grow: 999;
   min-width: 30%;
   padding: 20px; */
 }
 
-.flex-vertical-center {
+/* .flex-vertical-center {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   margin: 20px;
-}
+} */
 
 .form-label {
   flex-basis: 2rem;
@@ -539,7 +546,7 @@ body {
   border-radius: 6px;
 }
 .submit-btn {
-  @apply w-[80%] rounded-3xl bg-[#0364FF] text-[white] h-12;
+  @apply w-[80%] rounded-3xl bg-[#0364FF] text-[white] h-12 bottom-0;
   /* width: 400px; */
 }
 
@@ -547,7 +554,7 @@ body {
   background-color: #f5f7fc;
   border-color: #005cbf;
 }
-.rpcBtn {
+/* .rpcBtn {
   padding: 9px 16px;
   max-height: 80px;
   max-width: 80px;
@@ -564,7 +571,7 @@ body {
   border: 1px solid #0364ff;
   box-sizing: border-box;
   border-radius: 6px;
-}
+} */
 
 .rpcBtn:hover {
   background-color: #f5f7fc;
@@ -614,20 +621,27 @@ body {
   box-shadow: 4px 4px 20px rgba(46, 91, 255, 0.1);
 }
 .select-menu {
-  @apply h-10 w-80 rounded-3xl text-center bg-[#F9F9FB] bg-no-repeat;
+  @apply h-10 w-full rounded-3xl text-center bg-[#F9F9FB] bg-no-repeat;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-position: right 16px top 50%;
+  background-size: 10px;
+}
+.select-menu-whitelabel {
+  @apply h-10 w-80 rounded-3xl text-center bg-white bg-no-repeat;
   -webkit-appearance: none;
   -moz-appearance: none;
   background-position: right 16px top 50%;
   background-size: 10px;
 }
 #content button {
-  @apply min-h-[44px] w-80 m-0 bg-white rounded-3xl text-[#6F717A] text-sm lg:text-base font-medium mb-2;
+  @apply min-h-[44px] max-w-[60%] min-w-[60%] m-0 bg-white rounded-3xl text-[#6F717A] text-sm lg:text-base font-medium mb-2;
   border: 1px solid #6f717a;
 }
 #content h2 {
   @apply mt-1 mb-4 text-3xl font-bold;
 }
-#content #console {
-  @apply overflow-auto min-h-[150px] rounded-3xl relative p-4 w-[100%];
-}
+/* #content #console {
+  @apply overflow-auto min-h-[150px] rounded-3xl relative p-4 w-[20%];
+} */
 </style>

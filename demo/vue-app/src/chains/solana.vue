@@ -13,7 +13,7 @@
       <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
-    <div id="console" style="white-space: pre-line">
+    <div id="console" style="white-space: pre-line" class="console-div">
       <p style="white-space: pre-line"></p>
     </div>
   </div>
