@@ -13,6 +13,7 @@ import {
   log,
   SafeEventEmitterProvider,
   storageAvailable,
+  UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
@@ -22,6 +23,12 @@ import {
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
 export interface Web3AuthCoreOptions {
+  /**
+   * Client id for web3auth.
+   * You can obtain your client id from the web3auth developer dashboard.
+   * You can set any random string for this on localhost.
+   */
+  clientId: string;
   /**
    * custom chain configuration for chainNamespace
    *
@@ -41,6 +48,14 @@ export interface Web3AuthCoreOptions {
    * @defaultValue "local"
    */
   storageKey?: "session" | "local";
+
+  /**
+   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
+   * @defaultValue 86400
+   *
+   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
+   */
+  sessionTime?: number;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -61,6 +76,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   constructor(options: Web3AuthCoreOptions) {
     super();
+    if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.disableAll();
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
@@ -104,6 +120,8 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
         } as CustomChainConfig;
         this.walletAdapters[adapterName].setChainConfig(chainConfig);
       }
+      this.walletAdapters[adapterName].setAdapterSettings({ sessionTime: this.coreOptions.sessionTime, clientId: this.coreOptions.clientId });
+
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     this.status = ADAPTER_STATUS.READY;
@@ -162,6 +180,11 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     log.debug("Getting user info", this.status, this.connectedAdapterName);
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
   }
 
   public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {

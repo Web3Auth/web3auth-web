@@ -1,0 +1,88 @@
+name: Update, Build and Deploy torus-wallet-plugin-app example
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [master]
+jobs:
+  torus-wallet-plugin-app:
+    strategy:
+      matrix:
+        node: ["16.x"]
+        os: [ubuntu-latest]
+        demo: [torus-wallet-plugin-app]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out Git repository
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: "https://registry.npmjs.org"
+      - name: Build ${{ matrix.demo }} demo
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        run: |
+          npm i -g npm-check-updates
+          cd demo/${{ matrix.demo }}
+          ncu -u --target=minor
+          ncu -u "/^@web3auth.*$/"
+          npm install
+          npm run build
+      - name: Commit Changes
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          push: origin HEAD:master
+          # Determines the way the action fills missing author name and email. Three options are available:
+          # - github_actor -> UserName <UserName@users.noreply.github.com>
+          # - user_info -> Your Display Name <your-actual@email.com>
+          # - github_actions -> github-actions <email associated with the github logo>
+          # Default: github_actor
+          default_author: user_info
+
+          # The way the action should handle pathspec errors from the add and remove commands. Three options are available:
+          # - ignore -> errors will be logged but the step won't fail
+          # - exitImmediately -> the action will stop right away, and the step will fail
+          # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
+          # Default: ignore
+          pathspec_error_handling: exitImmediately
+
+            # Set the credentials from repository settings/secrets
+      - name: Configure AWS credentials
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION_US }}
+
+      # Copy the files from build folder to the S3 bucket
+      # Upload to S3
+      - name: sync s3
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          SOURCE_DIR: "./demo/torus-wallet-plugin-app/build"
+          AWS_REGION: "us-east-1"
+          AWS_S3_BUCKET: "core-demo.web3auth.io"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Invalidate Cloudfront (this action)
+      - name: invalidate
+        if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_PLUGIN_DEMO_DISTRIBUTION_ID }}
+          PATHS: "/*"
+          AWS_REGION: ${{ secrets.AWS_REGION_US }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    

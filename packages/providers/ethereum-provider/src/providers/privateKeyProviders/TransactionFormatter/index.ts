@@ -3,7 +3,7 @@ import { Block } from "@toruslabs/base-controllers";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import { addHexPrefix, stripHexPrefix } from "ethereumjs-util";
 
-import { TransactionParams } from "../../../rpc/walletMidddleware";
+import { TransactionParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
 import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../../utils";
 import { EIP1559APIEndpoint, GAS_ESTIMATE_TYPES, LegacyGasAPIEndpoint, TRANSACTION_ENVELOPE_TYPES, TRANSACTION_TYPES } from "./constants";
@@ -226,7 +226,7 @@ export class TransactionFormatter {
         // The LEGACY type includes low, medium and high estimates of
         // gas price values.
         return {
-          gasPrice: decGWEIToHexWEI((gasFeeEstimates as LegacyGasData).medium),
+          gasPrice: addHexPrefix(decGWEIToHexWEI((gasFeeEstimates as LegacyGasData).medium)),
         };
       } else if (gasEstimateType === GAS_ESTIMATE_TYPES.ETH_GASPRICE) {
         // The ETH_GASPRICE type just includes a single gas price property,
@@ -280,8 +280,8 @@ export class TransactionFormatter {
   private addGasBuffer(initialGasLimitHex: string, blockGasLimitHex: string, multiplier = 1.5): string {
     const initialGasLimitBn = hexToBn(initialGasLimitHex);
     const blockGasLimitBn = hexToBn(blockGasLimitHex);
-    const upperGasLimitBn = blockGasLimitBn.multipliedBy(0.9).dp(0, 1);
-    const bufferedGasLimitBn = initialGasLimitBn.multipliedBy(multiplier).dp(0, 1);
+    const upperGasLimitBn = blockGasLimitBn.muln(0.9);
+    const bufferedGasLimitBn = initialGasLimitBn.muln(multiplier);
 
     // if initialGasLimit is above blockGasLimit, dont modify it
     if (initialGasLimitBn.gt(upperGasLimitBn)) return bnToHex(initialGasLimitBn);

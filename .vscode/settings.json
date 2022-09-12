@@ -8,7 +8,7 @@
       "changeProcessCWD": true
     },
     {
-      "directory": "examples/*/*",
+      "directory": "demo/*/*",
       "changeProcessCWD": true
     }
   ],

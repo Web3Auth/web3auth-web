@@ -93,6 +93,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthProps> = ({ children, 
         setIsLoading(true);
         const web3AuthInstance = new Web3AuthCore({
           chainConfig: currentChainConfig,
+          clientId,
         });
 
         const adapter = new OpenloginAdapter({

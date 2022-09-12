@@ -41,12 +41,15 @@ export type CONNECTED_EVENT_DATA = {
   adapter: string;
   reconnected: boolean;
 };
+
+export type UserAuthInfo = { idToken: string };
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
   chainConfigProxy: CustomChainConfig | null;
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
+  sessionTime: number;
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
@@ -56,14 +59,19 @@ export interface IAdapter<T> extends SafeEventEmitter {
   getUserInfo(): Promise<Partial<UserInfo>>;
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
+  authenticateUser(): Promise<UserAuthInfo>;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public adapterData?: unknown = {};
 
+  public sessionTime = 86400;
+
   // should be added in constructor or from setChainConfig function
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
+
+  public abstract clientId: string;
 
   public abstract adapterNamespace: AdapterNamespaceType;
 
@@ -96,7 +104,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
-    if (this.status !== ADAPTER_STATUS.READY) throw WalletLoginError.connectionError("Wallet adapter is not ready yet");
+    if (this.status !== ADAPTER_STATUS.READY)
+      throw WalletLoginError.connectionError(
+        "Wallet adapter is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
+      );
+    if (!this.clientId) throw WalletLoginError.connectionError("Please initialize Web3Auth with a valid clientId in constructor");
   }
 
   checkInitializationRequirements(): void {
@@ -114,6 +126,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
+  abstract authenticateUser(): Promise<UserAuthInfo>;
 }
 
 export interface BaseAdapterConfig {

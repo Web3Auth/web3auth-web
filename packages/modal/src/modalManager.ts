@@ -46,13 +46,6 @@ export interface UIConfig {
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
-   * Client id for web3auth.
-   * You can obtain your client id from the web3auth developer dashboard.
-   * You can set any random string for this on localhost.
-   */
-  clientId: string;
-
-  /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
    * If you are a wallet and only want to use you own wallet implementations along with openlogin,
@@ -157,11 +150,9 @@ export class Web3Auth extends Web3AuthCore {
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
-        // add client id to openlogin adapter, same web3auth client id can be used in openlogin.
-        // this id is being overridden if user is also passing client id in openlogin's adapter constructor.
-        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId });
-        }
+        // add client id to adapter, same web3auth client id can be used in adapter.
+        // this id is being overridden if user is also passing client id in adapter's constructor.
+        this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId, sessionTime: this.options.sessionTime });
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
         // and chainNamespace.
@@ -263,10 +254,19 @@ export class Web3Auth extends Web3AuthCore {
           if (this.cachedAdapter === adapterName) {
             return;
           }
-          if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
-          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
-          adaptersData[adapterName] = adapter.adapterData || {};
-          return adapterName;
+          if (adapter.status === ADAPTER_STATUS.NOT_READY)
+            return await Promise.race([
+              adapter.init({ autoConnect: this.cachedAdapter === adapterName }).then(() => {
+                adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+                adaptersData[adapterName] = adapter.adapterData || {};
+                return adapterName;
+              }),
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  return resolve(null);
+                }, 5000);
+              }),
+            ]);
         }
       } catch (error) {
         log.error(error, "error while initializing adapter");

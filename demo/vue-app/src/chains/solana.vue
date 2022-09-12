@@ -10,6 +10,7 @@
       <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
       <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -72,11 +73,6 @@ export default Vue.extend({
       // watch it
       console.log("Prop changed: ", newVal, " | was: ", oldVal);
       await this.initSolanaAuth();
-    },
-    openloginNetwork: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
     },
   },
   data() {
@@ -211,6 +207,10 @@ export default Vue.extend({
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
       this.console(userInfo);
+    },
+    async authenticateUser() {
+      const idTokenDetails = await this.web3auth.authenticateUser();
+      this.console(idTokenDetails);
     },
     console(...args: unknown[]): void {
       const el = document.querySelector("#console>p");

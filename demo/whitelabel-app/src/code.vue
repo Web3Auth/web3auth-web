@@ -14,7 +14,9 @@
 <script lang="ts">
 import copyToClipboard from "copy-to-clipboard";
 
-import * as CodeMirror from "codemirror";
+import type CodeMirror from "codemirror";
+import { fromTextArea } from "codemirror";
+
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/dracula.css";
 import "codemirror/mode/javascript/javascript.js";
@@ -27,7 +29,7 @@ import { defineComponent } from "vue";
 let jsEditor: CodeMirror.Editor;
 
 const initEditor = () => {
-  jsEditor = CodeMirror.fromTextArea(document.getElementById("jsEditor") as HTMLTextAreaElement, {
+  jsEditor = fromTextArea(document.getElementById("jsEditor") as HTMLTextAreaElement, {
     lineNumbers: true,
     theme: "dracula",
     mode: "javascript",

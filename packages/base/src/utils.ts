@@ -1,4 +1,4 @@
-export function storageAvailable(type: string): boolean {
+export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
   let storageExists = false;
   let storageLength = 0;
   let storage: Storage;

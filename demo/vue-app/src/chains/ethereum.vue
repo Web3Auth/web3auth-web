@@ -11,6 +11,7 @@
       <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
       <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
       <!-- <span>{{ connecting }}</span> -->
 
@@ -204,6 +205,10 @@ export default Vue.extend({
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
       this.console(userInfo);
+    },
+    async authenticateUser() {
+      const idTokenDetails = await this.web3auth.authenticateUser();
+      this.console(idTokenDetails);
     },
     console(...args: unknown[]): void {
       const el = document.querySelector("#console>p");

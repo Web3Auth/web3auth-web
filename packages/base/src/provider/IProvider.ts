@@ -1,6 +1,6 @@
 import { JRPCRequest, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-export type SendCallBack<U> = (err: any, providerRes: U) => void;
+export type SendCallBack<U> = (err: unknown, providerRes: U) => void;
 export interface RequestArguments {
   method: string;
   params?: unknown[] | object;

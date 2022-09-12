@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,15 +21,18 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
 export interface TorusWalletOptions {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
+  clientId?: string;
 }
 
-export class TorusWalletAdapter extends BaseAdapter<never> {
+export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   readonly name: string = WALLET_ADAPTERS.TORUS_EVM;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -51,12 +53,13 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
 
   private rehydrated = false;
 
-  constructor(params: TorusWalletOptions = {}) {
-    super();
+  constructor(params: TorusWalletOptions) {
+    super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig || null;
+    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -76,11 +79,11 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     let network: NetworkInterface;
     if (!this.chainConfig) {
       this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-      const { blockExplorer, displayName } = this.chainConfig as CustomChainConfig;
-      network = { chainId: 1, host: "mainnet", blockExplorer, networkName: displayName };
+      const { blockExplorer, displayName, chainId, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId: Number.parseInt(chainId, 16), host: "mainnet", blockExplorer, networkName: displayName, ticker, tickerName };
     } else {
-      const { chainId, blockExplorer, displayName, rpcTarget } = this.chainConfig as CustomChainConfig;
-      network = { chainId: parseInt(chainId as string, 16), host: rpcTarget, blockExplorer, networkName: displayName };
+      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+      network = { chainId: Number.parseInt(chainId, 16), host: rpcTarget, blockExplorer, networkName: displayName, ticker, tickerName };
     }
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus evm adapter init");
@@ -114,14 +117,13 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
       const { chainId } = this.torusInstance.provider;
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-        const network = {
-          chainId: _chainId,
+        const network: NetworkInterface = {
+          chainId: Number.parseInt(_chainId, 16),
           host: rpcTarget,
-          blockExplorerUrl: blockExplorer,
+          blockExplorer,
           networkName: displayName,
           tickerName,
           ticker,
-          logo: "",
         };
         // in some cases when user manually switches chain and relogin then adapter will not connect to initially passed
         // chainConfig but will connect to the one that user switched to.
@@ -151,8 +153,8 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await super.disconnect();
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     if (options.cleanup) {
@@ -174,5 +176,13 @@ export class TorusWalletAdapter extends BaseAdapter<never> {
     return userInfo;
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    }
+  }
 }

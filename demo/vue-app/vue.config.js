@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const path = require("path");
 const { ProvidePlugin } = require("webpack");
-
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 module.exports = {
   devServer: {
     port: 3000, // CHANGE YOUR PORT HERE!
@@ -26,6 +26,9 @@ module.exports = {
     };
     config.plugins.push(new ProvidePlugin({ Buffer: ["buffer", "Buffer"] }));
     config.plugins.push(new ProvidePlugin({ process: ["process/browser"] }));
+    config.plugins.push(new BundleAnalyzerPlugin({
+      analyzerMode: "disabled"
+    }))
   },
   chainWebpack: (config) => {
     if (process.env.NODE_ENV !== "production") {

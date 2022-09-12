@@ -8,4 +8,6 @@ interface IAdapterSettings extends IWalletConnectOptions {
 export interface WalletConnectV1AdapterOptions {
   adapterSettings?: IAdapterSettings;
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
+  clientId?: string;
 }

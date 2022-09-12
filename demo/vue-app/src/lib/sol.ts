@@ -18,7 +18,7 @@ function getNewTx(publicKeys, blockhash) {
   return new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(publicKeys![0]) }).add(inst);
 }
 
-export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[]> => {
+export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[] | undefined> => {
   try {
     const solWeb3 = new SolanaWallet(provider);
     const acc = await solWeb3.requestAccounts();

@@ -66,11 +66,6 @@ export default Vue.extend({
     adapterConfig: async function (newSettings, oldSettings) {
       await this.initBinanceWeb3Auth();
     },
-    openloginNetwork: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
-    },
   },
   components: {
     EthRpc,

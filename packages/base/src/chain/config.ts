@@ -1,5 +1,4 @@
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
-export const DEFAULT_INFURA_ID = "776218ac4734478c90191dde8cae483c";
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;
@@ -15,91 +14,121 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
     return {
       chainNamespace,
       chainId: "0x1",
-      rpcTarget: `https://mainnet.infura.io/v3/${DEFAULT_INFURA_ID}`,
+      rpcTarget: `https://rpc.ankr.com/eth`,
       displayName: "Ethereum Mainnet",
       blockExplorer: "https://etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 3) {
+  }
+  if (chainId === 3) {
     return {
       chainNamespace,
       chainId: "0x3",
-      rpcTarget: `https://ropsten.infura.io/v3/${DEFAULT_INFURA_ID}`,
-      displayName: "ropsten",
+      rpcTarget: `https://rpc.ankr.com/eth_ropsten`,
+      displayName: "Ropsten Testnet",
       blockExplorer: "https://ropsten.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 4) {
+  }
+  if (chainId === 4) {
     return {
       chainNamespace,
       chainId: "0x4",
-      rpcTarget: `https://rinkeby.infura.io/v3/${DEFAULT_INFURA_ID}`,
-      displayName: "rinkeby",
+      rpcTarget: `https://rpc.ankr.com/eth_rinkeby`,
+      displayName: "Rinkeby Testnet",
       blockExplorer: "https://rinkeby.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 5) {
+  }
+  if (chainId === 5) {
     return {
       chainNamespace,
       chainId: "0x5",
-      rpcTarget: `https://goerli.infura.io/v3/${DEFAULT_INFURA_ID}`,
-      displayName: "goerli",
+      rpcTarget: `https://rpc.ankr.com/eth_goerli`,
+      displayName: "Goerli Testnet",
       blockExplorer: "https://goerli.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
     };
-  } else if (chainId === 42) {
+  }
+  if (chainId === 137) {
     return {
       chainNamespace,
-      chainId: "0x2a",
-      rpcTarget: `https://kovan.infura.io/v3/${DEFAULT_INFURA_ID}`,
-      displayName: "kovan",
-      blockExplorer: "https://kovan.etherscan.io/",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    };
-  } else if (chainId === 137) {
-    return {
-      chainNamespace,
-      rpcTarget: "https://polygon-rpc.com",
-      blockExplorer: "https://polygonscan.com",
       chainId: "0x89",
+      rpcTarget: "https://rpc.ankr.com/polygon",
       displayName: "Polygon Mainnet",
-      ticker: "matic",
-      tickerName: "matic",
+      blockExplorer: "https://polygonscan.com",
+      ticker: "MATIC",
+      tickerName: "Polygon",
     };
-  } else if (chainId === 80001) {
+  }
+  if (chainId === 80001) {
     return {
       chainNamespace,
-      rpcTarget: "https://rpc-mumbai.maticvigil.com",
-      blockExplorer: "https://mumbai-explorer.matic.today",
       chainId: "0x13881",
+      rpcTarget: "https://rpc.ankr.com/polygon_mumbai",
       displayName: "Polygon Mumbai Testnet",
-      ticker: "matic",
-      tickerName: "matic",
+      blockExplorer: "https://mumbai.polygonscan.com/",
+      ticker: "MATIC",
+      tickerName: "Polygon",
     };
-  } else if (chainId === 56) {
+  }
+  if (chainId === 56) {
     return {
       chainNamespace,
-      rpcTarget: "https://bsc-dataseed.binance.org",
-      blockExplorer: "https://bscscan.com",
       chainId: "0x38",
+      rpcTarget: "https://rpc.ankr.com/bsc",
       displayName: "Binance SmartChain Mainnet",
+      blockExplorer: "https://bscscan.com",
       ticker: "BNB",
-      tickerName: "BNB",
+      tickerName: "Binance SmartChain",
     };
-  } else if (chainId === 97) {
+  }
+  if (chainId === 97) {
     return {
       chainNamespace,
-      rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
-      blockExplorer: "https://testnet.bscscan.com",
       chainId: "0x61",
+      rpcTarget: "https://rpc.ankr.com/bsc_testnet_chapel",
       displayName: "Binance SmartChain Testnet",
+      blockExplorer: "https://testnet.bscscan.com",
       ticker: "BNB",
-      tickerName: "BNB",
+      tickerName: "Binance SmartChain",
+    };
+  }
+  if (chainId === 25) {
+    return {
+      chainNamespace,
+      chainId: "0x19",
+      rpcTarget: "https://rpc.cronos.org",
+      displayName: "Cronos Mainnet",
+      blockExplorer: "https://cronoscan.com/",
+      ticker: "CRO",
+      tickerName: "Cronos",
+    };
+  }
+  if (chainId === 338) {
+    return {
+      chainNamespace,
+      chainId: "0x152",
+      rpcTarget: "https://rpc-t3.cronos.org/",
+      displayName: "Cronos Testnet",
+      blockExplorer: "https://cronoscan.com/",
+      ticker: "CRO",
+      tickerName: "Cronos",
+    };
+  }
+  if (chainId === 8217) {
+    return {
+      chainNamespace,
+      chainId: "0x2019",
+      rpcTarget: "https://public-node-api.klaytnapi.com/v1/cypress",
+      displayName: "Klaytn Mainnet",
+      blockExplorer: "https://scope.klaytn.com",
+      ticker: "KLAY",
+      tickerName: "Klaytn",
     };
   }
 
@@ -111,32 +140,32 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
   if (chainId === 1) {
     return {
       chainNamespace,
-      blockExplorer: "https://explorer.solana.com",
       chainId: "0x1",
+      rpcTarget: "https://rpc.ankr.com/solana",
       displayName: "Solana Mainnet",
-      rpcTarget: "https://api.mainnet-beta.solana.com",
+      blockExplorer: "https://explorer.solana.com",
       ticker: "SOL",
-      tickerName: "Solana Token",
+      tickerName: "Solana",
     };
   } else if (chainId === 2) {
     return {
-      rpcTarget: "https://api.testnet.solana.com",
-      blockExplorer: "https://explorer.solana.com?cluster=testnet",
-      chainId: "0x2",
       chainNamespace,
-      displayName: "testnet",
+      chainId: "0x2",
+      rpcTarget: "https://api.testnet.solana.com",
+      displayName: "Solana Testnet",
+      blockExplorer: "https://explorer.solana.com?cluster=testnet",
       ticker: "SOL",
-      tickerName: "solana",
+      tickerName: "Solana",
     };
   } else if (chainId === 3) {
     return {
-      rpcTarget: "https://api.devnet.solana.com",
-      blockExplorer: "https://explorer.solana.com?cluster=devnet",
-      chainId: "0x3",
       chainNamespace,
-      displayName: "devnet",
+      chainId: "0x3",
+      rpcTarget: "https://api.devnet.solana.com",
+      displayName: "Solana Devnet",
+      blockExplorer: "https://explorer.solana.com?cluster=devnet",
       ticker: "SOL",
-      tickerName: "solana",
+      tickerName: "Solana",
     };
   }
 

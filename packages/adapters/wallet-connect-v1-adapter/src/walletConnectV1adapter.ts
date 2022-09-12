@@ -7,7 +7,6 @@ import {
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,12 +21,13 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import { WalletConnectProvider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";
 
-class WalletConnectV1Adapter extends BaseAdapter<void> {
+class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V1;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -51,10 +51,11 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: WalletConnectV1AdapterOptions = {}) {
-    super();
+  constructor(options: WalletConnectV1AdapterOptions) {
+    super(options);
     this.adapterOptions = { ...options };
     this.chainConfig = options.chainConfig || null;
+    this.sessionTime = options.sessionTime || 86400;
   }
 
   get connected(): boolean {
@@ -147,6 +148,16 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
     });
   }
 
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    }
+  }
+
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
@@ -155,6 +166,7 @@ class WalletConnectV1Adapter extends BaseAdapter<void> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     const { cleanup } = options;
     if (!this.connector || !this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    await super.disconnect();
     await this.connector.killSession();
     this.rehydrated = false;
     if (cleanup) {

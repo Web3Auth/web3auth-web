@@ -6,6 +6,24 @@ const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");
 
+const ssrModule = {
+  rules: [
+    {
+      test: /\.css$/,
+      use: [
+        "isomorphic-style-loader",
+        {
+          loader: "css-loader",
+        },
+      ],
+    },
+    {
+      test: /\.svg$/,
+      exclude: /node_modules/,
+      use: ["@svgr/webpack", "url-loader"],
+    },
+  ],
+};
 const config = generateWebpackConfig({
   currentPath,
   pkg,
@@ -13,20 +31,20 @@ const config = generateWebpackConfig({
   module: {
     rules: [
       {
-        test: /\.css$/,
+        test: /\.css$/i,
         use: [
-          "isomorphic-style-loader",
-          {
-            loader: "css-loader",
-          },
+          { loader: "style-loader", options: {} },
+          { loader: "css-loader", options: {} },
         ],
       },
       {
         test: /\.svg$/,
+        exclude: /node_modules/,
         use: ["@svgr/webpack", "url-loader"],
       },
     ],
   },
+  ssrModule,
 });
 
 module.exports = config;

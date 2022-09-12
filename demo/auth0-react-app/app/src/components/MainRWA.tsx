@@ -38,6 +38,7 @@ const Main = () => {
 
   useEffect(() => {
     handleAuthLogin();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWeb3AuthInit]);
 
   const loggedInView = (

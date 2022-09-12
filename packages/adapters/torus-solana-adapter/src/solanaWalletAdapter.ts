@@ -8,7 +8,6 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
-  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
@@ -22,6 +21,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { ITorusWalletProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 
 export interface SolanaWalletOptions {
@@ -29,9 +29,11 @@ export interface SolanaWalletOptions {
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
   chainConfig?: CustomChainConfig;
+  sessionTime?: number;
+  clientId?: string;
 }
 
-export class SolanaWalletAdapter extends BaseAdapter<void> {
+export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.TORUS_SOLANA;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
@@ -54,12 +56,13 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(params: SolanaWalletOptions = {}) {
-    super();
+  constructor(params: SolanaWalletOptions) {
+    super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
     this.chainConfig = params.chainConfig || null;
+    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -149,8 +152,8 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await super.disconnect();
     await this.torusInstance.logout();
     if (options.cleanup) {
       // ready to connect again
@@ -172,5 +175,13 @@ export class SolanaWalletAdapter extends BaseAdapter<void> {
     return userInfo;
   }
 
-  setAdapterSettings(_: unknown): void {}
+  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    }
+  }
 }

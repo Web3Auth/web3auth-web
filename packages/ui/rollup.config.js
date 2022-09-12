@@ -2,7 +2,7 @@ import svgr from "@svgr/rollup";
 import postcss from "rollup-plugin-postcss";
 import url from "rollup-plugin-url";
 
-export default {
+const config = {
   plugins: [
     postcss({
       plugins: [],
@@ -11,3 +11,5 @@ export default {
     svgr(),
   ],
 };
+
+export default config;
