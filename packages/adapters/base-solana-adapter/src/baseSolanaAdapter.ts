@@ -15,7 +15,7 @@ import bs58 from "bs58";
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   public clientId: string;
 
-  constructor(params: { clientId?: string }) {
+  constructor(params: { clientId?: string } = {}) {
     super();
     this.clientId = params.clientId;
   }
