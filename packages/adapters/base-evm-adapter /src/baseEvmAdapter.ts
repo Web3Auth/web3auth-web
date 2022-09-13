@@ -14,7 +14,7 @@ import {
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   public clientId: string;
 
-  constructor(params: { clientId?: string }) {
+  constructor(params: { clientId?: string } = {}) {
     super();
     this.clientId = params.clientId;
   }
