@@ -9,7 +9,7 @@ Web3Auth Ethereum Provider can be used to interact with wallet or connected EVM 
 
 ## 📖 Documentation
 
-Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/evm#getting-a-provider-from-any-secp512k1-private-key/).
+Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/evm#getting-a-provider-from-any-secp256k1-private-key).
 
 ## 🔗 Installation
 
