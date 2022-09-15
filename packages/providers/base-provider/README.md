@@ -11,6 +11,18 @@ Each adapter in Web3Auth exposes a Provider on successful user authentication. T
 
 Read more about Web3Auth providers in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/).
 
+## 💡 Features
+- Plug and Play, OAuth based Web3 Authentication Service
+- Fully decentralized, non-custodial key infrastructure
+- End to end Whitelabelable solution
+- Threshold Cryptography based Key Reconstruction
+- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Support for WebAuthn & Passwordless Login
+- Support for connecting to multiple wallets
+- DApp Active Session Management
+
+...and a lot more
+
 ## 🔗 Installation
 
 ```shell
