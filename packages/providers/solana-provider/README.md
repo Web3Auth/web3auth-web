@@ -9,7 +9,7 @@ Web3Auth Solana Provider can be used to interact with wallet or connected Solana
 
 ## 📖 Documentation
 
-Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/solana).
+Read more about Web3Auth Solana Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/solana#getting-a-provider-from-any-secp256k1-private-key).
 
 ## 🔗 Installation
 
@@ -19,35 +19,82 @@ npm install --save @web3auth/solana-provider
 
 ## 🩹 Example
 
+### `SolanaPrivateKeyProvider`
+
 ```ts
-import { PrivateKeyWallet } from "@web3auth/solana-provider";
+import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 
-/*
-privKey: any secp512k1 private key.
-*/
+const solanaPrivateProvider = await SolanaPrivateKeyProvider.getProviderInstance({
+  chainConfig: {
+    rpcTarget: "https://ssc-dao.genesysgo.net",
+    chainId: "0x1", // hex chain id
+    displayName: "solana",
+    ticker: "SOL",
+    tickerName: "Solana",
+  },
+  privKey: "user's private key",
+});
+```
 
-async setProvider(privKey: string) {
-    this.PrivateKeyProvider = new PrivateKeyWallet({
-    config: {
-        /*
-        pass the chain config that you want to connect with
-        all chainConfig fields are required.
-        */
-        chainConfig: {
-        rpcTarget: "https://ssc-dao.genesysgo.net", // This is the testnet RPC we have added, please pass on your own endpoint while creating an app
-        displayName: "solana",
-        ticker: "SOL",
-        tickerName: "Solana",
-        },
+### `SolanaWallet`
+
+`SolanaWallet` can be used with two types of providers:
+
+1. `web3auth.provider` that you get after logging in with Web3Auth.
+2. `solanaPrivateProvider.provider` that you get after passing user's private key to `SolanaPrivateKeyProvider`.
+
+`web3auth.provider`
+
+```ts
+import { SolanaWallet } from "@web3auth/solana-provider";
+
+const solanaWallet = new SolanaWallet(web3auth.provider);
+const msg = Buffer.from("Signing Message", "utf8");
+const result = await solanaWallet.signMessage(msg);
+return result;
+```
+
+`solanaPrivateProvider.provider`
+
+```ts
+import { SolanaWallet } from "@web3auth/solana-provider";
+
+const solanaWallet = new SolanaWallet(solanaPrivateProvider.provider);
+const msg = Buffer.from("Signing Message", "utf8");
+const result = await solanaWallet.signMessage(msg);
+return result.toString();
+```
+
+### General Example
+
+```ts
+import { SolanaPrivateKeyProvider, SolanaWallet } from "@web3auth/solana-provider";
+import type { SafeEventEmitterProvider } from "@web3auth/base";
+
+const signSolanaMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
+  const solanaWallet = new SolanaWallet(provider as any);
+  const msg = Buffer.from("Signing Message", "utf8");
+  const result = await solanaWallet.signMessage(msg);
+  return result.toString();
+};
+
+(async () => {
+  // Assuming you're logged in with Web3Auth.
+  const privateKey = await web3auth.provider.request({
+    method: "solanaPrivateKey",
+  });
+  const solanaPrivateProvider = await SolanaPrivateKeyProvider.getProviderInstance({
+    chainConfig: {
+      rpcTarget: "https://ssc-dao.genesysgo.net",
+      chainId: "0x1", // hex chain id
+      displayName: "solana",
+      ticker: "SOL",
+      tickerName: "Solana",
     },
-    });
-    /*
-    pass user's private key here.
-    after calling setupProvider, we can use
-    this.ethereumPrivateKeyProvider._providerProxy as a eip1193 provider
-    */
-    const provider = await this.PrivateKeyProvider.solanaPrivateKey(privKey);
-}
+    privKey: privateKey,
+  });
+  const signedMessage = await signSolanaMessage(solanaPrivateProvider.provider);
+})();
 ```
 
 Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
