@@ -3,9 +3,9 @@ import { Block } from "@toruslabs/base-controllers";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import { addHexPrefix, stripHexPrefix } from "ethereumjs-util";
 
-import { TransactionParams } from "../../../rpc/interfaces";
-import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
-import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../../utils";
+import { TransactionParams } from "../../rpc/interfaces";
+import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../converter";
+import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../utils";
 import { EIP1559APIEndpoint, GAS_ESTIMATE_TYPES, LegacyGasAPIEndpoint, TRANSACTION_ENVELOPE_TYPES, TRANSACTION_TYPES } from "./constants";
 import { EIP1159GasData, FallbackGasData, GasData, LegacyGasData, TxType } from "./interfaces";
 import { fetchEip1159GasEstimates, fetchLegacyGasPriceEstimates } from "./utils";

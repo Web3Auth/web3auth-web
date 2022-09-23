@@ -17,8 +17,8 @@ import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
-import { TransactionFormatter } from "./TransactionFormatter";
-import { validateTypedMessageParams } from "./TransactionFormatter/utils";
+import { TransactionFormatter } from "../TransactionFormatter";
+import { validateTypedMessageParams } from "../TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);

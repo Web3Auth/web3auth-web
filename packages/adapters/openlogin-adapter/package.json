@@ -35,16 +35,22 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
+    "@types/elliptic": "^6.4.14",
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^2.6.0",
+    "@toruslabs/openlogin": "file:./../../../../OpenLoginSdk/packages/openlogin",
     "@toruslabs/openlogin-ed25519": "^2.0.0",
+    "@toruslabs/http-helpers": "^3.2.0",
     "@web3auth/base": "^2.1.2",
     "@web3auth/base-provider": "^2.1.2",
     "@web3auth/ethereum-provider": "^2.1.2",
     "@web3auth/solana-provider": "^2.1.2",
-    "lodash.merge": "^4.6.2"
+    "bn.js": "^5.2.1",
+    "elliptic": "^6.5.4",
+    "lodash.merge": "^4.6.2",
+    "socket.io-client": "^4.5.2",
+    "tss-client": "file:./../../../../tss-node/packages/tss-client/"
   },
   "lint-staged": {
     "!(*d).ts": [

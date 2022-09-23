@@ -8,43 +8,58 @@ import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddlewa
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers } from "../../rpc/interfaces";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { TransactionFormatter } from "../TransactionFormatter";
-import { getProviderHandlers } from "./ethPrivatekeyUtils";
+import { getProviderHandlers } from "./signingUtils";
 
-export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {
+export interface EthereumSigningProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
 }
 
-export interface EthereumPrivKeyProviderState extends BaseProviderState {
+export interface EthereumSigningProviderState extends BaseProviderState {
   privateKey?: string;
+  signMethods?: {
+    sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    getPublic: () => Promise<Buffer>;
+  };
 }
-export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig, EthereumPrivKeyProviderState, string> {
-  constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: EthereumPrivKeyProviderState }) {
+export class EthereumSigningProvider extends BaseProvider<
+  BaseProviderConfig,
+  EthereumSigningProviderState,
+  {
+    sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    getPublic: () => Promise<Buffer>;
+  }
+> {
+  constructor({ config, state }: { config: EthereumSigningProviderConfig; state?: EthereumSigningProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
   }
 
   public static getProviderInstance = async (params: {
-    privKey: string;
+    signMethods: {
+      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      getPublic: () => Promise<Buffer>;
+    };
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<EthereumPrivateKeyProvider> => {
-    const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
-    await providerFactory.setupProvider(params.privKey);
+  }): Promise<EthereumSigningProvider> => {
+    const providerFactory = new EthereumSigningProvider({ config: { chainConfig: params.chainConfig } });
+    await providerFactory.setupProvider(params.signMethods);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
       throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.privateKey);
+    await this.setupProvider(this.state.signMethods);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
-  public async setupProvider(privKey: string): Promise<void> {
+  public async setupProvider({ sign, getPublic }): Promise<void> {
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
     const providerHandlers = getProviderHandlers({
       txFormatter,
-      privKey,
+      sign,
+      getPublic,
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
@@ -62,11 +77,21 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     await this.lookupNetwork();
   }
 
-  public async updateAccount(params: { privateKey: string }): Promise<void> {
+  public async updateAccount(params: {
+    signMethods: {
+      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      getPublic: () => Promise<Buffer>;
+    };
+  }): Promise<void> {
     if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-    const existingKey = await this._providerEngineProxy.request<unknown, string>({ method: "eth_private_key" });
-    if (existingKey !== params.privateKey) {
-      await this.setupProvider(params.privateKey);
+    const currentSignMethods = this.state.signMethods;
+    if (!currentSignMethods) {
+      throw ethErrors.provider.custom({ message: "signing methods are unavailable ", code: 4092 });
+    }
+    const currentPubKey = (await currentSignMethods.getPublic()).toString("hex");
+    const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
+    if (currentPubKey !== updatePubKey) {
+      await this.setupProvider(params.signMethods);
       this._providerEngineProxy.emit("accountsChanged", {
         accounts: await this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" }),
       });
@@ -80,8 +105,10 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerEngineProxy.request<unknown, string>({ method: "eth_private_key" });
-    await this.setupProvider(privKey);
+    if (!this.state.signMethods) {
+      throw ethErrors.provider.custom({ message: "sign methods are undefined", code: 4902 });
+    }
+    await this.setupProvider(this.state.signMethods);
   }
 
   protected async lookupNetwork(): Promise<string> {
@@ -127,9 +154,13 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
   private getAccountMiddleware(): JRPCMiddleware<unknown, unknown> {
     const accountHandlers: IAccountHandlers = {
-      updatePrivatekey: async (params: { privateKey: string }): Promise<void> => {
-        const { privateKey } = params;
-        await this.updateAccount({ privateKey });
+      updateSignMethods: async (params: {
+        signMethods: {
+          sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+          getPublic: () => Promise<Buffer>;
+        };
+      }): Promise<void> => {
+        await this.updateAccount(params);
       },
     };
     return createAccountMiddleware(accountHandlers);

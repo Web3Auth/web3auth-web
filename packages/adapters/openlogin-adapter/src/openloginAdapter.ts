@@ -21,6 +21,7 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
+import { EthereumSigningProvider } from "@web3auth/ethereum-provider";
 import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
@@ -31,7 +32,13 @@ export type OpenloginLoginParams = LoginParams & {
   login_hint?: string;
 };
 
-type PrivateKeyProvider = IBaseProvider<string>;
+type PrivateKeyOrSigningProvider = IBaseProvider<
+  | string
+  | {
+      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      getPublic: () => Promise<Buffer>;
+    }
+>;
 
 export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
@@ -52,7 +59,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private loginSettings: LoginSettings = {};
 
-  private privKeyProvider: PrivateKeyProvider | null = null;
+  private tssSettings?: {
+    useTSS: boolean;
+    tssSign?: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    tssGetPublic?: () => Promise<Buffer>;
+    tssDataCallback?: (tssDataReader: () => Promise<{ tssShare: string; signatures: string[] }>) => Promise<void>;
+  };
+
+  private privateKeyOrSigningProvider: PrivateKeyOrSigningProvider | null = null;
 
   constructor(params: OpenloginAdapterOptions) {
     super();
@@ -66,6 +80,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     };
     this.clientId = params.adapterSettings?.clientId as string;
     this.loginSettings = { ...defaultOptions.loginSettings, ...params.loginSettings };
+    if (params.tssSettings) {
+      this.tssSettings = params.tssSettings;
+    }
     this.sessionTime = this.loginSettings.sessionTime || 86400;
     // if no chainNamespace is passed then chain config should be set before calling init
     if (params.chainConfig?.chainNamespace) {
@@ -84,7 +101,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.privKeyProvider?.provider || null;
+    return this.privateKeyOrSigningProvider?.provider || null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -132,7 +149,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
-      await this.connectWithProvider(params);
+      if (this.tssSettings?.useTSS) {
+        await this.connectWithTSSProvider(params);
+      } else {
+        await this.connectWithPrivKeyProvider(params);
+      }
       return this.provider;
     } catch (error: unknown) {
       log.error("Failed to connect with openlogin provider", error);
@@ -153,7 +174,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
       this.openloginInstance = null;
-      this.privKeyProvider = null;
+      this.privateKeyOrSigningProvider = null;
     } else {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
@@ -196,18 +217,18 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
 
-  private async connectWithProvider(params?: OpenloginLoginParams): Promise<void> {
+  private async connectWithPrivKeyProvider(params?: OpenloginLoginParams): Promise<void> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privateKeyOrSigningProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      this.privateKeyOrSigningProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-      this.privKeyProvider = new CommonPrivateKeyProvider();
+      this.privateKeyOrSigningProvider = new CommonPrivateKeyProvider();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
@@ -231,9 +252,73 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
-      await this.privKeyProvider.setupProvider(finalPrivKey);
+      await this.privateKeyOrSigningProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
     }
+  }
+
+  private async connectWithTSSProvider(params?: OpenloginLoginParams): Promise<void> {
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
+    if (!this.tssSettings) throw new Error("tss settings are undefined");
+
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      throw new Error("solana is not supported at the moment for TSS");
+      // const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      // this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+      this.privateKeyOrSigningProvider = new EthereumSigningProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
+      throw new Error("other chains are not supported at the moment for TSS");
+      // this.privKeyProvider = new CommonPrivateKeyProvider();
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
+    }
+    // if not logged in then login
+    if (!this.openloginInstance.privKey && params) {
+      if (!this.loginSettings.curve) {
+        this.loginSettings.curve = SUPPORTED_KEY_CURVES.SECP256K1;
+      }
+      await this.openloginInstance.login(
+        merge(
+          this.loginSettings,
+          { loginProvider: params.loginProvider },
+          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } }
+        )
+      );
+    }
+
+    // check if TSS is available
+    if (!this.openloginInstance.state.tssShare) {
+      throw new Error("TSS share is currently unavailable.");
+    }
+    if (!Array.isArray(this.openloginInstance.state.signatures) || this.openloginInstance.state.signatures.length === 0) {
+      throw new Error("TSS session is currently unavailable.");
+    }
+
+    if (!this.tssSettings.tssDataCallback) {
+      throw new Error("tss data callback is undefined");
+    }
+    if (!this.tssSettings.tssSign) {
+      throw new Error("sign method is undefined");
+    }
+    if (!this.tssSettings.tssGetPublic) {
+      throw new Error("sign method is undefined");
+    }
+
+    await this.tssSettings.tssDataCallback(async () => {
+      return {
+        tssShare: this.openloginInstance?.state.tssShare || "",
+        signatures: this.openloginInstance?.state.signatures || [],
+      };
+    });
+
+    await this.privateKeyOrSigningProvider.setupProvider({
+      sign: this.tssSettings.tssSign,
+      getPublic: this.tssSettings.tssGetPublic,
+    });
+    this.status = ADAPTER_STATUS.CONNECTED;
+    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
   }
 }

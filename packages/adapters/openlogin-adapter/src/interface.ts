@@ -8,4 +8,10 @@ export interface OpenloginAdapterOptions {
   chainConfig?: CustomChainConfig | null;
   adapterSettings?: MakeOptional<OpenLoginOptions, "clientId">;
   loginSettings?: LoginSettings;
+  tssSettings?: {
+    useTSS: boolean;
+    tssSign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    tssGetPublic: () => Promise<Buffer>;
+    tssDataCallback: (tssDataReader: () => Promise<{ tssShare: string; signatures: string[] }>) => Promise<void>;
+  };
 }

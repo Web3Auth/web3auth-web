@@ -42,6 +42,11 @@ export type CONNECTED_EVENT_DATA = {
   reconnected: boolean;
 };
 
+export type TSSInfo = {
+  tssShare: string;
+  signatures: string[];
+};
+
 export type UserAuthInfo = { idToken: string };
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
@@ -60,6 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   setChainConfig(customChainConfig: CustomChainConfig): void;
   setAdapterSettings(adapterSettings: unknown): void;
   authenticateUser(): Promise<UserAuthInfo>;
+  getTSSInfo?(): Promise<TSSInfo>;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {

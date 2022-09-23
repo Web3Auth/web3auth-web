@@ -27,9 +27,15 @@
 </template>
 
 <script lang="ts">
+import { post } from "@toruslabs/http-helpers";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthCore } from "@web3auth/core";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
+import BN from "bn.js";
+import { ec as EC } from "elliptic";
+const ec = new EC("secp256k1");
+
+import { Client } from "tss-client";
 import Vue from "vue";
 
 import Loader from "../components/loader.vue";
@@ -46,6 +52,7 @@ export default Vue.extend({
       provider: undefined,
       namespace: undefined,
       web3auth: new Web3AuthCore({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
+      tssDataReader: null,
     };
   },
   components: {
@@ -60,7 +67,23 @@ export default Vue.extend({
       try {
         this.web3auth = new Web3AuthCore({ chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId });
         this.subscribeAuthEvents(this.web3auth);
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const openloginAdapter = new OpenloginAdapter({
+          tssSettings: {
+            useTSS: true,
+            tssGetPublic: async function () {
+              console.log("tssGetPublic called");
+              return Buffer.from("00", "hex");
+            },
+            tssSign: async (msgHash: Buffer) => {
+              openloginAdapter.openloginInstance.state;
+              console.log("tssSign called");
+              return { v: 0, r: Buffer.from("00", "hex"), s: Buffer.from("00", "hex") };
+            },
+            tssDataCallback: async (tssDataReader) => {
+              this.tssDataReader = tssDataReader;
+            },
+          },
           adapterSettings: {
             network: "testnet",
             clientId: config.clientId,
