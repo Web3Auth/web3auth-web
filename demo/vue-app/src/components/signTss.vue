@@ -20,6 +20,9 @@
       </div>
 
       <div class="form-row">
+        <v-progress-circular :rotate="-90" :size="100" :width="15" :value="progress" color="primary">
+          {{ progress }}
+        </v-progress-circular>
         <div id="console" class="form-input" style="white-space: pre-line">
           <p style="white-space: pre-line"></p>
           <li>exchanging seeds 15%</li>
@@ -95,6 +98,7 @@ export default Vue.extend({
       hash: "",
       signature: "",
       signer: "",
+      progress: 20,
     };
   },
   components: {
