@@ -2,78 +2,107 @@
   <div>
     <!-- TSS SIGN SCREEN -->
     <div v-if="!signature">
-      <h2>TSS Message Signing</h2>
-
-      <div class="form-row">
-        <label class="form-label" for="message">Region</label>
-        <select id="message" class="form-input" v-model="region">
-          <option value="sg">Singapore</option>
-          <option value="na">North America</option>
-          <option value="sa">South America</option>
-          <option value="eu">Europe</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label class="form-label" for="message">Message</label>
-        <input id="message" class="form-input" v-model="message" placeholder="Hello DevCon" />
-      </div>
-
-      <div class="form-row">
-        <v-progress-circular :rotate="-90" :size="100" :width="15" :value="progress" color="primary">
-          {{ progress }}
-        </v-progress-circular>
-        <div id="console" class="form-input" style="white-space: pre-line">
-          <p style="white-space: pre-line"></p>
+      <div class="text-h5 mb-10">TSS Message Signing</div>
+      <v-row cols="12">
+        <v-col cols="3" md="5" class="justify-end d-flex align-center font-weight-bold">
+          <v-label>Region</v-label>
+        </v-col>
+        <v-col cols="6" md="2" class="d-flex align-center">
+          <v-select id="region" v-model="region" :items="regions" item-text="name" item-value="key" append-icon="⌄" />
+        </v-col>
+      </v-row>
+      <v-row cols="12">
+        <v-col cols="3" md="5" class="justify-end d-flex align-center font-weight-bold">
+          <v-label for="message">Message</v-label>
+        </v-col>
+        <v-col cols="8" md="4" class="d-flex align-center">
+          <v-text-field id="message" v-model="message" placeholder="Hello DevCon" />
+        </v-col>
+      </v-row>
+      <v-row class="mt-10">
+        <v-col cols="8" sm="5" class="text-right">
+          <v-progress-circular :rotate="-90" :size="120" :width="20" :value="progress" color="deep-orange">
+            {{ progress }}
+          </v-progress-circular>
+        </v-col>
+        <v-col cols="12" md="7" class="text-left pl-5 logs">
           <li>exchanging seeds 15%</li>
           <li>ga1_array processing 30%</li>
           <li>challenge + commitment 40%</li>
           <li>sampled seeds + deltas 65%</li>
           <li>verify commitments and unpad 100%</li>
-        </div>
-      </div>
-
-      <button @click="sign" style="cursor: pointer">Sign</button>
+        </v-col>
+      </v-row>
+      <v-row class="mt-5 mb-5 mt-10">
+        <v-col cols="3" sm="5"></v-col>
+        <v-col cols="auto" sm="5" class="text-left">
+          <v-btn depressed color="primary" @click="sign" :loading="signing" :disabled="signing" style="cursor: pointer">Sign Message</v-btn>
+        </v-col>
+      </v-row>
     </div>
 
     <!-- VERIFY SCREEN -->
     <div v-if="signature">
-      <h2>Verify</h2>
+      <div class="text-h5 mb-10">Verify Signature</div>
+      <v-row>
+        <v-col cols="3" md="5" class="justify-end d-flex align-center font-weight-bold">
+          <v-label>Hash:</v-label>
+        </v-col>
+        <v-col cols="6" md="3" class="d-flex align-center">
+          <v-text-field disabled id="hash" v-model="hash" />
+        </v-col>
+        <v-col cols="2" class="d-flex align-center">
+          <CopyToClipboard :text="hash" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="3" md="5" class="justify-end d-flex align-center font-weight-bold">
+          <v-label>Signature:</v-label>
+        </v-col>
+        <v-col cols="6" md="3" class="d-flex align-center">
+          <v-text-field disabled id="signature" v-model="signature" />
+        </v-col>
+        <v-col cols="2" class="d-flex align-center">
+          <CopyToClipboard :text="signature" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="3" md="5" class="justify-end d-flex align-center font-weight-bold">
+          <v-label>Signer:</v-label>
+        </v-col>
+        <v-col cols="6" md="3" class="d-flex align-center">
+          <v-text-field disabled id="signature" v-model="signer" />
+        </v-col>
+        <v-col cols="2" class="d-flex align-center">
+          <CopyToClipboard :text="signer" />
+        </v-col>
+      </v-row>
 
-      <div class="form-row">
-        <label class="form-label" for="hash">Hash:</label>
-        <input disabled id="hash" class="form-input" v-model="hash" placeholder="" />
-        <CopyToClipboard :text="hash" />
-      </div>
+      <v-row class="mt-5 mb-16">
+        <v-col cols="3" sm="5"></v-col>
+        <v-col cols="6" sm="5" class="text-left">
+          <v-btn
+            link
+            depressed
+            color="primary"
+            target="_blank"
+            href="https://etherscan.io/address/0x71d91a8988D81617be53427126ee62471321b7DF#readContract#F1"
+            style="cursor: pointer"
+          >
+            Verify Signature
+          </v-btn>
+        </v-col>
+      </v-row>
 
-      <div class="form-row">
-        <label class="form-label" for="signature">Signature:</label>
-        <input disabled id="signature" class="form-input" v-model="signature" placeholder="" />
-        <CopyToClipboard :text="signature" />
-      </div>
-
-      <div class="form-row">
-        <label class="form-label" for="signer">Signer:</label>
-        <input disabled id="signer" class="form-input" v-model="signer" placeholder="" />
-        <CopyToClipboard :text="signer" />
-      </div>
-
-      <div class="form-row">
-        <label class="form-label"></label>
-        <a target="_blank" href="https://etherscan.io/verifyContract">Verify Signature</a>
-      </div>
-
-      <div id="console" style="white-space: pre-line">
-        <p style="white-space: pre-line"></p>
-      </div>
-      <div class="form-row">
-        <label class="form-label"></label>
-        <a class="rpcBtn" target="_blank" href="https://mpc-compare.web3auth.io/">Benchmark site</a>
-      </div>
-      <div class="form-row">
-        <label class="form-label"></label>
-        <button class="rpcBtn" @click="reset" style="cursor: pointer">Back to signing</button>
-      </div>
+      <hr />
+      <v-row class="mt-5 mb-5">
+        <v-col cols="6" class="text-right">
+          <v-btn small text @click="reset" color="primary" style="cursor: pointer">{{ "< Back to signing" }}</v-btn>
+        </v-col>
+        <v-col cols="6" class="text-left">
+          <v-btn small text target="_blank" color="primary" href="https://mpc-compare.web3auth.io/">Benchmark site ></v-btn>
+        </v-col>
+      </v-row>
     </div>
   </div>
 </template>
@@ -93,12 +122,19 @@ export default Vue.extend({
   },
   data() {
     return {
-      region: "sg",
       message: "",
       hash: "",
       signature: "",
       signer: "",
-      progress: 20,
+      signing: false,
+      progress: 60,
+      region: { name: "Singapore", key: "sg" },
+      regions: [
+        { name: "Singapore", key: "sg" },
+        { name: "North America", key: "na" },
+        { name: "South America", key: "sa" },
+        { name: "Europe", key: "eu" },
+      ],
     };
   },
   components: {
@@ -107,13 +143,18 @@ export default Vue.extend({
   methods: {
     async sign() {
       try {
+        this.signing = true;
         alert("signing message");
+
+        this.progress = 100;
         this.signature = "signature";
         this.hash = "hash";
         this.signer = "signer";
       } catch (error) {
         console.error(error);
         this.console("error", error);
+      } finally {
+        this.signing = false;
       }
     },
     async reset() {
@@ -131,26 +172,16 @@ export default Vue.extend({
 </script>
 
 <style>
-.form-row {
-  display: flex;
-  margin-bottom: 0.5rem;
-  width: 100%;
+.col {
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
 }
-.form-label {
-  flex-basis: 30%;
-  padding-right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: right;
-  font-weight: bold;
-  font-size: 1rem;
+.logs {
+  height: 300px;
+  max-height: 300px;
+  overflow: auto;
 }
-.form-input {
-  flex-basis: 30%;
-  text-align: left;
-  padding: 0.3rem 0.8rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  border-width: 2px;
+.v-text-field {
+  padding-top: 0;
 }
 </style>

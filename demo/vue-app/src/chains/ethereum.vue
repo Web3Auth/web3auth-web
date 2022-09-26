@@ -1,18 +1,20 @@
 <template>
   <div id="app">
-    <h1>Web3Auth TSS Demo</h1>
+    <div class="text-h4 mb-3">Web3Auth TSS Demo</div>
     <Loader :isLoading="loading"></Loader>
 
-    <section :style="{ fontSize: '12px' }">
-      <!-- LOGIN SCREEN -->
-      <button v-if="!provider" class="rpcBtn" @click="connect" style="cursor: pointer">Login</button>
-      <button v-if="provider" class="rpcBtn" @click="connect" style="cursor: pointer">Logout</button>
+    <!-- TSS SIGN SCREEN -->
+    <div v-if="provider">
+      <SignTSS />
+    </div>
 
-      <!-- TSS SIGN SCREEN -->
+    <!-- LOGIN SCREEN -->
+    <div class="pt-16">
+      <v-btn v-if="!provider" color="primary" @click="connect" style="cursor: pointer">Login</v-btn>
       <div v-if="provider">
-        <SignTSS />
+        <v-btn small class="mt-10" text color="primary" @click="logout" style="cursor: pointer">Logout</v-btn>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -227,6 +229,7 @@ export default Vue.extend({
       }
     },
     async logout() {
+      this.provider = null;
       await this.web3auth.logout();
       this.provider = undefined;
     },

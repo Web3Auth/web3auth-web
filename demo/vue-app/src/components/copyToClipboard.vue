@@ -1,9 +1,9 @@
 <template>
   <div class="tooltip">
-    <button class="tooltip-btn" @click="copy" @mouseout="outFunc">
-      <span class="tooltiptext">{{ copied ? "Copied " + text : "Copy to clipboard" }}</span>
+    <v-btn small class="tooltip-btn" @click="copy" @mouseout="outFunc">
+      <span class="tooltiptext text-truncate">{{ copied ? "Copied " + text : "Copy to clipboard" }}</span>
       Copy
-    </button>
+    </v-btn>
   </div>
 </template>
 
@@ -50,7 +50,7 @@ export default Vue.extend({
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 140px;
+  width: 160px;
   background-color: #555;
   color: #fff;
   text-align: center;

@@ -1,13 +1,7 @@
 <template>
-  <div id="app">
+  <v-app>
     <Home />
-    <!-- <DefaultModal /> -->
-    <!-- <section>
-      <ConfigurableExample :chain="chain" v-if="exampleMode === 'default'"></ConfigurableExample>
-      <WhitelabelExample :theme="'dark'" v-else-if="exampleMode === 'whitelabel'"></WhitelabelExample>
-      <CustomUiContainer :authType="authType" v-else-if="exampleMode === 'customUi'"></CustomUiContainer>
-    </section> -->
-  </div>
+  </v-app>
 </template>
 
 <script lang="ts">
