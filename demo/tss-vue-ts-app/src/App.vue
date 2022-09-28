@@ -1,6 +1,6 @@
 <template>
-  <!-- HEADER -->
   <v-app>
+    <!-- HEADER -->
     <v-app-bar app>
       <div class="d-flex align-center ml-5">
         <v-img
@@ -20,21 +20,28 @@
         @click="logout"
       >
         <v-icon>mdi-logout</v-icon>
-        <span class="mr-2 text-capitalize">Log out</span>
+        <span class="mr-2 text-capitalize">Logout</span>
       </v-btn>
     </v-app-bar>
 
     <!-- MAIN -->
-    <v-main class="mt-16">
+    <v-main class="mt-10">
       <v-row justify="center">
+        <v-col cols="12" md="4" class="pl-5" v-if="$vuetify.breakpoint.smAndDown">
+          <div class="text-center">
+            <div class="text-h3 mb-3 font-weight-bold">MPC Demo</div>
+            <div class="text-h6 mb-2 font-weight-regular">Experience MPC in 3 simple steps</div>
+          </div>
+          <Stepper :current-step="currentStep" />
+        </v-col>
 
-        <v-col cols="4">
+        <v-col cols="12" md="4">
           <Login v-if="currentStep == 1" :set-step="setStep" />
           <Sign v-if="currentStep == 2" :set-step="setStep" />
           <Verify v-if="currentStep >= 3" :set-step="setStep" />
         </v-col>
 
-        <v-col cols="4" class="pl-16">
+        <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
           <div>
             <div class="text-h3 mb-3 text-left font-weight-bold">MPC Demo</div>
             <div class="text-h6 text-left mb-10 font-weight-regular">Experience MPC in 3 simple steps</div>

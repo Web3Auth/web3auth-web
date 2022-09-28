@@ -1,23 +1,51 @@
 <template>
-  <v-stepper vertical outlined :value="currentStep">
-    <v-stepper-step step="1" :complete="currentStep > 1">
-      <small class="mb-2 text-uppercase font-weight-bold">Step 1</small>
-      <span class="font-weight-bold">Login</span>
-    </v-stepper-step>
-    <v-stepper-content step="1" :class="currentStep > 1 ? 'complete py-10 ' : 'py-10'"></v-stepper-content>
+  <!-- VERTICAL STEPPER -->
+  <div v-if="$vuetify.breakpoint.mdAndUp">
+    <v-stepper vertical outlined :value="currentStep">
+      <v-stepper-step step="1" :complete="currentStep > 1">
+        <small class="mb-2 text-uppercase font-weight-bold">Step 1</small>
+        <span class="font-weight-bold">Login</span>
+      </v-stepper-step>
+      <v-stepper-content step="1" :class="currentStep > 1 ? 'complete py-8 ' : 'py-8'"></v-stepper-content>
 
-    <v-stepper-step step="2" :complete="currentStep > 2">
-      <small class="mb-2 text-uppercase font-weight-bold">Step 2</small>
-      <span class="font-weight-bold">Precompute and Sign</span>
-    </v-stepper-step>
-    <v-stepper-content step="2" :class="currentStep > 2 ? 'complete py-10 ' : 'py-10'"></v-stepper-content>
+      <v-stepper-step step="2" :complete="currentStep > 2">
+        <small class="mb-2 text-uppercase font-weight-bold">Step 2</small>
+        <span class="font-weight-bold">Precompute and Sign</span>
+      </v-stepper-step>
+      <v-stepper-content step="2" :class="currentStep > 2 ? 'complete py-8 ' : 'py-8'"></v-stepper-content>
 
-    <v-stepper-step step="3" :complete="currentStep > 3">
-      <small class="mb-2 text-uppercase font-weight-bold">Step 3</small>
-      <span class="font-weight-bold">Verify</span>
-    </v-stepper-step>
-    <v-stepper-content step="3" :class="currentStep > 3 ? 'complete py-10 ' : 'py-10'"></v-stepper-content>
-  </v-stepper>
+      <v-stepper-step step="3" :complete="currentStep > 3">
+        <small class="mb-2 text-uppercase font-weight-bold">Step 3</small>
+        <span class="font-weight-bold">Verify</span>
+      </v-stepper-step>
+    </v-stepper>
+  </div>
+
+  <!-- HORIZONTAL STEPPER -->
+  <div v-else>
+    <v-stepper outlined alt-labels :value="currentStep">
+      <v-stepper-header>
+        <v-stepper-step step="1" :complete="currentStep > 1">
+          <small class="mb-2 text-uppercase font-weight-bold">Step 1</small>
+          <span class="font-weight-bold">Login</span>
+        </v-stepper-step>
+
+        <v-divider :class="currentStep > 1 ? 'complete py-8 ' : 'py-8'"></v-divider>
+
+        <v-stepper-step step="2" :complete="currentStep > 2">
+          <small class="mb-2 text-uppercase font-weight-bold">Step 2</small>
+          <span class="font-weight-bold test">Precompute & Sign</span>
+        </v-stepper-step>
+
+        <v-divider :class="currentStep > 2 ? 'complete py-8 ' : 'py-8'"></v-divider>
+
+        <v-stepper-step step="3" :complete="currentStep > 3">
+          <small class="mb-2 text-uppercase font-weight-bold">Step 3</small>
+          <span class="font-weight-bold">Verify</span>
+        </v-stepper-step>
+      </v-stepper-header>
+    </v-stepper>
+  </div>
 </template>
 
 <script lang="ts">
@@ -57,7 +85,7 @@ export default Vue.extend({
     background-color: #30CCA4 !important;
     border-color: #30CCA4 !important;
   }
-  .v-application--is-ltr .theme--light.v-stepper--vertical .v-stepper__content.complete:not(:last-child) {
+  .v-application--is-ltr .theme--light.v-stepper--vertical .v-stepper__content.complete {
     border-left: 3px solid #30CCA4 !important;
   }
   .v-application .v-stepper__step__step.primary {
@@ -65,5 +93,24 @@ export default Vue.extend({
     border: 2px solid hsl(210, 79%, 46%) !important;
     color: #1976d2;
     font-weight: bold;
+  }
+  @media only screen and (max-width: 959.98px) {
+    .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
+      display: block;
+    }
+    .v-stepper--alt-labels .v-stepper__step {
+      flex-basis: auto;
+    }
+    .v-stepper--alt-labels .v-stepper__header .v-divider {
+      margin: 44px -27px 0;
+    }
+    .v-stepper--alt-labels .v-divider.complete {
+      border-top: 2px solid #30CCA4 !important;
+    }
+    .test {
+      max-width: 50px;
+      overflow: visible;
+      display: block;
+    }
   }
 </style>

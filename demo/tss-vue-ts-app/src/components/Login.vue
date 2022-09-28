@@ -8,9 +8,15 @@
         </v-list-item-subtitle>
 
         <!-- BODY -->
-        <v-text-field label="Username" dense outlined rounded :rules="[rules.required]"></v-text-field>
-        <v-text-field label="Password" type="password" dense outlined rounded :rules="[rules.required]"></v-text-field>
-        <v-btn rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="signIn">Login</v-btn>
+        <v-row>
+          <v-text-field label="Username" dense outlined rounded :rules="[rules.required]"></v-text-field>
+        </v-row>
+        <v-row>
+          <v-text-field label="Password" type="password" dense outlined rounded :rules="[rules.required]"></v-text-field>
+        </v-row>
+        <v-row>
+          <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="signIn">Login</v-btn>
+        </v-row>
       </v-list-item-content>
 
       <!-- FOOTER -->
