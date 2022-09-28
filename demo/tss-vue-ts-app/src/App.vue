@@ -1,14 +1,10 @@
 <template>
   <!-- HEADER -->
   <v-app>
-    <v-app-bar
-      app
-      color="white"
-      dark
-    >
+    <v-app-bar app>
       <div class="d-flex align-center ml-5">
         <v-img
-          alt="Torus OpenLogin logo"
+          alt="Web3Auth logo"
           :src="require(`@/assets/web3auth.svg`)"
           height="30"
           transition="scale-transition"
@@ -17,15 +13,14 @@
       </div>
 
       <v-spacer></v-spacer>
-
       <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
+        v-if="currentStep > 1"
         text
-        color="black"
+        color="#828282"
+        @click="logout"
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        <v-icon>mdi-logout</v-icon>
+        <span class="mr-2 text-capitalize">Log out</span>
       </v-btn>
     </v-app-bar>
 
@@ -69,12 +64,16 @@ export default Vue.extend({
   },
 
   data: () => ({
-    currentStep: 2,
+    currentStep: 1,
     loggedIn: false
   }),
   methods: {
     setStep (value: number) {
       this.currentStep = value
+    },
+    logout () {
+      alert('Logout')
+      this.setStep(1)
     }
   }
 })
