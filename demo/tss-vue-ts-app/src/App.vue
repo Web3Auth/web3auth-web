@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
+    <v-img alt="Web3auth logo" :src="require(`@/assets/web3auth.svg`)" height="24" />
+    <img alt="Vue logo" src="./assets/web3auth.svg">
     <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
   </div>
 </template>
@@ -25,5 +26,10 @@ export default class App extends Vue {}
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+#app {
+  background-image: url("@/assets/bg-1.svg"), url("@/assets/bg-2.svg");
+  background-position: left -250px top -250px, right -40px bottom -170px;
+  background-repeat: no-repeat, no-repeat;
 }
 </style>
