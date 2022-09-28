@@ -1,32 +1,85 @@
 <template>
-  <div id="app">
-    <v-img alt="Web3auth logo" :src="require(`@/assets/web3auth.svg`)" height="24" />
-    <img alt="Vue logo" src="./assets/web3auth.svg">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+  <!-- HEADER -->
+  <v-app>
+    <v-app-bar
+      app
+      color="white"
+      dark
+    >
+      <div class="d-flex align-center ml-5">
+        <v-img
+          alt="Torus OpenLogin logo"
+          :src="require(`@/assets/web3auth.svg`)"
+          height="30"
+          transition="scale-transition"
+          contain
+        />
+      </div>
+
+      <v-spacer></v-spacer>
+
+      <v-btn
+        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        target="_blank"
+        text
+        color="black"
+      >
+        <span class="mr-2">Latest Release</span>
+        <v-icon>mdi-open-in-new</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <!-- MAIN -->
+    <v-main class="mt-16">
+      <v-row justify="center">
+
+        <v-col cols="4">
+          <Login v-if="currentStep == 1" :set-step="setStep" />
+          <Sign v-if="currentStep == 2" :set-step="setStep" />
+          <Verify v-if="currentStep >= 3" :set-step="setStep" />
+        </v-col>
+
+        <v-col cols="4" class="pl-16">
+          <div>
+            <div class="text-h3 mb-3 text-left font-weight-bold">MPC Demo</div>
+            <div class="text-h6 text-left mb-10 font-weight-regular">Experience MPC in 3 simple steps</div>
+          </div>
+          <Stepper :current-step="currentStep" />
+        </v-col>
+      </v-row>
+    </v-main>
+  </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import HelloWorld from './components/HelloWorld.vue'
+import Vue from 'vue'
+import Login from './components/Login.vue'
+import Verify from './components/Verify.vue'
+import Sign from './components/Sign.vue'
+import Stepper from './components/Stepper.vue'
 
-@Component({
+export default Vue.extend({
+  name: 'App',
+
   components: {
-    HelloWorld
+    Login,
+    Verify,
+    Sign,
+    Stepper
+  },
+
+  data: () => ({
+    currentStep: 2,
+    loggedIn: false
+  }),
+  methods: {
+    setStep (value: number) {
+      this.currentStep = value
+    }
   }
 })
-export default class App extends Vue {}
 </script>
-
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 #app {
   background-image: url("@/assets/bg-1.svg"), url("@/assets/bg-2.svg");
   background-position: left -250px top -250px, right -40px bottom -170px;
