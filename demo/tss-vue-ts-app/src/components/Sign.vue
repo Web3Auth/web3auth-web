@@ -20,7 +20,7 @@
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
           <v-col cols="12" sm="8">
-            <v-text-field :disabled="signing" class="rounded-lg" dense outlined :rules="[rules.required]" :value="message" />
+            <v-text-field :disabled="signing" class="rounded-lg" dense outlined :rules="[rules.required]" v-model="message" />
           </v-col>
           <v-col cols="12" sm="4">
             <v-btn block large depressed color="primary" class="rounded-lg" :disabled="!validForm || signing" :loading="signing" @click="signMessage">Sign Message</v-btn>

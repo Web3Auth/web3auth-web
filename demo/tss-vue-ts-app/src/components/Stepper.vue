@@ -34,7 +34,7 @@
 
         <v-stepper-step step="2" :complete="currentStep > 2">
           <small class="mb-2 text-uppercase font-weight-bold">Step 2</small>
-          <span class="font-weight-bold test">Precompute & Sign</span>
+          <span class="font-weight-bold step-label">Precompute & Sign</span>
         </v-stepper-step>
 
         <v-divider :class="currentStep > 2 ? 'complete py-8 ' : 'py-8'"></v-divider>
@@ -107,7 +107,7 @@ export default Vue.extend({
     .v-stepper--alt-labels .v-divider.complete {
       border-top: 2px solid #30CCA4 !important;
     }
-    .test {
+    .step-label {
       max-width: 50px;
       overflow: visible;
       display: block;

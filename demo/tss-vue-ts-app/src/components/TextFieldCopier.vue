@@ -2,13 +2,17 @@
   <v-text-field
     class="rounded-lg text-subtitle-2"
     dense
-    readonly
     filled
+    readonly
     outlined
-    :append-icon="copied ? 'mdi-check': 'mdi-content-copy'"
-    @click:append='copyToClipboard'
     :value="text"
   >
+  <template v-slot:append>
+    <div @click="copyToClipboard">
+      <v-icon>{{ copied ? 'mdi-check': 'mdi-content-copy' }}</v-icon>
+      Copy
+    </div>
+  </template>
   </v-text-field>
 </template>
 
@@ -29,8 +33,8 @@ export default Vue.extend({
   },
   methods: {
     async copyToClipboard () {
-      await navigator.clipboard.writeText(this.text)
       alert(this.text)
+      await navigator.clipboard.writeText(this.text)
       this.copied = true
       setTimeout(() => {
         this.copied = false
