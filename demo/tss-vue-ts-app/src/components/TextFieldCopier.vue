@@ -1,9 +1,10 @@
 <template>
   <v-text-field
-    class="rounded-lg text-subtitle-2"
+    class="text-subtitle-2"
     dense
     filled
     readonly
+    rounded
     outlined
     :value="text"
   >
@@ -35,7 +36,6 @@ export default Vue.extend({
     async copyToClipboard () {
       await navigator.clipboard.writeText(this.text)
       this.copied = true
-      alert(this.text)
       setTimeout(() => {
         this.copied = false
       }, 3000)
@@ -49,6 +49,6 @@ export default Vue.extend({
   }
   .copy-btn:hover {
     background: #f0f0f0;
-    border-radius: 10px;
+    border-radius: 8px;
   }
 </style>

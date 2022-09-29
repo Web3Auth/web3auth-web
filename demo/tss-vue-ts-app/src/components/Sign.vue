@@ -12,7 +12,7 @@
     <div class="font-weight-bold mt-8 mb-1">Precomputing based on the following region:</div>
     <v-row>
       <v-col cols="12">
-        <v-select :disabled="signing" class="rounded-lg" dense outlined v-model="region" :items="regions" item-text="name" item-value="key" />
+        <v-select :disabled="signing" rounded dense outlined v-model="region" :items="regions" item-text="name" item-value="key" />
       </v-col>
     </v-row>
 
@@ -20,10 +20,10 @@
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
           <v-col cols="12" md="8">
-            <v-text-field :disabled="signing" class="rounded-lg" dense outlined :rules="[rules.required]" v-model="message" />
+            <v-text-field :disabled="signing" rounded dense outlined :rules="[rules.required]" v-model="message" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-btn block large depressed color="primary" class="rounded-lg text-truncate" :disabled="!validForm || signing" :loading="signing" @click="signMessage">{{ $vuetify.breakpoint.xlOnly ? 'Sign Message' : 'Sign' }}</v-btn>
+            <v-btn block large depressed color="primary" class="text-truncate" rounded :disabled="!validForm || signing" :loading="signing" @click="signMessage">{{ $vuetify.breakpoint.xlOnly ? 'Sign Message' : 'Sign' }}</v-btn>
           </v-col>
       </v-row>
     </v-form>
