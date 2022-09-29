@@ -8,9 +8,9 @@
     :value="text"
   >
   <template v-slot:append>
-    <div @click="copyToClipboard">
+    <div class="copy-btn" @click="copyToClipboard">
       <v-icon>{{ copied ? 'mdi-check': 'mdi-content-copy' }}</v-icon>
-      Copy
+      {{ copied ? 'Copied' : 'Copy' }}
     </div>
   </template>
   </v-text-field>
@@ -33,9 +33,9 @@ export default Vue.extend({
   },
   methods: {
     async copyToClipboard () {
-      alert(this.text)
       await navigator.clipboard.writeText(this.text)
       this.copied = true
+      alert(this.text)
       setTimeout(() => {
         this.copied = false
       }, 3000)
@@ -43,3 +43,12 @@ export default Vue.extend({
   }
 })
 </script>
+<style>
+  .copy-btn {
+    cursor: pointer;
+  }
+  .copy-btn:hover {
+    background: #f0f0f0;
+    border-radius: 10px;
+  }
+</style>

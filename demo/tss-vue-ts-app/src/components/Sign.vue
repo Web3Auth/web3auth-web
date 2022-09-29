@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6">
+  <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
     <v-row>
       <v-col cols="4">
         <span class="tag font-weight-black">DKLS19</span>
@@ -19,11 +19,11 @@
     <div class="font-weight-bold mb-1">Message:</div>
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
-          <v-col cols="12" sm="8">
+          <v-col cols="12" md="8">
             <v-text-field :disabled="signing" class="rounded-lg" dense outlined :rules="[rules.required]" v-model="message" />
           </v-col>
-          <v-col cols="12" sm="4">
-            <v-btn block large depressed color="primary" class="rounded-lg" :disabled="!validForm || signing" :loading="signing" @click="signMessage">Sign Message</v-btn>
+          <v-col cols="12" md="4">
+            <v-btn block large depressed color="primary" class="rounded-lg text-truncate" :disabled="!validForm || signing" :loading="signing" @click="signMessage">{{ $vuetify.breakpoint.xlOnly ? 'Sign Message' : 'Sign' }}</v-btn>
           </v-col>
       </v-row>
     </v-form>
