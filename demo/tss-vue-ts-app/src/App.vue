@@ -1,24 +1,19 @@
 <template>
   <v-app>
     <!-- HEADER -->
-    <v-app-bar app>
-      <div class="d-flex align-center ml-5">
+    <v-app-bar app absolute :class="landingPage ? 'transparent-navbar' : 'navbar'">
+      <div class="d-flex align-center" :class="$vuetify.breakpoint.smAndDown ? '' : 'ml-10'">
         <v-img
           alt="Web3Auth logo"
           :src="require(`@/assets/web3auth.svg`)"
-          height="30"
+          :height="$vuetify.breakpoint.smAndDown ? 24 : 30"
           transition="scale-transition"
           contain
         />
       </div>
 
       <v-spacer></v-spacer>
-      <v-btn
-        v-if="currentStep > 1"
-        text
-        color="#828282"
-        @click="logout"
-      >
+      <v-btn text rounded color="#828282" @click="logout" v-if="!landingPage">
         <v-icon>mdi-logout</v-icon>
         <span class="mr-2 text-capitalize">Logout</span>
       </v-btn>
@@ -74,6 +69,11 @@ export default Vue.extend({
     currentStep: 1,
     loggedIn: false
   }),
+  computed: {
+    landingPage () {
+      return this.currentStep === 1
+    }
+  },
   methods: {
     setStep (value: number) {
       this.currentStep = value
@@ -97,5 +97,13 @@ export default Vue.extend({
 }
 .v-application a {
   color: #0364FF !important;
+}
+.navbar {
+  background-color: #FFFFFF !important;
+  box-shadow: 0px 15px 30px rgb(46 91 255 / 6%) !important;
+}
+.transparent-navbar {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 </style>

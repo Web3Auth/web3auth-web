@@ -6,11 +6,12 @@
     readonly
     rounded
     outlined
+    append-icon="mdi-check"
     :value="text"
   >
   <template v-slot:append>
-    <div class="copy-btn" @click="copyToClipboard">
-      <v-icon>{{ copied ? 'mdi-check': 'mdi-content-copy' }}</v-icon>
+    <div class="px-2 copy-btn d-flex align-center" @click="copyToClipboard">
+      <v-icon class="mr-1" size="16">{{ copied ? 'mdi-check': 'mdi-content-copy' }}</v-icon>
       {{ copied ? 'Copied' : 'Copy' }}
     </div>
   </template>
@@ -50,5 +51,11 @@ export default Vue.extend({
   .copy-btn:hover {
     background: #f0f0f0;
     border-radius: 8px;
+  }
+  .v-input__append-inner {
+    margin-top: 12px !important;
+  }
+  .v-input.v-input--is-focused .v-icon {
+    color: #1976d2 !important;
   }
 </style>
