@@ -91,4 +91,11 @@ export default Vue.extend({
   background-position: left -250px top -250px, right -40px bottom -170px;
   background-repeat: no-repeat, no-repeat;
 }
+.v-application .v-btn.primary {
+  background-color: #0364FF !important;
+  border-color: #0364FF !important;
+}
+.v-application a {
+  color: #0364FF !important;
+}
 </style>

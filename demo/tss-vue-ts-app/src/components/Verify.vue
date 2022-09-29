@@ -35,7 +35,7 @@
         <v-btn block large depressed color="primary" rounded :disabled="verified" @click="confirmVerification">I have verified it</v-btn>
       </v-col>
       <v-col cols="12" sm="6" class="text-center">
-        <v-btn target="_blank" rounded link depressed plain color="primary" href="https://mpc-compare.web3auth.io/">Visit Benchmarking Site</v-btn>
+        <v-btn target="_blank" block large rounded link depressed plain color="primary" href="https://mpc-compare.web3auth.io/">Visit Benchmarking Site</v-btn>
       </v-col>
     </v-row>
   </div>
