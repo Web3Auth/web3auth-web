@@ -45,7 +45,7 @@ import Loader from "@/components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-const tssServerEndpoint = "http://localhost:4000";
+const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
 const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
@@ -150,7 +150,9 @@ async function createSockets(wsEndpoints: (string | null | undefined)[]): Promis
     if (wsEndpoint === null || wsEndpoint === undefined) {
       return null;
     }
-    return io(wsEndpoint);
+    const origin = new URL(wsEndpoint).origin;
+    const path = `${new URL(wsEndpoint).pathname}/socket.io/`;
+    return io(origin, { path });
   });
 
   await new Promise((resolve) => {
