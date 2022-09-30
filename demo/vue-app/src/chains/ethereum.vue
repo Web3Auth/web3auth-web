@@ -318,7 +318,8 @@ export default Vue.extend({
             },
           },
           adapterSettings: {
-            network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
+            _iframeUrl: "https://mpc-beta.openlogin.com",
+            network: "development",
             clientId: config.clientId,
           },
         });
