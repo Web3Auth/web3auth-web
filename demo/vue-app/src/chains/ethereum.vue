@@ -46,7 +46,7 @@ import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
 const tssServerEndpoint = "http://localhost:4000";
-const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmRbDvSppFZ62DMRHpqZt8JhNXmX4VBrsT6P24o5YCzd9m";
+const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh";
 
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -144,7 +144,6 @@ async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]):
 
   return pubKey;
 }
-const existingSockets = {};
 
 async function createSockets(wsEndpoints: (string | null | undefined)[]): Promise<(Socket | null)[]> {
   const sockets = wsEndpoints.map((wsEndpoint) => {
@@ -169,7 +168,7 @@ async function createSockets(wsEndpoints: (string | null | undefined)[]): Promis
   return sockets;
 }
 
-async function setupTSS(tssShare: string, signatures: string[], pubKey: string, verifierName: string, verifierId: string): Promise<Client> {
+async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<Client> {
   const endpoints = [tssServerEndpoint, null];
   const wsEndpoints = [tssServerEndpoint, null];
   const sockets = await createSockets(wsEndpoints);
@@ -297,7 +296,7 @@ export default Vue.extend({
           }
           const { tssShare, signatures } = await getTSSData();
           const pubKey = (await tssGetPublic()).toString("base64");
-          const client = await setupTSS(tssShare, signatures, pubKey, verifierName, verifierId);
+          const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
           await tss.default(tssImportURL);
           client.precompute(tss as any);
           await client.ready;
@@ -305,6 +304,9 @@ export default Vue.extend({
         };
         (window as any).generatePrecompute = generatePrecompute;
         const openloginAdapter = new OpenloginAdapter({
+          loginSettings: {
+            mfaLevel: "mandatory",
+          },
           tssSettings: {
             useTSS: true,
             tssGetPublic,
