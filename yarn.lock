@@ -2756,8 +2756,9 @@
     keccak "^3.0.2"
     randombytes "^2.1.0"
 
-"@toruslabs/openlogin@^2.6.0", "@toruslabs/openlogin@file:../OpenLoginSdk/packages/openlogin":
+"@toruslabs/openlogin@^2.6.0", "@toruslabs/openlogin@file:packages/adapters/openlogin-adapter/toruslabs-openlogin-v2.6.0.tgz":
   version "2.6.0"
+  resolved "file:packages/adapters/openlogin-adapter/toruslabs-openlogin-v2.6.0.tgz#b39ab210c7121a1b75fd9de6ded252243b182280"
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
     "@toruslabs/http-helpers" "^3.1.0"
