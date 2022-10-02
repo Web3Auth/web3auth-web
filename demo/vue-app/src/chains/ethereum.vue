@@ -26,6 +26,7 @@
 <script lang="ts">
 import { post } from "@toruslabs/http-helpers";
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { safeatob, safebtoa } from "@toruslabs/openlogin-utils";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -67,22 +68,10 @@ async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]):
     share: tssShare.split("-")[0].split(":")[1],
     index: tssShare.split("-")[1].split(":")[1],
   };
-  const parsedSignature: {
-    sig: { r: string; s: string; recoveryParam: number };
-    data: {
-      exp: number;
-      scope: string;
-      temp_key_x: string;
-      temp_key_y: string;
-      verifier_id: string;
-      verifier_name: string;
-    };
-  }[] = signatures.map(function (a) {
-    return JSON.parse(a as string);
-  });
 
-  // get tssPubKey
-  const { verifier_name: verifierName, verifier_id: verifierId, temp_key_x: tmpKeyX } = parsedSignature[0].data;
+  const parsedSignatures = signatures.map((s) => JSON.parse(s));
+  const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)];
+  const { verifier_name: verifierName, verifier_id: verifierId } = chosenSignature.data;
   if (!verifierName || !verifierId) {
     throw new Error("verifier_name and verifier_id must be specified");
   }
