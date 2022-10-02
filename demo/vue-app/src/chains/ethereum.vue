@@ -72,7 +72,6 @@ async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]):
   const parsedSignatures = signatures.map((s) => JSON.parse(s));
   const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)];
   const { verifier_name: verifierName, verifier_id: verifierId } = JSON.parse(safeatob(chosenSignature.data));
-  console.log("WHAT IS VERIFIER NAMEAND ID", verifierName, verifierId, chosenSignature);
   if (!verifierName || !verifierId) {
     throw new Error("verifier_name and verifier_id must be specified");
   }
