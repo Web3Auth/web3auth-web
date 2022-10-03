@@ -31,7 +31,10 @@
         </v-col>
 
         <v-col cols="12" md="5">
-          <Login v-if="currentStep == 1" :set-step="setStep" :connect="connect" />
+          <div class="text-center py-16" v-if="signingin">
+            <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
+          </div>
+          <Login v-else-if="currentStep == 1" :set-step="setStep" :connect="connect" />
           <Sign
             v-if="currentStep == 2"
             :set-step="setStep"
@@ -234,6 +237,7 @@ export default Vue.extend({
     finalHash: "",
     finalSig: "",
     finalSigner: "",
+    signingin: false,
   }),
   computed: {
     landingPage() {
@@ -399,7 +403,10 @@ export default Vue.extend({
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
         this.provider = web3auth.provider;
         this.setStep(2);
-        // this.loginButtonStatus = "Logged in";
+        this.signingin = false;
+      });
+      web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
+        this.signingin = true;
       });
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.provider = undefined;
