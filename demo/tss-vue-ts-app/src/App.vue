@@ -49,43 +49,43 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Login from './components/Login.vue'
-import Verify from './components/Verify.vue'
-import Sign from './components/Sign.vue'
-import Stepper from './components/Stepper.vue'
+import { post } from "@toruslabs/http-helpers";
+import { safeatob } from "@toruslabs/openlogin-utils";
+import { Client } from "@toruslabs/tss-client";
+import * as tss from "@toruslabs/tss-lib";
+import { OpenloginAdapter } from "@web3auth-mpc/openlogin-adapter";
+import { Web3Auth } from "@web3auth-mpc/web3auth";
+import BN from "bn.js";
+import { ec as EC } from "elliptic";
+import { io, Socket } from "socket.io-client";
+import Vue from "vue";
 
-import BN from 'bn.js'
-import { ec as EC } from 'elliptic'
-import { Client } from 'tss-client'
-import * as tss from 'tss-lib'
-import { io, Socket } from 'socket.io-client'
-import { Web3Auth } from '@web3auth/web3auth'
-import { safeatob } from '@toruslabs/openlogin-utils'
-import { post } from '@toruslabs/http-helpers'
-import { OpenloginAdapter } from '@web3auth/openlogin-adapter'
+import Login from "./components/Login.vue";
+import Sign from "./components/Sign.vue";
+import Stepper from "./components/Stepper.vue";
+import Verify from "./components/Verify.vue";
 
-const ec = new EC('secp256k1')
+const ec = new EC("secp256k1");
 
-const clientId = 'BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs'
-const tssServerEndpoint = 'https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss'
-const tssImportURL = 'https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh'
+const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
+const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
+const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh";
 
-async function getPublicKeyFromTSSShare (tssShare: string, signatures: string[]): Promise<string> {
+async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
   // check if TSS is available
   if (!tssShare || !Array.isArray(signatures) || signatures.length === 0) {
-    throw new Error('tssShare or signatures not available')
+    throw new Error("tssShare or signatures not available");
   }
   const parsedTSSShare = {
-    share: tssShare.split('-')[0].split(':')[1],
-    index: tssShare.split('-')[1].split(':')[1]
-  }
+    share: tssShare.split("-")[0].split(":")[1],
+    index: tssShare.split("-")[1].split(":")[1],
+  };
 
-  const parsedSignatures = signatures.map((s) => JSON.parse(s))
-  const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)]
-  const { verifier_name: verifierName, verifier_id: verifierId } = JSON.parse(safeatob(chosenSignature.data))
+  const parsedSignatures = signatures.map((s) => JSON.parse(s));
+  const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)];
+  const { verifier_name: verifierName, verifier_id: verifierId } = JSON.parse(safeatob(chosenSignature.data));
   if (!verifierName || !verifierId) {
-    throw new Error('verifier_name and verifier_id must be specified')
+    throw new Error("verifier_name and verifier_id must be specified");
   }
 
   const { share_pub_x: sharePubX, share_pub_y: sharePubY } = await post<{
@@ -95,31 +95,31 @@ async function getPublicKeyFromTSSShare (tssShare: string, signatures: string[])
     share_pub_y: string;
   }>(`${tssServerEndpoint}/getOrCreateTSSPub`, {
     verifier_name: verifierName,
-    verifier_id: verifierId
-  })
+    verifier_id: verifierId,
+  });
 
   const getLagrangeCoeff = (partyIndexes: BN[], partyIndex: BN): BN => {
-    let upper = new BN(1)
-    let lower = new BN(1)
+    let upper = new BN(1);
+    let lower = new BN(1);
     for (let i = 0; i < partyIndexes.length; i += 1) {
-      const otherPartyIndex = partyIndexes[i]
+      const otherPartyIndex = partyIndexes[i];
       if (!partyIndex.eq(otherPartyIndex)) {
-        upper = upper.mul(otherPartyIndex.neg())
-        upper = upper.umod(ec.curve.n)
-        let temp = partyIndex.sub(otherPartyIndex)
-        temp = temp.umod(ec.curve.n)
-        lower = lower.mul(temp).umod(ec.curve.n)
+        upper = upper.mul(otherPartyIndex.neg());
+        upper = upper.umod(ec.curve.n);
+        let temp = partyIndex.sub(otherPartyIndex);
+        temp = temp.umod(ec.curve.n);
+        lower = lower.mul(temp).umod(ec.curve.n);
       }
     }
 
-    const delta = upper.mul(lower.invm(ec.curve.n)).umod(ec.curve.n)
-    return delta
-  }
+    const delta = upper.mul(lower.invm(ec.curve.n)).umod(ec.curve.n);
+    return delta;
+  };
 
   // TODO: extend
-  const localIndex = 1
-  const remoteIndex = 0
-  const parties = [0, 1]
+  const localIndex = 1;
+  const remoteIndex = 0;
+  const parties = [0, 1];
   const pubKeyPoint = ec
     .keyFromPublic({ x: sharePubX, y: sharePubY })
     .getPublic()
@@ -131,7 +131,7 @@ async function getPublicKeyFromTSSShare (tssShare: string, signatures: string[])
     )
     .add(
       ec
-        .keyFromPrivate(Buffer.from(parsedTSSShare.share.padStart(64, '0'), 'hex'))
+        .keyFromPrivate(Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex"))
         .getPublic()
         .mul(
           getLagrangeCoeff(
@@ -139,175 +139,175 @@ async function getPublicKeyFromTSSShare (tssShare: string, signatures: string[])
             new BN(localIndex + 1)
           )
         )
-    )
-  const pubKeyX = pubKeyPoint.getX().toString(16, 64)
-  const pubKeyY = pubKeyPoint.getY().toString(16, 64)
-  const pubKeyHex = `${pubKeyX}${pubKeyY}`
-  const pubKey = Buffer.from(pubKeyHex, 'hex').toString('base64')
+    );
+  const pubKeyX = pubKeyPoint.getX().toString(16, 64);
+  const pubKeyY = pubKeyPoint.getY().toString(16, 64);
+  const pubKeyHex = `${pubKeyX}${pubKeyY}`;
+  const pubKey = Buffer.from(pubKeyHex, "hex").toString("base64");
 
-  return pubKey
+  return pubKey;
 }
 
-async function createSockets (wsEndpoints: (string | null | undefined)[]): Promise<(Socket | null)[]> {
+async function createSockets(wsEndpoints: (string | null | undefined)[]): Promise<(Socket | null)[]> {
   const sockets = wsEndpoints.map((wsEndpoint) => {
     if (wsEndpoint === null || wsEndpoint === undefined) {
-      return null
+      return null;
     }
-    const origin = new URL(wsEndpoint).origin
-    const path = `${new URL(wsEndpoint).pathname}/socket.io/`
-    return io(origin, { path })
-  })
+    const origin = new URL(wsEndpoint).origin;
+    const path = `${new URL(wsEndpoint).pathname}/socket.io/`;
+    return io(origin, { path });
+  });
 
   await new Promise((resolve) => {
     const timer = setInterval(() => {
       for (let i = 0; i < sockets.length; i++) {
-        const socket = sockets[i]
-        if (socket === null) continue
-        if (!socket.id) return
+        const socket = sockets[i];
+        if (socket === null) continue;
+        if (!socket.id) return;
       }
-      clearInterval(timer)
-      resolve(true)
-    }, 500)
-  })
+      clearInterval(timer);
+      resolve(true);
+    }, 500);
+  });
 
-  return sockets
+  return sockets;
 }
 
-async function setupTSS (tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<any> {
-  const endpoints = [tssServerEndpoint, null]
-  const wsEndpoints = [tssServerEndpoint, null]
-  const sockets = await createSockets(wsEndpoints)
+async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<any> {
+  const endpoints = [tssServerEndpoint, null];
+  const wsEndpoints = [tssServerEndpoint, null];
+  const sockets = await createSockets(wsEndpoints);
   const parsedTSSShare = {
-    share: tssShare.split('-')[0].split(':')[1],
-    index: tssShare.split('-')[1].split(':')[1]
-  }
+    share: tssShare.split("-")[0].split(":")[1],
+    index: tssShare.split("-")[1].split(":")[1],
+  };
 
-  const base64Share = Buffer.from(parsedTSSShare.share.padStart(64, '0'), 'hex').toString('base64')
+  const base64Share = Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex").toString("base64");
   // TODO: extend
-  const localIndex = 1
-  const remoteIndex = 0
-  const parties = [0, 1]
+  const localIndex = 1;
+  const remoteIndex = 0;
+  const parties = [0, 1];
 
-  return new Client(`${verifierName}~${verifierId}:${Date.now()}`, localIndex, parties, endpoints, sockets, base64Share, pubKey, true, tssImportURL)
+  return new Client(`${verifierName}~${verifierId}:${Date.now()}`, localIndex, parties, endpoints, sockets, base64Share, pubKey, true, tssImportURL);
 }
 
 export default Vue.extend({
-  name: 'App',
+  name: "App",
 
   components: {
     Login,
     Verify,
     Sign,
-    Stepper
+    Stepper,
   },
 
   data: () => ({
     currentStep: 1,
     loggedIn: false,
-    web3auth: null as any
+    web3auth: null as any,
   }),
   computed: {
-    landingPage () {
-      return this.currentStep === 1
-    }
+    landingPage() {
+      return this.currentStep === 1;
+    },
   },
-  async mounted () {
-    await this.initEthAuth()
+  async mounted() {
+    await this.initEthAuth();
   },
   methods: {
-    setStep (value: number) {
-      this.currentStep = value
+    setStep(value: number) {
+      this.currentStep = value;
     },
-    logout () {
-      alert('Logout')
-      this.setStep(1)
+    logout() {
+      alert("Logout");
+      this.setStep(1);
     },
-    async initEthAuth () {
+    async initEthAuth() {
       try {
         this.web3auth = new Web3Auth({
           chainConfig: {
-            chainNamespace: 'eip155',
-            chainId: '0x1',
+            chainNamespace: "eip155",
+            chainId: "0x1",
             // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
             // displayName: "ropsten",
             // blockExplorer: "https://ropsten.etherscan.io/",
-            ticker: 'ETH',
-            tickerName: 'Ethereum'
+            ticker: "ETH",
+            tickerName: "Ethereum",
           },
           clientId,
-          authMode: 'DAPP',
-          enableLogging: true
-        })
+          authMode: "DAPP",
+          enableLogging: true,
+        });
 
         let getTSSData: () => Promise<{
           tssShare: string;
           signatures: string[];
-        }>
+        }>;
         const tssGetPublic = async () => {
           if (!getTSSData) {
-            throw new Error('tssShare / sigs are undefined')
+            throw new Error("tssShare / sigs are undefined");
           }
-          const { tssShare, signatures } = await getTSSData()
-          const pubKey = await getPublicKeyFromTSSShare(tssShare, signatures)
-          return Buffer.from(pubKey, 'base64')
-        }
-        const clients: { client: any; allocated: boolean }[] = []
+          const { tssShare, signatures } = await getTSSData();
+          const pubKey = await getPublicKeyFromTSSShare(tssShare, signatures);
+          return Buffer.from(pubKey, "base64");
+        };
+        const clients: { client: any; allocated: boolean }[] = [];
         const tssSign = async (msgHash: Buffer) => {
           for (let i = 0; i < clients.length; i++) {
-            const client = clients[i]
+            const client = clients[i];
             if (!client.allocated) {
-              client.allocated = true
-              await client.client
-              await tss.default(tssImportURL)
-              const { r, s, recoveryParam } = await client.client.sign(tss as any, Buffer.from(msgHash).toString('base64'), true, '', 'keccak256')
-              return { v: recoveryParam + 27, r: Buffer.from(r.toString('hex'), 'hex'), s: Buffer.from(s.toString('hex'), 'hex') }
+              client.allocated = true;
+              await client.client;
+              await tss.default(tssImportURL);
+              const { r, s, recoveryParam } = await client.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256");
+              return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
             }
           }
-          throw new Error('no available clients, please generate precomputes first')
-        }
+          throw new Error("no available clients, please generate precomputes first");
+        };
         const generatePrecompute = async (verifierName: string, verifierId: string) => {
           if (!getTSSData) {
-            throw new Error('tssShare and signatures are not defined')
+            throw new Error("tssShare and signatures are not defined");
           }
-          const { tssShare, signatures } = await getTSSData()
-          const pubKey = (await tssGetPublic()).toString('base64')
-          const client = await setupTSS(tssShare, pubKey, verifierName, verifierId)
-          await tss.default(tssImportURL)
-          client.precompute(tss as any)
-          await client.ready
-          clients.push({ client, allocated: false })
+          const { tssShare, signatures } = await getTSSData();
+          const pubKey = (await tssGetPublic()).toString("base64");
+          const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
+          await tss.default(tssImportURL);
+          client.precompute(tss as any);
+          await client.ready;
+          clients.push({ client, allocated: false });
         };
-        (window as any).generatePrecompute = generatePrecompute
+        (window as any).generatePrecompute = generatePrecompute;
         const openloginAdapter = new OpenloginAdapter({
           loginSettings: {
-            mfaLevel: 'mandatory'
+            mfaLevel: "mandatory",
           },
           tssSettings: {
             useTSS: true,
             tssGetPublic,
             tssSign,
             tssDataCallback: async (tssDataReader) => {
-              getTSSData = tssDataReader
-            }
+              getTSSData = tssDataReader;
+            },
           },
           adapterSettings: {
-            _iframeUrl: 'https://mpc-beta.openlogin.com',
-            network: 'development',
-            clientId
-          }
+            _iframeUrl: "https://mpc-beta.openlogin.com",
+            network: "development",
+            clientId,
+          },
         });
-        (window as any).openloginAdapter = openloginAdapter
+        (window as any).openloginAdapter = openloginAdapter;
 
-        this.web3auth.configureAdapter(openloginAdapter)
+        this.web3auth.configureAdapter(openloginAdapter);
         // this.subscribeAuthEvents(this.web3auth)
 
-        await this.web3auth.initModal()
+        await this.web3auth.initModal();
       } catch (error) {
-        console.log('error', error)
+        console.log("error", error);
       }
-    }
-  }
-})
+    },
+  },
+});
 </script>
 <style>
 #app {
@@ -316,14 +316,14 @@ export default Vue.extend({
   background-repeat: no-repeat, no-repeat;
 }
 .v-application .v-btn.primary {
-  background-color: #0364FF !important;
-  border-color: #0364FF !important;
+  background-color: #0364ff !important;
+  border-color: #0364ff !important;
 }
 .v-application a {
-  color: #0364FF !important;
+  color: #0364ff !important;
 }
 .navbar {
-  background-color: #FFFFFF !important;
+  background-color: #ffffff !important;
   box-shadow: 0px 15px 30px rgb(46 91 255 / 6%) !important;
 }
 .transparent-navbar {

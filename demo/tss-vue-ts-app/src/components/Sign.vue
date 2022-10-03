@@ -5,7 +5,7 @@
         <span class="tag font-weight-black">DKLS19</span>
       </v-col>
       <v-col cols="12" md="8" class="text-right">
-        <div >30/100%</div>
+        <div>30/100%</div>
         <div>ga_array processing...</div>
       </v-col>
     </v-row>
@@ -19,59 +19,71 @@
     <div class="font-weight-bold mb-1">Message:</div>
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
-          <v-col cols="12" md="8">
-            <v-text-field :disabled="signing" rounded dense outlined :rules="[rules.required]" v-model="message" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-btn block large depressed color="primary" class="text-truncate" rounded :disabled="!validForm || signing" :loading="signing" @click="signMessage">{{ $vuetify.breakpoint.xlOnly ? 'Sign Message' : 'Sign' }}</v-btn>
-          </v-col>
+        <v-col cols="12" md="8">
+          <v-text-field :disabled="signing" rounded dense outlined :rules="[rules.required]" v-model="message" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-btn
+            block
+            large
+            depressed
+            color="primary"
+            class="text-truncate"
+            rounded
+            :disabled="!validForm || signing"
+            :loading="signing"
+            @click="signMessage"
+          >
+            {{ $vuetify.breakpoint.xlOnly ? "Sign Message" : "Sign" }}
+          </v-btn>
+        </v-col>
       </v-row>
     </v-form>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue from "vue";
 
 export default Vue.extend({
-  name: 'SignScreen',
+  name: "SignScreen",
   props: {
     setStep: {
-      type: Function
-    }
+      type: Function,
+    },
   },
   data: () => ({
-    region: { name: 'South America', key: 'sa' },
+    region: { name: "South America", key: "sa" },
     regions: [
-      { name: 'Singapore', key: 'sg' },
-      { name: 'North America', key: 'na' },
-      { name: 'South America', key: 'sa' },
-      { name: 'Europe', key: 'eu' }
+      { name: "Singapore", key: "sg" },
+      { name: "North America", key: "na" },
+      { name: "South America", key: "sa" },
+      { name: "Europe", key: "eu" },
     ],
-    message: 'Hello Bogota',
+    message: "Hello Bogota",
     signing: false,
     rules: {
-      required: (value: string) => !!value || 'Required.'
+      required: (value: string) => !!value || "Required.",
     },
-    validForm: true
+    validForm: true,
   }),
   methods: {
-    signMessage () {
-      this.signing = true
+    signMessage() {
+      this.signing = true;
 
       // TODO
-      alert(this.message)
+      alert(this.message);
 
-      this.signing = false
-      this.setStep(3)
-    }
-  }
-})
+      this.signing = false;
+      this.setStep(3);
+    },
+  },
+});
 </script>
 <style>
-  .tag {
-    background: #F0F0F0;
-    border-radius: 10px;
-    padding: 10px;
-  }
+.tag {
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 10px;
+}
 </style>

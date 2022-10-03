@@ -49,68 +49,66 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue from "vue";
 
 export default Vue.extend({
-  name: 'StepperComponent',
+  name: "StepperComponent",
   props: {
     currentStep: {
-      type: Number
-    }
+      type: Number,
+    },
   },
-  components: {
-  },
+  components: {},
   data: () => ({
     copied: false,
-    hash: 'sample-hash',
-    signature: 'sample-signature',
-    signer: 'sample-signer'
+    hash: "sample-hash",
+    signature: "sample-signature",
+    signer: "sample-signer",
   }),
-  methods: {
-  }
-})
+  methods: {},
+});
 </script>
 <style>
-  .v-sheet--outlined {
-    border: none !important;
+.v-sheet--outlined {
+  border: none !important;
+}
+.v-stepper__step__step {
+  height: 40px !important;
+  width: 40px !important;
+}
+.v-application--is-ltr .v-stepper--vertical .v-stepper__content {
+  margin: -8px -43px -16px 43px !important;
+}
+.v-application .v-stepper__step--complete .v-stepper__step__step.primary {
+  background-color: #30cca4 !important;
+  border-color: #30cca4 !important;
+}
+.v-application--is-ltr .theme--light.v-stepper--vertical .v-stepper__content.complete {
+  border-left: 3px solid #30cca4 !important;
+}
+.v-application .v-stepper__step__step.primary {
+  background-color: #fff !important;
+  border: 2px solid hsl(210, 79%, 46%) !important;
+  color: #1976d2;
+  font-weight: bold;
+}
+@media only screen and (max-width: 959.98px) {
+  .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
+    display: block;
   }
-  .v-stepper__step__step {
-    height: 40px !important;
-    width: 40px !important;
+  .v-stepper--alt-labels .v-stepper__step {
+    flex-basis: auto;
   }
-  .v-application--is-ltr .v-stepper--vertical .v-stepper__content {
-    margin: -8px -43px -16px 43px !important;
+  .v-stepper--alt-labels .v-stepper__header .v-divider {
+    margin: 44px -27px 0;
   }
-  .v-application .v-stepper__step--complete .v-stepper__step__step.primary {
-    background-color: #30CCA4 !important;
-    border-color: #30CCA4 !important;
+  .v-stepper--alt-labels .v-divider.complete {
+    border-top: 2px solid #30cca4 !important;
   }
-  .v-application--is-ltr .theme--light.v-stepper--vertical .v-stepper__content.complete {
-    border-left: 3px solid #30CCA4 !important;
+  .step-label {
+    max-width: 50px;
+    overflow: visible;
+    display: block;
   }
-  .v-application .v-stepper__step__step.primary {
-    background-color: #FFF !important;
-    border: 2px solid hsl(210, 79%, 46%) !important;
-    color: #1976d2;
-    font-weight: bold;
-  }
-  @media only screen and (max-width: 959.98px) {
-    .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
-      display: block;
-    }
-    .v-stepper--alt-labels .v-stepper__step {
-      flex-basis: auto;
-    }
-    .v-stepper--alt-labels .v-stepper__header .v-divider {
-      margin: 44px -27px 0;
-    }
-    .v-stepper--alt-labels .v-divider.complete {
-      border-top: 2px solid #30CCA4 !important;
-    }
-    .step-label {
-      max-width: 50px;
-      overflow: visible;
-      display: block;
-    }
-  }
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="px-5">
-    <v-btn class="mb-2 px-0" link depressed plain color="primary" @click="goBack">{{"< Back"}}</v-btn>
+    <v-btn class="mb-2 px-0" link depressed plain color="primary" @click="goBack">{{ "< Back" }}</v-btn>
     <div>
       <span class="tag font-weight-black">DKLS19</span>
     </div>
@@ -35,57 +35,59 @@
         <v-btn block large depressed color="primary" rounded :disabled="verified" @click="confirmVerification">I have verified it</v-btn>
       </v-col>
       <v-col cols="12" sm="6" class="text-center">
-        <v-btn target="_blank" block large rounded link depressed plain color="primary" href="https://mpc-compare.web3auth.io/">Visit Benchmarking Site</v-btn>
+        <v-btn target="_blank" block large rounded link depressed plain color="primary" href="https://mpc-compare.web3auth.io/">
+          Visit Benchmarking Site
+        </v-btn>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue from "vue";
 
-import TextFieldCopier from './TextFieldCopier.vue'
+import TextFieldCopier from "./TextFieldCopier.vue";
 
 export default Vue.extend({
-  name: 'VerifyScreen',
+  name: "VerifyScreen",
   props: {
     setStep: {
-      type: Function
-    }
+      type: Function,
+    },
   },
   components: {
-    TextFieldCopier
+    TextFieldCopier,
   },
   data: () => ({
     copied: false,
-    hash: 'sample-hash',
-    signature: 'sample-signature',
-    signer: 'sample-signer',
-    verified: false
+    hash: "sample-hash",
+    signature: "sample-signature",
+    signer: "sample-signer",
+    verified: false,
   }),
   methods: {
-    goBack () {
-      this.setStep(2)
-      this.verified = false
+    goBack() {
+      this.setStep(2);
+      this.verified = false;
     },
-    copyToClipboard () {
-      this.copied = true
+    copyToClipboard() {
+      this.copied = true;
       setTimeout(() => {
-        this.copied = false
-      }, 3000)
+        this.copied = false;
+      }, 3000);
     },
-    confirmVerification () {
-      this.verified = true
-      this.setStep(4)
-    }
-  }
-})
+    confirmVerification() {
+      this.verified = true;
+      this.setStep(4);
+    },
+  },
+});
 </script>
 <style>
-  .tag {
-    background: #F0F0F0;
-    border-radius: 10px;
-    padding: 10px;
-    display: inline-block;
-  }
+.tag {
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 10px;
+  display: inline-block;
+}
 </style>
