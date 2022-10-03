@@ -1,5 +1,5 @@
-import type { OpenloginUserInfo } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import type { OpenloginUserInfo } from "@toruslabs/openlogin-mpc";
 
 import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";

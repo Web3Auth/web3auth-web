@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^3.2.0",
-    "@toruslabs/openlogin": "file:toruslabs-openlogin-v2.6.0.tgz",
+    "@toruslabs/openlogin-mpc": "^3.0.1-alpha.0",
     "bn.js": "^5.2.1",
     "elliptic": "^6.5.4",
     "socket.io-client": "^4.5.2",

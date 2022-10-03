@@ -1,5 +1,5 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-mpc";
 import { log, WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";

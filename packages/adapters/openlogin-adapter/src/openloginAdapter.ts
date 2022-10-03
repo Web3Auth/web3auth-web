@@ -1,4 +1,11 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, {
+  getHashQueryParams,
+  LoginParams,
+  OPENLOGIN_NETWORK,
+  OpenLoginOptions,
+  SUPPORTED_KEY_CURVES,
+  UX_MODE,
+} from "@toruslabs/openlogin-mpc";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,

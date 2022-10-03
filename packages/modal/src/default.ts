@@ -1,4 +1,4 @@
-import type { OpenLoginOptions } from "@toruslabs/openlogin";
+import type { OpenLoginOptions } from "@toruslabs/openlogin-mpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 
 export const getDefaultAdapterModule = async (params: {

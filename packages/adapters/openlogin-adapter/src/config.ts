@@ -1,4 +1,4 @@
-import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-mpc";
 import { ChainNamespaceType, getChainConfig } from "@web3auth/base";
 
 import { OpenloginAdapterOptions } from "./interface";
