@@ -8,13 +8,7 @@
 
         <!-- BODY -->
         <v-row>
-          <v-text-field label="Username" dense outlined rounded :rules="[rules.required]"></v-text-field>
-        </v-row>
-        <v-row>
-          <v-text-field label="Password" type="password" dense outlined rounded :rules="[rules.required]"></v-text-field>
-        </v-row>
-        <v-row>
-          <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="signIn">
+          <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="connectTo">
             Login
           </v-btn>
         </v-row>
@@ -38,6 +32,12 @@ export default Vue.extend({
     setStep: {
       type: Function,
     },
+    connect: {
+      type: Function,
+    },
+    generatePrecompute: {
+      type: Function,
+    },
   },
   data: () => ({
     validForm: true,
@@ -47,6 +47,11 @@ export default Vue.extend({
     submitting: false,
   }),
   methods: {
+    async connectTo() {
+      await this.connect();
+      this.setStep(2);
+      this.generatePrecompute();
+    },
     signIn() {
       this.submitting = true;
 

@@ -13,7 +13,7 @@
       </div>
 
       <v-spacer></v-spacer>
-      <v-btn text rounded color="#828282" @click="logout" v-if="!landingPage">
+      <v-btn text rounded color="#828282" @click="logout" v-if="!!provider">
         <v-icon>mdi-logout</v-icon>
         <span class="mr-2 text-capitalize">Logout</span>
       </v-btn>
@@ -31,9 +31,15 @@
         </v-col>
 
         <v-col cols="12" md="4">
-          <Login v-if="currentStep == 1" :set-step="setStep" />
-          <Sign v-if="currentStep == 2" :set-step="setStep" />
-          <Verify v-if="currentStep >= 3" :set-step="setStep" />
+          <Login v-if="currentStep == 1" :set-step="setStep" :connect="connect" :generatePrecompute="generatePrecompute" />
+          <Sign
+            v-if="currentStep == 2"
+            :set-step="setStep"
+            :progressPercent="progressPercent"
+            :progressText="progressText"
+            :signMessage="signMessage"
+          />
+          <Verify v-if="currentStep >= 3" :set-step="setStep" :finalHash="finalHash" :finalSig="finalSig" :finalSigner="finalSigner" />
         </v-col>
 
         <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
@@ -50,7 +56,7 @@
 
 <script lang="ts">
 import { post } from "@toruslabs/http-helpers";
-import { safeatob } from "@toruslabs/openlogin-utils";
+import { keccak256, safeatob } from "@toruslabs/openlogin-utils";
 import { Client } from "@toruslabs/tss-client";
 import * as tss from "@toruslabs/tss-lib";
 import { OpenloginAdapter } from "@web3auth-mpc/openlogin-adapter";
@@ -59,6 +65,7 @@ import BN from "bn.js";
 import { ec as EC } from "elliptic";
 import { io, Socket } from "socket.io-client";
 import Vue from "vue";
+import Web3 from "web3";
 
 import Login from "./components/Login.vue";
 import Sign from "./components/Sign.vue";
@@ -204,7 +211,27 @@ export default Vue.extend({
   data: () => ({
     currentStep: 1,
     loggedIn: false,
-    web3auth: null as any,
+    web3auth: new Web3Auth({
+      chainConfig: {
+        chainNamespace: "eip155",
+        chainId: "0x1",
+        // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
+        // displayName: "ropsten",
+        // blockExplorer: "https://ropsten.etherscan.io/",
+        ticker: "ETH",
+        tickerName: "Ethereum",
+      },
+      clientId: "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs",
+      authMode: "DAPP",
+      enableLogging: true,
+    }),
+    provider: null as any,
+    generatePrecompute: null as any,
+    progressPercent: "0%",
+    progressText: "selecting nearest region...",
+    finalHash: "",
+    finalSig: "",
+    finalSigner: "",
   }),
   computed: {
     landingPage() {
@@ -218,27 +245,42 @@ export default Vue.extend({
     setStep(value: number) {
       this.currentStep = value;
     },
-    logout() {
-      alert("Logout");
+    async logout() {
+      await this.web3auth.logout();
       this.setStep(1);
+    },
+    async connect() {
+      try {
+        const web3authProvider = await this.web3auth.connect();
+        this.provider = web3authProvider;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async signMessage(message: string) {
+      const web3 = new Web3(this.web3auth.provider as any);
+      const accounts = await web3.eth.getAccounts();
+      const typedMessage = [
+        {
+          type: "string",
+          name: "message",
+          value: message,
+        },
+      ];
+
+      const params = [JSON.stringify(typedMessage), accounts[0]];
+      const method = "eth_signTypedData";
+
+      const signedMessage = await this.web3auth.provider!.request({
+        method,
+        params,
+      });
+
+      this.finalSig = signedMessage as string;
+      this.finalSigner = accounts[0];
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({
-          chainConfig: {
-            chainNamespace: "eip155",
-            chainId: "0x1",
-            // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-            // displayName: "ropsten",
-            // blockExplorer: "https://ropsten.etherscan.io/",
-            ticker: "ETH",
-            tickerName: "Ethereum",
-          },
-          clientId,
-          authMode: "DAPP",
-          enableLogging: true,
-        });
-
         let getTSSData: () => Promise<{
           tssShare: string;
           signatures: string[];
@@ -253,22 +295,37 @@ export default Vue.extend({
         };
         const clients: { client: any; allocated: boolean }[] = [];
         const tssSign = async (msgHash: Buffer) => {
-          for (let i = 0; i < clients.length; i++) {
-            const client = clients[i];
-            if (!client.allocated) {
-              client.allocated = true;
-              await client.client;
-              await tss.default(tssImportURL);
-              const { r, s, recoveryParam } = await client.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256");
-              return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
+          this.finalHash = `0x${msgHash.toString("hex")}`;
+          let foundClient = null;
+
+          while (!foundClient) {
+            for (let i = 0; i < clients.length; i++) {
+              const client = clients[i];
+              if (!client.allocated) {
+                client.allocated = true;
+                foundClient = client;
+              }
             }
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           }
-          throw new Error("no available clients, please generate precomputes first");
+          await foundClient.client;
+          await tss.default(tssImportURL);
+          const { r, s, recoveryParam } = await foundClient.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256");
+          return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
         };
-        const generatePrecompute = async (verifierName: string, verifierId: string) => {
+        this.generatePrecompute = async () => {
           if (!getTSSData) {
             throw new Error("tssShare and signatures are not defined");
           }
+          if (!this.provider) {
+            throw new Error("not initialized");
+          }
+          const { aggregateVerifier: verifierName, verifierId } = await this.web3auth.getUserInfo();
+          if (!verifierName || !verifierId) {
+            throw new Error("not logged in, verifier or verifierId undefined");
+          }
+
+          console.log("WHAT IS THIS", verifierName, verifierId);
           const { tssShare, signatures } = await getTSSData();
           const pubKey = (await tssGetPublic()).toString("base64");
           const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
@@ -277,7 +334,6 @@ export default Vue.extend({
           await client.ready;
           clients.push({ client, allocated: false });
         };
-        (window as any).generatePrecompute = generatePrecompute;
         const openloginAdapter = new OpenloginAdapter({
           loginSettings: {
             mfaLevel: "mandatory",

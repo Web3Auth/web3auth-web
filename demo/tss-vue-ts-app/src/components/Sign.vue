@@ -4,17 +4,18 @@
       <v-col cols="4">
         <span class="tag font-weight-black">DKLS19</span>
       </v-col>
+      <span></span>
       <v-col cols="12" md="8" class="text-right">
-        <div>30/100%</div>
-        <div>ga_array processing...</div>
+        <div>{{ progressPercent }}</div>
+        <div>{{ progressText }}</div>
       </v-col>
     </v-row>
-    <div class="font-weight-bold mt-8 mb-1">Precomputing based on the following region:</div>
-    <v-row>
-      <v-col cols="12">
-        <v-select :disabled="signing" rounded dense outlined v-model="region" :items="regions" item-text="name" item-value="key" />
-      </v-col>
-    </v-row>
+
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
 
     <div class="font-weight-bold mb-1">Message:</div>
     <v-form ref="form" v-model="validForm" @submit.prevent="">
@@ -32,7 +33,7 @@
             rounded
             :disabled="!validForm || signing"
             :loading="signing"
-            @click="signMessage"
+            @click="signMessageTo"
           >
             {{ $vuetify.breakpoint.xlOnly ? "Sign Message" : "Sign" }}
           </v-btn>
@@ -51,6 +52,15 @@ export default Vue.extend({
     setStep: {
       type: Function,
     },
+    progressPercent: {
+      type: String,
+    },
+    progressText: {
+      type: String,
+    },
+    signMessage: {
+      type: Function,
+    },
   },
   data: () => ({
     region: { name: "South America", key: "sa" },
@@ -66,14 +76,12 @@ export default Vue.extend({
       required: (value: string) => !!value || "Required.",
     },
     validForm: true,
+    clients: [],
   }),
   methods: {
-    signMessage() {
+    async signMessageTo() {
       this.signing = true;
-
-      // TODO
-      alert(this.message);
-
+      await this.signMessage(this.message);
       this.signing = false;
       this.setStep(3);
     },
