@@ -1,21 +1,21 @@
 # Web3Auth Sollet Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/sollet-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/sollet-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/sollet-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/sollet-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/sollet-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/sollet-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/sollet-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/sollet-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Sollet adapter allows your Web3Auth Instance to connect with sollet wallet. 
+Sollet adapter allows your Web3Auth Instance to connect with sollet wallet.
+
 ## 📖 Documentation
 
- Read more about the Web3Auth Sollet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/sollet).
-
+Read more about the Web3Auth Sollet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/sollet).
 
 ## 📄 Basic Details
 
 - Adapter Name: `sollet`
 
-- Package Name: [`@web3auth/sollet-adapter`](https://web3auth.io/docs/sdk/web/adapters/sollet)
+- Package Name: [`@web3auth-mpc/sollet-adapter`](https://web3auth.io/docs/sdk/web/adapters/sollet)
 
 - authMode: `DAPP`
 
@@ -26,13 +26,13 @@ Sollet adapter allows your Web3Auth Instance to connect with sollet wallet.
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/sollet-adapter
+npm install --save @web3auth-mpc/sollet-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { SolletWebAdapter } from "@web3auth/sollet-adapter";
+import { SolletWebAdapter } from "@web3auth-mpc/sollet-adapter";
 const solletWebAdapter = new SolletWebAdapter();
 web3auth.configureAdapter(solletWebAdapter);
 ```
@@ -40,7 +40,7 @@ web3auth.configureAdapter(solletWebAdapter);
 ### `SolletExtensionAdapter`
 
 ```ts
-import { SolletExtensionAdapter } from "@web3auth/sollet-adapter";
+import { SolletExtensionAdapter } from "@web3auth-mpc/sollet-adapter";
 const solletExtensionAdapter = new SolletExtensionAdapter();
 web3auth.configureAdapter(solletExtensionAdapter);
 ```

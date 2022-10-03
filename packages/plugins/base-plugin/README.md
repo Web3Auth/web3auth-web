@@ -1,7 +1,7 @@
 # Web3Auth Base Plugin
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/base-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/base-plugin/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base-plugin@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/base-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/base-plugin/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/base-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/base-plugin@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,7 +14,7 @@ Read more about Web3Auth plugins in the [official Web3Auth Documentation](https:
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/base-plugin
+npm install --save @web3auth-mpc/base-plugin
 ```
 
 ## 🩹 Example

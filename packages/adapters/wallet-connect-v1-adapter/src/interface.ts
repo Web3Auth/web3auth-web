@@ -1,5 +1,5 @@
 import type { IWalletConnectOptions } from "@walletconnect/types";
-import { CustomChainConfig, INetworkSwitch } from "@web3auth/base";
+import { CustomChainConfig, INetworkSwitch } from "@web3auth-mpc/base";
 
 interface IAdapterSettings extends IWalletConnectOptions {
   skipNetworkSwitching?: boolean;

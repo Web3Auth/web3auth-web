@@ -1,21 +1,21 @@
 # Web3Auth Slope Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/slope-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/slope-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/slope-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/slope-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/slope-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/slope-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/slope-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/slope-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Slope adapter allows your Web3Auth Instance to connect with slope wallet. 
+Slope adapter allows your Web3Auth Instance to connect with slope wallet.
+
 ## 📖 Documentation
 
- Read more about the Web3Auth Slope Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/slope).
-
+Read more about the Web3Auth Slope Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/slope).
 
 ## 📄 Basic Details
 
 - Adapter Name: `slope`
 
-- Package Name: [`@web3auth/slope-adapter`](https://web3auth.io/docs/sdk/web/adapters/slope)
+- Package Name: [`@web3auth-mpc/slope-adapter`](https://web3auth.io/docs/sdk/web/adapters/slope)
 
 - authMode: `DAPP`
 
@@ -26,13 +26,13 @@ Slope adapter allows your Web3Auth Instance to connect with slope wallet.
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/slope-adapter
+npm install --save @web3auth-mpc/slope-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { SlopeAdapter } from "@web3auth/slope-adapter";
+import { SlopeAdapter } from "@web3auth-mpc/slope-adapter";
 const slopeAdapter = new SlopeAdapter();
 web3auth.configureAdapter(slopeAdapter);
 ```

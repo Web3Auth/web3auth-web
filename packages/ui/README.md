@@ -1,7 +1,7 @@
 # Web3Auth UI
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/ui?label=%22%22)](https://www.npmjs.com/package/@web3auth/ui/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ui?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ui@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/ui?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/ui/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/ui?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/ui@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -10,10 +10,11 @@ This package contains the UI used for creating the default Web3Auth Modal.
 ## 📖 Documentation
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/web3auth/) to get started.
+
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/ui
+npm install --save @web3auth-mpc/ui
 ```
 
 ## 🩹 Examples

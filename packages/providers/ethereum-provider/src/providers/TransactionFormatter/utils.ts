@@ -1,6 +1,6 @@
 import { SignTypedDataVersion, TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
-import { isHexStrict } from "@web3auth/base";
+import { isHexStrict } from "@web3auth-mpc/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
 import { ethErrors } from "eth-rpc-errors";

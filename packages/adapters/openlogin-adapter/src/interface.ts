@@ -1,5 +1,5 @@
 import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-mpc";
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig } from "@web3auth-mpc/base";
 
 export type LoginSettings = LoginParams & Partial<BaseRedirectParams>;
 

@@ -1,11 +1,12 @@
 # Web3Auth Phantom Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/phantom-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/phantom-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/phantom-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/phantom-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/phantom-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/phantom-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/phantom-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/phantom-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Phantom adapter allows your Web3Auth Instance to connect with phantom wallet. 
+Phantom adapter allows your Web3Auth Instance to connect with phantom wallet.
+
 ## 📖 Documentation
 
 Read more about the Web3Auth Phantom Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/phantom).
@@ -14,7 +15,7 @@ Read more about the Web3Auth Phantom Adapter in the [official Web3Auth Documenta
 
 - Adapter Name: `phantom`
 
-- Package Name: [`@web3auth/phantom-adapter`](https://web3auth.io/docs/sdk/web/adapters/phantom)
+- Package Name: [`@web3auth-mpc/phantom-adapter`](https://web3auth.io/docs/sdk/web/adapters/phantom)
 
 - authMode: `DAPP`
 
@@ -25,13 +26,13 @@ Read more about the Web3Auth Phantom Adapter in the [official Web3Auth Documenta
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/phantom-adapter
+npm install --save @web3auth-mpc/phantom-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { PhantomAdapter } from "@web3auth/phantom-adapter";
+import { PhantomAdapter } from "@web3auth-mpc/phantom-adapter";
 const phantomAdapter = new PhantomAdapter();
 web3auth.configureAdapter(phantomAdapter);
 ```

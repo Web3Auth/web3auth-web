@@ -1,11 +1,12 @@
 # Web3Auth Torus EVM Wallet Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/torus-evm-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/torus-evm-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-evm-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/torus-evm-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/torus-evm-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/torus-evm-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/torus-evm-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/torus-evm-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Torus Wallet adapter allows your Web3Auth Instance to connect with torus wallet for evm chains. 
+Torus Wallet adapter allows your Web3Auth Instance to connect with torus wallet for evm chains.
+
 ## 📖 Documentation
 
 Read more about the Web3Auth Torus EVM Wallet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/torus-evm).
@@ -14,7 +15,7 @@ Read more about the Web3Auth Torus EVM Wallet Adapter in the [official Web3Auth 
 
 - Adapter Name: `torus-evm`
 
-- Package Name: [`@web3auth/torus-evm-adapter`](https://web3auth.io/docs/sdk/web/adapters/torus-evm)
+- Package Name: [`@web3auth-mpc/torus-evm-adapter`](https://web3auth.io/docs/sdk/web/adapters/torus-evm)
 
 - authMode: `DAPP`
 
@@ -25,13 +26,13 @@ Read more about the Web3Auth Torus EVM Wallet Adapter in the [official Web3Auth 
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/torus-evm-adapter
+npm install --save @web3auth-mpc/torus-evm-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
+import { TorusWalletAdapter } from "@web3auth-mpc/torus-evm-adapter";
 
 const torusWalletAdapter = new TorusWalletAdapter({
   adapterSettings: {

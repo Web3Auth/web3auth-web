@@ -2,7 +2,7 @@ import { Capability, TransactionFactory, TypedTransaction } from "@ethereumjs/tx
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { isHexStrict, log } from "@web3auth/base";
+import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
 import { BN, hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
 

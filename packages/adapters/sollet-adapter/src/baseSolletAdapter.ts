@@ -20,9 +20,9 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-} from "@web3auth/base";
-import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
-import { SolletInjectedProvider } from "@web3auth/solana-provider";
+} from "@web3auth-mpc/base";
+import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
+import { SolletInjectedProvider } from "@web3auth-mpc/solana-provider";
 
 import { detectProvider, getChainNameById, SolletProvider } from "./utils";
 

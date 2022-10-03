@@ -1,19 +1,20 @@
 # Web3Auth Plug and Play Modal
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/web3auth?label=%22%22)](https://www.npmjs.com/package/@web3auth/web3auth/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/web3auth?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/web3auth@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/web3auth?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/web3auth/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/web3auth?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/web3auth@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-This package provides main class for using default Web3Auth Modal. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. Additionally, it is a child class of [`@web3auth/core`](https://web3auth.io/docs/sdk/web/core/) package. Hence, you can still call all the functions available in the [`@web3auth/core`](https://web3auth.io/docs/sdk/web/core/) package.
+This package provides main class for using default Web3Auth Modal. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. Additionally, it is a child class of [`@web3auth-mpc/core`](https://web3auth.io/docs/sdk/web/core/) package. Hence, you can still call all the functions available in the [`@web3auth-mpc/core`](https://web3auth.io/docs/sdk/web/core/) package.
 
 ## 📖 Documentation
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/web3auth/) to get started.
+
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/web3auth
+npm install --save @web3auth-mpc/web3auth
 ```
 
 ## ⚡ Quick Start
@@ -29,7 +30,7 @@ Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a 
 Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
 ```js
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth-mpc/web3auth";
 
 //Initialize within your constructor
 const web3auth = new Web3Auth({

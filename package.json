@@ -1,5 +1,5 @@
 {
-  "name": "web3auth",
+  "name": "web3auth-mpc",
   "private": true,
   "workspaces": [
     "packages/base",

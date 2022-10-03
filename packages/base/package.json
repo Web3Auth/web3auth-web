@@ -1,5 +1,5 @@
 {
-  "name": "@web3auth/base",
+  "name": "@web3auth-mpc/base",
   "version": "2.1.3",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",

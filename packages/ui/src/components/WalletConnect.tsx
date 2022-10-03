@@ -1,4 +1,4 @@
-import { IWalletConnectExtensionAdapter } from "@web3auth/base";
+import { IWalletConnectExtensionAdapter } from "@web3auth-mpc/base";
 import bowser from "bowser";
 import { memo, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
