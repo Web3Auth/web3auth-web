@@ -30,7 +30,7 @@
           <Stepper :current-step="currentStep" />
         </v-col>
 
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="5">
           <Login v-if="currentStep == 1" :set-step="setStep" :connect="connect" :generatePrecompute="generatePrecompute" />
           <Sign
             v-if="currentStep == 2"
@@ -235,7 +235,7 @@ export default Vue.extend({
     provider: null as any,
     generatePrecompute: null as any,
     progressPercent: 0,
-    progressText: "selecting nearest region...",
+    progressText: "selecting nearest region",
     finalHash: "",
     finalSig: "",
     finalSigner: "",
@@ -321,7 +321,7 @@ export default Vue.extend({
           return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
         };
         this.generatePrecompute = async () => {
-          this.progressText = "selecting region...";
+          this.progressText = "selecting region";
           this.progressPercent = 0;
           if (!getTSSData) {
             throw new Error("tssShare and signatures are not defined");
@@ -368,6 +368,7 @@ export default Vue.extend({
             _iframeUrl: "https://mpc-beta.openlogin.com",
             network: "development",
             clientId,
+            uxMode: "redirect",
           },
         });
         (window as any).openloginAdapter = openloginAdapter;
@@ -393,9 +394,6 @@ export default Vue.extend({
   background-color: #0364ff !important;
   border-color: #0364ff !important;
 }
-.v-application a {
-  color: #0364ff !important;
-}
 .navbar {
   background-color: #ffffff !important;
   box-shadow: 0px 15px 30px rgb(46 91 255 / 6%) !important;
@@ -403,5 +401,8 @@ export default Vue.extend({
 .transparent-navbar {
   background-color: transparent !important;
   box-shadow: none !important;
+}
+.v-btn {
+  text-transform: unset !important;
 }
 </style>

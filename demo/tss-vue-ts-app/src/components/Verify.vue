@@ -4,6 +4,10 @@
     <div>
       <span class="tag font-weight-black">DKLS19</span>
     </div>
+    <div class="mt-5 font-weight-medium">
+      Copy and paste the fields to verify them on
+      <a target="_blank" href="https://etherscan.io/address/0x71d91a8988D81617be53427126ee62471321b7DF#readContract#F1">Etherscan</a>
+    </div>
 
     <div class="font-weight-bold mt-4 mb-1">Hash:</div>
     <v-row>
@@ -32,8 +36,11 @@
           target="_blank"
           block
           large
-          depressed
           rounded
+          link
+          depressed
+          color="primary"
+          @click="confirmVerification"
           href="https://etherscan.io/address/0x71d91a8988D81617be53427126ee62471321b7DF#readContract#F1"
         >
           Verify on Etherscan

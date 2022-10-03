@@ -15,7 +15,7 @@
       </v-list-item-content>
 
       <!-- FOOTER -->
-      <div class="footer text-center text-caption font-weight-regular pa-5 mt-5">
+      <div class="footer text-center text-caption font-weight-regular pa-8 mt-12">
         <div>Self-custodial login by Web3Auth</div>
         <div>Terms of Service | Privacy Policy | Version 1.27.3</div>
       </div>
