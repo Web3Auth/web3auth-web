@@ -38,15 +38,6 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-yarn-
 
-      - name: Install Web3Auth dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Bootstrap Web3Auth dependencies
-        run: yarn run bootstrap
-
-      - name: Build Web3Auth packages
-        run: yarn run build
-
       - name: Build MPC demo app
         if: github.ref == 'refs/heads/feat/tss-demo'
         run: |
