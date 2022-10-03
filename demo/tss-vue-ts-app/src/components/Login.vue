@@ -7,7 +7,7 @@
         <v-list-item-subtitle class="text-subtitle-1 font-weight-bold mb-10">Your blockchain account in one-click</v-list-item-subtitle>
 
         <!-- BODY -->
-        <v-row>
+        <v-row class="px-3">
           <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="connectTo">
             Login
           </v-btn>
@@ -15,7 +15,7 @@
       </v-list-item-content>
 
       <!-- FOOTER -->
-      <div class="footer text-center text-caption font-weight-regular pa-5 mt-5">
+      <div class="footer text-center text-caption font-weight-regular pa-8 mt-12">
         <div>Self-custodial login by Web3Auth</div>
         <div>Terms of Service | Privacy Policy | Version 1.27.3</div>
       </div>
@@ -35,9 +35,6 @@ export default Vue.extend({
     connect: {
       type: Function,
     },
-    generatePrecompute: {
-      type: Function,
-    },
   },
   data: () => ({
     validForm: true,
@@ -49,8 +46,6 @@ export default Vue.extend({
   methods: {
     async connectTo() {
       await this.connect();
-      this.setStep(2);
-      this.generatePrecompute();
     },
   },
 });

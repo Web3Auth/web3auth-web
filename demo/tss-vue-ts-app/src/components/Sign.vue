@@ -1,16 +1,10 @@
 <template>
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
-    <v-row>
-      <v-col cols="4">
-        <span class="tag font-weight-black">DKLS19</span>
-      </v-col>
-      <span></span>
-      <v-col cols="12" md="8" class="text-right">
-        <div>{{ progressPercent }}%</div>
-        <div>{{ progressText }}</div>
-      </v-col>
-    </v-row>
-
+    <div class="d-flex justify-space-between mb-2">
+      <div class="tag font-weight-black">DKLS19</div>
+      <div class="text-right">{{ progressPercent }}%</div>
+    </div>
+    <div class="text-right text-truncate">{{ progressText }}</div>
     <br />
     <br />
     <br />
@@ -35,7 +29,7 @@
             :loading="signing"
             @click="signMessageTo"
           >
-            {{ $vuetify.breakpoint.xlOnly ? "Sign Message" : "Sign" }}
+            {{ $vuetify.breakpoint.xlOnly ? "Sign message" : "Sign" }}
           </v-btn>
         </v-col>
       </v-row>
@@ -61,6 +55,9 @@ export default Vue.extend({
     signMessage: {
       type: Function,
     },
+    generatePrecompute: {
+      type: Function,
+    },
   },
   data: () => ({
     region: { name: "South America", key: "sa" },
@@ -78,6 +75,9 @@ export default Vue.extend({
     validForm: true,
     clients: [],
   }),
+  async mounted() {
+    await this.generatePrecompute();
+  },
   methods: {
     async signMessageTo() {
       this.signing = true;
@@ -92,6 +92,6 @@ export default Vue.extend({
 .tag {
   background: #f0f0f0;
   border-radius: 10px;
-  padding: 10px;
+  padding: 5px 10px;
 }
 </style>
