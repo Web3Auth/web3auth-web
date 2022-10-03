@@ -1,8 +1,12 @@
 <template>
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
-    <div class="d-flex justify-space-between mb-2">
+    <div class="d-flex justify-space-between align-center mb-2">
       <div class="tag font-weight-black">DKLS19</div>
-      <div class="text-right">{{ progressPercent }}%</div>
+      <v-progress-linear :value="progressPercent" rounded color="success" class="ml-5" height="20">
+        <template v-slot:default="{ value }">
+          <strong>{{ Math.ceil(value) }}%</strong>
+        </template>
+      </v-progress-linear>
     </div>
     <div class="text-right text-truncate">{{ progressText }}</div>
     <br />
