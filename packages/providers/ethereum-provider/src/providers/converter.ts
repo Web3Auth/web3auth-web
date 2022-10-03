@@ -1,5 +1,5 @@
+import { stripHexPrefix } from "@ethereumjs/util";
 import BigNumber from "bignumber.js";
-import { stripHexPrefix } from "ethereumjs-util";
 
 type DenominationType = "WEI" | "GWEI" | "ETH";
 type NumericBaseType = "hex" | "dec";
