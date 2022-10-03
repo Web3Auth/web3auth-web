@@ -2,13 +2,13 @@
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
     <div class="d-flex justify-space-between align-center mb-2">
       <div class="tag font-weight-black">DKLS19</div>
-      <v-progress-linear :value="progressPercent" rounded color="success" class="ml-5" height="20">
-        <template v-slot:default="{ value }">
-          <strong>{{ Math.ceil(value) }}%</strong>
+      <v-progress-linear :value="percent" rounded color="success" class="ml-5" height="20">
+        <template v-slot:default="{}">
+          <strong>{{ Math.ceil(progressPercent) }}%</strong>
         </template>
       </v-progress-linear>
     </div>
-    <div class="text-right text-truncate">{{ progressText }}</div>
+    <div class="text-right text-wrap">{{ progressText }}</div>
     <br />
     <br />
     <br />
@@ -78,9 +78,19 @@ export default Vue.extend({
     },
     validForm: true,
     clients: [],
+    percent: "",
+    count: 1,
   }),
   async mounted() {
     await this.generatePrecompute();
+  },
+  watch: {
+    async progressPercent(val) {
+      this.count++;
+      setTimeout(() => {
+        this.percent = val;
+      }, this.count * 100);
+    },
   },
   methods: {
     async signMessageTo() {
