@@ -1,7 +1,7 @@
 # Web3Auth Base solana Adapter (Basic Types and Interface for Web3Auth)
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/base-solana-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/base-solana-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base-solana-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/base-solana-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/base-solana-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/base-solana-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,17 +14,15 @@ Read more about the Web3Auth in the [official Web3Auth Documentation](https://we
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/base-solana-adapter
+npm install --save @web3auth-mpc/base-solana-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
+import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
 
-
-export class solanaAdapter extends BaseSolanaAdapter<void> {
-}
+export class solanaAdapter extends BaseSolanaAdapter<void> {}
 ```
 
 Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)

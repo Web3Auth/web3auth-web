@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { CustomChainConfig, WalletInitializationError } from "@web3auth/base";
+import { CustomChainConfig, WalletInitializationError } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseProvider } from "./IBaseProvider";

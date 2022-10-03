@@ -19,8 +19,8 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-} from "@web3auth/base";
-import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+} from "@web3auth-mpc/base";
+import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth-mpc/base-plugin";
 
 export interface Web3AuthCoreOptions {
   /**

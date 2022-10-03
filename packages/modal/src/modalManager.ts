@@ -10,9 +10,9 @@ import {
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
-} from "@web3auth/base";
-import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
-import LoginModal, { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
+} from "@web3auth-mpc/base";
+import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth-mpc/core";
+import LoginModal, { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, OPENLOGIN_PROVIDERS } from "@web3auth-mpc/ui";
 
 import {
   defaultEvmDappModalConfig,

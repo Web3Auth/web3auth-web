@@ -1,4 +1,11 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, {
+  getHashQueryParams,
+  LoginParams,
+  OPENLOGIN_NETWORK,
+  OpenLoginOptions,
+  SUPPORTED_KEY_CURVES,
+  UX_MODE,
+} from "@toruslabs/openlogin-mpc";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -19,9 +26,9 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
-} from "@web3auth/base";
-import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
-import { EthereumSigningProvider } from "@web3auth/ethereum-provider";
+} from "@web3auth-mpc/base";
+import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth-mpc/base-provider";
+import { EthereumSigningProvider } from "@web3auth-mpc/ethereum-provider";
 import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
@@ -222,10 +229,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      const { SolanaPrivateKeyProvider } = await import("@web3auth-mpc/solana-provider");
       this.privateKeyOrSigningProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      const { EthereumPrivateKeyProvider } = await import("@web3auth-mpc/ethereum-provider");
       this.privateKeyOrSigningProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
       this.privateKeyOrSigningProvider = new CommonPrivateKeyProvider();
@@ -265,7 +272,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       throw new Error("solana is not supported at the moment for TSS");
-      // const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      // const { SolanaPrivateKeyProvider } = await import("@web3auth-mpc/solana-provider");
       // this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
       this.privateKeyOrSigningProvider = new EthereumSigningProvider({ config: { chainConfig: this.chainConfig } });

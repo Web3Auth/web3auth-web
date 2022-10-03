@@ -12,7 +12,7 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { isHexStrict, log } from "@web3auth/base";
+import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
 import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 

@@ -1,20 +1,22 @@
 # Web3Auth Plug and Play Core
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/core?label=%22%22)](https://www.npmjs.com/package/@web3auth/core/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/core?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/core@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/core?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/core/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/core?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/core@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Plug and Play Core is the main SDK that consists of the core module of Web3Auth Plug and Play. This SDK gives you all the needed modules for implementing the Web3Auth features, giving you the flexibility of implementing your own UI to use all the functionalities. 
+Web3Auth Plug and Play Core is the main SDK that consists of the core module of Web3Auth Plug and Play. This SDK gives you all the needed modules for implementing the Web3Auth features, giving you the flexibility of implementing your own UI to use all the functionalities.
 
 ## 📖 Documentation
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/core/) to get started.
+
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/core
+npm install --save @web3auth-mpc/core
 ```
+
 ## ⚡ Quick Start
 
 ### Get your Client ID from Web3Auth Dashboard
@@ -28,7 +30,7 @@ Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a 
 Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
 ```js
-import { Web3AuthCore } from "@web3auth/core";
+import { Web3AuthCore } from "@web3auth-mpc/core";
 
 //Initialize within your constructor
 const web3auth = new Web3AuthCore({
@@ -41,17 +43,15 @@ const web3auth = new Web3AuthCore({
 
 await web3auth.init();
 ```
+
 ### Login your User
 
 Once you're done initialising, just create a button that triggers login for your preferred social channel for the user on their request. You can further use the returned provider for making RPC calls to the blockchain.
 
 ```js
-const web3authProvider = await web3auth.connectTo(
-    "openlogin",
-    {
-        loginProvider: 'google',
-    },
-)
+const web3authProvider = await web3auth.connectTo("openlogin", {
+  loginProvider: "google",
+});
 ```
 
 ## 🩹 Examples

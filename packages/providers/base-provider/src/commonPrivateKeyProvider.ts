@@ -1,6 +1,6 @@
 import { createEventEmitterProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCEngine, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig } from "@web3auth-mpc/base";
 
 import { IBaseProvider } from "./IBaseProvider";
 

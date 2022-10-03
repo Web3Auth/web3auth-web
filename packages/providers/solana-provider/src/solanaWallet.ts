@@ -1,5 +1,5 @@
 import { Transaction } from "@solana/web3.js";
-import { RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import { RequestArguments, SafeEventEmitterProvider } from "@web3auth-mpc/base";
 
 import { ISolanaWallet } from "./interface";
 

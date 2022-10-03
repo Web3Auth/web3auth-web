@@ -1,6 +1,6 @@
 {
-  "name": "@web3auth/base",
-  "version": "2.1.2",
+  "name": "@web3auth-mpc/base",
+  "version": "2.1.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -26,7 +26,7 @@
     "ts-custom-error": "^3.2.2"
   },
   "devDependencies": {
-    "@toruslabs/openlogin": "^2.6.0"
+    "@toruslabs/openlogin-mpc": "^3.0.1-alpha.0"
   },
   "files": [
     "dist",

@@ -1,11 +1,12 @@
 # Web3Auth Solflare Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/solflare-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/solflare-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/solflare-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/solflare-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/solflare-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/solflare-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/solflare-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/solflare-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Solflare adapter allows your Web3Auth Instance to connect with solflare wallet. 
+Solflare adapter allows your Web3Auth Instance to connect with solflare wallet.
+
 ## 📖 Documentation
 
 Read more about the Web3Auth Solflare Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/solflare).
@@ -14,7 +15,7 @@ Read more about the Web3Auth Solflare Adapter in the [official Web3Auth Document
 
 - Adapter Name: `solflare`
 
-- Package Name: [`@web3auth/solflare-adapter`](https://web3auth.io/docs/sdk/web/adapters/solflare)
+- Package Name: [`@web3auth-mpc/solflare-adapter`](https://web3auth.io/docs/sdk/web/adapters/solflare)
 
 - authMode: `DAPP`
 
@@ -25,13 +26,13 @@ Read more about the Web3Auth Solflare Adapter in the [official Web3Auth Document
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/solflare-adapter
+npm install --save @web3auth-mpc/solflare-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { SolflareAdapter } from "@web3auth/solflare-adapter";
+import { SolflareAdapter } from "@web3auth-mpc/solflare-adapter";
 const phantomAdapter = new SolflareAdapter();
 web3auth.configureAdapter(phantomAdapter);
 ```

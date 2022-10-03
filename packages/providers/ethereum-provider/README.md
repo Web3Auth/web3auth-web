@@ -1,7 +1,7 @@
 # Web3Auth Ethereum Provider
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/ethereum-provider/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/ethereum-provider@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,14 +14,14 @@ Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentati
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/ethereum-provider
+npm install --save @web3auth-mpc/ethereum-provider
 ```
 
 ## 🩹 Example
 
 ```ts
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
+import { EthereumPrivateKeyProvider } from "@web3auth-mpc/ethereum-provider";
+import type { SafeEventEmitterProvider } from "@web3auth-mpc/base";
 const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
   const web3 = new Web3(provider as any);
   const accounts = await web3.eth.getAccounts();

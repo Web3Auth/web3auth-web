@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, IWeb3Auth, SafeEventEmitterProvider, UserInfo } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IWeb3Auth, SafeEventEmitterProvider, UserInfo } from "@web3auth-mpc/base";
 
 export const PLUGIN_NAMESPACES = {
   ...CHAIN_NAMESPACES,

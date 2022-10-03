@@ -1,7 +1,7 @@
 # Web3Auth Torus Solana Wallet Connector Plugin
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/solana-wallet-connector-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/solana-wallet-connector-plugin/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/solana-wallet-connector-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/solana-wallet-connector-plugin@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/solana-wallet-connector-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/solana-wallet-connector-plugin/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/solana-wallet-connector-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/solana-wallet-connector-plugin@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,7 +14,7 @@ Read more about the Web3Auth Solana Wallet Connector Plugin in the [official Web
 ## 🔗 Installation
 
 ```shell
-npm i --save @web3auth/solana-wallet-connector-plugin
+npm i --save @web3auth-mpc/solana-wallet-connector-plugin
 ```
 
 ## 🩹 Example

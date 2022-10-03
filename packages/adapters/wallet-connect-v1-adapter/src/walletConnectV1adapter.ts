@@ -20,9 +20,9 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-} from "@web3auth/base";
-import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
-import { WalletConnectProvider } from "@web3auth/ethereum-provider";
+} from "@web3auth-mpc/base";
+import { BaseEvmAdapter } from "@web3auth-mpc/base-evm-adapter";
+import { WalletConnectProvider } from "@web3auth-mpc/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV1AdapterOptions } from "./interface";

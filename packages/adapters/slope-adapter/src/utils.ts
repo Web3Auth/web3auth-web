@@ -1,4 +1,4 @@
-import type { ISlopeProvider } from "@web3auth/solana-provider";
+import type { ISlopeProvider } from "@web3auth-mpc/solana-provider";
 
 interface SlopeWindow extends Window {
   Slope?: {
