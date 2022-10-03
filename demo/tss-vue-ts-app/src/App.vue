@@ -180,7 +180,7 @@ async function createSockets(wsEndpoints: (string | null | undefined)[]): Promis
   return sockets;
 }
 
-async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<any> {
+async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<Client> {
   const endpoints = [tssServerEndpoint, null];
   const wsEndpoints = [tssServerEndpoint, null];
   const sockets = await createSockets(wsEndpoints);
@@ -227,7 +227,7 @@ export default Vue.extend({
     }),
     provider: null as any,
     generatePrecompute: null as any,
-    progressPercent: "0%",
+    progressPercent: 0,
     progressText: "selecting nearest region...",
     finalHash: "",
     finalSig: "",
@@ -293,7 +293,7 @@ export default Vue.extend({
           const pubKey = await getPublicKeyFromTSSShare(tssShare, signatures);
           return Buffer.from(pubKey, "base64");
         };
-        const clients: { client: any; allocated: boolean }[] = [];
+        const clients: { client: Client; allocated: boolean }[] = [];
         const tssSign = async (msgHash: Buffer) => {
           this.finalHash = `0x${msgHash.toString("hex")}`;
           let foundClient = null;
@@ -314,6 +314,8 @@ export default Vue.extend({
           return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
         };
         this.generatePrecompute = async () => {
+          this.progressText = "selecting region...";
+          this.progressPercent = 0;
           if (!getTSSData) {
             throw new Error("tssShare and signatures are not defined");
           }
@@ -329,9 +331,18 @@ export default Vue.extend({
           const { tssShare, signatures } = await getTSSData();
           const pubKey = (await tssGetPublic()).toString("base64");
           const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
+          client.log = (msg) => {
+            this.progressText = msg;
+            this.progressPercent += 2;
+            console.log("PROGRESS PERCENTAGE", this.progressPercent);
+            console.log(msg);
+          };
           await tss.default(tssImportURL);
           client.precompute(tss as any);
-          await client.ready;
+          await client.ready();
+          this.progressPercent = 100;
+          console.log("WHATTTTT WHY 100 HOW CAN IT BE READDYYYY", client);
+          this.progressText = "precomputation complete";
           clients.push({ client, allocated: false });
         };
         const openloginAdapter = new OpenloginAdapter({

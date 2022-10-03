@@ -6,7 +6,7 @@
       </v-col>
       <span></span>
       <v-col cols="12" md="8" class="text-right">
-        <div>{{ progressPercent }}</div>
+        <div>{{ progressPercent }}%</div>
         <div>{{ progressText }}</div>
       </v-col>
     </v-row>
@@ -53,7 +53,7 @@ export default Vue.extend({
       type: Function,
     },
     progressPercent: {
-      type: String,
+      type: Number,
     },
     progressText: {
       type: String,

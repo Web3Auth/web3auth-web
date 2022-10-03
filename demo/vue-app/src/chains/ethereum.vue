@@ -290,7 +290,7 @@ export default Vue.extend({
           const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
           await tss.default(tssImportURL);
           client.precompute(tss as any);
-          await client.ready;
+          await client.ready();
           clients.push({ client, allocated: false });
         };
         (window as any).generatePrecompute = generatePrecompute;
