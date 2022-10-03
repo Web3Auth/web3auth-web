@@ -1,0 +1,87 @@
+name: Build & Release MPC Demo
+
+on: 
+  push:
+    branches: [feat/tss-demo]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node: ["16.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Set output of cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Node dependency cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ matrix.os }}-yarn-
+
+      - name: Install Web3Auth dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Bootstrap Web3Auth dependencies
+        run: yarn run bootstrap
+
+      - name: Build Web3Auth packages
+        run: yarn run build
+
+      - name: Build MPC demo app
+        if: github.ref == 'refs/heads/feat/tss-demo'
+        run: |
+          cd demo/tss-vue-ts-app
+          yarn install
+          yarn build
+
+      # Set the credentials from repository settings/secrets
+      - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/feat/tss-demo'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION_US }}
+
+      # Copy the files from build folder to the S3 bucket
+      # Upload to S3
+      - name: sync S3
+        if: github.ref == 'refs/heads/feat/tss-demo'
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          SOURCE_DIR: "./demo/tss-vue-ts-app/dist"
+          AWS_REGION: "us-east-1"
+          AWS_S3_BUCKET: "demo-mpc.web3auth.io"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Invalidate Cloudfront (this action)
+      - name: invalidate CF
+        if: github.ref == 'refs/heads/feat/tss-demo'
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: "ELG6ZES5X2HOC"
+          PATHS: "/*"
+          AWS_REGION: ${{ secrets.AWS_REGION_US }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
