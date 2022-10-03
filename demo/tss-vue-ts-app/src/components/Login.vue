@@ -52,15 +52,6 @@ export default Vue.extend({
       this.setStep(2);
       this.generatePrecompute();
     },
-    signIn() {
-      this.submitting = true;
-
-      // TODO
-      alert("Signing in");
-
-      this.submitting = false;
-      this.setStep(2);
-    },
   },
 });
 </script>

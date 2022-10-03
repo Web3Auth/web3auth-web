@@ -39,7 +39,14 @@
             :progressText="progressText"
             :signMessage="signMessage"
           />
-          <Verify v-if="currentStep >= 3" :set-step="setStep" :finalHash="finalHash" :finalSig="finalSig" :finalSigner="finalSigner" />
+          <Verify
+            v-if="currentStep >= 3"
+            :set-step="setStep"
+            :finalHash="finalHash"
+            :finalSig="finalSig"
+            :finalSigner="finalSigner"
+            :generatePrecompute="generatePrecompute"
+          />
         </v-col>
 
         <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
