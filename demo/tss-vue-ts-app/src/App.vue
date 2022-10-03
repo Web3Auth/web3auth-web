@@ -83,7 +83,7 @@ const ec = new EC("secp256k1");
 
 const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
 const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
-const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh";
+const tssImportURL = "https://scripts.toruswallet.io/tss-lib.wasm";
 
 async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
   // check if TSS is available
