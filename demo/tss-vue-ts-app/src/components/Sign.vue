@@ -1,6 +1,6 @@
 <template>
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
-    <div class="d-flex justify-space-between">
+    <div class="d-flex justify-space-between mb-2">
       <div class="tag font-weight-black">DKLS19</div>
       <div class="text-right">{{ progressPercent }}%</div>
     </div>
@@ -55,6 +55,9 @@ export default Vue.extend({
     signMessage: {
       type: Function,
     },
+    generatePrecompute: {
+      type: Function,
+    },
   },
   data: () => ({
     region: { name: "South America", key: "sa" },
@@ -72,6 +75,9 @@ export default Vue.extend({
     validForm: true,
     clients: [],
   }),
+  async mounted() {
+    await this.generatePrecompute();
+  },
   methods: {
     async signMessageTo() {
       this.signing = true;

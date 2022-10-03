@@ -75,9 +75,6 @@ export default Vue.extend({
     finalSigner: {
       type: String,
     },
-    generatePrecompute: {
-      type: Function,
-    },
   },
   components: {
     TextFieldCopier,
@@ -88,7 +85,6 @@ export default Vue.extend({
   }),
   methods: {
     goBack() {
-      this.generatePrecompute();
       this.setStep(2);
       this.verified = false;
     },
@@ -109,7 +105,7 @@ export default Vue.extend({
 .tag {
   background: #f0f0f0;
   border-radius: 10px;
-  padding: 10px;
+  padding: 5px 16px;
   display: inline-block;
 }
 </style>

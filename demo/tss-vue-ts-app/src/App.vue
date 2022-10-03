@@ -31,22 +31,16 @@
         </v-col>
 
         <v-col cols="12" md="5">
-          <Login v-if="currentStep == 1" :set-step="setStep" :connect="connect" :generatePrecompute="generatePrecompute" />
+          <Login v-if="currentStep == 1" :set-step="setStep" :connect="connect" />
           <Sign
             v-if="currentStep == 2"
             :set-step="setStep"
             :progressPercent="progressPercent"
             :progressText="progressText"
             :signMessage="signMessage"
-          />
-          <Verify
-            v-if="currentStep >= 3"
-            :set-step="setStep"
-            :finalHash="finalHash"
-            :finalSig="finalSig"
-            :finalSigner="finalSigner"
             :generatePrecompute="generatePrecompute"
           />
+          <Verify v-if="currentStep >= 3" :set-step="setStep" :finalHash="finalHash" :finalSig="finalSig" :finalSigner="finalSigner" />
         </v-col>
 
         <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
@@ -63,9 +57,10 @@
 
 <script lang="ts">
 import { post } from "@toruslabs/http-helpers";
-import { keccak256, safeatob } from "@toruslabs/openlogin-utils";
+import { safeatob } from "@toruslabs/openlogin-utils";
 import { Client } from "@toruslabs/tss-client";
 import * as tss from "@toruslabs/tss-lib";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA } from "@web3auth-mpc/base";
 import { OpenloginAdapter } from "@web3auth-mpc/openlogin-adapter";
 import { Web3Auth } from "@web3auth-mpc/web3auth";
 import BN from "bn.js";
@@ -374,16 +369,46 @@ export default Vue.extend({
         (window as any).openloginAdapter = openloginAdapter;
 
         this.web3auth.configureAdapter(openloginAdapter);
-        // this.subscribeAuthEvents(this.web3auth)
+        this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal();
+        await this.web3auth.initModal({
+          modalConfig: {
+            "wallet-connect-v1": {
+              label: "Wallet-connect-v1",
+              showOnModal: false,
+            },
+            coinbase: {
+              label: "Coinbase",
+              showOnModal: false,
+            },
+            "torus-evm": {
+              label: "Torus-evm",
+              showOnModal: false,
+            },
+            metamask: {
+              label: "Metamask",
+              showOnModal: false,
+            },
+          },
+        });
       } catch (error) {
         console.log("error", error);
       }
     },
+    subscribeAuthEvents(web3auth: Web3Auth) {
+      web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+        this.provider = web3auth.provider;
+        this.setStep(2);
+        // this.loginButtonStatus = "Logged in";
+      });
+      web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
+        this.provider = undefined;
+      });
+    },
   },
 });
 </script>
+
 <style>
 #app {
   background-image: url("@/assets/bg-1.svg"), url("@/assets/bg-2.svg");
