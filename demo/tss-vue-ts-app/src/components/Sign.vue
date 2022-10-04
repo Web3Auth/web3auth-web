@@ -2,9 +2,9 @@
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
     <div class="d-flex justify-space-between align-center mb-2">
       <div class="tag font-weight-black">DKLS19</div>
-      <v-progress-linear :value="percent" rounded color="success" class="ml-5" height="20">
-        <template v-slot:default="{}">
-          <strong>{{ Math.ceil(progressPercent) }}%</strong>
+      <v-progress-linear :value="progressPercent" rounded color="success" class="ml-5" height="20">
+        <template v-slot:default="{ value }">
+          <strong>{{ Math.ceil(value) }}%</strong>
         </template>
       </v-progress-linear>
     </div>
@@ -19,7 +19,7 @@
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
         <v-col cols="12" md="8">
-          <v-text-field :disabled="signing" rounded dense outlined :rules="[rules.required]" v-model="message" />
+          <v-text-field :disabled="signing || !isPrecomputeCompleted" rounded dense outlined :rules="[rules.required]" v-model="message" />
         </v-col>
         <v-col cols="12" md="4">
           <v-btn
@@ -29,7 +29,7 @@
             color="primary"
             class="text-truncate"
             rounded
-            :disabled="!validForm || signing"
+            :disabled="!validForm || signing || !isPrecomputeCompleted"
             :loading="signing"
             @click="signMessageTo"
           >
@@ -78,19 +78,14 @@ export default Vue.extend({
     },
     validForm: true,
     clients: [],
-    percent: "",
-    count: 1,
   }),
+  computed: {
+    isPrecomputeCompleted() {
+      return this.progressPercent == 100;
+    },
+  },
   async mounted() {
     await this.generatePrecompute();
-  },
-  watch: {
-    async progressPercent(val) {
-      this.count++;
-      setTimeout(() => {
-        this.percent = val;
-      }, this.count * 100);
-    },
   },
   methods: {
     async signMessageTo() {

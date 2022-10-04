@@ -1,5 +1,5 @@
 <template>
-  <v-text-field class="text-subtitle-2" dense filled readonly rounded outlined append-icon="mdi-check" :value="text">
+  <v-text-field class="text-subtitle-2" dense filled readonly rounded outlined append-icon="mdi-check" :value="text" @click="copyToClipboard">
     <template v-slot:append>
       <div class="px-2 copy-btn d-flex align-center" @click="copyToClipboard">
         <v-icon class="mr-1" size="16">{{ copied ? "mdi-check" : "mdi-content-copy" }}</v-icon>
