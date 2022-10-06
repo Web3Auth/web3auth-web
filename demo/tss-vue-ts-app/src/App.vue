@@ -80,7 +80,7 @@ import Verify from "./components/Verify.vue";
 const ec = new EC("secp256k1");
 
 const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
-const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
+const tssServerEndpoint = "https://load-test-1.k8.authnetwork.dev/tss";
 
 const tssImportURL = "https://scripts.toruswallet.io/tss-lib.wasm";
 
