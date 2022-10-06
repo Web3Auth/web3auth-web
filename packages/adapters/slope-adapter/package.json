@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/slope-adapter",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "slope wallet adapter for web3auth",
   "keywords": [
     "web3Auth/slope-adapter",
@@ -36,10 +36,10 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@web3auth-mpc/base": "^2.1.5",
-    "@web3auth-mpc/base-provider": "^2.1.5",
-    "@web3auth-mpc/base-solana-adapter": "^2.1.5",
-    "@web3auth-mpc/solana-provider": "^2.1.5",
+    "@web3auth-mpc/base": "^2.1.7",
+    "@web3auth-mpc/base-provider": "^2.1.7",
+    "@web3auth-mpc/base-solana-adapter": "^2.1.7",
+    "@web3auth-mpc/solana-provider": "^2.1.7",
     "bn.js": "^5.2.1"
   },
   "lint-staged": {

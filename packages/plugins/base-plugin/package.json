@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/base-plugin",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "Base plugin for web3auth plugins",
   "keywords": [
     "web3Auth/base-plugin",
@@ -32,7 +32,7 @@
     "src"
   ],
   "dependencies": {
-    "@web3auth-mpc/base": "^2.1.5"
+    "@web3auth-mpc/base": "^2.1.7"
   },
   "lint-staged": {
     "!(*d).ts": [
