@@ -39,6 +39,7 @@ import { Client } from "tss-client";
 import * as tss from "tss-lib";
 import Vue from "vue";
 const ec = new EC("secp256k1");
+
 import { io, Socket } from "socket.io-client";
 
 import Loader from "@/components/loader.vue";
