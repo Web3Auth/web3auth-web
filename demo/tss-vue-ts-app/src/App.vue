@@ -81,6 +81,7 @@ const ec = new EC("secp256k1");
 
 const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
 const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
+
 const tssImportURL = "https://scripts.toruswallet.io/tss-lib.wasm";
 
 async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
@@ -301,6 +302,10 @@ export default Vue.extend({
         };
         const clients: { client: Client; allocated: boolean }[] = [];
         const tssSign = async (msgHash: Buffer) => {
+          if (!getTSSData) {
+            throw new Error("tssShare / sigs are undefined");
+          }
+          const { signatures } = await getTSSData();
           this.finalHash = `0x${msgHash.toString("hex")}`;
           let foundClient = null;
 
@@ -316,7 +321,9 @@ export default Vue.extend({
           }
           await foundClient.client;
           await tss.default(tssImportURL);
-          const { r, s, recoveryParam } = await foundClient.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256");
+          const { r, s, recoveryParam } = await foundClient.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256", {
+            signatures: signatures,
+          });
           return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
         };
         this.generatePrecompute = async () => {
