@@ -4,7 +4,7 @@ import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
+import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, rlp, stripHexPrefix, toBuffer } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";
@@ -54,8 +54,11 @@ async function signTx(
   // };
 
   // TODO get v r s from TSS
-  const msgHash = unsignedEthTx.getMessageToSign(true);
-  const { v, r, s } = await sign(msgHash);
+  let msg = unsignedEthTx.getMessageToSign(false);
+  if (Array.isArray(msg)) {
+    msg = rlp.encode(msg);
+  }
+  const { v, r, s } = await sign(msg);
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV = 27;
