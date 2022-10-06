@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/web3auth",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/web3auth.cjs.js",
@@ -19,15 +19,15 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth-mpc/base": "^2.1.4",
-    "@web3auth-mpc/core": "^2.1.4",
-    "@web3auth-mpc/metamask-adapter": "^2.1.4",
-    "@web3auth-mpc/openlogin-adapter": "^2.1.4",
-    "@web3auth-mpc/phantom-adapter": "^2.1.4",
-    "@web3auth-mpc/torus-evm-adapter": "^2.1.4",
-    "@web3auth-mpc/torus-solana-adapter": "^2.1.4",
-    "@web3auth-mpc/ui": "^2.1.4",
-    "@web3auth-mpc/wallet-connect-v1-adapter": "^2.1.4"
+    "@web3auth-mpc/base": "^2.1.5",
+    "@web3auth-mpc/core": "^2.1.5",
+    "@web3auth-mpc/metamask-adapter": "^2.1.5",
+    "@web3auth-mpc/openlogin-adapter": "^2.1.5",
+    "@web3auth-mpc/phantom-adapter": "^2.1.5",
+    "@web3auth-mpc/torus-evm-adapter": "^2.1.5",
+    "@web3auth-mpc/torus-solana-adapter": "^2.1.5",
+    "@web3auth-mpc/ui": "^2.1.5",
+    "@web3auth-mpc/wallet-connect-v1-adapter": "^2.1.5"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.4.0",
