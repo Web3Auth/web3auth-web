@@ -1,11 +1,11 @@
 # Web3Auth Metamask Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/metamask-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/metamask-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/metamask-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/metamask-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/metamask-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/metamask-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/metamask-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/metamask-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Metamask Adapter allows your Web3Auth Instance to connect to login with Metamask Wallet. 
+Metamask Adapter allows your Web3Auth Instance to connect to login with Metamask Wallet.
 
 ## 📖 Documentation
 
@@ -15,7 +15,7 @@ Read more about the Web3Auth Metamask Adapter in the [official Web3Auth Document
 
 - Adapter Name: `metamask`
 
-- Package Name: [`@web3auth/metamask-adapter`](https://web3auth.io/docs/sdk/web/adapters/metamask)
+- Package Name: [`@web3auth-mpc/metamask-adapter`](https://web3auth.io/docs/sdk/web/adapters/metamask)
 
 - authMode: `DAPP`
 
@@ -26,13 +26,13 @@ Read more about the Web3Auth Metamask Adapter in the [official Web3Auth Document
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/metamask-adapter
+npm install --save @web3auth-mpc/metamask-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
+import { MetamaskAdapter } from "@web3auth-mpc/metamask-adapter";
 const metamaskAdapter = new MetamaskAdapter();
 
 // it will add/update  the metamask adapter in to web3auth class

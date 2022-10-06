@@ -9,7 +9,7 @@ import {
   UserAuthInfo,
   verifySignedChallenge,
   WalletLoginError,
-} from "@web3auth/base";
+} from "@web3auth-mpc/base";
 import bs58 from "bs58";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {

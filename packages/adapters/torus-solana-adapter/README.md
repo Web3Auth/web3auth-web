@@ -1,11 +1,12 @@
 # Web3Auth Torus Solana Wallet Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/torus-solana-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/torus-solana-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-solana-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/torus-solana-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/torus-solana-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/torus-solana-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/torus-solana-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/torus-solana-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Torus solana adapter allows allows your Web3Auth Instance to connect with torus wallet for solana blockchain.  
+Torus solana adapter allows allows your Web3Auth Instance to connect with torus wallet for solana blockchain.
+
 ## 📖 Documentation
 
 Read more about the Web3Auth Torus Solana Wallet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/torus-solana).
@@ -14,7 +15,7 @@ Read more about the Web3Auth Torus Solana Wallet Adapter in the [official Web3Au
 
 - Adapter Name: `torus-solana`
 
-- Package Name: [`@web3auth/torus-solana-adapter`](https://web3auth.io/docs/sdk/web/adapters/torus-solana)
+- Package Name: [`@web3auth-mpc/torus-solana-adapter`](https://web3auth.io/docs/sdk/web/adapters/torus-solana)
 
 - authMode: `DAPP`
 
@@ -25,14 +26,13 @@ Read more about the Web3Auth Torus Solana Wallet Adapter in the [official Web3Au
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/torus-solana-adapter
+npm install --save @web3auth-mpc/torus-solana-adapter
 ```
 
 ## 🩹 Example
 
-
 ```ts
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { SolanaWalletAdapter } from "@web3auth-mpc/torus-solana-adapter";
 const solanaWalletAdapter = new SolanaWalletAdapter({
   adapterSettings: {
     modalZIndex: 99999,

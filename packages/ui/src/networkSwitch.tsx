@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import "../css/network.css";
 
-import { BaseNetworkSwitch, CustomChainConfig } from "@web3auth/base";
+import { BaseNetworkSwitch, CustomChainConfig } from "@web3auth-mpc/base";
 import { render } from "react-dom";
 
 import AddNetwork from "./components/AddNetwork";

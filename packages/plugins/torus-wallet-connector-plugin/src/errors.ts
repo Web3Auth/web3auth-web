@@ -1,4 +1,4 @@
-import { ErrorCodes, IWeb3AuthError, Web3AuthError } from "@web3auth/base";
+import { ErrorCodes, IWeb3AuthError, Web3AuthError } from "@web3auth-mpc/base";
 
 export class TorusWalletPluginError extends Web3AuthError {
   protected static messages: ErrorCodes = {

@@ -1,4 +1,4 @@
-import type { IPhantomWalletProvider } from "@web3auth/solana-provider";
+import type { IPhantomWalletProvider } from "@web3auth-mpc/solana-provider";
 
 export function poll(callback: () => boolean | Promise<boolean>, interval: number, count: number): Promise<boolean> {
   return new Promise((resolve, reject) => {

@@ -1,7 +1,7 @@
 import TorusEmbed, { PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
-import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
-import type { Web3AuthCore } from "@web3auth/core";
+import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth-mpc/base";
+import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth-mpc/base-plugin";
+import type { Web3AuthCore } from "@web3auth-mpc/core";
 import type { EthereumRpcError } from "eth-rpc-errors";
 import log from "loglevel";
 

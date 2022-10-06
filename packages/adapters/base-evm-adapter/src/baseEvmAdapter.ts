@@ -9,7 +9,7 @@ import {
   UserAuthInfo,
   verifySignedChallenge,
   WalletLoginError,
-} from "@web3auth/base";
+} from "@web3auth-mpc/base";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   public clientId: string;

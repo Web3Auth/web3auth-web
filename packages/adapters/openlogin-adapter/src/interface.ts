@@ -1,5 +1,5 @@
-import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin";
-import { CustomChainConfig } from "@web3auth/base";
+import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-mpc";
+import { CustomChainConfig } from "@web3auth-mpc/base";
 
 export type LoginSettings = LoginParams & Partial<BaseRedirectParams>;
 
@@ -8,4 +8,10 @@ export interface OpenloginAdapterOptions {
   chainConfig?: CustomChainConfig | null;
   adapterSettings?: MakeOptional<OpenLoginOptions, "clientId">;
   loginSettings?: LoginSettings;
+  tssSettings?: {
+    useTSS: boolean;
+    tssSign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    tssGetPublic: () => Promise<Buffer>;
+    tssDataCallback: (tssDataReader: () => Promise<{ tssShare: string; signatures: string[] }>) => Promise<void>;
+  };
 }

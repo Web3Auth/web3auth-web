@@ -1,4 +1,4 @@
-import { WALLET_ADAPTERS } from "@web3auth/base";
+import { WALLET_ADAPTERS } from "@web3auth-mpc/base";
 
 import { BaseSolletAdapter, SolletAdapterOptions } from "./baseSolletAdapter";
 

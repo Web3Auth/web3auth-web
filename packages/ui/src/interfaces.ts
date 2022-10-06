@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth-mpc/base";
 
 export interface UIConfig {
   appLogo: string;

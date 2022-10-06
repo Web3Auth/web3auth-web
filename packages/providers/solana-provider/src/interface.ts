@@ -1,7 +1,7 @@
 import type { Transaction } from "@solana/web3.js";
 import type Solflare from "@solflare-wallet/sdk";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { RequestArguments } from "@web3auth/base";
+import { RequestArguments } from "@web3auth-mpc/base";
 import BN from "bn.js";
 
 import { InjectedProvider } from "./providers";

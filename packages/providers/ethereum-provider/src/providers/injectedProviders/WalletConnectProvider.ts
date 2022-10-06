@@ -1,8 +1,16 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 import type { IConnector } from "@walletconnect/types";
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, isHexStrict, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import {
+  CHAIN_NAMESPACES,
+  CustomChainConfig,
+  getChainConfig,
+  isHexStrict,
+  log,
+  WalletInitializationError,
+  WalletLoginError,
+} from "@web3auth-mpc/base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth-mpc/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
 import { createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
