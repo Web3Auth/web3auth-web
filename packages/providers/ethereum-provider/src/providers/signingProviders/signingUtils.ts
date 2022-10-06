@@ -1,10 +1,10 @@
-import { Capability, TransactionFactory, TypedTransaction } from "@ethereumjs/tx";
+import { Capability, TransactionFactory } from "@ethereumjs/tx";
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { BN, hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
+import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";
@@ -31,27 +31,27 @@ async function signTx(
     hackApplied = true;
   }
 
-  const _processSignature = (tx: TypedTransaction, v, r, s, gasPrice, gasLimit) => {
-    const vBN = new BN(v);
-    if (tx.supports(Capability.EIP155ReplayProtection)) {
-      vBN.iadd(tx.common.chainIdBN().muln(2).addn(8));
-    }
-    const opts = { ...(tx as any).txOptions, common: tx.common };
-    return TransactionFactory.fromTxData(
-      {
-        nonce: tx.nonce,
-        gasPrice,
-        gasLimit,
-        to: tx.to,
-        value: tx.value,
-        data: tx.data,
-        v: vBN,
-        r: new BN(r),
-        s: new BN(s),
-      },
-      opts
-    );
-  };
+  // const _processSignature = (tx: TypedTransaction, v, r, s, gasPrice, gasLimit) => {
+  //   const vBN = new BN(v);
+  //   if (tx.supports(Capability.EIP155ReplayProtection)) {
+  //     vBN.iadd(tx.common.chainIdBN().muln(2).addn(8));
+  //   }
+  //   const opts = { ...(tx as any).txOptions, common: tx.common };
+  //   return TransactionFactory.fromTxData(
+  //     {
+  //       nonce: tx.nonce,
+  //       gasPrice,
+  //       gasLimit,
+  //       to: tx.to,
+  //       value: tx.value,
+  //       data: tx.data,
+  //       v: vBN,
+  //       r: new BN(r),
+  //       s: new BN(s),
+  //     },
+  //     opts
+  //   );
+  // };
 
   // TODO get v r s from TSS
   const msgHash = unsignedEthTx.getMessageToSign(true);
@@ -60,7 +60,7 @@ async function signTx(
   if (modifiedV <= 1) {
     modifiedV = modifiedV = 27;
   }
-  const tx = _processSignature(unsignedEthTx, v, r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
+  const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, v, r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
 
   // Hack part 2
   if (hackApplied) {
