@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/openlogin-adapter",
-  "version": "2.1.19",
+  "version": "2.1.20",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
