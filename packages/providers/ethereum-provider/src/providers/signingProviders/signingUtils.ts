@@ -44,7 +44,7 @@ async function signTx(
   // eslint-disable-next-line no-console
   console.log("what is _processSignature implementation", (unsignedEthTx as any)._processSignature.toString());
 
-  const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, v, r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
+  const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, BigInt(modifiedV), r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
 
   // eslint-disable-next-line no-console
   console.log("tx", tx);
@@ -65,7 +65,7 @@ async function signMessage(sign: (msgHash: Buffer) => Promise<{ v: number; r: Bu
   const msgSig = await sign(Buffer.from(message, "hex"));
   let modifiedV = msgSig.v;
   if (modifiedV <= 1) {
-    modifiedV = modifiedV = 27;
+    modifiedV = modifiedV + 27;
   }
   const rawMsgSig = concatSig(intToBuffer(modifiedV), msgSig.r, msgSig.s);
   return rawMsgSig;
