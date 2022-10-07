@@ -4,7 +4,7 @@ import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { hashPersonalMessage, intToBuffer, isHexString, keccak256, publicToAddress, rlp, stripHexPrefix, toBuffer } from "ethereumjs-util";
+import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";
@@ -31,11 +31,7 @@ async function signTx(
     hackApplied = true;
   }
 
-  let msg = unsignedEthTx.getMessageToSign(false);
-  if (Array.isArray(msg)) {
-    msg = rlp.encode(msg);
-  }
-  const msgHash = keccak256(msg);
+  const msgHash = unsignedEthTx.getMessageToSign(true);
   const { v, r, s } = await sign(msgHash);
   let modifiedV = v;
   if (modifiedV <= 1) {
