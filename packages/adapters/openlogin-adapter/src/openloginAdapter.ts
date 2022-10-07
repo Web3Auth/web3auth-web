@@ -70,7 +70,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     useTSS: boolean;
     tssSign?: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     tssGetPublic?: () => Promise<Buffer>;
-    tssDataCallback?: (tssDataReader: () => Promise<{ tssShare: string; signatures: string[] }>) => Promise<void>;
+    tssDataCallback?: (
+      tssDataReader: () => Promise<{ tssShare: string; signatures: string[]; verifierName: string; verifierId: string }>
+    ) => Promise<void>;
   };
 
   private privateKeyOrSigningProvider: PrivateKeyOrSigningProvider | null = null;
@@ -315,9 +317,12 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
 
     await this.tssSettings.tssDataCallback(async () => {
+      const userInfo = await this.openloginInstance?.getUserInfo();
       return {
         tssShare: this.openloginInstance?.state.tssShare || "",
         signatures: this.openloginInstance?.state.signatures || [],
+        verifierName: userInfo?.aggregateVerifier || userInfo?.verifier || "",
+        verifierId: userInfo?.verifierId || "",
       };
     });
 
