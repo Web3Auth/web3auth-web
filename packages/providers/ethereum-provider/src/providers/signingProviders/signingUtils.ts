@@ -31,29 +31,6 @@ async function signTx(
     hackApplied = true;
   }
 
-  // const _processSignature = (tx: TypedTransaction, v, r, s, gasPrice, gasLimit) => {
-  //   const vBN = new BN(v);
-  //   if (tx.supports(Capability.EIP155ReplayProtection)) {
-  //     vBN.iadd(tx.common.chainIdBN().muln(2).addn(8));
-  //   }
-  //   const opts = { ...(tx as any).txOptions, common: tx.common };
-  //   return TransactionFactory.fromTxData(
-  //     {
-  //       nonce: tx.nonce,
-  //       gasPrice,
-  //       gasLimit,
-  //       to: tx.to,
-  //       value: tx.value,
-  //       data: tx.data,
-  //       v: vBN,
-  //       r: new BN(r),
-  //       s: new BN(s),
-  //     },
-  //     opts
-  //   );
-  // };
-
-  // TODO get v r s from TSS
   let msg = unsignedEthTx.getMessageToSign(false);
   if (Array.isArray(msg)) {
     msg = rlp.encode(msg);
@@ -62,7 +39,7 @@ async function signTx(
   const { v, r, s } = await sign(msgHash);
   let modifiedV = v;
   if (modifiedV <= 1) {
-    modifiedV = modifiedV = 27;
+    modifiedV = modifiedV + 27;
   }
   const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, v, r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
 
