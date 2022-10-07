@@ -1,7 +1,7 @@
-import Common, { Hardfork } from "@ethereumjs/common";
+import { Common, Hardfork } from "@ethereumjs/common";
+import { addHexPrefix, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@toruslabs/base-controllers";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth-mpc/base";
-import { addHexPrefix, stripHexPrefix } from "ethereumjs-util";
 
 import { TransactionParams } from "../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../converter";

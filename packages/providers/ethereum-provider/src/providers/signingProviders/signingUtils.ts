@@ -1,10 +1,10 @@
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
+import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "@ethereumjs/util";
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";
@@ -20,6 +20,9 @@ async function signTx(
   const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
     common,
   });
+
+  // eslint-disable-next-line no-console
+  console.log("unsignedethtx", unsignedEthTx);
 
   // Hack for the constellation that we have got a legacy tx after spuriousDragon with a non-EIP155 conforming signature
   // and want to recreate a signature (where EIP155 should be applied)
@@ -37,7 +40,14 @@ async function signTx(
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
   }
+
+  // eslint-disable-next-line no-console
+  console.log("what is _processSignature implementation", (unsignedEthTx as any)._processSignature.toString());
+
   const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, v, r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
+
+  // eslint-disable-next-line no-console
+  console.log("tx", tx);
 
   // Hack part 2
   if (hackApplied) {

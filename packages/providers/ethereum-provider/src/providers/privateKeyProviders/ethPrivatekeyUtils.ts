@@ -1,4 +1,5 @@
 import { TransactionFactory } from "@ethereumjs/tx";
+import { privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import {
   decrypt,
   EthEncryptedData,
@@ -14,7 +15,6 @@ import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controlle
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";

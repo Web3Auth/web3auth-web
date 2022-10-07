@@ -1,5 +1,5 @@
+import { addHexPrefix, BN, stripHexPrefix } from "@ethereumjs/util";
 import { BigNumber } from "bignumber.js";
-import { addHexPrefix, BN, stripHexPrefix } from "ethereumjs-util";
 
 export function bnLessThan(a, b) {
   if (a === null || a === undefined || b === null || b === undefined) {
