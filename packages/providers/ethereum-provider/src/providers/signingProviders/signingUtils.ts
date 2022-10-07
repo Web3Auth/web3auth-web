@@ -21,9 +21,6 @@ async function signTx(
     common,
   });
 
-  // eslint-disable-next-line no-console
-  console.log("unsignedethtx", unsignedEthTx);
-
   // Hack for the constellation that we have got a legacy tx after spuriousDragon with a non-EIP155 conforming signature
   // and want to recreate a signature (where EIP155 should be applied)
   // Leaving this hack lets the legacy.spec.ts -> sign(), verifySignature() test fail
@@ -41,13 +38,7 @@ async function signTx(
     modifiedV = modifiedV + 27;
   }
 
-  // eslint-disable-next-line no-console
-  console.log("what is _processSignature implementation", (unsignedEthTx as any)._processSignature.toString());
-
   const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
-
-  // eslint-disable-next-line no-console
-  console.log("tx", tx);
 
   // Hack part 2
   if (hackApplied) {
