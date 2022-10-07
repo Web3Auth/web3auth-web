@@ -12,6 +12,8 @@ export interface OpenloginAdapterOptions {
     useTSS: boolean;
     tssSign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     tssGetPublic: () => Promise<Buffer>;
-    tssDataCallback: (tssDataReader: () => Promise<{ tssShare: string; signatures: string[] }>) => Promise<void>;
+    tssDataCallback: (
+      tssDataReader: () => Promise<{ tssShare: string; signatures: string[]; verifierName: string; verifierId: string }>
+    ) => Promise<void>;
   };
 }
