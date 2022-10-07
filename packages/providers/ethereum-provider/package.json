@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/ethereum-provider",
-  "version": "2.1.14",
+  "version": "2.1.15",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@ethereumjs/common": "^3.0.0",
     "@ethereumjs/tx": "^4.0.0",
+    "@ethereumjs/util": "^8.0.0",
     "@metamask/eth-sig-util": "^5.0.0",
     "@toruslabs/base-controllers": "^2.2.6",
     "@toruslabs/http-helpers": "^3.2.0",
@@ -30,10 +31,9 @@
     "@web3auth-mpc/base-provider": "^2.1.9",
     "assert": "^2.0.0",
     "bignumber.js": "^9.1.0",
+    "bn.js": "^5.2.1",
     "eth-rpc-errors": "^4.0.3",
-    "@ethereumjs/util": "^8.0.0",
-    "jsonschema": "^1.4.1",
-    "bn.js":"^5.2.1"
+    "jsonschema": "^1.4.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
