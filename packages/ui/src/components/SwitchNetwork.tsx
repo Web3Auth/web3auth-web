@@ -1,4 +1,4 @@
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig } from "@web3auth-mpc/base";
 import { useEffect, useState } from "react";
 
 import { getNetworkIconId } from "../utils";

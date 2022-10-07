@@ -13,7 +13,7 @@ import {
   WALLET_ADAPTERS,
   WalletConnectV1Data,
   Web3AuthError,
-} from "@web3auth/base";
+} from "@web3auth-mpc/base";
 import { render } from "react-dom";
 
 import Modal from "./components/Modal";

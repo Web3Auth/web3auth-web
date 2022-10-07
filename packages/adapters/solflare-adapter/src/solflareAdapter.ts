@@ -20,9 +20,9 @@ import {
   WALLET_ADAPTERS,
   WalletLoginError,
   Web3AuthError,
-} from "@web3auth/base";
-import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
-import { SolflareInjectedProvider, SolflareWallet } from "@web3auth/solana-provider";
+} from "@web3auth-mpc/base";
+import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
+import { SolflareInjectedProvider, SolflareWallet } from "@web3auth-mpc/solana-provider";
 
 export interface SolflareWalletOptions {
   chainConfig?: CustomChainConfig;

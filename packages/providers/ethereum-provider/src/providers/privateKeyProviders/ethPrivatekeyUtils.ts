@@ -1,4 +1,5 @@
 import { TransactionFactory } from "@ethereumjs/tx";
+import { privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import {
   decrypt,
   EthEncryptedData,
@@ -12,13 +13,12 @@ import {
 } from "@metamask/eth-sig-util";
 import { SafeEventEmitterProvider, signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { isHexStrict, log } from "@web3auth/base";
+import { isHexStrict, log } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
-import { privateToAddress, stripHexPrefix } from "ethereumjs-util";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
-import { TransactionFormatter } from "./TransactionFormatter";
-import { validateTypedMessageParams } from "./TransactionFormatter/utils";
+import { TransactionFormatter } from "../TransactionFormatter";
+import { validateTypedMessageParams } from "../TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);

@@ -1,7 +1,7 @@
 import type SolletWallet from "@project-serum/sol-wallet-adapter";
 import { Connection, Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth-mpc/base";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseWalletProvider } from "../../../interface";

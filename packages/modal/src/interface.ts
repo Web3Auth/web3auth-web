@@ -1,4 +1,4 @@
-import type { BaseAdapterConfig, ChainNamespaceType, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import type { BaseAdapterConfig, ChainNamespaceType, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth-mpc/base";
 export interface ModalConfig extends BaseAdapterConfig {
   loginMethods?: LoginMethodConfig;
 }

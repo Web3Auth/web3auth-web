@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, EVM_ADAPTERS, SOLANA_ADAPTERS } from "@web3auth/base";
+import { CHAIN_NAMESPACES, EVM_ADAPTERS, SOLANA_ADAPTERS } from "@web3auth-mpc/base";
 
 import { AdaptersModalConfig } from "./interface";
 

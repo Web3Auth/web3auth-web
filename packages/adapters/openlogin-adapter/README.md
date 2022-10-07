@@ -1,10 +1,9 @@
 # Web3Auth Openlogin Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/openlogin-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/openlogin-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/openlogin-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/openlogin-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/openlogin-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/openlogin-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/openlogin-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/openlogin-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
-
 
 This adapter is a wrapper around the [`openlogin`](https://www.npmjs.com/package/@toruslabs/openlogin) library from Web3Auth (previously Torus) and enables the main social login features of Web3Auth. By default, Web3Auth has
 certain configuration set to enable a quick integration, however, for customising features, like Whitelabel,
@@ -15,12 +14,11 @@ instantiated, you can explore a number of options and can customise the login ex
 
 Read more about the Web3Auth Openlogin Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/openlogin).
 
-
 ## 📄 Basic Details
 
 - Adapter Name: `openlogin`
 
-- Package Name: [`@web3auth/openlogin-adapter`](https://web3auth.io/docs/sdk/web/openlogin)
+- Package Name: [`@web3auth-mpc/openlogin-adapter`](https://web3auth.io/docs/sdk/web/openlogin)
 
 - authMode: `WALLET`, `DAPP`
 
@@ -31,7 +29,7 @@ Read more about the Web3Auth Openlogin Adapter in the [official Web3Auth Documen
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/openlogin-adapter
+npm install --save @web3auth-mpc/openlogin-adapter
 ```
 
 ## 🩹 Example

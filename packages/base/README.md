@@ -1,7 +1,7 @@
 # Web3Auth Base (Basic Types and Interface for Web3Auth)
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/base?label=%22%22)](https://www.npmjs.com/package/@web3auth/base/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/base?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/base/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/base@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,23 +14,22 @@ Read more about the Web3Auth in the [official Web3Auth Documentation](https://we
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/base
+npm install --save @web3auth-mpc/base
 ```
 
 ## 🩹 Example
 
 ```ts
-import { Web3Auth } from "@web3auth/web3auth";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
-
+import { Web3Auth } from "@web3auth-mpc/web3auth";
+import { CHAIN_NAMESPACES } from "@web3auth-mpc/base";
 
 const web3auth = new Web3Auth({
-    clientId,
-    chainConfig: {
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
-        chainId: "0x1",
-        rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
-    },
+  clientId,
+  chainConfig: {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    chainId: "0x1",
+    rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+  },
 });
 
 await web3auth.initModal();

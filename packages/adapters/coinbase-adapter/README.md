@@ -1,11 +1,11 @@
 # Web3Auth Coinbase Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/coinbase-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/coinbase-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/coinbase-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/coinbase-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/coinbase-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/coinbase-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/coinbase-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/coinbase-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Coinbase adapter allows your Web3Auth Instance to connect with the Coinbase Wallet. 
+Coinbase adapter allows your Web3Auth Instance to connect with the Coinbase Wallet.
 
 ## 📖 Documentation
 
@@ -15,7 +15,7 @@ Read more about the Web3Auth Coinbase Adapter in the [official Web3Auth Document
 
 - Adapter Name: `coinbase`
 
-- Package Name: [`@web3auth/coinbase-adapter`](https://web3auth.io/docs/sdk/web/adapters/coinbase)
+- Package Name: [`@web3auth-mpc/coinbase-adapter`](https://web3auth.io/docs/sdk/web/adapters/coinbase)
 
 - authMode: `DAPP`
 
@@ -26,13 +26,13 @@ Read more about the Web3Auth Coinbase Adapter in the [official Web3Auth Document
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/coinbase-adapter
+npm install --save @web3auth-mpc/coinbase-adapter
 ```
 
 ## 🩹 Example
 
 ```ts
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { CoinbaseAdapter } from "@web3auth-mpc/coinbase-adapter";
 const coinbaseAdapter = new CoinbaseAdapter();
 web3auth.configureAdapter(coinbaseAdapter);
 ```

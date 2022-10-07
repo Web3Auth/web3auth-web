@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, IWalletConnectExtensionAdapter } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IWalletConnectExtensionAdapter } from "@web3auth-mpc/base";
 
 export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[] = [
   {

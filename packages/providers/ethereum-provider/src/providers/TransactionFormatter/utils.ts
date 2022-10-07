@@ -1,14 +1,14 @@
+import { isValidAddress } from "@ethereumjs/util";
 import { SignTypedDataVersion, TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
-import { isHexStrict } from "@web3auth/base";
+import { isHexStrict } from "@web3auth-mpc/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
 import { ethErrors } from "eth-rpc-errors";
-import { isValidAddress } from "ethereumjs-util";
 import jsonschema from "jsonschema";
 
-import { TypedMessageParams } from "../../../rpc/interfaces";
-import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
+import { TypedMessageParams } from "../../rpc/interfaces";
+import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../converter";
 import { EIP1159GasData, LegacyGasData } from "./interfaces";
 
 export function normalizeGWEIDecimalNumbers(n: string | BigNumber): string {

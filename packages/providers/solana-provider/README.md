@@ -1,7 +1,7 @@
 # Web3Auth Solana Provider
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/solana-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/solana-provider/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/solana-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/solana-provider@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/solana-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/solana-provider/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/solana-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/solana-provider@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -14,7 +14,7 @@ Read more about Web3Auth Solana Provider in the [official Web3Auth Documentation
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/solana-provider
+npm install --save @web3auth-mpc/solana-provider
 ```
 
 ## 🩹 Example
@@ -22,7 +22,7 @@ npm install --save @web3auth/solana-provider
 ### `SolanaPrivateKeyProvider`
 
 ```ts
-import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
+import { SolanaPrivateKeyProvider } from "@web3auth-mpc/solana-provider";
 
 const solanaPrivateProvider = await SolanaPrivateKeyProvider.getProviderInstance({
   chainConfig: {
@@ -46,7 +46,7 @@ const solanaPrivateProvider = await SolanaPrivateKeyProvider.getProviderInstance
 `web3auth.provider`
 
 ```ts
-import { SolanaWallet } from "@web3auth/solana-provider";
+import { SolanaWallet } from "@web3auth-mpc/solana-provider";
 
 const solanaWallet = new SolanaWallet(web3auth.provider);
 const msg = Buffer.from("Signing Message", "utf8");
@@ -57,7 +57,7 @@ return result;
 `solanaPrivateProvider.provider`
 
 ```ts
-import { SolanaWallet } from "@web3auth/solana-provider";
+import { SolanaWallet } from "@web3auth-mpc/solana-provider";
 
 const solanaWallet = new SolanaWallet(solanaPrivateProvider.provider);
 const msg = Buffer.from("Signing Message", "utf8");
@@ -68,8 +68,8 @@ return result.toString();
 ### General Example
 
 ```ts
-import { SolanaPrivateKeyProvider, SolanaWallet } from "@web3auth/solana-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
+import { SolanaPrivateKeyProvider, SolanaWallet } from "@web3auth-mpc/solana-provider";
+import type { SafeEventEmitterProvider } from "@web3auth-mpc/base";
 
 const signSolanaMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
   const solanaWallet = new SolanaWallet(provider as any);
