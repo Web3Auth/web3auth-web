@@ -44,7 +44,7 @@ async function signTx(
   // eslint-disable-next-line no-console
   console.log("what is _processSignature implementation", (unsignedEthTx as any)._processSignature.toString());
 
-  const tx = (unsignedEthTx as any)._processSignature(unsignedEthTx, BigInt(modifiedV), r, s, finalTxParams.gasPrice, finalTxParams.gasLimit);
+  const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
 
   // eslint-disable-next-line no-console
   console.log("tx", tx);
