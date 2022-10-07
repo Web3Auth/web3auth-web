@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/openlogin-adapter",
-  "version": "2.1.18",
+  "version": "2.1.19",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -44,7 +44,7 @@
     "@toruslabs/openlogin-mpc": "^3.0.1-alpha.0",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-provider": "^2.1.9",
-    "@web3auth-mpc/ethereum-provider": "^2.1.18",
+    "@web3auth-mpc/ethereum-provider": "^2.1.19",
     "@web3auth-mpc/solana-provider": "^2.1.9",
     "bn.js": "^5.2.1",
     "elliptic": "^6.5.4",
