@@ -17,7 +17,7 @@ export interface EthereumSigningProviderConfig extends BaseProviderConfig {
 export interface EthereumSigningProviderState extends BaseProviderState {
   privateKey?: string;
   signMethods?: {
-    sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     getPublic: () => Promise<Buffer>;
   };
 }
@@ -25,7 +25,7 @@ export class EthereumSigningProvider extends BaseProvider<
   BaseProviderConfig,
   EthereumSigningProviderState,
   {
-    sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     getPublic: () => Promise<Buffer>;
   }
 > {
@@ -35,7 +35,7 @@ export class EthereumSigningProvider extends BaseProvider<
 
   public static getProviderInstance = async (params: {
     signMethods: {
-      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
       getPublic: () => Promise<Buffer>;
     };
     chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -79,7 +79,7 @@ export class EthereumSigningProvider extends BaseProvider<
 
   public async updateAccount(params: {
     signMethods: {
-      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
       getPublic: () => Promise<Buffer>;
     };
   }): Promise<void> {
@@ -156,7 +156,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const accountHandlers: IAccountHandlers = {
       updateSignMethods: async (params: {
         signMethods: {
-          sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+          sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
           getPublic: () => Promise<Buffer>;
         };
       }): Promise<void> => {

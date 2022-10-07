@@ -1,5 +1,6 @@
+import { RLP } from "@ethereumjs/rlp";
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
-import { hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "@ethereumjs/util";
+import { bufArrToArr, hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "@ethereumjs/util";
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
@@ -12,7 +13,7 @@ import { validateTypedMessageParams } from "../TransactionFormatter/utils";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
-  sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
 ): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
@@ -32,7 +33,13 @@ async function signTx(
   }
 
   const msgHash = unsignedEthTx.getMessageToSign(true);
-  const { v, r, s } = await sign(msgHash);
+  let rawMessage = unsignedEthTx.getMessageToSign(false);
+  if (Array.isArray(rawMessage)) {
+    // legacy tx, rlp encode it
+    rawMessage = Buffer.from(RLP.encode(bufArrToArr(rawMessage)));
+  }
+
+  const { v, r, s } = await sign(msgHash, rawMessage);
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
@@ -51,7 +58,7 @@ async function signTx(
   return tx.serialize();
 }
 
-async function signMessage(sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
+async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   const message = stripHexPrefix(data);
   const msgSig = await sign(Buffer.from(message, "hex"));
   let modifiedV = msgSig.v;
@@ -65,13 +72,14 @@ async function signMessage(sign: (msgHash: Buffer) => Promise<{ v: number; r: Bu
 function legacyToBuffer(value) {
   return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBuffer(value);
 }
-async function personalSign(sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
+async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
   const message = legacyToBuffer(data);
   const msgHash = hashPersonalMessage(message);
-  const sig = await sign(msgHash);
+  const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${message.length}`, "utf-8");
+  const sig = await sign(msgHash, Buffer.concat([prefix, message]));
   let modifiedV = sig.v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV = 27;
@@ -88,7 +96,7 @@ function validateVersion(version, allowedVersions) {
   }
 }
 
-async function signTypedData(sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data, version) {
+async function signTypedData(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data, version) {
   validateVersion(version, undefined); // Note: this is intentional;
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
@@ -106,7 +114,7 @@ export function getProviderHandlers({
   getProviderEngineProxy,
 }: {
   txFormatter: TransactionFormatter;
-  sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
   getPublic: () => Promise<Buffer>;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): IProviderHandlers {

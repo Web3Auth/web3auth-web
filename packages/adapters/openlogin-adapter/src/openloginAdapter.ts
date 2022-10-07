@@ -42,7 +42,7 @@ export type OpenloginLoginParams = LoginParams & {
 type PrivateKeyOrSigningProvider = IBaseProvider<
   | string
   | {
-      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
       getPublic: () => Promise<Buffer>;
     }
 >;
@@ -68,7 +68,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private tssSettings?: {
     useTSS: boolean;
-    tssSign?: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    tssSign?: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     tssGetPublic?: () => Promise<Buffer>;
     tssDataCallback?: (
       tssDataReader: () => Promise<{ tssShare: string; signatures: string[]; verifierName: string; verifierId: string }>

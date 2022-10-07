@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@ethereumjs/common": "^3.0.0",
+    "@ethereumjs/rlp": "^4.0.0",
     "@ethereumjs/tx": "^4.0.0",
     "@ethereumjs/util": "^8.0.0",
     "@metamask/eth-sig-util": "^5.0.0",
