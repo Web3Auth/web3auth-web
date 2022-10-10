@@ -1,5 +1,6 @@
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
-import { useEffect, useState } from "react";
+import bowser from "bowser";
+import { useEffect, useMemo, useState } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -16,9 +17,17 @@ interface ExternalWalletsProps {
   modalStatus: ModalStatusType;
   wcAdapters: IWalletConnectExtensionAdapter[];
 }
+type platform = "mobile" | "desktop" | "tablet";
+
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcAdapters } = props;
   const [isLoaded, setIsLoaded] = useState(false);
+  const [adapterVisibilityMap, setAdapterVisibilityMap] = useState<Record<string, boolean>>({});
+
+  const deviceType = useMemo<platform>(() => {
+    const browser = bowser.getParser(window.navigator.userAgent);
+    return browser.getPlatformType() as platform;
+  }, []);
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri);
@@ -28,7 +37,26 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     } else if (Object.keys(config).length > 0) {
       setIsLoaded(true);
     }
-  }, [config, handleExternalWalletClick, walletConnectUri]);
+
+    const canShowMap = {};
+    Object.keys(config).forEach((adapter) => {
+      const adapterConfig = config[adapter];
+      if (!adapterConfig.showOnModal) {
+        canShowMap[adapter] = false;
+        return;
+      }
+      if (deviceType === "desktop" && adapterConfig.showOnDesktop) {
+        canShowMap[adapter] = true;
+        return;
+      }
+      if ((deviceType === "mobile" || deviceType === "tablet") && adapterConfig.showOnMobile) {
+        canShowMap[adapter] = true;
+        return;
+      }
+      canShowMap[adapter] = false;
+    });
+    setAdapterVisibilityMap(canShowMap);
+  }, [config, handleExternalWalletClick, walletConnectUri, deviceType]);
 
   return (
     <div className="w3ajs-external-wallet w3a-group">
@@ -57,12 +85,14 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               const providerIcon = <Image imageId={`login-${adapter}`} />;
 
               return (
-                <li className="w3a-adapter-item" key={adapter}>
-                  <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
-                    {providerIcon}
-                  </button>
-                  <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
-                </li>
+                adapterVisibilityMap[adapter] && (
+                  <li className="w3a-adapter-item" key={adapter}>
+                    <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
+                      {providerIcon}
+                    </button>
+                    <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
+                  </li>
+                )
               );
             })}
           </ul>
