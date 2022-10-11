@@ -1,5 +1,6 @@
 import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -18,6 +19,7 @@ const closeIcon = <Icon iconName="close" />;
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose, canEmit = true } = props;
   const web3authIcon = <Image imageId="web3auth" />;
+  const { t } = useTranslation();
 
   useEffect(() => {
     log.debug("loader re-rendering");
@@ -46,7 +48,7 @@ export default function Loader(props: LoaderProps) {
           )}
         </div>
         <div className="w3a-spinner-power">
-          <div>Self-custodial login by</div>
+          <div>{t("modal.footer.message")}</div>
           {web3authIcon}
         </div>
       </div>

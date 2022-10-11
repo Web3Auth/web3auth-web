@@ -1,5 +1,6 @@
 import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -21,6 +22,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
+  const { t } = useTranslation();
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
@@ -53,9 +55,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                 <div className="w3a-modal__loader-adapter">{providerIcon}</div>
               </div>
               <div>
-                <div className="w3a-modal__loader-bridge-message">
-                  Verify on your <span>{adapter}</span> account to continue
-                </div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message", { adapter })}</div>
               </div>
             </>
           )}
@@ -65,7 +65,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           )}
         </div>
         <div className="w3a-spinner-power">
-          <div>Self-custodial login by</div>
+          <div>{t("modal.footer.message")}</div>
           {web3authIcon}
         </div>
       </div>

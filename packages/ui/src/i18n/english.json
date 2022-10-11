@@ -1,0 +1,15 @@
+{
+  "common": {
+    "copier-manage-account": "Manage account"
+  },
+  "modal": {
+    "adapter-loader": {
+      "message": "Verify on your {{adapter}} account to continue"
+    },
+    "footer": {
+      "message": "Self-custodial login by"
+    },
+    "header-subtitle": "Select one of the following to continue",
+    "header-title": "Sign in"
+  }
+}

@@ -14,10 +14,13 @@ import {
   WalletConnectV1Data,
   Web3AuthError,
 } from "@web3auth/base";
+import i18n from "i18next";
 import { render } from "react-dom";
+import { initReactI18next } from "react-i18next";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
+import { en } from "./i18n";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
@@ -27,6 +30,15 @@ function createWrapper(): HTMLElement {
   document.body.appendChild(wrapper);
   return wrapper;
 }
+
+i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: en },
+  },
+  lng: "en",
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+});
 
 export default class LoginModal extends SafeEventEmitter {
   private appLogo: string;

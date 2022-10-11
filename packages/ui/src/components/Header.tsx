@@ -1,4 +1,5 @@
 import { memo, useContext } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
@@ -15,6 +16,8 @@ function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
   const { appLogo = DEFAULT_LOGO_URL, onClose } = props;
 
+  const { t } = useTranslation();
+
   const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 
   return (
@@ -23,8 +26,10 @@ function Header(props: HeaderProps) {
         {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : web3authIcon}
 
         <div>
-          <div className="w3a-header__title">Sign in</div>
-          <p className="w3a-header__subtitle">Select one of the following to continue</p>
+          <div className="w3a-header__title">{t("modal.header-title")}</div>
+          <p className="w3a-header__subtitle">{t("modal.header-subtitle")}</p>
+          {/* Test */}
+          {/* Test */}
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
