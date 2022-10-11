@@ -1,5 +1,6 @@
 import { CustomChainConfig } from "@web3auth/base";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { getNetworkIconId } from "../utils";
 import Image from "./Image";
@@ -15,6 +16,8 @@ interface SwitchNetworkProps {
 function SwitchNetwork(props: SwitchNetworkProps) {
   const { currentChainConfig, newChainConfig, appOrigin, onSwitchNetwork, onCancelNetwork } = props;
   const [showModal, setShowModal] = useState(true);
+
+  const { t } = useTranslation();
 
   const [fromNetworkIconId, setFromNetworkIconId] = useState("network-default");
   const [toNetworkIconId, setToNetworkIconId] = useState("network-default");
@@ -35,7 +38,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
     showModal && (
       <div id="w3a-modal-network">
         <div className="w3a-switch-network">
-          <div className="w3a-switch-network__title">This site is requesting to switch Network</div>
+          <div className="w3a-switch-network__title">{t("modal.network.switch-request")}</div>
           <div>
             <a className="w3a-switch-network__link" href={appOrigin}>
               {appOrigin}
@@ -47,7 +50,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
                 <Image imageId={fromNetworkIconId} />
               </div>
               <div>
-                <div>From:</div>
+                <div>{t("modal.network.from")}:</div>
                 <div>{currentChainConfig.displayName}</div>
               </div>
             </div>
@@ -61,7 +64,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
                 <Image imageId={toNetworkIconId} />
               </div>
               <div>
-                <div>To:</div>
+                <div>{t("modal.network.to")}:</div>
                 <div>{newChainConfig.displayName}</div>
               </div>
             </div>
@@ -75,7 +78,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
                 onCancelNetwork();
               }}
             >
-              Cancel
+              {t("modal.network.cancel")}
             </button>
             <button
               type="button"
@@ -85,7 +88,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
                 onSwitchNetwork(currentChainConfig.chainId, newChainConfig.chainId);
               }}
             >
-              Proceed
+              {t("modal.network.proceed")}
             </button>
           </div>
         </div>

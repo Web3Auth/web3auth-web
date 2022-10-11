@@ -1,6 +1,7 @@
 import { IWalletConnectExtensionAdapter } from "@web3auth/base";
 import bowser from "bowser";
 import { memo, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import QRCode from "react-qr-code";
 
 import Image from "./Image";
@@ -66,6 +67,8 @@ function WalletConnect(props: WalletConnectProps) {
   const { walletConnectUri, wcAdapters } = props;
   const [links, setLinks] = useState<IMobileRegistryEntry[]>([]);
 
+  const { t } = useTranslation();
+
   const deviceDetails = useMemo<{ platform: platform; os: os }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
     return { platform: browser.getPlatformType() as platform, os: browser.getOSName() as os };
@@ -89,7 +92,7 @@ function WalletConnect(props: WalletConnectProps) {
         <div className="w3a-wallet-connect__logo">{walletConnectIcon}</div>
         {deviceDetails.platform === bowser.PLATFORMS_MAP.desktop ? (
           <div className="w3a-wallet-connect__container-desktop">
-            <div>Scan QR code with a WalletConnect-compatible wallet</div>
+            <div>{t("modal.external.walletconnect-subtitle")}</div>
             <div className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr">
               <QRCode size={200} value={walletConnectUri} />
             </div>
@@ -110,7 +113,7 @@ function WalletConnect(props: WalletConnectProps) {
                 <div className="w3a-wallet-connect__container-android">
                   <a key={link.name} href={link.href} rel="noopener noreferrer" target="_blank">
                     <button type="button" className="w3a-button">
-                      Connect
+                      {t("modal.external.walletconnect-connect")}
                     </button>
                   </a>
                 </div>

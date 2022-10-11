@@ -4,6 +4,7 @@ import { log, WALLET_ADAPTERS } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
@@ -52,6 +53,8 @@ export default function Modal(props: ModalProps) {
 
   const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
   const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -125,7 +128,7 @@ export default function Modal(props: ModalProps) {
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
-        <div className="w3a-group__title">EXTERNAL WALLET</div>
+        <div className="w3a-group__title">{t("modal.external.title")}</div>
         <button
           type="button"
           className="w3a-button w3ajs-external-toggle__button"
@@ -139,7 +142,7 @@ export default function Modal(props: ModalProps) {
             });
           }}
         >
-          Connect with Wallet
+          {t("modal.external.connect")}
         </button>
       </div>
     </div>

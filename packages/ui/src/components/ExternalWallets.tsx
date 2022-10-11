@@ -1,5 +1,6 @@
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -20,6 +21,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcAdapters } = props;
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri);
     const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
@@ -36,7 +39,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
             <Icon iconName="arrow-left" />
-            <div className="w3a-group__title">Back</div>
+            <div className="w3a-group__title">{t("modal.external.back")}</div>
           </button>
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}

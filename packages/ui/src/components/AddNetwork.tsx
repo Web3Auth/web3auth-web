@@ -1,5 +1,6 @@
 import { CustomChainConfig } from "@web3auth/base";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { getNetworkIconId } from "../utils";
 import Image from "./Image";
@@ -16,6 +17,8 @@ function AddNetwork(props: AddNetworkProps) {
   const [showModal, setShowModal] = useState(true);
   const [networkIconId, setNetworkIconId] = useState("network-default");
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     getNetworkIconId(chainConfig.ticker)
       .then((id) => {
@@ -28,7 +31,7 @@ function AddNetwork(props: AddNetworkProps) {
     showModal && (
       <div id="w3a-modal-network">
         <div className="w3a-switch-network">
-          <div className="w3a-switch-network__title">This site is requesting to add Network</div>
+          <div className="w3a-switch-network__title">{t("modal.network.add-request")}</div>
           <div>
             <a className="w3a-switch-network__link" href={appOrigin}>
               {appOrigin}
@@ -53,7 +56,7 @@ function AddNetwork(props: AddNetworkProps) {
                 onCancelNetwork();
               }}
             >
-              Cancel
+              {t("modal.network.cancel")}
             </button>
             <button
               type="button"
@@ -63,7 +66,7 @@ function AddNetwork(props: AddNetworkProps) {
                 onAddNetwork(chainConfig.chainId);
               }}
             >
-              Proceed
+              {t("modal.network.proceed")}
             </button>
           </div>
         </div>
