@@ -113,8 +113,7 @@ export class Web3Auth extends Web3AuthCore {
     }
 
     // get userLanguage
-    const defaultLanguage = this.options.uiConfig?.defaultLanguage || getUserLanguage();
-    log.info("defaultLanguage", defaultLanguage);
+    const defaultLanguage = getUserLanguage(this.options.uiConfig?.defaultLanguage);
 
     this.loginModal = new LoginModal({
       theme: this.options.uiConfig?.theme,

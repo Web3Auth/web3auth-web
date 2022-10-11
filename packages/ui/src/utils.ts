@@ -56,12 +56,3 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
     return fallbackId;
   }
 }
-
-export const languageMap = {
-  en: "english",
-  de: "german",
-  ja: "japanese",
-  ko: "korean",
-  zh: "mandarin",
-  es: "spanish",
-};

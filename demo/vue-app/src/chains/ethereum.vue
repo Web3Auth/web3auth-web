@@ -124,9 +124,6 @@ export default Vue.extend({
           clientId: config.clientId,
           authMode: "DAPP",
           enableLogging: true,
-          uiConfig: {
-            defaultLanguage: "de",
-          },
         });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {

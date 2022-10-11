@@ -11,9 +11,11 @@ export const languageMap = {
   es: "spanish",
 };
 
-export const getUserLanguage = () => {
-  let userLanguage = (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US";
-  const userLanguageArr = userLanguage.split("-");
-  userLanguage = Object.prototype.hasOwnProperty.call(languageMap, userLanguageArr[0]) ? userLanguageArr[0] : "en";
-  return userLanguage;
+export const getUserLanguage = (defaultLanguage: string | undefined) => {
+  let userLanguage = defaultLanguage;
+  if (!userLanguage) {
+    const browserLanguage = (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US";
+    userLanguage = browserLanguage.split("-")[0];
+  }
+  return Object.prototype.hasOwnProperty.call(languageMap, userLanguage) ? userLanguage : "en";
 };
