@@ -15,6 +15,14 @@
       "terms": "Terms of use",
       "policy": "Privacy policy"
     },
+    "network": {
+      "switch-request": "This site is requesting to switch Network",
+      "to": "To",
+      "cancel": "Cancel",
+      "proceed": "Proceed",
+      "add-request": "This site is requesting to add Network",
+      "from": "From"
+    },
     "social": {
       "email": "Email",
       "view-more": "View more options",

@@ -32,19 +32,24 @@ function getLocale() {
 getLocale()
   .then((result) => {
     const locales = result.data;
-    const folder = "./packages/ui/src/i18n/";
-    const folderPath = path.resolve(folder);
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath);
-    }
+    const folders = ["./packages/ui/src/i18n/"];
+    folders.forEach((folder) => {
+      const folderPath = path.resolve(folder);
+
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath);
+      }
+    });
 
     // Create json files
     const keys = Object.keys(locales);
     for (const localeKey of keys) {
       if (Object.prototype.hasOwnProperty.call(locales, localeKey)) {
-        const filePath = path.resolve(`${folder}${localeKey}.json`);
-        fs.writeFile(filePath, JSON.stringify(locales[localeKey], null, 2), { flag: "w" }, (error) => {
-          if (error) throw error;
+        folders.forEach((folder) => {
+          const filePath = path.resolve(`${folder}${localeKey}.json`);
+          fs.writeFile(filePath, JSON.stringify(locales[localeKey], null, 2), { flag: "w" }, (error) => {
+            if (error) throw error;
+          });
         });
       }
     }

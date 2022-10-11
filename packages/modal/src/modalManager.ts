@@ -23,6 +23,7 @@ import {
 } from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
+import { getUserLanguage } from "./utils";
 
 export interface UIConfig {
   /**
@@ -98,12 +99,18 @@ export class Web3Auth extends Web3AuthCore {
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
+
+    // get userLanguage
+    const defaultLanguage = getUserLanguage();
+    log.info("defaultLanguage", defaultLanguage);
+
     this.loginModal = new LoginModal({
       theme: this.options.uiConfig?.theme,
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,
       displayErrorsOnModal: this.options.displayErrorsOnModal,
+      defaultLanguage,
     });
     this.subscribeToLoginModalEvents();
   }
