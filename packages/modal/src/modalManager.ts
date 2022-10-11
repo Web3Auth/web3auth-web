@@ -44,6 +44,18 @@ export interface UIConfig {
    * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
    */
   loginMethodsOrder?: string[];
+
+  /**
+   * language which will be used by web3auth. app will use browser language if not specified. if language is not supported it will use "en"
+   * en: english
+   * de: german
+   * ja: japanese
+   * ko: korean
+   * zh: mandarin
+   * es: spanish
+   *
+   */
+  defaultLanguage?: string;
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
@@ -101,7 +113,7 @@ export class Web3Auth extends Web3AuthCore {
     }
 
     // get userLanguage
-    const defaultLanguage = getUserLanguage();
+    const defaultLanguage = this.options.uiConfig?.defaultLanguage || getUserLanguage();
     log.info("defaultLanguage", defaultLanguage);
 
     this.loginModal = new LoginModal({
