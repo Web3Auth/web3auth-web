@@ -335,7 +335,7 @@ export default Vue.extend({
         },
         {
           value: "de",
-          display: "german",
+          display: "German",
         },
         {
           value: "ja",

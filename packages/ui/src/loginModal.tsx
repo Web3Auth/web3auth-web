@@ -20,8 +20,10 @@ import { initReactI18next } from "react-i18next";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-import { de, en, es, ja, ko, zh } from "./i18n";
+// import { de, en, es, ja, ko, zh } from "./i18n";
+import { en } from "./i18n";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+import { languageMap } from "./utils";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(): HTMLElement {
@@ -34,11 +36,11 @@ function createWrapper(): HTMLElement {
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
-    de: { translation: de },
-    es: { translation: es },
-    ja: { translation: ja },
-    ko: { translation: ko },
-    zh: { translation: zh },
+    // de: { translation: de },
+    // es: { translation: es },
+    // ja: { translation: ja },
+    // ko: { translation: ko },
+    // zh: { translation: zh },
   },
   lng: "en",
   fallbackLng: "en",
@@ -72,7 +74,19 @@ export default class LoginModal extends SafeEventEmitter {
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
 
-    i18n.changeLanguage(this.defaultLanguage || "en");
+    const useLang = this.defaultLanguage || "en";
+
+    // Load new language resource
+    if (useLang !== "en") {
+      import(/* webpackChunkName: "lang-[request]" */ `./i18n/${languageMap[useLang]}.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    }
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
