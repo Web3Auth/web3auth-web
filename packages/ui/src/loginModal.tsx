@@ -14,7 +14,7 @@ import {
   WalletConnectV1Data,
   Web3AuthError,
 } from "@web3auth/base";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
@@ -60,8 +60,9 @@ export default class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-
-      render(
+      const container = createWrapper();
+      const root = createRoot(container);
+      root.render(
         <ThemedContext.Provider value={darkState}>
           <Modal
             closeModal={this.closeModal}
@@ -72,8 +73,7 @@ export default class LoginModal extends SafeEventEmitter {
             appLogo={this.appLogo}
             version={this.version}
           />
-        </ThemedContext.Provider>,
-        createWrapper()
+        </ThemedContext.Provider>
       );
     });
   };

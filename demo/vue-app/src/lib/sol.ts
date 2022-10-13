@@ -48,13 +48,20 @@ export const signAndSendTransaction = async (provider: SafeEventEmitterProvider,
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const pubKey = await solWeb3.requestAccounts();
-    const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-    const TransactionInstruction = SystemProgram.transfer({
+
+    const block = await conn.getLatestBlockhash("finalized");
+    const transactionInstruction = SystemProgram.transfer({
       fromPubkey: new PublicKey(pubKey[0]),
-      toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
+      toPubkey: new PublicKey(pubKey[0]),
       lamports: 0.01 * LAMPORTS_PER_SOL,
     });
-    const transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
+
+    const transaction = new Transaction({
+      blockhash: block.blockhash,
+      lastValidBlockHeight: block.lastValidBlockHeight,
+      feePayer: new PublicKey(pubKey[0]),
+    }).add(transactionInstruction);
+
     const signature = await solWeb3.signAndSendTransaction(transaction);
     uiConsole("signature", signature);
   } catch (error) {
@@ -68,13 +75,20 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const pubKey = await solWeb3.requestAccounts();
-    const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-    const TransactionInstruction = SystemProgram.transfer({
+
+    const block = await conn.getLatestBlockhash("finalized");
+    const transactionInstruction = SystemProgram.transfer({
       fromPubkey: new PublicKey(pubKey[0]),
-      toPubkey: new PublicKey("oWvBmHCj6m8ZWtypYko8cRVVnn7jQRpSZjKpYBeESxu"),
-      lamports: 0.01 * LAMPORTS_PER_SOL,
+      toPubkey: new PublicKey(pubKey[0]),
+      lamports: 0 * LAMPORTS_PER_SOL,
     });
-    const transaction = new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(pubKey[0]) }).add(TransactionInstruction);
+
+    const transaction = new Transaction({
+      blockhash: block.blockhash,
+      lastValidBlockHeight: block.lastValidBlockHeight,
+      feePayer: new PublicKey(pubKey[0]),
+    }).add(transactionInstruction);
+
     const signedTx = await solWeb3.signTransaction(transaction);
 
     // const res = await conn.sendRawTransaction(signedTx.serialize());
