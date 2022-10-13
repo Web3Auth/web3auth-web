@@ -10,6 +10,18 @@ Torus Wallet adapter allows your Web3Auth Instance to connect with torus wallet 
 
 Read more about the Web3Auth Torus EVM Wallet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/torus-evm).
 
+## 💡 Features
+- Plug and Play, OAuth based Web3 Authentication Service
+- Fully decentralized, non-custodial key infrastructure
+- End to end Whitelabelable solution
+- Threshold Cryptography based Key Reconstruction
+- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Support for WebAuthn & Passwordless Login
+- Support for connecting to multiple wallets
+- DApp Active Session Management
+
+...and a lot more
+
 ## 📄 Basic Details
 
 - Adapter Name: `torus-evm`

@@ -11,6 +11,18 @@ Web3Auth Torus Wallet Connector Plugin helps you get the functionalities of the 
 
 Read more about the Web3Auth Torus Wallet Connector Plugin in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/plugins/torus-wallet).
 
+## 💡 Features
+- Plug and Play, OAuth based Web3 Authentication Service
+- Fully decentralized, non-custodial key infrastructure
+- End to end Whitelabelable solution
+- Threshold Cryptography based Key Reconstruction
+- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Support for WebAuthn & Passwordless Login
+- Support for connecting to multiple wallets
+- DApp Active Session Management
+
+...and a lot more
+
 ## 🔗 Installation
 
 ```shell
