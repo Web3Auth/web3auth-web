@@ -30,7 +30,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
-      txMessage.addSignature(publicKey, signature);
+      txMessage.addSignature(publicKey, Buffer.from(signature));
       return txMessage;
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
@@ -46,7 +46,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
-      txMessage.addSignature(publicKey, signature);
+      txMessage.addSignature(publicKey, Buffer.from(signature));
       const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
       const conn = new Connection(chainConfig.rpcTarget);
       const res = await conn.sendRawTransaction(txMessage.serialize());
@@ -73,7 +73,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
 
       for (let i = 0; i < length; i++) {
         const signature = bs58.decode(data.signatures[i]);
-        allTxns[i].addSignature(publicKey, signature);
+        allTxns[i].addSignature(publicKey, Buffer.from(signature));
       }
 
       return allTxns;

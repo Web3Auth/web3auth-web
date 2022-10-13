@@ -9,7 +9,7 @@
     "packages/adapters/*",
     "packages/plugins/*"
   ],
-  "version": "2.1.2",
-  "npmClient": "yarn",
+  "version": "2.1.3",
+  "npmClient": "npm",
   "useWorkspaces": true
 }

@@ -20,7 +20,7 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
     [SOLANA_ADAPTERS.PHANTOM]: {
       label: "Phantom",
       showOnModal: true,
-      showOnMobile: true,
+      showOnMobile: false,
       showOnDesktop: true,
     },
   },
@@ -38,7 +38,7 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
     [EVM_ADAPTERS.METAMASK]: {
       label: "MetaMask",
       showOnModal: true,
-      showOnMobile: true,
+      showOnMobile: false,
       showOnDesktop: true,
     },
     [EVM_ADAPTERS.OPENLOGIN]: {
