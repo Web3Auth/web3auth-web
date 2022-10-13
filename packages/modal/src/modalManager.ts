@@ -23,6 +23,7 @@ import {
 } from "./config";
 import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, ModalConfig } from "./interface";
+import { getUserLanguage } from "./utils";
 
 export interface UIConfig {
   /**
@@ -43,6 +44,18 @@ export interface UIConfig {
    * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
    */
   loginMethodsOrder?: string[];
+
+  /**
+   * language which will be used by web3auth. app will use browser language if not specified. if language is not supported it will use "en"
+   * en: english
+   * de: german
+   * ja: japanese
+   * ko: korean
+   * zh: mandarin
+   * es: spanish
+   *
+   */
+  defaultLanguage?: string;
 }
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
@@ -98,12 +111,17 @@ export class Web3Auth extends Web3AuthCore {
     } else {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
+
+    // get userLanguage
+    const defaultLanguage = getUserLanguage(this.options.uiConfig?.defaultLanguage);
+
     this.loginModal = new LoginModal({
       theme: this.options.uiConfig?.theme,
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,
       displayErrorsOnModal: this.options.displayErrorsOnModal,
+      defaultLanguage,
     });
     this.subscribeToLoginModalEvents();
   }

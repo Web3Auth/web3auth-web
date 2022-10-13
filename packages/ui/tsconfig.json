@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.json",
   "include": ["src", "test", "css", "assets"],
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "target": "es6",
     // "rootDir": ".",
     // "strict": true
   }

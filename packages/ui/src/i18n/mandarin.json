@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "验证您的 {{adapter}} 帐户以继续"
+    },
+    "external": {
+      "title": "外部钱包",
+      "walletconnect-subtitle": "使用兼容 WalletConnect 的钱包扫描 QR 码",
+      "walletconnect-connect": "连接",
+      "connect": "连接钱包",
+      "back": "后退"
+    },
+    "footer": {
+      "message": "自托管登录由",
+      "terms": "使用条款",
+      "policy": "隐私政策"
+    },
+    "network": {
+      "switch-request": "此站点正在请求切换网络",
+      "to": "至",
+      "cancel": "取消",
+      "proceed": "继续",
+      "add-request": "此站点正在请求添加网络",
+      "from": "从"
+    },
+    "social": {
+      "email": "电子邮件",
+      "view-more": "查看更多选项",
+      "email-continue": "继续使用电子邮件",
+      "continue": "继续",
+      "view-less": "查看更少的选项"
+    },
+    "header-subtitle": "选择以下一项以继续",
+    "header-title": "登入"
+  }
+}

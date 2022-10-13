@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "続行するには、{{adapter}} アカウントで確認してください"
+    },
+    "external": {
+      "title": "外部ウォレット",
+      "walletconnect-subtitle": "WalletConnect対応ウォレットでQRコードをスキャン",
+      "walletconnect-connect": "接続",
+      "connect": "ウォレットと接続",
+      "back": "戻る"
+    },
+    "footer": {
+      "message": "による自己管理ログイン",
+      "terms": "利用規約",
+      "policy": "プライバシーポリシー"
+    },
+    "network": {
+      "switch-request": "このサイトはネットワークの切り替えを要求しています",
+      "to": "に",
+      "cancel": "キャンセル",
+      "proceed": "続行",
+      "add-request": "このサイトはネットワークの追加をリクエストしています",
+      "from": "から"
+    },
+    "social": {
+      "email": "Eメール",
+      "view-more": "その他のオプションを表示",
+      "email-continue": "メールで続行",
+      "continue": "続ける",
+      "view-less": "オプションを少なく表示"
+    },
+    "header-subtitle": "次のいずれかを選択して続行します",
+    "header-title": "ログイン"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "Verifica tu cuenta de {{adapter}} para continuar"
+    },
+    "external": {
+      "title": "Monedero externo",
+      "walletconnect-subtitle": "Escanea el código QR con una billetera compatible con WalletConnect",
+      "walletconnect-connect": "Conectar",
+      "connect": "Conectar con Monedero",
+      "back": "atrás"
+    },
+    "footer": {
+      "message": "Inicio de sesión con autocustodia por",
+      "terms": "Términos de Uso",
+      "policy": "Política de privacidad"
+    },
+    "network": {
+      "switch-request": "Este sitio está solicitando cambiar de red",
+      "to": "A",
+      "cancel": "Cancelar",
+      "proceed": "Proceder",
+      "add-request": "Este sitio está solicitando agregar Red",
+      "from": "De"
+    },
+    "social": {
+      "email": "Correo electrónico",
+      "view-more": "Ver más opciones",
+      "email-continue": "Continuar con correo electrónico",
+      "continue": "Continua con",
+      "view-less": "Ver menos opciones"
+    },
+    "header-subtitle": "Seleccione uno de los siguientes para continuar",
+    "header-title": "Iniciar sesión"
+  }
+}

@@ -24,7 +24,8 @@
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "locale": "node locales/importLocales.js"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-typescript": "^1.1.2",

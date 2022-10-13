@@ -149,19 +149,25 @@
                 <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
               </span>
             </div>
-            <br />
             <div class="flex-vertical-center">
               <span class="form-label">Theme</span>
               <span class="form-control">
                 <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
                 <label for="light">Light</label>
-                <br />
                 <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
                 <label for="dark">Dark</label>
-                <br />
               </span>
             </div>
-            <br />
+            <div class="flex-vertical-center">
+              <span class="form-label">Default Language</span>
+              <span class="form-control">
+                <select v-model="form.uiMode.whitelabel.defaultLanguage">
+                  <option v-for="language in languages" :value="language.value" :key="language.value">
+                    {{ language.display }}
+                  </option>
+                </select>
+              </span>
+            </div>
             <div class="order-container">
               <div class="form-label">
                 <div>Login Methods Order</div>
@@ -278,9 +284,10 @@ const defaultFormConfig = {
       type: "openlogin",
     },
     whitelabel: {
-      logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+      logoUrl: "https://images.web3auth.io/example-hello.svg",
       theme: "light",
       loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
+      defaultLanguage: "en",
     },
   },
 };
@@ -310,6 +317,8 @@ const initialFormConfig = {
   ...configFromURL(),
 };
 
+console.log(initialFormConfig);
+
 export default Vue.extend({
   name: "HomeComponent",
   data() {
@@ -319,6 +328,32 @@ export default Vue.extend({
       // sending to other components
       config: { ...cloneDeep(initialFormConfig) },
       tempLoginMethodsOrder: initialFormConfig.uiMode?.whitelabel.loginMethodsOrder.join(",") ?? "",
+      languages: [
+        {
+          value: "en",
+          display: "English",
+        },
+        {
+          value: "de",
+          display: "German",
+        },
+        {
+          value: "ja",
+          display: "Japanese",
+        },
+        {
+          value: "ko",
+          display: "Korean",
+        },
+        {
+          value: "zh",
+          display: "Mandarin",
+        },
+        {
+          value: "es",
+          display: "Spanish",
+        },
+      ],
     };
   },
   components: {

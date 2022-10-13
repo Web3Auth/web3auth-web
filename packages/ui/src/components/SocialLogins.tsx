@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
@@ -25,6 +26,8 @@ export default function SocialLogins(props: SocialLoginProps) {
   } = props;
   const { isDark } = useContext(ThemedContext);
 
+  const { t } = useTranslation();
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Too small a function to use `useCallback`
@@ -41,11 +44,11 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
-  const adapterExpandText = isExpanded ? "View less options" : "View more options";
+  const adapterExpandText = isExpanded ? t("modal.social.view-less") : t("modal.social.view-more");
 
   return (
     <div className="w3ajs-social-logins w3a-group">
-      <div className="w3a-group__title">CONTINUE WITH</div>
+      <div className="w3a-group__title">{t("modal.social.continue")}</div>
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;

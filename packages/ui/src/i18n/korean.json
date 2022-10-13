@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "계속하려면 {{adapter}} 계정에서 인증하세요."
+    },
+    "external": {
+      "title": "외부 지갑",
+      "walletconnect-subtitle": "WalletConnect 호환 지갑으로 QR 코드 스캔",
+      "walletconnect-connect": "연결하다",
+      "connect": "지갑과 연결",
+      "back": "뒤"
+    },
+    "footer": {
+      "message": "자가 관리 로그인",
+      "terms": "이용약관",
+      "policy": "개인 정보 정책"
+    },
+    "network": {
+      "switch-request": "이 사이트는 네트워크 전환을 요청하고 있습니다",
+      "to": "에게",
+      "cancel": "취소",
+      "proceed": "진행하다",
+      "add-request": "이 사이트는 네트워크 추가를 요청하고 있습니다",
+      "from": "에서"
+    },
+    "social": {
+      "email": "이메일",
+      "view-more": "더 많은 옵션 보기",
+      "email-continue": "이메일로 계속",
+      "continue": "계속",
+      "view-less": "더 적은 옵션 보기"
+    },
+    "header-subtitle": "계속하려면 다음 중 하나를 선택하세요.",
+    "header-title": "로그인"
+  }
+}

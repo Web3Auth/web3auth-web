@@ -8,6 +8,7 @@ export interface UIConfig {
   theme?: "light" | "dark";
   loginMethodsOrder?: string[];
   displayErrorsOnModal?: boolean;
+  defaultLanguage?: string;
 }
 
 export const LOGIN_MODAL_EVENTS = {

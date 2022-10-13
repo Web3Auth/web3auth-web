@@ -1,6 +1,7 @@
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
 import bowser from "bowser";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
@@ -28,6 +29,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     const browser = bowser.getParser(window.navigator.userAgent);
     return browser.getPlatformType() as platform;
   }, []);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri);
@@ -64,7 +67,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {showBackButton && (
           <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
             <Icon iconName="arrow-left" />
-            <div className="w3a-group__title">Back</div>
+            <div className="w3a-group__title">{t("modal.external.back")}</div>
           </button>
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}

@@ -233,7 +233,6 @@
   }
 }
 
-
 /* Header */
 #w3a-modal .w3a-header {
   display: flex;
@@ -295,6 +294,7 @@
   font-size: 14px;
   line-height: 1.5em;
   margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
 /* Adapter List */

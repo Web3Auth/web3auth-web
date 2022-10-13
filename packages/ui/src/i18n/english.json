@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "Verify on your {{adapter}} account to continue"
+    },
+    "external": {
+      "title": "External wallet",
+      "walletconnect-subtitle": "Scan QR code with a WalletConnect-compatible wallet",
+      "walletconnect-connect": "Connect",
+      "connect": "Connect with Wallet",
+      "back": "Back"
+    },
+    "footer": {
+      "message": "Self-custodial login by",
+      "terms": "Terms of use",
+      "policy": "Privacy policy"
+    },
+    "network": {
+      "switch-request": "This site is requesting to switch Network",
+      "to": "To",
+      "cancel": "Cancel",
+      "proceed": "Proceed",
+      "add-request": "This site is requesting to add Network",
+      "from": "From"
+    },
+    "social": {
+      "email": "Email",
+      "view-more": "View more options",
+      "email-continue": "Continue with Email",
+      "continue": "Continue with",
+      "view-less": "View less options"
+    },
+    "header-subtitle": "Select one of the following to continue",
+    "header-title": "Sign in"
+  }
+}

@@ -29,6 +29,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
@@ -43,7 +44,7 @@ export default Vue.extend({
       type: Object,
       default: () => ({
         theme: "light",
-        logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+        logoUrl: "https://images.web3auth.io/example-hello.svg",
       }),
     },
   },
@@ -76,12 +77,23 @@ export default Vue.extend({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
-          uiConfig: { appLogo: this.uiConfig.logoUrl, theme: this.uiConfig.theme, loginMethodsOrder: this.uiConfig.loginMethodsOrder },
+          uiConfig: {
+            appLogo: this.uiConfig.logoUrl,
+            theme: this.uiConfig.theme,
+            loginMethodsOrder: this.uiConfig.loginMethodsOrder,
+            defaultLanguage: this.uiConfig.defaultLanguage,
+          },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId,
         });
+
+        const coinbaseAdapter = new CoinbaseAdapter({
+          adapterSettings: { appName: "Web3Auth Example" },
+        });
+
+        this.web3auth.configureAdapter(coinbaseAdapter);
         this.subscribeAuthEvents(this.web3auth);
-        await (this.web3auth as Web3Auth).initModal({});
+        await this.web3auth.initModal({});
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);
