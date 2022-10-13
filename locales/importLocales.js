@@ -1,17 +1,17 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable promise/always-return */
-const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const log = require("loglevel");
 
-// const localeUrl = "https://api.tor.us/locales/open-login";
-const localeUrl = "http://localhost:2020/locales/web3auth";
+const localeUrl = "https://api.tor.us/locales/web3auth";
+// const localeUrl = "http://localhost:2020/locales/web3auth";
 
 function getLocale() {
   return new Promise((resolve, reject) => {
-    const request = http.get(`${localeUrl}`, (response) => {
+    const request = https.get(`${localeUrl}`, (response) => {
       let body = "";
       response.on("data", (data) => {
         body += data;
