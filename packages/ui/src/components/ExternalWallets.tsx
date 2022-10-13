@@ -38,7 +38,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       setIsLoaded(true);
     }
 
-    const canShowMap = {};
+    const canShowMap: Record<string, boolean> = {};
     Object.keys(config).forEach((adapter) => {
       const adapterConfig = config[adapter];
       if (!adapterConfig.showOnModal) {
