@@ -12,6 +12,7 @@ Web3Auth Base contains the basic typescript types and interfaces for Web3Auth. T
 Read more about the Web3Auth in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -32,17 +33,16 @@ npm install --save @web3auth/base
 ## 🩹 Example
 
 ```ts
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES } from "@web3auth/base";
 
-
 const web3auth = new Web3Auth({
-    clientId,
-    chainConfig: {
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
-        chainId: "0x1",
-        rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
-    },
+  clientId,
+  chainConfig: {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    chainId: "0x1",
+    rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+  },
 });
 
 await web3auth.initModal();
