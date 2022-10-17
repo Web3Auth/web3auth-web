@@ -1,5 +1,5 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
@@ -197,7 +197,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await provider.onWithdrawalRequest();
   };
 
-
   const contextProvider = {
     web3Auth,
     chain,
@@ -211,7 +210,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getStarkKey,
     onMintRequest,
     onDepositRequest,
-    onWithdrawalRequest
+    onWithdrawalRequest,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

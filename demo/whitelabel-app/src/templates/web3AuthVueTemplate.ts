@@ -1,8 +1,7 @@
-
-import type { UIConfig } from "@web3auth/web3auth";
+import type { UIConfig } from "@web3auth/modal";
 
 export const generateVueCode = (uiConfig: UIConfig): string => {
-    return `
+  return `
      <template>
       <div class="grid grid-cols-12 h-full">
           <button v-if="isLoggedIn" type="button" class="app-btn" @click="logout">Log out</button>
@@ -11,7 +10,7 @@ export const generateVueCode = (uiConfig: UIConfig): string => {
     </template>
   
   <script lang="ts">
-  import { UIConfig, Web3Auth } from "@web3auth/web3auth";
+  import { UIConfig, Web3Auth } from "@web3auth/modal";
   import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, SafeEventEmitterProvider } from "@web3auth/base";
   import { defineComponent } from "vue";
   
@@ -105,5 +104,5 @@ export const generateVueCode = (uiConfig: UIConfig): string => {
     @apply py-2 px-5 w-full outline-none text-base text-app-primary bg-white rounded-lg border border-app-primary hover:bg-gray-100 focus:ring-1 focus:ring-app-primary;
   }
   </style>
-  `
-}
+  `;
+};

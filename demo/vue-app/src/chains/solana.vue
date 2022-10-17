@@ -36,7 +36,7 @@ import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-p
 import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { SolletExtensionAdapter, SolletWebAdapter } from "@web3auth/sollet-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";

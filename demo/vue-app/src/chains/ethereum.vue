@@ -31,7 +31,7 @@ import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";

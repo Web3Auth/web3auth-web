@@ -1,5 +1,5 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -176,8 +176,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const accounts = await provider.getAccounts()
-    const user = await torusPlugin?.initiateTopup("moonpay", { selectedAddress: accounts[0] })
+    const accounts = await provider.getAccounts();
+    const user = await torusPlugin?.initiateTopup("moonpay", { selectedAddress: accounts[0] });
     uiConsole(user);
   };
   const showWalletConnectScanner = async () => {
@@ -186,7 +186,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const user = await torusPlugin?.showWalletConnectScanner()
+    const user = await torusPlugin?.showWalletConnectScanner();
     uiConsole(user);
   };
   const showDapp = async (url: string) => {
@@ -195,7 +195,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const user = torusPlugin?.torusWalletInstance.showWallet("discover", { url })
+    const user = torusPlugin?.torusWalletInstance.showWallet("discover", { url });
     uiConsole(user);
   };
 
