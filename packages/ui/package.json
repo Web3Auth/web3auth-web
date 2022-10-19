@@ -11,7 +11,7 @@
     "solana"
   ],
   "main": "dist/ui.cjs.js",
-  "module": "dist/ui.esm.js",
+  "module": "dist/index.js",
   "unpkg": "dist/ui.umd.min.js",
   "jsdelivr": "dist/ui.umd.min.js",
   "types": "dist/types/index.d.ts",
