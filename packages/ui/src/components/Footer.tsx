@@ -10,7 +10,7 @@ interface FooterProps {
 function Footer(props: FooterProps) {
   const { version } = props;
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   const web3authIcon = <Image imageId="web3auth" height="14px" width="auto" />;
 

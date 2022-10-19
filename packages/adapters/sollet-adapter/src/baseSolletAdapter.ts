@@ -52,7 +52,7 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: SolletAdapterOptions) {
+  constructor(options: SolletAdapterOptions = {}) {
     super(options);
     this.chainConfig = options?.chainConfig || null;
     this._provider = options?.provider;

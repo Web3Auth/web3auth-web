@@ -28,9 +28,11 @@ interface ModalProps {
 
 log.enableAll();
 
+const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
+
 export default function Modal(props: ModalProps) {
-  const { isDark } = useContext(ThemedContext);
   const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
+
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
@@ -50,11 +52,10 @@ export default function Modal(props: ModalProps) {
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
+  const { isDark } = useContext(ThemedContext);
+  const [t] = useTranslation();
 
   const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
-  const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
-
-  const { t } = useTranslation();
 
   useEffect(() => {
     stateListener.emit("MOUNTED");

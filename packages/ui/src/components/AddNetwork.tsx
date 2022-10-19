@@ -17,7 +17,7 @@ function AddNetwork(props: AddNetworkProps) {
   const [showModal, setShowModal] = useState(true);
   const [networkIconId, setNetworkIconId] = useState("network-default");
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   useEffect(() => {
     getNetworkIconId(chainConfig.ticker)

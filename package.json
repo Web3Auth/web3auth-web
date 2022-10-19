@@ -80,7 +80,8 @@
     "node": ">=14.17.0",
     "npm": ">=6.x"
   },
-  "resolutions": {
-    "@typescript-eslint/eslint-plugin": "^5.40.1"
+  "overrides": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

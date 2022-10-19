@@ -48,7 +48,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: SlopeWalletOptions) {
+  constructor(options: SlopeWalletOptions = {}) {
     super(options);
     this.chainConfig = options?.chainConfig || null;
     this.sessionTime = options?.sessionTime || 86400;

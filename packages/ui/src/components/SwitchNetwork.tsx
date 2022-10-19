@@ -17,10 +17,10 @@ function SwitchNetwork(props: SwitchNetworkProps) {
   const { currentChainConfig, newChainConfig, appOrigin, onSwitchNetwork, onCancelNetwork } = props;
   const [showModal, setShowModal] = useState(true);
 
-  const { t } = useTranslation();
-
   const [fromNetworkIconId, setFromNetworkIconId] = useState("network-default");
   const [toNetworkIconId, setToNetworkIconId] = useState("network-default");
+
+  const [t] = useTranslation();
 
   useEffect(() => {
     getNetworkIconId(currentChainConfig.ticker)

@@ -67,7 +67,7 @@ function WalletConnect(props: WalletConnectProps) {
   const { walletConnectUri, wcAdapters } = props;
   const [links, setLinks] = useState<IMobileRegistryEntry[]>([]);
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   const deviceDetails = useMemo<{ platform: platform; os: os }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);

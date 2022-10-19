@@ -47,7 +47,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
 
   private rehydrated = false;
 
-  constructor(options: SolflareWalletOptions) {
+  constructor(options: SolflareWalletOptions = {}) {
     super(options);
     this.chainConfig = options?.chainConfig || null;
     this.sessionTime = options?.sessionTime || 86400;

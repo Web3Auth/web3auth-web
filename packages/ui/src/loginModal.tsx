@@ -1,4 +1,5 @@
 import "../css/web3auth.css";
+import "./localeImport";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
@@ -16,12 +17,9 @@ import {
 } from "@web3auth/base";
 import i18n from "i18next";
 import { createRoot } from "react-dom/client";
-import { initReactI18next } from "react-i18next";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-// import { de, en, es, ja, ko, zh } from "./i18n";
-import { en } from "./i18n";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
@@ -32,21 +30,7 @@ function createWrapper(): HTMLElement {
   return wrapper;
 }
 
-i18n.use(initReactI18next).init({
-  resources: {
-    en: { translation: en },
-    // de: { translation: de },
-    // es: { translation: es },
-    // ja: { translation: ja },
-    // ko: { translation: ko },
-    // zh: { translation: zh },
-  },
-  lng: "en",
-  fallbackLng: "en",
-  interpolation: { escapeValue: false },
-});
-
-export default class LoginModal extends SafeEventEmitter {
+class LoginModal extends SafeEventEmitter {
   private appLogo: string;
 
   private version: string;
@@ -285,3 +269,5 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 }
+
+export default LoginModal;

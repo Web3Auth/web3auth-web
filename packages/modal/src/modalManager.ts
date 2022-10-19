@@ -12,7 +12,7 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
-import LoginModal, { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
+import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
 
 import {
   defaultEvmDappModalConfig,
@@ -261,44 +261,26 @@ export class Web3Auth extends Web3AuthCore {
   private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
-    const adaptersData: Record<string, unknown> = {};
-    const adapterPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
-      try {
-        const adapter = this.walletAdapters[adapterName];
-        if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
-          log.debug("init external wallet", this.cachedAdapter, adapterName);
-          this.subscribeToAdapterEvents(adapter);
-          // we are not initializing cached adapter here as it is already being initialized in initModal before.
-          if (this.cachedAdapter === adapterName) {
-            return;
-          }
-          if (adapter.status === ADAPTER_STATUS.NOT_READY)
-            return await Promise.race([
-              adapter.init({ autoConnect: this.cachedAdapter === adapterName }).then(() => {
-                adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
-                adaptersData[adapterName] = adapter.adapterData || {};
-                return adapterName;
-              }),
-              new Promise((resolve) => {
-                setTimeout(() => {
-                  return resolve(null);
-                }, 5000);
-              }),
-            ]);
+    Object.keys(this.walletAdapters).forEach(async (adapterName) => {
+      const adapter = this.walletAdapters[adapterName];
+      if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
+        log.debug("init external wallet", this.cachedAdapter, adapterName);
+        this.subscribeToAdapterEvents(adapter);
+        // we are not initializing cached adapter here as it is already being initialized in initModal before.
+        if (this.cachedAdapter === adapterName) {
+          return;
         }
-      } catch (error) {
-        log.error(error, "error while initializing adapter");
+        if (adapter.status === ADAPTER_STATUS.NOT_READY)
+          await adapter
+            .init({ autoConnect: this.cachedAdapter === adapterName })
+            .then(() => {
+              adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+              this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+              return undefined;
+            })
+            .catch((error) => log.error(error, "error while initializing adapter"));
       }
     });
-
-    const adapterInitResults = await Promise.all(adapterPromises);
-    const finalAdaptersConfig: Record<WALLET_ADAPTER_TYPE, BaseAdapterConfig> = {};
-    adapterInitResults.forEach((result: string | undefined) => {
-      if (result) {
-        finalAdaptersConfig[result] = adaptersConfig[result];
-      }
-    });
-    this.loginModal.addWalletLogins(finalAdaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
   }
 
   private initializeInAppWallet(adapterName: string): void {

@@ -16,7 +16,7 @@ function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
   const { appLogo = DEFAULT_LOGO_URL, onClose } = props;
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 

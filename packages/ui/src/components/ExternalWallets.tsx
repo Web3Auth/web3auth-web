@@ -30,7 +30,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     return browser.getPlatformType() as platform;
   }, []);
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri);

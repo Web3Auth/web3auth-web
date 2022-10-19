@@ -93,7 +93,7 @@ export default Vue.extend({
 
         this.web3auth.configureAdapter(coinbaseAdapter);
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({});
+        await this.web3auth.initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);
