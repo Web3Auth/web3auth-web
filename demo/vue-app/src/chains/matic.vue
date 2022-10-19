@@ -24,9 +24,9 @@
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";

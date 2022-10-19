@@ -28,10 +28,10 @@ import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { WALLET_ADAPTERS } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+// import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
+import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-// import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";

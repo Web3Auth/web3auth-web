@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@metamask/detect-provider": "^1.2.0",
+    "@metamask/detect-provider": "^2.0.0",
     "@web3auth/base": "^2.1.3",
     "@web3auth/base-evm-adapter": "^2.1.3"
   },

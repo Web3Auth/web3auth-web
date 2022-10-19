@@ -30,13 +30,13 @@ import {
   SafeEventEmitterProvider,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
+import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
 import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { SolletExtensionAdapter, SolletWebAdapter } from "@web3auth/sollet-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { Web3Auth } from "@web3auth/web3auth";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";

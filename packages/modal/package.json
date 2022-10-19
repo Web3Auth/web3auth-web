@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/web3auth",
+  "name": "@web3auth/modal",
   "version": "2.1.3",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/web3auth.cjs.js",
-  "module": "dist/web3auth.esm.js",
-  "unpkg": "dist/web3auth.umd.min.js",
-  "jsdelivr": "dist/web3auth.umd.min.js",
+  "main": "dist/modal.cjs.js",
+  "module": "dist/modal.esm.js",
+  "unpkg": "dist/modal.umd.min.js",
+  "jsdelivr": "dist/modal.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
@@ -30,7 +30,7 @@
     "@web3auth/wallet-connect-v1-adapter": "^2.1.3"
   },
   "devDependencies": {
-    "@svgr/webpack": "^6.4.0",
+    "@svgr/webpack": "^6.5.0",
     "@toruslabs/openlogin": "^2.7.0",
     "css-loader": "^6.7.1",
     "isomorphic-style-loader": "^5.3.2",

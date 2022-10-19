@@ -12,6 +12,7 @@ Web3Auth is where passwordless auth meets non-custodial key infrastructure for W
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SDK Reference](https://web3auth.io/docs/sdk/web/) to get started!
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -27,7 +28,7 @@ Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SD
 
 For using Web3Auth in the web, you have two choices of SDKs to get started with.
 
-[Web3Auth Plug and Play UI SDK `@web3auth/web3auth`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
+[Web3Auth Plug and Play UI SDK `@web3auth/modal`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
 
 [Web3Auth Plug and Play Core SDK `@web3auth/core`](https://web3auth.io/docs/sdk/web/core/): The core module implemeting all the Web3Auth features you need and giving you the flexibilty of using your own UI with the Web3Auth SDK working in the backend.
 
@@ -36,7 +37,7 @@ For using Web3Auth in the web, you have two choices of SDKs to get started with.
 ### Installation (Web3Auth Plug and Play UI)
 
 ```shell
-npm install --save @web3auth/web3auth
+npm install --save @web3auth/modal
 ```
 
 ### Get your Client ID from Web3Auth Dashboard
@@ -50,7 +51,7 @@ Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a 
 Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
 ```js
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 
 //Initialize within your constructor
 const web3auth = new Web3Auth({
@@ -78,7 +79,7 @@ await web3auth.connect();
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 🏠 **Core**                                |
 | `@web3auth/core`                           | [![npm version](https://img.shields.io/npm/v/@web3auth/core?label=%22%22)](https://www.npmjs.com/package/@web3auth/core/v/latest)                                                     | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/core?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/core@latest)                                                     | Provides the core logic for handling adapters within web3auth. This package acts as a manager for all the adapters. You should use this package to build your custom login UI on top of web3auth.                                                                                                            |
-| `@web3auth/web3auth`                       | [![npm version](https://img.shields.io/npm/v/@web3auth/web3auth?label=%22%22)](https://www.npmjs.com/package/@web3auth/web3auth/v/latest)                                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/web3auth?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/web3auth@latest)                                             | Provides the main class for using default web3auth modal. It inherits `@web3auth/core` package. So you can still call all the functions available in the `@web3auth/core` api reference. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. |
+| `@web3auth/modal`                          | [![npm version](https://img.shields.io/npm/v/@web3auth/modal?label=%22%22)](https://www.npmjs.com/package/@web3auth/modal/v/latest)                                                   | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/modal?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/modal@latest)                                                   | Provides the main class for using default web3auth modal. It inherits `@web3auth/core` package. So you can still call all the functions available in the `@web3auth/core` api reference. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. |
 | 🔌 **Adapters**                            |
 | `@web3auth/coinbase-adapter`               | [![npm version](https://img.shields.io/npm/v/@web3auth/coinbase-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/coinbase-adapter/v/latest)                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/coinbase-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/coinbase-adapter@latest)                             | Adds coinbase login functionality                                                                                                                                                                                                                                                                            |
 | `@web3auth/metamask-adapter`               | [![npm version](https://img.shields.io/npm/v/@web3auth/metamask-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/metamask-adapter/v/latest)                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/metamask-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/metamask-adapter@latest)                             | Adds metamask chrome extension login functionality                                                                                                                                                                                                                                                           |
@@ -129,6 +130,7 @@ Please replace package and version with the appropriate package name
 ```js
 <script src="https://cdn.jsdelivr.net/npm/@web3auth/PACKAGE@VERSION"></script>
 ```
+
 #### `unpkg`
 
 ```js

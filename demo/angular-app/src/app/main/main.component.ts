@@ -3,7 +3,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
 import { ADAPTER_EVENTS } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { Web3Auth } from "@web3auth/web3auth";
+import { Web3Auth } from "@web3auth/modal";
 
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../../config/chains";
 import { WEB3AUTH_NETWORK_TYPE } from "../../config/web3auth-networks";

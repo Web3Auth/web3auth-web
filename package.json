@@ -28,17 +28,17 @@
     "locale": "node locales/importLocales.js"
   },
   "devDependencies": {
-    "@toruslabs/eslint-config-typescript": "^1.1.2",
-    "@toruslabs/torus-scripts": "^1.2.2",
+    "@toruslabs/eslint-config-typescript": "^1.1.3",
+    "@toruslabs/torus-scripts": "^1.2.3",
     "@types/node": "^16",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
     "cross-env": "^7.0.3",
-    "eslint": "^8.24.0",
+    "eslint": "^8.25.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-promise": "^6.1.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-tsdoc": "^0.2.17",
     "husky": "^8.0.1",
@@ -81,6 +81,6 @@
     "npm": ">=6.x"
   },
   "resolutions": {
-    "@typescript-eslint/eslint-plugin": "^5.38.1"
+    "@typescript-eslint/eslint-plugin": "^5.40.1"
   }
 }
