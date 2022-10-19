@@ -23,7 +23,6 @@ import { ThemedContext } from "./context/ThemeContext";
 // import { de, en, es, ja, ko, zh } from "./i18n";
 import { en } from "./i18n";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
-import { languageMap } from "./utils";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(): HTMLElement {
@@ -75,17 +74,54 @@ export default class LoginModal extends SafeEventEmitter {
     const darkState = { isDark: this.isDark };
 
     const useLang = this.defaultLanguage || "en";
-
     // Load new language resource
     if (useLang !== "en") {
-      import(/* webpackChunkName: "lang-[request]" */ `./i18n/${languageMap[useLang]}.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
+      if (useLang === "de") {
+        import(/* webpackChunkName: "lang-de" */ "./i18n/german.json")
+          .then((messages) => {
+            i18n.addResourceBundle(useLang as string, "translation", messages.default);
+            return i18n.changeLanguage(useLang);
+          })
+          .catch((error) => {
+            log.error(error);
+          });
+      } else if (useLang === "ja") {
+        import(/* webpackChunkName: "lang-ja" */ `./i18n/japanese.json`)
+          .then((messages) => {
+            i18n.addResourceBundle(useLang as string, "translation", messages.default);
+            return i18n.changeLanguage(useLang);
+          })
+          .catch((error) => {
+            log.error(error);
+          });
+      } else if (useLang === "ko") {
+        import(/* webpackChunkName: "lang-ja" */ `./i18n/korean.json`)
+          .then((messages) => {
+            i18n.addResourceBundle(useLang as string, "translation", messages.default);
+            return i18n.changeLanguage(useLang);
+          })
+          .catch((error) => {
+            log.error(error);
+          });
+      } else if (useLang === "zh") {
+        import(/* webpackChunkName: "lang-ja" */ `./i18n/mandarin.json`)
+          .then((messages) => {
+            i18n.addResourceBundle(useLang as string, "translation", messages.default);
+            return i18n.changeLanguage(useLang);
+          })
+          .catch((error) => {
+            log.error(error);
+          });
+      } else if (useLang === "es") {
+        import(/* webpackChunkName: "lang-ja" */ `./i18n/spanish.json`)
+          .then((messages) => {
+            i18n.addResourceBundle(useLang as string, "translation", messages.default);
+            return i18n.changeLanguage(useLang);
+          })
+          .catch((error) => {
+            log.error(error);
+          });
+      }
     }
 
     return new Promise((resolve) => {
