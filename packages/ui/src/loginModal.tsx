@@ -75,53 +75,52 @@ export default class LoginModal extends SafeEventEmitter {
 
     const useLang = this.defaultLanguage || "en";
     // Load new language resource
-    if (useLang !== "en") {
-      if (useLang === "de") {
-        import("./i18n/german.json")
-          .then((messages) => {
-            i18n.addResourceBundle(useLang as string, "translation", messages.default);
-            return i18n.changeLanguage(useLang);
-          })
-          .catch((error) => {
-            log.error(error);
-          });
-      } else if (useLang === "ja") {
-        import(`./i18n/japanese.json`)
-          .then((messages) => {
-            i18n.addResourceBundle(useLang as string, "translation", messages.default);
-            return i18n.changeLanguage(useLang);
-          })
-          .catch((error) => {
-            log.error(error);
-          });
-      } else if (useLang === "ko") {
-        import(`./i18n/korean.json`)
-          .then((messages) => {
-            i18n.addResourceBundle(useLang as string, "translation", messages.default);
-            return i18n.changeLanguage(useLang);
-          })
-          .catch((error) => {
-            log.error(error);
-          });
-      } else if (useLang === "zh") {
-        import(`./i18n/mandarin.json`)
-          .then((messages) => {
-            i18n.addResourceBundle(useLang as string, "translation", messages.default);
-            return i18n.changeLanguage(useLang);
-          })
-          .catch((error) => {
-            log.error(error);
-          });
-      } else if (useLang === "es") {
-        import(`./i18n/spanish.json`)
-          .then((messages) => {
-            i18n.addResourceBundle(useLang as string, "translation", messages.default);
-            return i18n.changeLanguage(useLang);
-          })
-          .catch((error) => {
-            log.error(error);
-          });
-      }
+
+    if (useLang === "de") {
+      import("./i18n/german.json")
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "ja") {
+      import(`./i18n/japanese.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "ko") {
+      import(`./i18n/korean.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "zh") {
+      import(`./i18n/mandarin.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "es") {
+      import(`./i18n/spanish.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
     }
 
     return new Promise((resolve) => {
