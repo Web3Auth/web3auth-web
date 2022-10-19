@@ -77,7 +77,7 @@ export default class LoginModal extends SafeEventEmitter {
     // Load new language resource
     if (useLang !== "en") {
       if (useLang === "de") {
-        import(/* webpackChunkName: "lang-de" */ "./i18n/german.json")
+        import("./i18n/german.json")
           .then((messages) => {
             i18n.addResourceBundle(useLang as string, "translation", messages.default);
             return i18n.changeLanguage(useLang);
@@ -86,7 +86,7 @@ export default class LoginModal extends SafeEventEmitter {
             log.error(error);
           });
       } else if (useLang === "ja") {
-        import(/* webpackChunkName: "lang-ja" */ `./i18n/japanese.json`)
+        import(`./i18n/japanese.json`)
           .then((messages) => {
             i18n.addResourceBundle(useLang as string, "translation", messages.default);
             return i18n.changeLanguage(useLang);
@@ -95,7 +95,7 @@ export default class LoginModal extends SafeEventEmitter {
             log.error(error);
           });
       } else if (useLang === "ko") {
-        import(/* webpackChunkName: "lang-ja" */ `./i18n/korean.json`)
+        import(`./i18n/korean.json`)
           .then((messages) => {
             i18n.addResourceBundle(useLang as string, "translation", messages.default);
             return i18n.changeLanguage(useLang);
@@ -104,7 +104,7 @@ export default class LoginModal extends SafeEventEmitter {
             log.error(error);
           });
       } else if (useLang === "zh") {
-        import(/* webpackChunkName: "lang-ja" */ `./i18n/mandarin.json`)
+        import(`./i18n/mandarin.json`)
           .then((messages) => {
             i18n.addResourceBundle(useLang as string, "translation", messages.default);
             return i18n.changeLanguage(useLang);
@@ -113,7 +113,7 @@ export default class LoginModal extends SafeEventEmitter {
             log.error(error);
           });
       } else if (useLang === "es") {
-        import(/* webpackChunkName: "lang-ja" */ `./i18n/spanish.json`)
+        import(`./i18n/spanish.json`)
           .then((messages) => {
             i18n.addResourceBundle(useLang as string, "translation", messages.default);
             return i18n.changeLanguage(useLang);

@@ -100,6 +100,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
           clientId,
+          uiConfig: {
+            defaultLanguage: "en"
+          }
         });
         const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
         web3AuthInstance.configureAdapter(adapter);
