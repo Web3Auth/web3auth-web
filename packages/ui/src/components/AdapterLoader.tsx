@@ -22,7 +22,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");

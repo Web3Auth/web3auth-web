@@ -21,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import {
   ADAPTER_STATUS,
   CHAIN_NAMESPACES,
@@ -121,7 +122,7 @@ export default Vue.extend({
         this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
-            network: this.openloginNetwork,
+            network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId,
           },
         });
@@ -150,6 +151,7 @@ export default Vue.extend({
           modalConfig: {
             // to hide social login methods
             [WALLET_ADAPTERS.OPENLOGIN]: {
+              label: "OpenLogin",
               loginMethods: {
                 twitter: {
                   name: "twitter",

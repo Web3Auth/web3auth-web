@@ -74,7 +74,7 @@ export default Vue.extend({
           authMode: "DAPP",
         });
         this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({});
+        await this.web3auth.initModal();
         console.log("web3auth", this.web3auth);
       } catch (error) {
         console.log("error", error);
@@ -85,7 +85,7 @@ export default Vue.extend({
       try {
         this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId });
         this.subscribeAuthEvents(this.web3auth);
-        await (this.web3auth as Web3Auth).initModal({});
+        await (this.web3auth as Web3Auth).initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);

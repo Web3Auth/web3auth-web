@@ -9,7 +9,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
   const { handleSocialLoginClick, adapter } = props;
   const [isValidEmail, setIsValidEmail] = useState(false);
 
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   const handleEmailSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

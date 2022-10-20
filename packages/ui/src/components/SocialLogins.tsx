@@ -16,6 +16,7 @@ interface SocialLoginProps {
 
 export default function SocialLogins(props: SocialLoginProps) {
   const [canShowMore, setCanShowMore] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     socialLoginsConfig = {
       loginMethods: {},
@@ -26,9 +27,7 @@ export default function SocialLogins(props: SocialLoginProps) {
   } = props;
   const { isDark } = useContext(ThemedContext);
 
-  const { t } = useTranslation();
-
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [t] = useTranslation();
 
   // Too small a function to use `useCallback`
   const expandClickHandler = () => {

@@ -53,7 +53,7 @@ export const generateVueCode = (uiConfig: UIConfig): string => {
                     clientId: "example-client-id",
                   });
                   this.subscribeAuthEvents(web3auth);
-                  await web3auth.initModal({});
+                  await web3auth.initModal();
               }
               catch (error) {
                   console.log("error", error);
