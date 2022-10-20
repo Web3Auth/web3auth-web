@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -69,11 +69,11 @@
     "i18next": "^22.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
+    "qr.js": "^0.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^11.18.6",
-    "react-qr-code": "^2.0.8",
-    "qr.js": "^0.0.0"
+    "react-qr-code": "^2.0.8"
   },
   "lint-staged": {
     "!(*d).ts": [
