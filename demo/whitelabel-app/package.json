@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@tailwindcss/postcss7-compat": "^2.2.17",
-    "@web3auth/base": "^1.2.0",
-    "@web3auth/openlogin-adapter": "^1.2.4",
-    "@web3auth/modal": "^1.2.4",
+    "@web3auth/base": "file:../../packages/base",
+    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
+    "@web3auth/modal": "file:../../packages/modal",
     "autoprefixer": "^10",
     "codemirror": "^5.65.2",
     "copy-to-clipboard": "^3.3.2",

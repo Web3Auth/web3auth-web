@@ -39,12 +39,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/@solana/web3.js@1/lib/index.iife.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@1"></script>
     <script src="https://bundle.run/buffer@6"></script>
 
     <script>
-      const web3authSdk = window.Web3auth;
+      const web3authSdk = window.Modal;
       window.Web3 = solanaWeb3;
       let web3AuthInstance = null;
 
@@ -64,6 +64,10 @@
             tickerName: "solana",
           },
           clientId: "BEExcOSoQPOv159WU4H_DZ1A5yh9Gv68yHFp3t861W5niPawEPlXekYYOafDZke05_cTvGE1qC-oUNaqkDJQpbw",
+          uiConfig: {
+            theme: "light",
+            defaultLanguage: "en",
+          },
         });
 
         subscribeAuthEvents(web3AuthInstance);
