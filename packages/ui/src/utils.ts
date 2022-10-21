@@ -64,4 +64,5 @@ export const languageMap = {
   ko: "korean",
   zh: "mandarin",
   es: "spanish",
+  fr: "french",
 };
