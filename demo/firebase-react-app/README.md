@@ -1,4 +1,29 @@
-# Web3Auth X Firebase Demo
+# Web3Auth x Firebase - React Demo App
+
+## Quickstart
+
+To use this demo app, you'll first have to build the Web3Auth packages.
+
+### Build the `Web3Auth` packages
+
+```bash
+git clone https://github.com/Web3Auth/web3auth-web.git
+cd web3auth-web
+npm install
+npm bootstrap && npm run build
+```
+
+### Start the demo app
+
+> Inside `web3auth-web` directory.
+
+```bash
+cd demo/firebase-react-app
+npm install
+npm run start
+# localhost:3000
+```
+
 ## Firebase Prerequisites:-
 
 - Create a firebase project and configure a web app from [Firebase Console](https://firebase.google.com/console/).
@@ -10,11 +35,10 @@
 - Enable the Auth providers you would like to offer your users in the firebase console, under
   Auth > Sign-in methods.
 
-
 ## Web3Auth Pre-requisites
 
 - Create a project from plug and play section of [web3auth developer dashboard](https://dashboard.web3auth.io) and
-copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.development file.
+  copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.development file.
 
 - Create a custom verifier from [web3auth developer dashboard](https://dashboard.web3auth.io) with following configuration:
 
@@ -22,28 +46,25 @@ copy your clientId to env variable named `REACT_APP_CLIENT_ID` in env.developmen
 
 - Use `https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com` as JWK Endpoint in custom verifier window
 
- - Make sure to add a following JWT validation fields in custom verifier window ([here](https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients) is a related, helpful Firebase doc):-
+- Make sure to add a following JWT validation fields in custom verifier window ([here](https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients) is a related, helpful Firebase doc):-
 
-    - `aud`: firebase project id.
-    - `iss`: `https://securetoken.google.com/<firebase-project-id>`
+  - `aud`: firebase project id.
+  - `iss`: `https://securetoken.google.com/<firebase-project-id>`
 
 - Add your verifier name as a env variable named `REACT_APP_VERIFIER` in env.development file.
 
-
 - To know how above configuration is being used in this example repo, refer to `init()` and `login()` functions in `src/services/web3auth.tsx` file
-
 
 - Your custom verifer configuration should look like the config given in the image below:-
 
 - <img src="https://i.ibb.co/1Jrzph5/Screenshot-2022-03-10-at-1-46-03-AM.png"/>
 
-
 ## How it works?
 
 - While using firebase or any auth service provider, Web3Auth requires two things to validate user's jwt token:-
 
-    - A Valid Jwt token issued by auth service provider.
-    - Information about how to validate the JWT token in torus key management network.
+  - A Valid Jwt token issued by auth service provider.
+  - Information about how to validate the JWT token in torus key management network.
 
 - On successful login with firebase, firebase returns a jwt token. This jwt token is sent to Web3Auth sdk's login function.
 

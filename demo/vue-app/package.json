@@ -16,7 +16,7 @@
     "@web3auth/base-evm-adapter": "file:../../packages/adapters/base-evm-adapter",
     "@web3auth/base-solana-adapter": "file:../../packages/adapters/base-solana-adapter",
     "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",
-    "@web3auth/core": "file../../packages/core",
+    "@web3auth/core": "file:../../packages/core",
     "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",

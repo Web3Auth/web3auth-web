@@ -39,9 +39,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal"></script>
     <script>
-      const web3authSdk = window.Web3auth;
+      const web3authSdk = window.Modal;
       let web3AuthInstance = null;
 
       (async function init() {
@@ -50,6 +50,10 @@
 
         web3AuthInstance = new web3authSdk.Web3Auth({
           chainConfig: { chainNamespace: "eip155" },
+          uiConfig: {
+            theme: "dark",
+            defaultLanguage: "en",
+          },
           clientId: "YOUR_CLIENT_ID_HERE", // get your clientId from https://developer.web3auth.io
         });
 

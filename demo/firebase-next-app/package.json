@@ -9,9 +9,10 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.9",
-    "@web3auth/solana-provider": "^1.1.2",
-    "@web3auth/core": "^1.1.2",
-    "@web3auth/openlogin-adapter": "^1.1.2",
+    "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
+    "@web3auth/core": "file:../../packages/core",
+    "@web3auth/base": "file:../../packages/base",
+    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "firebase": "^9.9.1",
     "next": "12.2.3",
     "react": "18.2.0",
