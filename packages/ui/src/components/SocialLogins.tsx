@@ -38,16 +38,16 @@ export default function SocialLogins(props: SocialLoginProps) {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
       return socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
     });
-    setCanShowMore(maxOptions.length > 5);
+    setCanShowMore(maxOptions.length > 4);
   }, [socialLoginsConfig.loginMethods]);
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
-  const adapterExpandText = isExpanded ? t("modal.social.view-less") : t("modal.social.view-more");
+  const adapterExpandText = isExpanded ? t("modal.social.view-less-new") : t("modal.social.view-more-new");
 
   return (
     <div className="w3ajs-social-logins w3a-group">
-      <div className="w3a-group__title">{t("modal.social.continue")}</div>
+      {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;
@@ -77,8 +77,8 @@ export default function SocialLogins(props: SocialLoginProps) {
         })}
       </ul>
       {canShowMore && (
-        <button type="button" className={adapterButtonClass} style={{ display: "flex" }} onClick={expandClickHandler}>
-          <Icon iconName={`expand${isDark ? "-light" : ""}`} />
+        <button type="button" className={adapterButtonClass} style={{ display: "flex", color:  "#0364FF"}} onClick={expandClickHandler}>
+          {/* <Icon iconName={`expand${isDark ? "-light" : ""}`} /> */}
           <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
         </button>
       )}

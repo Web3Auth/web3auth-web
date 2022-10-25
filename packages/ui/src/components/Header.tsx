@@ -14,7 +14,7 @@ interface HeaderProps {
 
 function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
-  const { appLogo = DEFAULT_LOGO_URL, onClose } = props;
+  const { onClose } = props;
 
   const [t] = useTranslation();
 
@@ -23,11 +23,11 @@ function Header(props: HeaderProps) {
   return (
     <div className="w3a-modal__header">
       <div className="w3a-header">
-        {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : web3authIcon}
+        {/* {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : <></>} */}
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <p className="w3a-header__subtitle">{t("modal.header-subtitle")}</p>
+          <p className="w3a-header__subtitle">{t("modal.header-subtitle-new")}</p>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">

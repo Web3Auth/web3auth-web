@@ -18,16 +18,20 @@ function Footer(props: FooterProps) {
     <div className="w3a-modal__footer">
       <div className="w3a-footer">
         <div>
+          <div>
+            <div>{t("modal.footer.message-new")}</div>
+            {/* {web3authIcon} */}
+          </div>
           <div className="w3a-footer__links">
-            <a href="https://docs.web3auth.io/legal/terms-and-conditions">{t("modal.footer.terms")}</a>
+            <a href="https://docs.web3auth.io/legal/terms-and-conditions">{t("modal.footer.terms-service")}</a>
             <span>|</span>
             <a href="https://docs.web3auth.io/legal/privacy-policy">{t("modal.footer.policy")}</a>
+            <span>|</span>
+            <span>
+              {`${t("modal.footer.version")} `}
+              {version}
+            </span>
           </div>
-          <p>{version}</p>
-        </div>
-        <div className="w3a-footer__secured">
-          <div>{t("modal.footer.message")}</div>
-          {web3authIcon}
         </div>
       </div>
     </div>

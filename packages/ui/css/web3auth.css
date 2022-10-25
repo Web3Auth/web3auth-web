@@ -46,10 +46,13 @@
 #w3a-modal {
   --bg1: #0f1222;
   --bg2: #24262e;
+  --bg3: #F9FAFB;
   --text-color1: #d3d3d4;
   --text-color2: #ffffff;
+  --text-color3: #9ca3af;
 
   --text-header: "Poppins", Helvetica, sans-serif;
+  --text-title: "Inter";
   --text-body: "DM Sans", Helvetica, sans-serif;
 
   position: fixed;
@@ -80,7 +83,7 @@
 
 #w3a-modal .w3a-modal__inner {
   width: 100%;
-  max-width: 375px;
+  max-width: 392px;
   overflow: hidden;
   border-radius: 6px;
   position: relative;
@@ -90,6 +93,8 @@
   transition: 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
   transform-origin: center center;
   min-height: 350px;
+  background: var(--bg1);;
+  border-radius: 30px;
 }
 
 #w3a-modal .w3a-modal__inner.w3a-modal__inner--active {
@@ -101,16 +106,19 @@
 #w3a-modal .w3a-modal__header {
   padding: 25px 34px;
   background: var(--bg1);
-  box-shadow: 0px 4px 28px rgba(3, 100, 255, 0.05);
+  /* box-shadow: 0px 4px 28px rgba(3, 100, 255, 0.05); */
   position: relative;
 }
 #w3a-modal .w3a-modal__content {
-  padding: 30px 34px;
-  background: var(--bg2);
+  padding: 10px 32px;
+  background: var(--bg1);
 }
 #w3a-modal .w3a-modal__footer {
-  padding: 16px 34px;
-  background: var(--bg1);
+  padding: 16px 32px;
+  background: var(--bg3);
+  text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 
 /* SPINNER */
@@ -246,9 +254,10 @@
 }
 #w3a-modal .w3a-header__title {
   font-family: var(--text-header);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 20px;
-  line-height: 1.5em;
+  line-height: 150%;
+  color: #111928;
 }
 #w3a-modal p.w3a-header__subtitle {
   font-size: 14px;
@@ -284,17 +293,17 @@
 #w3a-modal .w3a-group:not(.w3a-group--social-hidden):not(:last-child),
 #w3a-modal .w3a-group:not(.w3a-group--email-hidden):not(:last-child),
 #w3a-modal .w3a-group:not(.w3a-group--ext-wallet-hidden):not(:last-child) {
-  border-bottom: 0.5px solid #5c6c7f;
+  /* border-bottom: 0.5px solid #5c6c7f; */
   padding-bottom: 24px;
 }
 
 #w3a-modal div.w3a-group__title {
   font-family: var(--text-header);
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 500;
   font-size: 14px;
-  line-height: 1.5em;
-  margin-bottom: 8px;
-  text-transform: uppercase;
+  line-height: 150%;
+  color: #111928;
 }
 
 /* Adapter List */
@@ -425,7 +434,7 @@
   height: unset;
   width: auto;
   margin-left: auto;
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 16px;
   display: flex;
   border: 8px;
@@ -563,13 +572,14 @@
 
 /* Text Field */
 #w3a-modal .w3a-text-field {
-  background: #393938;
-  border: 1px solid #27282d;
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
   box-sizing: border-box;
   box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.4);
   border-radius: 24px;
-  padding: 0 28px;
-  height: 48px;
+  padding: 12px 24px;
+  gap: 10px;
+  height: 42px;
   width: 100%;
   font-family: var(--text-body);
   font-size: 16px;
@@ -589,11 +599,12 @@
 /* Footer Components */
 #w3a-modal .w3a-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 150%;
-  color: var(--text-color2);
+  color: var(--text-color3);
 }
 
 #w3a-modal .w3a-footer__links {
@@ -817,7 +828,7 @@
 #w3a-modal .w3a-group:not(.w3a-group--social-hidden):not(:last-child),
 #w3a-modal .w3a-group:not(.w3a-group--email-hidden):not(:last-child),
 #w3a-modal .w3a-group:not(.w3a-group--ext-wallet-hidden):not(:last-child) {
-  border-bottom: 0.5px solid #b7b8bd;
+  /* border-bottom: 0.5px solid #b7b8bd;  */
   padding-bottom: 24px;
 }
 
@@ -837,9 +848,9 @@
 }
 
 #w3a-modal.w3a-modal--light .w3a-text-field {
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.1);
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
+  box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.01);
   color: #b7b8bd;
 }
 
