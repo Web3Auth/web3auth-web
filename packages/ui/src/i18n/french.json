@@ -1,0 +1,44 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "Vérifiez votre compte {{adapter}} pour continuer"
+    },
+    "external": {
+      "title": "Portefeuille externe",
+      "walletconnect-subtitle": "Scannez le QR code avec un portefeuille compatible WalletConnect",
+      "walletconnect-connect": "Connecter",
+      "connect": "Connecter avec un portefeuille",
+      "back": "Retour"
+    },
+    "social": {
+      "view-less-new": "Voir moins",
+      "policy": "Nous ne stockons aucune information en lien avec vos accès sociaux.",
+      "view-more-new": "Voir plus",
+      "email": "Email",
+      "view-more": "Voir plus d'options",
+      "email-continue": "Continuer avec un email",
+      "continue": "Continuer avec",
+      "email-new": "nom@exemple.fr",
+      "view-less": "Voir moins d'options"
+    },
+    "footer": {
+      "message": "Ouverture d'une session d'auto-détention par",
+      "terms": "Conditions d'utilisation",
+      "message-new": "Ouverture d'une session d'auto-détention par Web3Auth",
+      "version": "Version",
+      "terms-service": "Conditions de service",
+      "policy": "Politique de confidentialité"
+    },
+    "network": {
+      "switch-request": "Ce site souhaite changer de réseau",
+      "to": "À",
+      "cancel": "Annuler",
+      "proceed": "Confirmer",
+      "add-request": "Ce site souhaite ajouter un réseau",
+      "from": "De"
+    },
+    "header-subtitle": "Sélectionnez un des choix suivants pour continuer",
+    "header-title": "Se connecter",
+    "header-subtitle-new": "Votre portefeuille blockchain en un clic"
+  }
+}

@@ -353,6 +353,10 @@ export default Vue.extend({
           value: "es",
           display: "Spanish",
         },
+        {
+          value: "fr",
+          display: "French",
+        },
       ],
     };
   },
