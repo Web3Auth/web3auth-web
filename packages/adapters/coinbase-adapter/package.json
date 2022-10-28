@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@coinbase/wallet-sdk": "^3.5.3",
+    "@coinbase/wallet-sdk": "^3.5.4",
     "@web3auth/base": "^3.0.0",
     "@web3auth/base-evm-adapter": "^3.0.0"
   },

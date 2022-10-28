@@ -19,9 +19,9 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^3.0.0",
-    "@ethereumjs/tx": "^4.0.0",
-    "@ethereumjs/util": "^8.0.0",
+    "@ethereumjs/common": "^3.0.1",
+    "@ethereumjs/tx": "^4.0.1",
+    "@ethereumjs/util": "^8.0.2",
     "@metamask/eth-sig-util": "^5.0.0",
     "@toruslabs/base-controllers": "^2.2.6",
     "@toruslabs/http-helpers": "^3.2.0",
