@@ -5,11 +5,13 @@ export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any
   try {
     const web3 = new Web3(provider as any);
     const accounts = await web3.eth.getAccounts();
-    console.log("pubKey", accounts);
+    console.log("pubKey", accounts[0]);
     const txRes = await web3.eth.sendTransaction({
       from: accounts[0],
       to: accounts[0],
       value: web3.utils.toWei("0.01"),
+      maxPriorityFeePerGas: "5000000000",
+      maxFeePerGas: "6000000000000",
     });
     uiConsole("txRes", txRes);
   } catch (error) {
@@ -20,7 +22,7 @@ export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any
 
 export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
   try {
-    const pubKey = await provider.request({ method: "eth_accounts" });
+    // const pubKey = await provider.request({ method: "eth_accounts" });
     const web3 = new Web3();
     web3.setProvider(provider as any);
     // hex message
@@ -53,14 +55,15 @@ export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConso
         value: "1212",
       },
     ];
-    const params = [JSON.stringify(originalMessage), fromAddress];
+    const params = [originalMessage, fromAddress];
     const method = "eth_signTypedData";
 
     const signedMessage = await provider.request({
       method,
       params,
     });
-    console.log("signedMessage orog", signedMessage);
+    console.log("signedMessage", signedMessage);
+    uiConsole("signedMessage", signedMessage);
   } catch (error) {
     console.log("error", error);
     uiConsole("error", error);
