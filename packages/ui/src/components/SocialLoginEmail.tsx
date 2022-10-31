@@ -33,7 +33,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
           placeholder={t("modal.social.email-new")}
           onChange={(e) => handleEmailChange(e)}
         />
-        <button disabled={!isValidEmail} className="w3a-button" type="submit">
+        <button disabled={!isValidEmail} className="w3a-button w3a-button--email" type="submit">
           {t("modal.social.email-continue")}
         </button>
       </form>

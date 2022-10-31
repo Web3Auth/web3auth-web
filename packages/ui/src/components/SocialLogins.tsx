@@ -7,7 +7,7 @@ import { SocialLoginsConfig } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
 
-const hasLightIcons = ["apple", "github"];
+// const hasLightIcons = ["apple", "github"];
 
 interface SocialLoginProps {
   socialLoginsConfig: SocialLoginsConfig;
@@ -50,8 +50,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const providerIcon = <Image imageId={`login-${method}${isDark && hasLightIcons.includes(method) ? "-light" : ""}`} />;
-
+          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} />;
           if (
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||
@@ -62,7 +61,23 @@ export default function SocialLogins(props: SocialLoginProps) {
           }
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
-
+          if (order === 1) {
+            return (
+              <li className="w3a-adapter-item" key={method} style={{ order }}>
+                <button
+                  type="button"
+                  onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
+                  className="w3a-button w3a-button--long"
+                >
+                  <div>{providerIcon}</div>
+                  <p className="w3a-social__subtitle">
+                    {t("modal.social.continue")}
+                    {method}
+                  </p>
+                </button>
+              </li>
+            );
+          }
           return (
             <li className="w3a-adapter-item" key={method} style={{ order }}>
               <button
@@ -76,8 +91,9 @@ export default function SocialLogins(props: SocialLoginProps) {
           );
         })}
       </ul>
+      <span className="w3a-social__policy">{t("modal.social.policy")}</span>
       {canShowMore && (
-        <button type="button" className={adapterButtonClass} style={{ display: "flex", color:  "#0364FF"}} onClick={expandClickHandler}>
+        <button type="button" className={adapterButtonClass} style={{ display: "flex", color: "#0364FF" }} onClick={expandClickHandler}>
           {/* <Icon iconName={`expand${isDark ? "-light" : ""}`} /> */}
           <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
         </button>

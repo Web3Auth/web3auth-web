@@ -10,10 +10,24 @@
       "connect": "Connect with Wallet",
       "back": "Back"
     },
+    "social": {
+      "view-less-new": "View less",
+      "policy": "We do not store any data related to your social logins.",
+      "view-more-new": "View more",
+      "email": "Email",
+      "view-more": "View more options",
+      "email-continue": "Continue with Email",
+      "continue": "Continue with ",
+      "email-new": "name@example.com",
+      "view-less": "View less options"
+    },
     "footer": {
       "message": "Self-custodial login by",
       "terms": "Terms of use",
-      "policy": "Privacy policy"
+      "message-new": "Self-custodial login by Web3Auth",
+      "version": "Version",
+      "terms-service": "Terms of Service ",
+      "policy": "Privacy Policy"
     },
     "network": {
       "switch-request": "This site is requesting to switch Network",
@@ -23,14 +37,8 @@
       "add-request": "This site is requesting to add Network",
       "from": "From"
     },
-    "social": {
-      "email": "Email",
-      "view-more": "View more options",
-      "email-continue": "Continue with Email",
-      "continue": "Continue with",
-      "view-less": "View less options"
-    },
     "header-subtitle": "Select one of the following to continue",
-    "header-title": "Sign in"
+    "header-title": "Sign in",
+    "header-subtitle-new": "Your blockchain wallet in one-click"
   }
 }
