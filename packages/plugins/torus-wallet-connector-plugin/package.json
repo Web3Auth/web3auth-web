@@ -35,11 +35,11 @@
     "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.36.6",
+    "@toruslabs/torus-embed": "^1.37.0",
     "@web3auth/base": "^3.0.0",
     "@web3auth/base-plugin": "^3.0.0",
     "@web3auth/core": "^3.0.0",
-    "loglevel": "^1.8.0"
+    "loglevel": "^1.8.1"
   },
   "lint-staged": {
     "!(*d).ts": [

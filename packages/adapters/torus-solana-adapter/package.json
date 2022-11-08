@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.3.0",
+    "@toruslabs/solana-embed": "^0.3.2",
     "@web3auth/base": "^3.0.0",
     "@web3auth/base-provider": "^3.0.0",
     "@web3auth/base-solana-adapter": "^3.0.0",
