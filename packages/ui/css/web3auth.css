@@ -108,13 +108,13 @@
 }
 
 #w3a-modal .w3a-modal__header {
-  padding: 12px 32px;
+  padding: 8px 32px;
   background: var(--bg1);
   /* box-shadow: 0px 4px 28px rgba(3, 100, 255, 0.05); */
   position: relative;
 }
 #w3a-modal .w3a-modal__content {
-  padding: 10px 32px;
+  padding: 16px 32px;
   background: var(--bg1);
 }
 #w3a-modal .w3a-modal__footer {
@@ -318,6 +318,7 @@
 #w3a-modal div.w3a-group__title {
   font-family: var(--text-header);
   font-style: normal;
+  margin-bottom: 8px;
   font-weight: 500;
   font-size: 14px;
   line-height: 150%;
@@ -331,10 +332,10 @@
   align-items: center;
   padding: 0;
   margin: 0;
-  gap: 16px;
+  gap: 16px 8px;
   overflow-y: hidden;
   flex-wrap: wrap;
-  margin-bottom: 17px;
+  margin-bottom: 16px;
   max-height: 500px;
   transition: max-height 0.4s ease-in;
 }
@@ -408,7 +409,7 @@
 }
 
 #w3a-modal button.w3a-button--icon {
-  width: 98px;
+  width: 104px;
 }
 
 #w3a-modal button.w3a-button--long {
