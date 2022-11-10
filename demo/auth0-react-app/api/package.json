@@ -5,13 +5,13 @@
   },
   "dependencies": {
     "debug": "~4.3.4",
-    "dotenv": "^16.0.1",
-    "express": "^4.18.1",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "http-errors": "~2.0.0",
     "request": "^2.88.2"
   },
   "devDependencies": {
-    "eslint": "^8.20.0",
-    "nodemon": "^2.0.19"
+    "eslint": "^8.27.0",
+    "nodemon": "^2.0.20"
   }
 }

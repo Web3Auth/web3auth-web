@@ -32,6 +32,14 @@ module.exports = function override(config) {
       analyzerMode: "disabled"
     }),
   ]);
+  config.module.rules.push({
+    test: /\.(js|mjs|jsx)$/,
+    enforce: "pre",
+    loader: require.resolve("source-map-loader"),
+    resolve: {
+      fullySpecified: false,
+    },
+  });
   config.ignoreWarnings = [/Failed to parse source map/];
   return config;
 };
