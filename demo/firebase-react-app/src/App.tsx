@@ -7,8 +7,6 @@ import { Web3AuthProvider } from "./services/web3auth";
 import Setting from "./components/Setting";
 import Main from "./components/Main";
 
-
-
 function App() {
   const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("testnet");
   const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("mainnet");

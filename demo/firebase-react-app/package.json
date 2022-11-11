@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.54.1",
+    "@solana/web3.js": "^1.66.2",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/core": "file:../../packages/core",
     "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
@@ -13,11 +13,11 @@
     "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/wallet-connect-v1-adapter": "file:../../packages/adapters/wallet-connect-v1-adapter",
-    "firebase": "^9.9.1",
+    "firebase": "^9.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-loader-spinner": "^5.3.3",
-    "web3": "^1.7.5"
+    "react-loader-spinner": "^5.3.4",
+    "web3": "^1.8.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -46,9 +46,9 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^18.7.13",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
@@ -59,8 +59,8 @@
     "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^4.8.2",
+    "typescript": "^4.8.4",
     "url": "^0.11.0",
-    "webpack-bundle-analyzer": "^4.6.1"
+    "webpack-bundle-analyzer": "^4.7.0"
   }
 }
