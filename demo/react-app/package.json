@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.50.1",
-    "@taquito/signer": "^13.0.1",
-    "@taquito/taquito": "^13.0.1",
-    "@taquito/utils": "^13.0.1",
+    "@solana/web3.js": "^1.66.2",
+    "@taquito/signer": "^14.1.0",
+    "@taquito/taquito": "^14.1.0",
+    "@taquito/utils": "^14.1.0",
     "@tezos-core-tools/crypto-utils": "^0.0.7",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
@@ -15,7 +15,7 @@
     "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web3": "^1.7.5"
+    "web3": "^1.8.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -44,9 +44,9 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^18.7.13",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
@@ -57,8 +57,8 @@
     "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^4.8.2",
+    "typescript": "^4.8.4",
     "url": "^0.11.0",
-    "webpack-bundle-analyzer": "^4.6.1"
+    "webpack-bundle-analyzer": "^4.7.0"
   }
 }
