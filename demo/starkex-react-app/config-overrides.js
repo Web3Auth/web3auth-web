@@ -20,8 +20,8 @@ module.exports = function override(config) {
     lodash: path.resolve(__dirname, "node_modules/lodash"),
   };
   config.plugins = (config.plugins || []).concat([
-    new webpack.ProvidePlugin({
-      process: "process/browser",
+    new webpack.ProvidePlugin({     
+       process: "process/browser",
       Buffer: ["buffer", "Buffer"],
     }),
     new webpack.IgnorePlugin({
@@ -33,5 +33,11 @@ module.exports = function override(config) {
     }),
   ]);
   config.ignoreWarnings = [/Failed to parse source map/];
+  config.module.rules.unshift({
+    test: /\.m?js$/,
+    resolve: {
+      fullySpecified: false,
+    },
+  });
   return config;
 };

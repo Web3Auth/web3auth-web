@@ -6,16 +6,16 @@
     "@starkware-industries/starkex-js": "0.0.6",
     "@starkware-industries/starkware-crypto-utils": "^0.0.2",
     "@toruslabs/starkware-crypto": "^1.1.0",
-    "@web3auth/base": "file:../../packages/base",
-    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
-    "@web3auth/modal": "file:../../packages/modal",
+    "@web3auth/base": "^3.0.4",
+    "@web3auth/openlogin-adapter": "^3.0.4",
+    "@web3auth/modal": "^3.0.4",
     "bn.js": "^5.2.1",
     "elliptic": "^6.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "web3": "^1.7.5"
-  },
+    },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
@@ -43,9 +43,8 @@
     ]
   },
   "devDependencies": {
-    "@types/elliptic": "^6.4.14",
-    "@types/node": "^18.7.13",
-    "@types/react": "^18.0.17",
+    "@types/node": "^18.6.1",
+    "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
@@ -58,7 +57,6 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "typescript": "^4.8.2",
-    "url": "^0.11.0",
-    "webpack-bundle-analyzer": "^4.6.1"
+    "url": "^0.11.0"
   }
 }
