@@ -1,5 +1,5 @@
 //@ts-ignore
-import StarkExAPI from "@starkware-industries/starkex-js/dist/browser";
+import StarkExAPI from "@starkware-industries/starkex-js/browser";
 //@ts-ignore
 import starkwareCrypto from "@starkware-industries/starkware-crypto-utils";
 import type { SafeEventEmitterProvider } from "@web3auth/base";
