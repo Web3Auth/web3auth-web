@@ -9,7 +9,7 @@
     "packages/adapters/*",
     "packages/plugins/*"
   ],
-  "version": "3.0.2",
+  "version": "3.0.4",
   "npmClient": "npm",
   "useWorkspaces": true
 }
