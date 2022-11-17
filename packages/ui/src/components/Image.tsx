@@ -1,5 +1,5 @@
 interface ImageProps {
-  hoverImageId: string;
+  hoverImageId?: string;
   imageId: string;
   height?: string;
   width?: string;
