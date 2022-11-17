@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
-import Icon from "./Icon";
 import Image from "./Image";
 
 // const hasLightIcons = ["apple", "github"];
@@ -50,7 +49,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} />;
+          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}`} />;
           if (
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||
@@ -69,7 +68,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
                   className="w3a-button w3a-button--long"
                 >
-                  <div>{providerIcon}</div>
+                  {providerIcon}
                   <p className="w3a-social__subtitle">
                     {t("modal.social.continue")}
                     {method}
