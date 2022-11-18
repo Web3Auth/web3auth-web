@@ -24,14 +24,14 @@
       <v-row justify="center">
         <v-col cols="12" md="4" class="pl-5" v-if="$vuetify.breakpoint.smAndDown">
           <div class="text-center">
-            <div class="text-h3 mb-3 font-weight-bold">MPC Demo</div>
-            <div class="text-h6 mb-2 font-weight-regular">Experience MPC in 3 simple steps</div>
+            <div class="mb-3 text-h3 font-weight-bold">MPC Demo</div>
+            <div class="mb-2 text-h6 font-weight-regular">Experience MPC in 3 simple steps</div>
           </div>
           <Stepper :current-step="currentStep" />
         </v-col>
 
         <v-col cols="12" md="5">
-          <div class="text-center py-16" v-if="signingin">
+          <div class="py-16 text-center" v-if="signingin">
             <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
           </div>
           <Login v-else-if="currentStep == 1" :set-step="setStep" :connect="connect" />
@@ -48,8 +48,8 @@
 
         <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
           <div>
-            <div class="text-h3 mb-3 text-left font-weight-bold">MPC Demo</div>
-            <div class="text-h6 text-left mb-10 font-weight-regular">Experience MPC in 3 simple steps</div>
+            <div class="mb-3 text-left text-h3 font-weight-bold">MPC Demo</div>
+            <div class="mb-10 text-left text-h6 font-weight-regular">Experience MPC in 3 simple steps</div>
           </div>
           <Stepper :current-step="currentStep" />
         </v-col>
@@ -80,7 +80,7 @@ import Verify from "./components/Verify.vue";
 const ec = new EC("secp256k1");
 
 const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
-const tssServerEndpoint = "https://load-test-1.k8.authnetwork.dev/tss";
+const tssServerEndpoint = "https://lc-1.k8.authnetwork.dev/tss";
 
 const tssImportURL = "https://scripts.toruswallet.io/tss-lib.wasm";
 
