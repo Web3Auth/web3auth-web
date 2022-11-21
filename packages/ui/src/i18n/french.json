@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "adapter-loader": {
+      "message": "Vérifiez votre compte sur {{adapter}} pour continuer"
+    },
+    "external": {
+      "title": "Portefeuille externe",
+      "walletconnect-subtitle": "Scannez le QR code avec un portefeuille compatible WalletConnect",
+      "walletconnect-connect": "Se connecter",
+      "connect": "Se connecter avec un portefeuille",
+      "back": "Retour"
+    },
+    "footer": {
+      "message": "Portefeuille hébergé par",
+      "terms": "CGU",
+      "policy": "Politique de confidentialité"
+    },
+    "network": {
+      "switch-request": "Ce site vous demande de changer de réseau",
+      "to": "A",
+      "cancel": "Annuler",
+      "proceed": "Procéder",
+      "add-request": "Ce site vous demande de rajouter un réseau",
+      "from": "De"
+    },
+    "social": {
+      "email": "Email",
+      "view-more": "Voir plus d'options",
+      "email-continue": "Continuer avec l'email",
+      "continue": "Continuer avec",
+      "view-less": "Voir moins d'options"
+    },
+    "header-subtitle": "Sélectionnez une option suivante :",
+    "header-title": "Se connecter"
+  }
+}

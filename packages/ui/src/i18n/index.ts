@@ -4,5 +4,6 @@ import ja from "./japanese.json";
 import ko from "./korean.json";
 import zh from "./mandarin.json";
 import es from "./spanish.json";
+import fr from "./french.json";
 
 export { de, en, es, ja, ko, zh };
