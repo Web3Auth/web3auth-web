@@ -42,7 +42,7 @@
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-tsdoc": "^0.2.17",
     "husky": "^8.0.2",
-    "lerna": "^5.5.4",
+    "lerna": "^6.0.3",
     "lint-staged": "^13.0.3",
     "prettier": "^2.8.0",
     "rimraf": "^3.0.2",
