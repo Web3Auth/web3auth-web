@@ -116,7 +116,10 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
       this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
     }
     return new Promise((resolve, reject) => {
-      if (!this.connector) return reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+      if (!this.connector) {
+        reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+        return;
+      }
       // for wallet connect default modal.
       this.connector.on("modal_closed", async () => {
         this.status = ADAPTER_STATUS.READY;
@@ -220,7 +223,10 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
 
     // for web3auth qr code modal
     return new Promise<void>((resolve, reject) => {
-      if (!this.connector) return reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+      if (!this.connector) {
+        reject(WalletInitializationError.notReady("Wallet adapter is not ready yet"));
+        return;
+      }
       log.debug("creating new session for web3auth wallet connect");
       this.connector.on("display_uri", async (err, payload) => {
         if (err) {

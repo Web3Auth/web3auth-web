@@ -114,7 +114,10 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
               await this.connectWithProvider(this._wallet as IPhantomWalletProvider);
               resolve(this.provider);
             };
-            if (!this._wallet) return reject(WalletInitializationError.notInstalled());
+            if (!this._wallet) {
+              reject(WalletInitializationError.notInstalled());
+              return;
+            }
             this._wallet.once("connect", connect);
             // Raise an issue on phantom that if window is closed, disconnect event is not fired
             (this._wallet as IPhantomWalletProvider)._handleDisconnect = (...args: unknown[]) => {

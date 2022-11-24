@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^2.2.6",
-    "@toruslabs/openlogin-jrpc": "^2.7.1",
+    "@toruslabs/openlogin-jrpc": "^2.8.0",
     "@web3auth/base": "^3.0.4",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
