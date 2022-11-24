@@ -20,13 +20,13 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^3.2.0",
-    "@toruslabs/openlogin-jrpc": "^2.6.0",
+    "@toruslabs/openlogin-jrpc": "^2.7.1",
     "jwt-decode": "^3.1.2",
     "loglevel": "^1.8.1",
     "ts-custom-error": "^3.3.1"
   },
   "devDependencies": {
-    "@toruslabs/openlogin": "^2.7.0"
+    "@toruslabs/openlogin": "^2.7.1"
   },
   "files": [
     "dist",

@@ -21,7 +21,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.66.2",
     "@toruslabs/base-controllers": "^2.2.6",
-    "@toruslabs/openlogin-jrpc": "^2.6.0",
+    "@toruslabs/openlogin-jrpc": "^2.7.1",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^3.0.4",
     "@web3auth/base-provider": "^3.0.4",
