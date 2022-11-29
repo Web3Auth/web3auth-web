@@ -1,18 +1,19 @@
-# Web3Auth Plug and Play Core
+# Web3Auth Single Factor Auth
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/core?label=%22%22)](https://www.npmjs.com/package/@web3auth/core/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/core?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/core@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth/single-factor-auth?label=%22%22)](https://www.npmjs.com/package/@web3auth/single-factor-auth/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/single-factor-auth?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/single-factor-auth@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Plug and Play Core is the main SDK that consists of the core module of Web3Auth Plug and Play. This SDK gives you all the needed modules for implementing the Web3Auth features, giving you the flexibility of implementing your own UI to use all the functionalities. 
+Web3Auth Single Factor Auth is the SDK that gives you the ability to start with just one key (aka, Single Factor) with Web3Auth, giving you the flexibility of implementing your own UI and UX.
 
 ## 📖 Documentation
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/core/) to get started.
 
 ## 💡 Features
-- Plug and Play, OAuth based Web3 Authentication Service
+
+- JWT based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
 - Threshold Cryptography based Key Reconstruction
@@ -26,8 +27,9 @@ Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/core
+npm install --save @web3auth/single-factor-auth
 ```
+
 ## ⚡ Quick Start
 
 ### Get your Client ID from Web3Auth Dashboard
@@ -41,35 +43,36 @@ Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a 
 Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
 ```js
-import { Web3AuthCore } from "@web3auth/core";
+import { Web3Auth } from "@web3auth/single-factor-auth";
 
 //Initialize within your constructor
-const web3auth = new Web3AuthCore({
+const web3auth = new Web3Auth({
   clientId: "", // Get your Client ID from Web3Auth Dashboard
   chainConfig: {
     chainNamespace: "eip155",
     chainId: "0x1",
+    rpcTarget: "https://rpc.ankr.com/eth",
   },
 });
 
-await web3auth.init();
+web3auth.init({ network: "mainnet" });
 ```
+
 ### Login your User
 
-Once you're done initialising, just create a button that triggers login for your preferred social channel for the user on their request. You can further use the returned provider for making RPC calls to the blockchain.
+Once you're done initialising, just create a button that triggers login with the JWT and verifier details.
 
 ```js
-const web3authProvider = await web3auth.connectTo(
-    "openlogin",
-    {
-        loginProvider: 'google',
-    },
-)
+await web3auth.connect({
+  verifier: "verifier-name",
+  verifierId: "verifier-Id",
+  idToken: "JWT Token",
+});
 ```
 
 ## 🩹 Examples
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/tree/main/web-core-sdk)
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples)
 
 ## 🌐 Demo
 
