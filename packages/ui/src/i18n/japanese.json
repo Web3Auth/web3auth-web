@@ -1,7 +1,9 @@
 {
   "modal": {
     "adapter-loader": {
-      "message": "続行するには、{{adapter}} アカウントで確認してください"
+      "message": "続行するには、{{adapter}} アカウントで確認してください",
+      "message1": "{{adapter}} で確認する",
+      "message2": "継続するアカウント"
     },
     "external": {
       "title": "外部ウォレット",
@@ -10,9 +12,23 @@
       "connect": "ウォレットと接続",
       "back": "戻る"
     },
+    "social": {
+      "view-less-new": "表示を減らす",
+      "policy": "ソーシャル ログインに関連するデータは保存されません。",
+      "view-more-new": "もっと見る",
+      "email": "Eメール",
+      "view-more": "その他のオプションを表示",
+      "email-continue": "メールで続行",
+      "continue": "続ける",
+      "email-new": "name@example.com",
+      "view-less": "オプションを少なく表示"
+    },
     "footer": {
       "message": "による自己管理ログイン",
       "terms": "利用規約",
+      "message-new": "Web3Authによる自己管理ログイン",
+      "version": "バージョン",
+      "terms-service": "利用規約",
       "policy": "プライバシーポリシー"
     },
     "network": {
@@ -23,14 +39,8 @@
       "add-request": "このサイトはネットワークの追加をリクエストしています",
       "from": "から"
     },
-    "social": {
-      "email": "Eメール",
-      "view-more": "その他のオプションを表示",
-      "email-continue": "メールで続行",
-      "continue": "続ける",
-      "view-less": "オプションを少なく表示"
-    },
     "header-subtitle": "次のいずれかを選択して続行します",
-    "header-title": "ログイン"
+    "header-title": "ログイン",
+    "header-subtitle-new": "ワンクリックであなたのブロックチェーンウォレット"
   }
 }

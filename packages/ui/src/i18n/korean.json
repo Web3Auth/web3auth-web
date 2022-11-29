@@ -1,7 +1,9 @@
 {
   "modal": {
     "adapter-loader": {
-      "message": "계속하려면 {{adapter}} 계정에서 인증하세요."
+      "message": "계속하려면 {{adapter}} 계정에서 인증하세요.",
+      "message1": "{{adapter}}에서 확인",
+      "message2": "계속할 계정"
     },
     "external": {
       "title": "외부 지갑",
@@ -10,9 +12,23 @@
       "connect": "지갑과 연결",
       "back": "뒤"
     },
+    "social": {
+      "view-less-new": "적게 보기",
+      "policy": "우리는 귀하의 소셜 로그인과 관련된 데이터를 저장하지 않습니다.",
+      "view-more-new": "더보기",
+      "email": "이메일",
+      "view-more": "더 많은 옵션 보기",
+      "email-continue": "이메일로 계속",
+      "continue": "계속",
+      "email-new": "name@example.com",
+      "view-less": "더 적은 옵션 보기"
+    },
     "footer": {
       "message": "자가 관리 로그인",
       "terms": "이용약관",
+      "message-new": "Web3Auth를 통한 자가 관리 로그인",
+      "version": "버전",
+      "terms-service": "서비스 약관",
       "policy": "개인 정보 정책"
     },
     "network": {
@@ -23,14 +39,8 @@
       "add-request": "이 사이트는 네트워크 추가를 요청하고 있습니다",
       "from": "에서"
     },
-    "social": {
-      "email": "이메일",
-      "view-more": "더 많은 옵션 보기",
-      "email-continue": "이메일로 계속",
-      "continue": "계속",
-      "view-less": "더 적은 옵션 보기"
-    },
     "header-subtitle": "계속하려면 다음 중 하나를 선택하세요.",
-    "header-title": "로그인"
+    "header-title": "로그인",
+    "header-subtitle-new": "클릭 한 번으로 블록체인 지갑"
   }
 }
