@@ -62,7 +62,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
     };
   },
   components: {
@@ -84,7 +84,7 @@ export default Vue.extend({
             defaultLanguage: this.uiConfig.defaultLanguage,
           },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
-          clientId: config.clientId,
+          clientId: config.clientId["mainnet"],
         });
 
         const coinbaseAdapter = new CoinbaseAdapter({
