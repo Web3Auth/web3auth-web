@@ -196,7 +196,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.currentChainNamespace = customChainConfig.chainNamespace;
   }
 
-  private async connectWithProvider(params?: OpenloginLoginParams): Promise<void> {
+  private async connectWithProvider(params: OpenloginLoginParams = {}): Promise<void> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
@@ -212,7 +212,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
     // if not logged in then login
-    if (!this.openloginInstance.privKey && params) {
+    if (!this.openloginInstance.privKey) {
       if (!this.loginSettings.curve) {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
@@ -220,6 +220,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       await this.openloginInstance.login(
         merge(
           this.loginSettings,
+          params,
           { loginProvider: params.loginProvider },
           { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } }
         )

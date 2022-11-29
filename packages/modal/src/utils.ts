@@ -14,7 +14,8 @@ export const languageMap = {
 export const getUserLanguage = (defaultLanguage: string | undefined) => {
   let userLanguage = defaultLanguage;
   if (!userLanguage) {
-    const browserLanguage = (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US";
+    const browserLanguage =
+      typeof window !== "undefined" ? (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US" : "en-US";
     userLanguage = browserLanguage.split("-")[0];
   }
   return Object.prototype.hasOwnProperty.call(languageMap, userLanguage) ? userLanguage : "en";

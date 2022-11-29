@@ -10,7 +10,7 @@ To use this demo app, you'll first have to build the Web3Auth packages.
 git clone https://github.com/Web3Auth/web3auth-web.git
 cd web3auth-web
 npm install
-npm bootstrap && npm run build
+npm run bootstrap && npm run build
 ```
 
 ### Start the demo app
