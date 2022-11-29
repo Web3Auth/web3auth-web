@@ -83,7 +83,11 @@ export default Vue.extend({
       loginButtonStatus: "",
       connecting: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId, enableLogging: true }),
+      web3auth: new Web3Auth({
+        chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
+        clientId: config.clientId[this.openloginNetwork],
+        enableLogging: true,
+      }),
     };
   },
   components: {
@@ -122,14 +126,14 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({
           chainConfig: ethChainConfig,
-          clientId: config.clientId,
+          clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
         });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-            clientId: config.clientId,
+            clientId: config.clientId[this.openloginNetwork],
           },
         });
 

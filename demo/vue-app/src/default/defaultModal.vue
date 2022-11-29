@@ -44,7 +44,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
     };
   },
   components: {
@@ -70,7 +70,7 @@ export default Vue.extend({
       try {
         this.web3auth = new Web3Auth({
           chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.SOLANA },
-          clientId: config.clientId,
+          clientId: config.clientId["mainnet"],
           authMode: "DAPP",
         });
         this.subscribeAuthEvents(this.web3auth);
@@ -83,7 +83,7 @@ export default Vue.extend({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId });
+        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] });
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal();
       } catch (error) {
