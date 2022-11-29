@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* devanagari */
 @font-face {
   font-family: "Poppins";
@@ -46,13 +50,13 @@
 #w3a-modal {
   --bg1: #374151;
   --bg2: #24262e;
-  --bg3: #4B5563;
-  --bg4: #3B4555;
-  --bg5: #1F2A37;
+  --bg3: #4b5563;
+  --bg4: #3b4555;
+  --bg5: #1f2a37;
   --text-color1: #d3d3d4;
   --text-color2: #ffffff;
   --text-color3: #9ca3af;
-  --text-color5: #6B7280;
+  --text-color5: #6b7280;
 
   --text-header: "Poppins", Helvetica, sans-serif;
   --text-title: "Inter";
@@ -98,7 +102,7 @@
   transition: 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
   min-height: 350px;
-  background: var(--bg1);;
+  background: var(--bg1);
   border-radius: 30px;
 }
 
@@ -411,7 +415,6 @@
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-
 #w3a-modal button.w3a-button:active {
   background: #6f717a;
 }
@@ -449,12 +452,12 @@
 }
 
 #w3a-modal button.w3a-button--wallet {
-  background: #0364FF !important;
-  color: #FFFFFF !important;
+  background: #0364ff !important;
+  color: #ffffff !important;
 }
 #w3a-modal button.w3a-button--wallet:hover {
-  background: #1E429F !important;
-  color: #FFFFFF !important;
+  background: #1e429f !important;
+  color: #ffffff !important;
 }
 
 #w3a-modal button.w3a-button--left > img {
@@ -498,7 +501,7 @@
   margin-top: 16px;
   display: flex;
   border: 8px;
-  color: #0364FF;
+  color: #0364ff;
   align-items: center;
   cursor: pointer;
   border-radius: 12px;
@@ -633,7 +636,7 @@
 /* Text Field */
 #w3a-modal .w3a-text-field {
   background: var(--bg3);
-  border: 1px solid #D1D5DB;
+  border: 1px solid #d1d5db;
   box-sizing: border-box;
   /* box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.4); */
   border-radius: 24px;
@@ -657,11 +660,9 @@
 }
 
 #w3a-modal .w3a-text-field:focus-visible {
-  outline: 1px solid #0364FF;
+  outline: 1px solid #0364ff;
   outline-offset: -1px;
 }
-
-
 
 /* Footer Components */
 #w3a-modal .w3a-footer {
@@ -719,7 +720,6 @@
 #w3a-modal .w3a-modal__loader-app-logo img {
   width: 72px;
   height: auto;
-  
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
@@ -729,10 +729,9 @@
 
 #w3a-modal .w3a-modal__loader-social-logo img {
   width: 72px;
-  height:  72px;
+  height: 72px;
   background: #f3f4f6;
   border-radius: 72px;
-  
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {
@@ -901,14 +900,14 @@
 #w3a-modal.w3a-modal--light {
   --bg1: #ffffff;
   --bg2: #f9f9fb;
-  --bg3: #F9FAFB;
-  --bg4: #F9FAFB;
-  --bg5: #D1D5DB;
+  --bg3: #f9fafb;
+  --bg4: #f9fafb;
+  --bg5: #d1d5db;
   --text-color1: #a2a5b5;
   --text-color2: #5c6c7f;
-  --text-color3: #6B7280;
+  --text-color3: #6b7280;
   --text-color4: #111928;
-  --text-color5: #D1D5DB;
+  --text-color5: #d1d5db;
   --button-bg1: #f3f4f6;
 }
 
@@ -938,7 +937,7 @@
 
 #w3a-modal.w3a-modal--light .w3a-text-field {
   background: var(--bg3);
-  border: 1px solid #D1D5DB;
+  border: 1px solid #d1d5db;
   box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.01);
   color: #b7b8bd;
 }
@@ -950,7 +949,7 @@
 
 #w3a-modal.w3a-modal--light .w3a-text-field:focus-visible {
   color: #0f1222;
-  outline: 1px solid #0364FF;
+  outline: 1px solid #0364ff;
 }
 
 #w3a-modal.w3a-modal--light .w3a-footer__links a:focus-visible {

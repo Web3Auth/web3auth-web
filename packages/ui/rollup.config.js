@@ -8,7 +8,14 @@ const config = {
   output: [{ dir: path.resolve("./dist/"), format: "es", sourcemap: true }],
   plugins: [
     postcss({
-      plugins: [],
+      config: {
+        path: "./postcss.config.js",
+      },
+      extensions: [".css"],
+      minimize: true,
+      inject: {
+        insertAt: "top",
+      },
     }),
     url(),
     svgr(),
