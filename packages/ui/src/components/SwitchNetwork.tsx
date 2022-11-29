@@ -47,7 +47,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
           <div className="w3a-switch-network__connect">
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId={fromNetworkIconId} isButton={false} />
+                <Image imageId={fromNetworkIconId} />
               </div>
               <div>
                 <div>{t("modal.network.from")}:</div>
@@ -56,12 +56,12 @@ function SwitchNetwork(props: SwitchNetworkProps) {
             </div>
             <div>
               <div className="w3a-switch-network__connect-divider">
-                <Image imageId="network-arrow" isButton={false} />
+                <Image imageId="network-arrow" />
               </div>
             </div>
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId={toNetworkIconId} isButton={false} />
+                <Image imageId={toNetworkIconId} />
               </div>
               <div>
                 <div>{t("modal.network.to")}:</div>

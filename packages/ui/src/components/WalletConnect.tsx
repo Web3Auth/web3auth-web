@@ -6,7 +6,7 @@ import QRCode from "react-qr-code";
 
 import Image from "./Image";
 
-const walletConnectIcon = <Image imageId="wallet-connect" width="114px" isButton={false} />;
+const walletConnectIcon = <Image imageId="wallet-connect" width="114px" />;
 
 interface WalletConnectProps {
   walletConnectUri: string;

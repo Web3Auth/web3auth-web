@@ -18,7 +18,7 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose, canEmit = true } = props;
-  const web3authIcon = <Image imageId="web3auth" isButton={false} />;
+  const web3authIcon = <Image imageId="web3auth" />;
   const [t] = useTranslation();
 
   useEffect(() => {

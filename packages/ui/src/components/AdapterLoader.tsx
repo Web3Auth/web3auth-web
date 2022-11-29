@@ -20,8 +20,8 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
-  const web3authIcon = <Image imageId="web3auth" isButton={false} />;
-  const providerIcon = <Image imageId={`login-${adapter}`} isButton={false} />;
+  const web3authIcon = <Image imageId="web3auth" />;
+  const providerIcon = <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation();
 
   useEffect(() => {
