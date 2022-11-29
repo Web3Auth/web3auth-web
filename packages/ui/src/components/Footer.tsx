@@ -1,13 +1,7 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
 
-interface FooterProps {
-  version: string;
-}
-
-function Footer(props: FooterProps) {
-  const { version } = props;
-
+function Footer() {
   const [t] = useTranslation();
 
   return (
@@ -22,11 +16,6 @@ function Footer(props: FooterProps) {
             <a href="https://docs.web3auth.io/legal/terms-and-conditions">{t("modal.footer.terms-service")}</a>
             <span>|</span>
             <a href="https://docs.web3auth.io/legal/privacy-policy">{t("modal.footer.policy")}</a>
-            <span>|</span>
-            <span>
-              {`${t("modal.footer.version")} `}
-              {version}
-            </span>
           </div>
         </div>
       </div>

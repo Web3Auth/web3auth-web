@@ -19,7 +19,6 @@ import SocialLogins from "./SocialLogins";
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
-  version: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -55,7 +54,7 @@ export default function Modal(props: ModalProps) {
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation();
 
-  const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -224,7 +223,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer version={version} />
+          <Footer />
         </div>
       </div>
     )
