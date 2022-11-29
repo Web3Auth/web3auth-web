@@ -40,7 +40,7 @@ function AddNetwork(props: AddNetworkProps) {
           <div className="w3a-switch-network__connect">
             <div>
               <div className="w3a-switch-network__logo">
-                <Image imageId={networkIconId} />
+                <Image imageId={networkIconId} isButton={false} />
               </div>
               <div>
                 <div>{chainConfig.displayName}</div>

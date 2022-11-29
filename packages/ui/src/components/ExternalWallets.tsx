@@ -85,7 +85,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                 return null;
               }
               // if (allKeys.length - 1 === index && isOthersLoading) setOthersLoading(false);
-              const providerIcon = <Image imageId={`login-${adapter}`} />;
+              const providerIcon = <Image imageId={`login-${adapter}`} hoverImageId={`login-${adapter}`} isButton />;
 
               return (
                 adapterVisibilityMap[adapter] && (
