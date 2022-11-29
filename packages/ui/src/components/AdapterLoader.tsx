@@ -20,8 +20,8 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
-  const web3authIcon = <Image imageId="web3auth" />;
-  const providerIcon = <Image imageId={`login-${adapter}`} />;
+  const web3authIcon = <Image imageId="web3auth" isButton={false} />;
+  const providerIcon = <Image imageId={`login-${adapter}`} isButton={false} />;
   const [t] = useTranslation();
 
   useEffect(() => {
@@ -52,10 +52,11 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                     <div />
                   </div>
                 </div>
-                <div className="w3a-modal__loader-adapter">{providerIcon}</div>
+                <div className="w3a-modal__loader-social-logo">{providerIcon}</div>
               </div>
               <div>
-                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message", { adapter })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter })}</div>
               </div>
             </>
           )}

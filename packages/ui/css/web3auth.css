@@ -48,7 +48,7 @@
   --bg2: #24262e;
   --bg3: #4B5563;
   --bg4: #3B4555;
-  --bg5: #D1D5DB;
+  --bg5: #1F2A37;
   --text-color1: #d3d3d4;
   --text-color2: #ffffff;
   --text-color3: #9ca3af;
@@ -129,7 +129,7 @@
 /* SPINNER */
 /* Loader */
 #w3a-modal .w3a-modal__loader {
-  background: var(--bg2);
+  background: var(--bg1);
   position: absolute;
   display: flex;
   justify-content: center;
@@ -146,7 +146,7 @@
 
 #w3a-modal .w3a-modal__loader-content {
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 50px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -218,7 +218,7 @@
 #w3a-modal .w3a-spinner__head {
   content: "";
   position: absolute;
-  border-radius: 50%;
+  border-radius: 100%;
 }
 
 #w3a-modal .w3a-spinner__mask {
@@ -713,8 +713,22 @@
 }
 
 #w3a-modal .w3a-modal__loader-app-logo img {
-  width: 64px;
+  width: 72px;
   height: auto;
+  
+}
+
+#w3a-modal .w3a-modal__loader-social-logo {
+  display: flex;
+  padding: 8px;
+}
+
+#w3a-modal .w3a-modal__loader-social-logo img {
+  width: 72px;
+  height:  72px;
+  background: #f3f4f6;
+  border-radius: 72px;
+  
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {

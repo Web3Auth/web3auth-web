@@ -49,7 +49,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}`} />;
+          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}`} isButton />;
           if (
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||

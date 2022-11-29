@@ -108,20 +108,21 @@ export default function Modal(props: ModalProps) {
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { adapter } = params;
-    if (DETAILED_ADAPTERS.includes(adapter))
-      setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: adapter };
-      });
-    else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
-      setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: "" };
-      });
+    // if (DETAILED_ADAPTERS.includes(adapter))
+    setModalState((prevState) => {
+      return { ...prevState, detailedLoaderAdapter: adapter };
+    });
+    // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
+    //   setModalState((prevState) => {
+    //     return { ...prevState, detailedLoaderAdapter: "" };
+    //   });
     handleExternalWalletClick(params);
   };
 
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
+    const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: "" };
+      return { ...prevState, detailedLoaderAdapter: loginParams.loginProvider };
     });
     handleSocialLoginClick(params);
   };
@@ -172,17 +173,17 @@ export default function Modal(props: ModalProps) {
           <Header onClose={closeModal} appLogo={appLogo} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <div className="w3a-modal__content w3ajs-content">
-              {modalState.detailedLoaderAdapter ? (
-                <AdapterLoader
-                  onClose={onCloseLoader}
-                  appLogo={appLogo}
-                  modalStatus={modalState.status}
-                  message={modalState.postLoadingMessage}
-                  adapter={modalState.detailedLoaderAdapter}
-                />
-              ) : (
-                <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
-              )}
+              {/* {modalState.detailedLoaderAdapter ? ( */}
+              <AdapterLoader
+                onClose={onCloseLoader}
+                appLogo={appLogo}
+                modalStatus={modalState.status}
+                message={modalState.postLoadingMessage}
+                adapter={modalState.detailedLoaderAdapter}
+              />
+              {/* ) : ( */}
+              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} /> */}
+              {/* )} */}
             </div>
           ) : (
             <div className="w3a-modal__content w3ajs-content">
