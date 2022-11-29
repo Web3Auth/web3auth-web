@@ -90,7 +90,12 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               return (
                 adapterVisibilityMap[adapter] && (
                   <li className="w3a-adapter-item" key={adapter}>
-                    <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
+                    <button
+                      type="button"
+                      onClick={() => handleExternalWalletClick({ adapter })}
+                      className="w3a-button w3a-button--icon"
+                      title={config[adapter]?.label || adapter}
+                    >
                       {providerIcon}
                     </button>
                     {/* <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p> */}
