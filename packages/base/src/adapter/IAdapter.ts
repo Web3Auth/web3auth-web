@@ -98,12 +98,12 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   setAdapterSettings(_: unknown): void {}
 
-  checkConnectionRequirements(): void {
+  checkConnectionRequirements(options?: { skipExistingConnection?: boolean }): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
     if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
     else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
+    if (!options.skipExistingConnection && this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
     if (this.status !== ADAPTER_STATUS.READY)
       throw WalletLoginError.connectionError(
         "Wallet adapter is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"

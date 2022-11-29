@@ -29,6 +29,7 @@ import type { LoginSettings, OpenloginAdapterOptions } from "./interface";
 export type OpenloginLoginParams = LoginParams & {
   // to maintain backward compatibility
   login_hint?: string;
+  skip_existing_connection?: boolean;
 };
 
 type PrivateKeyProvider = IBaseProvider<string>;
@@ -128,7 +129,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   async connect(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
-    super.checkConnectionRequirements();
+    super.checkConnectionRequirements({ skipExistingConnection: params?.skip_existing_connection });
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
@@ -211,8 +212,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
-    // if not logged in then login
-    if (!this.openloginInstance.privKey) {
+    // if not logged in then login or if want to skip checking for existing connection
+    if (!this.openloginInstance.privKey || params.skip_existing_connection) {
       if (!this.loginSettings.curve) {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
