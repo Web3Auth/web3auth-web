@@ -1,10 +1,7 @@
+import type { TorusSubVerifierInfo } from "@toruslabs/customauth";
 import type { TORUS_NETWORK_TYPE } from "@toruslabs/fetch-node-details";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
-export interface TorusSubVerifierInfo {
-  verifier: string;
-  idToken: string;
-}
 export type InitParams = { network: TORUS_NETWORK_TYPE };
 
 export type LoginParams = {

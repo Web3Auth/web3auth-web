@@ -52,6 +52,7 @@ class Web3Auth implements IWeb3Auth {
         chainId: options.chainConfig.chainId as string,
         rpcTarget: options.chainConfig.rpcTarget as string,
         ...(options?.chainConfig || {}),
+        chainNamespace: options.chainConfig.chainNamespace as ChainNamespaceType,
       };
     }
 
@@ -93,7 +94,7 @@ class Web3Auth implements IWeb3Auth {
     const pubDetails = await this.customAuthInstance.torus.getUserTypeAndAddress(torusNodeEndpoints, torusNodePub, verifierDetails, true);
 
     if (pubDetails.typeOfUser === "v1" || pubDetails.upgraded) {
-      throw WalletLoginError.fromCode(5000, "User has already enabled mfa, please use the @web3auth/web3auth-web sdk for login with mfa");
+      throw WalletLoginError.mfaEnabled();
     }
 
     let privKey = "";
