@@ -1,9 +1,11 @@
 import {
   ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   BaseAdapter,
   checkIfTokenIsExpired,
   clearToken,
   getSavedToken,
+  SafeEventEmitterProvider,
   saveToken,
   signChallenge,
   UserAuthInfo,
@@ -14,14 +16,18 @@ import {
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   public clientId: string;
 
+  public abstract status: ADAPTER_STATUS_TYPE;
+
+  public abstract provider: SafeEventEmitterProvider;
+
   constructor(params: { clientId?: string } = {}) {
     super();
     this.clientId = params.clientId;
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
-    const { chainNamespace, chainId } = this.chainConfig;
+    if (!this.provider || !super.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
+    const { chainNamespace, chainId } = super.chainConfig;
 
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const accounts = await this.provider.request<string[]>({
@@ -53,7 +59,7 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         params: [challenge, accounts[0]],
       });
 
-      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime, this.clientId);
+      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, super.sessionTime, this.clientId);
       saveToken(accounts[0] as string, this.name, idToken);
       return {
         idToken,

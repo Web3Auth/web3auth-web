@@ -1,9 +1,11 @@
 import {
   ADAPTER_STATUS,
+  ADAPTER_STATUS_TYPE,
   BaseAdapter,
   checkIfTokenIsExpired,
   clearToken,
   getSavedToken,
+  SafeEventEmitterProvider,
   saveToken,
   signChallenge,
   UserAuthInfo,
@@ -15,15 +17,19 @@ import bs58 from "bs58";
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   public clientId: string;
 
+  public abstract status: ADAPTER_STATUS_TYPE;
+
+  public abstract provider: SafeEventEmitterProvider;
+
   constructor(params: { clientId?: string } = {}) {
     super();
     this.clientId = params.clientId;
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
+    if (!this.provider || !super.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
 
-    const { chainNamespace, chainId } = this.chainConfig;
+    const { chainNamespace, chainId } = super.chainConfig;
 
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const accounts = await this.provider.request<string[]>({
@@ -62,7 +68,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
         bs58.encode(signedMessage as Uint8Array),
         challenge,
         this.name,
-        this.sessionTime,
+        super.sessionTime,
         this.clientId
       );
       saveToken(accounts[0] as string, this.name, idToken);
