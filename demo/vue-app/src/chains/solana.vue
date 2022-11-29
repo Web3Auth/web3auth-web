@@ -82,7 +82,7 @@ export default Vue.extend({
       loading: false,
       loginButtonStatus: "",
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: config.clientId }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA }, clientId: config.clientId[this.openloginNetwork] }),
     };
   },
   components: {
@@ -119,11 +119,11 @@ export default Vue.extend({
         this.parseConfig();
 
         this.loading = true;
-        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId, authMode: "DAPP" });
+        this.web3auth = new Web3Auth({ chainConfig: solanaChainConfig, clientId: config.clientId[this.openloginNetwork], authMode: "DAPP" });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-            clientId: config.clientId,
+            clientId: config.clientId[this.openloginNetwork],
           },
         });
         const slopeAdapter = new SlopeAdapter();
