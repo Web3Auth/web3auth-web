@@ -93,7 +93,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                     <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
                       {providerIcon}
                     </button>
-                    <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
+                    {/* <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p> */}
                   </li>
                 )
               );
