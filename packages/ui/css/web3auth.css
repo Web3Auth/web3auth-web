@@ -417,8 +417,8 @@
 }
 
 #w3a-modal button.w3a-button:disabled {
-  background: var(--bg3);
-  color: #D1D5DB;
+  background: var(--bg4) !important;
+  color: var(--text-color5) !important;
 }
 
 #w3a-modal button.w3a-button:focus-visible {
@@ -440,8 +440,12 @@
 }
 
 #w3a-modal button.w3a-button--email {
-  background: var(--bg4) !important;
-  color: var(--text-color5) !important;
+  background: var(--bg3) !important;
+  color: var(--text-color1) !important;
+}
+
+#w3a-modal button.w3a-button--email :disabled {
+  opacity: 80% !important;
 }
 
 #w3a-modal button.w3a-button--wallet {
@@ -494,7 +498,7 @@
   margin-top: 16px;
   display: flex;
   border: 8px;
-  color: var(--text-color2);
+  color: #0364FF;
   align-items: center;
   cursor: pointer;
   border-radius: 12px;
@@ -925,6 +929,7 @@
 
 #w3a-modal.w3a-modal--light button.w3a-button:disabled {
   color: #b7b8bd;
+  opacity: 50%;
 }
 
 #w3a-modal.w3a-modal--light button.w3a-button:focus-visible {
@@ -976,4 +981,13 @@
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
+}
+
+#w3a-modal.w3a-modal--light button.w3a-button--email {
+  background: var(--bg4) !important;
+  color: var(--text-color4) !important;
+}
+
+#w3a-modal.w3a-modal--light button.w3a-button--email :disabled {
+  opacity: 80% !important;
 }

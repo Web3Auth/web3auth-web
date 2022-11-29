@@ -49,7 +49,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}`} isButton />;
+          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}-active`} isButton />;
           if (
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||
@@ -92,7 +92,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       </ul>
       <span className="w3a-social__policy">{t("modal.social.policy")}</span>
       {canShowMore && (
-        <button type="button" className={adapterButtonClass} style={{ display: "flex", color: "#0364FF" }} onClick={expandClickHandler}>
+        <button type="button" className={adapterButtonClass} onClick={expandClickHandler}>
           {/* <Icon iconName={`expand${isDark ? "-light" : ""}`} /> */}
           <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
         </button>
