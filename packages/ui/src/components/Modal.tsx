@@ -1,6 +1,6 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { log, WALLET_ADAPTERS } from "@web3auth/base";
+import { log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -12,7 +12,7 @@ import AdapterLoader from "./AdapterLoader";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
-import Loader from "./Loader";
+// import Loader from "./Loader";
 import SocialLoginEmail from "./SocialLoginEmail";
 import SocialLogins from "./SocialLogins";
 
@@ -28,7 +28,7 @@ interface ModalProps {
 
 log.enableAll();
 
-const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
+// const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
 
 export default function Modal(props: ModalProps) {
   const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
