@@ -9,13 +9,10 @@ const config = {
   plugins: [
     postcss({
       config: {
-        path: "./postcss.config.js",
+        path: require.resolve("./postcss.config.js"),
       },
       extensions: [".css"],
       minimize: true,
-      inject: {
-        insertAt: "top",
-      },
     }),
     url(),
     svgr(),
