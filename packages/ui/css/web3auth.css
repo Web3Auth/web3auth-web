@@ -287,8 +287,6 @@
 
 #w3a-modal span.w3a-social__policy {
   color: var(--text-color3);
-  font-weight: 500;
-  font-size: 12px;
 }
 #w3a-modal p.w3a-social__subtitle {
   font-size: 16px;
@@ -332,7 +330,7 @@
 }
 
 /* Adapter List */
-#w3a-modal ul.w3a-adapter-list {
+#w3a-modal ul.w3a-adapter-list2 {
   display: flex;
   align-items: center;
   padding: 0;
@@ -346,8 +344,15 @@
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
 }
 
+#w3a-modal ul.w3a-adapter-list {
+  @apply grid grid-cols-3 overflow-y-hidden mb-4 gap-x-2 gap-y-4;
+  max-height: 500px;
+  transition: max-height 0.35s;
+  transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
+}
+
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
-  max-height: 106px;
+  max-height: 108px;
   transition: max-height 0.3s;
   transition-timing-function: cubic-bezier(0, 0.73, 0.71, 1);
 }
@@ -374,146 +379,6 @@
   position: absolute;
   transform: translate(-6px);
   width: 60px;
-}
-
-/* Buttons */
-#w3a-modal button.w3a-button {
-  background-color: var(--button-bg1);
-  border: 1px solid #404145;
-  box-sizing: border-box;
-  /* box-shadow: 2px 2px 12px rgba(3, 100, 255, 0.05); */
-  border-radius: 24px;
-  height: 44px;
-  width: 100%;
-  /* padding: 8px; */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--text-body);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  color: var(--text-color2);
-  cursor: pointer;
-}
-
-#w3a-modal button.w3a-button:hover {
-  background: var(--bg5);
-  transition: background 150ms;
-  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
-}
-
-#w3a-modal button.w3a-button:hover > .hover-icon {
-  display: block;
-  transition: display 150ms;
-  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
-}
-
-#w3a-modal button.w3a-button:hover > .image-icon {
-  display: none;
-  transition: display 150ms;
-  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
-}
-
-#w3a-modal button.w3a-button:active {
-  background: #6f717a;
-}
-
-#w3a-modal button.w3a-button:disabled {
-  background: var(--bg4) !important;
-  color: var(--text-color5) !important;
-}
-
-#w3a-modal button.w3a-button:focus-visible {
-  outline: 1px solid #daf0ff;
-  outline-offset: -1px;
-}
-
-#w3a-modal button.w3a-button--icon {
-  width: 104px;
-}
-
-#w3a-modal button.w3a-button--long {
-  width: 328px;
-}
-
-#w3a-modal button.w3a-button--left {
-  justify-content: start;
-  padding: 8px 16px;
-}
-
-#w3a-modal button.w3a-button--email {
-  background: var(--bg3) !important;
-  color: var(--text-color1) !important;
-}
-
-#w3a-modal button.w3a-button--email :disabled {
-  opacity: 80% !important;
-}
-
-#w3a-modal button.w3a-button--wallet {
-  background: #0364ff !important;
-  color: #ffffff !important;
-}
-#w3a-modal button.w3a-button--wallet:hover {
-  background: #1e429f !important;
-  color: #ffffff !important;
-}
-
-#w3a-modal button.w3a-button--left > img {
-  height: 30px;
-  width: auto;
-}
-
-#w3a-modal button.w3a-button--left > div.w3a-button__name {
-  max-width: 180px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-transform: capitalize;
-}
-
-#w3a-modal button.w3a-button--left > div.w3a-button__note {
-  margin-left: 8px;
-  color: #b7b8bd;
-  margin-left: auto;
-}
-
-#w3a-modal .w3a-button__image {
-  max-width: 100%;
-  max-height: 100%;
-  transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1), visibility 0s;
-}
-
-#w3a-modal button.w3a-button.w3a-button--rotate .w3a-button__image {
-  transform: rotate(180deg);
-}
-
-#w3a-modal .w3a-button--left .w3a-button__image {
-  margin-right: 12px;
-}
-
-#w3a-modal button.w3a-button-expand {
-  height: unset;
-  width: auto;
-  margin-left: auto;
-  font-size: 14px;
-  margin-top: 16px;
-  display: flex;
-  border: 8px;
-  color: #0364ff;
-  align-items: center;
-  cursor: pointer;
-  border-radius: 12px;
-  cursor: pointer;
-  padding: 0 10px 0 8px;
-  background: transparent;
-}
-
-#w3a-modal button.w3a-button-expand svg {
-  width: 12px;
-  height: auto;
-  margin-right: 4px;
 }
 
 #w3a-modal .w3a-external-toggle {
@@ -612,56 +477,17 @@
   margin: 16px 16px;
   padding: inherit;
 }
+#w3a-modal .w3a-wallet-connect-qr > svg {
+  margin: auto;
+}
 
 #w3a-modal .w3a-wallet-connect__container-android a {
   text-decoration: none;
 }
 
-#w3a-modal .w3a-wallet-connect__container-android .w3a-button {
-  background-color: rgb(64, 153, 255) !important;
-  color: #ffffff !important;
-  height: auto;
-  font-size: 14px;
-  padding: 8px 16px;
-  width: auto;
-  margin: auto;
-}
-
 #w3a-modal .w3a-wallet-connect__logo > img {
-  text-align: center;
+  margin: 0 auto 16px;
   width: 115px;
-  margin-bottom: 16px;
-}
-
-/* Text Field */
-#w3a-modal .w3a-text-field {
-  background: var(--bg3);
-  border: 1px solid #d1d5db;
-  box-sizing: border-box;
-  /* box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.4); */
-  border-radius: 24px;
-  padding: 12px 24px;
-  gap: 10px;
-  height: 42px;
-  width: 100%;
-  font-family: var(--text-body);
-  font-size: 16px;
-  color: var(--text-color3);
-  margin-bottom: 16px;
-}
-
-#w3a-modal .w3a-text-field:active {
-  background: #0f1222;
-}
-
-#w3a-modal .w3a-text-field:hover {
-  outline: 1px solid black;
-  outline-offset: -1px;
-}
-
-#w3a-modal .w3a-text-field:focus-visible {
-  outline: 1px solid #0364ff;
-  outline-offset: -1px;
 }
 
 /* Footer Components */
@@ -719,6 +545,8 @@
 
 #w3a-modal .w3a-modal__loader-app-logo img {
   width: 72px;
+  max-width: 72px;
+  max-height: 72px;
   height: auto;
 }
 
@@ -919,39 +747,6 @@
   /* padding-bottom: 24px; */
 }
 
-#w3a-modal.w3a-modal--light button.w3a-button {
-  background-color: var(--button-bg1);
-  border: 1px solid var(--button-bg1);
-  box-shadow: none;
-  color: #595857;
-}
-
-#w3a-modal.w3a-modal--light button.w3a-button:disabled {
-  color: #b7b8bd;
-  opacity: 50%;
-}
-
-#w3a-modal.w3a-modal--light button.w3a-button:focus-visible {
-  outline: 1px solid #0f1222;
-}
-
-#w3a-modal.w3a-modal--light .w3a-text-field {
-  background: var(--bg3);
-  border: 1px solid #d1d5db;
-  box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.01);
-  color: #b7b8bd;
-}
-
-#w3a-modal.w3a-modal--light .w3a-text-field:active {
-  color: #0f1222;
-  outline: 1px solid #0f1222;
-}
-
-#w3a-modal.w3a-modal--light .w3a-text-field:focus-visible {
-  color: #0f1222;
-  outline: 1px solid #0364ff;
-}
-
 #w3a-modal.w3a-modal--light .w3a-footer__links a:focus-visible {
   outline: 1px solid #0f1222;
 }
@@ -959,34 +754,146 @@
 #w3a-modal.w3a-modal--light .w3a-external-back:focus-visible {
   outline: 1px solid #0f1222;
 }
-#w3a-modal.w3a-modal--light button.w3a-button:hover {
-  background: var(--bg5);
-  transition: background 150ms;
-  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
-}
 .hover-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal.w3a-modal--light button.w3a-button:hover > .hover-icon {
+/* Tailwind classes */
+#w3a-modal .w3a-text-field {
+  @apply rounded-full
+  py-3 px-6
+  text-sm
+  outline
+  outline-1
+  bg-[#374151]
+  outline-[#4B5563]
+  text-[#9CA3AF]
+  focus:text-[#fff]
+  disabled:bg-[#242933]
+  disabled:outline-[#242933]
+  disabled:placeholder:text-[#3E444E];
+  line-height: 1.25em;
+}
+
+#w3a-modal input.w3a-text-field:-webkit-autofill,
+#w3a-modal input.w3a-text-field:-webkit-autofill:hover,
+#w3a-modal input.w3a-text-field:-webkit-autofill:focus,
+#w3a-modal input.w3a-text-field:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #374151 inset !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}
+
+#w3a-modal.w3a-modal--light .w3a-text-field {
+  @apply bg-[#F9FAFB]
+  placeholder:text-[#9CA3AF]
+  outline-[#D1D5DB]
+  text-[#6B7280]
+  focus:outline
+  focus:text-[#111928]
+  focus:outline-[#0364FF]
+  disabled:bg-[#F2F2F2]
+  disabled:outline-[#F2F2F2]
+  disabled:placeholder:text-[#9CA3AF];
+}
+
+#w3a-modal.w3a-modal--light input.w3a-text-field:-webkit-autofill,
+#w3a-modal.w3a-modal--light input.w3a-text-field:-webkit-autofill:hover,
+#w3a-modal.w3a-modal--light input.w3a-text-field:-webkit-autofill:focus,
+#w3a-modal.w3a-modal--light input.w3a-text-field:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
+  -webkit-text-fill-color: #6b7280 !important;
+}
+
+/* Buttons */
+#w3a-modal .w3a-button {
+  @apply rounded-full
+  py-3 px-6
+  text-base
+  bg-[#111928]
+  focus:bg-[#111928]
+  hover:bg-[#1F2A37]
+  disabled:bg-[#3B4555]
+  text-[#ffffff]
+  focus:text-[#ffffff]
+  disabled:text-[#6B7280]
+  focus:outline
+  focus:outline-1
+  active:outline
+  active:outline-1
+  focus:outline-[#9CA3AF]
+  active:outline-[#9CA3AF];
+}
+
+#w3a-modal.w3a-modal--light .w3a-button {
+  @apply bg-[#F3F4F6]
+  hover:bg-[#D1D5DB]
+  focus:bg-[#F3F4F6]
+  disabled:bg-[#F9FAFB]
+  text-[#111928]
+  disabled:text-[#D1D5DB]
+  focus:outline-[#F3F4F6]
+  active:outline-[#F3F4F6]
+  focus:text-[#374151];
+}
+
+#w3a-modal .w3a-button--primary {
+  @apply bg-[#0364FF]
+  hover:bg-[#1E429F]
+  focus:bg-[#0364FF]
+  disabled:bg-[#2D4874]
+  text-[#ffffff]
+  focus:text-[#ffffff]
+  active:text-[#ffffff]
+  disabled:text-[#6B7280]
+  focus:outline-[#A4CAFE]
+  active:outline-[#A4CAFE];
+}
+
+#w3a-modal.w3a-modal--light .w3a-button--primary {
+  @apply bg-[#0364FF]
+  hover:bg-[#1E429F]
+  focus:bg-[#0364FF]
+  disabled:bg-[#C3DDFD]
+  text-[#ffffff]
+  focus:text-[#ffffff]
+  disabled:text-[#EBF5FF]
+  focus:outline-[#A4CAFE];
+}
+
+#w3a-modal .w3a-button--login {
+  @apply inline-flex
+  items-center
+  justify-center
+  h-11;
+}
+
+#w3a-modal button.w3a-button--login:hover > .hover-icon {
   display: block;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal.w3a-modal--light button.w3a-button:hover > .image-icon {
+#w3a-modal button.w3a-button--login:hover > .image-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal.w3a-modal--light button.w3a-button--email {
-  background: var(--bg4) !important;
-  color: var(--text-color4) !important;
-}
-
-#w3a-modal.w3a-modal--light button.w3a-button--email :disabled {
-  opacity: 80% !important;
+#w3a-modal button.w3a-button-expand {
+  height: unset;
+  width: auto;
+  margin-left: auto;
+  font-size: 14px;
+  margin-top: 16px;
+  display: flex;
+  border: 8px;
+  color: #0364ff;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0 10px 0 8px;
+  background: transparent;
 }

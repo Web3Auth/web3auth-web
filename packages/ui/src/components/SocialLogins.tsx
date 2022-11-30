@@ -49,7 +49,9 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const providerIcon = <Image imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}-active`} isButton />;
+          const providerIcon = (
+            <Image width="20" imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}-active`} isButton />
+          );
           if (
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||
@@ -62,27 +64,27 @@ export default function SocialLogins(props: SocialLoginProps) {
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
           if (order === 1) {
             return (
-              <li className="w3a-adapter-item" key={method} style={{ order }}>
+              <li className="w3a-adapter-item col-span-3" key={method} style={{ order }}>
                 <button
                   type="button"
                   onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
-                  className="w3a-button w3a-button--long"
+                  className="w3a-button w3a-button--login h-12 w-full"
                 >
                   {providerIcon}
                   <p className="w3a-social__subtitle">
                     {t("modal.social.continue")}
-                    {method}
+                    <span className="w3a-button__adapter">{method}</span>
                   </p>
                 </button>
               </li>
             );
           }
           return (
-            <li className="w3a-adapter-item" key={method} style={{ order }}>
+            <li className="w3a-adapter-item col-span-1" key={method} style={{ order }}>
               <button
                 type="button"
                 onClick={() => handleSocialLoginClick({ adapter: socialLoginsConfig.adapter, loginParams: { loginProvider: method } })}
-                className="w3a-button w3a-button--icon"
+                className="w3a-button w3a-button--login w-full"
               >
                 {providerIcon}
               </button>
@@ -90,12 +92,13 @@ export default function SocialLogins(props: SocialLoginProps) {
           );
         })}
       </ul>
-      <span className="w3a-social__policy">{t("modal.social.policy")}</span>
+      <div className="w3a-social__policy text-left text-xs font-[500]">{t("modal.social.policy")}</div>
       {canShowMore && (
-        <button type="button" className={adapterButtonClass} onClick={expandClickHandler}>
-          {/* <Icon iconName={`expand${isDark ? "-light" : ""}`} /> */}
-          <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
-        </button>
+        <div className="text-right">
+          <button type="button" className={adapterButtonClass} onClick={expandClickHandler}>
+            <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
+          </button>
+        </div>
       )}
     </div>
   );

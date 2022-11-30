@@ -11,7 +11,7 @@ export default function Image(props: ImageProps) {
     <>
       <img src={`https://images.web3auth.io/${imageId}.svg`} height={height} width={width} alt={imageId} className="image-icon" />
       {isButton ? (
-        <img src={`https://images.web3auth.io/${hoverImageId}.svg`} height={height} width={20} alt={hoverImageId} className="hover-icon" />
+        <img src={`https://images.web3auth.io/${hoverImageId}.svg`} height={height} width={width} alt={hoverImageId} className="hover-icon" />
       ) : null}
     </>
   );

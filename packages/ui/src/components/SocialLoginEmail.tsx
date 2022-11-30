@@ -26,7 +26,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
       <div className="w3a-group__title">{t("modal.social.email")}</div>
       <form className="w3ajs-email-passwordless-form" onSubmit={(e) => handleEmailSubmit(e)}>
         <input
-          className="w3a-text-field"
+          className="w3a-text-field w-full mb-4"
           type="email"
           name="email"
           required
@@ -35,7 +35,8 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
           onBlur={(e) => (e.target.placeholder = t("modal.social.email-new"))}
           onChange={(e) => handleEmailChange(e)}
         />
-        <button disabled={!isValidEmail} className="w3a-button w3a-button--email" type="submit">
+
+        <button disabled={!isValidEmail} className="w3a-button w-full" type="submit">
           {t("modal.social.email-continue")}
         </button>
       </form>

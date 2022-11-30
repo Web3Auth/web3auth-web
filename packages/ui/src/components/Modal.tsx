@@ -132,7 +132,7 @@ export default function Modal(props: ModalProps) {
         <div className="w3a-group__title">{t("modal.external.title")}</div>
         <button
           type="button"
-          className="w3a-button w3a-button--wallet w3ajs-external-toggle__button"
+          className="w3a-button w3a-button--primary w-full w3ajs-external-toggle__button"
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
