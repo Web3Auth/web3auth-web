@@ -1557,22 +1557,22 @@
     "once" "^1.4.0"
     "pump" "^3.0.0"
 
-"@toruslabs/tss-client@^0.0.1":
-  "integrity" "sha512-J0UeiL8+cAfR0JM9L8xKdBp/MrXowgnsHQU5Bv3jSPaJGKaW0ea7rksfnET85R31l825Tmy6wTHiy96QrHU8uQ=="
-  "resolved" "https://registry.npmjs.org/@toruslabs/tss-client/-/tss-client-0.0.1.tgz"
-  "version" "0.0.1"
+"@toruslabs/tss-client@^1.2.1":
+  "integrity" "sha512-lb13wzXgxgloFKV3SlDk69rwdn5ciOXZT75F/ceH94ZInGpqcG438Hycb+8UxQg9Ku5W3vojfcMnniFrdYNAkA=="
+  "resolved" "https://registry.npmjs.org/@toruslabs/tss-client/-/tss-client-1.2.1.tgz"
+  "version" "1.2.1"
   dependencies:
     "@toruslabs/eccrypto" "^1.1.8"
-    "@toruslabs/tss-lib" "^0.0.1"
+    "@toruslabs/tss-lib" "^1.2.1"
     "axios" "^0.27.2"
     "bn.js" "^5.2.1"
     "keccak256" "^1.0.6"
     "socket.io-client" "^4.5.1"
 
-"@toruslabs/tss-lib@^0.0.1":
-  "integrity" "sha512-cGMQj9h3qCwhqpxez/sFLnix9vipkeIfnvdAoFqsIF8BoLGSsdpKNPE7h+3GtqrK2w6xYyPbUBltci+lSXEO5A=="
-  "resolved" "https://registry.npmjs.org/@toruslabs/tss-lib/-/tss-lib-0.0.1.tgz"
-  "version" "0.0.1"
+"@toruslabs/tss-lib@^1.2.1":
+  "integrity" "sha512-Cif9fbqmhG37ock7n7qVfSww4ueFn6LWSACwJsq52uEnWSsZ+ZkE3j/Ow1dlNEiI7GTAxaxjKI5H4OIGgvScjA=="
+  "resolved" "https://registry.npmjs.org/@toruslabs/tss-lib/-/tss-lib-1.2.1.tgz"
+  "version" "1.2.1"
 
 "@toruslabs/tweetnacl-js@^1.0.3":
   "integrity" "sha512-WQJYMTR/bkqvpk3DWOqRt5e24RhwJp9PXUoSj4zSthd3+fDhKYCI56YVMPNDKah1fCffOe9F3m8iZ5SgDZ+Csw=="

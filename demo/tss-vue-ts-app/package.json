@@ -8,8 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@toruslabs/tss-client": "^0.0.1",
-    "@toruslabs/tss-lib": "^0.0.1",
+    "@toruslabs/tss-client": "^1.2.1",
+    "@toruslabs/tss-lib": "^1.2.1",
     "@web3auth-mpc/openlogin-adapter": "^2.1.4",
     "@web3auth-mpc/web3auth": "^2.1.4",
     "core-js": "^3.25.4",
