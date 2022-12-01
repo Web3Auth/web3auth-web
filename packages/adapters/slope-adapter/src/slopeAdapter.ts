@@ -7,11 +7,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -25,11 +25,7 @@ import { ISlopeProvider, SlopeInjectedProxyProvider } from "@web3auth/solana-pro
 
 import { detectProvider } from "./utils";
 
-export interface SlopeWalletOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type SlopeWalletOptions = BaseAdapterSettings;
 
 export class SlopeAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SLOPE;
@@ -46,14 +42,6 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
 
   private slopeProxyProvider: SlopeInjectedProxyProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(options: SlopeWalletOptions = {}) {
-    super(options);
-    this.chainConfig = options?.chainConfig || null;
-    this.sessionTime = options?.sessionTime || 86400;
-  }
-
   get isWalletConnected(): boolean {
     return this.status === ADAPTER_STATUS.CONNECTED;
   }
@@ -66,22 +54,8 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
     this._wallet = await detectProvider({ interval: 500, count: 3 });
     if (!this._wallet) throw WalletInitializationError.notInstalled();
     this.slopeProxyProvider = new SlopeInjectedProxyProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
@@ -135,7 +109,6 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
         this.slopeProxyProvider = null;
         this._wallet = null;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

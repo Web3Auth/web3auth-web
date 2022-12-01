@@ -9,11 +9,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -24,11 +24,7 @@ import {
 import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { SolflareInjectedProvider, SolflareWallet } from "@web3auth/solana-provider";
 
-export interface SolflareWalletOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type SolflareWalletOptions = BaseAdapterSettings;
 
 export class SolflareAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SOLFLARE;
@@ -45,14 +41,6 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
 
   private solflareProvider: SolflareInjectedProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(options: SolflareWalletOptions = {}) {
-    super(options);
-    this.chainConfig = options?.chainConfig || null;
-    this.sessionTime = options?.sessionTime || 86400;
-  }
-
   get isWalletConnected(): boolean {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
@@ -65,22 +53,8 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
     this.solflareProvider = new SolflareInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.SOLFLARE);
@@ -146,8 +120,9 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
         this.status = ADAPTER_STATUS.NOT_READY;
         this.solflareProvider = null;
         this._wallet = null;
+      } else {
+        this.status = ADAPTER_STATUS.READY;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

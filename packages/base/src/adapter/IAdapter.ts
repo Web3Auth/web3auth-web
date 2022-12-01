@@ -2,7 +2,7 @@ import type { OpenloginUserInfo } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { getChainConfig } from "../chain/config";
-import { AdapterNamespaceType, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { AdapterNamespaceType, CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTERS } from "../wallet";
@@ -43,6 +43,13 @@ export type CONNECTED_EVENT_DATA = {
 };
 
 export type UserAuthInfo = { idToken: string };
+
+export interface BaseAdapterSettings {
+  clientId?: string;
+  sessionTime?: number;
+  chainConfig?: CustomChainConfig;
+}
+
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
@@ -50,6 +57,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
   sessionTime: number;
+  clientId: string;
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
@@ -57,8 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  setChainConfig(customChainConfig: CustomChainConfig): void;
-  setAdapterSettings(adapterSettings: unknown): void;
+  setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
@@ -67,11 +74,13 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public sessionTime = 86400;
 
-  // should be added in constructor or from setChainConfig function
+  public clientId: string;
+
+  protected rehydrated = false;
+
+  // should be added in constructor or from setAdapterSettings function
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
-
-  public abstract clientId: string;
 
   public abstract adapterNamespace: AdapterNamespaceType;
 
@@ -83,20 +92,31 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
+  constructor(options: BaseAdapterSettings = {}) {
+    super();
+    this.setAdapterSettings(options);
+  }
+
   get chainConfigProxy(): CustomChainConfig | null {
     return this.chainConfig ? { ...this.chainConfig } : null;
   }
 
   public abstract get provider(): SafeEventEmitterProvider | null;
 
-  setChainConfig(customChainConfig: CustomChainConfig): void {
+  public setAdapterSettings(options: BaseAdapterSettings): void {
     if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    }
+    const customChainConfig = options.chainConfig;
     if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+    if (!customChainConfig.chainId) throw WalletInitializationError.notReady("ChainId is required while setting chainConfig");
     const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
     this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
   }
-
-  setAdapterSettings(_: unknown): void {}
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
@@ -108,10 +128,14 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
       throw WalletLoginError.connectionError(
         "Wallet adapter is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
       );
-    if (!this.clientId) throw WalletLoginError.connectionError("Please initialize Web3Auth with a valid clientId in constructor");
   }
 
   checkInitializationRequirements(): void {
+    if (!this.clientId) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid clientId in constructor");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
+    if (!this.chainConfig.rpcTarget && this.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+      throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
+    }
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");

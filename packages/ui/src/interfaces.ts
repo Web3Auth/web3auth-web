@@ -5,7 +5,7 @@ export interface UIConfig {
   appLogo: string;
   version: string;
   adapterListener: SafeEventEmitter;
-  theme?: "light" | "dark";
+  theme?: "light" | "dark" | "auto";
   loginMethodsOrder?: string[];
   displayErrorsOnModal?: boolean;
   defaultLanguage?: string;

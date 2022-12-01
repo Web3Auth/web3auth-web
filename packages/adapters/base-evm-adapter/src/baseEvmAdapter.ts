@@ -1,8 +1,12 @@
 import {
+  ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  AdapterInitOptions,
   BaseAdapter,
+  CHAIN_NAMESPACES,
   checkIfTokenIsExpired,
   clearToken,
+  getChainConfig,
   getSavedToken,
   saveToken,
   signChallenge,
@@ -12,18 +16,14 @@ import {
 } from "@web3auth/base";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
-  public clientId: string;
-
-  constructor(params: { clientId?: string } = {}) {
-    super();
-    this.clientId = params.clientId;
+  async init(_?: AdapterInitOptions): Promise<void> {
+    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
-    const { chainNamespace, chainId } = this.chainConfig;
-
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    const { chainNamespace, chainId } = this.chainConfig;
     const accounts = await this.provider.request<string[]>({
       method: "eth_accounts",
     });
@@ -70,5 +70,8 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
     if (accounts && accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }
+
+    this.rehydrated = false;
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 }

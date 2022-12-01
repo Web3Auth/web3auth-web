@@ -35,10 +35,10 @@ export const getDefaultAdapterModule = async (params: {
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
-    const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
+    const defaultOptions = getOpenloginDefaultOptions();
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
-      chainConfig: { ...(defaultOptions.chainConfig || {}), ...finalChainConfig },
+      chainConfig: { ...finalChainConfig },
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId },
     });
     return adapter;
