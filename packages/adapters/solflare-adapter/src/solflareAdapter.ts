@@ -54,6 +54,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
     this.solflareProvider = new SolflareInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.status = ADAPTER_STATUS.READY;
@@ -113,7 +114,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    await super.checkDisconnectionRequirements();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
@@ -123,6 +124,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
       } else {
         this.status = ADAPTER_STATUS.READY;
       }
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

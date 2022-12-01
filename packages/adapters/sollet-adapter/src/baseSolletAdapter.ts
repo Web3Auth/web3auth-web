@@ -61,6 +61,7 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
     if (typeof this._provider !== "string") {
       this._provider = await detectProvider({ interval: 500, count: 3 });
@@ -157,9 +158,9 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    super.checkDisconnectionRequirements();
     const wallet = this._wallet;
     if (!wallet || !this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await super.disconnect();
     wallet.off("disconnect", this._onDisconnect);
     this._wallet = null;
 
@@ -195,6 +196,7 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
       } else {
         this.status = ADAPTER_STATUS.READY;
       }
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

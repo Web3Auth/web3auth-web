@@ -47,7 +47,7 @@ export type UserAuthInfo = { idToken: string };
 export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
-  chainConfig?: CustomChainConfig;
+  chainConfig?: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
 }
 
 export interface IAdapter<T> extends SafeEventEmitter {
@@ -112,10 +112,17 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
       this.clientId = options.clientId;
     }
     const customChainConfig = options.chainConfig;
-    if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
-    if (!customChainConfig.chainId) throw WalletInitializationError.notReady("ChainId is required while setting chainConfig");
-    const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
-    this.chainConfig = { ...defaultChainConfig, ...customChainConfig };
+    if (customChainConfig) {
+      if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+      // chainId is optional in this function.
+      // we go with mainnet chainId by default.
+      const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
+      // NOTE: It is being forced casted to CustomChainConfig to handle OTHER Chainnamespace
+      // where chainConfig is not required.
+      const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;
+
+      this.chainConfig = finalChainConfig;
+    }
   }
 
   checkConnectionRequirements(): void {
@@ -136,9 +143,17 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (!this.chainConfig.rpcTarget && this.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
     }
+
+    if (!this.chainConfig.chainId && this.chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+      throw WalletInitializationError.invalidParams("chainID is required in chainConfig");
+    }
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
+  }
+
+  checkDisconnectionRequirements(): void {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
   updateAdapterData(data: unknown): void {

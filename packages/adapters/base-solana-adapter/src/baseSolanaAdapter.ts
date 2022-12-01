@@ -22,8 +22,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
 
     const { chainNamespace, chainId } = this.chainConfig;
 
@@ -75,7 +74,6 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   }
 
   async disconnect(): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     const accounts = await this.provider.request<string[]>({
       method: "getAccounts",
     });

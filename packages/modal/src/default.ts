@@ -1,6 +1,7 @@
 import type { OpenLoginOptions } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 
+// warning: this function is not compatible with "OTHER" chainnamespace.
 export const getDefaultAdapterModule = async (params: {
   name: WALLET_ADAPTER_TYPE;
   clientId: string;

@@ -67,6 +67,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
 
     const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
@@ -147,8 +148,8 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    super.checkDisconnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    await super.disconnect();
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     if (options.cleanup) {
@@ -158,6 +159,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
     }
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

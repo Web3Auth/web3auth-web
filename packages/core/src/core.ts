@@ -120,18 +120,17 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
         const providedChainConfig = this.coreOptions.chainConfig;
         if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
-        const chainConfig = {
-          ...getChainConfig(providedChainConfig.chainNamespace, providedChainConfig.chainId),
-          ...providedChainConfig,
-        } as CustomChainConfig;
         this.walletAdapters[adapterName].setAdapterSettings({
-          chainConfig,
+          chainConfig: providedChainConfig,
+          sessionTime: this.coreOptions.sessionTime,
+          clientId: this.coreOptions.clientId,
+        });
+      } else {
+        this.walletAdapters[adapterName].setAdapterSettings({
+          sessionTime: this.coreOptions.sessionTime,
+          clientId: this.coreOptions.clientId,
         });
       }
-      this.walletAdapters[adapterName].setAdapterSettings({
-        sessionTime: this.coreOptions.sessionTime,
-        clientId: this.coreOptions.clientId,
-      });
 
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });

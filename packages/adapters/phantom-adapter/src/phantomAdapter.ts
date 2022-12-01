@@ -128,7 +128,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    super.checkDisconnectionRequirements();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
@@ -136,6 +136,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
         this.phantomProvider = null;
         this._wallet = null;
       }
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

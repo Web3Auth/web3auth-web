@@ -55,6 +55,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
     this._wallet = await detectProvider({ interval: 500, count: 3 });
     if (!this._wallet) throw WalletInitializationError.notInstalled();
@@ -101,7 +102,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    super.checkDisconnectionRequirements();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
@@ -109,6 +110,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
         this.slopeProxyProvider = null;
         this._wallet = null;
       }
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

@@ -111,7 +111,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    super.checkDisconnectionRequirements();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
@@ -120,6 +120,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
     }
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

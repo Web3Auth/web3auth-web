@@ -70,6 +70,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
     const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
     const network: NetworkInterface = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
@@ -138,8 +139,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    super.checkDisconnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    await super.disconnect();
     await this.torusInstance.logout();
     if (options.cleanup) {
       // ready to connect again
@@ -150,6 +151,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {

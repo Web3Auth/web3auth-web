@@ -67,6 +67,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   async init(): Promise<void> {
+    await super.init();
     super.checkInitializationRequirements();
     // Create a connector
     this.connector = this.getWalletConnectInstance();
@@ -150,9 +151,9 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    super.checkDisconnectionRequirements();
     const { cleanup } = options;
     if (!this.connector || !this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await super.disconnect();
     await this.connector.killSession();
     this.rehydrated = false;
     if (cleanup) {
@@ -163,6 +164,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
+    await super.disconnect();
   }
 
   private async addChain(chainConfig: CustomChainConfig): Promise<void> {
