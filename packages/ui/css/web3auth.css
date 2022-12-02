@@ -215,25 +215,27 @@
   @apply w-full
   max-w-[392px]
   max-h-[95%]
-  min-h-[350px]
+  min-h-[610px]
   overflow-x-hidden
   overflow-y-auto
   rounded-[32px]
-  relative
   opacity-0
+  relative
   bg-white
   dark:bg-app-gray-700
   shadow-modal
   border
   border-app-gray-100
   dark:border-app-gray-700;
-  transition: 150ms cubic-bezier(0.92, 0, 1, 0.67);
+  transform: scale(0);
+  transition: all 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
 }
 
 #w3a-modal .w3a-modal__inner.w3a-modal__inner--active {
   @apply opacity-100;
-  transition: 150ms cubic-bezier(0, 0.73, 0.71, 1);
+  transform: scale(1);
+  transition: all 150ms cubic-bezier(0, 0.73, 0.71, 1);
   transform-origin: center center;
 }
 
