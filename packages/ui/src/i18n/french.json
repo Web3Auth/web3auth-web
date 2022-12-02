@@ -1,7 +1,9 @@
 {
   "modal": {
     "adapter-loader": {
-      "message": "Vérifiez votre compte sur {{adapter}} pour continuer"
+      "message": "Vérifiez votre compte sur {{adapter}} pour continuer",
+      "message1": "Vérifiez sur votre {{adaptateur}}",
+      "message2": "compte pour continuer"
     },
     "external": {
       "title": "Portefeuille externe",
@@ -10,9 +12,23 @@
       "connect": "Se connecter avec un portefeuille",
       "back": "Retour"
     },
+    "social": {
+      "view-less-new": "Voir moins",
+      "policy": "Nous ne stockons aucune donnée liée à vos connexions sociales.",
+      "view-more-new": "Voir plus",
+      "email": "Email",
+      "view-more": "Voir plus d'options",
+      "email-continue": "Continuer avec l'email",
+      "continue": "  Continue avec",
+      "email-new": "nom@exemple.com",
+      "view-less": "Voir moins d'options"
+    },
     "footer": {
       "message": "Portefeuille hébergé par",
       "terms": "CGU",
+      "message-new": "Connexion autonome par Web3Auth",
+      "version": "Version",
+      "terms-service": "Conditions d'utilisation",
       "policy": "Politique de confidentialité"
     },
     "network": {
@@ -23,14 +39,8 @@
       "add-request": "Ce site vous demande de rajouter un réseau",
       "from": "De"
     },
-    "social": {
-      "email": "Email",
-      "view-more": "Voir plus d'options",
-      "email-continue": "Continuer avec l'email",
-      "continue": "Continuer avec",
-      "view-less": "Voir moins d'options"
-    },
     "header-subtitle": "Sélectionnez une option suivante :",
-    "header-title": "Se connecter"
+    "header-title": "Se connecter",
+    "header-subtitle-new": "Votre portefeuille blockchain en un clic"
   }
 }
