@@ -164,10 +164,11 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
-  const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
+  // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
+  const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
   return (
     modalState.modalVisibilityDelayed && (
-      <div id="w3a-modal" className={modalClassName} style={{ display: "flex" }}>
+      <div id="w3a-modal" className={modalClassName}>
         <div className={modalTransitionClasses.join(" ")}>
           <Header onClose={closeModal} appLogo={appLogo} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (

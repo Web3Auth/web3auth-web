@@ -13,9 +13,13 @@ function Footer() {
             {/* {web3authIcon} */}
           </div>
           <div className="w3a-footer__links">
-            <a href="https://docs.web3auth.io/legal/terms-and-conditions">{t("modal.footer.terms-service")}</a>
+            <a href="https://docs.web3auth.io/legal/terms-and-conditions" target="_blank" rel="noreferrer noopener">
+              {t("modal.footer.terms-service")}
+            </a>
             <span>|</span>
-            <a href="https://docs.web3auth.io/legal/privacy-policy">{t("modal.footer.policy")}</a>
+            <a href="https://docs.web3auth.io/legal/privacy-policy" target="_blank" rel="noreferrer noopener">
+              {t("modal.footer.policy")}
+            </a>
           </div>
         </div>
       </div>

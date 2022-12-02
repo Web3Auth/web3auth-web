@@ -18,8 +18,6 @@ function Header(props: HeaderProps) {
 
   const [t] = useTranslation();
 
-  // const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
-
   return (
     <div className="w3a-modal__header">
       <div className="w3a-header">

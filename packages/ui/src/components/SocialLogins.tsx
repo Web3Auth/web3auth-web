@@ -71,7 +71,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   className="w3a-button w3a-button--login h-12 w-full"
                 >
                   {providerIcon}
-                  <p className="w3a-social__subtitle">
+                  <p className="ml-2">
                     {t("modal.social.continue")}
                     <span className="w3a-button__adapter">{method}</span>
                   </p>
@@ -92,7 +92,7 @@ export default function SocialLogins(props: SocialLoginProps) {
           );
         })}
       </ul>
-      <div className="w3a-social__policy text-left text-xs font-[500]">{t("modal.social.policy")}</div>
+      <div className="w3a-social__policy">{t("modal.social.policy")}</div>
       {canShowMore && (
         <div className="text-right">
           <button type="button" className={adapterButtonClass} onClick={expandClickHandler}>

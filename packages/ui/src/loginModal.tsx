@@ -37,6 +37,8 @@ class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
+  private theme: string;
+
   private stateEmitter: SafeEventEmitter;
 
   private displayErrorsOnModal = true;
@@ -48,6 +50,7 @@ class LoginModal extends SafeEventEmitter {
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
     this.isDark = theme === "dark";
+    this.theme = theme;
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;
     this.defaultLanguage = defaultLanguage;
@@ -55,7 +58,7 @@ class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
-    const darkState = { isDark: this.isDark };
+    const darkState = { isDark: this.isDark, theme: this.theme };
 
     const useLang = this.defaultLanguage || "en";
     // Load new language resource
@@ -125,6 +128,11 @@ class LoginModal extends SafeEventEmitter {
         return resolve();
       });
       const container = createWrapper();
+
+      if (darkState.isDark) {
+        container.classList.add("dark");
+      }
+
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
