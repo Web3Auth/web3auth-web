@@ -60,7 +60,12 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
               </div>
             </>
           )}
-          {modalStatus === ADAPTER_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
+          {modalStatus === ADAPTER_STATUS.CONNECTED && (
+            <div className="flex flex-col items-center">
+              <Icon iconName="connected" />
+              <div className="w3ajs-modal-loader__message w3a-spinner-message mt-4">{message}</div>
+            </div>
+          )}
           {modalStatus === ADAPTER_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}

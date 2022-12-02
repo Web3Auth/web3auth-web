@@ -1,5 +1,6 @@
 import CircleArrowLeft from "../../assets/icons/circle-arrow-left.svg";
 import Close from "../../assets/icons/close.svg";
+import Connected from "../../assets/icons/connected.svg";
 import Expand from "../../assets/icons/expand.svg";
 import ExpandLight from "../../assets/icons/expand-light.svg";
 
@@ -21,6 +22,9 @@ const icons: Record<string, { image: string }> = {
   },
   expand: {
     image: Expand,
+  },
+  connected: {
+    image: Connected,
   },
 };
 

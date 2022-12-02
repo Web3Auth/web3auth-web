@@ -622,7 +622,7 @@
 }
 
 #w3a-modal .w3a-spinner-message {
-  @apply mt-[10px] text-base first-letter:capitalize;
+  @apply mt-[10px] text-base text-app-gray-500 dark:text-white first-letter:capitalize;
 }
 #w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
   @apply text-red-500;
