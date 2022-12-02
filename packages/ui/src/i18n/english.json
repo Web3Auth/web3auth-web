@@ -1,36 +1,36 @@
 {
   "modal": {
-    "adapter-loader": {
-      "message": "Verify on your {{adapter}} account to continue"
-    },
-    "external": {
-      "title": "External wallet",
-      "walletconnect-subtitle": "Scan QR code with a WalletConnect-compatible wallet",
-      "walletconnect-connect": "Connect",
-      "connect": "Connect with Wallet",
-      "back": "Back"
-    },
-    "footer": {
-      "message": "Self-custodial login by",
-      "terms": "Terms of use",
-      "policy": "Privacy policy"
-    },
-    "network": {
-      "switch-request": "This site is requesting to switch Network",
-      "to": "To",
-      "cancel": "Cancel",
-      "proceed": "Proceed",
-      "add-request": "This site is requesting to add Network",
-      "from": "From"
-    },
-    "social": {
-      "email": "Email",
-      "view-more": "View more options",
-      "email-continue": "Continue with Email",
-      "continue": "Continue with",
-      "view-less": "View less options"
-    },
+    "adapter-loader.message": "Verify on your {{adapter}} account to continue",
+    "external.title": "External wallet",
+    "social.view-less-new": "View less",
+    "footer.message": "Self-custodial login by",
+    "network.switch-request": "This site is requesting to switch Network",
+    "footer.terms": "Terms of use",
+    "footer.message-new": "Self-custodial login by Web3Auth",
+    "network.to": "To",
+    "external.walletconnect-subtitle": "Scan QR code with a WalletConnect-compatible wallet",
+    "social.policy": "We do not store any data related to your social logins.",
+    "external.walletconnect-connect": "Connect",
+    "network.cancel": "Cancel",
+    "social.view-more-new": "View more",
+    "social.email": "Email",
+    "external.connect": "Connect with Wallet",
+    "network.proceed": "Proceed",
     "header-subtitle": "Select one of the following to continue",
-    "header-title": "Sign in"
+    "adapter-loader.message1": "Verify on your {{adapter}}",
+    "footer.version": "Version",
+    "social.view-more": "View more options",
+    "header-title": "Sign in",
+    "header-subtitle-new": "Your blockchain wallet in one-click",
+    "footer.terms-service": "Terms of Service",
+    "social.email-continue": "Continue with Email",
+    "social.continue": " Continue with ",
+    "external.back": "Back",
+    "network.add-request": "This site is requesting to add Network",
+    "social.email-new": "name@example.com",
+    "footer.policy": "Privacy Policy",
+    "adapter-loader.message2": "account to continue",
+    "network.from": "From",
+    "social.view-less": "View less options"
   }
 }

@@ -1,36 +1,36 @@
 {
   "modal": {
-    "adapter-loader": {
-      "message": "Vérifiez votre compte sur {{adapter}} pour continuer"
-    },
-    "external": {
-      "title": "Portefeuille externe",
-      "walletconnect-subtitle": "Scannez le QR code avec un portefeuille compatible WalletConnect",
-      "walletconnect-connect": "Se connecter",
-      "connect": "Se connecter avec un portefeuille",
-      "back": "Retour"
-    },
-    "footer": {
-      "message": "Portefeuille hébergé par",
-      "terms": "CGU",
-      "policy": "Politique de confidentialité"
-    },
-    "network": {
-      "switch-request": "Ce site vous demande de changer de réseau",
-      "to": "A",
-      "cancel": "Annuler",
-      "proceed": "Procéder",
-      "add-request": "Ce site vous demande de rajouter un réseau",
-      "from": "De"
-    },
-    "social": {
-      "email": "Email",
-      "view-more": "Voir plus d'options",
-      "email-continue": "Continuer avec l'email",
-      "continue": "Continuer avec",
-      "view-less": "Voir moins d'options"
-    },
+    "adapter-loader.message": "Vérifiez votre compte sur {{adapter}} pour continuer",
+    "external.title": "Portefeuille externe",
+    "social.view-less-new": "Voir moins",
+    "footer.message": "Portefeuille hébergé par",
+    "network.switch-request": "Ce site vous demande de changer de réseau",
+    "footer.terms": "CGU",
+    "footer.message-new": "Connexion autonome par Web3Auth",
+    "network.to": "A",
+    "external.walletconnect-subtitle": "Scannez le QR code avec un portefeuille compatible WalletConnect",
+    "social.policy": "Nous ne stockons aucune donnée liée à vos connexions sociales.",
+    "external.walletconnect-connect": "Se connecter",
+    "network.cancel": "Annuler",
+    "social.view-more-new": "Voir plus",
+    "social.email": "Email",
+    "external.connect": "Se connecter avec un portefeuille",
+    "network.proceed": "Procéder",
     "header-subtitle": "Sélectionnez une option suivante :",
-    "header-title": "Se connecter"
+    "adapter-loader.message1": "Vérifiez sur votre {{adaptateur}}",
+    "footer.version": "Version",
+    "social.view-more": "Voir plus d'options",
+    "header-title": "Se connecter",
+    "header-subtitle-new": "Votre portefeuille blockchain en un clic",
+    "footer.terms-service": "Conditions d'utilisation",
+    "social.email-continue": "Continuer avec l'email",
+    "social.continue": "  Continue avec",
+    "external.back": "Retour",
+    "network.add-request": "Ce site vous demande de rajouter un réseau",
+    "social.email-new": "nom@exemple.com",
+    "footer.policy": "Politique de confidentialité",
+    "adapter-loader.message2": "compte pour continuer",
+    "network.from": "De",
+    "social.view-less": "Voir moins d'options"
   }
 }
