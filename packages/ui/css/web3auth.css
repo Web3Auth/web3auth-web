@@ -196,18 +196,6 @@
 
 /* Modal */
 #w3a-modal {
-  /* --bg1: #374151;
-  --bg2: #24262e;
-  --bg3: #4b5563;
-  --bg4: #3b4555;
-  --bg5: #1f2a37;
-  --text-color1: #d3d3d4;
-  --text-color2: #ffffff;
-  --text-color3: #9ca3af;
-  --text-color5: #6b7280;
-
-  --button-bg1: #111928; */
-
   @apply fixed
   font-body
   inset-0
@@ -216,21 +204,6 @@
   justify-center
   box-border
   p-4;
-}
-
-/* LIGHT MODE */
-#w3a-modal.w3a-modal--light {
-  /* --bg1: #ffffff;
-  --bg2: #f9f9fb;
-  --bg3: #f9fafb;
-  --bg4: #f9fafb;
-  --bg5: #d1d5db;
-  --text-color1: #a2a5b5;
-  --text-color2: #5c6c7f;
-  --text-color3: #6b7280;
-  --text-color4: #111928;
-  --text-color5: #d1d5db;
-  --button-bg1: #f3f4f6; */
 }
 
 #w3a-modal.w3a-modal--hidden {
