@@ -1,5 +1,6 @@
 import { IWalletConnectExtensionAdapter } from "@web3auth/base";
 import bowser from "bowser";
+import copyToClipboard from "copy-to-clipboard";
 import { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import QRCode from "react-qr-code";
@@ -93,7 +94,13 @@ function WalletConnect(props: WalletConnectProps) {
         {deviceDetails.platform === bowser.PLATFORMS_MAP.desktop ? (
           <div className="w3a-wallet-connect__container-desktop">
             <div>{t("modal.external.walletconnect-subtitle")}</div>
-            <div className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr">
+            <div
+              className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr"
+              tabIndex={0}
+              role="button"
+              onClick={() => copyToClipboard(walletConnectUri)}
+              onKeyDown={() => copyToClipboard(walletConnectUri)}
+            >
               <QRCode size={200} value={walletConnectUri} />
             </div>
           </div>

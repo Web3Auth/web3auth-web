@@ -76,7 +76,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.0.0",
-    "react-qr-code": "^2.0.8"
+    "react-qr-code": "^2.0.8",
+    "copy-to-clipboard": "^3.3.3"
   },
   "lint-staged": {
     "!(*d).ts": [
