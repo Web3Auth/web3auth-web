@@ -1,54 +1,202 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* devanagari */
+/* cyrillic-ext */
 @font-face {
-  font-family: "Poppins";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 600;
-  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z11lFd2JQEl8qw.woff2) format("woff2");
-  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
 @font-face {
-  font-family: "Poppins";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 600;
-  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1JlFd2JQEl8qw.woff2) format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
 @font-face {
-  font-family: "Poppins";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 600;
-  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2) format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
     U+2215, U+FEFF, U+FFFD;
 }
-
+/* cyrillic-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
 /* latin-ext */
 @font-face {
-  font-family: "DM Sans";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/dmsans/v6/rP2Hp2ywxg089UriCZ2IHTWEBlwu8Q.woff2) format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
 @font-face {
-  font-family: "DM Sans";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/dmsans/v6/rP2Hp2ywxg089UriCZOIHTWEBlw.woff2) format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2) format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
     U+2215, U+FEFF, U+FFFD;
 }
 
 /* Modal */
 #w3a-modal {
-  --bg1: #374151;
+  /* --bg1: #374151;
   --bg2: #24262e;
   --bg3: #4b5563;
   --bg4: #3b4555;
@@ -58,9 +206,10 @@
   --text-color3: #9ca3af;
   --text-color5: #6b7280;
 
-  --button-bg1: #111928;
+  --button-bg1: #111928; */
 
   @apply fixed
+  font-body
   inset-0
   flex
   items-center
@@ -71,7 +220,7 @@
 
 /* LIGHT MODE */
 #w3a-modal.w3a-modal--light {
-  --bg1: #ffffff;
+  /* --bg1: #ffffff;
   --bg2: #f9f9fb;
   --bg3: #f9fafb;
   --bg4: #f9fafb;
@@ -81,7 +230,7 @@
   --text-color3: #6b7280;
   --text-color4: #111928;
   --text-color5: #d1d5db;
-  --button-bg1: #f3f4f6;
+  --button-bg1: #f3f4f6; */
 }
 
 #w3a-modal.w3a-modal--hidden {
@@ -98,8 +247,8 @@
   rounded-[32px]
   relative
   opacity-0
-  bg-[#ffffff]
-  dark:bg-[#374151];
+  bg-white
+  dark:bg-app-gray-700;
   transition: 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
 }
@@ -117,7 +266,7 @@
   @apply py-4 px-8;
 }
 #w3a-modal .w3a-modal__footer {
-  @apply py-4 px-8 text-center items-center justify-center bg-[#F9FAFB] dark:bg-[#4B5563];
+  @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600;
 }
 
 /* Header */
@@ -130,23 +279,23 @@
 #w3a-modal .w3a-header__title {
   @apply font-bold
   text-xl
-  text-[#111928]
-  dark:text-[#FFFFFF]
+  text-app-gray-900
+  dark:text-white
   pt-8;
 }
 #w3a-modal p.w3a-header__subtitle {
-  @apply font-normal text-sm text-[#6b7280] dark:text-[#9CA3AF];
+  @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400;
 }
 #w3a-modal button.w3a-header__button {
   @apply cursor-pointer absolute p-0 border-0 top-5 right-7 
-  focus:outline-[#F3F4F6]
-  active:outline-[#F3F4F6]
+  focus:outline-app-gray-50
+  active:outline-app-gray-50
   dark:focus:outline
   dark:focus:outline-1
   dark:active:outline
   dark:active:outline-1
-  dark:focus:outline-[#9CA3AF]
-  dark:active:outline-[#9CA3AF];
+  dark:focus:outline-app-gray-400
+  dark:active:outline-app-gray-400;
 }
 
 /* BODY */
@@ -154,8 +303,8 @@
   @apply text-left
   text-xs
   font-medium
-  text-[#6B7280]
-  dark:text-[#9CA3AF];
+  text-app-gray-500
+  dark:text-app-gray-400;
 }
 
 #w3a-modal .w3a-group {
@@ -173,7 +322,7 @@
 }
 
 #w3a-modal div.w3a-group__title {
-  @apply text-sm font-medium mb-2 text-[#111928] dark:text-[#FFFFFF];
+  @apply text-sm font-medium mb-2 text-app-gray-900 dark:text-white;
 }
 
 /* Adapter List */
@@ -231,19 +380,19 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply bg-none border-0 p-0 inline-flex items-center mb-[30px] cursor-pointer text-[#a2a5b5] dark:text-[#d3d3d4]
-  focus:outline-[#F3F4F6]
-  active:outline-[#F3F4F6]
+  @apply bg-none border-0 p-0 inline-flex items-center mb-[30px] cursor-pointer text-app-gray-500 dark:text-app-gray-400
+  focus:outline-app-gray-50
+  active:outline-app-gray-50
   dark:focus:outline
   dark:focus:outline-1
   dark:active:outline
   dark:active:outline-1
-  dark:focus:outline-[#9CA3AF]
-  dark:active:outline-[#9CA3AF];
+  dark:focus:outline-app-gray-400
+  dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
-  @apply text-[#D3D3D4] mb-0 ml-[5px];
+  @apply text-app-gray-400 mb-0 ml-[5px];
 }
 
 #w3a-modal .w3a-external-loader {
@@ -259,7 +408,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-  @apply bg-[#ffffff] rounded-[10px]  text-[#a2a5b5] dark:text-[#d3d3d4] text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
+  @apply bg-white rounded-[10px]  text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
 }
 
 #w3a-modal .w3a-wallet-connect__container-desktop,
@@ -292,18 +441,18 @@
 
 /* Footer Components */
 #w3a-modal .w3a-footer {
-  @apply flex justify-center items-center text-xs text-[#9CA3AF];
+  @apply flex justify-center items-center text-xs text-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links a {
-  @apply focus:outline-[#F3F4F6]
-  active:outline-[#F3F4F6]
+  @apply focus:outline-app-gray-50
+  active:outline-app-gray-50
   dark:focus:outline
   dark:focus:outline-1
   dark:active:outline
   dark:active:outline-1
-  dark:focus:outline-[#9CA3AF]
-  dark:active:outline-[#9CA3AF];
+  dark:focus:outline-app-gray-400
+  dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links span {
@@ -330,26 +479,26 @@
   py-3 px-6
   text-sm
   /* bg */
-  bg-[#F9FAFB]
+  bg-app-gray-50
   disabled:bg-[#F2F2F2]
-  dark:bg-[#374151]
+  dark:bg-app-gray-700
   dark:disabled:bg-[#242933]
   /* outline */
   outline
   outline-1
   focus:outline
-  outline-[#D1D5DB]
-  focus:outline-[#0364FF]
+  outline-app-gray-300
+  focus:outline-app-primary-600
   disabled:outline-[#F2F2F2]
-  dark:outline-[#4B5563]
+  dark:outline-app-gray-600
   dark:disabled:outline-[#242933]
   /* text */
-  text-[#6B7280]
-  focus:text-[#111928]
-  placeholder:text-[#9CA3AF]
-  disabled:placeholder:text-[#9CA3AF]
-  dark:text-[#9CA3AF]
-  dark:focus:text-[#fff]
+  text-app-gray-500
+  focus:text-app-gray-900
+  placeholder:text-app-gray-400
+  disabled:placeholder:text-app-gray-400
+  dark:text-app-gray-400
+  dark:focus:text-white
   dark:disabled:placeholder:text-[#3E444E];
 
   line-height: 1.25em;
@@ -371,55 +520,61 @@
   text-base
   font-medium
   /* background */
-  bg-[#F3F4F6]
-  hover:bg-[#D1D5DB]
-  focus:bg-[#F3F4F6]
-  disabled:bg-[#F9FAFB]
-  dark:bg-[#111928]
-  dark:focus:bg-[#111928]
-  dark:hover:bg-[#1F2A37]
+  bg-app-gray-100
+  hover:bg-app-gray-300
+  focus:bg-app-gray-100
+  disabled:bg-app-gray-50
+  dark:bg-app-gray-900
+  dark:focus:bg-app-gray-900
+  dark:hover:bg-app-gray-800
   dark:disabled:bg-[#3B4555]
   /* text */
-  text-[#111928]
-  focus:text-[#374151]
-  disabled:text-[#D1D5DB]
-  dark:text-[#ffffff]
-  dark:focus:text-[#ffffff]
-  dark:disabled:text-[#6B7280]
+  text-app-gray-900
+  focus:text-app-gray-700
+  disabled:text-app-gray-300
+  dark:text-white
+  dark:focus:text-white
+  dark:disabled:text-app-gray-500
   /* outline */
-  focus:outline-[#F3F4F6]
-  active:outline-[#F3F4F6]
+  focus:outline-app-gray-50
+  active:outline-app-gray-50
   dark:focus:outline
   dark:focus:outline-1
   dark:active:outline
   dark:active:outline-1
-  dark:focus:outline-[#9CA3AF]
-  dark:active:outline-[#9CA3AF];
+  dark:focus:outline-app-gray-400
+  dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-button--primary {
-  @apply bg-[#0364FF]
-  hover:bg-[#1E429F]
-  focus:bg-[#0364FF]
-  disabled:bg-[#2D4874]
-  text-[#ffffff]
-  focus:text-[#ffffff]
-  active:text-[#ffffff]
-  disabled:text-[#6B7280]
-  focus:outline-[#A4CAFE]
-  active:outline-[#A4CAFE];
+  @apply bg-app-primary-600
+  hover:bg-app-primary-800
+  focus:bg-app-primary-600
+  dark:bg-app-primary-600
+  dark:hover:bg-app-primary-800
+  dark:focus:bg-app-primary-600
+  disabled:bg-app-primary-200
+  dark:disabled:bg-app-primary-950
+  text-white
+  focus:text-white
+  disabled:text-[#EBF5FF]
+  dark:disabled:text-app-gray-500
+  focus:outline-app-primary-300
+  active:outline-app-primary-300;
 }
 
-#w3a-modal.w3a-modal--light .w3a-button--primary {
-  @apply bg-[#0364FF]
-  hover:bg-[#1E429F]
-  focus:bg-[#0364FF]
-  disabled:bg-[#C3DDFD]
-  text-[#ffffff]
-  focus:text-[#ffffff]
-  disabled:text-[#EBF5FF]
-  focus:outline-[#A4CAFE];
-}
+/* #w3a-modal .w3a-button--primary {
+  @apply bg-app-primary-600
+  hover:bg-app-primary-800
+  focus:bg-app-primary-600
+  disabled:bg-app-primary-950
+  text-white
+  focus:text-white
+  active:text-white
+  disabled:text-app-gray-500
+  focus:outline-app-primary-300
+  active:outline-app-primary-300;
+} */
 
 #w3a-modal .w3a-button--login {
   @apply inline-flex
@@ -445,15 +600,15 @@
   ml-auto
   text-sm
   mt-4
-  text-[#0364ff]
-  focus:outline-[#F3F4F6]
-  active:outline-[#F3F4F6]
+  text-app-primary-600
+  focus:outline-app-gray-50
+  active:outline-app-gray-50
   dark:focus:outline
   dark:focus:outline-1
   dark:active:outline
   dark:active:outline-1
-  dark:focus:outline-[#9CA3AF]
-  dark:active:outline-[#9CA3AF];
+  dark:focus:outline-app-gray-400
+  dark:active:outline-app-gray-400;
 }
 
 /* SPINNER */
@@ -464,8 +619,8 @@
   justify-center
   inset-0
   z-10
-  bg-[#ffffff]
-  dark:bg-[#374151];
+  bg-white
+  dark:bg-app-gray-700;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -493,7 +648,7 @@
 #w3a-modal .w3a-spinner-label {
   @apply text-base
   font-medium
-  text-[#0364ff]
+  text-app-primary-600
   mt-[10px];
 }
 
@@ -501,7 +656,7 @@
   @apply mt-[10px] text-base first-letter:capitalize;
 }
 #w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
-  @apply text-[#fb4a61];
+  @apply text-red-500;
 }
 
 #w3a-modal .w3a-spinner-power {
@@ -514,9 +669,9 @@
 }
 
 #w3a-modal .w3a-spinner {
+  @apply bg-app-primary-600;
   display: inline-block;
   position: relative;
-  background-color: #0364ff;
   height: 60px;
   width: 60px;
   border-radius: 50%;
@@ -532,8 +687,8 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-[#ffffff]
-  dark:bg-[#374151];
+  @apply bg-white
+  dark:bg-app-gray-700;
   width: 50px;
   height: 50px;
   top: 5px;
@@ -541,9 +696,9 @@
 }
 
 #w3a-modal .w3a-spinner__head {
+  @apply bg-app-primary-600;
   height: 5px;
   width: 5px;
-  background-color: #0364ff;
   top: 0;
   left: 26px;
 }
@@ -563,7 +718,7 @@
 }
 
 #w3a-modal .w3a-modal__loader-bridge-message {
-  @apply text-[#6B7280] dark:text-[#FFFFFF] first-letter:capitalize;
+  @apply text-app-gray-500 dark:text-white first-letter:capitalize;
 }
 
 #w3a-modal .w3a-modal__loader-app-logo {
