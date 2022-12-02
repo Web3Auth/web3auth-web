@@ -1,46 +1,36 @@
 {
   "modal": {
-    "adapter-loader": {
-      "message": "验证您的 {{adapter}} 帐户以继续",
-      "message1": "在您的{{adapter}}上验证",
-      "message2": "帐号继续"
-    },
-    "external": {
-      "title": "外部钱包",
-      "walletconnect-subtitle": "使用兼容 WalletConnect 的钱包扫描 QR 码",
-      "walletconnect-connect": "连接",
-      "connect": "连接钱包",
-      "back": "后退"
-    },
-    "social": {
-      "view-less-new": "少看",
-      "policy": "我们不存储与您的社交登录相关的任何数据。",
-      "view-more-new": "查看更多",
-      "email": "电子邮件",
-      "view-more": "查看更多选项",
-      "email-continue": "继续使用电子邮件",
-      "continue": "继续",
-      "email-new": "姓名@example.com",
-      "view-less": "查看更少的选项"
-    },
-    "footer": {
-      "message": "自托管登录由",
-      "terms": "使用条款",
-      "message-new": "Web3Auth 的自我托管登录",
-      "version": "版本",
-      "terms-service": "服务条款",
-      "policy": "隐私政策"
-    },
-    "network": {
-      "switch-request": "此站点正在请求切换网络",
-      "to": "至",
-      "cancel": "取消",
-      "proceed": "继续",
-      "add-request": "此站点正在请求添加网络",
-      "from": "从"
-    },
+    "adapter-loader.message": "验证您的 {{adapter}} 帐户以继续",
+    "external.title": "外部钱包",
+    "social.view-less-new": "少看",
+    "footer.message": "自托管登录由",
+    "network.switch-request": "此站点正在请求切换网络",
+    "footer.terms": "使用条款",
+    "footer.message-new": "Web3Auth 的自我托管登录",
+    "network.to": "至",
+    "external.walletconnect-subtitle": "使用兼容 WalletConnect 的钱包扫描 QR 码",
+    "social.policy": "我们不存储与您的社交登录相关的任何数据。",
+    "external.walletconnect-connect": "连接",
+    "network.cancel": "取消",
+    "social.view-more-new": "查看更多",
+    "social.email": "电子邮件",
+    "external.connect": "连接钱包",
+    "network.proceed": "继续",
     "header-subtitle": "选择以下一项以继续",
+    "adapter-loader.message1": "在您的{{adapter}}上验证",
+    "footer.version": "版本",
+    "social.view-more": "查看更多选项",
     "header-title": "登入",
-    "header-subtitle-new": "一键创建您的区块链钱包"
+    "header-subtitle-new": "一键创建您的区块链钱包",
+    "footer.terms-service": "服务条款",
+    "social.email-continue": "继续使用电子邮件",
+    "social.continue": "继续",
+    "external.back": "后退",
+    "network.add-request": "此站点正在请求添加网络",
+    "social.email-new": "姓名@example.com",
+    "footer.policy": "隐私政策",
+    "adapter-loader.message2": "帐号继续",
+    "network.from": "从",
+    "social.view-less": "查看更少的选项"
   }
 }

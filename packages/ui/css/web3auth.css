@@ -704,13 +704,15 @@
 #w3a-modal .w3a-modal__loader-social-logo {
   display: flex;
   padding: 8px;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  background: #f3f4f6;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
-  width: 72px;
-  height: 72px;
-  background: #f3f4f6;
-  border-radius: 72px;
+  width: 64px;
+  height: 64px;
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {
