@@ -280,6 +280,7 @@
 #w3a-modal div.w3a-social__policy {
   @apply text-left
   text-xs
+  mt-4
   font-medium
   text-app-gray-500
   dark:text-app-gray-400;
@@ -305,7 +306,7 @@
 
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-3 overflow-y-hidden mb-4 gap-x-2 gap-y-4;
+  @apply grid grid-cols-3 overflow-y-hidden gap-x-2 gap-y-4;
   padding: 1px;
   max-height: 500px;
   transition: max-height 0.35s;
@@ -339,7 +340,7 @@
 }
 
 #w3a-modal .w3a-external-container {
-  @apply block mb-[34px];
+  @apply block mb-0;
 }
 
 #w3a-modal .w3a-external-container.w3a-external-container--hidden {
@@ -358,7 +359,7 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply bg-none border-0 p-0 inline-flex items-center mb-[30px] cursor-pointer text-app-gray-500 dark:text-app-gray-400
+  @apply bg-none border-0 p-0 inline-flex items-center mb-2 cursor-pointer text-app-gray-500 dark:text-app-gray-400
   focus:outline-app-gray-50
   active:outline-app-gray-50
   dark:focus:outline
