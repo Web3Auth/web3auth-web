@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 /* cyrillic-ext */
 @font-face {
   font-family: "Inter";
@@ -221,7 +222,11 @@
   relative
   opacity-0
   bg-white
-  dark:bg-app-gray-700;
+  dark:bg-app-gray-700
+  shadow-modal
+  border
+  border-app-gray-100
+  dark:border-app-gray-700;
   transition: 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
 }
@@ -457,14 +462,17 @@
   dark:bg-app-gray-700
   dark:disabled:bg-[#242933]
   /* outline */
-  outline
-  outline-1
-  focus:outline
-  outline-app-gray-300
-  focus:outline-app-primary-600
-  disabled:outline-[#F2F2F2]
-  dark:outline-app-gray-600
-  dark:disabled:outline-[#242933]
+  outline-0
+  ring
+  ring-1
+  focus:ring
+  focus:ring-1
+  ring-app-gray-300
+  focus:ring-app-primary-600
+  disabled:ring-[#F2F2F2]
+  dark:ring-app-gray-600
+  dark:focus:ring-app-primary-600
+  dark:disabled:ring-[#242933]
   /* text */
   text-app-gray-500
   focus:text-app-gray-900
@@ -535,19 +543,6 @@
   focus:outline-app-primary-300
   active:outline-app-primary-300;
 }
-
-/* #w3a-modal .w3a-button--primary {
-  @apply bg-app-primary-600
-  hover:bg-app-primary-800
-  focus:bg-app-primary-600
-  disabled:bg-app-primary-950
-  text-white
-  focus:text-white
-  active:text-white
-  disabled:text-app-gray-500
-  focus:outline-app-primary-300
-  active:outline-app-primary-300;
-} */
 
 #w3a-modal .w3a-button--login {
   @apply inline-flex

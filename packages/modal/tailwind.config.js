@@ -33,6 +33,7 @@ module.exports = {
         },
       },
       boxShadow: {
+        modal: "0px 4px 16px rgba(0, 0, 0, 0.08)",
         autofill: "0 0 0 30px #f9fafb inset !important",
         autofillDark: "0 0 0 30px #374151 inset !important",
       },
