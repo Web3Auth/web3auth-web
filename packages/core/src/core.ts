@@ -1,3 +1,4 @@
+// import type { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_EVENTS,
@@ -56,6 +57,11 @@ export interface Web3AuthCoreOptions {
    * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
    */
   sessionTime?: number;
+  // /**
+  //  * Web3Auth Network to use for the session & the issued idToken
+  //  * @defaultValue mainnet
+  //  */
+  // web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -114,13 +120,17 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
         const providedChainConfig = this.coreOptions.chainConfig;
         if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
-        const chainConfig = {
-          ...getChainConfig(providedChainConfig.chainNamespace, providedChainConfig.chainId),
-          ...providedChainConfig,
-        } as CustomChainConfig;
-        this.walletAdapters[adapterName].setChainConfig(chainConfig);
+        this.walletAdapters[adapterName].setAdapterSettings({
+          chainConfig: providedChainConfig,
+          sessionTime: this.coreOptions.sessionTime,
+          clientId: this.coreOptions.clientId,
+        });
+      } else {
+        this.walletAdapters[adapterName].setAdapterSettings({
+          sessionTime: this.coreOptions.sessionTime,
+          clientId: this.coreOptions.clientId,
+        });
       }
-      this.walletAdapters[adapterName].setAdapterSettings({ sessionTime: this.coreOptions.sessionTime, clientId: this.coreOptions.clientId });
 
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
@@ -147,7 +157,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       providedChainConfig.chainNamespace !== adapter.currentChainNamespace
     ) {
       // chainConfig checks are already validated in constructor so using typecast is safe here.
-      adapter.setChainConfig(providedChainConfig as CustomChainConfig);
+      adapter.setAdapterSettings({ chainConfig: providedChainConfig as CustomChainConfig });
     }
 
     this.walletAdapters[adapter.name] = adapter;

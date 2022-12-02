@@ -1,6 +1,7 @@
 import type { OpenLoginOptions } from "@toruslabs/openlogin";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 
+// warning: this function is not compatible with "OTHER" chainnamespace.
 export const getDefaultAdapterModule = async (params: {
   name: WALLET_ADAPTER_TYPE;
   clientId: string;
@@ -35,10 +36,10 @@ export const getDefaultAdapterModule = async (params: {
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
-    const defaultOptions = getOpenloginDefaultOptions(customChainConfig.chainNamespace, customChainConfig?.chainId);
+    const defaultOptions = getOpenloginDefaultOptions();
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
-      chainConfig: { ...(defaultOptions.chainConfig || {}), ...finalChainConfig },
+      chainConfig: { ...finalChainConfig },
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId },
     });
     return adapter;

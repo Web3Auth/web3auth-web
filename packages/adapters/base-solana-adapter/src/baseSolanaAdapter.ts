@@ -1,8 +1,12 @@
 import {
+  ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  AdapterInitOptions,
   BaseAdapter,
+  CHAIN_NAMESPACES,
   checkIfTokenIsExpired,
   clearToken,
+  getChainConfig,
   getSavedToken,
   saveToken,
   signChallenge,
@@ -13,19 +17,15 @@ import {
 import bs58 from "bs58";
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
-  public clientId: string;
-
-  constructor(params: { clientId?: string } = {}) {
-    super();
-    this.clientId = params.clientId;
+  async init(_?: AdapterInitOptions): Promise<void> {
+    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, 1);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || !this.chainConfig?.chainId) throw WalletLoginError.notConnectedError();
+    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
 
     const { chainNamespace, chainId } = this.chainConfig;
 
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const accounts = await this.provider.request<string[]>({
       method: "getAccounts",
     });
@@ -74,12 +74,14 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   }
 
   async disconnect(): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
     const accounts = await this.provider.request<string[]>({
       method: "getAccounts",
     });
     if (accounts && accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }
+
+    this.rehydrated = false;
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }
 }

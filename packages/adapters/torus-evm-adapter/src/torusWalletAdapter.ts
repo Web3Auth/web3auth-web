@@ -8,11 +8,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -23,13 +23,10 @@ import {
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
-export interface TorusWalletOptions {
+export interface TorusWalletOptions extends BaseAdapterSettings {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: LoginParams;
   initParams?: Omit<TorusParams, "network">;
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
 }
 
 export class TorusWalletAdapter extends BaseEvmAdapter<never> {
@@ -51,15 +48,11 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
 
   private loginSettings?: LoginParams = {};
 
-  private rehydrated = false;
-
   constructor(params: TorusWalletOptions) {
     super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
-    this.chainConfig = params.chainConfig || null;
-    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -74,17 +67,19 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    let network: NetworkInterface;
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-      const { blockExplorer, displayName, chainId, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-      network = { chainId: Number.parseInt(chainId, 16), host: "mainnet", blockExplorer, networkName: displayName, ticker, tickerName };
-    } else {
-      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-      network = { chainId: Number.parseInt(chainId, 16), host: rpcTarget, blockExplorer, networkName: displayName, ticker, tickerName };
-    }
+
+    const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+    const network: NetworkInterface = {
+      chainId: Number.parseInt(chainId, 16),
+      host: rpcTarget,
+      blockExplorer,
+      networkName: displayName,
+      ticker,
+      tickerName,
+    };
+
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus evm adapter init");
     await this.torusInstance.init({
@@ -153,8 +148,8 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    super.checkDisconnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    await super.disconnect();
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
     if (options.cleanup) {
@@ -164,9 +159,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
     }
-
-    this.rehydrated = false;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -174,15 +167,5 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
-  }
-
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
   }
 }

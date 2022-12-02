@@ -179,7 +179,7 @@ export class Web3Auth extends Web3AuthCore {
             ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
             ...this.coreOptions.chainConfig,
           } as CustomChainConfig;
-          this.walletAdapters[adapterName].setChainConfig(chainConfig);
+          this.walletAdapters[adapterName].setAdapterSettings({ chainConfig });
         }
 
         return adapterName;
