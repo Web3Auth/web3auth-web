@@ -37,20 +37,24 @@ class LoginModal extends SafeEventEmitter {
 
   private isDark: boolean;
 
-  private theme: string;
-
   private stateEmitter: SafeEventEmitter;
 
   private displayErrorsOnModal = true;
 
   private defaultLanguage: string;
 
-  constructor({ appLogo, version, adapterListener, theme = "light", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
-    this.isDark = theme === "dark";
-    this.theme = theme;
+
+    // set theme
+    if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      this.isDark = true;
+    } else {
+      this.isDark = false;
+    }
+
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;
     this.defaultLanguage = defaultLanguage;
@@ -58,7 +62,7 @@ class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
-    const darkState = { isDark: this.isDark, theme: this.theme };
+    const darkState = { isDark: this.isDark };
 
     const useLang = this.defaultLanguage || "en";
     // Load new language resource
@@ -131,6 +135,8 @@ class LoginModal extends SafeEventEmitter {
 
       if (darkState.isDark) {
         container.classList.add("dark");
+      } else {
+        container.classList.remove("dark");
       }
 
       const root = createRoot(container);

@@ -156,6 +156,8 @@
                 <label for="light">Light</label>
                 <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
                 <label for="dark">Dark</label>
+                <input type="radio" id="auto" name="auto" value="auto" v-model="form.uiMode.whitelabel.theme" />
+                <label for="auto">Auto</label>
               </span>
             </div>
             <div class="flex-vertical-center">
