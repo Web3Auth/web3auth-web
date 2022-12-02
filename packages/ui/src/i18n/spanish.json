@@ -9,6 +9,7 @@
     "footer.message-new": "Inicio de sesión con autocustodia por Web3Auth",
     "network.to": "A",
     "external.walletconnect-subtitle": "Escanea el código QR con una billetera compatible con WalletConnect",
+    "external.walletconnect-copy": "Haga clic en el código QR para copiar al portapapeles",
     "social.policy": "No almacenamos ningún dato relacionado con sus inicios de sesión sociales.",
     "external.walletconnect-connect": "Conectar",
     "network.cancel": "Cancelar",

@@ -103,6 +103,7 @@ function WalletConnect(props: WalletConnectProps) {
             >
               <QRCode size={200} value={walletConnectUri} />
             </div>
+            <div>{t("modal.external.walletconnect-copy")}</div>
           </div>
         ) : (
           <div className="w3a-wallet-connect__container-btn-group">

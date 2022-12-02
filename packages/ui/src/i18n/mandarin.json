@@ -9,6 +9,7 @@
     "footer.message-new": "Web3Auth 的自我托管登录",
     "network.to": "至",
     "external.walletconnect-subtitle": "使用兼容 WalletConnect 的钱包扫描 QR 码",
+    "external.walletconnect-copy": "点击二维码复制到剪贴板",
     "social.policy": "我们不存储与您的社交登录相关的任何数据。",
     "external.walletconnect-connect": "连接",
     "network.cancel": "取消",

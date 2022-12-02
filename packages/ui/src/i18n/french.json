@@ -9,6 +9,7 @@
     "footer.message-new": "Connexion autonome par Web3Auth",
     "network.to": "A",
     "external.walletconnect-subtitle": "Scannez le QR code avec un portefeuille compatible WalletConnect",
+    "external.walletconnect-copy": "Cliquez sur le code QR pour le copier dans le presse-papiers",
     "social.policy": "Nous ne stockons aucune donnée liée à vos connexions sociales.",
     "external.walletconnect-connect": "Se connecter",
     "network.cancel": "Annuler",

@@ -9,6 +9,7 @@
     "footer.message-new": "Self-custodial login by Web3Auth",
     "network.to": "To",
     "external.walletconnect-subtitle": "Scan QR code with a WalletConnect-compatible wallet",
+    "external.walletconnect-copy": "Click on the QR Code to copy to clipboard",
     "social.policy": "We do not store any data related to your social logins.",
     "external.walletconnect-connect": "Connect",
     "network.cancel": "Cancel",

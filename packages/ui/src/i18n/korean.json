@@ -9,6 +9,7 @@
     "footer.message-new": "Web3Auth를 통한 자가 관리 로그인",
     "network.to": "에게",
     "external.walletconnect-subtitle": "WalletConnect 호환 지갑으로 QR 코드 스캔",
+    "external.walletconnect-copy": "클립보드에 복사하려면 QR 코드를 클릭하세요.",
     "social.policy": "우리는 귀하의 소셜 로그인과 관련된 데이터를 저장하지 않습니다.",
     "external.walletconnect-connect": "연결하다",
     "network.cancel": "취소",

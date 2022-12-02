@@ -9,6 +9,7 @@
     "footer.message-new": "Web3Authによる自己管理ログイン",
     "network.to": "に",
     "external.walletconnect-subtitle": "WalletConnect対応ウォレットでQRコードをスキャン",
+    "external.walletconnect-copy": "QRコードをクリックしてクリップボードにコピー",
     "social.policy": "ソーシャル ログインに関連するデータは保存されません。",
     "external.walletconnect-connect": "接続",
     "network.cancel": "キャンセル",
