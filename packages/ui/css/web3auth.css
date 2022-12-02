@@ -475,24 +475,30 @@
   dark:focus:ring-app-primary-600
   dark:disabled:ring-[#242933]
   /* text */
-  text-app-gray-500
+  text-app-gray-900
   focus:text-app-gray-900
   placeholder:text-app-gray-400
   disabled:placeholder:text-app-gray-400
-  dark:text-app-gray-400
+  dark:text-white
   dark:focus:text-white
   dark:disabled:placeholder:text-[#3E444E];
 
   line-height: 1.25em;
 }
 
-#w3a-modal input.w3a-text-field:-webkit-autofill,
-#w3a-modal input.w3a-text-field:-webkit-autofill:hover,
-#w3a-modal input.w3a-text-field:-webkit-autofill:focus,
-#w3a-modal input.w3a-text-field:-webkit-autofill:active {
-  @apply shadow-autofill dark:shadow-autofillDark;
-  /* -webkit-box-shadow: 0 0 0 30px #374151 inset !important; */
-  -webkit-text-fill-color: #9ca3af !important;
+#w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
+#w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill:hover,
+#w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill:focus,
+#w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill:active {
+  @apply shadow-autofill;
+  -webkit-text-fill-color: #111928 !important;
+}
+#w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill,
+#w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill:hover,
+#w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill:focus,
+#w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill:active {
+  @apply shadow-autofillDark;
+  -webkit-text-fill-color: #fff !important;
 }
 
 /* Buttons */
