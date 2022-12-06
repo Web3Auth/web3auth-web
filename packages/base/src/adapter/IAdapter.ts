@@ -114,6 +114,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     const customChainConfig = options.chainConfig;
     if (customChainConfig) {
       if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+      this.currentChainNamespace = customChainConfig.chainNamespace;
       // chainId is optional in this function.
       // we go with mainnet chainId by default.
       const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
