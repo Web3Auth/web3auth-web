@@ -212,10 +212,12 @@
 }
 
 #w3a-modal .w3a-modal__inner {
-  @apply w-full
+  @apply flex
+  flex-col
+  w-full
   max-w-[392px]
   max-h-[95%]
-  min-h-[610px]
+  min-h-[630px]
   overflow-x-hidden
   overflow-y-auto
   rounded-[32px]
@@ -246,7 +248,7 @@
   @apply py-4 px-8;
 }
 #w3a-modal .w3a-modal__footer {
-  @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600;
+  @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600 mt-auto;
 }
 
 /* Header */
@@ -578,14 +580,12 @@
   text-sm
   mt-4
   text-app-primary-600
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  focus-visible:outline-1
+  dark:focus-visible:outline-1
+  focus-visible:outline
+  dark:focus-visible:outline
+  focus-visible:outline-app-gray-50
+  dark:focus-visible:outline-app-gray-400;
 }
 
 /* SPINNER */
