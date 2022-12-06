@@ -141,7 +141,7 @@ export class WalletLoginError extends Web3AuthError {
   }
 
   public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletLoginError(code, `${WalletLoginError.messages[code]}${extraMessage}`);
+    return new WalletLoginError(code, `${WalletLoginError.messages[code]}. ${extraMessage}`);
   }
 
   public static connectionError(extraMessage = ""): IWeb3AuthError {

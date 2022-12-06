@@ -109,6 +109,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       log.debug("initializing openlogin adapter");
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
       if (this.openloginInstance.privKey && (options.autoConnect || isRedirectResult)) {
+        this.rehydrated = true;
         await this.connect();
       }
     } catch (error) {
@@ -210,7 +211,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       }
       await this.privKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: !params } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     }
   }
 }

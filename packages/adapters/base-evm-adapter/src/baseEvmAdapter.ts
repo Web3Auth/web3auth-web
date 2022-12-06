@@ -61,14 +61,17 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
-  async disconnect(): Promise<void> {
+  async checkDisconnectionRequirements(): Promise<void> {
+    super.checkDisconnectionRequirements();
     const accounts = await this.provider.request<string[]>({
       method: "eth_accounts",
     });
     if (accounts && accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }
+  }
 
+  async disconnect(): Promise<void> {
     this.rehydrated = false;
     this.emit(ADAPTER_EVENTS.DISCONNECTED);
   }

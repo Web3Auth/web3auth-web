@@ -71,7 +71,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
-                      loginParams: { loginProvider: method, name },
+                      loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
                   className="w3a-button w3a-button--login h-12 w-full"
@@ -92,7 +92,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                 onClick={() =>
                   handleSocialLoginClick({
                     adapter: socialLoginsConfig.adapter,
-                    loginParams: { loginProvider: method, name },
+                    loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
                 className="w3a-button w3a-button--login w-full"

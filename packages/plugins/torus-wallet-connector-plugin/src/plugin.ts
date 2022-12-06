@@ -1,5 +1,5 @@
 import TorusEmbed, { LOGIN_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
-import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthCore } from "@web3auth/core";
 import type { EthereumRpcError } from "eth-rpc-errors";
@@ -148,7 +148,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     this.torusWalletInstance?.provider.on("accountsChanged", (accounts = []) => {
       if ((accounts as string[]).length === 0) {
         this.torusWalletInstance.hideTorusButton();
-        this.web3auth?.logout();
+        if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
       }
     });
   }

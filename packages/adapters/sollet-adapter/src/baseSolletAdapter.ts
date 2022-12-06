@@ -158,7 +158,7 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    super.checkDisconnectionRequirements();
+    await super.checkDisconnectionRequirements();
     const wallet = this._wallet;
     if (!wallet || !this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     wallet.off("disconnect", this._onDisconnect);

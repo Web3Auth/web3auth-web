@@ -148,7 +148,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    super.checkDisconnectionRequirements();
+    await super.checkDisconnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     await this.torusInstance.logout();
     this.torusInstance.hideTorusButton();
