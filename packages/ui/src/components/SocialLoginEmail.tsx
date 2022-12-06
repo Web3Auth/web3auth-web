@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 interface SocialLoginEmailProps {
   adapter: string;
-  handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string } }) => void;
+  handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 export default function SocialLoginEmail(props: SocialLoginEmailProps) {
   const { handleSocialLoginClick, adapter } = props;
@@ -14,7 +14,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
   const handleEmailSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = ((e.target as HTMLFormElement)[0] as HTMLInputElement).value;
-    if (email) handleSocialLoginClick({ adapter, loginParams: { loginProvider: "email_passwordless", login_hint: email } });
+    if (email) handleSocialLoginClick({ adapter, loginParams: { loginProvider: "email_passwordless", login_hint: email, name: "Email" } });
   };
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const email = e.target.value;

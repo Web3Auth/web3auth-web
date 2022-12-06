@@ -213,7 +213,7 @@ class LoginModal extends SafeEventEmitter {
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
-      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint },
+      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
     });
   };
 

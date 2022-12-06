@@ -1,6 +1,6 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { log } from "@web3auth/base";
+import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -48,6 +48,7 @@ export default function Modal(props: ModalProps) {
     },
     externalWalletsConfig: {},
     detailedLoaderAdapter: "",
+    detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
@@ -109,7 +110,7 @@ export default function Modal(props: ModalProps) {
     const { adapter } = params;
     // if (DETAILED_ADAPTERS.includes(adapter))
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: adapter };
+      return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
     });
     // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
     //   setModalState((prevState) => {
@@ -121,7 +122,7 @@ export default function Modal(props: ModalProps) {
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: loginParams.loginProvider };
+      return { ...prevState, detailedLoaderAdapter: loginParams.loginProvider, detailedLoaderAdapterName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -180,6 +181,7 @@ export default function Modal(props: ModalProps) {
                 modalStatus={modalState.status}
                 message={modalState.postLoadingMessage}
                 adapter={modalState.detailedLoaderAdapter}
+                adapterName={modalState.detailedLoaderAdapterName}
               />
               {/* ) : ( */}
               {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} /> */}

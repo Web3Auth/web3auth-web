@@ -1,6 +1,6 @@
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS } from "./config";
+import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
 
 export const getAdapterSocialLogins = (
   adapterName: string,
@@ -11,7 +11,7 @@ export const getAdapterSocialLogins = (
   if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {
-        name: loginMethod,
+        name: OPENLOGIN_PROVIDERS_NAMES[loginMethod],
         showOnMobile: true,
         showOnModal: true,
         showOnDesktop: true,
