@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -40,10 +40,10 @@
   "dependencies": {
     "@toruslabs/openlogin": "^2.10.0",
     "@toruslabs/openlogin-ed25519": "^2.0.0",
-    "@web3auth/base": "^3.2.0",
-    "@web3auth/base-provider": "^3.2.0",
-    "@web3auth/ethereum-provider": "^3.2.0",
-    "@web3auth/solana-provider": "^3.2.0",
+    "@web3auth/base": "^3.3.0",
+    "@web3auth/base-provider": "^3.3.0",
+    "@web3auth/ethereum-provider": "^3.3.0",
+    "@web3auth/solana-provider": "^3.3.0",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {

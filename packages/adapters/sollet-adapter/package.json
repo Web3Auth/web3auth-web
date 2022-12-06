@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/sollet-adapter",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "sollet wallet adapter for web3auth",
   "keywords": [
     "web3Auth/sollet-adapter",
@@ -41,10 +41,10 @@
   },
   "dependencies": {
     "@project-serum/sol-wallet-adapter": "^0.2.6",
-    "@web3auth/base": "^3.2.0",
-    "@web3auth/base-provider": "^3.2.0",
-    "@web3auth/base-solana-adapter": "^3.2.0",
-    "@web3auth/solana-provider": "^3.2.0",
+    "@web3auth/base": "^3.3.0",
+    "@web3auth/base-provider": "^3.3.0",
+    "@web3auth/base-solana-adapter": "^3.3.0",
+    "@web3auth/solana-provider": "^3.3.0",
     "bn.js": "^5.2.1"
   },
   "lint-staged": {

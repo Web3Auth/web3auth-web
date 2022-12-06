@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -63,7 +63,7 @@
   "dependencies": {
     "@toruslabs/openlogin": "^2.10.0",
     "@toruslabs/openlogin-jrpc": "^2.9.0",
-    "@web3auth/base": "^3.2.0",
+    "@web3auth/base": "^3.3.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
     "i18next": "^22.0.8",
