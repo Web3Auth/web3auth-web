@@ -60,6 +60,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       chainConfig: params.chainConfig,
       clientId: params.clientId || "",
       sessionTime: params.sessionTime,
+      web3AuthNetwork: params.web3AuthNetwork,
     });
     this.loginSettings = params.loginSettings || {};
   }
@@ -95,8 +96,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.openloginInstance = new OpenLogin({
       ...this.openloginOptions,
       clientId: this.clientId,
-      // TODO: Change this to web3auth network
-      network: this.openloginOptions.network || OPENLOGIN_NETWORK.MAINNET,
+      network: this.openloginOptions.network || this.web3AuthNetwork || OPENLOGIN_NETWORK.MAINNET,
     });
     log.debug("initializing openlogin adapter init");
 

@@ -32,6 +32,12 @@ export interface Web3AuthOptions {
   chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
 
   /**
+   * Web3Auth Network to use for login
+   * @defaultValue mainnet
+   */
+  web3AuthNetwork?: TORUS_NETWORK_TYPE;
+
+  /**
    * setting to true will enable logs
    *
    * @defaultValue false

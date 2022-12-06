@@ -12,7 +12,7 @@ import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 
-import { InitParams, IWeb3Auth, LoginParams, Web3AuthOptions } from "./interface";
+import { IWeb3Auth, LoginParams, Web3AuthOptions } from "./interface";
 
 type PrivateKeyProvider = IBaseProvider<string>;
 
@@ -58,15 +58,16 @@ class Web3Auth implements IWeb3Auth {
     }
 
     this.currentChainNamespace = options.chainConfig.chainNamespace;
-    this.options = options;
+    this.options = {
+      ...options,
+      web3AuthNetwork: options.web3AuthNetwork || "mainnet",
+    };
   }
 
-  init(options: InitParams): void {
-    const { network = "mainnet" } = options;
-
+  init(): void {
     this.customAuthInstance = new CustomAuth({
       enableOneKey: true,
-      network,
+      network: this.options.web3AuthNetwork,
       baseUrl: "https://web3auth.io",
       enableLogging: this.options.enableLogging,
     });
