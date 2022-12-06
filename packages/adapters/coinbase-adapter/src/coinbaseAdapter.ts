@@ -41,7 +41,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   private coinbaseProvider: CoinbaseWalletProvider | null = null;
 
-  private coinbaseOptions: CoinbaseWalletSDKOptions;
+  private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
 
   constructor(adapterOptions: CoinbaseAdapterOptions) {
     super(adapterOptions);
@@ -61,7 +61,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   public setAdapterSettings(options: CoinbaseAdapterOptions): void {
     super.setAdapterSettings(options);
-    this.coinbaseOptions = options?.adapterSettings || { appName: "Web3Auth" };
+    this.coinbaseOptions = { ...this.coinbaseOptions, ...options.adapterSettings };
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
