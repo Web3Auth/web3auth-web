@@ -40,4 +40,8 @@ export type CustomChainConfig = {
    * Name for currency ticker (e.g: `Ethereum`)
    */
   tickerName: string;
+  /**
+   * Number of decimals for the currency ticker (e.g: 18)
+   */
+  decimals?: number;
 };

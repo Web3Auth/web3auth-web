@@ -114,6 +114,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
           displayName: chainName,
           rpcTarget: rpcUrls[0],
           blockExplorer: blockExplorerUrls?.[0] || "",
+          decimals: nativeCurrency?.decimals || 18,
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {

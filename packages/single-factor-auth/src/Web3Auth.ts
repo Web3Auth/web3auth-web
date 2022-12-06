@@ -53,6 +53,7 @@ class Web3Auth implements IWeb3Auth {
         rpcTarget: options.chainConfig.rpcTarget as string,
         ...(options?.chainConfig || {}),
         chainNamespace: options.chainConfig.chainNamespace as ChainNamespaceType,
+        decimals: 18,
       };
     }
 

@@ -140,7 +140,19 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       if ((switchError as { code: number }).code === 4902) {
         await this.coinbaseProvider.request({
           method: "wallet_addEthereumChain",
-          params: [{ chainId: chainConfig.chainId, chainName: chainConfig.displayName, rpcUrls: [chainConfig.rpcTarget] }],
+          params: [
+            {
+              chainId: chainConfig.chainId,
+              chainName: chainConfig.displayName,
+              rpcUrls: [chainConfig.rpcTarget],
+              blockExplorerUrls: [chainConfig.blockExplorer],
+              nativeCurrency: {
+                name: chainConfig.tickerName,
+                symbol: chainConfig.ticker,
+                decimals: chainConfig.decimals || 18,
+              },
+            },
+          ],
         });
       } else {
         throw switchError;

@@ -117,6 +117,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
           displayName: chainName,
           rpcTarget: rpcUrls[0],
           blockExplorer: blockExplorerUrls?.[0] || "",
+          decimals: nativeCurrency?.decimals || 9,
         });
       },
       switchSolanaChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {

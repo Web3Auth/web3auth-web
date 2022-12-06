@@ -78,6 +78,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       networkName: displayName,
       ticker,
       tickerName,
+      // decimals: decimals || 18,
     };
 
     this.torusInstance = new Torus(this.torusWalletOptions);
