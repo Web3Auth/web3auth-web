@@ -63,7 +63,8 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
         challenge,
         this.name,
         this.sessionTime,
-        this.clientId
+        this.clientId,
+        this.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
       return {

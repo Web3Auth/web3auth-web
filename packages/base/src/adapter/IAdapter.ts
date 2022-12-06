@@ -1,4 +1,4 @@
-import type { OpenloginUserInfo } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { getChainConfig } from "../chain/config";
@@ -48,6 +48,7 @@ export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
   chainConfig?: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
+  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }
 
 export interface IAdapter<T> extends SafeEventEmitter {
@@ -57,6 +58,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
   sessionTime: number;
+  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   clientId: string;
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
@@ -75,6 +77,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   public sessionTime = 86400;
 
   public clientId: string;
+
+  public web3AuthNetwork: OPENLOGIN_NETWORK_TYPE = OPENLOGIN_NETWORK.MAINNET;
 
   protected rehydrated = false;
 
@@ -110,6 +114,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     }
     if (options?.clientId) {
       this.clientId = options.clientId;
+    }
+    if (options?.web3AuthNetwork) {
+      this.web3AuthNetwork = options.web3AuthNetwork;
     }
     const customChainConfig = options.chainConfig;
     if (customChainConfig) {

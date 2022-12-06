@@ -170,7 +170,11 @@ export class Web3Auth extends Web3AuthCore {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to adapter, same web3auth client id can be used in adapter.
         // this id is being overridden if user is also passing client id in adapter's constructor.
-        this.walletAdapters[adapterName].setAdapterSettings({ clientId: this.options.clientId, sessionTime: this.options.sessionTime });
+        this.walletAdapters[adapterName].setAdapterSettings({
+          clientId: this.options.clientId,
+          sessionTime: this.options.sessionTime,
+          web3AuthNetwork: this.options.web3AuthNetwork,
+        });
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
         // and chainNamespace.

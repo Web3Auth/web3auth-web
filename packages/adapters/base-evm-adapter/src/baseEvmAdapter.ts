@@ -52,7 +52,15 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         params: [challenge, accounts[0]],
       });
 
-      const idToken = await verifySignedChallenge(chainNamespace, signedMessage as string, challenge, this.name, this.sessionTime, this.clientId);
+      const idToken = await verifySignedChallenge(
+        chainNamespace,
+        signedMessage as string,
+        challenge,
+        this.name,
+        this.sessionTime,
+        this.clientId,
+        this.web3AuthNetwork
+      );
       saveToken(accounts[0] as string, this.name, idToken);
       return {
         idToken,
