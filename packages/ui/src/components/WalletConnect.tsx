@@ -1,12 +1,9 @@
 import { IWalletConnectExtensionAdapter } from "@web3auth/base";
 import bowser from "bowser";
+import copyToClipboard from "copy-to-clipboard";
 import { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import QRCode from "react-qr-code";
-
-import Image from "./Image";
-
-const walletConnectIcon = <Image imageId="wallet-connect" width="114px" />;
+import { QRCode } from "react-qrcode-logo";
 
 interface WalletConnectProps {
   walletConnectUri: string;
@@ -89,13 +86,26 @@ function WalletConnect(props: WalletConnectProps) {
           deviceDetails.os === bowser.OS_MAP.Android ? " w3a-wallet-connect__container--android" : ""
         }`}
       >
-        <div className="w3a-wallet-connect__logo">{walletConnectIcon}</div>
         {deviceDetails.platform === bowser.PLATFORMS_MAP.desktop ? (
           <div className="w3a-wallet-connect__container-desktop">
             <div>{t("modal.external.walletconnect-subtitle")}</div>
-            <div className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr">
-              <QRCode size={200} value={walletConnectUri} />
+            <div
+              className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr"
+              tabIndex={0}
+              role="button"
+              onClick={() => copyToClipboard(walletConnectUri)}
+              onKeyDown={() => copyToClipboard(walletConnectUri)}
+            >
+              <QRCode
+                size={200}
+                eyeRadius={5}
+                qrStyle="dots"
+                removeQrCodeBehindLogo
+                logoImage="https://images.web3auth.io/login-wallet-connect.svg"
+                value={walletConnectUri}
+              />
             </div>
+            <div>{t("modal.external.walletconnect-copy")}</div>
           </div>
         ) : (
           <div className="w3a-wallet-connect__container-btn-group">

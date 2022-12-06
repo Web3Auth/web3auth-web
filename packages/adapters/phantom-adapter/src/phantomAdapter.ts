@@ -7,11 +7,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -24,11 +24,7 @@ import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth/solana-provider";
 
 import { detectProvider } from "./utils";
-export interface PhantomAdapterOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type PhantomAdapterOptions = BaseAdapterSettings;
 
 export class PhantomAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.PHANTOM;
@@ -45,14 +41,6 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
 
   private phantomProvider: PhantomInjectedProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(options: PhantomAdapterOptions) {
-    super(options);
-    this.chainConfig = options?.chainConfig || null;
-    this.sessionTime = options?.sessionTime || 86400;
-  }
-
   get isWalletConnected(): boolean {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
@@ -65,22 +53,9 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
     this._wallet = await detectProvider({ interval: 500, count: 3 });
     if (!this._wallet) throw WalletInitializationError.notInstalled();
     this.phantomProvider = new PhantomInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
@@ -153,7 +128,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    await super.disconnectSession();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
@@ -161,7 +136,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
         this.phantomProvider = null;
         this._wallet = null;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

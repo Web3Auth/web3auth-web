@@ -8,11 +8,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -24,13 +24,10 @@ import {
 import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { ITorusWalletProvider, TorusInjectedProvider } from "@web3auth/solana-provider";
 
-export interface SolanaWalletOptions {
+export interface SolanaWalletOptions extends BaseAdapterSettings {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
 }
 
 export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
@@ -54,15 +51,11 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
 
   private solanaProvider: TorusInjectedProvider | null = null;
 
-  private rehydrated = false;
-
   constructor(params: SolanaWalletOptions) {
     super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
-    this.chainConfig = params.chainConfig || null;
-    this.sessionTime = params.sessionTime || 86400;
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -77,17 +70,11 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    let network: NetworkInterface;
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-      const { blockExplorer, displayName, ticker, tickerName, rpcTarget, chainId } = this.chainConfig as CustomChainConfig;
-      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, ticker, tickerName, logo: "" };
-    } else {
-      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
-    }
+    const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+    const network: NetworkInterface = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus solana adapter init");
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
@@ -152,8 +139,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    await super.disconnectSession();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    await super.disconnect();
     await this.torusInstance.logout();
     if (options.cleanup) {
       // ready to connect again
@@ -164,8 +151,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
-
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -173,15 +159,5 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
-  }
-
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
   }
 }

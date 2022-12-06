@@ -12,6 +12,7 @@ interface DetailedLoaderProps {
   message?: string;
   appLogo?: string;
   adapter: string;
+  adapterName: string;
   modalStatus: ModalStatusType;
   onClose: () => void;
 }
@@ -19,7 +20,7 @@ interface DetailedLoaderProps {
 const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
-  const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
+  const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, adapterName, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation();
@@ -52,14 +53,20 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                     <div />
                   </div>
                 </div>
-                <div className="w3a-modal__loader-adapter">{providerIcon}</div>
+                <div className="w3a-modal__loader-social-logo">{providerIcon}</div>
               </div>
               <div>
-                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message", { adapter })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter: adapterName })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter: adapterName })}</div>
               </div>
             </>
           )}
-          {modalStatus === ADAPTER_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
+          {modalStatus === ADAPTER_STATUS.CONNECTED && (
+            <div className="flex flex-col items-center">
+              <Icon iconName="connected" />
+              <div className="w3ajs-modal-loader__message w3a-spinner-message mt-4">{message}</div>
+            </div>
+          )}
           {modalStatus === ADAPTER_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}

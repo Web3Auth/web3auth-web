@@ -15,6 +15,17 @@ const ssrModule = {
         {
           loader: "css-loader",
         },
+        {
+          loader: "postcss-loader",
+          options: {
+            postcssOptions: {
+              plugins: {
+                tailwindcss: {},
+                autoprefixer: {},
+              },
+            },
+          },
+        },
       ],
     },
     {
@@ -35,6 +46,17 @@ const config = generateWebpackConfig({
         use: [
           { loader: "style-loader", options: {} },
           { loader: "css-loader", options: {} },
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: {
+                  tailwindcss: {},
+                  autoprefixer: {},
+                },
+              },
+            },
+          },
         ],
       },
       {

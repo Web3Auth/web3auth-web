@@ -1,6 +1,6 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { log, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -12,14 +12,13 @@ import AdapterLoader from "./AdapterLoader";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
-import Loader from "./Loader";
+// import Loader from "./Loader";
 import SocialLoginEmail from "./SocialLoginEmail";
 import SocialLogins from "./SocialLogins";
 
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
-  version: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -28,7 +27,7 @@ interface ModalProps {
 
 log.enableAll();
 
-const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
+// const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
 
 export default function Modal(props: ModalProps) {
   const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
@@ -49,13 +48,14 @@ export default function Modal(props: ModalProps) {
     },
     externalWalletsConfig: {},
     detailedLoaderAdapter: "",
+    detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation();
 
-  const { stateListener, appLogo, version, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -108,20 +108,21 @@ export default function Modal(props: ModalProps) {
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { adapter } = params;
-    if (DETAILED_ADAPTERS.includes(adapter))
-      setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: adapter };
-      });
-    else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
-      setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: "" };
-      });
+    // if (DETAILED_ADAPTERS.includes(adapter))
+    setModalState((prevState) => {
+      return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
+    });
+    // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
+    //   setModalState((prevState) => {
+    //     return { ...prevState, detailedLoaderAdapter: "" };
+    //   });
     handleExternalWalletClick(params);
   };
 
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
+    const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: "" };
+      return { ...prevState, detailedLoaderAdapter: loginParams.loginProvider, detailedLoaderAdapterName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -132,7 +133,7 @@ export default function Modal(props: ModalProps) {
         <div className="w3a-group__title">{t("modal.external.title")}</div>
         <button
           type="button"
-          className="w3a-button w3ajs-external-toggle__button"
+          className="w3a-button w3a-button--primary w-full w3ajs-external-toggle__button"
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
@@ -164,25 +165,27 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
-  const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
+  // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
+  const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
   return (
     modalState.modalVisibilityDelayed && (
-      <div id="w3a-modal" className={modalClassName} style={{ display: "flex" }}>
+      <div id="w3a-modal" className={modalClassName}>
         <div className={modalTransitionClasses.join(" ")}>
           <Header onClose={closeModal} appLogo={appLogo} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <div className="w3a-modal__content w3ajs-content">
-              {modalState.detailedLoaderAdapter ? (
-                <AdapterLoader
-                  onClose={onCloseLoader}
-                  appLogo={appLogo}
-                  modalStatus={modalState.status}
-                  message={modalState.postLoadingMessage}
-                  adapter={modalState.detailedLoaderAdapter}
-                />
-              ) : (
-                <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} />
-              )}
+              {/* {modalState.detailedLoaderAdapter ? ( */}
+              <AdapterLoader
+                onClose={onCloseLoader}
+                appLogo={appLogo}
+                modalStatus={modalState.status}
+                message={modalState.postLoadingMessage}
+                adapter={modalState.detailedLoaderAdapter}
+                adapterName={modalState.detailedLoaderAdapterName}
+              />
+              {/* ) : ( */}
+              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} /> */}
+              {/* )} */}
             </div>
           ) : (
             <div className="w3a-modal__content w3ajs-content">
@@ -223,7 +226,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer version={version} />
+          <Footer />
         </div>
       </div>
     )

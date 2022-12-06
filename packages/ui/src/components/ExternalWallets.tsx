@@ -22,7 +22,7 @@ type platform = "mobile" | "desktop" | "tablet";
 
 export default function ExternalWallet(props: ExternalWalletsProps) {
   const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcAdapters } = props;
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true);
   const [adapterVisibilityMap, setAdapterVisibilityMap] = useState<Record<string, boolean>>({});
 
   const deviceType = useMemo<platform>(() => {
@@ -36,6 +36,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     log.debug("loaded external wallets", config, walletConnectUri);
     const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
+      setIsLoaded(false);
       handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
     } else if (Object.keys(config).length > 0) {
       setIsLoaded(true);
@@ -85,15 +86,19 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                 return null;
               }
               // if (allKeys.length - 1 === index && isOthersLoading) setOthersLoading(false);
-              const providerIcon = <Image imageId={`login-${adapter}`} />;
+              const providerIcon = <Image imageId={`login-${adapter}`} hoverImageId={`login-${adapter}`} isButton />;
 
               return (
                 adapterVisibilityMap[adapter] && (
                   <li className="w3a-adapter-item" key={adapter}>
-                    <button type="button" onClick={() => handleExternalWalletClick({ adapter })} className="w3a-button w3a-button--icon">
+                    <button
+                      type="button"
+                      onClick={() => handleExternalWalletClick({ adapter })}
+                      className="w3a-button w3a-button--login w-full"
+                      title={config[adapter]?.label || adapter}
+                    >
                       {providerIcon}
                     </button>
-                    <p className="w3a-adapter-item__label">{config[adapter]?.label || adapter}</p>
                   </li>
                 )
               );

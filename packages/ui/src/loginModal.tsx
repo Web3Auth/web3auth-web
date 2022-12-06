@@ -43,11 +43,18 @@ class LoginModal extends SafeEventEmitter {
 
   private defaultLanguage: string;
 
-  constructor({ appLogo, version, adapterListener, theme = "light", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
+  constructor({ appLogo, version, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.version = version;
-    this.isDark = theme === "dark";
+
+    // set theme
+    if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      this.isDark = true;
+    } else {
+      this.isDark = false;
+    }
+
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;
     this.defaultLanguage = defaultLanguage;
@@ -125,6 +132,13 @@ class LoginModal extends SafeEventEmitter {
         return resolve();
       });
       const container = createWrapper();
+
+      if (darkState.isDark) {
+        container.classList.add("dark");
+      } else {
+        container.classList.remove("dark");
+      }
+
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
@@ -135,7 +149,6 @@ class LoginModal extends SafeEventEmitter {
             handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
             handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
             appLogo={this.appLogo}
-            version={this.version}
           />
         </ThemedContext.Provider>
       );
@@ -200,7 +213,7 @@ class LoginModal extends SafeEventEmitter {
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
-      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint },
+      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
     });
   };
 

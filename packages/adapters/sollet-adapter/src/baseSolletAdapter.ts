@@ -9,11 +9,11 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
   log,
   SafeEventEmitterProvider,
   UserInfo,
@@ -26,11 +26,8 @@ import { SolletInjectedProvider } from "@web3auth/solana-provider";
 
 import { detectProvider, getChainNameById, SolletProvider } from "./utils";
 
-export interface SolletAdapterOptions {
-  chainConfig?: CustomChainConfig;
+export interface SolletAdapterOptions extends BaseAdapterSettings {
   provider?: string;
-  sessionTime?: number;
-  clientId?: string;
 }
 
 export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
@@ -50,13 +47,9 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
 
   private solletProvider: SolletInjectedProvider | null = null;
 
-  private rehydrated = false;
-
   constructor(options: SolletAdapterOptions = {}) {
     super(options);
-    this.chainConfig = options?.chainConfig || null;
     this._provider = options?.provider;
-    this.sessionTime = options?.sessionTime || 86400;
   }
 
   get isWalletConnected(): boolean {
@@ -67,23 +60,9 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
     return this.solletProvider?.provider || null;
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
   async init(options: AdapterInitOptions): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
-
     if (typeof this._provider !== "string") {
       this._provider = await detectProvider({ interval: 500, count: 3 });
       if (!this._provider) throw WalletInitializationError.notInstalled();
@@ -179,9 +158,9 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    await super.disconnectSession();
     const wallet = this._wallet;
     if (!wallet || !this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await super.disconnect();
     wallet.off("disconnect", this._onDisconnect);
     this._wallet = null;
 
@@ -217,7 +196,7 @@ export class BaseSolletAdapter extends BaseSolanaAdapter<void> {
       } else {
         this.status = ADAPTER_STATUS.READY;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }

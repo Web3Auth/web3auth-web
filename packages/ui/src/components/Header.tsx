@@ -1,11 +1,11 @@
-import { memo, useContext } from "react";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../context/ThemeContext";
+// import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
-import Image from "./Image";
+// import Image from "./Image";
 
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
+// const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface HeaderProps {
   appLogo?: string;
@@ -13,21 +13,20 @@ interface HeaderProps {
 }
 
 function Header(props: HeaderProps) {
-  const { isDark } = useContext(ThemedContext);
-  const { appLogo = DEFAULT_LOGO_URL, onClose } = props;
+  // const { isDark } = useContext(ThemedContext);
+  const { onClose, appLogo } = props;
 
   const [t] = useTranslation();
-
-  const web3authIcon = <Image imageId={`web3auth${isDark ? "-light" : ""}`} />;
 
   return (
     <div className="w3a-modal__header">
       <div className="w3a-header">
-        {appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : web3authIcon}
+        {/* todo: invert condition to show app logo */}
+        {!appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : <div />}
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <p className="w3a-header__subtitle">{t("modal.header-subtitle")}</p>
+          <p className="w3a-header__subtitle">{t("modal.header-subtitle-new")}</p>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">

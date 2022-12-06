@@ -49,13 +49,9 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
 
   private wcProvider: WalletConnectProvider | null = null;
 
-  private rehydrated = false;
-
   constructor(options: WalletConnectV1AdapterOptions) {
     super(options);
     this.adapterOptions = { ...options };
-    this.chainConfig = options.chainConfig || null;
-    this.sessionTime = options.sessionTime || 86400;
   }
 
   get connected(): boolean {
@@ -71,10 +67,8 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   async init(): Promise<void> {
+    await super.init();
     super.checkInitializationRequirements();
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-    }
     // Create a connector
     this.connector = this.getWalletConnectInstance();
     this.wcProvider = new WalletConnectProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
@@ -151,25 +145,15 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     });
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    await super.disconnectSession();
     const { cleanup } = options;
     if (!this.connector || !this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await super.disconnect();
     await this.connector.killSession();
     this.rehydrated = false;
     if (cleanup) {
@@ -180,7 +164,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    await super.disconnect();
   }
 
   private async addChain(chainConfig: CustomChainConfig): Promise<void> {

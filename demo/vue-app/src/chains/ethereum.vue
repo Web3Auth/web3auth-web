@@ -13,7 +13,6 @@
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
       <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
-      <span>{{ connecting }}</span>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -165,14 +164,32 @@ export default Vue.extend({
             [WALLET_ADAPTERS.METAMASK]: {
               showOnDesktop: true,
               showOnModal: true,
-              showOnMobile: false,
+              showOnMobile: true,
               label: "Metamask",
             },
             [WALLET_ADAPTERS.COINBASE]: {
               showOnDesktop: true,
               showOnModal: true,
-              showOnMobile: false,
+              showOnMobile: true,
               label: "Coinbase",
+            },
+            [WALLET_ADAPTERS.WALLET_CONNECT_V1]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "Wallet Connect",
+            },
+            [WALLET_ADAPTERS.TORUS_EVM]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "Torus",
+            },
+            [WALLET_ADAPTERS.OPENLOGIN]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "OpenLogin",
             },
           },
         });

@@ -62,7 +62,19 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
       try {
         await this.connector.sendCustomRequest({
           method: "wallet_addEthereumChain",
-          params: [{ chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+          params: [
+            {
+              chainId,
+              chainName: displayName,
+              rpcUrls: [rpcTarget],
+              blockExplorerUrls: [currentChainConfig.blockExplorer],
+              nativeCurrency: {
+                name: currentChainConfig.tickerName,
+                symbol: currentChainConfig.ticker,
+                decimals: currentChainConfig.decimals || 18,
+              },
+            },
+          ],
         });
       } catch (error) {
         log.error(error);
@@ -94,7 +106,19 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
     try {
       await this.connector.sendCustomRequest({
         method: "wallet_addEthereumChain",
-        params: [{ chainId: chainConfig.chainId, chainName: displayName, rpcUrls: [rpcTarget] }],
+        params: [
+          {
+            chainId: chainConfig.chainId,
+            chainName: displayName,
+            rpcUrls: [rpcTarget],
+            blockExplorerUrls: [chainConfig.blockExplorer],
+            nativeCurrency: {
+              name: chainConfig.tickerName,
+              symbol: chainConfig.ticker,
+              decimals: chainConfig.decimals || 18,
+            },
+          },
+        ],
       });
       super.addChain(chainConfig);
     } catch (error) {

@@ -1,36 +1,37 @@
 {
   "modal": {
-    "adapter-loader": {
-      "message": "Verifica tu cuenta de {{adapter}} para continuar"
-    },
-    "external": {
-      "title": "Monedero externo",
-      "walletconnect-subtitle": "Escanea el código QR con una billetera compatible con WalletConnect",
-      "walletconnect-connect": "Conectar",
-      "connect": "Conectar con Monedero",
-      "back": "atrás"
-    },
-    "footer": {
-      "message": "Inicio de sesión con autocustodia por",
-      "terms": "Términos de Uso",
-      "policy": "Política de privacidad"
-    },
-    "network": {
-      "switch-request": "Este sitio está solicitando cambiar de red",
-      "to": "A",
-      "cancel": "Cancelar",
-      "proceed": "Proceder",
-      "add-request": "Este sitio está solicitando agregar Red",
-      "from": "De"
-    },
-    "social": {
-      "email": "Correo electrónico",
-      "view-more": "Ver más opciones",
-      "email-continue": "Continuar con correo electrónico",
-      "continue": "Continua con",
-      "view-less": "Ver menos opciones"
-    },
+    "adapter-loader.message": "Verifica tu cuenta de {{adapter}} para continuar",
+    "external.title": "Monedero externo",
+    "social.view-less-new": "ver menos",
+    "footer.message": "Inicio de sesión con autocustodia por",
+    "network.switch-request": "Este sitio está solicitando cambiar de red",
+    "footer.terms": "Términos de Uso",
+    "footer.message-new": "Inicio de sesión con autocustodia por Web3Auth",
+    "network.to": "A",
+    "external.walletconnect-subtitle": "Escanea el código QR con una billetera compatible con WalletConnect",
+    "external.walletconnect-copy": "Haga clic en el código QR para copiar al portapapeles",
+    "social.policy": "No almacenamos ningún dato relacionado con sus inicios de sesión sociales.",
+    "external.walletconnect-connect": "Conectar",
+    "network.cancel": "Cancelar",
+    "social.view-more-new": "Ver más",
+    "social.email": "Correo electrónico",
+    "external.connect": "Conectar con Monedero",
+    "network.proceed": "Proceder",
     "header-subtitle": "Seleccione uno de los siguientes para continuar",
-    "header-title": "Iniciar sesión"
+    "adapter-loader.message1": "Verifique en su {{adaptador}}",
+    "footer.version": "Versión",
+    "social.view-more": "Ver más opciones",
+    "header-title": "Iniciar sesión",
+    "header-subtitle-new": "Su billetera blockchain en un clic",
+    "footer.terms-service": "Términos de servicio",
+    "social.email-continue": "Continuar con correo electrónico",
+    "social.continue": "Continua con",
+    "external.back": "atrás",
+    "network.add-request": "Este sitio está solicitando agregar Red",
+    "social.email-new": "nombre@ejemplo.com",
+    "footer.policy": "Política de privacidad",
+    "adapter-loader.message2": "cuenta para continuar",
+    "network.from": "De",
+    "social.view-less": "Ver menos opciones"
   }
 }

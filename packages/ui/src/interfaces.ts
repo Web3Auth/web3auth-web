@@ -5,7 +5,7 @@ export interface UIConfig {
   appLogo: string;
   version: string;
   adapterListener: SafeEventEmitter;
-  theme?: "light" | "dark";
+  theme?: "light" | "dark" | "auto";
   loginMethodsOrder?: string[];
   displayErrorsOnModal?: boolean;
   defaultLanguage?: string;
@@ -44,9 +44,10 @@ export interface ModalState {
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseAdapterConfig>;
   detailedLoaderAdapter: string;
+  detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
   wcAdapters: IWalletConnectExtensionAdapter[];
 }
 
-export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string } };
+export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
 export type ExternalWalletEventType = { adapter: string };

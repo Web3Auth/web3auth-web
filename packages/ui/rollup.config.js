@@ -8,7 +8,11 @@ const config = {
   output: [{ dir: path.resolve("./dist/"), format: "es", sourcemap: true }],
   plugins: [
     postcss({
-      plugins: [],
+      config: {
+        path: require.resolve("./postcss.config.js"),
+      },
+      extensions: [".css"],
+      minimize: true,
     }),
     url(),
     svgr(),
