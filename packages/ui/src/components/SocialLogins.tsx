@@ -75,6 +75,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     })
                   }
                   className="w3a-button w3a-button--login h-12 w-full"
+                  title={name}
                 >
                   {providerIcon}
                   <p className="ml-2">
@@ -96,6 +97,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   })
                 }
                 className="w3a-button w3a-button--login w-full"
+                title={name}
               >
                 {providerIcon}
               </button>
