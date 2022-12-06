@@ -151,7 +151,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.checkDisconnectionRequirements();
+    await super.disconnectSession();
     const { cleanup } = options;
     if (!this.connector || !this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     await this.connector.killSession();

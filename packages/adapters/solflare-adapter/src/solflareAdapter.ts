@@ -114,7 +114,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await await super.checkDisconnectionRequirements();
+    await await super.disconnectSession();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {

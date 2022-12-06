@@ -128,7 +128,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.checkDisconnectionRequirements();
+    await super.disconnectSession();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {

@@ -101,7 +101,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.checkDisconnectionRequirements();
+    await super.disconnectSession();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
