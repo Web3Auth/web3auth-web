@@ -691,7 +691,7 @@
 
 /* Loader Bridge */
 #w3a-modal .w3a-modal__loader-bridge {
-  @apply flex mb-[14px];
+  @apply flex mb-[14px] items-center justify-center;
 }
 
 #w3a-modal .w3a-modal__loader-bridge-message {
@@ -712,10 +712,12 @@
 #w3a-modal .w3a-modal__loader-social-logo {
   display: flex;
   padding: 8px;
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: 40px;
   background: #f3f4f6;
+  align-items: center;
+  justify-content: center;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
