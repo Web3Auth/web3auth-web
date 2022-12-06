@@ -173,7 +173,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings>): void {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
-    this.openloginOptions = { ...defaultOptions.adapterSettings, ...adapterSettings };
+    log.info("setting adapter settings", adapterSettings);
+    this.openloginOptions = { ...defaultOptions.adapterSettings, ...this.openloginOptions, ...adapterSettings };
   }
 
   private async connectWithProvider(params: OpenloginLoginParams = {}): Promise<void> {
