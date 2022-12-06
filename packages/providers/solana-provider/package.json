@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/solana-provider",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/solanaProvider.cjs.js",
@@ -20,11 +20,11 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.69.0",
-    "@toruslabs/base-controllers": "^2.2.6",
+    "@toruslabs/base-controllers": "^2.5.0",
     "@toruslabs/openlogin-jrpc": "^2.9.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
-    "@web3auth/base": "^3.2.0",
-    "@web3auth/base-provider": "^3.2.0",
+    "@web3auth/base": "^3.3.0",
+    "@web3auth/base-provider": "^3.3.0",
     "bn.js": "^5.2.1",
     "bs58": "^4.0.1",
     "eth-rpc-errors": "^4.0.3",
