@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "3.3.0",
+  "version": "4.0.0-alpha.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -45,6 +45,7 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
+    "autoprefixer": "^10.4.13",
     "css-loader": "^6.7.2",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
@@ -60,15 +61,15 @@
     "rollup-plugin-url": "^3.0.1",
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.2.4",
-    "url-loader": "^4.1.1",
-    "autoprefixer": "^10.4.13"
+    "url-loader": "^4.1.1"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^2.10.0",
     "@toruslabs/openlogin-jrpc": "^2.9.0",
-    "@web3auth/base": "^3.3.0",
+    "@web3auth/base": "^4.0.0-alpha.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
+    "copy-to-clipboard": "^3.3.3",
     "i18next": "^22.0.8",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
@@ -77,8 +78,7 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^12.0.0",
     "react-qr-code": "^2.0.8",
-    "react-qrcode-logo": "^2.8.0",
-    "copy-to-clipboard": "^3.3.3"
+    "react-qrcode-logo": "^2.8.0"
   },
   "lint-staged": {
     "!(*d).ts": [
