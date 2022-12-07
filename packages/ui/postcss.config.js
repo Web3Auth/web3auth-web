@@ -1,6 +1,7 @@
 module.exports = {
   plugins: {
     tailwindcss: {},
-    autoprefixer: {},
+    "postcss-prefix-selector": { prefix: ".w3a-parent-container" },
+    // autoprefixer: {},
   },
 };

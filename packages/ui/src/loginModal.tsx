@@ -24,9 +24,12 @@ import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, 
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(): HTMLElement {
+  const parent = document.createElement("section");
+  parent.classList.add("w3a-parent-container");
   const wrapper = document.createElement("section");
   wrapper.setAttribute("id", "w3a-container");
-  document.body.appendChild(wrapper);
+  parent.appendChild(wrapper);
+  document.body.appendChild(parent);
   return wrapper;
 }
 
@@ -132,7 +135,6 @@ class LoginModal extends SafeEventEmitter {
         return resolve();
       });
       const container = createWrapper();
-
       if (darkState.isDark) {
         container.classList.add("dark");
       } else {
