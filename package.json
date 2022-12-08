@@ -45,13 +45,13 @@
     "husky": "^8.0.2",
     "lerna": "^5.5.4",
     "lint-staged": "^13.1.0",
-    "prettier": "^2.8.0",
+    "prettier": "^2.8.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.1",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.4"
   },
   "repository": {
     "type": "git",

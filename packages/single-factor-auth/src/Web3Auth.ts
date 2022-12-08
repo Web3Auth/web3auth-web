@@ -1,5 +1,4 @@
 import CustomAuth from "@toruslabs/customauth";
-import { subkey } from "@toruslabs/openlogin-subkey";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -95,8 +94,13 @@ class Web3Auth implements IWeb3Auth {
     // does the key assign
     const pubDetails = await this.customAuthInstance.torus.getUserTypeAndAddress(torusNodeEndpoints, torusNodePub, verifierDetails, true);
 
-    if (pubDetails.typeOfUser === "v1" || pubDetails.upgraded) {
+    if (pubDetails.upgraded) {
       throw WalletLoginError.mfaEnabled();
+    }
+
+    if (pubDetails.typeOfUser === "v1") {
+      // This shouldn't happen for this sdk.
+      await this.customAuthInstance.torus.getOrSetNonce(pubDetails.X, pubDetails.Y);
     }
 
     let privKey = "";
@@ -110,8 +114,7 @@ class Web3Auth implements IWeb3Auth {
 
     if (!privKey) throw WalletLoginError.fromCode(5000, "Unable to get private key from torus nodes");
 
-    const finalKey = subkey(privKey.padStart(64, "0"), Buffer.from(this.options.clientId, "base64"));
-    await this.privKeyProvider.setupProvider(finalKey.padStart(64, "0"));
+    await this.privKeyProvider.setupProvider(privKey.padStart(64, "0"));
     return this.privKeyProvider.provider;
   }
 }
