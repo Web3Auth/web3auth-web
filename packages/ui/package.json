@@ -61,7 +61,8 @@
     "rollup-plugin-url": "^3.0.1",
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.2.4",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "postcss-prefix-selector": "^1.16.0"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^2.10.0",
