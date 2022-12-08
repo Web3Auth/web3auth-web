@@ -84,6 +84,11 @@ class Web3Auth implements IWeb3Auth {
     }
   }
 
+  /**
+   * Use this function only with verifiers created on developer dashboard (https://dashboard.web3auth.io)
+   * @param loginParams - Params used to login
+   * @returns provider to connect
+   */
   async connect(loginParams: LoginParams): Promise<SafeEventEmitterProvider | null> {
     if (!this.customAuthInstance || !this.privKeyProvider) throw new Error("Please call init first");
     const { verifier, verifierId, idToken, subVerifierInfoArray } = loginParams;

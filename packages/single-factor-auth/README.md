@@ -42,6 +42,9 @@ Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a 
 
 Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
 
+**Note**
+This package can only be used with verifiers created on developer dashboard.
+
 ```js
 import { Web3Auth } from "@web3auth/single-factor-auth";
 
