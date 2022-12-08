@@ -9,6 +9,7 @@ export const languageMap = {
   ko: "korean",
   zh: "mandarin",
   es: "spanish",
+  fr: "french",
 };
 
 export const getUserLanguage = (defaultLanguage: string | undefined) => {
