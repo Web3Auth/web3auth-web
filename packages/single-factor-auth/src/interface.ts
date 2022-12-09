@@ -9,11 +9,13 @@ export type LoginParams = {
   verifierId: string;
   idToken: string;
   subVerifierInfoArray?: TorusSubVerifierInfo[];
+  // offset in seconds
+  serverTimeOffset?: number;
 };
 
 export interface IWeb3Auth {
   provider: SafeEventEmitterProvider | null;
-  init(params: InitParams): void;
+  init(): void;
   connect(loginParams: LoginParams): Promise<SafeEventEmitterProvider | null>;
 }
 

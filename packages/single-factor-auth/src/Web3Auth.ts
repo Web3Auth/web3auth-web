@@ -95,7 +95,9 @@ class Web3Auth implements IWeb3Auth {
     const verifierDetails = { verifier, verifierId };
 
     const { torusNodeEndpoints, torusNodePub } = await this.customAuthInstance.nodeDetailManager.getNodeDetails(verifierDetails);
-
+    if (loginParams.serverTimeOffset) {
+      this.customAuthInstance.torus.serverTimeOffset = loginParams.serverTimeOffset;
+    }
     // does the key assign
     const pubDetails = await this.customAuthInstance.torus.getUserTypeAndAddress(torusNodeEndpoints, torusNodePub, verifierDetails, true);
 
