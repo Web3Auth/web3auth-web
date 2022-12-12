@@ -22,7 +22,7 @@ import {
   defaultSolanaWalletModalConfig,
 } from "./config";
 import { getDefaultAdapterModule } from "./default";
-import { AdaptersModalConfig, ModalConfig } from "./interface";
+import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
 export interface UIConfig {
@@ -79,7 +79,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    */
   displayErrorsOnModal?: boolean;
 }
-export class Web3Auth extends Web3AuthCore {
+export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
   readonly options: Web3AuthOptions;
