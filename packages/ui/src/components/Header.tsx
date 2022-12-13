@@ -8,13 +8,14 @@ import Icon from "./Icon";
 // const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface HeaderProps {
+  appName: string;
   appLogo?: string;
   onClose: () => void;
 }
 
 function Header(props: HeaderProps) {
   // const { isDark } = useContext(ThemedContext);
-  const { onClose, appLogo } = props;
+  const { onClose, appLogo, appName } = props;
 
   const [t] = useTranslation();
 
@@ -26,7 +27,7 @@ function Header(props: HeaderProps) {
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <p className="w3a-header__subtitle">{t("modal.header-subtitle-new")}</p>
+          <div className="w3a-header__subtitle">{t("modal.header-subtitle-name", { appName })}</div>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">

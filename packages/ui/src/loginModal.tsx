@@ -34,6 +34,8 @@ function createWrapper(): HTMLElement {
 }
 
 class LoginModal extends SafeEventEmitter {
+  private appName: string;
+
   private appLogo: string;
 
   private version: string;
@@ -46,9 +48,10 @@ class LoginModal extends SafeEventEmitter {
 
   private defaultLanguage: string;
 
-  constructor({ appLogo, version, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
+  constructor({ appName, appLogo, version, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
+    this.appName = appName || "blockchain";
     this.version = version;
 
     // set theme
@@ -151,6 +154,7 @@ class LoginModal extends SafeEventEmitter {
             handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
             handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
             appLogo={this.appLogo}
+            appName={this.appName}
           />
         </ThemedContext.Provider>
       );

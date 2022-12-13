@@ -128,6 +128,9 @@ export default Vue.extend({
           clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
+          uiConfig: {
+            appName: "Demo",
+          },
         });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {

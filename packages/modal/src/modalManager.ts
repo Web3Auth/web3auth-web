@@ -27,6 +27,11 @@ import { getUserLanguage } from "./utils";
 
 export interface UIConfig {
   /**
+   * App name to display in the UI.
+   */
+  appName?: string;
+
+  /**
    * Logo for your app.
    */
   appLogo?: string;
