@@ -122,6 +122,7 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
 
     this.loginModal = new LoginModal({
       theme: this.options.uiConfig?.theme,
+      appName: this.options.uiConfig?.appName || "blockchain",
       appLogo: this.options.uiConfig?.appLogo || "",
       version: "",
       adapterListener: this,

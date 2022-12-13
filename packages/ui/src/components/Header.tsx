@@ -27,7 +27,7 @@ function Header(props: HeaderProps) {
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <div className="w3a-header__subtitle">{t("modal.header-subtitle-name", { appName })}</div>
+          <p className="w3a-header__subtitle">{t("modal.header-subtitle-name", { appName })}</p>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
