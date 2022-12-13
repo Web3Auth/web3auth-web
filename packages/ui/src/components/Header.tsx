@@ -1,7 +1,7 @@
-import { memo } from "react";
+import { memo, useContext } from "react";
 import { useTranslation } from "react-i18next";
 
-// import { ThemedContext } from "../context/ThemeContext";
+import { ThemedContext } from "../context/ThemeContext";
 import Icon from "./Icon";
 // import Image from "./Image";
 
@@ -14,7 +14,7 @@ interface HeaderProps {
 }
 
 function Header(props: HeaderProps) {
-  // const { isDark } = useContext(ThemedContext);
+  const { isDark } = useContext(ThemedContext);
   const { onClose, appLogo, appName } = props;
 
   const [t] = useTranslation();
@@ -27,7 +27,10 @@ function Header(props: HeaderProps) {
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <p className="w3a-header__subtitle">{t("modal.header-subtitle-name", { appName })}</p>
+          <p className="w3a-header__subtitle">
+            {t("modal.header-subtitle-name", { appName })}
+            <Icon iconTitle={t("modal.header-tooltip-desc")} iconName={`information-circle${isDark ? "-light" : ""}`} />
+          </p>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
