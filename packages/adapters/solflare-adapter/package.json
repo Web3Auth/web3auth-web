@@ -36,7 +36,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.69.0",
+    "@solana/web3.js": "^1.70.1",
     "@solflare-wallet/sdk": "^1.1.0",
     "@web3auth/base": "^4.0.0-alpha.0",
     "@web3auth/base-provider": "^4.0.0-alpha.0",
