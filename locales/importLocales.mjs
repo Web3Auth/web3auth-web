@@ -1,10 +1,8 @@
-/* eslint-disable no-console */
 /* eslint-disable promise/always-return */
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const fetch = require("node-fetch");
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import fetch from "node-fetch";
+import path from "path";
 
 const args = process.argv.slice(2);
 const branch = args[0] || "main";
@@ -54,5 +52,6 @@ Promise.all(promises)
     }
   })
   .catch((error) => {
+    // eslint-disable-next-line no-console
     console.error(error);
   });
