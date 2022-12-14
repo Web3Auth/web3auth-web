@@ -34,8 +34,8 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "react": "~18.x",
-    "react-dom": "~18.x"
+    "react": "~18.1.x",
+    "react-dom": "~18.1.x"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.18.6",
