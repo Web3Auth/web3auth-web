@@ -29,7 +29,16 @@ function Header(props: HeaderProps) {
           <div className="w3a-header__title">{t("modal.header-title")}</div>
           <p className="w3a-header__subtitle">
             {t("modal.header-subtitle-name", { appName })}
-            <Icon iconTitle={t("modal.header-tooltip-desc")} iconName={`information-circle${isDark ? "-light" : ""}`} />
+            <div className="relative flex flex-col items-center group cursor-pointer">
+              <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
+              <div className="absolute top-4 z-20 flex-col items-center hidden mb-5 group-hover:flex">
+                <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
+                <div className="relative -ml-[100px] sm:ml-0 p-4 w-[220px] text-xs leading-none text-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg">
+                  <div className="text-xs font-medium mb-1 text-app-gray-400">{t("modal.header-tooltip-title")}</div>
+                  <div className="text-xxs text-app-gray-400">{t("modal.header-tooltip-desc")}</div>
+                </div>
+              </div>
+            </div>
           </p>
         </div>
       </div>
