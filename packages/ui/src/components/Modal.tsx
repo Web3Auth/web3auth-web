@@ -19,6 +19,7 @@ import SocialLogins from "./SocialLogins";
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
+  appName?: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -55,7 +56,7 @@ export default function Modal(props: ModalProps) {
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation();
 
-  const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -171,7 +172,7 @@ export default function Modal(props: ModalProps) {
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className={modalClassName}>
         <div className={modalTransitionClasses.join(" ")}>
-          <Header onClose={closeModal} appLogo={appLogo} />
+          <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <div className="w3a-modal__content w3ajs-content">
               {/* {modalState.detailedLoaderAdapter ? ( */}

@@ -2,6 +2,7 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
+  appName: string;
   appLogo: string;
   version: string;
   adapterListener: SafeEventEmitter;
