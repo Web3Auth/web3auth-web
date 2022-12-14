@@ -41,6 +41,9 @@
     "@web3auth/core": "^4.0.0-alpha.0",
     "loglevel": "^1.8.1"
   },
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

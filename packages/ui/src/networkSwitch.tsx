@@ -2,7 +2,7 @@
 import "../css/network.css";
 
 import { BaseNetworkSwitch, CustomChainConfig } from "@web3auth/base";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import AddNetwork from "./components/AddNetwork";
 import SwitchNetwork from "./components/SwitchNetwork";
@@ -26,9 +26,10 @@ export class NetworkSwitch extends BaseNetworkSwitch {
       const cancelCallback = (): void => {
         return reject(new Error("User cancelled request for adding new network"));
       };
-      render(
-        <AddNetwork appOrigin={appOrigin} chainConfig={chainConfig} onAddNetwork={addNetworkCallback} onCancelNetwork={cancelCallback} />,
-        createWrapper("w3a-add-network-container")
+      const container = createWrapper("w3a-add-network-container");
+      const networkRoot = createRoot(container);
+      networkRoot.render(
+        <AddNetwork appOrigin={appOrigin} chainConfig={chainConfig} onAddNetwork={addNetworkCallback} onCancelNetwork={cancelCallback} />
       );
     });
   }
@@ -47,15 +48,16 @@ export class NetworkSwitch extends BaseNetworkSwitch {
       const cancelCallback = (): void => {
         return reject(new Error("User cancelled request for adding new network"));
       };
-      render(
+      const networkSwitchContainer = createWrapper("w3a-switch-network-container");
+      const networkRoot = createRoot(networkSwitchContainer);
+      networkRoot.render(
         <SwitchNetwork
           appOrigin={appOrigin}
           currentChainConfig={currentChainConfig}
           newChainConfig={newChainConfig}
           onSwitchNetwork={switchNetworkCallback}
           onCancelNetwork={cancelCallback}
-        />,
-        createWrapper("w3a-switch-network-container")
+        />
       );
     });
   }

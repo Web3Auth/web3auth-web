@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@web3auth/base": "^4.0.0-alpha.0",
-    "bs58": "^5.0.0"
+    "bs58": "^4.0.1"
   },
   "files": [
     "dist",
@@ -28,6 +28,9 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x"
+  },
+  "devDependencies": {
+    "@types/bs58": "^4.0.1"
   },
   "lint-staged": {
     "!(*d).ts": [

@@ -33,16 +33,20 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@solflare-wallet/sdk": "^1.x",
+    "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.70.1",
-    "@solflare-wallet/sdk": "^1.1.0",
     "@web3auth/base": "^4.0.0-alpha.0",
     "@web3auth/base-provider": "^4.0.0-alpha.0",
     "@web3auth/base-solana-adapter": "^4.0.0-alpha.0",
     "@web3auth/solana-provider": "^4.2.2-alpha.0",
     "bn.js": "^5.2.1"
+  },
+  "devDependencies": {
+    "@solflare-wallet/sdk": "^1.1.0",
+    "@solana/web3.js": "^1.70.1"
   },
   "lint-staged": {
     "!(*d).ts": [

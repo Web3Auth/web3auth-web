@@ -32,14 +32,18 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@walletconnect/client": "~1.x",
+    "@walletconnect/types": "~1.x"
   },
   "dependencies": {
-    "@walletconnect/client": "~1.8.0",
-    "@walletconnect/types": "~1.8.0",
     "@web3auth/base": "^4.0.0-alpha.0",
     "@web3auth/base-evm-adapter": "^4.0.0-alpha.0",
     "@web3auth/ethereum-provider": "^4.0.0-alpha.0"
+  },
+  "devDependencies": {
+    "@walletconnect/client": "~1.8.0",
+    "@walletconnect/types": "~1.8.0"
   },
   "lint-staged": {
     "!(*d).ts": [

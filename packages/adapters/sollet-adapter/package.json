@@ -34,13 +34,14 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@solana/web3.js": "^1.x"
+    "@solana/web3.js": "^1.x",
+    "@project-serum/sol-wallet-adapter": "^0.x"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.70.1"
+    "@solana/web3.js": "^1.70.1",
+    "@project-serum/sol-wallet-adapter": "^0.2.6"
   },
   "dependencies": {
-    "@project-serum/sol-wallet-adapter": "^0.2.6",
     "@web3auth/base": "^4.0.0-alpha.0",
     "@web3auth/base-provider": "^4.0.0-alpha.0",
     "@web3auth/base-solana-adapter": "^4.0.0-alpha.0",
