@@ -1,8 +1,10 @@
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+
 import { ADAPTER_STATUS_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
-export interface IWeb3Auth {
+export interface IWeb3Auth extends SafeEventEmitter {
   connectedAdapterName: string | null;
   status: ADAPTER_STATUS_TYPE;
   cachedAdapter: string | null;
