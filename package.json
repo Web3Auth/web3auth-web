@@ -91,9 +91,5 @@
   "engines": {
     "node": ">=14.17.0",
     "npm": ">=6.x"
-  },
-  "overrides": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
   }
 }
