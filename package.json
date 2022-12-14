@@ -26,7 +26,7 @@
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
     "prepare": "husky install",
-    "locale": "node locales/importLocales.js"
+    "locale": "node locales/importLocales.mjs"
   },
   "devDependencies": {
     "@babel/register": "^7.18.9",
