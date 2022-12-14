@@ -20,7 +20,7 @@ class Web3Auth implements IWeb3Auth {
 
   readonly options: Web3AuthOptions;
 
-  private customAuthInstance: CustomAuth | null = null;
+  public customAuthInstance: CustomAuth | null = null;
 
   private privKeyProvider: PrivateKeyProvider | null = null;
 
