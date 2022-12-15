@@ -11,7 +11,7 @@ const ssrModule = {
     {
       test: /\.css$/,
       use: [
-        "isomorphic-style-loader",
+        "@toruslabs/isomorphic-style-loader",
         {
           loader: "css-loader",
         },

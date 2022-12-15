@@ -252,14 +252,6 @@ const defaultLoginProviders = () => {
 
 const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappModalConfig : defaultEvmDappModalConfig;
-  if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
-    adaptersConfig.adapters[EVM_ADAPTERS.COINBASE] = {
-      label: "Coinbase",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    };
-  }
   return Object.keys(adaptersConfig.adapters).map((adapterName) => {
     return {
       id: adapterName,

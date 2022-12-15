@@ -29,7 +29,6 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { Web3Auth } from "@web3auth/modal";
 import Vue from "vue";
 
@@ -86,12 +85,6 @@ export default Vue.extend({
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId["mainnet"],
         });
-
-        const coinbaseAdapter = new CoinbaseAdapter({
-          adapterSettings: { appName: "Web3Auth Example" },
-        });
-
-        this.web3auth.configureAdapter(coinbaseAdapter);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
       } catch (error) {
