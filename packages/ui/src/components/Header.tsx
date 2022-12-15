@@ -27,7 +27,7 @@ function Header(props: HeaderProps) {
 
         <div>
           <div className="w3a-header__title">{t("modal.header-title")}</div>
-          <p className="w3a-header__subtitle">
+          <div className="w3a-header__subtitle">
             {t("modal.header-subtitle-name", { appName })}
             <div className="relative flex flex-col items-center group cursor-pointer">
               <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
@@ -39,7 +39,7 @@ function Header(props: HeaderProps) {
                 </div>
               </div>
             </div>
-          </p>
+          </div>
         </div>
       </div>
       <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
