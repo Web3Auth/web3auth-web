@@ -63,7 +63,7 @@ export const verifySignedChallenge = async (
     headers: {
       client_id: clientId,
       wallet_provider: issuer,
-      network: web3AuthNetwork,
+      web3auth_network: web3AuthNetwork,
     },
   });
   if (!idTokenRes.success) {
