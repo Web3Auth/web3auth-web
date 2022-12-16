@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-solana-adapter",
-  "version": "4.5.0-beta.0",
+  "version": "4.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseSolanaAdapter.cjs.js",
@@ -19,7 +19,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^4.5.0-beta.0",
+    "@web3auth/base": "^4.0.0",
     "bs58": "^4.0.1"
   },
   "files": [
