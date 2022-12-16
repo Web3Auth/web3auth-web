@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "4.3.1-beta.0",
+  "version": "4.3.2-beta.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -44,6 +44,7 @@
     "@svgr/rollup": "^6.5.1",
     "@svgr/webpack": "^6.5.1",
     "@toruslabs/eslint-config-react": "^1.2.0",
+    "@toruslabs/isomorphic-style-loader": "^5.3.3",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.merge": "^4.6.7",
     "@types/react": "^18.0.26",
@@ -56,7 +57,6 @@
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",
-    "@toruslabs/isomorphic-style-loader": "^5.3.3",
     "live-server": "^1.2.2",
     "postcss": "^8.4.20",
     "postcss-loader": "^7.0.2",
@@ -71,7 +71,7 @@
   "dependencies": {
     "@toruslabs/openlogin": "^2.10.0",
     "@toruslabs/openlogin-jrpc": "^2.9.0",
-    "@web3auth/base": "^4.2.3-beta.0",
+    "@web3auth/base": "^4.3.2-beta.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
     "copy-to-clipboard": "^3.3.3",
