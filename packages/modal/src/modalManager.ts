@@ -83,7 +83,7 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       adapterListener: this,
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
-      modalZIndex: this.options.uiConfig?.modalZIndex || "99999",
+      modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
     });
     this.subscribeToLoginModalEvents();
   }

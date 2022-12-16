@@ -40,7 +40,7 @@ export interface UIConfig {
 
   /**
    * Z-index of the modal and iframe
-   * @defaultValue 99999
+   * @defaultValue 99998
    */
   modalZIndex?: string;
 
