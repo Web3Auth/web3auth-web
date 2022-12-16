@@ -265,10 +265,10 @@
   dark:text-white
   pt-8;
 }
-#w3a-modal p.w3a-header__subtitle {
+#w3a-modal div.w3a-header__subtitle {
   @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400 flex items-center;
 }
-#w3a-modal p.w3a-header__subtitle img {
+#w3a-modal div.w3a-header__subtitle img {
   @apply h-[14px] w-[14px] ml-1;
 }
 #w3a-modal button.w3a-header__button {
