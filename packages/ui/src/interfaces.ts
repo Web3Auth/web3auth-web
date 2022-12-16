@@ -2,14 +2,55 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
-  appName: string;
-  appLogo: string;
-  version: string;
-  adapterListener: SafeEventEmitter;
+  /**
+   * App name to display in the UI.
+   */
+  appName?: string;
+
+  /**
+   * Logo for your app.
+   */
+  appLogo?: string;
+
+  /**
+   * theme for the modal
+   *
+   * @defaultValue `auto`
+   */
   theme?: "light" | "dark" | "auto";
+
+  /**
+   * order of how login methods are shown
+   *
+   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
+   */
   loginMethodsOrder?: string[];
-  displayErrorsOnModal?: boolean;
+
+  /**
+   * language which will be used by web3auth. app will use browser language if not specified. if language is not supported it will use "en"
+   * en: english
+   * de: german
+   * ja: japanese
+   * ko: korean
+   * zh: mandarin
+   * es: spanish
+   *
+   */
   defaultLanguage?: string;
+
+  /**
+   * Z-index of the modal and iframe
+   * @defaultValue 99999
+   */
+  modalZIndex?: string;
+
+  /**
+   * Whether to show errors on Web3Auth modal.
+   *
+   * @defaultValue `true`
+   */
+  displayErrorsOnModal?: boolean;
+  adapterListener: SafeEventEmitter;
 }
 
 export const LOGIN_MODAL_EVENTS = {

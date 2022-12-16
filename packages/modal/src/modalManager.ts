@@ -12,7 +12,7 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
-import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS } from "@web3auth/ui";
+import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
   defaultEvmDappModalConfig,
@@ -25,43 +25,6 @@ import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
-export interface UIConfig {
-  /**
-   * App name to display in the UI.
-   */
-  appName?: string;
-
-  /**
-   * Logo for your app.
-   */
-  appLogo?: string;
-
-  /**
-   * theme for the modal
-   *
-   * @defaultValue `light`
-   */
-  theme?: "light" | "dark";
-
-  /**
-   * order of how login methods are shown
-   *
-   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
-   */
-  loginMethodsOrder?: string[];
-
-  /**
-   * language which will be used by web3auth. app will use browser language if not specified. if language is not supported it will use "en"
-   * en: english
-   * de: german
-   * ja: japanese
-   * ko: korean
-   * zh: mandarin
-   * es: spanish
-   *
-   */
-  defaultLanguage?: string;
-}
 export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
@@ -75,14 +38,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   /**
    * Config for configuring modal ui display properties
    */
-  uiConfig?: UIConfig;
-
-  /**
-   * Whether to show errors on Web3Auth modal.
-   *
-   * @defaultValue `true`
-   */
-  displayErrorsOnModal?: boolean;
+  uiConfig?: Omit<UIConfig, "adapterListener">;
 }
 export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
   public loginModal: LoginModal;
@@ -124,10 +80,10 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       theme: this.options.uiConfig?.theme,
       appName: this.options.uiConfig?.appName || "blockchain",
       appLogo: this.options.uiConfig?.appLogo || "",
-      version: "",
       adapterListener: this,
-      displayErrorsOnModal: this.options.displayErrorsOnModal,
+      displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
+      modalZIndex: this.options.uiConfig?.modalZIndex || "99999",
     });
     this.subscribeToLoginModalEvents();
   }
