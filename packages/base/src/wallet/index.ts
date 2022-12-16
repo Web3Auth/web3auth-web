@@ -7,8 +7,6 @@ export const MULTI_CHAIN_ADAPTERS = {
 export const SOLANA_ADAPTERS = {
   TORUS_SOLANA: "torus-solana",
   PHANTOM: "phantom",
-  SOLLET: "sollet",
-  SOLLET_EXTENSION: "sollet-extension",
   SOLFLARE: "solflare",
   SLOPE: "slope",
   ...MULTI_CHAIN_ADAPTERS,
@@ -36,8 +34,6 @@ export const ADAPTER_NAMES = {
   [MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V2]: "Wallet Connect v2",
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
   [SOLANA_ADAPTERS.PHANTOM]: "Phantom",
-  [SOLANA_ADAPTERS.SOLLET]: "Sollet",
-  [SOLANA_ADAPTERS.SOLLET_EXTENSION]: "Sollet Extension",
   [SOLANA_ADAPTERS.SOLFLARE]: "Solflare",
   [SOLANA_ADAPTERS.SLOPE]: "Slope",
   [EVM_ADAPTERS.TORUS_EVM]: "Torus",
