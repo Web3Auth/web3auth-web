@@ -25,7 +25,6 @@
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
     "@web3auth/solana-wallet-connector-plugin": "file:../../packages/plugins/solana-wallet-connector-plugin",
     "@web3auth/solflare-adapter": "file:../../packages/adapters/solflare-adapter",
-    "@web3auth/sollet-adapter": "file:../../packages/adapters/sollet-adapter",
     "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",

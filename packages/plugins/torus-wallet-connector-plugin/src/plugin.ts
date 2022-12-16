@@ -15,6 +15,8 @@ export type ProviderInfo = {
 export class TorusWalletConnectorPlugin implements IPlugin {
   name = "TORUS_WALLET_CONNECTOR_PLUGIN";
 
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
+
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
   public torusWalletInstance: TorusEmbed;
