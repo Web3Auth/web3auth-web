@@ -25,7 +25,7 @@
     "header-subtitle-new": "Votre portefeuille blockchain en un clic",
     "header-subtitle-name": "Votre portefeuille {{appName}} en un clic",
     "header-tooltip-title": "Porte monnaie",
-    "header-tooltip-desc": "Chaque utilisateur a besoin d'un portefeuille pour stocker et gérer ses actifs numériques. Connectez votre portefeuille à une application pour commencer.",
+    "header-tooltip-desc": "Le portefeuille vous sert de compte pour stocker et gérer vos actifs numériques sur la blockchain.",
     "footer.terms-service": "Conditions d'utilisation",
     "social.email-continue": "Continuer avec l'email",
     "social.continue": "  Continue avec",

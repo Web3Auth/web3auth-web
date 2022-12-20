@@ -25,7 +25,7 @@
     "header-subtitle-new": "ワンクリックであなたのブロックチェーンウォレット",
     "header-subtitle-name": "ワンクリックで {{appName}} ウォレット",
     "header-tooltip-title": "財布",
-    "header-tooltip-desc": "すべてのユーザーは、デジタル資産を保管および管理するためにウォレットが必要です。 ウォレットをアプリケーションに接続して開始します。",
+    "header-tooltip-desc": "ウォレットは、ブロックチェーン上でデジタル資産を保存および管理するためのアカウントとして機能します。",
     "footer.terms-service": "利用規約",
     "social.email-continue": "メールで続行",
     "social.continue": "続ける",
