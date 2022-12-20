@@ -34,6 +34,8 @@ export interface UIConfig {
    * ko: korean
    * zh: mandarin
    * es: spanish
+   * fr: french
+   * pt: portuguese
    *
    */
   defaultLanguage?: string;

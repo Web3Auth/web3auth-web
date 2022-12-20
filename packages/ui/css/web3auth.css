@@ -413,6 +413,7 @@
 #w3a-modal .w3a-wallet-connect-qr {
   @apply m-4;
 }
+#w3a-modal .w3a-wallet-connect-qr > canvas,
 #w3a-modal .w3a-wallet-connect-qr > svg {
   @apply m-auto;
 }

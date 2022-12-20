@@ -10,6 +10,7 @@ export const languageMap = {
   zh: "mandarin",
   es: "spanish",
   fr: "french",
+  pt: "portuguese",
 };
 
 export const getUserLanguage = (defaultLanguage: string | undefined) => {
