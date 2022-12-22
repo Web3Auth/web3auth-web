@@ -71,6 +71,7 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     createGenericJRPCMiddleware<{ message: Transaction[] }, Transaction[]>("signAllTransactions", signAllTransactions),
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey),
+    createGenericJRPCMiddleware<void, string>("private_key", getPrivateKey),
     createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey),
   ]);
 }

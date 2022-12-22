@@ -248,6 +248,7 @@ export function createWalletMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
+    private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),
