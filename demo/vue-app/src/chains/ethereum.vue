@@ -26,7 +26,6 @@
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { WALLET_ADAPTERS } from "@web3auth/base";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -136,12 +135,7 @@ export default Vue.extend({
           },
         });
 
-        const coinbaseAdapter = new CoinbaseAdapter({
-          adapterSettings: { appName: "Web3Auth Example" },
-        });
-
         this.web3auth.configureAdapter(openloginAdapter);
-        this.web3auth.configureAdapter(coinbaseAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new TorusWalletConnectorPlugin({
             torusWalletOpts: {},
@@ -166,12 +160,6 @@ export default Vue.extend({
               showOnModal: true,
               showOnMobile: true,
               label: "Metamask",
-            },
-            [WALLET_ADAPTERS.COINBASE]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Coinbase",
             },
             [WALLET_ADAPTERS.WALLET_CONNECT_V1]: {
               showOnDesktop: true,

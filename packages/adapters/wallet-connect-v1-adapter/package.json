@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v1-adapter",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0",
   "description": "wallet connect v1 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v1-adapter",
@@ -32,14 +32,18 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@walletconnect/client": "~1.x",
+    "@walletconnect/types": "~1.x"
   },
   "dependencies": {
+    "@web3auth/base": "^4.0.0",
+    "@web3auth/base-evm-adapter": "^4.0.0",
+    "@web3auth/ethereum-provider": "^4.0.0"
+  },
+  "devDependencies": {
     "@walletconnect/client": "~1.8.0",
-    "@walletconnect/types": "~1.8.0",
-    "@web3auth/base": "^4.0.0-alpha.0",
-    "@web3auth/base-evm-adapter": "^4.0.0-alpha.0",
-    "@web3auth/ethereum-provider": "^4.0.0-alpha.0"
+    "@walletconnect/types": "~1.8.0"
   },
   "lint-staged": {
     "!(*d).ts": [

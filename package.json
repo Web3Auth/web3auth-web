@@ -26,7 +26,7 @@
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
     "prepare": "husky install",
-    "locale": "node locales/importLocales.js"
+    "locale": "node locales/importLocales.mjs"
   },
   "devDependencies": {
     "@babel/register": "^7.18.9",
@@ -37,7 +37,7 @@
     "@types/jsonwebtoken": "^8.5.9",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16",
-    "@typescript-eslint/eslint-plugin": "^5.45.1",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
     "chai": "^4.3.7",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
@@ -54,7 +54,7 @@
     "jsonwebtoken": "^8.5.1",
     "lerna": "^5.5.4",
     "lint-staged": "^13.1.0",
-    "mocha": "^10.1.0",
+    "mocha": "^10.2.0",
     "node-fetch": "^3.3.0",
     "prettier": "^2.8.1",
     "rimraf": "^3.0.2",
@@ -91,9 +91,5 @@
   "engines": {
     "node": ">=14.17.0",
     "npm": ">=6.x"
-  },
-  "overrides": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
   }
 }

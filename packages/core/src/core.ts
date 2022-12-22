@@ -68,7 +68,7 @@ const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
   readonly coreOptions: Web3AuthCoreOptions;
 
-  public connectedAdapterName: string | null = null;
+  public connectedAdapterName: WALLET_ADAPTER_TYPE | null = null;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -207,7 +207,6 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       );
 
     this.plugins[plugin.name] = plugin;
-    await plugin.initWithWeb3Auth(this);
     return this;
   }
 
@@ -218,15 +217,20 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
       await Promise.all(
-        Object.values(this.plugins).map((plugin) => {
-          return plugin.connect().catch((error: Web3AuthError) => {
-            // swallow error if connector adapter doesn't supports this plugin.
-            if (error.code === 5211) {
+        Object.values(this.plugins).map(async (plugin) => {
+          try {
+            if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
               return;
             }
-            // throw error;
+            await plugin.initWithWeb3Auth(this);
+            await plugin.connect();
+          } catch (error: unknown) {
+            // swallow error if connector adapter doesn't supports this plugin.
+            if ((error as Web3AuthError).code === 5211) {
+              return;
+            }
             log.error(error);
-          });
+          }
         })
       );
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);

@@ -23,9 +23,10 @@ import { ThemedContext } from "./context/ThemeContext";
 import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
-function createWrapper(): HTMLElement {
+function createWrapper(parentZIndex: string): HTMLElement {
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
+  parent.style.zIndex = parentZIndex;
   const wrapper = document.createElement("section");
   wrapper.setAttribute("id", "w3a-container");
   parent.appendChild(wrapper);
@@ -34,9 +35,11 @@ function createWrapper(): HTMLElement {
 }
 
 class LoginModal extends SafeEventEmitter {
+  private appName: string;
+
   private appLogo: string;
 
-  private version: string;
+  private modalZIndex: string;
 
   private isDark: boolean;
 
@@ -46,10 +49,11 @@ class LoginModal extends SafeEventEmitter {
 
   private defaultLanguage: string;
 
-  constructor({ appLogo, version, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage }: UIConfig) {
+  constructor({ appName, appLogo, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage, modalZIndex = "99998" }: UIConfig) {
     super();
     this.appLogo = appLogo || DEFAULT_LOGO_URL;
-    this.version = version;
+    this.appName = appName || "blockchain";
+    this.modalZIndex = modalZIndex || "99998";
 
     // set theme
     if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -124,6 +128,15 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
+    } else if (useLang === "pt") {
+      import(`./i18n/portuguese.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
     }
 
     return new Promise((resolve) => {
@@ -134,7 +147,7 @@ class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      const container = createWrapper();
+      const container = createWrapper(this.modalZIndex);
       if (darkState.isDark) {
         container.classList.add("dark");
       } else {
@@ -151,6 +164,7 @@ class LoginModal extends SafeEventEmitter {
             handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
             handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
             appLogo={this.appLogo}
+            appName={this.appName}
           />
         </ThemedContext.Provider>
       );

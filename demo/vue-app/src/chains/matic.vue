@@ -24,7 +24,6 @@
 <script lang="ts">
 import { OPENLOGIN_METHOD_TYPE, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
@@ -123,11 +122,6 @@ export default Vue.extend({
             clientId: config.clientId[this.openloginNetwork],
           },
         });
-        const coinbaseAdapter = new CoinbaseAdapter({
-          adapterSettings: { appName: "Web3Auth Example" },
-        });
-
-        this.web3auth.configureAdapter(coinbaseAdapter);
 
         this.web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
