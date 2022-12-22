@@ -39,7 +39,8 @@
     "@web3auth/base": "^4.0.0-alpha.0",
     "@web3auth/base-provider": "^4.0.0-alpha.0",
     "@web3auth/ethereum-provider": "^4.0.0-alpha.0",
-    "@web3auth/solana-provider": "^4.0.0-alpha.0"
+    "@web3auth/solana-provider": "^4.0.0-alpha.0",
+    "@toruslabs/openlogin-ed25519": "^2.0.0"
   },
   "lint-staged": {
     "!(*d).ts": [
