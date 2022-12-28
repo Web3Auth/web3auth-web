@@ -10,7 +10,7 @@
     "packages/plugins/*",
     "packages/single-factor-auth"
   ],
-  "version": "4.1.0",
+  "version": "4.1.1",
   "npmClient": "npm",
   "useWorkspaces": true
 }
