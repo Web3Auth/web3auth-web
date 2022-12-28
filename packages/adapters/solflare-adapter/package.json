@@ -45,7 +45,7 @@
     "bn.js": "^5.2.1"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.70.1",
+    "@solana/web3.js": "^1.72.0",
     "@solflare-wallet/sdk": "^1.1.0"
   },
   "lint-staged": {
