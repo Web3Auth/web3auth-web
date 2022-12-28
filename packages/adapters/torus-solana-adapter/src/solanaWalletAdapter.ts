@@ -51,7 +51,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
 
   private solanaProvider: TorusInjectedProvider | null = null;
 
-  constructor(params: SolanaWalletOptions) {
+  constructor(params: SolanaWalletOptions = {}) {
     super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
@@ -69,7 +69,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
     const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;

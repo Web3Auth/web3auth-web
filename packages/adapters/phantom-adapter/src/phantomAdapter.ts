@@ -53,7 +53,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
     this._wallet = await detectProvider({ interval: 500, count: 3 });

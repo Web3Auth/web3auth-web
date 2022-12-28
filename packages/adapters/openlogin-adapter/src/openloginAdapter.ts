@@ -53,7 +53,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private privKeyProvider: PrivateKeyProvider | null = null;
 
-  constructor(params: OpenloginAdapterOptions) {
+  constructor(params: OpenloginAdapterOptions = {}) {
     super(params);
     this.setAdapterSettings({
       ...params.adapterSettings,
@@ -118,7 +118,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  async connect(params?: OpenloginLoginParams): Promise<SafeEventEmitterProvider | null> {
+  async connect(params: OpenloginLoginParams = {}): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });

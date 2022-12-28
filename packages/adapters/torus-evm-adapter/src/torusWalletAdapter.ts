@@ -48,7 +48,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
 
   private loginSettings?: LoginParams = {};
 
-  constructor(params: TorusWalletOptions) {
+  constructor(params: TorusWalletOptions = {}) {
     super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
@@ -66,7 +66,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
 

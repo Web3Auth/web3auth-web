@@ -49,7 +49,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
 
   private wcProvider: WalletConnectProvider | null = null;
 
-  constructor(options: WalletConnectV1AdapterOptions) {
+  constructor(options: WalletConnectV1AdapterOptions = {}) {
     super(options);
     this.adapterOptions = { ...options };
   }

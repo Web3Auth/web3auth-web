@@ -40,6 +40,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
 }
+
 export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
@@ -123,6 +124,8 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
           name: adapterName,
           customChainConfig: this.options.chainConfig,
           clientId: this.options.clientId,
+          sessionTime: this.options.sessionTime,
+          web3AuthNetwork: this.options.web3AuthNetwork,
         });
 
         this.walletAdapters[adapterName] = ad;
