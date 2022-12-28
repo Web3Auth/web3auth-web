@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/phantom-adapter",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "description": "phantom wallet adapter for web3auth",
   "keywords": [
     "web3Auth/phantom-wallet-adapter",
