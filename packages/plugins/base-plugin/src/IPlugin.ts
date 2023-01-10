@@ -5,7 +5,7 @@ export const PLUGIN_NAMESPACES = {
   MULTICHAIN: "multichain",
 } as const;
 
-export type PluginNamespace = typeof PLUGIN_NAMESPACES[keyof typeof PLUGIN_NAMESPACES];
+export type PluginNamespace = (typeof PLUGIN_NAMESPACES)[keyof typeof PLUGIN_NAMESPACES];
 
 export interface IPlugin {
   name: string;

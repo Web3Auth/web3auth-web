@@ -13,7 +13,7 @@ export const ADAPTER_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",
 } as const;
-export type ADAPTER_CATEGORY_TYPE = typeof ADAPTER_CATEGORY[keyof typeof ADAPTER_CATEGORY];
+export type ADAPTER_CATEGORY_TYPE = (typeof ADAPTER_CATEGORY)[keyof typeof ADAPTER_CATEGORY];
 
 export interface AdapterInitOptions {
   /**
@@ -35,7 +35,7 @@ export const ADAPTER_EVENTS = {
   ...ADAPTER_STATUS,
   ADAPTER_DATA_UPDATED: "adapter_data_updated",
 } as const;
-export type ADAPTER_STATUS_TYPE = typeof ADAPTER_STATUS[keyof typeof ADAPTER_STATUS];
+export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
 
 export type CONNECTED_EVENT_DATA = {
   adapter: string;

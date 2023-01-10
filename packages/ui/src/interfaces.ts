@@ -74,7 +74,7 @@ export const MODAL_STATUS = {
   CONNECTING: "connecting",
   ERRORED: "errored",
 };
-export type ModalStatusType = typeof MODAL_STATUS[keyof typeof MODAL_STATUS];
+export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
 export interface ModalState {
   status: ModalStatusType;
