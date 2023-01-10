@@ -51,7 +51,7 @@
     "eslint-plugin-tsdoc": "^0.2.17",
     "faker": "^5.5.3",
     "husky": "^8.0.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lerna": "^5.5.4",
     "lint-staged": "^13.1.0",
     "mocha": "^10.2.0",
