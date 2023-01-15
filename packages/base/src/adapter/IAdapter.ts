@@ -244,6 +244,7 @@ export interface WalletConnectV1Data {
   extensionAdapters: IWalletConnectExtensionAdapter[];
 }
 
+export type WalletConnectV2Data = WalletConnectV1Data;
 export interface IAdapterDataEvent {
   adapterName: string;
   data: unknown;
