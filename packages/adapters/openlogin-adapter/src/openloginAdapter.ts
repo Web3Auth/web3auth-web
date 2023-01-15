@@ -107,8 +107,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
     try {
       log.debug("initializing openlogin adapter");
+
+      let finalPrivKey = this.openloginInstance.privKey;
+      if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
+        finalPrivKey = this.openloginInstance.sfaKey;
+      }
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
-      if (this.openloginInstance.privKey && (options.autoConnect || isRedirectResult)) {
+      if (finalPrivKey && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
         await this.connect();
       }
@@ -199,8 +204,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
+    let finalPrivKey = this.openloginInstance.privKey;
+    // sfaKey will be returned only for custom verifiers
+    if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
+      finalPrivKey = this.openloginInstance.sfaKey;
+    }
     // if not logged in then login
-    if (!this.openloginInstance.privKey || params.extraLoginOptions?.id_token) {
+    if (!finalPrivKey || params.extraLoginOptions?.id_token) {
       if (!this.loginSettings.curve) {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
@@ -211,7 +221,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         })
       );
     }
-    let finalPrivKey = this.openloginInstance.privKey;
     if (finalPrivKey) {
       if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
