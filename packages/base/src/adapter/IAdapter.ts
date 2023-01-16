@@ -49,6 +49,7 @@ export interface BaseAdapterSettings {
   sessionTime?: number;
   chainConfig?: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+  useCoreKitKey?: boolean;
 }
 
 export interface IAdapter<T> extends SafeEventEmitter {

@@ -192,8 +192,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;
     // sfaKey will be returned only for custom verifiers
-    if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
-      finalPrivKey = this.openloginInstance.sfaKey;
+    if (this.openloginOptions?.useCoreKitKey && this.openloginInstance.coreKitKey) {
+      finalPrivKey = this.openloginInstance.coreKitKey;
     }
     return finalPrivKey;
   }
