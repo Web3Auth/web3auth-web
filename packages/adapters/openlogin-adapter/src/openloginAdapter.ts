@@ -108,10 +108,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     try {
       log.debug("initializing openlogin adapter");
 
-      let finalPrivKey = this.openloginInstance.privKey;
-      if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
-        finalPrivKey = this.openloginInstance.sfaKey;
-      }
+      const finalPrivKey = this._getFinalPrivKey();
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
       if (finalPrivKey && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
@@ -129,6 +126,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
       await this.connectWithProvider(params);
+      // eslint-disable-next-line no-debugger
+      debugger;
       return this.provider;
     } catch (error: unknown) {
       log.error("Failed to connect with openlogin provider", error);
@@ -189,6 +188,16 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
+  private _getFinalPrivKey() {
+    if (!this.openloginInstance) return "";
+    let finalPrivKey = this.openloginInstance.privKey;
+    // sfaKey will be returned only for custom verifiers
+    if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
+      finalPrivKey = this.openloginInstance.sfaKey;
+    }
+    return finalPrivKey;
+  }
+
   private async connectWithProvider(params: OpenloginLoginParams = {}): Promise<void> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
@@ -204,13 +213,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
-    let finalPrivKey = this.openloginInstance.privKey;
-    // sfaKey will be returned only for custom verifiers
-    if (this.loginSettings.isSfaUser && this.openloginInstance.sfaKey) {
-      finalPrivKey = this.openloginInstance.sfaKey;
-    }
+    const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
-    if (!finalPrivKey || params.extraLoginOptions?.id_token) {
+    if (!keyAvailable || params.extraLoginOptions?.id_token) {
       if (!this.loginSettings.curve) {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
@@ -221,6 +226,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         })
       );
     }
+    let finalPrivKey = this._getFinalPrivKey();
     if (finalPrivKey) {
       if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
