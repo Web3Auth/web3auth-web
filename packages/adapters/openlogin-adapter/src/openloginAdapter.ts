@@ -126,8 +126,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
     try {
       await this.connectWithProvider(params);
-      // eslint-disable-next-line no-debugger
-      debugger;
       return this.provider;
     } catch (error: unknown) {
       log.error("Failed to connect with openlogin provider", error);
@@ -191,7 +189,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   private _getFinalPrivKey() {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;
-    // sfaKey will be returned only for custom verifiers
+    // coreKitKey is available only for custom verifiers by default
     if (this.openloginOptions?.useCoreKitKey && this.openloginInstance.coreKitKey) {
       finalPrivKey = this.openloginInstance.coreKitKey;
     }
