@@ -2,7 +2,7 @@ import { log } from "@web3auth/base";
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getUserCountry } from "../utils";
+import { getUserCountry, validatePhoneNumber } from "../utils";
 
 interface SocialLoginSmsProps {
   adapter: string;
@@ -15,7 +15,7 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
   const [flag, setUserFlag] = useState<string>("");
   const [code, setUserCode] = useState<string>("");
   const [number, setUserNumber] = useState<string>("");
-  const [isValidNumber, setValidNumber] = useState<boolean>(false);
+  const [isValidFormattedNumber, setValidFormattedNumber] = useState<boolean | null>(null);
   const [showCountryCodeDropdown, setShowCountryCodeDropdown] = useState<boolean>(false);
 
   const fetchUserLocation = useCallback(() => {
@@ -23,7 +23,10 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
       const result = await getUserCountry();
       if (country) {
         const match = countryData.find((i) => i.code.toLowerCase() === country.toLowerCase());
-        if (match) setUserCountry(country);
+        if (match) {
+          setUserCode(match.code);
+          setUserFlag(match.flag);
+        }
       }
       setUserCountry(result);
     };
@@ -33,10 +36,17 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
 
   const [t] = useTranslation();
 
-  const handleSmsSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSmsSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = ((e.target as HTMLFormElement)[0] as HTMLInputElement).value;
-    if (email) handleSocialLoginClick({ adapter, loginParams: { loginProvider: "email_passwordless", login_hint: email, name: "Email" } });
+    if (!code || !number) return;
+    const parsedPhoneNumber = `${code}-${number}`;
+    const isNumberValid = await validatePhoneNumber(parsedPhoneNumber);
+    if (!isNumberValid) {
+      setValidFormattedNumber(false);
+      return;
+    }
+    if (parsedPhoneNumber)
+      handleSocialLoginClick({ adapter, loginParams: { loginProvider: "sms_passwordless", login_hint: parsedPhoneNumber, name: "Mobile" } });
   };
 
   const toggleCountryCodeDropdown = () => {
@@ -47,6 +57,11 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
     setUserCode(countryDetails.dial_code);
     setUserFlag(countryDetails.flag);
     setShowCountryCodeDropdown(false);
+  };
+
+  const handleNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setUserNumber(e.target.value);
+    if (isValidFormattedNumber === false) setValidFormattedNumber(null);
   };
 
   useEffect(() => {
@@ -113,43 +128,20 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
           </div>
           <div className="w3a-sms-field__number">
             <input
-              className="w-full mb-4 w3a-text-field"
-              type="email"
-              name="email"
+              className="w-full mb-4 w3a-text-field w3a-text-field--number"
+              type="number"
+              name="phone number"
               required
               placeholder={`${t("modal.social.sms-placeholder-text")}: 9009009009`}
               onFocus={(e) => (e.target.placeholder = "")}
               onBlur={(e) => (e.target.placeholder = `${t("modal.social.sms-placeholder-text")}: 9009009009`)}
-              onChange={(e) => setUserNumber(e.target.value)}
+              onChange={handleNumberChange}
             />
           </div>
         </div>
-        {/* <select
-          id="country-code"
-          onChange={(e) => setUserCountry(e.target.value)}
-          className="w3ajs-sms-passwordless-country-code-select w3a-text-field"
-        >
-          {countryData &&
-            countryData.map((i) => {
-              return (
-                <option key={i.code} value={i.code}>
-                  {i.name}
-                </option>
-              );
-            })}
-        </select>
-        <input
-          className="w-full mb-4 w3a-text-field"
-          type="email"
-          name="email"
-          required
-          placeholder={t("modal.social.email-new")}
-          onFocus={(e) => (e.target.placeholder = "")}
-          onBlur={(e) => (e.target.placeholder = t("modal.social.email-new"))}
-          onChange={(e) => setUserNumber(e.target.value)}
-        /> */}
+        {isValidFormattedNumber === false && <div className="w3a-sms-field--error">{t("modal.social.sms-invalid-number")}</div>}
 
-        <button disabled={!isValidNumber} className="w-full w3a-button" type="submit">
+        <button disabled={!code || !number || isValidFormattedNumber === false} className="w-full w3a-button" type="submit">
           {t("modal.social.sms-continue")}
         </button>
       </form>

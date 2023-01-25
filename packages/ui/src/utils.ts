@@ -1,4 +1,4 @@
-import { get } from "@toruslabs/http-helpers";
+import { get, post } from "@toruslabs/http-helpers";
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
@@ -66,6 +66,22 @@ export const getUserCountry = async (): Promise<string> => {
   } catch (error) {
     log.error("error getting user country", error);
     return "";
+  }
+};
+
+export const validatePhoneNumber = async (phoneNumber: string): Promise<boolean> => {
+  try {
+    const result = await post<{ success: boolean }>(`${PASSWORDLESS_BACKEND}/api/v2/phone_number/validate`, { phone_number: phoneNumber });
+    if (result && result.success) return true;
+    return false;
+  } catch (error: unknown) {
+    log.error("error validating phone number", error);
+    if ((error as Response).status === 400) {
+      return false;
+    }
+    // sending true because we don't want the user to be stuck on a flow
+    // if there is an error with the api or something went wrong.
+    return true;
   }
 };
 

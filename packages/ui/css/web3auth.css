@@ -12,6 +12,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    @apply appearance-none;
+  }
+}
+
 /* cyrillic-ext */
 @font-face {
   font-family: "Inter";
@@ -505,7 +512,19 @@
 }
 
 #w3a-modal .w3a-text-field--country-code {
-  @apply w-full flex justify-between px-4;
+  @apply flex justify-between w-full px-4;
+}
+
+#w3a-modal .w3a-text-field--number {
+  @apply appearance-none;
+}
+
+#w3a-modal .w3a-sms-field--error {
+  @apply text-red-500
+  text-sm
+  -mt-2
+  mb-2
+  ml-1.5;
 }
 
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,

@@ -57,7 +57,8 @@ export default function SocialLogins(props: SocialLoginProps) {
             socialLoginsConfig.loginMethods[method].showOnModal === false ||
             method === "webauthn" ||
             method === "jwt" ||
-            method === "email_passwordless"
+            method === "email_passwordless" ||
+            method === "sms_passwordless"
           ) {
             return null;
           }
