@@ -1,4 +1,14 @@
 @tailwind base;
+
+@layer base {
+  ::-webkit-scrollbar {
+    @apply w-[9px] bg-app-gray-100 dark:bg-app-gray-900 rounded-md;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply w-[7px] border border-solid border-app-gray-100 dark:border-app-gray-900 bg-app-gray-300 dark:bg-app-gray-600 rounded-md /*color trackbar*/;
+  }
+}
+
 @tailwind components;
 @tailwind utilities;
 
@@ -494,6 +504,10 @@
   line-height: 1.25em;
 }
 
+#w3a-modal .w3a-text-field--country-code {
+  @apply w-full flex justify-between px-4;
+}
+
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill:hover,
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill:focus,
@@ -592,6 +606,48 @@
   dark:focus-visible:outline
   focus-visible:outline-app-gray-50
   dark:focus-visible:outline-app-gray-400;
+}
+
+/* SMS */
+#w3a-modal .w3a-sms-field__container {
+  @apply grid grid-cols-12 gap-2;
+}
+
+#w3a-modal .w3a-sms-field__code-selected {
+  @apply flex;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown {
+  @apply absolute z-10 overflow-y-scroll bg-white divide-y divide-gray-100 rounded-lg shadow-modal dark:bg-gray-700 w-[120px] h-[185px];
+  transform: translate(0, -230px);
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown--hidden {
+  @apply hidden;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown ul {
+  @apply py-2 text-sm text-gray-700 dark:text-gray-200;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li {
+  @apply p-0 hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-white cursor-pointer;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li button {
+  @apply w-full h-full px-4 py-2 text-left;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li button div {
+  @apply flex items-center;
+}
+
+#w3a-modal .w3a-sms-field__code {
+  @apply col-span-5;
+}
+
+#w3a-modal .w3a-sms-field__number {
+  @apply col-span-7;
 }
 
 /* SPINNER */
