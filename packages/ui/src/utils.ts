@@ -1,6 +1,7 @@
+import { get } from "@toruslabs/http-helpers";
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
+import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
 
 export const getAdapterSocialLogins = (
   adapterName: string,
@@ -56,6 +57,17 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
     return fallbackId;
   }
 }
+
+export const getUserCountry = async (): Promise<string> => {
+  try {
+    const result = await get<{ data: { country: string } }>(`${PASSWORDLESS_BACKEND}/api/v2/user/location`);
+    if (result && result.data.country) return result.data.country;
+    return "";
+  } catch (error) {
+    log.error("error getting user country", error);
+    return "";
+  }
+};
 
 export const languageMap = {
   en: "english",

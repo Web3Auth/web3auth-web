@@ -15,6 +15,7 @@ import Header from "./Header";
 // import Loader from "./Loader";
 import SocialLoginEmail from "./SocialLoginEmail";
 import SocialLogins from "./SocialLogins";
+import SocialLoginSms from "./SocialLoginSms";
 
 interface ModalProps {
   stateListener: SafeEventEmitter;
@@ -134,7 +135,7 @@ export default function Modal(props: ModalProps) {
         <div className="w3a-group__title">{t("modal.external.title")}</div>
         <button
           type="button"
-          className="w3a-button w3a-button--primary w-full w3ajs-external-toggle__button"
+          className="w-full w3a-button w3a-button--primary w3ajs-external-toggle__button"
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
@@ -166,6 +167,10 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
+  const isSmsPassworedlessLoginVisible = useMemo(() => {
+    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+  }, [modalState.socialLoginsConfig?.loginMethods]);
+
   // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
   return (
@@ -190,7 +195,8 @@ export default function Modal(props: ModalProps) {
             </div>
           ) : (
             <div className="w3a-modal__content w3ajs-content">
-              {(areSocialLoginsVisible || isEmailPassworedlessLoginVisible) && !modalState.externalWalletsVisibility ? (
+              {(areSocialLoginsVisible || isEmailPassworedlessLoginVisible || isSmsPassworedlessLoginVisible) &&
+              !modalState.externalWalletsVisibility ? (
                 <>
                   {areSocialLoginsVisible ? (
                     <SocialLogins
@@ -201,6 +207,13 @@ export default function Modal(props: ModalProps) {
 
                   {isEmailPassworedlessLoginVisible && (
                     <SocialLoginEmail
+                      adapter={modalState.socialLoginsConfig?.adapter}
+                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                    />
+                  )}
+
+                  {isSmsPassworedlessLoginVisible && (
+                    <SocialLoginSms
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                     />
