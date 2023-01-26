@@ -48,28 +48,10 @@ const COUNTRY_DATA = [
     dial_code: "+599",
   },
   {
-    name: "Angola",
-    flag: "🇦🇴",
-    code: "AO",
-    dial_code: "+244",
-  },
-  {
-    name: "Antarctica",
-    flag: "🇦🇶",
-    code: "AQ",
-    dial_code: "+672",
-  },
-  {
     name: "Argentina",
     flag: "🇦🇷",
     code: "AR",
     dial_code: "+54",
-  },
-  {
-    name: "American Samoa",
-    flag: "🇦🇸",
-    code: "AS",
-    dial_code: "+1684",
   },
   {
     name: "Austria",
@@ -88,12 +70,6 @@ const COUNTRY_DATA = [
     flag: "🇦🇼",
     code: "AW",
     dial_code: "+297",
-  },
-  {
-    name: "Åland Islands",
-    flag: "🇦🇽",
-    code: "AX",
-    dial_code: "+358",
   },
   {
     name: "Azerbaijan",
@@ -144,18 +120,6 @@ const COUNTRY_DATA = [
     dial_code: "+973",
   },
   {
-    name: "Burundi",
-    flag: "🇧🇮",
-    code: "BI",
-    dial_code: "+257",
-  },
-  {
-    name: "Benin",
-    flag: "🇧🇯",
-    code: "BJ",
-    dial_code: "+229",
-  },
-  {
     name: "Saint Barthelemy",
     flag: "🇧🇱",
     code: "BL",
@@ -198,12 +162,6 @@ const COUNTRY_DATA = [
     dial_code: "+975",
   },
   {
-    name: "Bouvet Island",
-    flag: "🇧🇻",
-    code: "BV",
-    dial_code: "+47",
-  },
-  {
     name: "Botswana",
     flag: "🇧🇼",
     code: "BW",
@@ -228,12 +186,6 @@ const COUNTRY_DATA = [
     dial_code: "+1",
   },
   {
-    name: "Cocos (Keeling) Islands",
-    flag: "🇨🇨",
-    code: "CC",
-    dial_code: "+61",
-  },
-  {
     name: "Congo, The Democratic Republic of the Congo",
     flag: "🇨🇩",
     code: "CD",
@@ -256,12 +208,6 @@ const COUNTRY_DATA = [
     flag: "🇨🇭",
     code: "CH",
     dial_code: "+41",
-  },
-  {
-    name: "Cote d'Ivoire",
-    flag: "🇨🇮",
-    code: "CI",
-    dial_code: "+225",
   },
   {
     name: "Cook Islands",
@@ -300,22 +246,10 @@ const COUNTRY_DATA = [
     dial_code: "+506",
   },
   {
-    name: "Cuba",
-    flag: "🇨🇺",
-    code: "CU",
-    dial_code: "+53",
-  },
-  {
     name: "Cape Verde",
     flag: "🇨🇻",
     code: "CV",
     dial_code: "+238",
-  },
-  {
-    name: "Christmas Island",
-    flag: "🇨🇽",
-    code: "CX",
-    dial_code: "+61",
   },
   {
     name: "Cyprus",
@@ -346,12 +280,6 @@ const COUNTRY_DATA = [
     flag: "🇩🇰",
     code: "DK",
     dial_code: "+45",
-  },
-  {
-    name: "Dominica",
-    flag: "🇩🇲",
-    code: "DM",
-    dial_code: "+1767",
   },
   {
     name: "Dominican Republic",
@@ -414,12 +342,6 @@ const COUNTRY_DATA = [
     dial_code: "+679",
   },
   {
-    name: "Falkland Islands (Malvinas)",
-    flag: "🇫🇰",
-    code: "FK",
-    dial_code: "+500",
-  },
-  {
     name: "Micronesia, Federated States of Micronesia",
     flag: "🇫🇲",
     code: "FM",
@@ -479,12 +401,7 @@ const COUNTRY_DATA = [
     code: "GH",
     dial_code: "+233",
   },
-  {
-    name: "Gibraltar",
-    flag: "🇬🇮",
-    code: "GI",
-    dial_code: "+350",
-  },
+
   {
     name: "Greenland",
     flag: "🇬🇱",
@@ -521,12 +438,7 @@ const COUNTRY_DATA = [
     code: "GR",
     dial_code: "+30",
   },
-  {
-    name: "South Georgia and the South Sandwich Islands",
-    flag: "🇬🇸",
-    code: "GS",
-    dial_code: "+500",
-  },
+
   {
     name: "Guatemala",
     flag: "🇬🇹",
@@ -557,12 +469,7 @@ const COUNTRY_DATA = [
     code: "HK",
     dial_code: "+852",
   },
-  {
-    name: "Heard Island and Mcdonald Islands",
-    flag: "🇭🇲",
-    code: "HM",
-    dial_code: "+672",
-  },
+
   {
     name: "Honduras",
     flag: "🇭🇳",
@@ -575,12 +482,7 @@ const COUNTRY_DATA = [
     code: "HR",
     dial_code: "+385",
   },
-  {
-    name: "Haiti",
-    flag: "🇭🇹",
-    code: "HT",
-    dial_code: "+509",
-  },
+
   {
     name: "Hungary",
     flag: "🇭🇺",
@@ -617,24 +519,14 @@ const COUNTRY_DATA = [
     code: "IN",
     dial_code: "+91",
   },
-  {
-    name: "British Indian Ocean Territory",
-    flag: "🇮🇴",
-    code: "IO",
-    dial_code: "+246",
-  },
+
   {
     name: "Iraq",
     flag: "🇮🇶",
     code: "IQ",
     dial_code: "+964",
   },
-  {
-    name: "Iran, Islamic Republic of Persian Gulf",
-    flag: "🇮🇷",
-    code: "IR",
-    dial_code: "+98",
-  },
+
   {
     name: "Iceland",
     flag: "🇮🇸",
@@ -689,12 +581,7 @@ const COUNTRY_DATA = [
     code: "KH",
     dial_code: "+855",
   },
-  {
-    name: "Kiribati",
-    flag: "🇰🇮",
-    code: "KI",
-    dial_code: "+686",
-  },
+
   {
     name: "Comoros",
     flag: "🇰🇲",
@@ -707,12 +594,7 @@ const COUNTRY_DATA = [
     code: "KN",
     dial_code: "+1869",
   },
-  {
-    name: "Korea, Democratic People's Republic of Korea",
-    flag: "🇰🇵",
-    code: "KP",
-    dial_code: "+850",
-  },
+
   {
     name: "Korea, Republic of South Korea",
     flag: "🇰🇷",
@@ -827,12 +709,7 @@ const COUNTRY_DATA = [
     code: "ME",
     dial_code: "+382",
   },
-  {
-    name: "Saint Martin",
-    flag: "🇲🇫",
-    code: "MF",
-    dial_code: "+590",
-  },
+
   {
     name: "Madagascar",
     flag: "🇲🇬",
@@ -875,12 +752,7 @@ const COUNTRY_DATA = [
     code: "MO",
     dial_code: "+853",
   },
-  {
-    name: "Northern Mariana Islands",
-    flag: "🇲🇵",
-    code: "MP",
-    dial_code: "+1670",
-  },
+
   {
     name: "Martinique",
     flag: "🇲🇶",
@@ -935,12 +807,7 @@ const COUNTRY_DATA = [
     code: "MY",
     dial_code: "+60",
   },
-  {
-    name: "Mozambique",
-    flag: "🇲🇿",
-    code: "MZ",
-    dial_code: "+258",
-  },
+
   {
     name: "Namibia",
     flag: "🇳🇦",
@@ -959,12 +826,7 @@ const COUNTRY_DATA = [
     code: "NE",
     dial_code: "+227",
   },
-  {
-    name: "Norfolk Island",
-    flag: "🇳🇫",
-    code: "NF",
-    dial_code: "+672",
-  },
+
   {
     name: "Nigeria",
     flag: "🇳🇬",
@@ -994,12 +856,6 @@ const COUNTRY_DATA = [
     flag: "🇳🇵",
     code: "NP",
     dial_code: "+977",
-  },
-  {
-    name: "Nauru",
-    flag: "🇳🇷",
-    code: "NR",
-    dial_code: "+674",
   },
   {
     name: "Niue",
@@ -1062,18 +918,6 @@ const COUNTRY_DATA = [
     dial_code: "+48",
   },
   {
-    name: "Saint Pierre and Miquelon",
-    flag: "🇵🇲",
-    code: "PM",
-    dial_code: "+508",
-  },
-  {
-    name: "Pitcairn",
-    flag: "🇵🇳",
-    code: "PN",
-    dial_code: "+64",
-  },
-  {
     name: "Puerto Rico",
     flag: "🇵🇷",
     code: "PR",
@@ -1090,12 +934,6 @@ const COUNTRY_DATA = [
     flag: "🇵🇹",
     code: "PT",
     dial_code: "+351",
-  },
-  {
-    name: "Palau",
-    flag: "🇵🇼",
-    code: "PW",
-    dial_code: "+680",
   },
   {
     name: "Paraguay",
@@ -1158,12 +996,6 @@ const COUNTRY_DATA = [
     dial_code: "+248",
   },
   {
-    name: "Sudan",
-    flag: "🇸🇩",
-    code: "SD",
-    dial_code: "+249",
-  },
-  {
     name: "Sweden",
     flag: "🇸🇪",
     code: "SE",
@@ -1176,22 +1008,10 @@ const COUNTRY_DATA = [
     dial_code: "+65",
   },
   {
-    name: "Saint Helena, Ascension and Tristan Da Cunha",
-    flag: "🇸🇭",
-    code: "SH",
-    dial_code: "+290",
-  },
-  {
     name: "Slovenia",
     flag: "🇸🇮",
     code: "SI",
     dial_code: "+386",
-  },
-  {
-    name: "Svalbard and Jan Mayen",
-    flag: "🇸🇯",
-    code: "SJ",
-    dial_code: "+47",
   },
   {
     name: "Slovakia",
@@ -1248,12 +1068,6 @@ const COUNTRY_DATA = [
     dial_code: "+503",
   },
   {
-    name: "Syrian Arab Republic",
-    flag: "🇸🇾",
-    code: "SY",
-    dial_code: "+963",
-  },
-  {
     name: "Eswatini",
     flag: "🇸🇿",
     code: "SZ",
@@ -1272,12 +1086,6 @@ const COUNTRY_DATA = [
     dial_code: "+235",
   },
   {
-    name: "French Southern Territories",
-    flag: "🇹🇫",
-    code: "TF",
-    dial_code: "+262",
-  },
-  {
     name: "Togo",
     flag: "🇹🇬",
     code: "TG",
@@ -1294,12 +1102,6 @@ const COUNTRY_DATA = [
     flag: "🇹🇯",
     code: "TJ",
     dial_code: "+992",
-  },
-  {
-    name: "Tokelau",
-    flag: "🇹🇰",
-    code: "TK",
-    dial_code: "+690",
   },
   {
     name: "Timor-Leste",
@@ -1338,22 +1140,10 @@ const COUNTRY_DATA = [
     dial_code: "+1868",
   },
   {
-    name: "Tuvalu",
-    flag: "🇹🇻",
-    code: "TV",
-    dial_code: "+688",
-  },
-  {
     name: "Taiwan",
     flag: "🇹🇼",
     code: "TW",
     dial_code: "+886",
-  },
-  {
-    name: "Tanzania, United Republic of Tanzania",
-    flag: "🇹🇿",
-    code: "TZ",
-    dial_code: "+255",
   },
   {
     name: "Ukraine",
@@ -1386,18 +1176,6 @@ const COUNTRY_DATA = [
     dial_code: "+998",
   },
   {
-    name: "Holy See (Vatican City State)",
-    flag: "🇻🇦",
-    code: "VA",
-    dial_code: "+379",
-  },
-  {
-    name: "Saint Vincent and the Grenadines",
-    flag: "🇻🇨",
-    code: "VC",
-    dial_code: "+1784",
-  },
-  {
     name: "Venezuela, Bolivarian Republic of Venezuela",
     flag: "🇻🇪",
     code: "VE",
@@ -1408,12 +1186,6 @@ const COUNTRY_DATA = [
     flag: "🇻🇬",
     code: "VG",
     dial_code: "+1284",
-  },
-  {
-    name: "Virgin Islands, U.S.",
-    flag: "🇻🇮",
-    code: "VI",
-    dial_code: "+1340",
   },
   {
     name: "Vietnam",
