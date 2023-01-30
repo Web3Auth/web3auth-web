@@ -61,6 +61,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       clientId: params.clientId || "",
       sessionTime: params.sessionTime,
       web3AuthNetwork: params.web3AuthNetwork,
+      useCoreKitKey: params.useCoreKitKey,
     });
     this.loginSettings = params.loginSettings || {};
   }
@@ -183,6 +184,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     };
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
+    }
+    if (adapterSettings.useCoreKitKey !== undefined) {
+      this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
     }
   }
 
