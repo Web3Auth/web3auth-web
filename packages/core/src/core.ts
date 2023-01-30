@@ -62,6 +62,8 @@ export interface Web3AuthCoreOptions {
    * @defaultValue mainnet
    */
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+
+  useCoreKitKey?: boolean;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -125,12 +127,14 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
           sessionTime: this.coreOptions.sessionTime,
           clientId: this.coreOptions.clientId,
           web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+          useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
       } else {
         this.walletAdapters[adapterName].setAdapterSettings({
           sessionTime: this.coreOptions.sessionTime,
           clientId: this.coreOptions.clientId,
           web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+          useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
       }
 

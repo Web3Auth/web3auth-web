@@ -61,6 +61,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       clientId: params.clientId || "",
       sessionTime: params.sessionTime,
       web3AuthNetwork: params.web3AuthNetwork,
+      useCoreKitKey: params.useCoreKitKey,
     });
     this.loginSettings = params.loginSettings || {};
   }
@@ -107,8 +108,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
     try {
       log.debug("initializing openlogin adapter");
+
+      const finalPrivKey = this._getFinalPrivKey();
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
-      if (this.openloginInstance.privKey && (options.autoConnect || isRedirectResult)) {
+      if (finalPrivKey && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
         await this.connect();
       }
@@ -182,6 +185,19 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
     }
+    if (adapterSettings.useCoreKitKey !== undefined) {
+      this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
+    }
+  }
+
+  private _getFinalPrivKey() {
+    if (!this.openloginInstance) return "";
+    let finalPrivKey = this.openloginInstance.privKey;
+    // coreKitKey is available only for custom verifiers by default
+    if (this.openloginOptions?.useCoreKitKey && this.openloginInstance.coreKitKey) {
+      finalPrivKey = this.openloginInstance.coreKitKey;
+    }
+    return finalPrivKey;
   }
 
   private async connectWithProvider(params: OpenloginLoginParams = {}): Promise<void> {
@@ -199,8 +215,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
+    const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
-    if (!this.openloginInstance.privKey || params.extraLoginOptions?.id_token) {
+    if (!keyAvailable || params.extraLoginOptions?.id_token) {
       if (!this.loginSettings.curve) {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
@@ -211,7 +228,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         })
       );
     }
-    let finalPrivKey = this.openloginInstance.privKey;
+    let finalPrivKey = this._getFinalPrivKey();
     if (finalPrivKey) {
       if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
