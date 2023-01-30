@@ -70,8 +70,8 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "3.2.0",
-    "@toruslabs/openlogin": "^2.12.0",
-    "@toruslabs/openlogin-jrpc": "^2.9.0",
+    "@toruslabs/openlogin": "^2.13.0",
+    "@toruslabs/openlogin-jrpc": "^2.13.0",
     "@web3auth/base": "^4.2.2",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",

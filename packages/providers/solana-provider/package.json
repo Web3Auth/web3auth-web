@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^2.5.0",
-    "@toruslabs/openlogin-jrpc": "^2.9.0",
+    "@toruslabs/openlogin-jrpc": "^2.13.0",
     "@toruslabs/tweetnacl-js": "^1.0.3",
     "@web3auth/base": "^4.2.2",
     "@web3auth/base-provider": "^4.2.2",

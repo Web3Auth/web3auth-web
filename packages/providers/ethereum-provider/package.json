@@ -25,7 +25,7 @@
     "@metamask/eth-sig-util": "^5.0.2",
     "@toruslabs/base-controllers": "^2.5.0",
     "@toruslabs/http-helpers": "^3.2.0",
-    "@toruslabs/openlogin-jrpc": "^2.9.0",
+    "@toruslabs/openlogin-jrpc": "^2.13.0",
     "@walletconnect/types": "~1.8.0",
     "@web3auth/base": "^4.2.2",
     "@web3auth/base-provider": "^4.2.2",
