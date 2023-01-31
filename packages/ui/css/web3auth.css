@@ -204,14 +204,7 @@
 
 /* Modal */
 #w3a-modal {
-  @apply fixed
-  font-body
-  inset-0
-  flex
-  items-center
-  justify-center
-  box-border
-  p-4;
+  @apply box-border fixed inset-0 flex items-center justify-center p-4 font-body;
 }
 
 #w3a-modal.w3a-modal--hidden {
@@ -249,13 +242,13 @@
 }
 
 #w3a-modal .w3a-modal__header {
-  @apply py-2 px-8 relative;
+  @apply relative px-8 py-2;
 }
 #w3a-modal .w3a-modal__content {
-  @apply py-4 px-8 overflow-y-auto h-[500px];
+  @apply py-4 px-8 overflow-y-auto;
 }
 #w3a-modal .w3a-modal__footer {
-  @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600 mt-auto;
+  @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
 }
 
 /* Header */
@@ -263,41 +256,24 @@
   @apply flex items-center;
 }
 #w3a-modal .w3a-header__logo {
-  @apply h-auto w-10 mr-4;
+  @apply w-10 h-auto mr-4;
 }
 #w3a-modal .w3a-header__title {
-  @apply font-bold
-  text-xl
-  text-app-gray-900
-  dark:text-white
-  pt-8;
+  @apply pt-8 text-xl font-bold text-app-gray-900 dark:text-white;
 }
 #w3a-modal div.w3a-header__subtitle {
-  @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400 flex items-center;
+  @apply flex items-center text-sm font-normal text-app-gray-500 dark:text-app-gray-400;
 }
 #w3a-modal div.w3a-header__subtitle img {
   @apply h-[14px] w-[14px] ml-1;
 }
 #w3a-modal button.w3a-header__button {
-  @apply cursor-pointer absolute p-0 border-0 top-5 right-7 
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply absolute p-0 border-0 cursor-pointer top-5 right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 /* BODY */
 #w3a-modal div.w3a-social__policy {
-  @apply text-left
-  text-xs
-  mt-4
-  font-medium
-  text-app-gray-500
-  dark:text-app-gray-400;
+  @apply mt-4 text-xs font-medium text-left text-app-gray-500 dark:text-app-gray-400;
 }
 
 #w3a-modal .w3a-group {
@@ -315,7 +291,7 @@
 }
 
 #w3a-modal div.w3a-group__title {
-  @apply text-sm font-medium mb-2 text-app-gray-900 dark:text-white;
+  @apply mb-2 text-sm font-medium text-app-gray-900 dark:text-white;
 }
 
 /* Adapter List */
@@ -362,10 +338,7 @@
 }
 
 #w3a-modal .w3a-external-group {
-  @apply flex
-  flex-wrap
-  gap-3
-  mb-4;
+  @apply flex flex-wrap gap-3 mb-4;
 }
 
 #w3a-modal .w3a-external-group__left {
@@ -373,15 +346,7 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply bg-none border-0 p-0 inline-flex items-center mb-2 cursor-pointer text-app-gray-500 dark:text-app-gray-400
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply inline-flex items-center p-0 mb-2 border-0 cursor-pointer bg-none text-app-gray-500 dark:text-app-gray-400 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
@@ -393,7 +358,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect {
-  @apply block text-center mb-4;
+  @apply block mb-4 text-center;
 }
 
 #w3a-modal .w3a-wallet-connect.w3a-wallet-connect--hidden {
@@ -435,18 +400,11 @@
 
 /* Footer Components */
 #w3a-modal .w3a-footer {
-  @apply flex justify-center items-center text-xs text-app-gray-400;
+  @apply flex items-center justify-center text-xs text-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links a {
-  @apply focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links span {
@@ -583,10 +541,7 @@
 }
 
 #w3a-modal .w3a-button--login {
-  @apply inline-flex
-  items-center
-  justify-center
-  h-11;
+  @apply inline-flex items-center justify-center h-11;
 }
 
 #w3a-modal button.w3a-button--login:hover > .hover-icon {
@@ -602,19 +557,7 @@
 }
 
 #w3a-modal button.w3a-button-expand {
-  @apply h-auto w-auto
-  ml-auto
-  text-sm
-  mt-4
-  text-app-primary-600
-  hover:text-app-primary-800
-  dark:hover:text-app-primary-500
-  focus-visible:outline-1
-  dark:focus-visible:outline-1
-  focus-visible:outline
-  dark:focus-visible:outline
-  focus-visible:outline-app-gray-50
-  dark:focus-visible:outline-app-gray-400;
+  @apply w-auto h-auto mt-4 ml-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:hover:text-app-primary-500 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
 }
 
 /* SMS */
@@ -640,7 +583,7 @@
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown li {
-  @apply p-0 hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-white cursor-pointer;
+  @apply p-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-white;
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown li button {
@@ -662,13 +605,7 @@
 /* SPINNER */
 /* Loader */
 #w3a-modal .w3a-modal__loader {
-  @apply absolute
-  flex
-  justify-center
-  inset-0
-  z-10
-  bg-white
-  dark:bg-app-gray-700;
+  @apply absolute inset-0 z-10 flex justify-center bg-white dark:bg-app-gray-700;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -713,7 +650,7 @@
   text-[#b7b8bd];
 }
 #w3a-modal .w3a-spinner-power > img {
-  @apply h-8 w-auto inline;
+  @apply inline w-auto h-8;
 }
 
 #w3a-modal .w3a-spinner {
@@ -735,8 +672,7 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-white
-  dark:bg-app-gray-700;
+  @apply bg-white dark:bg-app-gray-700;
   width: 50px;
   height: 50px;
   top: 5px;

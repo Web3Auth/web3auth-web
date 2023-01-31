@@ -54,7 +54,7 @@ export interface UIConfig {
    */
   displayErrorsOnModal?: boolean;
   adapterListener: SafeEventEmitter;
-  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
+  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }
 
 export const LOGIN_MODAL_EVENTS = {
