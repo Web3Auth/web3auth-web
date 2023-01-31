@@ -81,6 +81,7 @@ export default Vue.extend({
             theme: this.uiConfig.theme,
             loginMethodsOrder: this.uiConfig.loginMethodsOrder,
             defaultLanguage: this.uiConfig.defaultLanguage,
+            web3AuthNetwork: "testnet",
           },
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId["mainnet"],

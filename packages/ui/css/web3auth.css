@@ -1,14 +1,4 @@
 @tailwind base;
-
-@layer base {
-  ::-webkit-scrollbar {
-    @apply w-[9px] bg-app-gray-100 dark:bg-app-gray-900 rounded-md;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply w-[7px] border border-solid border-app-gray-100 dark:border-app-gray-900 bg-app-gray-300 dark:bg-app-gray-600 rounded-md /*color trackbar*/;
-  }
-}
-
 @tailwind components;
 @tailwind utilities;
 
@@ -236,7 +226,7 @@
   max-h-[95%]
   min-h-[630px]
   overflow-x-hidden
-  overflow-y-auto
+  overflow-y-hidden
   rounded-[32px]
   opacity-0
   relative
@@ -262,7 +252,7 @@
   @apply py-2 px-8 relative;
 }
 #w3a-modal .w3a-modal__content {
-  @apply py-4 px-8;
+  @apply py-4 px-8 overflow-y-auto h-[500px];
 }
 #w3a-modal .w3a-modal__footer {
   @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600 mt-auto;
