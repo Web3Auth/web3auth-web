@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
@@ -21,6 +21,7 @@ interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
   appName?: string;
+  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -57,7 +58,16 @@ export default function Modal(props: ModalProps) {
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation();
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const {
+    stateListener,
+    appLogo,
+    appName,
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleShowExternalWallets,
+    closeModal,
+    web3AuthNetwork,
+  } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -215,6 +225,7 @@ export default function Modal(props: ModalProps) {
                   {isSmsPassworedlessLoginVisible && (
                     <SocialLoginSms
                       adapter={modalState.socialLoginsConfig?.adapter}
+                      web3AuthNetwork={web3AuthNetwork}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                     />
                   )}

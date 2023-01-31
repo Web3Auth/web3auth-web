@@ -1,38 +1,23 @@
+import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { log } from "@web3auth/base";
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getUserCountry, validatePhoneNumber } from "../utils";
 
 interface SocialLoginSmsProps {
   adapter: string;
+  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 export default function SocialLoginSms(props: SocialLoginSmsProps) {
-  const { handleSocialLoginClick, adapter } = props;
+  const { handleSocialLoginClick, adapter, web3AuthNetwork } = props;
   const [countryData, setCountryData] = useState<Record<string, string>[] | null>(null);
-  const [country, setUserCountry] = useState<string>("");
   const [flag, setUserFlag] = useState<string>("");
   const [code, setUserCode] = useState<string>("");
   const [number, setUserNumber] = useState<string>("");
   const [isValidFormattedNumber, setValidFormattedNumber] = useState<boolean | null>(null);
   const [showCountryCodeDropdown, setShowCountryCodeDropdown] = useState<boolean>(false);
-
-  const fetchUserLocation = useCallback(() => {
-    const getLocation = async () => {
-      const result = await getUserCountry();
-      if (country) {
-        const match = countryData.find((i) => i.code.toLowerCase() === country.toLowerCase());
-        if (match) {
-          setUserCode(match.code);
-          setUserFlag(match.flag);
-        }
-      }
-      setUserCountry(result);
-    };
-
-    if (countryData) getLocation();
-  }, [country, countryData, setUserCountry]);
 
   const [t] = useTranslation();
 
@@ -40,13 +25,16 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
     e.preventDefault();
     if (!code || !number) return;
     const parsedPhoneNumber = `${code}-${number}`;
-    const isNumberValid = await validatePhoneNumber(parsedPhoneNumber);
+    const isNumberValid = await validatePhoneNumber(parsedPhoneNumber, web3AuthNetwork);
     if (!isNumberValid) {
       setValidFormattedNumber(false);
       return;
     }
     if (parsedPhoneNumber)
-      handleSocialLoginClick({ adapter, loginParams: { loginProvider: "sms_passwordless", login_hint: parsedPhoneNumber, name: "Mobile" } });
+      handleSocialLoginClick({
+        adapter,
+        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: parsedPhoneNumber, name: "Mobile" },
+      });
   };
 
   const toggleCountryCodeDropdown = () => {
@@ -65,8 +53,6 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
   };
 
   useEffect(() => {
-    let isCancelled = false;
-
     const importCountryData = async () => {
       try {
         const data = (await import("../helper/countryData")).default;
@@ -76,19 +62,22 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
       }
     };
 
-    if (!isCancelled) {
-      importCountryData();
-      fetchUserLocation();
-    }
-
-    return () => {
-      isCancelled = true;
-    };
+    importCountryData();
   }, []);
 
   useEffect(() => {
-    if (countryData) fetchUserLocation();
-  }, [countryData, fetchUserLocation]);
+    const getLocation = async () => {
+      const result = await getUserCountry(web3AuthNetwork);
+      if (result) {
+        const match = countryData.find((i) => i.code.toLowerCase() === result.toLowerCase());
+        if (match) {
+          setUserCode(match.dial_code);
+          setUserFlag(match.flag);
+        }
+      }
+    };
+    if (countryData) getLocation();
+  }, [countryData, web3AuthNetwork]);
 
   return (
     <div className="w3ajs-sms-passwordless w3a-group w3a-group--sms">
@@ -131,6 +120,7 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
               className="w-full mb-4 w3a-text-field w3a-text-field--number"
               type="number"
               name="phone number"
+              autoComplete="tel-national"
               required
               placeholder={`${t("modal.social.sms-placeholder-text")}: 9009009009`}
               onFocus={(e) => (e.target.placeholder = "")}

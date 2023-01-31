@@ -1,3 +1,4 @@
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
@@ -53,6 +54,7 @@ export interface UIConfig {
    */
   displayErrorsOnModal?: boolean;
   adapterListener: SafeEventEmitter;
+  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
 }
 
 export const LOGIN_MODAL_EVENTS = {

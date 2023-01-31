@@ -1,4 +1,5 @@
 import { get, post } from "@toruslabs/http-helpers";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
@@ -58,9 +59,13 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
   }
 }
 
-export const getUserCountry = async (): Promise<string> => {
+export const getPasswordlessBackendUrl = (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE) => {
+  return PASSWORDLESS_BACKEND[web3AuthNetwork] ?? PASSWORDLESS_BACKEND.mainnet;
+};
+
+export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<string> => {
   try {
-    const result = await get<{ data: { country: string } }>(`${PASSWORDLESS_BACKEND}/api/v2/user/location`);
+    const result = await get<{ data: { country: string } }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/user/location`);
     if (result && result.data.country) return result.data.country;
     return "";
   } catch (error) {
@@ -69,9 +74,11 @@ export const getUserCountry = async (): Promise<string> => {
   }
 };
 
-export const validatePhoneNumber = async (phoneNumber: string): Promise<boolean> => {
+export const validatePhoneNumber = async (phoneNumber: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<boolean> => {
   try {
-    const result = await post<{ success: boolean }>(`${PASSWORDLESS_BACKEND}/api/v2/phone_number/validate`, { phone_number: phoneNumber });
+    const result = await post<{ success: boolean }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/phone_number/validate`, {
+      phone_number: phoneNumber,
+    });
     if (result && result.success) return true;
     return false;
   } catch (error: unknown) {
