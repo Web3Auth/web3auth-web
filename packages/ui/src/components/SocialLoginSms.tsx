@@ -24,17 +24,16 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
   const handleSmsSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!code || !number) return;
-    const parsedPhoneNumber = `${code}-${number}`;
+    const parsedPhoneNumber = `${code}${number}`;
     const isNumberValid = await validatePhoneNumber(parsedPhoneNumber, web3AuthNetwork);
     if (!isNumberValid) {
       setValidFormattedNumber(false);
       return;
     }
-    if (parsedPhoneNumber)
-      handleSocialLoginClick({
-        adapter,
-        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: parsedPhoneNumber, name: "Mobile" },
-      });
+    handleSocialLoginClick({
+      adapter,
+      loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: parsedPhoneNumber, name: "Mobile" },
+    });
   };
 
   const toggleCountryCodeDropdown = () => {

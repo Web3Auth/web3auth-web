@@ -14,6 +14,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 // import Loader from "./Loader";
 import SocialLoginEmail from "./SocialLoginEmail";
+import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 import SocialLoginSms from "./SocialLoginSms";
 
@@ -215,14 +216,22 @@ export default function Modal(props: ModalProps) {
                     />
                   ) : null}
 
-                  {isEmailPassworedlessLoginVisible && (
+                  {isEmailPassworedlessLoginVisible && isSmsPassworedlessLoginVisible && (
+                    <SocialLoginPasswordless
+                      adapter={modalState.socialLoginsConfig?.adapter}
+                      web3AuthNetwork={web3AuthNetwork}
+                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                    />
+                  )}
+
+                  {isEmailPassworedlessLoginVisible && !isSmsPassworedlessLoginVisible && (
                     <SocialLoginEmail
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                     />
                   )}
 
-                  {isSmsPassworedlessLoginVisible && (
+                  {isSmsPassworedlessLoginVisible && !isEmailPassworedlessLoginVisible && (
                     <SocialLoginSms
                       adapter={modalState.socialLoginsConfig?.adapter}
                       web3AuthNetwork={web3AuthNetwork}

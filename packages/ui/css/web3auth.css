@@ -245,7 +245,7 @@
   @apply relative px-8 py-2;
 }
 #w3a-modal .w3a-modal__content {
-  @apply py-4 px-8 overflow-y-auto;
+  @apply px-8 py-4 overflow-y-auto;
 }
 #w3a-modal .w3a-modal__footer {
   @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
@@ -281,6 +281,14 @@
 }
 #w3a-modal .w3a-group:last-child {
   @apply mb-0;
+}
+
+#w3a-modal .w3ajs-passwordless div.w3a-group__title {
+  @apply flex items-center;
+}
+
+#w3a-modal .w3ajs-passwordless div.w3a-group__title img {
+  @apply h-[14px] w-[14px] ml-1;
 }
 
 #w3a-modal .w3a-group.w3a-group--hidden,
