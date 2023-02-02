@@ -1,5 +1,4 @@
 import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
-import { log } from "@web3auth/base";
 import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -44,17 +43,9 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
   useEffect(() => {
     const getLocation = async () => {
-      try {
-        const data = (await import("../helper/countryData")).default;
-        const result = await getUserCountry(web3AuthNetwork);
-        if (result) {
-          const match = data.find((i) => i.code.toLowerCase() === result.toLowerCase());
-          if (match) {
-            setCountryCode(match.dial_code);
-          }
-        }
-      } catch (error: unknown) {
-        log.error("error fetching country data", (error as Error).message);
+      const result = await getUserCountry(web3AuthNetwork);
+      if (result && result.dialCode) {
+        setCountryCode(result.dialCode);
       }
     };
     getLocation();

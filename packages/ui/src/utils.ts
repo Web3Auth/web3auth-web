@@ -63,14 +63,14 @@ export const getPasswordlessBackendUrl = (web3AuthNetwork: OPENLOGIN_NETWORK_TYP
   return PASSWORDLESS_BACKEND[web3AuthNetwork] ?? PASSWORDLESS_BACKEND.mainnet;
 };
 
-export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<string> => {
+export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<{ country: string; dialCode: string } | null> => {
   try {
-    const result = await get<{ data: { country: string } }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/user/location`);
-    if (result && result.data.country) return result.data.country;
-    return "";
+    const result = await get<{ data: { country: string; dial_code: string } }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/user/location`);
+    if (result && result.data.country) return { country: result.data.country, dialCode: result.data.dial_code };
+    return null;
   } catch (error) {
     log.error("error getting user country", error);
-    return "";
+    return null;
   }
 };
 
