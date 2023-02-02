@@ -74,12 +74,15 @@ export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): P
   }
 };
 
-export const validatePhoneNumber = async (phoneNumber: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<boolean> => {
+export const validatePhoneNumber = async (phoneNumber: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<string | boolean> => {
   try {
-    const result = await post<{ success: boolean }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/phone_number/validate`, {
-      phone_number: phoneNumber,
-    });
-    if (result && result.success) return true;
+    const result = await post<{ success: boolean; parsed_number: string }>(
+      `${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/phone_number/validate`,
+      {
+        phone_number: phoneNumber,
+      }
+    );
+    if (result && result.success) return result.parsed_number;
     return false;
   } catch (error: unknown) {
     log.error("error validating phone number", error);

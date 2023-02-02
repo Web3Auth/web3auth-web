@@ -29,11 +29,11 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       return handleSocialLoginClick({ adapter, loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" } });
     }
     const number = value.startsWith("+") ? value : `${countryCode}${value}`;
-    const isNumberValid = await validatePhoneNumber(number, web3AuthNetwork);
-    if (isNumberValid) {
+    const result = await validatePhoneNumber(number, web3AuthNetwork);
+    if (result) {
       return handleSocialLoginClick({
         adapter,
-        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: number, name: "Mobile" },
+        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
       });
     }
 

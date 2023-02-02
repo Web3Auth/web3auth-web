@@ -24,7 +24,7 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
   const handleSmsSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!code || !number) return;
-    const parsedPhoneNumber = `${code}${number}`;
+    const parsedPhoneNumber = `${code}-${number}`;
     const isNumberValid = await validatePhoneNumber(parsedPhoneNumber, web3AuthNetwork);
     if (!isNumberValid) {
       setValidFormattedNumber(false);
@@ -68,11 +68,8 @@ export default function SocialLoginSms(props: SocialLoginSmsProps) {
     const getLocation = async () => {
       const result = await getUserCountry(web3AuthNetwork);
       if (result) {
-        const match = countryData.find((i) => i.code.toLowerCase() === result.toLowerCase());
-        if (match) {
-          setUserCode(match.dial_code);
-          setUserFlag(match.flag);
-        }
+        setUserCode(result.dialCode);
+        setUserFlag(result.country);
       }
     };
     if (countryData) getLocation();
