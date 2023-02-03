@@ -84,7 +84,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
     let isRedirectResult = false;
 
-    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
+    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT || this.openloginOptions.uxMode === UX_MODE.SESSIONLESS_REDIRECT) {
       const redirectResult = getHashQueryParams();
       if (Object.keys(redirectResult).length > 0 && redirectResult._pid) {
         isRedirectResult = true;
