@@ -49,12 +49,12 @@
     "@types/lodash.merge": "^4.6.7",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
     "autoprefixer": "^10.4.13",
     "css-loader": "^6.7.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-react": "^7.32.1",
+    "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^9.0.0",
     "live-server": "^1.2.2",
@@ -69,8 +69,8 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^2.12.0",
-    "@toruslabs/openlogin-jrpc": "^2.9.0",
+    "@toruslabs/openlogin": "^2.13.0",
+    "@toruslabs/openlogin-jrpc": "^2.13.0",
     "@web3auth/base": "^4.3.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
@@ -78,7 +78,7 @@
     "i18next": "^22.4.9",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^12.1.4",
+    "react-i18next": "^12.1.5",
     "react-qrcode-logo": "^2.8.0"
   },
   "lint-staged": {
