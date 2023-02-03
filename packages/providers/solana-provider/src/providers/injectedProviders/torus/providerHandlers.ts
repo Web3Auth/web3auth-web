@@ -1,8 +1,7 @@
-import { Transaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 
-import { ITorusWalletProvider } from "../../../interface";
+import { ITorusWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
 
 export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProviderHandlers => {
@@ -37,7 +36,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
       return message;
     },
 
-    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
@@ -46,7 +45,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
       return response;
     },
 
-    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
         throw ethErrors.rpc.invalidParams("message");
       }
@@ -55,7 +54,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
       return { signature: response };
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
