@@ -1,4 +1,4 @@
-import { Connection, PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import bs58 from "bs58";
@@ -6,6 +6,9 @@ import { ethErrors } from "eth-rpc-errors";
 
 import { ISlopeProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
+
+const isVersionTransction = (transaction: TransactionOrVersionedTransaction) =>
+  (transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction;
 
 export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEngineProxy: () => SafeEventEmitterProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {
@@ -27,7 +30,9 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const txMessage = req.params.message;
       if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
 
-      const message = txMessage instanceof VersionedTransaction ? txMessage.message.serialize() : txMessage.serializeMessage();
+      const message = isVersionTransction(txMessage)
+        ? (txMessage as VersionedTransaction).message.serialize()
+        : (txMessage as Transaction).serializeMessage();
       const { data } = await injectedProvider.signTransaction(bs58.encode(message));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
 
@@ -46,7 +51,9 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const txMessage = req.params.message;
       if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
 
-      const message = txMessage instanceof VersionedTransaction ? txMessage.message.serialize() : txMessage.serializeMessage();
+      const message = isVersionTransction(txMessage)
+        ? (txMessage as VersionedTransaction).message.serialize()
+        : (txMessage as Transaction).serializeMessage();
       const { data } = await injectedProvider.signTransaction(bs58.encode(message));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
@@ -69,7 +76,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
 
       for (let i = 0; i < length; i++) {
         const item = allTxns[i];
-        const message = item instanceof VersionedTransaction ? item.message.serialize() : item.serializeMessage();
+        const message = isVersionTransction(item) ? (item as VersionedTransaction).message.serialize() : (item as Transaction).serializeMessage();
         unsignedTx.push(bs58.encode(message));
       }
       const { msg, data } = await injectedProvider.signAllTransactions(unsignedTx);
