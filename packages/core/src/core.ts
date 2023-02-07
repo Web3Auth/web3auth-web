@@ -220,23 +220,23 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      await Promise.all(
-        Object.values(this.plugins).map(async (plugin) => {
-          try {
-            if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
-              return;
-            }
-            await plugin.initWithWeb3Auth(this);
-            await plugin.connect();
-          } catch (error: unknown) {
-            // swallow error if connector adapter doesn't supports this plugin.
-            if ((error as Web3AuthError).code === 5211) {
-              return;
-            }
-            log.error(error);
+
+      Object.values(this.plugins).map(async (plugin) => {
+        try {
+          if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+            return;
           }
-        })
-      );
+          await plugin.initWithWeb3Auth(this);
+          await plugin.connect();
+        } catch (error: unknown) {
+          // swallow error if connector adapter doesn't supports this plugin.
+          if ((error as Web3AuthError).code === 5211) {
+            return;
+          }
+          log.error(error);
+        }
+      });
+
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
