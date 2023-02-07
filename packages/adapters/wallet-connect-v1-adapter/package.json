@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@walletconnect/client": "~1.8.0",
-    "@walletconnect/types": "~1.8.0"
+    "@walletconnect/types": "~2.3.3"
   },
   "lint-staged": {
     "!(*d).ts": [
