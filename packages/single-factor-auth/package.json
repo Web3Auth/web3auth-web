@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@toruslabs/customauth": "^11.4.2",
-    "@toruslabs/openlogin-ed25519": "^2.0.0",
+    "@toruslabs/openlogin-ed25519": "^3.0.0",
     "@web3auth/base": "^4.3.2",
     "@web3auth/base-provider": "^4.3.2",
     "@web3auth/ethereum-provider": "^4.3.2",

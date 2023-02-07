@@ -9,6 +9,8 @@ export const getOpenloginDefaultOptions = (): OpenloginAdapterOptions => {
       clientId: "",
       uxMode: UX_MODE.POPUP,
     },
-    loginSettings: {},
+    loginSettings: {
+      loginProvider: "",
+    },
   };
 };
