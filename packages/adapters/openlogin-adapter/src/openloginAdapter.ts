@@ -197,6 +197,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (this.openloginOptions?.useCoreKitKey && this.openloginInstance.coreKitKey) {
       finalPrivKey = this.openloginInstance.coreKitKey;
     }
+    finalPrivKey = finalPrivKey.padStart(64, "0");
     return finalPrivKey;
   }
 
