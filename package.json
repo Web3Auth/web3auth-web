@@ -10,7 +10,8 @@
     "packages/providers/*",
     "packages/adapters/*",
     "packages/plugins/*",
-    "packages/single-factor-auth"
+    "packages/single-factor-auth",
+    "packages/core-kit"
   ],
   "description": "Monorepo for web3 auth packages",
   "scripts": {
