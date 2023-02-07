@@ -7,6 +7,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   log,
+  LoginMethodConfig,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
@@ -158,14 +159,14 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
     const adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
-      if (this.modalConfig.adapters[adapter.name].showOnModal !== true) return false;
-      if (!this.modalConfig.adapters[adapter.name].loginMethods) return true;
+      if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
+      if (!this.modalConfig.adapters?.[adapter.name]?.loginMethods) return true;
       const mergedLoginMethods = getAdapterSocialLogins(
         adapter.name,
         this.walletAdapters[adapter.name],
         (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
       );
-      if (Object.values(mergedLoginMethods).some((method) => method.showOnModal)) return true;
+      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
