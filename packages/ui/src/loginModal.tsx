@@ -24,8 +24,8 @@ import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, 
 
 const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(parentZIndex: string): HTMLElement {
-  const existingWrapper = document.getElementById("w3a-container");
-  if (existingWrapper) return existingWrapper;
+  const existingWrapper = document.getElementById("w3a-parent-container");
+  if (existingWrapper) existingWrapper.remove();
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
