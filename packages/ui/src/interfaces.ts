@@ -97,3 +97,6 @@ export interface ModalState {
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
 export type ExternalWalletEventType = { adapter: string };
+
+export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w-light.svg";
+export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w.svg";
