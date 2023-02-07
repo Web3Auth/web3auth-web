@@ -24,8 +24,8 @@
       <v-row justify="center">
         <v-col cols="12" md="4" class="pl-5" v-if="$vuetify.breakpoint.smAndDown">
           <div class="text-center">
-            <div class="text-h3 mb-3 font-weight-bold">MPC Demo</div>
-            <div class="text-h6 mb-2 font-weight-regular">Experience MPC in 3 simple steps</div>
+            <div class="mb-3 text-h3 font-weight-bold">MPC Demo</div>
+            <div class="mb-2 text-h6 font-weight-regular">Experience MPC in 3 simple steps</div>
           </div>
           <Stepper :current-step="currentStep" />
         </v-col>
@@ -44,8 +44,8 @@
 
         <v-col cols="12" md="4" class="pl-16" v-if="$vuetify.breakpoint.mdAndUp">
           <div>
-            <div class="text-h3 mb-3 text-left font-weight-bold">MPC Demo</div>
-            <div class="text-h6 text-left mb-10 font-weight-regular">Experience MPC in 3 simple steps</div>
+            <div class="mb-3 text-left text-h3 font-weight-bold">MPC Demo</div>
+            <div class="mb-10 text-left text-h6 font-weight-regular">Experience MPC in 3 simple steps</div>
           </div>
           <Stepper :current-step="currentStep" />
         </v-col>
@@ -75,7 +75,7 @@ import Verify from "./components/Verify.vue";
 const ec = new EC("secp256k1");
 
 const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
-const tssServerEndpoint = "https://swaraj-test-coordinator-1.k8.authnetwork.dev/tss";
+const tssServerEndpoint = "https://sapphire-dev-2-1.authnetwork.dev/tss";
 const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yCady62n3VGW2gcUEcHg6Vh";
 
 async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
