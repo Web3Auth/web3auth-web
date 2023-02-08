@@ -253,17 +253,19 @@
 
 /* Header */
 #w3a-modal .w3a-header {
-  @apply flex items-center;
+  @apply flex items-center pt-8;
 }
 #w3a-modal .w3a-header__logo {
-  @apply h-auto w-10 mr-4;
+  @apply mb-4;
+}
+#w3a-modal .w3a-header__logo img {
+  @apply h-auto w-10;
 }
 #w3a-modal .w3a-header__title {
   @apply font-bold
   text-xl
   text-app-gray-900
-  dark:text-white
-  pt-8;
+  dark:text-white;
 }
 #w3a-modal div.w3a-header__subtitle {
   @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400 flex items-center;
@@ -708,27 +710,24 @@
   @apply flex p-2;
 }
 
+#w3a-modal .w3a-modal__loader-app-logo--default {
+  @apply bg-app-primary-600 dark:bg-app-gray-50 w-[72px] h-[72px] rounded-full items-center justify-center;
+}
+
 #w3a-modal .w3a-modal__loader-app-logo img {
-  width: 72px;
-  max-width: 72px;
-  max-height: 72px;
-  height: auto;
+  @apply max-h-[72px] max-w-[72px] w-[72px] h-auto;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo--default img {
+  @apply max-h-[45px] max-w-[45px] w-[45px];
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
-  display: flex;
-  padding: 8px;
-  width: 72px;
-  height: 72px;
-  border-radius: 40px;
-  background: #f3f4f6;
-  align-items: center;
-  justify-content: center;
+  @apply bg-app-gray-100 dark:bg-app-gray-50 w-[72px] h-[72px] flex rounded-full items-center justify-center;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
-  width: 64px;
-  height: 64px;
+  @apply w-16 h-16;
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {

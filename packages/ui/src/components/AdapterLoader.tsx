@@ -2,11 +2,9 @@ import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
-
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface DetailedLoaderProps {
   message?: string;
@@ -20,10 +18,11 @@ interface DetailedLoaderProps {
 const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
-  const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, adapterName, onClose } = props;
+  const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation();
+  const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
@@ -41,7 +40,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
-                <div className="w3a-modal__loader-app-logo">
+                <div className={["w3a-modal__loader-app-logo", isDefaultLogo ? "w3a-modal__loader-app-logo--default" : ""].join(" ")}>
                   <img src={appLogo} alt="" />
                 </div>
                 <div className="w3a-modal__connector">

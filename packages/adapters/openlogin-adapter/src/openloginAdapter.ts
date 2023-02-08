@@ -49,7 +49,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private openloginOptions: OpenloginAdapterOptions["adapterSettings"];
 
-  private loginSettings: LoginSettings = {};
+  private loginSettings: LoginSettings = { loginProvider: "" };
 
   private privKeyProvider: PrivateKeyProvider | null = null;
 
@@ -63,7 +63,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       web3AuthNetwork: params.web3AuthNetwork,
       useCoreKitKey: params.useCoreKitKey,
     });
-    this.loginSettings = params.loginSettings || {};
+    this.loginSettings = params.loginSettings || { loginProvider: "" };
   }
 
   get chainConfigProxy(): CustomChainConfig | null {
@@ -84,7 +84,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
     let isRedirectResult = false;
 
-    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
+    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT || this.openloginOptions.uxMode === UX_MODE.SESSIONLESS_REDIRECT) {
       const redirectResult = getHashQueryParams();
       if (Object.keys(redirectResult).length > 0 && redirectResult._pid) {
         isRedirectResult = true;
@@ -121,7 +121,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  async connect(params: OpenloginLoginParams = {}): Promise<SafeEventEmitterProvider | null> {
+  async connect(params: OpenloginLoginParams = { loginProvider: "" }): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
@@ -200,7 +200,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     return finalPrivKey;
   }
 
-  private async connectWithProvider(params: OpenloginLoginParams = {}): Promise<void> {
+  private async connectWithProvider(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
@@ -222,6 +222,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         this.loginSettings.curve =
           this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
       }
+      if (!params.loginProvider && !this.loginSettings.loginProvider)
+        throw WalletInitializationError.invalidParams("loginProvider is required for login");
       await this.openloginInstance.login(
         merge(this.loginSettings, params, {
           extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },

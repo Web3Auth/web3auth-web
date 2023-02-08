@@ -20,12 +20,20 @@ import { createRoot } from "react-dom/client";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+import {
+  DEFAULT_LOGO_DARK,
+  DEFAULT_LOGO_LIGHT,
+  ExternalWalletEventType,
+  LOGIN_MODAL_EVENTS,
+  MODAL_STATUS,
+  ModalState,
+  SocialLoginEventType,
+  UIConfig,
+} from "./interfaces";
 
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(parentZIndex: string): HTMLElement {
-  const existingWrapper = document.getElementById("w3a-container");
-  if (existingWrapper) return existingWrapper;
+  const existingWrapper = document.getElementById("w3a-parent-container");
+  if (existingWrapper) existingWrapper.remove();
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
@@ -55,7 +63,6 @@ class LoginModal extends SafeEventEmitter {
 
   constructor({ appName, appLogo, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage, modalZIndex = "99998" }: UIConfig) {
     super();
-    this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.appName = appName || "blockchain";
     this.modalZIndex = modalZIndex || "99998";
 
@@ -65,6 +72,8 @@ class LoginModal extends SafeEventEmitter {
     } else {
       this.isDark = false;
     }
+
+    this.appLogo = appLogo || (this.isDark ? DEFAULT_LOGO_DARK : DEFAULT_LOGO_LIGHT);
 
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;

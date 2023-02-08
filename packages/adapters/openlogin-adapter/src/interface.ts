@@ -1,7 +1,7 @@
 import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin";
 import { BaseAdapterSettings } from "@web3auth/base";
 
-export type LoginSettings = LoginParams & Partial<BaseRedirectParams>;
+export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 
 type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick<Type, Key>>;
 export interface OpenloginAdapterOptions extends BaseAdapterSettings {
