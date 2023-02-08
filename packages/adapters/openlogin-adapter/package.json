@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "4.4.2",
+  "version": "4.5.0",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/core",
@@ -43,7 +43,7 @@
     "@web3auth/base": "^4.4.0",
     "@web3auth/base-provider": "^4.4.0",
     "@web3auth/ethereum-provider": "^4.4.0",
-    "@web3auth/solana-provider": "^4.4.0",
+    "@web3auth/solana-provider": "^4.5.0",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {
