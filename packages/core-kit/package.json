@@ -48,7 +48,10 @@
       "@tkey/web-storage": "^7.2.0",
       "@tkey/service-provider-torus": "^7.2.0",
       "@tkey/service-provider-base": "^7.2.0",
-      "@tkey/common-types": "^7.2.0"
+      "@tkey/storage-layer-torus": "^7.2.0",
+      "@tkey/common-types": "^7.2.0",
+      "bn.js": "^5.2.1",
+      "bowser": "^2.11.0"
     },
     "devDependencies": {
     },
