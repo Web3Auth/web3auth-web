@@ -15,13 +15,16 @@ const vuexPersist = new VuexPersistence({
 
 const VuexStore = new Vuex.Store({
   plugins: vuexPersist ? [vuexPersist.plugin] : [],
-  state: { postboxKey: "" },
+  state: { postboxKey: "", userInfo: {}, sharesInfo: {} },
   mutations: {
     setPostboxKey(state: any, payload) {
       state.postboxKey = payload;
     },
     setUserInfo(state: any, payload) {
       state.userInfo = payload;
+    },
+    setSharesInfo(state: any, payload) {
+      state.sharesInfo = payload;
     },
   },
   actions: {},
