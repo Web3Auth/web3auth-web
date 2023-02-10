@@ -197,9 +197,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               const isBlock = externalButtons.length === 1 || button.block;
 
-              const label = isBlock ? <p className="ml-2 text-left">Connect with {button.name}</p> : "";
+              const label = isBlock ? <p className="ml-2 text-left">{button.name}</p> : "";
               return (
-                <li className={[`w3a-adapter-item w3a-adapter-item--external`, isBlock ? "w3a-adapter-item--full" : ""].join(" ")} key={button.name}>
+                <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : ""].join(" ")} key={button.name}>
                   {button.isLink ? (
                     <a key={button.name} href={button.href} rel="noopener noreferrer" target="_blank">
                       <button type="button" className="w3a-button w3a-button--login w-full">
