@@ -332,6 +332,16 @@
   @apply hidden;
 }
 
+#w3a-modal li.w3a-adapter-item.w3a-adapter-item--external .w3a-button--login {
+  @apply text-xs;
+}
+
+@media screen and (min-width: 390px) {
+  #w3a-modal li.w3a-adapter-item.w3a-adapter-item--external .w3a-button--login {
+    @apply text-sm;
+  }
+}
+
 #w3a-modal li.w3a-adapter-item {
   @apply list-none;
 }
