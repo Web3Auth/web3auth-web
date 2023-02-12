@@ -336,6 +336,10 @@
   @apply list-none;
 }
 
+#w3a-modal li.w3a-adapter-item--full {
+  @apply col-span-3;
+}
+
 #w3a-modal .w3a-adapter-item--hide {
   @apply hidden;
 }

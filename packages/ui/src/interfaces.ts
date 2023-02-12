@@ -98,3 +98,5 @@ export type ExternalWalletEventType = { adapter: string };
 
 export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w-light.svg";
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w.svg";
+
+export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
