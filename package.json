@@ -31,7 +31,7 @@
   "devDependencies": {
     "@babel/register": "^7.18.9",
     "@toruslabs/eslint-config-typescript": "^1.4.0",
-    "@toruslabs/torus-scripts": "^2.0.2",
+    "@toruslabs/torus-scripts": "^3.0.2",
     "@types/chai": "^4.3.4",
     "@types/faker": "^5.5.9",
     "@types/jsonwebtoken": "^9.0.1",
