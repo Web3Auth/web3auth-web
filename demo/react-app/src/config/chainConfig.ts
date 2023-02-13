@@ -1,6 +1,15 @@
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 
 export const CHAIN_CONFIG = {
+  polygon: {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    rpcTarget: "https://rpc.ankr.com/polygon",
+    blockExplorer: "https://polygonscan.com/",
+    chainId: "0x89",
+    displayName: "Polygon Mainnet",
+    ticker: "matic",
+    tickerName: "Matic",
+  } as CustomChainConfig,
   mainnet: {
     displayName: "Ethereum Mainnet",
     chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -18,15 +27,6 @@ export const CHAIN_CONFIG = {
     displayName: "Solana Mainnet",
     ticker: "SOL",
     tickerName: "Solana",
-  } as CustomChainConfig,
-  polygon: {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://polygon-rpc.com",
-    blockExplorer: "https://polygonscan.com/",
-    chainId: "0x89",
-    displayName: "Polygon Mainnet",
-    ticker: "matic",
-    tickerName: "Matic",
   } as CustomChainConfig,
   tezos: {
     chainNamespace: CHAIN_NAMESPACES.OTHER,

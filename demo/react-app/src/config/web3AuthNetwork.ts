@@ -1,12 +1,12 @@
 export const WEB3AUTH_NETWORK = {
+  cyan: {
+    displayName: "Cyan",
+  },
   mainnet: {
     displayName: "Mainnet",
   },
   testnet: {
     displayName: "Testnet",
-  },
-  cyan: {
-    displayName: "Cyan",
   },
 } as const;
 

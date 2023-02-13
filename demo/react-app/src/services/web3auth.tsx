@@ -1,4 +1,5 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -95,7 +96,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         setIsLoading(true);
-        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = "BHhjZ5eaJLgRtz1nVBwCFvlbpCCOHlK4Sxku2m56Gufn5IBuK9XfUzKg_HDlos14I-ZbsN1CgSLszZzr9ICc2Ho";
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
@@ -106,8 +107,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           },
           enableLogging: true,
         });
-        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        const adapter = new OpenloginAdapter({
+          adapterSettings: { network: web3AuthNetwork, clientId, _iframeUrl: "https://fox.web3auth.com" },
+          loginSettings: { mfaLevel: "none" },
+        });
+        const cbAdapter = new CoinbaseAdapter();
         web3AuthInstance.configureAdapter(adapter);
+        web3AuthInstance.configureAdapter(cbAdapter);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal();
