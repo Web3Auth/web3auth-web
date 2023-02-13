@@ -5,7 +5,7 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "target": "es6",
-    "declarationDir": "./dist/types",
+    "declarationDir": "./dist/types"
     // "rootDir": "."
   }
 }
