@@ -118,36 +118,32 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  private async switchChain(chainConfig: CustomChainConfig): Promise<void> {
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    await this.metamaskProvider.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    try {
-      await this.metamaskProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
-    } catch (switchError: unknown) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if ((switchError as { code: number }).code === 4902) {
-        await this.metamaskProvider.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: chainConfig.chainId,
-              chainName: chainConfig.displayName,
-              rpcUrls: [chainConfig.rpcTarget],
-              blockExplorerUrls: [chainConfig.blockExplorer],
-              nativeCurrency: {
-                name: chainConfig.tickerName,
-                symbol: chainConfig.ticker,
-                decimals: chainConfig.decimals || 18,
-              },
-            },
-          ],
-        });
-      } else {
-        throw switchError;
-      }
-    }
+    await this.metamaskProvider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: params.chainId }],
+    });
   }
 }
 

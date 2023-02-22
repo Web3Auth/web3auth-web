@@ -176,6 +176,16 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     this.cachedAdapter = null;
   }
 
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].switchChain(params);
+  }
+
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.

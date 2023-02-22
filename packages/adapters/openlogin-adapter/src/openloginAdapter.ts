@@ -190,6 +190,16 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    return this.privKeyProvider?.addChain(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    return this.privKeyProvider?.switchChain(params);
+  }
+
   private _getFinalPrivKey() {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;

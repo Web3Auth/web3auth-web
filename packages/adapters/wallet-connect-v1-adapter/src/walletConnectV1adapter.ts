@@ -58,6 +58,10 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     return !!this.connector?.connected;
   }
 
+  get providerFactory(): WalletConnectProvider | null {
+    return this.wcProvider || null;
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     return this.wcProvider?.provider || null;
   }
@@ -167,7 +171,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     await super.disconnect();
   }
 
-  private async addChain(chainConfig: CustomChainConfig): Promise<void> {
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
     try {
       if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
       const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
@@ -180,7 +184,14 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     }
   }
 
-  private async switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
+
+    this._switchChain({ chainId: params.chainId }, this.chainConfig);
+  }
+
+  private async _switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
     if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
 
@@ -249,7 +260,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
       if (!isCustomUi || (isCustomUi && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching)) {
         try {
           await this.addChain(this.chainConfig);
-          await this.switchChain(connectedChainConfig, this.chainConfig);
+          await this._switchChain(connectedChainConfig, this.chainConfig);
           this.connector = this.getWalletConnectInstance();
         } catch (error) {
           log.error("error while chain switching", error);

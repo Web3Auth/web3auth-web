@@ -12,10 +12,8 @@
       <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
       <button class="rpcBtn" @click="getConnectedChainId" style="cursor: pointer">Get chainId</button>
       <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin'" @click="addChain" style="cursor: pointer">Add Chain</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'metamask'" @click="switchChain" style="cursor: pointer">
-        Switch Chain
-      </button>
+      <button class="rpcBtn" v-if="web3auth" @click="addChain" style="cursor: pointer">Add Chain</button>
+      <button class="rpcBtn" v-if="web3auth" @click="switchChain" style="cursor: pointer">Switch Chain</button>
     </section>
     <section
       :style="{
@@ -41,7 +39,7 @@ import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTrans
 
 export default Vue.extend({
   name: "EthRpc",
-  props: ["provider", "console", "connectedAdapter"],
+  props: ["provider", "console", "connectedAdapter", "web3auth"],
   data() {
     return {};
   },
@@ -71,7 +69,7 @@ export default Vue.extend({
     },
     async switchChain() {
       try {
-        await this.provider.sendAsync({
+        await this.web3auth.switchChain({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: "0x4" }],
         });
@@ -83,7 +81,7 @@ export default Vue.extend({
     },
     async addChain() {
       try {
-        await this.provider.sendAsync({
+        await this.web3auth.addChain({
           method: "wallet_addEthereumChain",
           params: [
             {

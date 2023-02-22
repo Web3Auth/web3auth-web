@@ -147,6 +147,16 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    return this.phantomProvider?.addChain(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    return this.phantomProvider?.switchChain(params);
+  }
+
   private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<SafeEventEmitterProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);

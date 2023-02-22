@@ -64,11 +64,13 @@ export interface IAdapter<T> extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
+  switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
@@ -175,6 +177,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
+  abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
+  abstract switchChain(params: { chainId: string }): Promise<void>;
 }
 
 export interface BaseAdapterConfig {

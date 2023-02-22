@@ -58,6 +58,10 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     this.loginSettings = params.loginSettings || {};
   }
 
+  get providerFactory(): TorusInjectedProvider | null {
+    return this.solanaProvider || null;
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProvider) {
       return this.solanaProvider?.provider || null;
@@ -159,5 +163,33 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
+  }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await this.torusInstance.provider.request({
+      method: "addNewChainConfig",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await this.torusInstance.provider.request({
+      method: "switchSolanaChain",
+      params: [{ chainId: params.chainId }],
+    });
   }
 }

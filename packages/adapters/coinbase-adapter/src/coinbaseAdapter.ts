@@ -128,36 +128,32 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  private async switchChain(chainConfig: CustomChainConfig): Promise<void> {
+  public addChain(chainConfig: CustomChainConfig): Promise<void> {
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    try {
-      await this.coinbaseProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
-    } catch (switchError: unknown) {
-      // This error code indicates that the chain has not been added to Coinbase Wallet.
-      if ((switchError as { code: number }).code === 4902) {
-        await this.coinbaseProvider.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: chainConfig.chainId,
-              chainName: chainConfig.displayName,
-              rpcUrls: [chainConfig.rpcTarget],
-              blockExplorerUrls: [chainConfig.blockExplorer],
-              nativeCurrency: {
-                name: chainConfig.tickerName,
-                symbol: chainConfig.ticker,
-                decimals: chainConfig.decimals || 18,
-              },
-            },
-          ],
-        });
-      } else {
-        throw switchError;
-      }
-    }
+    return this.coinbaseProvider.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+  }
+
+  public switchChain(params: { chainId: string }): Promise<void> {
+    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    return this.coinbaseProvider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: params.chainId }],
+    });
   }
 }
 

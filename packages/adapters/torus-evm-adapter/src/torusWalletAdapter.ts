@@ -169,4 +169,32 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await this.torusInstance.provider.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
+    await this.torusInstance.provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: params.chainId }],
+    });
+  }
 }
