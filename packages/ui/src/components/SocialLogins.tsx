@@ -44,6 +44,7 @@ export default function SocialLogins(props: SocialLoginProps) {
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
   const adapterExpandText = isExpanded ? t("modal.social.view-less-new") : t("modal.social.view-more-new");
+  const loginMethodsCount = Object.keys(socialLoginsConfig.loginMethods).length + 1;
   return (
     <div className="w3ajs-social-logins w3a-group">
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
@@ -64,7 +65,8 @@ export default function SocialLogins(props: SocialLoginProps) {
           }
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
-          if (order === 1) {
+          // const order = index;
+          if (socialLoginsConfig.loginMethods[method].mainOption || order === 1) {
             return (
               <li className="w3a-adapter-item col-span-3" key={method} style={{ order }}>
                 <button
@@ -88,7 +90,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             );
           }
           return (
-            <li className="w3a-adapter-item col-span-1" key={method} style={{ order }}>
+            <li className="w3a-adapter-item col-span-1" key={method} style={{ order: order + loginMethodsCount }}>
               <button
                 type="button"
                 onClick={() =>
