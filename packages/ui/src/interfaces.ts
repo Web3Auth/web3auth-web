@@ -64,7 +64,7 @@ export interface UIConfig {
    * decides which button will be displayed as primary button in modal
    * only one button will be primary and other buttons in modal will be secondary
    *
-   * @defaultValue `externalLogin`
+   * @defaultValue `socialLogin`
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 

@@ -87,7 +87,7 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
       loginGridCol: this.options.uiConfig?.loginGridCol || 3,
-      primaryButton: this.options.uiConfig?.primaryButton || "externalLogin",
+      primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });
     this.subscribeToLoginModalEvents();
   }
@@ -269,7 +269,7 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
         {
           ...this.options.uiConfig,
           loginGridCol: this.options.uiConfig?.loginGridCol || 3,
-          primaryButton: this.options.uiConfig?.primaryButton || "externalLogin",
+          primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
         }
       );
     }
