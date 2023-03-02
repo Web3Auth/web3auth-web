@@ -86,6 +86,8 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
+      loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+      primaryButton: this.options.uiConfig?.primaryButton || "externalLogin",
     });
     this.subscribeToLoginModalEvents();
   }
@@ -263,7 +265,12 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
           this.walletAdapters[adapterName],
           (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
         ),
-        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
+        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
+        {
+          ...this.options.uiConfig,
+          loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+          primaryButton: this.options.uiConfig?.primaryButton || "externalLogin",
+        }
       );
     }
   }
