@@ -89,6 +89,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
 
+  protected knownChainConfigs: CustomChainConfig[] = [];
+
   public abstract adapterNamespace: AdapterNamespaceType;
 
   public abstract currentChainNamespace: ChainNamespaceType;

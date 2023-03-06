@@ -3,7 +3,7 @@
   "version": "4.6.0",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/torus-evm-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/torusEvmAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/torus-evm-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.38.8",
+    "@toruslabs/torus-embed": "^1.40.1",
     "@web3auth/base": "^4.6.0",
     "@web3auth/base-evm-adapter": "^4.6.0"
   },

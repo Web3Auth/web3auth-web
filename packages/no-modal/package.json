@@ -16,7 +16,7 @@
   "jsdelivr": "dist/noModal.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/core#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
@@ -57,4 +57,3 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   }
 }
-  

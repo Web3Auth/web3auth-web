@@ -3,7 +3,7 @@
   "version": "4.6.0",
   "description": "openlogin adapter for web3auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/openlogin-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/openloginAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/openlogin-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",

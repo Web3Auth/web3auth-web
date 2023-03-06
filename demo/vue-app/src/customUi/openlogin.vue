@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
-import { Web3AuthCore } from "@web3auth/core";
+import { Web3AuthNoModal } from "@web3auth/core";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import Vue from "vue";
 
@@ -45,7 +45,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3AuthCore({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["testnet"] }),
+      web3auth: new Web3AuthNoModal({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["testnet"] }),
     };
   },
   components: {
@@ -58,7 +58,7 @@ export default Vue.extend({
   methods: {
     async initWeb3Auth() {
       try {
-        this.web3auth = new Web3AuthCore({
+        this.web3auth = new Web3AuthNoModal({
           chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 },
           clientId: config.clientId["testnet"],
         });
@@ -78,7 +78,7 @@ export default Vue.extend({
         this.console("error", error);
       }
     },
-    subscribeAuthEvents(web3auth: Web3AuthCore) {
+    subscribeAuthEvents(web3auth: Web3AuthNoModal) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
         this.console("connected to wallet", data);
         this.provider = web3auth.provider;

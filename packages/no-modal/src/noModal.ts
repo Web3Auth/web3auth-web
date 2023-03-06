@@ -23,7 +23,7 @@ import {
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
-export interface Web3AuthCoreOptions {
+export interface Web3AuthNoModalOptions {
   /**
    * Client id for web3auth.
    * You can obtain your client id from the web3auth developer dashboard.
@@ -67,8 +67,8 @@ export interface Web3AuthCoreOptions {
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
-export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
-  readonly coreOptions: Web3AuthCoreOptions;
+export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
+  readonly coreOptions: Web3AuthNoModalOptions;
 
   public connectedAdapterName: WALLET_ADAPTER_TYPE | null = null;
 
@@ -82,7 +82,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   private storage: "sessionStorage" | "localStorage" = "localStorage";
 
-  constructor(options: Web3AuthCoreOptions) {
+  constructor(options: Web3AuthNoModalOptions) {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
@@ -144,7 +144,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     await Promise.all(initPromises);
   }
 
-  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthCore {
+  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthNoModal {
     this.checkInitRequirements();
     const providedChainConfig = this.coreOptions.chainConfig;
 

@@ -3,7 +3,7 @@
   "version": "4.6.0",
   "description": "Torus wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/torus-wallet-connector-plugin",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/torusWalletConnectorPlugin.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/torusWalletConnectorPlugin#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/plugins/torus-wallet-connector-plugin#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -35,10 +35,10 @@
     "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.38.8",
+    "@toruslabs/torus-embed": "^1.40.1",
     "@web3auth/base": "^4.6.0",
     "@web3auth/base-plugin": "^4.6.0",
-    "@web3auth/core": "^4.6.0",
+    "@web3auth/no-modal": "^4.6.0",
     "loglevel": "^1.8.1"
   },
   "peerDependencies": {
