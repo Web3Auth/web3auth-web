@@ -28,7 +28,7 @@
 <script lang="ts">
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
-import { Web3AuthNoModal } from "@web3auth/core";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import Vue from "vue";
 

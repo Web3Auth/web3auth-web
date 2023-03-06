@@ -1,7 +1,7 @@
 import { ADAPTER_EVENTS, SafeEventEmitterProvider, WALLET_ADAPTERS, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 
-import { Web3AuthNoModal } from "@web3auth/core";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import { NetworkSwitch } from "@web3auth/ui";
