@@ -19,6 +19,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
@@ -97,6 +98,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with metamask wallet");
     }
   }

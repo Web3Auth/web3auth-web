@@ -20,6 +20,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
 import merge from "lodash.merge";
@@ -135,6 +136,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       if ((error as Error)?.message.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
+      } else if (error instanceof Web3AuthError) {
+        throw error;
       }
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
