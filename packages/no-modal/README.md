@@ -1,15 +1,15 @@
-# Web3Auth Plug and Play Core
+# Web3Auth Plug and Play NoModal
 
 [![npm version](https://img.shields.io/npm/v/@web3auth/no-modal?label=%22%22)](https://www.npmjs.com/package/@web3auth/no-modal/v/latest)
 [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/no-modal?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/no-modal@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Plug and Play Core is the main SDK that consists of the core module of Web3Auth Plug and Play. This SDK gives you all the needed modules for implementing the Web3Auth features, giving you the flexibility of implementing your own UI to use all the functionalities.
+Web3Auth Plug and Play NoModal is the main SDK that consists of the nomodal module of Web3Auth Plug and Play. This SDK gives you all the needed modules for implementing the Web3Auth features, giving you the flexibility of implementing your own UI to use all the functionalities.
 
 ## 📖 Documentation
 
-Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/core/) to get started.
+Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/no-modal/) to get started.
 
 ## 💡 Features
 
