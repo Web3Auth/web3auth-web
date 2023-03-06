@@ -89,7 +89,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
 
-  protected knownChainConfigs: CustomChainConfig[] = [];
+  protected knownChainConfigs: Record<CustomChainConfig["chainId"], CustomChainConfig> = {};
 
   public abstract adapterNamespace: AdapterNamespaceType;
 
@@ -135,6 +135,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
       const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;
 
       this.chainConfig = finalChainConfig;
+      this.addChainConfig(finalChainConfig);
     }
   }
 
@@ -169,9 +170,30 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
+  checkAddChainRequirements(): void {
+    if (!this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+  }
+
+  checkSwitchChainRequirements(chainId: string): void {
+    if (!this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (!this.knownChainConfigs[chainId]) throw WalletLoginError.chainConfigNotAdded("Invalid chainId");
+  }
+
   updateAdapterData(data: unknown): void {
     this.adapterData = data;
     this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  }
+
+  protected addChainConfig(chainConfig: CustomChainConfig): void {
+    const currentConfig = this.knownChainConfigs[chainConfig.chainId];
+    this.knownChainConfigs[chainConfig.chainId] = {
+      ...(currentConfig || {}),
+      ...chainConfig,
+    };
+  }
+
+  protected getChainConfig(chainId: string): CustomChainConfig | null {
+    return this.knownChainConfigs[chainId] || null;
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;

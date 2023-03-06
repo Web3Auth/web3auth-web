@@ -128,9 +128,9 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.coinbaseProvider.request({
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    super.checkAddChainRequirements();
+    await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [
         {
@@ -146,14 +146,16 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
         },
       ],
     });
+    super.addChainConfig(chainConfig);
   }
 
-  public switchChain(params: { chainId: string }): Promise<void> {
-    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.coinbaseProvider.request({
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    super.checkSwitchChainRequirements(params.chainId);
+    await this.coinbaseProvider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],
     });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
   }
 }
 

@@ -136,6 +136,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
         },
       ],
     });
+    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
@@ -144,6 +145,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],
     });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 }
 
