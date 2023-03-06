@@ -2,11 +2,12 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface SocialLoginEmailProps {
+  isPrimaryBtn: boolean;
   adapter: string;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 export default function SocialLoginEmail(props: SocialLoginEmailProps) {
-  const { handleSocialLoginClick, adapter } = props;
+  const { handleSocialLoginClick, adapter, isPrimaryBtn } = props;
   const [isValidEmail, setIsValidEmail] = useState(false);
 
   const [t] = useTranslation();
@@ -36,7 +37,7 @@ export default function SocialLoginEmail(props: SocialLoginEmailProps) {
           onChange={(e) => handleEmailChange(e)}
         />
 
-        <button disabled={!isValidEmail} className="w3a-button w-full" type="submit">
+        <button disabled={!isValidEmail} className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w-full`} type="submit">
           {t("modal.social.email-continue")}
         </button>
       </form>

@@ -315,7 +315,7 @@
 
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-3 overflow-y-hidden gap-x-2 gap-y-4;
+  @apply grid grid-cols-6 overflow-y-hidden gap-x-2 gap-y-4;
   padding: 1px;
   max-height: 500px;
   transition: max-height 0.35s;
