@@ -88,7 +88,7 @@ const openloginAdapter = new OpenloginAdapter({
 web3auth.configureAdapter(openloginAdapter);
 ```
 
-### Using with `web3auth/nomodal` (Web3Auth Plug and Play NoModal Package)
+### Using with `web3auth/no-modal` (Web3Auth Plug and Play NoModal Package)
 
 ```js
 const openloginAdapter = new OpenloginAdapter({
