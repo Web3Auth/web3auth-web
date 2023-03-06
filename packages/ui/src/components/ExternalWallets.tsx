@@ -199,10 +199,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               const label = isBlock ? <p className="ml-2 text-left">{config[button.name]?.label || button.name}</p> : "";
               return (
-                <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : ""].join(" ")} key={button.name}>
+                <li className={[`w3a-adapter-item col-span-2`, isBlock ? "w3a-adapter-item--full" : ""].join(" ")} key={button.name}>
                   {button.isLink ? (
                     <a key={button.name} href={button.href} rel="noopener noreferrer" target="_blank">
-                      <button type="button" className="w3a-button w3a-button--login w-full">
+                      <button type="button" className="w-full w3a-button w3a-button--login">
                         {providerIcon}
                         {label}
                       </button>
@@ -211,7 +211,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                     <button
                       type="button"
                       onClick={() => handleExternalWalletClick({ adapter: button.name })}
-                      className="w3a-button w3a-button--login w-full"
+                      className="w-full w3a-button w3a-button--login"
                       title={config[button.name]?.label || button.name}
                     >
                       {providerIcon}
