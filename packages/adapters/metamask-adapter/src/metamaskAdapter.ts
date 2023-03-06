@@ -119,8 +119,8 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
-    await this.metamaskProvider.request({
+    super.checkAddChainRequirements();
+    await this.metamaskProvider?.request({
       method: "wallet_addEthereumChain",
       params: [
         {
@@ -140,8 +140,8 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await this.metamaskProvider.request({
+    super.checkSwitchChainRequirements(params.chainId);
+    await this.metamaskProvider?.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],
     });

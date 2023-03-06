@@ -172,27 +172,22 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    try {
-      if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
-      const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
-      if (networkSwitch) {
-        await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
-      }
-      await this.wcProvider.addChain(chainConfig);
-    } catch (error) {
-      log.error(error);
+    super.checkAddChainRequirements();
+    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
+    if (networkSwitch) {
+      await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
     }
+    await this.wcProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
-    if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
-
-    this._switchChain({ chainId: params.chainId }, this.chainConfig);
+    super.checkSwitchChainRequirements(params.chainId);
+    await this._switchChain({ chainId: params.chainId }, this.chainConfig as CustomChainConfig);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private async _switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
 
     if (networkSwitch) {
@@ -202,7 +197,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
         appOrigin: window.location.hostname,
       });
     }
-    await this.wcProvider.switchChain({ chainId: chainConfig.chainId, lookup: false, addChain: false });
+    await this.wcProvider?.switchChain({ chainId: chainConfig.chainId, lookup: false, addChain: false });
   }
 
   private async createNewSession(opts: { forceNewSession: boolean } = { forceNewSession: false }): Promise<void> {

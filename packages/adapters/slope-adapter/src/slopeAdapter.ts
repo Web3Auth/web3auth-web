@@ -122,13 +122,15 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.slopeProxyProvider?.addChain(chainConfig);
+    super.checkAddChainRequirements();
+    this.slopeProxyProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.slopeProxyProvider?.switchChain(params);
+    super.checkSwitchChainRequirements(params.chainId);
+    await this.slopeProxyProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private async connectWithProvider(injectedProvider: ISlopeProvider): Promise<SafeEventEmitterProvider | null> {

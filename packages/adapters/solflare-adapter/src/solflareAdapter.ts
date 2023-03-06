@@ -136,13 +136,15 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.solflareProvider?.addChain(chainConfig);
+    super.checkAddChainRequirements();
+    this.solflareProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.solflareProvider?.switchChain(params);
+    super.checkSwitchChainRequirements(params.chainId);
+    await this.solflareProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private async connectWithProvider(injectedProvider: SolflareWallet): Promise<SafeEventEmitterProvider | null> {

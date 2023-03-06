@@ -191,13 +191,15 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.privKeyProvider?.addChain(chainConfig);
+    super.checkAddChainRequirements();
+    this.privKeyProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    return this.privKeyProvider?.switchChain(params);
+    super.checkSwitchChainRequirements(params.chainId);
+    await this.privKeyProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private _getFinalPrivKey() {

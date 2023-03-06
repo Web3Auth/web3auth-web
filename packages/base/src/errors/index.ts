@@ -131,6 +131,7 @@ export class WalletLoginError extends Web3AuthError {
     5114: "Wallet popup has been closed by the user",
     5115: "User has already enabled mfa, please use the @web3auth/web3auth-web sdk for login with mfa",
     5116: "Chain config has not been added. Please add the chain config before calling switchChain",
+    5117: "Unsupported operation",
   };
 
   public constructor(code: number, message?: string) {
@@ -167,5 +168,9 @@ export class WalletLoginError extends Web3AuthError {
 
   public static chainConfigNotAdded(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5116, extraMessage);
+  }
+
+  public static unsupportedOperation(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5117, extraMessage);
   }
 }
