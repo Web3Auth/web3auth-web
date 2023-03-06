@@ -9,6 +9,7 @@
     "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
     "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",
     "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
+    "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
     "ethers": "^5.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
