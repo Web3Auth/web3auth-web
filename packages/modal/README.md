@@ -67,7 +67,7 @@ await web3auth.connect();
 
 ## 🩹 Examples
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/tree/master/web-modal-sdk)
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/tree/main/web-modal-sdk)
 
 ## 🌐 Demo
 
