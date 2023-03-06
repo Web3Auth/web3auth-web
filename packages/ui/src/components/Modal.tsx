@@ -46,6 +46,7 @@ export default function Modal(props: ModalProps) {
       loginMethods: {},
       loginMethodsOrder: [],
       adapter: "",
+      uiConfig: {},
     },
     externalWalletsConfig: {},
     detailedLoaderAdapter: "",
@@ -128,13 +129,16 @@ export default function Modal(props: ModalProps) {
     handleSocialLoginClick(params);
   };
 
+  const isEmailPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
+  const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
+
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         <div className="w3a-group__title">{t("modal.external.title")}</div>
         <button
           type="button"
-          className="w3a-button w3a-button--primary w-full w3ajs-external-toggle__button"
+          className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
@@ -168,6 +172,7 @@ export default function Modal(props: ModalProps) {
 
   // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
   const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
+
   return (
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className={modalClassName}>
@@ -203,6 +208,7 @@ export default function Modal(props: ModalProps) {
                     <SocialLoginEmail
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                      isPrimaryBtn={isEmailPrimary}
                     />
                   )}
 

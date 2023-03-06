@@ -40,7 +40,8 @@
     "url-loader": "^4.1.1"
   },
   "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "@babel/runtime": "7.x",
+    "@solana/web3.js": "^1.x"
   },
   "files": [
     "dist",
