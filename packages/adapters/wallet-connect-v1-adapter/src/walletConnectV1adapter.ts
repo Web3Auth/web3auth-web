@@ -304,6 +304,14 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
         this.emit(ADAPTER_EVENTS.ERRORED, error);
       }
     });
+    connector.on("disconnect", async (error: Error | null, _) => {
+      if (error) {
+        this.emit(ADAPTER_EVENTS.ERRORED, error);
+      }
+      log.debug("disconnect event emitted by web3auth");
+      await super.disconnect();
+      this.status = ADAPTER_EVENTS.READY;
+    });
   }
 
   private getWalletConnectInstance(): WalletConnect {
