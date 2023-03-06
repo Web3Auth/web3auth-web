@@ -6,6 +6,7 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterInitOptions,
   AdapterNamespaceType,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -70,7 +71,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init();
     super.checkInitializationRequirements();
     // Create a connector
@@ -80,9 +81,18 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V1);
     this.status = ADAPTER_STATUS.READY;
     log.debug("initializing wallet connect v1 adapter");
-    if (this.connector.connected) {
-      this.rehydrated = true;
-      await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
+    if (options.autoConnect) {
+      if (this.connector.connected) {
+        try {
+          this.rehydrated = true;
+          await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
+        } catch (error) {
+          log.error(error);
+          this.emit(ADAPTER_EVENTS.ERRORED, error);
+        }
+      } else {
+        this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.connectionError("could not connect to wallet"));
+      }
     }
   }
 
