@@ -33,7 +33,8 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@solana/web3.js": "^1.x"
   },
   "dependencies": {
     "@web3auth/base": "^4.6.0",

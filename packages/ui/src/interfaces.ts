@@ -52,6 +52,22 @@ export interface UIConfig {
    * @defaultValue `true`
    */
   displayErrorsOnModal?: boolean;
+
+  /**
+   * number of columns to display the Social Login buttons
+   *
+   * @defaultValue `3`
+   */
+  loginGridCol?: 2 | 3;
+
+  /**
+   * decides which button will be displayed as primary button in modal
+   * only one button will be primary and other buttons in modal will be secondary
+   *
+   * @defaultValue `socialLogin`
+   */
+  primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
+
   adapterListener: SafeEventEmitter;
 }
 
@@ -66,6 +82,7 @@ export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
   adapter: WALLET_ADAPTER_TYPE;
+  uiConfig: Omit<UIConfig, "adapterListener">;
 };
 
 export const MODAL_STATUS = {
