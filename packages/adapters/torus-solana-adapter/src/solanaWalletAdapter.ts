@@ -162,8 +162,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     return userInfo;
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.checkAddChainRequirements();
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
     // await this.solanaProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

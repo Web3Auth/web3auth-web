@@ -10,6 +10,7 @@ import RPC from "./web3RPC"; // for using web3.js
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
@@ -24,14 +25,7 @@ function App() {
         const web3auth = new Web3AuthNoModal({
           clientId,
           chainConfig: {
-            chainNamespace: CHAIN_NAMESPACES.SOLANA,
-            chainId: "0x2",
-            rpcTarget: "https://api.testnet.solana.com",
-            displayName: "Solana Testnet",
-            blockExplorer: "https://explorer.solana.com?cluster=testnet",
-            ticker: "SOL",
-            tickerName: "Solana",
-            decimals: 9,
+            chainNamespace: CHAIN_NAMESPACES.EIP155,
           },
           web3AuthNetwork: "cyan",
         });
@@ -41,7 +35,7 @@ function App() {
         const openloginAdapter = new OpenloginAdapter();
         web3auth.configureAdapter(openloginAdapter);
 
-        const adapter = new SolanaWalletAdapter();
+        const adapter = new WalletConnectV1Adapter();
         web3auth.configureAdapter(adapter);
 
         await web3auth.init();
@@ -61,7 +55,7 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.TORUS_SOLANA);
+    const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1);
     setProvider(web3authProvider);
   };
 
@@ -109,13 +103,13 @@ function App() {
     }
     const newChain = {
       chainId: "0x5",
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: "https://api.devnet.solana.com",
-      displayName: "Solana Devnet",
-      blockExplorer: "https://explorer.solana.com?cluster=devnet",
-      ticker: "SOL",
-      tickerName: "Solana",
-      decimals: 9,
+      displayName: "Goerli",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      tickerName: "Goerli",
+      ticker: "ETH",
+      decimals: 18,
+      rpcTarget: "https://rpc.ankr.com/eth_goerli",
+      blockExplorer: "https://goerli.etherscan.io",
     };
     await web3auth?.addChain(newChain);
     uiConsole("New Chain Added");

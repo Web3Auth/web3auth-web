@@ -292,6 +292,13 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       log.debug("adapter data updated", data);
       this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, data);
     });
+
+    walletAdapter.on(ADAPTER_EVENTS.CACHE_CLEAR, (data) => {
+      log.debug("adapter cache clear", data);
+      if (storageAvailable(this.storage)) {
+        this.clearCache();
+      }
+    });
   }
 
   protected checkInitRequirements(): void {

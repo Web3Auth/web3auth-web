@@ -79,7 +79,7 @@ export default Vue.extend({
     },
     async addChain() {
       try {
-        await this.web3auth.addChain(getEvmChainConfig(5));
+        await this.web3auth.addChain(getEvmChainConfig(137));
         this.console("added chain");
       } catch (error) {
         console.log("error while adding chain", error);

@@ -34,6 +34,7 @@ export const ADAPTER_STATUS = {
 export const ADAPTER_EVENTS = {
   ...ADAPTER_STATUS,
   ADAPTER_DATA_UPDATED: "adapter_data_updated",
+  CACHE_CLEAR: "cache_clear",
 } as const;
 export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
 
@@ -170,8 +171,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
-  checkAddChainRequirements(): void {
-    if (!this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+  checkAddChainRequirements(init = false): void {
+    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
   }
 
   checkSwitchChainRequirements({ chainId }: { chainId: string }, init = false): void {

@@ -59,10 +59,6 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     return !!this.connector?.connected;
   }
 
-  get providerFactory(): WalletConnectProvider | null {
-    return this.wcProvider || null;
-  }
-
   get provider(): SafeEventEmitterProvider | null {
     return this.wcProvider?.provider || null;
   }
@@ -82,16 +78,17 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     this.status = ADAPTER_STATUS.READY;
     log.debug("initializing wallet connect v1 adapter");
     if (options.autoConnect) {
-      if (this.connector.connected) {
+      if (this.connected) {
         try {
           this.rehydrated = true;
           await this.onConnectHandler({ accounts: this.connector.accounts, chainId: this.connector.chainId });
         } catch (error) {
-          log.error(error);
+          log.error("wallet auto connect", error);
           this.emit(ADAPTER_EVENTS.ERRORED, error);
         }
       } else {
-        this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.connectionError("could not connect to wallet"));
+        this.status = ADAPTER_STATUS.NOT_READY;
+        this.emit(ADAPTER_EVENTS.CACHE_CLEAR);
       }
     }
   }
@@ -181,8 +178,8 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     await super.disconnect();
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.checkAddChainRequirements();
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
     if (networkSwitch) {
       await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
@@ -254,9 +251,17 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
 
     const { chainId } = params;
     log.debug("connected chainId in hex");
-    if (chainId !== parseInt(this.chainConfig.chainId, 16)) {
+    // This is to check if the connected wallet can return chainId
+    // in string or a number format.
+    let isDifferentChain = false;
+    if (typeof chainId === "string") {
+      isDifferentChain = chainId !== this.chainConfig.chainId;
+    } else if (typeof chainId === "number") {
+      isDifferentChain = chainId !== parseInt(this.chainConfig.chainId, 16);
+    }
+    if (isDifferentChain) {
       const connectedChainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, chainId) || {
-        chainId: `0x${chainId.toString(16)}`,
+        chainId: typeof chainId === "number" ? `0x${chainId.toString(16)}` : chainId,
         displayName: "Unknown Network",
       };
 
@@ -264,7 +269,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
       // skipping network is not allowed in default ui. We are use network switching modal for default ui.
       if (!isCustomUi || (isCustomUi && !this.adapterOptions?.adapterSettings?.skipNetworkSwitching)) {
         try {
-          await this.addChain(this.chainConfig);
+          await this.addChain(this.chainConfig, true);
           await this._switchChain(connectedChainConfig, this.chainConfig);
           this.connector = this.getWalletConnectInstance();
         } catch (error) {

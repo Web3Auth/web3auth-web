@@ -132,7 +132,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    if (!init) super.checkAddChainRequirements();
+    super.checkAddChainRequirements(init);
     await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [

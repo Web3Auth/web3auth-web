@@ -121,8 +121,8 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.checkAddChainRequirements();
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
     this.slopeProxyProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

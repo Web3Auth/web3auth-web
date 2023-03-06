@@ -122,7 +122,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    if (!init) super.checkAddChainRequirements();
+    super.checkAddChainRequirements(init);
     await this.metamaskProvider?.request({
       method: "wallet_addEthereumChain",
       params: [
