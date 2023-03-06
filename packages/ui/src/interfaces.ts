@@ -53,6 +53,22 @@ export interface UIConfig {
    * @defaultValue `true`
    */
   displayErrorsOnModal?: boolean;
+
+  /**
+   * number of columns to display the Social Login buttons
+   *
+   * @defaultValue `3`
+   */
+  loginGridCol?: 2 | 3;
+
+  /**
+   * decides which button will be displayed as primary button in modal
+   * only one button will be primary and other buttons in modal will be secondary
+   *
+   * @defaultValue `socialLogin`
+   */
+  primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
+
   adapterListener: SafeEventEmitter;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }
@@ -68,6 +84,7 @@ export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
   adapter: WALLET_ADAPTER_TYPE;
+  uiConfig: Omit<UIConfig, "adapterListener">;
 };
 
 export const MODAL_STATUS = {
@@ -100,3 +117,5 @@ export type ExternalWalletEventType = { adapter: string };
 
 export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w-light.svg";
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w.svg";
+
+export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";

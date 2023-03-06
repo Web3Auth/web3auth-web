@@ -1,7 +1,6 @@
-import { Transaction } from "@solana/web3.js";
 import { RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
 
-import { ISolanaWallet } from "./interface";
+import { ISolanaWallet, TransactionOrVersionedTransaction } from "./interface";
 
 export class SolanaWallet implements ISolanaWallet {
   public provider: SafeEventEmitterProvider;
@@ -18,7 +17,7 @@ export class SolanaWallet implements ISolanaWallet {
     return accounts;
   }
 
-  public async signAndSendTransaction(transaction: Transaction): Promise<{ signature: string }> {
+  public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }> {
     const { signature } = await this.provider.request<{ signature: string }>({
       method: "signAndSendTransaction",
       params: {
@@ -28,24 +27,24 @@ export class SolanaWallet implements ISolanaWallet {
     return { signature };
   }
 
-  public async signTransaction(transaction: Transaction): Promise<Transaction> {
-    const signedTransaction = (await this.provider.request({
+  public async signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T> {
+    const signedTransaction = await this.provider.request({
       method: "signTransaction",
       params: {
         message: transaction,
       },
-    })) as Transaction;
-    return signedTransaction;
+    });
+    return signedTransaction as T;
   }
 
-  public async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
-    const signedTransactions = (await this.provider.request({
+  public async signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]> {
+    const signedTransactions = await this.provider.request({
       method: "signAllTransactions",
       params: {
         message: transactions,
       },
-    })) as Transaction[];
-    return signedTransactions;
+    });
+    return signedTransactions as T[];
   }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {

@@ -1,9 +1,9 @@
 {
   "name": "@web3auth/torus-solana-adapter",
-  "version": "4.4.0",
+  "version": "4.6.0",
   "description": "torus solana wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/torus-solana-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/torusSolanaAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/torus-solana-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -32,14 +32,15 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.3.2",
-    "@web3auth/base": "^4.4.0",
-    "@web3auth/base-provider": "^4.4.0",
-    "@web3auth/base-solana-adapter": "^4.4.0",
-    "@web3auth/solana-provider": "^4.4.0"
+    "@toruslabs/solana-embed": "^0.3.3",
+    "@web3auth/base": "^4.6.0",
+    "@web3auth/base-provider": "^4.6.0",
+    "@web3auth/base-solana-adapter": "^4.6.0",
+    "@web3auth/solana-provider": "^4.6.0"
   },
   "lint-staged": {
     "!(*d).ts": [

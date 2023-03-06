@@ -198,15 +198,21 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 
-  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, loginMethods: LoginMethodConfig, loginMethodsOrder: string[]): void => {
+  addSocialLogins = (
+    adapter: WALLET_ADAPTER_TYPE,
+    loginMethods: LoginMethodConfig,
+    loginMethodsOrder: string[],
+    uiConfig: Omit<UIConfig, "adapterListener">
+  ): void => {
     this.setState({
       socialLoginsConfig: {
         adapter,
         loginMethods,
         loginMethodsOrder,
+        uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
+    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {

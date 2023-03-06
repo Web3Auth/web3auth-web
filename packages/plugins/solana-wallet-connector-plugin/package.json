@@ -1,9 +1,9 @@
 {
   "name": "@web3auth/solana-wallet-connector-plugin",
-  "version": "4.4.0",
+  "version": "4.6.0",
   "description": "Torus Solana wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/solana-wallet-connector-plugin",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/solanaWalletConnectorPlugin.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/solanaWalletConnectorPlugin#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/solanaWalletConnectorPlugin#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -35,10 +35,10 @@
     "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.3.2",
-    "@web3auth/base": "^4.4.0",
-    "@web3auth/base-plugin": "^4.4.0",
-    "@web3auth/core": "^4.4.0",
+    "@toruslabs/solana-embed": "^0.3.3",
+    "@web3auth/base": "^4.6.0",
+    "@web3auth/base-plugin": "^4.6.0",
+    "@web3auth/no-modal": "^4.6.0",
     "loglevel": "^1.8.1"
   },
   "peerDependencies": {

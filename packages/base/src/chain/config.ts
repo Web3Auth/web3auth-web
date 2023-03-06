@@ -22,30 +22,6 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       decimals: 18,
     };
   }
-  if (chainId === 3) {
-    return {
-      chainNamespace,
-      chainId: "0x3",
-      rpcTarget: `https://rpc.ankr.com/eth_ropsten`,
-      displayName: "Ropsten Testnet",
-      blockExplorer: "https://ropsten.etherscan.io/",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-      decimals: 18,
-    };
-  }
-  if (chainId === 4) {
-    return {
-      chainNamespace,
-      chainId: "0x4",
-      rpcTarget: `https://rpc.ankr.com/eth_rinkeby`,
-      displayName: "Rinkeby Testnet",
-      blockExplorer: "https://rinkeby.etherscan.io/",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-      decimals: 18,
-    };
-  }
   if (chainId === 5) {
     return {
       chainNamespace,
@@ -53,6 +29,18 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       rpcTarget: `https://rpc.ankr.com/eth_goerli`,
       displayName: "Goerli Testnet",
       blockExplorer: "https://goerli.etherscan.io/",
+      ticker: "ETH",
+      tickerName: "Ethereum",
+      decimals: 18,
+    };
+  }
+  if (chainId === 11155111) {
+    return {
+      chainNamespace,
+      chainId: "0xaa36a7",
+      rpcTarget: `https://rpc.ankr.com/eth_sepolia`,
+      displayName: "Sepolia Testnet",
+      blockExplorer: "https://sepolia.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
       decimals: 18,

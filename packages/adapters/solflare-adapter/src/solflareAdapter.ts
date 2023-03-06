@@ -135,6 +135,18 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    this.solflareProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.solflareProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
   private async connectWithProvider(injectedProvider: SolflareWallet): Promise<SafeEventEmitterProvider | null> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
