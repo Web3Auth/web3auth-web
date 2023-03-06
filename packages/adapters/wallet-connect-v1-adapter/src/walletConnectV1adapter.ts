@@ -181,8 +181,8 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
     this.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }): Promise<void> {
-    super.checkSwitchChainRequirements(params.chainId);
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
     await this._switchChain({ chainId: params.chainId }, this.chainConfig as CustomChainConfig);
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }

@@ -186,8 +186,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     this.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }): Promise<void> {
-    super.checkSwitchChainRequirements(params.chainId);
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
     await this.torusInstance?.provider.request({
       method: "switchSolanaChain",
       params: [{ chainId: params.chainId }],

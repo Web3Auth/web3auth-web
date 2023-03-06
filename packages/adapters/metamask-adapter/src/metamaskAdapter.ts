@@ -81,7 +81,8 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.metamaskProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        await this.switchChain(this.chainConfig as CustomChainConfig);
+        if (!this.getChainConfig((this.chainConfig as CustomChainConfig).chainId)) await this.addChain(this.chainConfig as CustomChainConfig, true);
+        await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -118,8 +119,8 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.checkAddChainRequirements();
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    if (!init) super.checkAddChainRequirements();
     await this.metamaskProvider?.request({
       method: "wallet_addEthereumChain",
       params: [
@@ -139,8 +140,8 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     this.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }): Promise<void> {
-    super.checkSwitchChainRequirements(params.chainId);
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
     await this.metamaskProvider?.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],

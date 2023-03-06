@@ -91,7 +91,8 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.coinbaseProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        await this.switchChain(this.chainConfig as CustomChainConfig);
+        if (!this.getChainConfig(this.chainConfig.chainId)) await this.addChain(this.chainConfig as CustomChainConfig);
+        await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -128,8 +129,8 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.checkAddChainRequirements();
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    if (!init) super.checkAddChainRequirements();
     await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [
@@ -149,8 +150,8 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     super.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }): Promise<void> {
-    super.checkSwitchChainRequirements(params.chainId);
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
     await this.coinbaseProvider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],

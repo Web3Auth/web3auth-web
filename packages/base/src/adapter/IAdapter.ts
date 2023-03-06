@@ -174,8 +174,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (!this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
   }
 
-  checkSwitchChainRequirements(chainId: string): void {
-    if (!this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+  checkSwitchChainRequirements({ chainId }: { chainId: string }, init = false): void {
+    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
     if (!this.knownChainConfigs[chainId]) throw WalletLoginError.chainConfigNotAdded("Invalid chainId");
   }
 

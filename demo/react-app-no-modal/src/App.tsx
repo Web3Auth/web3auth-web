@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
+// import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
+// import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { PhantomAdapter } from "@web3auth/phantom-adapter"
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
 //import RPC from "./ethersRPC"; // for using ethers.js
@@ -19,9 +21,7 @@ function App() {
         const web3auth = new Web3AuthNoModal({
           clientId,
           chainConfig: {
-            chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0x1",
-            rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            chainNamespace: CHAIN_NAMESPACES.SOLANA,
           },
           web3AuthNetwork: "cyan",
         });
@@ -31,8 +31,8 @@ function App() {
         const openloginAdapter = new OpenloginAdapter();
         web3auth.configureAdapter(openloginAdapter);
 
-        const torusWalletAdapter = new TorusWalletAdapter();
-        web3auth.configureAdapter(torusWalletAdapter);
+        const adapter = new PhantomAdapter();
+        web3auth.configureAdapter(adapter);
 
         await web3auth.init();
         if (web3auth.provider) {
@@ -51,9 +51,7 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
-      loginProvider: "google",
-    });
+    const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.PHANTOM);
     setProvider(web3authProvider);
   };
 
