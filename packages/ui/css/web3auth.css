@@ -337,7 +337,7 @@
 }
 
 #w3a-modal li.w3a-adapter-item--full {
-  @apply col-span-3;
+  @apply col-span-6;
 }
 
 #w3a-modal .w3a-adapter-item--hide {
