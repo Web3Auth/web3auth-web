@@ -58,10 +58,6 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     this.loginSettings = params.loginSettings || {};
   }
 
-  get providerFactory(): TorusInjectedProvider | null {
-    return this.solanaProvider || null;
-  }
-
   get provider(): SafeEventEmitterProvider | null {
     if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProvider) {
       return this.solanaProvider?.provider || null;
@@ -138,6 +134,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
   }
@@ -167,30 +164,21 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
     super.checkAddChainRequirements();
-    await this.torusInstance?.provider.request({
-      method: "addNewChainConfig",
-      params: [
-        {
-          chainId: chainConfig.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorer],
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
-        },
-      ],
-    });
+    // await this.solanaProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.torusInstance?.provider.request({
-      method: "switchSolanaChain",
-      params: [{ chainId: params.chainId }],
+    const chainConfig = this.getChainConfig(params.chainId) as CustomChainConfig;
+    await this.torusInstance?.setProvider({
+      rpcTarget: chainConfig.rpcTarget,
+      chainId: chainConfig.chainId,
+      displayName: chainConfig.displayName,
+      blockExplorerUrl: chainConfig.blockExplorer,
+      ticker: chainConfig.ticker,
+      tickerName: chainConfig.tickerName,
+      logo: "https://images.web3auth.io/login-torus-solana.svg",
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
