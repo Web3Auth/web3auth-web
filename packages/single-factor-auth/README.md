@@ -9,7 +9,7 @@ Web3Auth Single Factor Auth is the SDK that gives you the ability to start with 
 
 ## 📖 Documentation
 
-Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/core/) to get started.
+Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/no-modal/) to get started.
 
 ## 💡 Features
 

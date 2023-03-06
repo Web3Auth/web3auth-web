@@ -20,6 +20,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
 import merge from "lodash.merge";
@@ -135,6 +136,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       if ((error as Error)?.message.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
+      } else if (error instanceof Web3AuthError) {
+        throw error;
       }
       throw WalletLoginError.connectionError("Failed to login with openlogin");
     }
@@ -188,6 +191,18 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.useCoreKitKey !== undefined) {
       this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
     }
+  }
+
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    this.privKeyProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.privKeyProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private _getFinalPrivKey() {

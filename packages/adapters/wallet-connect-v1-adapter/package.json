@@ -16,7 +16,7 @@
   "jsdelivr": "dist/walletConnectV1Adapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/wallet-connect-v1-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",

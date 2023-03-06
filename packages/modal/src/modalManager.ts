@@ -12,7 +12,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
+import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -26,7 +26,7 @@ import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
-export interface Web3AuthOptions extends Web3AuthCoreOptions {
+export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
@@ -42,7 +42,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   uiConfig?: Omit<UIConfig, "adapterListener">;
 }
 
-export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
+export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
   readonly options: Web3AuthOptions;

@@ -121,6 +121,18 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    this.slopeProxyProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.slopeProxyProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
   private async connectWithProvider(injectedProvider: ISlopeProvider): Promise<SafeEventEmitterProvider | null> {
     if (!this.slopeProxyProvider) throw WalletLoginError.connectionError("No Slope provider found");
     await this.slopeProxyProvider.setupProvider(injectedProvider);

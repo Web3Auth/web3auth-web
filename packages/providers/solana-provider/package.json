@@ -30,7 +30,7 @@
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.73.2",
+    "@solana/web3.js": "^1.73.3",
     "@solflare-wallet/sdk": "^1.2.0",
     "@types/bn.js": "^5.1.1",
     "@types/bs58": "^4.0.1",

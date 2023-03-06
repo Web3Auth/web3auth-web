@@ -1,6 +1,6 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, isHexStrict, WalletInitializationError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
 
@@ -14,8 +14,32 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public async switchChain(_: { chainId: string }): Promise<void> {
-    return Promise.resolve();
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    // overrides the base provider implementation
+    await this.provider.request({
+      method: "switchSolanaChain",
+      params: [{ chainId: params.chainId }],
+    });
+  }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    super.addChain(chainConfig);
+    await this.provider.request({
+      method: "addNewChainConfig",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
   }
 
   public async setupProvider(injectedProvider: ITorusWalletProvider): Promise<void> {

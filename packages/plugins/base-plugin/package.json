@@ -16,7 +16,7 @@
   "jsdelivr": "dist/basePlugin.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/basePlugin#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/basePlugin#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
