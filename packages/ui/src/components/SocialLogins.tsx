@@ -61,7 +61,6 @@ export default function SocialLogins(props: SocialLoginProps) {
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method].name || method);
-
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
@@ -81,7 +80,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
           if (isMainOption || order === 1) {
             return (
-              <li className="w3a-adapter-item col-span-6" key={method} style={{ order }}>
+              <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <button
                   type="button"
                   onClick={() =>
@@ -112,7 +111,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
-                className="w3a-button w3a-button--login w-full"
+                className="w-full w3a-button w3a-button--login"
                 title={name}
               >
                 {providerIcon}

@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
@@ -13,13 +13,14 @@ import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
 // import Loader from "./Loader";
-import SocialLoginEmail from "./SocialLoginEmail";
+import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
   appName?: string;
+  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -57,7 +58,16 @@ export default function Modal(props: ModalProps) {
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation();
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const {
+    stateListener,
+    appLogo,
+    appName,
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleShowExternalWallets,
+    closeModal,
+    web3AuthNetwork,
+  } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -166,8 +176,12 @@ export default function Modal(props: ModalProps) {
   }, [modalState.showExternalWalletsOnly, modalState.socialLoginsConfig?.loginMethods]);
   log.info("modal state", modalState, areSocialLoginsVisible);
 
-  const isEmailPassworedlessLoginVisible = useMemo(() => {
+  const isEmailPasswordlessLoginVisible = useMemo(() => {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
+  }, [modalState.socialLoginsConfig?.loginMethods]);
+
+  const isSmsPasswordlessLoginVisible = useMemo(() => {
+    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
   // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
@@ -195,7 +209,8 @@ export default function Modal(props: ModalProps) {
             </div>
           ) : (
             <div className="w3a-modal__content w3ajs-content">
-              {(areSocialLoginsVisible || isEmailPassworedlessLoginVisible) && !modalState.externalWalletsVisibility ? (
+              {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
+              !modalState.externalWalletsVisibility ? (
                 <>
                   {areSocialLoginsVisible ? (
                     <SocialLogins
@@ -204,9 +219,12 @@ export default function Modal(props: ModalProps) {
                     />
                   ) : null}
 
-                  {isEmailPassworedlessLoginVisible && (
-                    <SocialLoginEmail
+                  {(isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && (
+                    <SocialLoginPasswordless
+                      isEmailVisible={isEmailPasswordlessLoginVisible}
+                      isSmsVisible={isSmsPasswordlessLoginVisible}
                       adapter={modalState.socialLoginsConfig?.adapter}
+                      web3AuthNetwork={web3AuthNetwork}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                       isPrimaryBtn={isEmailPrimary}
                     />
