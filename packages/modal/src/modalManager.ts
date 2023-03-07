@@ -7,11 +7,12 @@ import {
   CustomChainConfig,
   getChainConfig,
   log,
+  LoginMethodConfig,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
+import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -25,7 +26,7 @@ import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
-export interface Web3AuthOptions extends Web3AuthCoreOptions {
+export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
@@ -41,7 +42,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   uiConfig?: Omit<UIConfig, "adapterListener">;
 }
 
-export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
+export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
   readonly options: Web3AuthOptions;
@@ -85,6 +86,8 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
+      loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+      primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });
     this.subscribeToLoginModalEvents();
   }
@@ -158,14 +161,14 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
     const adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
-      if (this.modalConfig.adapters[adapter.name].showOnModal !== true) return false;
-      if (!this.modalConfig.adapters[adapter.name].loginMethods) return true;
+      if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
+      if (!this.modalConfig.adapters?.[adapter.name]?.loginMethods) return true;
       const mergedLoginMethods = getAdapterSocialLogins(
         adapter.name,
         this.walletAdapters[adapter.name],
         (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
       );
-      if (Object.values(mergedLoginMethods).some((method) => method.showOnModal)) return true;
+      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
@@ -262,7 +265,12 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
           this.walletAdapters[adapterName],
           (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
         ),
-        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
+        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
+        {
+          ...this.options.uiConfig,
+          loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+          primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
+        }
       );
     }
   }

@@ -1,8 +1,8 @@
 {
   "packages": [
     "packages/base",
-    "packages/core",
     "packages/modal",
+    "packages/no-modal",
     "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
@@ -10,7 +10,7 @@
     "packages/plugins/*",
     "packages/single-factor-auth"
   ],
-  "version": "4.2.0",
+  "version": "4.6.2",
   "npmClient": "npm",
   "useWorkspaces": true
 }

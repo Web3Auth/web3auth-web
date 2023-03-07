@@ -1,11 +1,14 @@
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import bs58 from "bs58";
 import { ethErrors } from "eth-rpc-errors";
 
-import { ISlopeProvider } from "../../../interface";
+import { ISlopeProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
+
+const isVersionTransction = (transaction: TransactionOrVersionedTransaction) =>
+  (transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction;
 
 export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEngineProxy: () => SafeEventEmitterProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {
@@ -23,11 +26,16 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
     getSecretKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
-    signTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<Transaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
       const txMessage = req.params.message;
       if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
-      const { data } = await injectedProvider.signTransaction(bs58.encode(txMessage.serializeMessage()));
+
+      const message = isVersionTransction(txMessage)
+        ? (txMessage as VersionedTransaction).message.serialize()
+        : (txMessage as Transaction).serializeMessage();
+      const { data } = await injectedProvider.signTransaction(bs58.encode(message));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
+
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
       txMessage.addSignature(publicKey, Buffer.from(signature));
@@ -37,12 +45,16 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const response = await injectedProvider.signMessage(req.params.message);
       return bs58.decode(response.data.signature);
     },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: Transaction }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
       const provider = getProviderEngineProxy();
       if (!provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
       const txMessage = req.params.message;
       if (!txMessage) throw ethErrors.rpc.invalidRequest({ message: "Invalid transaction message" });
-      const { data } = await injectedProvider.signTransaction(bs58.encode(txMessage.serializeMessage()));
+
+      const message = isVersionTransction(txMessage)
+        ? (txMessage as VersionedTransaction).message.serialize()
+        : (txMessage as Transaction).serializeMessage();
+      const { data } = await injectedProvider.signTransaction(bs58.encode(message));
       if (!data.publicKey || !data.signature) throw new Error("Invalid signature from slope wallet");
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
@@ -52,7 +64,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const res = await conn.sendRawTransaction(txMessage.serialize());
       return { signature: res };
     },
-    signAllTransactions: async (req: JRPCRequest<{ message: Transaction[] }>): Promise<Transaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw ethErrors.rpc.invalidParams("message");
       }
@@ -63,7 +75,9 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const unsignedTx = [];
 
       for (let i = 0; i < length; i++) {
-        unsignedTx.push(bs58.encode(req.params.message[i].serializeMessage()));
+        const item = allTxns[i];
+        const message = isVersionTransction(item) ? (item as VersionedTransaction).message.serialize() : (item as Transaction).serializeMessage();
+        unsignedTx.push(bs58.encode(message));
       }
       const { msg, data } = await injectedProvider.signAllTransactions(unsignedTx);
 

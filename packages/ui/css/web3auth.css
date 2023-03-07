@@ -253,17 +253,19 @@
 
 /* Header */
 #w3a-modal .w3a-header {
-  @apply flex items-center;
+  @apply flex items-center pt-8;
 }
 #w3a-modal .w3a-header__logo {
-  @apply h-auto w-10 mr-4;
+  @apply mb-4;
+}
+#w3a-modal .w3a-header__logo img {
+  @apply h-auto w-10;
 }
 #w3a-modal .w3a-header__title {
   @apply font-bold
   text-xl
   text-app-gray-900
-  dark:text-white
-  pt-8;
+  dark:text-white;
 }
 #w3a-modal div.w3a-header__subtitle {
   @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400 flex items-center;
@@ -313,7 +315,7 @@
 
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-3 overflow-y-hidden gap-x-2 gap-y-4;
+  @apply grid grid-cols-6 overflow-y-hidden gap-x-2 gap-y-4;
   padding: 1px;
   max-height: 500px;
   transition: max-height 0.35s;
@@ -332,6 +334,10 @@
 
 #w3a-modal li.w3a-adapter-item {
   @apply list-none;
+}
+
+#w3a-modal li.w3a-adapter-item--full {
+  @apply col-span-6;
 }
 
 #w3a-modal .w3a-adapter-item--hide {
@@ -462,34 +468,31 @@
 
 /* Text Field */
 #w3a-modal .w3a-text-field {
-  @apply rounded-full
-  py-3 px-6
+  @apply py-3
+  px-6
+  mt-2
   text-sm
-  /* bg */
-  bg-app-gray-50
-  disabled:bg-[#F2F2F2]
-  dark:bg-app-gray-700
-  dark:disabled:bg-[#242933]
-  /* outline */
   outline-0
-  ring
-  ring-1
-  focus:ring
-  focus:ring-1
-  ring-app-gray-300
-  focus:ring-app-primary-600
-  disabled:ring-[#F2F2F2]
-  dark:ring-app-gray-600
-  dark:focus:ring-app-primary-600
-  dark:disabled:ring-[#242933]
-  /* text */
+  ring-0
+  border
+  rounded-full
+  placeholder-app-gray-500
+  dark:placeholder-app-gray-400
+  bg-app-gray-50
+  border-app-gray-300
   text-app-gray-900
-  focus:text-app-gray-900
-  placeholder:text-app-gray-400
-  disabled:placeholder:text-app-gray-400
+  dark:bg-app-gray-600
+  dark:border-app-gray-500
   dark:text-white
-  dark:focus:text-white
-  dark:disabled:placeholder:text-[#3E444E];
+  disabled:placeholder-app-gray-400
+  dark:disabled:placeholder-app-gray-500
+  disabled:cursor-not-allowed
+  focus:ring-1
+  focus:ring-app-primary-600
+  dark:focus:ring-app-primary-600
+
+  focus:border-transparent
+  dark:focus:border-transparent;
 
   line-height: 1.25em;
 }
@@ -708,27 +711,24 @@
   @apply flex p-2;
 }
 
+#w3a-modal .w3a-modal__loader-app-logo--default {
+  @apply bg-app-primary-600 dark:bg-app-gray-50 w-[72px] h-[72px] rounded-full items-center justify-center;
+}
+
 #w3a-modal .w3a-modal__loader-app-logo img {
-  width: 72px;
-  max-width: 72px;
-  max-height: 72px;
-  height: auto;
+  @apply max-h-[72px] max-w-[72px] w-[72px] h-auto;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo--default img {
+  @apply max-h-[45px] max-w-[45px] w-[45px];
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
-  display: flex;
-  padding: 8px;
-  width: 72px;
-  height: 72px;
-  border-radius: 40px;
-  background: #f3f4f6;
-  align-items: center;
-  justify-content: center;
+  @apply bg-app-gray-100 dark:bg-app-gray-50 w-[72px] h-[72px] flex rounded-full items-center justify-center;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
-  width: 64px;
-  height: 64px;
+  @apply w-16 h-16;
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {

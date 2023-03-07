@@ -5,13 +5,14 @@
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-This package provides main class for using default Web3Auth Modal. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. Additionally, it is a child class of [`@web3auth/core`](https://web3auth.io/docs/sdk/web/core/) package. Hence, you can still call all the functions available in the [`@web3auth/core`](https://web3auth.io/docs/sdk/web/core/) package.
+This package provides main class for using default Web3Auth Modal. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. Additionally, it is a child class of [`@web3auth/no-modal`](https://web3auth.io/docs/sdk/web/no-modal/) package. Hence, you can still call all the functions available in the [`@web3auth/no-modal`](https://web3auth.io/docs/sdk/web/no-modal/) package.
 
 ## 📖 Documentation
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs/sdk/web/web3auth/) to get started.
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution

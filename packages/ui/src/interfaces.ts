@@ -52,6 +52,22 @@ export interface UIConfig {
    * @defaultValue `true`
    */
   displayErrorsOnModal?: boolean;
+
+  /**
+   * number of columns to display the Social Login buttons
+   *
+   * @defaultValue `3`
+   */
+  loginGridCol?: 2 | 3;
+
+  /**
+   * decides which button will be displayed as primary button in modal
+   * only one button will be primary and other buttons in modal will be secondary
+   *
+   * @defaultValue `socialLogin`
+   */
+  primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
+
   adapterListener: SafeEventEmitter;
 }
 
@@ -66,6 +82,7 @@ export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
   adapter: WALLET_ADAPTER_TYPE;
+  uiConfig: Omit<UIConfig, "adapterListener">;
 };
 
 export const MODAL_STATUS = {
@@ -74,7 +91,7 @@ export const MODAL_STATUS = {
   CONNECTING: "connecting",
   ERRORED: "errored",
 };
-export type ModalStatusType = typeof MODAL_STATUS[keyof typeof MODAL_STATUS];
+export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
 export interface ModalState {
   status: ModalStatusType;
@@ -95,3 +112,8 @@ export interface ModalState {
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
 export type ExternalWalletEventType = { adapter: string };
+
+export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w-light.svg";
+export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w.svg";
+
+export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";

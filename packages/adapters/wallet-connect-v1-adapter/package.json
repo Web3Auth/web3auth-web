@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v1-adapter",
-  "version": "4.2.0",
+  "version": "4.6.0",
   "description": "wallet connect v1 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v1-adapter",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/walletConnectV1Adapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/wallet-connect-v1-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -37,9 +37,9 @@
     "@walletconnect/types": "~1.x"
   },
   "dependencies": {
-    "@web3auth/base": "^4.0.0",
-    "@web3auth/base-evm-adapter": "^4.0.0",
-    "@web3auth/ethereum-provider": "^4.1.1"
+    "@web3auth/base": "^4.6.0",
+    "@web3auth/base-evm-adapter": "^4.6.0",
+    "@web3auth/ethereum-provider": "^4.6.0"
   },
   "devDependencies": {
     "@walletconnect/client": "~1.8.0",

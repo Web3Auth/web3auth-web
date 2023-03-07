@@ -1,13 +1,14 @@
-import type { Transaction } from "@solana/web3.js";
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
+
+import { TransactionOrVersionedTransaction } from "../interface";
 
 export interface IProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<Transaction>;
-  signAllTransactions: (req: JRPCRequest<{ message: Transaction[] }>) => Promise<Transaction[]>;
-  signAndSendTransaction: (req: JRPCRequest<{ message: Transaction }>) => Promise<{ signature: string }>;
+  signTransaction: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>) => Promise<TransactionOrVersionedTransaction>;
+  signAllTransactions: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>) => Promise<TransactionOrVersionedTransaction[]>;
+  signAndSendTransaction: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>) => Promise<{ signature: string }>;
   getSecretKey: (req: JRPCRequest<unknown>) => Promise<string>;
   signMessage: (req: JRPCRequest<{ message: Uint8Array; display?: string }>) => Promise<Uint8Array>;
 }
@@ -66,9 +67,18 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
   return mergeMiddleware([
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ message: Transaction }, Transaction>("signTransaction", signTransaction),
-    createGenericJRPCMiddleware<{ message: Transaction }, { signature: string }>("signAndSendTransaction", signAndSendTransaction),
-    createGenericJRPCMiddleware<{ message: Transaction[] }, Transaction[]>("signAllTransactions", signAllTransactions),
+    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction }, TransactionOrVersionedTransaction>(
+      "signTransaction",
+      signTransaction
+    ),
+    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction }, { signature: string }>(
+      "signAndSendTransaction",
+      signAndSendTransaction
+    ),
+    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction[] }, TransactionOrVersionedTransaction[]>(
+      "signAllTransactions",
+      signAllTransactions
+    ),
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage),
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey),
     createGenericJRPCMiddleware<void, string>("private_key", getPrivateKey),

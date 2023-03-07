@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "4.2.0",
+  "version": "4.6.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
@@ -19,28 +19,29 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^4.0.0",
-    "@web3auth/core": "^4.0.0",
-    "@web3auth/metamask-adapter": "^4.2.0",
-    "@web3auth/openlogin-adapter": "^4.2.0",
-    "@web3auth/phantom-adapter": "^4.2.0",
-    "@web3auth/torus-evm-adapter": "^4.2.0",
-    "@web3auth/torus-solana-adapter": "^4.2.0",
-    "@web3auth/ui": "^4.1.1",
-    "@web3auth/wallet-connect-v1-adapter": "^4.2.0"
+    "@web3auth/base": "^4.6.0",
+    "@web3auth/no-modal": "^4.6.0",
+    "@web3auth/metamask-adapter": "^4.6.0",
+    "@web3auth/openlogin-adapter": "^4.6.0",
+    "@web3auth/phantom-adapter": "^4.6.0",
+    "@web3auth/torus-evm-adapter": "^4.6.0",
+    "@web3auth/torus-solana-adapter": "^4.6.0",
+    "@web3auth/ui": "^4.6.2",
+    "@web3auth/wallet-connect-v1-adapter": "^4.6.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.5.1",
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@toruslabs/openlogin": "^2.10.0",
+    "@toruslabs/openlogin": "^3.1.0",
     "css-loader": "^6.7.3",
     "postcss-prefix-selector": "^1.16.0",
     "style-loader": "^3.3.1",
-    "tailwindcss": "^3.2.4",
+    "tailwindcss": "^3.2.7",
     "url-loader": "^4.1.1"
   },
   "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "@babel/runtime": "7.x",
+    "@solana/web3.js": "^1.x"
   },
   "files": [
     "dist",
