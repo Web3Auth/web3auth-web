@@ -86,6 +86,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
+      web3AuthNetwork: this.options.web3AuthNetwork,
       loginGridCol: this.options.uiConfig?.loginGridCol || 3,
       primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });

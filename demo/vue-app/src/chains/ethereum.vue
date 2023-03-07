@@ -85,6 +85,7 @@ export default Vue.extend({
         chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
         clientId: config.clientId[this.openloginNetwork],
         enableLogging: true,
+        web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
       }),
     };
   },
@@ -127,6 +128,7 @@ export default Vue.extend({
           clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
+          web3AuthNetwork: this.openloginNetwork,
         });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {

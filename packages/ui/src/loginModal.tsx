@@ -1,6 +1,7 @@
 import "../css/web3auth.css";
 import "./localeImport";
 
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_EVENTS,
@@ -61,10 +62,22 @@ class LoginModal extends SafeEventEmitter {
 
   private defaultLanguage: string;
 
-  constructor({ appName, appLogo, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage, modalZIndex = "99998" }: UIConfig) {
+  private web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
+
+  constructor({
+    appName,
+    appLogo,
+    adapterListener,
+    theme = "auto",
+    displayErrorsOnModal = true,
+    defaultLanguage,
+    modalZIndex = "99998",
+    web3AuthNetwork = "mainnet",
+  }: UIConfig) {
     super();
     this.appName = appName || "blockchain";
     this.modalZIndex = modalZIndex || "99998";
+    this.web3AuthNetwork = web3AuthNetwork;
 
     // set theme
     if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -178,6 +191,7 @@ class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
             appLogo={this.appLogo}
             appName={this.appName}
+            web3AuthNetwork={this.web3AuthNetwork}
           />
         </ThemedContext.Provider>
       );

@@ -1,6 +1,8 @@
+import { get, post } from "@toruslabs/http-helpers";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
+import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
 
 export const getAdapterSocialLogins = (
   adapterName: string,
@@ -56,6 +58,42 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
     return fallbackId;
   }
 }
+
+export const getPasswordlessBackendUrl = (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE) => {
+  return PASSWORDLESS_BACKEND[web3AuthNetwork] ?? PASSWORDLESS_BACKEND.mainnet;
+};
+
+export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<{ country: string; dialCode: string } | null> => {
+  try {
+    const result = await get<{ data: { country: string; dial_code: string } }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/user/location`);
+    if (result && result.data.country) return { country: result.data.country, dialCode: result.data.dial_code };
+    return null;
+  } catch (error) {
+    log.error("error getting user country", error);
+    return null;
+  }
+};
+
+export const validatePhoneNumber = async (phoneNumber: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<string | boolean> => {
+  try {
+    const result = await post<{ success: boolean; parsed_number: string }>(
+      `${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/phone_number/validate`,
+      {
+        phone_number: phoneNumber,
+      }
+    );
+    if (result && result.success) return result.parsed_number;
+    return false;
+  } catch (error: unknown) {
+    log.error("error validating phone number", error);
+    if ((error as Response).status === 400) {
+      return false;
+    }
+    // sending true because we don't want the user to be stuck on a flow
+    // if there is an error with the api or something went wrong.
+    return true;
+  }
+};
 
 export const languageMap = {
   en: "english",
