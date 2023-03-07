@@ -35,7 +35,7 @@
     "bn.js": "^5.2.1",
     "eth-rpc-errors": "^4.0.3",
     "jsonschema": "^1.4.1",
-    "@walletconnect/utils": "^2.2.1"
+    "@walletconnect/utils": "^2.4.7"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
