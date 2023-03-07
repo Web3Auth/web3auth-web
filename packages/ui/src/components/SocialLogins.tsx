@@ -61,24 +61,17 @@ export default function SocialLogins(props: SocialLoginProps) {
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method].name || method);
-          if (
-            socialLoginsConfig.loginMethods[method].showOnModal === false ||
-            method === "webauthn" ||
-            method === "jwt" ||
-            method === "email_passwordless" ||
-            method === "sms_passwordless"
-          ) {
-            return null;
-          }
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
           const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
-          const providerIcon = (
-            <Image width="20" imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}-active`} isButton />
-          );
+          const imageId = `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
+          const hoverId = `login-${method}-active`;
+          const hoverImage = method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB ? imageId : hoverId;
+          const providerIcon = <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
+
           if (socialLoginsConfig.loginMethods[method].showOnModal === false || restrictedLoginMethods.includes(method)) {
             return null;
           }
