@@ -116,6 +116,22 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
   }
 
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
+    if (networkSwitch) {
+      await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
+    }
+    await this.wcProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this._switchChain({ chainId: params.chainId }, this.chainConfig as CustomChainConfig);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
@@ -237,6 +253,19 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     this.connector.events.on("session_delete", () => {
       // Session was deleted -> reset the dapp state, clean up from user session, etc.
     });
+  }
+
+  private async _switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
+    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
+
+    if (networkSwitch) {
+      await networkSwitch.switchNetwork({
+        currentChainConfig: chainConfig,
+        newChainConfig: connectedChainConfig,
+        appOrigin: window.location.hostname,
+      });
+    }
+    await this.wcProvider?.switchChain({ chainId: chainConfig.chainId });
   }
 }
 

@@ -1,2 +1,2 @@
 export * from "./interface";
-export * from "./walletConnectV1adapter";
+export * from "./walletConnectV2adapter";
