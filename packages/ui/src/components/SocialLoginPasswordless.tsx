@@ -51,8 +51,8 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
         setCountryCode(result.dialCode);
       }
     };
-    getLocation();
-  }, [web3AuthNetwork]);
+    if (isSmsVisible) getLocation();
+  }, [isSmsVisible, web3AuthNetwork]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFieldValue(e.target.value);
