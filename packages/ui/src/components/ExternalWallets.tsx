@@ -98,10 +98,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri);
-    const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
+    const walletConnectAdapterName = config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal
+      ? WALLET_ADAPTERS.WALLET_CONNECT_V1
+      : WALLET_ADAPTERS.WALLET_CONNECT_V2;
+    const wcAvailable = (config[walletConnectAdapterName]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       setIsLoaded(false);
-      handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
+      handleExternalWalletClick({ adapter: walletConnectAdapterName });
     } else if (Object.keys(config).length > 0) {
       setIsLoaded(true);
     }

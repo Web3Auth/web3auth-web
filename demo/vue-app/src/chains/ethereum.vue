@@ -82,6 +82,7 @@ export default Vue.extend({
       connecting: false,
       provider: undefined,
       web3auth: new Web3Auth({
+        walletConnectProjectID: "04309ed1007e77d1f119b85205bb779d",
         chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
         clientId: config.clientId[this.openloginNetwork],
         enableLogging: true,
@@ -124,6 +125,7 @@ export default Vue.extend({
         this.parseConfig();
         this.loading = true;
         this.web3auth = new Web3Auth({
+          walletConnectProjectID: "04309ed1007e77d1f119b85205bb779d",
           chainConfig: ethChainConfig,
           clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
