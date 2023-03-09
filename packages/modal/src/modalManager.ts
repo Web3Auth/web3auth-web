@@ -40,6 +40,12 @@ export interface Web3AuthOptions extends Web3AuthNoModalOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
+
+  /**
+   * Project id for wallet connect v2.
+   * This field is required if you want to enable wallet connect in modal.
+   */
+  walletConnectProjectID?: string;
 }
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
@@ -123,16 +129,34 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
-        // if adapter is not configured and some default configuration is available, use it.
-        const ad = await getDefaultAdapterModule({
-          name: adapterName,
-          customChainConfig: this.options.chainConfig,
-          clientId: this.options.clientId,
-          sessionTime: this.options.sessionTime,
-          web3AuthNetwork: this.options.web3AuthNetwork,
-        });
+        if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+          log.debug("adapter name", adapterName);
+          // only add wallet connect v2 if project is given
+          if (this.options.walletConnectProjectID) {
+            // if adapter is not configured and some default configuration is available, use it.
+            const ad = await getDefaultAdapterModule({
+              name: adapterName,
+              customChainConfig: this.options.chainConfig,
+              clientId: this.options.clientId,
+              sessionTime: this.options.sessionTime,
+              web3AuthNetwork: this.options.web3AuthNetwork,
+              walletConnectProjectID: this.options.walletConnectProjectID,
+            });
 
-        this.walletAdapters[adapterName] = ad;
+            this.walletAdapters[adapterName] = ad;
+          }
+        } else {
+          // if adapter is not configured and some default configuration is available, use it.
+          const ad = await getDefaultAdapterModule({
+            name: adapterName,
+            customChainConfig: this.options.chainConfig,
+            clientId: this.options.clientId,
+            sessionTime: this.options.sessionTime,
+            web3AuthNetwork: this.options.web3AuthNetwork,
+          });
+
+          this.walletAdapters[adapterName] = ad;
+        }
 
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {

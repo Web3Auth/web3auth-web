@@ -5,7 +5,7 @@ export interface IQRCodeModal {
   open(uri: string, cb: any, opts?: any): void;
   close(): void;
 }
-interface IAdapterSettings {
+export interface IAdapterSettings {
   walletConnectInitOptions?: SignClientTypes.Options;
   skipNetworkSwitching?: boolean;
   networkSwitchModal?: INetworkSwitch;

@@ -7,9 +7,10 @@ export const getDefaultAdapterModule = async (params: {
   clientId: string;
   customChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
   sessionTime?: number;
+  walletConnectProjectID?: string;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }): Promise<IAdapter<unknown>> => {
-  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork } = params;
+  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork, walletConnectProjectID } = params;
   if (!Object.values(CHAIN_NAMESPACES).includes(customChainConfig.chainNamespace))
     throw new Error(`Invalid chainNamespace: ${customChainConfig.chainNamespace}`);
   const finalChainConfig = {
@@ -32,9 +33,25 @@ export const getDefaultAdapterModule = async (params: {
     const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
     const adapter = new PhantomAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
     return adapter;
-  } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
-    const { WalletConnectV1Adapter } = await import("@web3auth/wallet-connect-v1-adapter");
-    const adapter = new WalletConnectV1Adapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+  } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+    if (!walletConnectProjectID) {
+      throw new Error("walletConnectProjectID is required");
+    }
+    const { WalletConnectV2Adapter, getWalletConnectV2DefaultSettings } = await import("@web3auth/wallet-connect-v2-adapter");
+    const defaultOptions = await getWalletConnectV2DefaultSettings(
+      finalChainConfig.chainNamespace,
+      parseInt(finalChainConfig.chainId, 10),
+      walletConnectProjectID
+    );
+
+    const adapter = new WalletConnectV2Adapter({
+      chainConfig: finalChainConfig,
+      clientId,
+      sessionTime,
+      web3AuthNetwork,
+      adapterSettings: defaultOptions.adapterSettings,
+      loginSettings: defaultOptions.loginSettings,
+    });
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
