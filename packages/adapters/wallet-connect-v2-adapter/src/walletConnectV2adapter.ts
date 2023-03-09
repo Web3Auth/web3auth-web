@@ -158,6 +158,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
+    this.activeSession = null;
     await super.disconnect();
   }
 
@@ -259,6 +260,8 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     this.connector.events.on("session_delete", () => {
       // Session was deleted -> reset the dapp state, clean up from user session, etc.
+
+      this.disconnect();
     });
   }
 
