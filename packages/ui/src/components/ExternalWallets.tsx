@@ -173,7 +173,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
-          <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
+          <button type="button" className="w3a-external-back w3ajs-external-back" onClick={() => hideExternalWallets()}>
             <Icon iconName="arrow-left" />
             <div className="w3a-group__title">{t("modal.external.back")}</div>
           </button>
