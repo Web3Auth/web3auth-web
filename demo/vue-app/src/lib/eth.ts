@@ -53,7 +53,7 @@ export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConso
         value: "1212",
       },
     ];
-    const params = [JSON.stringify(originalMessage), fromAddress];
+    const params = [originalMessage, fromAddress];
     const method = "eth_signTypedData";
 
     const signedMessage = await provider.request({

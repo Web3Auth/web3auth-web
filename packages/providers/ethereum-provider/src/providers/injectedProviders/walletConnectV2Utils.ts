@@ -1,6 +1,7 @@
 import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
+import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
@@ -13,7 +14,7 @@ async function getLastActiveSession(signClient: ISignClient): Promise<SessionTyp
   return null;
 }
 
-export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: number, method: string, params: U): Promise<JRPCResponse<T>> {
+export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: number, method: string, params: U): Promise<T> {
   const session = await getLastActiveSession(signClient);
   if (!session) {
     throw ethErrors.provider.disconnected();
@@ -28,56 +29,55 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: nu
   });
 }
 
+export async function getAccounts(signClient: ISignClient): Promise<string[]> {
+  const session = await getLastActiveSession(signClient);
+  if (!session) {
+    throw ethErrors.provider.disconnected();
+  }
+  const accounts = getAccountsFromNamespaces(session.namespaces);
+  if (accounts && accounts.length) {
+    return accounts.map((add) => {
+      return parseAccountId(add).address;
+    });
+  }
+  throw new Error("Failed to get accounts");
+}
+
 export function getProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IProviderHandlers {
   return {
     getPrivateKey: async () => {
       throw ethErrors.rpc.methodNotSupported();
     },
     getAccounts: async (_: JRPCRequest<unknown>) => {
-      const res = await sendJrpcRequest<string[], unknown>(connector, chainId, "eth_accounts", []);
-      const accounts = res.result;
-      if (accounts && accounts.length) {
-        return accounts;
-      }
-      throw new Error("Failed to get accounts");
+      return getAccounts(connector);
     },
     processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, TransactionParams>(connector, chainId, "eth_sendTransaction", txParams);
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, chainId, "eth_sendTransaction", [txParams]);
+      return methodRes;
     },
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, TransactionParams>(connector, chainId, "eth_signTransaction", txParams);
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, chainId, "eth_signTransaction", [txParams]);
+      return methodRes;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, MessageParams<string>>(connector, chainId, "eth_sign", msgParams);
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, string[]>(connector, chainId, "eth_sign", [msgParams.from, msgParams.data]);
+      return methodRes;
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, MessageParams<string>>(connector, chainId, "personal_sign", msgParams);
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, string[]>(connector, chainId, "personal_sign", [msgParams.from, msgParams.data]);
+      return methodRes;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, MessageParams<TypedDataV1>>(connector, chainId, "eth_signTypedData", msgParams);
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData", [msgParams.data, msgParams.from]);
+      return methodRes;
     },
     processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, TypedMessageParams<TypedMessage<MessageTypes>>>(
-        connector,
-        chainId,
-        "eth_signTypedData_v3",
-        msgParams
-      );
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v3", [msgParams.from, msgParams.data]);
+      return methodRes;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-      const jspcRes = await sendJrpcRequest<string, TypedMessageParams<TypedMessage<MessageTypes>>>(
-        connector,
-        chainId,
-        "eth_signTypedData_v4",
-        msgParams
-      );
-      return jspcRes.result;
+      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v4", [msgParams.from, msgParams.data]);
+      return methodRes;
     },
     processEncryptionPublicKey: async (_: string): Promise<string> => {
       throw ethErrors.rpc.methodNotSupported();

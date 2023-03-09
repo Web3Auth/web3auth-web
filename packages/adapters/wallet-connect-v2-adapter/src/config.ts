@@ -33,17 +33,10 @@ export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[]
 ];
 
 export enum DEFAULT_EIP155_METHODS {
-  ETH_ACCOUNTS = "eth_accounts",
-  ETH_BALANCE = "eth_getBalance",
   ETH_SEND_TRANSACTION = "eth_sendTransaction",
   ETH_SIGN = "eth_sign",
   PERSONAL_SIGN = "personal_sign",
   ETH_SIGN_TYPED_DATA = "eth_signTypedData",
-  ETH_SIGN_TYPED_DATA_V1 = "eth_signTypedData_v1",
-  ETH_SIGN_TYPED_DATA_V3 = "eth_signTypedData_v3",
-  ETH_SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4",
-  SWITCH_CHAIN = "wallet_switchEthereumChain",
-  ADD_CHAIN = "wallet_addEthereumChain",
 }
 
 export enum DEFAULT_EIP_155_EVENTS {

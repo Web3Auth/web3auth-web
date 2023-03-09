@@ -9,7 +9,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { AddEthereumChainParameter, IChainSwitchHandlers } from "../../rpc/interfaces";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
-import { getProviderHandlers, sendJrpcRequest } from "./walletConnectV2Utils";
+import { getAccounts, getProviderHandlers, sendJrpcRequest } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -84,10 +84,10 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     const { chainId } = this.config.chainConfig;
     const numChainId = parseInt(chainId, 16);
     const providerHandlers = getProviderHandlers({ connector, chainId: numChainId });
-    const jrpcRes = await sendJrpcRequest<string[], unknown>(connector, numChainId, "eth_accounts", []);
+    const jrpcRes = await getAccounts(connector);
 
     this.update({
-      accounts: jrpcRes.result || [],
+      accounts: jrpcRes || [],
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
