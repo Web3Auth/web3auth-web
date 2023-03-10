@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "4.6.2",
+  "version": "5.0.0-alpha.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
@@ -19,15 +19,15 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^4.6.0",
-    "@web3auth/no-modal": "^4.6.0",
-    "@web3auth/metamask-adapter": "^4.6.0",
-    "@web3auth/openlogin-adapter": "^4.6.0",
-    "@web3auth/phantom-adapter": "^4.6.0",
-    "@web3auth/torus-evm-adapter": "^4.6.0",
-    "@web3auth/torus-solana-adapter": "^4.6.0",
-    "@web3auth/ui": "^4.6.2",
-    "@web3auth/wallet-connect-v1-adapter": "^4.6.0"
+    "@web3auth/base": "^5.0.0-alpha.0",
+    "@web3auth/metamask-adapter": "^5.0.0-alpha.0",
+    "@web3auth/no-modal": "^5.0.0-alpha.0",
+    "@web3auth/openlogin-adapter": "^5.0.0-alpha.0",
+    "@web3auth/phantom-adapter": "^5.0.0-alpha.0",
+    "@web3auth/torus-evm-adapter": "^5.0.0-alpha.0",
+    "@web3auth/torus-solana-adapter": "^5.0.0-alpha.0",
+    "@web3auth/ui": "^5.0.0-alpha.0",
+    "@web3auth/wallet-connect-v1-adapter": "^5.0.0-alpha.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.5.1",
