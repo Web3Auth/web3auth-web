@@ -307,13 +307,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]?.status;
-      if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
-        // refreshing session for wallet connect whenever modal is opened.
-        try {
-          this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2].connect();
-        } catch (error) {
-          log.error(`Error while disconnecting to wallet connect in core`, error);
+      const adapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2] || this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      if (adapter) {
+        const walletConnectStatus = adapter?.status;
+        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+        if (visibility && (walletConnectStatus === ADAPTER_STATUS.READY || walletConnectStatus === ADAPTER_STATUS.CONNECTING)) {
+          log.debug("refreshing wc session");
+
+          // refreshing session for wallet connect whenever modal is opened.
+          try {
+            adapter.connect();
+          } catch (error) {
+            log.error(`Error while disconnecting to wallet connect in core`, error);
+          }
         }
       }
     });

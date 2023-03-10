@@ -227,7 +227,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
           qrcodeModal.open(uri, () => {
             log.debug("EVENT", "QR Code Modal closed");
             this.status = ADAPTER_STATUS.READY;
-            this.rehydrated = true;
+            this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
           });
         } else {
           this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV2Data);
