@@ -26,7 +26,7 @@ import {
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import { WalletConnectV2Provider } from "@web3auth/ethereum-provider";
 
-import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
+import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
 import { isChainIdSupported } from "./utils";
 
@@ -74,8 +74,24 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   async init(): Promise<void> {
     await super.init();
     super.checkInitializationRequirements();
-    // Create a connector
+    const projectId = this.adapterOptions.adapterSettings?.walletConnectInitOptions?.projectId;
+    if (!projectId) {
+      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 adapter");
+    }
+
+    const wc2Settings = await getWalletConnectV2Settings(
+      this.chainConfig?.chainNamespace as ChainNamespaceType,
+      [parseInt(this.chainConfig?.chainId as string, 16)],
+      projectId
+    );
+    if (!this.adapterOptions.loginSettings) {
+      this.adapterOptions.loginSettings = wc2Settings.loginSettings;
+    }
+
+    this.adapterOptions.adapterSettings = { ...wc2Settings.adapterSettings, ...this.adapterOptions.adapterSettings };
+
     const { adapterSettings } = this.adapterOptions;
+
     this.connector = await SignClient.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
 
@@ -120,6 +136,9 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(init);
+    if (!isChainIdSupported(this.currentChainNamespace, parseInt(chainConfig.chainId, 16), this.adapterOptions.loginSettings)) {
+      throw WalletOperationsError.chainIDNotAllowed(`Unsupported chainID: ${chainConfig.chainId}`);
+    }
     await this.wcProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

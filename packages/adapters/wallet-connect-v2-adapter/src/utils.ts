@@ -7,12 +7,6 @@ export const isChainIdSupported = (chainNamespace: string, chainID: number, logi
   if (!supportedNamespaces[chainNamespace].chains || supportedNamespaces[chainNamespace].chains?.length === 0) {
     return false;
   }
-  const isSupported = supportedNamespaces[chainNamespace].chains?.find(async (chain) => {
-    if (chain === wcChainNamespace) {
-      return true;
-    }
-    return false;
-  });
-
+  const isSupported = supportedNamespaces[chainNamespace].chains?.includes(wcChainNamespace);
   return !!isSupported;
 };
