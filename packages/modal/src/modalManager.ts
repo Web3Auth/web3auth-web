@@ -144,6 +144,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             });
 
             this.walletAdapters[adapterName] = ad;
+            return adapterName;
           }
         } else {
           // if adapter is not configured and some default configuration is available, use it.
@@ -156,9 +157,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           });
 
           this.walletAdapters[adapterName] = ad;
+          return adapterName;
         }
-
-        return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to adapter, same web3auth client id can be used in adapter.

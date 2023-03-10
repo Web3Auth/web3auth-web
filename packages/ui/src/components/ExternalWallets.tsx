@@ -182,6 +182,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {/* <!-- Other Wallet --> */}
         {Object.keys(config).map((adapter) => {
           if (
+            walletConnectUri &&
             deviceDetails.platform === bowser.PLATFORMS_MAP.desktop &&
             [WALLET_ADAPTERS.WALLET_CONNECT_V1, WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter)
           ) {
