@@ -8,6 +8,7 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterInitOptions,
   AdapterNamespaceType,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -71,7 +72,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     await super.init();
     super.checkInitializationRequirements();
     const projectId = this.adapterOptions.adapterSettings?.walletConnectInitOptions?.projectId;
@@ -98,10 +99,13 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
     this.status = ADAPTER_STATUS.READY;
     log.debug("initializing wallet connect v2 adapter");
-    await this.checkForPersistedSession();
-    if (this.connected) {
-      this.rehydrated = true;
-      await this.onConnectHandler();
+    if (options.autoConnect) {
+      await this.checkForPersistedSession();
+
+      if (this.connected) {
+        this.rehydrated = true;
+        await this.onConnectHandler();
+      }
     }
   }
 

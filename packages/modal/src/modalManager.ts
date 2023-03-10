@@ -40,12 +40,6 @@ export interface Web3AuthOptions extends Web3AuthNoModalOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
-
-  /**
-   * Project id for wallet connect v2.
-   * This field is required if you want to enable wallet connect in modal.
-   */
-  walletConnectProjectID?: string;
 }
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
@@ -129,36 +123,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
-        if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-          log.debug("adapter name", adapterName);
-          // only add wallet connect v2 if project is given
-          if (this.options.walletConnectProjectID) {
-            // if adapter is not configured and some default configuration is available, use it.
-            const ad = await getDefaultAdapterModule({
-              name: adapterName,
-              customChainConfig: this.options.chainConfig,
-              clientId: this.options.clientId,
-              sessionTime: this.options.sessionTime,
-              web3AuthNetwork: this.options.web3AuthNetwork,
-              walletConnectProjectID: this.options.walletConnectProjectID,
-            });
+        // if adapter is not configured and some default configuration is available, use it.
+        const ad = await getDefaultAdapterModule({
+          name: adapterName,
+          customChainConfig: this.options.chainConfig,
+          clientId: this.options.clientId,
+          sessionTime: this.options.sessionTime,
+          web3AuthNetwork: this.options.web3AuthNetwork,
+        });
 
-            this.walletAdapters[adapterName] = ad;
-            return adapterName;
-          }
-        } else {
-          // if adapter is not configured and some default configuration is available, use it.
-          const ad = await getDefaultAdapterModule({
-            name: adapterName,
-            customChainConfig: this.options.chainConfig,
-            clientId: this.options.clientId,
-            sessionTime: this.options.sessionTime,
-            web3AuthNetwork: this.options.web3AuthNetwork,
-          });
-
-          this.walletAdapters[adapterName] = ad;
-          return adapterName;
-        }
+        this.walletAdapters[adapterName] = ad;
+        return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to adapter, same web3auth client id can be used in adapter.
@@ -183,7 +158,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    const adapterNames = await Promise.all(adapterConfigurationPromises);
+    let adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
       if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
@@ -196,7 +171,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
-    log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
+    log.debug(hasInAppWallets, this.walletAdapters, adapterNames, "hasInAppWallets");
+
+    // if both wc1 and wc2 are configured, give precedence to wc2.
+    if (this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1] && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
+      delete this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      adapterNames = adapterNames.filter((ad) => {
+        if (ad !== WALLET_ADAPTERS.WALLET_CONNECT_V1) {
+          return true;
+        }
+        return false;
+      });
+    }
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;

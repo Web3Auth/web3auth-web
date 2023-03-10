@@ -5,12 +5,12 @@ import { IAdapterSettings } from "./interface";
 
 export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[] = [
   {
-    name: "Rainbow",
+    name: "Argent",
     chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-rainbow.svg",
+    logo: "https://images.web3auth.io/login-argent.svg",
     mobile: {
-      native: "rainbow:",
-      universal: "https://rnbwapp.com",
+      native: "argent://",
+      universal: "https://www.argent.xyz/app",
     },
     desktop: {
       native: "",
@@ -18,12 +18,25 @@ export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[]
     },
   },
   {
-    name: "MetaMask",
+    name: "Trust Wallet",
     chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-metamask.svg",
+    logo: "https://images.web3auth.io/login-trust.svg",
     mobile: {
-      native: "metamask:",
-      universal: "https://metamask.app.link",
+      native: "trust:",
+      universal: "https://link.trustwallet.com",
+    },
+    desktop: {
+      native: "",
+      universal: "",
+    },
+  },
+  {
+    name: "Zerion",
+    chains: [CHAIN_NAMESPACES.EIP155],
+    logo: "https://images.web3auth.io/login-zerion.svg",
+    mobile: {
+      native: "zerion://",
+      universal: "https://wallet.zerion.io",
     },
     desktop: {
       native: "",

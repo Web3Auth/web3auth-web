@@ -47,7 +47,7 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [EVM_ADAPTERS.WALLET_CONNECT_V2]: {
+    [EVM_ADAPTERS.WALLET_CONNECT_V1]: {
       label: "Wallet Connect",
       showOnModal: true,
       showOnMobile: true,
