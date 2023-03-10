@@ -104,7 +104,13 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
       if (this.connected) {
         this.rehydrated = true;
-        await this.onConnectHandler();
+        try {
+          await this.onConnectHandler();
+        } catch (error) {
+          log.error("wallet auto connect", error);
+          this.status = ADAPTER_STATUS.NOT_READY;
+          this.emit(ADAPTER_EVENTS.CACHE_CLEAR);
+        }
       }
     }
   }
