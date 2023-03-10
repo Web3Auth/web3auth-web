@@ -97,7 +97,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [t] = useTranslation();
 
   useEffect(() => {
-    log.debug("loaded external wallets", config, walletConnectUri);
+    log.debug("loaded external wallets", config, walletConnectUri, deviceType);
     const walletConnectAdapterName = config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal
       ? WALLET_ADAPTERS.WALLET_CONNECT_V1
       : WALLET_ADAPTERS.WALLET_CONNECT_V2;

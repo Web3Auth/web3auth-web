@@ -37,10 +37,10 @@ export const getDefaultAdapterModule = async (params: {
     if (!walletConnectProjectID) {
       throw new Error("walletConnectProjectID is required");
     }
-    const { WalletConnectV2Adapter, getWalletConnectV2DefaultSettings } = await import("@web3auth/wallet-connect-v2-adapter");
-    const defaultOptions = await getWalletConnectV2DefaultSettings(
+    const { WalletConnectV2Adapter, getWalletConnectV2Settings } = await import("@web3auth/wallet-connect-v2-adapter");
+    const defaultOptions = await getWalletConnectV2Settings(
       finalChainConfig.chainNamespace,
-      parseInt(finalChainConfig.chainId, 16),
+      [parseInt(finalChainConfig.chainId, 16)],
       walletConnectProjectID
     );
 

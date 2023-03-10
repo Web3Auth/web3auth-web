@@ -20,6 +20,7 @@ import {
   WalletConnectV2Data,
   WalletInitializationError,
   WalletLoginError,
+  WalletOperationsError,
   Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
@@ -27,7 +28,7 @@ import { WalletConnectV2Provider } from "@web3auth/ethereum-provider";
 
 import { WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
-import { supportsAddChainRpc, supportsSwitchChainRpc } from "./utils";
+import { isChainIdSupported } from "./utils";
 
 class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V2;
@@ -119,23 +120,16 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(init);
-    if (!supportsAddChainRpc(this.adapterOptions.chainConfig as CustomChainConfig, this.adapterOptions.loginSettings)) {
-      throw WalletInitializationError.invalidParams("Please add `wallet_addEthereumChain` method in your namespace to use addChain method");
-    }
-    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
-    if (networkSwitch) {
-      await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });
-    }
     await this.wcProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    if (!supportsSwitchChainRpc(this.adapterOptions.chainConfig as CustomChainConfig, this.adapterOptions.loginSettings)) {
-      throw WalletInitializationError.invalidParams("Please add `wallet_switchEthereumChain` method in your namespace to use switchChain method");
+    if (!isChainIdSupported(this.currentChainNamespace, parseInt(params.chainId, 16), this.adapterOptions.loginSettings)) {
+      throw WalletOperationsError.chainIDNotAllowed(`Unsupported chainID: ${params.chainId}`);
     }
-    await this._switchChain({ chainId: params.chainId }, this.chainConfig as CustomChainConfig);
+    await this.wcProvider?.switchChain({ chainId: params.chainId });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
@@ -198,12 +192,13 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       log.debug("creating new session for web3auth wallet connect");
       const { uri, approval } = await this.connector.connect(this.adapterOptions.loginSettings);
       const qrcodeModal = this.adapterOptions?.adapterSettings?.qrcodeModal;
-      // Open QRCode modal if a URI was returned (i.e. we're not connecting an existing pairing).
+      // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {
         if (qrcodeModal) {
           qrcodeModal.open(uri, () => {
-            // eslint-disable-next-line no-console
-            console.log("EVENT", "QR Code Modal closed");
+            log.debug("EVENT", "QR Code Modal closed");
+            this.status = ADAPTER_STATUS.READY;
+            this.rehydrated = true;
           });
         } else {
           this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV2Data);
@@ -232,8 +227,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       this.wcProvider = new WalletConnectV2Provider({
         config: {
           chainConfig: this.chainConfig as CustomChainConfig,
-          // network switching can be skipped with custom ui
-          skipLookupNetwork: this.adapterOptions.adapterSettings?.skipNetworkSwitching,
+          skipLookupNetwork: true,
         },
         connector: this.connector,
       });
@@ -263,19 +257,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
       this.disconnect();
     });
-  }
-
-  private async _switchChain(connectedChainConfig: Partial<CustomChainConfig>, chainConfig: CustomChainConfig): Promise<void> {
-    const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
-
-    if (networkSwitch) {
-      await networkSwitch.switchNetwork({
-        currentChainConfig: chainConfig,
-        newChainConfig: connectedChainConfig,
-        appOrigin: window.location.hostname,
-      });
-    }
-    await this.wcProvider?.switchChain({ chainId: chainConfig.chainId });
   }
 }
 

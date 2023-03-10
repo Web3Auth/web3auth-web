@@ -1,26 +1,18 @@
 import type { EngineTypes } from "@walletconnect/types";
-import { CustomChainConfig } from "@web3auth/base";
 
-export const supportsSwitchChainRpc = (currentChainConfig: CustomChainConfig, loginSettings: EngineTypes.ConnectParams | undefined) => {
+export const isChainIdSupported = (chainNamespace: string, chainID: number, loginSettings: EngineTypes.ConnectParams | undefined) => {
   const supportedNamespaces = loginSettings ? loginSettings.requiredNamespaces || {} : {};
-  const wcChainNamespace = `${currentChainConfig.chainNamespace}:${parseInt(currentChainConfig.chainId || "0x1", 16)}`;
+  const wcChainNamespace = `${chainNamespace}:${chainID}`;
 
-  const namespaceMethods = supportedNamespaces[wcChainNamespace] || [];
-
-  if (namespaceMethods.methods.includes("wallet_switchEthereumChain")) {
-    return true;
+  if (!supportedNamespaces[chainNamespace].chains || supportedNamespaces[chainNamespace].chains?.length === 0) {
+    return false;
   }
-  return false;
-};
+  const isSupported = supportedNamespaces[chainNamespace].chains?.find(async (chain) => {
+    if (chain === wcChainNamespace) {
+      return true;
+    }
+    return false;
+  });
 
-export const supportsAddChainRpc = (currentChainConfig: CustomChainConfig, loginSettings: EngineTypes.ConnectParams | undefined) => {
-  const supportedNamespaces = loginSettings ? loginSettings.requiredNamespaces || {} : {};
-  const wcChainNamespace = `${currentChainConfig.chainNamespace}:${parseInt(currentChainConfig.chainId || "0x1", 16)}`;
-
-  const namespaceMethods = supportedNamespaces[wcChainNamespace] || [];
-
-  if (namespaceMethods.methods.includes("wallet_addEthereumChain")) {
-    return true;
-  }
-  return false;
+  return !!isSupported;
 };

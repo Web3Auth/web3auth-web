@@ -9,7 +9,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { AddEthereumChainParameter, IChainSwitchHandlers } from "../../rpc/interfaces";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
-import { getAccounts, getProviderHandlers, sendJrpcRequest } from "./walletConnectV2Utils";
+import { getAccounts, getProviderHandlers } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;
@@ -56,23 +56,12 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (!this.connector)
       throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
-    this.update({
-      chainId: "loading",
-    });
-
-    const numChainId = parseInt(chainId, 16);
-
-    await sendJrpcRequest<unknown, unknown>(this.connector, numChainId, "wallet_switchEthereumChain", [
-      {
-        chainId,
-      },
-    ]);
     this.configure({ chainConfig: currentChainConfig });
+    await this.setupEngine(this.connector);
   }
 
-  // not required in wallet connect v2, since chains are added during connection.
-  async addChain(_: CustomChainConfig): Promise<void> {
-    return Promise.resolve();
+  async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    super.addChain(chainConfig);
   }
 
   // no need to implement this method in wallet connect v2.
