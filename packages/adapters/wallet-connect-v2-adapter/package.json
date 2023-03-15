@@ -16,7 +16,7 @@
   "jsdelivr": "dist/walletConnectV2Adapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/wallet-connect-v2-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -32,20 +32,20 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@walletconnect/sign-client": "^2.x",
+    "@walletconnect/types": "^2.x",
+    "@walletconnect/utils": "^2.x"
   },
   "dependencies": {
     "@web3auth/base": "^5.0.0-alpha.0",
     "@web3auth/base-evm-adapter": "^5.0.0-alpha.0",
-    "@web3auth/ethereum-provider": "^5.0.0-alpha.0",
-    "@walletconnect/encoding": "^1.0.2",
+    "@web3auth/ethereum-provider": "^5.0.0-alpha.0"
+  },
+  "devDependencies": {
     "@walletconnect/sign-client": "^2.4.7",
     "@walletconnect/types": "^2.4.7",
     "@walletconnect/utils": "^2.4.7"
-  },
-  "devDependencies": {
-    "@walletconnect/client": "~1.8.0",
-    "@walletconnect/qrcode-modal": "^1.8.0"
   },
   "lint-staged": {
     "!(*d).ts": [

@@ -5,6 +5,7 @@ export interface IQRCodeModal {
   open(uri: string, cb: any, opts?: any): void;
   close(): void;
 }
+
 export interface IAdapterSettings {
   walletConnectInitOptions?: SignClientTypes.Options;
   qrcodeModal?: IQRCodeModal;
