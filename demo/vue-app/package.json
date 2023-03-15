@@ -30,7 +30,7 @@
     "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",
     "@web3auth/wallet-connect-v1-adapter": "4.6.0",
     "@web3auth/wallet-connect-v2-adapter": "file:../../packages/adapters/wallet-connect-v2-adapter",
-
+    "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "lodash.merge": "^4.6.2",
     "ts-custom-error": "^3.2.2",
     "vue": "^2.6.14",

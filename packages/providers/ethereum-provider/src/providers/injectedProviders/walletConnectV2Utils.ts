@@ -36,9 +36,13 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
   }
   const accounts = getAccountsFromNamespaces(session.namespaces);
   if (accounts && accounts.length) {
-    return accounts.map((add) => {
-      return parseAccountId(add).address;
-    });
+    return [
+      ...new Set(
+        accounts.map((add) => {
+          return parseAccountId(add).address;
+        })
+      ),
+    ];
   }
   throw new Error("Failed to get accounts");
 }

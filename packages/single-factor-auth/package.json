@@ -36,8 +36,8 @@
     "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@toruslabs/customauth": "^11.4.3",
-    "@toruslabs/openlogin-ed25519": "^3.0.0",
+    "@toruslabs/customauth": "^11.5.0",
+    "@toruslabs/openlogin-ed25519": "^3.2.0",
     "@web3auth/base": "^5.0.0-alpha.0",
     "@web3auth/base-provider": "^5.0.0-alpha.0",
     "@web3auth/ethereum-provider": "^5.0.0-alpha.0",

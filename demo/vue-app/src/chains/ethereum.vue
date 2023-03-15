@@ -83,7 +83,6 @@ export default Vue.extend({
       connecting: false,
       provider: undefined,
       web3auth: new Web3Auth({
-        walletConnectProjectID: "1a39a80152831e51be6192d6fe5ac322",
         chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
         clientId: config.clientId[this.openloginNetwork],
         enableLogging: true,
@@ -145,7 +144,7 @@ export default Vue.extend({
         // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
         const defaultWcSettings = await getWalletConnectV2Settings(
           ethChainConfig.chainNamespace,
-          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16)],
+          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16), 5],
           "04309ed1007e77d1f119b85205bb779d"
         );
         console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));

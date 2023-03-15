@@ -19,8 +19,8 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^2.7.0",
-    "@toruslabs/openlogin-jrpc": "^3.0.0",
+    "@toruslabs/base-controllers": "^2.8.0",
+    "@toruslabs/openlogin-jrpc": "^3.2.0",
     "@web3auth/base": "^5.0.0-alpha.0",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
