@@ -64,6 +64,10 @@ export interface Web3AuthNoModalOptions {
    */
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 
+  /**
+   * Uses core-kit key with web3auth provider
+   * @defaultValue false
+   */
   useCoreKitKey?: boolean;
 }
 

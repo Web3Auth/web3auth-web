@@ -1,6 +1,7 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { ADAPTER_STATUS_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
+import { CustomChainConfig } from "../chain/IChainInterface";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
@@ -18,4 +19,6 @@ export interface IWeb3Auth extends SafeEventEmitter {
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
+  switchChain(params: { chainId: string }): Promise<void>;
 }
