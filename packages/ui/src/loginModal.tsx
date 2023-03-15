@@ -14,6 +14,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletConnectV1Data,
+  WalletConnectV2Data,
   Web3AuthError,
 } from "@web3auth/base";
 import i18n from "i18next";
@@ -186,9 +187,9 @@ class LoginModal extends SafeEventEmitter {
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
-            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={this.appLogo}
             appName={this.appName}
             web3AuthNetwork={this.web3AuthNetwork}
@@ -281,6 +282,9 @@ class LoginModal extends SafeEventEmitter {
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
       const walletConnectData = adapterData.data as WalletConnectV1Data;
+      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+    } else if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     }
   };

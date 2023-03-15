@@ -118,18 +118,21 @@ export default function Modal(props: ModalProps) {
     }
   }, [closeModal, modalState.status]);
 
-  const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
-    const { adapter } = params;
-    // if (DETAILED_ADAPTERS.includes(adapter))
-    setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
-    });
-    // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
-    //   setModalState((prevState) => {
-    //     return { ...prevState, detailedLoaderAdapter: "" };
-    //   });
-    handleExternalWalletClick(params);
-  };
+  const preHandleExternalWalletClick = useCallback(
+    (params: ExternalWalletEventType) => {
+      const { adapter } = params;
+      // if (DETAILED_ADAPTERS.includes(adapter))
+      setModalState((prevState) => {
+        return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
+      });
+      // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
+      //   setModalState((prevState) => {
+      //     return { ...prevState, detailedLoaderAdapter: "" };
+      //   });
+      handleExternalWalletClick(params);
+    },
+    [handleExternalWalletClick]
+  );
 
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
@@ -237,7 +240,7 @@ export default function Modal(props: ModalProps) {
                 <ExternalWallets
                   modalStatus={modalState.status}
                   showBackButton={areSocialLoginsVisible}
-                  handleExternalWalletClick={(params: ExternalWalletEventType) => preHandleExternalWalletClick(params)}
+                  handleExternalWalletClick={preHandleExternalWalletClick}
                   walletConnectUri={modalState.walletConnectUri}
                   wcAdapters={modalState.wcAdapters}
                   config={modalState.externalWalletsConfig}

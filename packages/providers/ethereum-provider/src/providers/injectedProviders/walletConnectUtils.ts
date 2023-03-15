@@ -1,6 +1,6 @@
 import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import type { IConnector, ITxData } from "@walletconnect/types";
+import type { IConnector, ITxData } from "@walletconnect/legacy-types";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";

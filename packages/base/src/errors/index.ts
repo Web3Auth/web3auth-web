@@ -174,3 +174,32 @@ export class WalletLoginError extends Web3AuthError {
     return WalletLoginError.fromCode(5117, extraMessage);
   }
 }
+
+export class WalletOperationsError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    5201: "Provided chainId is not allowed",
+    5202: "This operation is not allowed",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletOperationsError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`);
+  }
+
+  // Custom methods
+  public static chainIDNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5201, extraMessage);
+  }
+
+  public static operationNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5202, extraMessage);
+  }
+}

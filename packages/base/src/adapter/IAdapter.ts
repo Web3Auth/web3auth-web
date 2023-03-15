@@ -142,7 +142,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
-    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
+    if (
+      (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 || this.name === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
+      this.status === ADAPTER_STATUS.CONNECTING
+    )
+      return;
     else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
@@ -274,6 +278,7 @@ export interface WalletConnectV1Data {
   extensionAdapters: IWalletConnectExtensionAdapter[];
 }
 
+export type WalletConnectV2Data = WalletConnectV1Data;
 export interface IAdapterDataEvent {
   adapterName: string;
   data: unknown;

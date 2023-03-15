@@ -97,11 +97,14 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [t] = useTranslation();
 
   useEffect(() => {
-    log.debug("loaded external wallets", config, walletConnectUri);
-    const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal || false) !== false;
+    log.debug("loaded external wallets", config, walletConnectUri, deviceType);
+    const walletConnectAdapterName = config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal
+      ? WALLET_ADAPTERS.WALLET_CONNECT_V1
+      : WALLET_ADAPTERS.WALLET_CONNECT_V2;
+    const wcAvailable = (config[walletConnectAdapterName]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       setIsLoaded(false);
-      handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V1 });
+      handleExternalWalletClick({ adapter: walletConnectAdapterName });
     } else if (Object.keys(config).length > 0) {
       setIsLoaded(true);
     }
@@ -170,7 +173,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
         {showBackButton && (
-          <button type="button" className="w3a-external-back w3ajs-external-back" onClick={hideExternalWallets}>
+          <button type="button" className="w3a-external-back w3ajs-external-back" onClick={() => hideExternalWallets()}>
             <Icon iconName="arrow-left" />
             <div className="w3a-group__title">{t("modal.external.back")}</div>
           </button>
@@ -179,6 +182,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {/* <!-- Other Wallet --> */}
         {Object.keys(config).map((adapter) => {
           if (
+            walletConnectUri &&
             deviceDetails.platform === bowser.PLATFORMS_MAP.desktop &&
             [WALLET_ADAPTERS.WALLET_CONNECT_V1, WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter)
           ) {

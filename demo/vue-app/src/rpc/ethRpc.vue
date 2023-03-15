@@ -70,7 +70,7 @@ export default Vue.extend({
     },
     async switchChain() {
       try {
-        await this.web3auth.switchChain({ chainId: "0x5" });
+        await this.web3auth.switchChain({ chainId: "0x89" });
         this.console("switchedChain");
       } catch (error) {
         console.log("error while switching chain", error);

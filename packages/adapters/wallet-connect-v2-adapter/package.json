@@ -1,22 +1,22 @@
 {
-  "name": "@web3auth/torus-solana-adapter",
+  "name": "@web3auth/wallet-connect-v2-adapter",
   "version": "5.0.0-alpha.0",
-  "description": "torus solana wallet adapter for web3auth",
+  "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
-    "web3Auth/torus-solana-adapter",
-    "web3Auth",
+    "@web3auth/wallet-connect-v2-adapter",
+    "web3auth",
     "multichainWallet",
     "blockchain",
     "ethereum",
-    "solana"
+    "walletconnect"
   ],
-  "main": "dist/torusSolanaAdapter.cjs.js",
-  "module": "dist/torusSolanaAdapter.esm.js",
-  "unpkg": "dist/torusSolanaAdapter.umd.min.js",
-  "jsdelivr": "dist/torusSolanaAdapter.umd.min.js",
+  "main": "dist/walletConnectV2Adapter.cjs.js",
+  "module": "dist/walletConnectV2Adapter.esm.js",
+  "unpkg": "dist/walletConnectV2Adapter.umd.min.js",
+  "jsdelivr": "dist/walletConnectV2Adapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/torus-solana-adapter#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/wallet-connect-v2-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -33,14 +33,21 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@solana/web3.js": "^1.x"
+    "@walletconnect/sign-client": "^2.x",
+    "@walletconnect/types": "^2.x",
+    "@walletconnect/utils": "^2.x"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.3.4",
+    "lodash.merge": "^4.6.2",
     "@web3auth/base": "^5.0.0-alpha.0",
-    "@web3auth/base-provider": "^5.0.0-alpha.0",
-    "@web3auth/base-solana-adapter": "^5.0.0-alpha.0",
-    "@web3auth/solana-provider": "^5.0.0-alpha.0"
+    "@web3auth/base-evm-adapter": "^5.0.0-alpha.0",
+    "@web3auth/ethereum-provider": "^5.0.0-alpha.0"
+  },
+  "devDependencies": {
+    "@types/lodash.merge": "^4.6.7",
+    "@walletconnect/sign-client": "^2.4.10",
+    "@walletconnect/types": "^2.4.10",
+    "@walletconnect/utils": "^2.4.10"
   },
   "lint-staged": {
     "!(*d).ts": [

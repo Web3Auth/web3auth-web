@@ -133,7 +133,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         });
 
         this.walletAdapters[adapterName] = ad;
-
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
@@ -159,7 +158,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    const adapterNames = await Promise.all(adapterConfigurationPromises);
+    let adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
       if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
@@ -172,7 +171,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
-    log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
+    log.debug(hasInAppWallets, this.walletAdapters, adapterNames, "hasInAppWallets");
+
+    // if both wc1 and wc2 are configured, give precedence to wc2.
+    if (this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1] && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
+      delete this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      adapterNames = adapterNames.filter((ad) => ad !== WALLET_ADAPTERS.WALLET_CONNECT_V1);
+    }
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
@@ -297,13 +302,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.status;
-      if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
-        // refreshing session for wallet connect whenever modal is opened.
-        try {
-          this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
-        } catch (error) {
-          log.error(`Error while disconnecting to wallet connect in core`, error);
+      const adapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2] || this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      if (adapter) {
+        const walletConnectStatus = adapter?.status;
+        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+        if (visibility && (walletConnectStatus === ADAPTER_STATUS.READY || walletConnectStatus === ADAPTER_STATUS.CONNECTING)) {
+          log.debug("refreshing wc session");
+
+          // refreshing session for wallet connect whenever modal is opened.
+          try {
+            adapter.connect();
+          } catch (error) {
+            log.error(`Error while disconnecting to wallet connect in core`, error);
+          }
         }
       }
     });

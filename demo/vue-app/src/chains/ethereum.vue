@@ -30,6 +30,7 @@ import { WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import Vue from "vue";
 
 import Loader from "@/components/loader.vue";
@@ -128,7 +129,7 @@ export default Vue.extend({
           clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
-          web3AuthNetwork: this.openloginNetwork,
+          web3AuthNetwork: this.openloginNetwork as any,
         });
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
@@ -136,6 +137,24 @@ export default Vue.extend({
             clientId: config.clientId[this.openloginNetwork],
           },
         });
+
+        // by default, web3auth modal uses wallet connect v1,
+        // if you want to use wallet connect v2, configure wallet-connect-v2-adapter
+        // as shown below.
+        // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
+        const defaultWcSettings = await getWalletConnectV2Settings(
+          ethChainConfig.chainNamespace,
+          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16), 5],
+          "04309ed1007e77d1f119b85205bb779d"
+        );
+        console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));
+        const wc2Adapter = new WalletConnectV2Adapter({
+          adapterSettings: { ...defaultWcSettings.adapterSettings },
+          chainConfig: ethChainConfig,
+          loginSettings: defaultWcSettings.loginSettings,
+        });
+
+        this.web3auth.configureAdapter(wc2Adapter);
 
         this.web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {

@@ -1,10 +1,12 @@
-import { ADAPTER_EVENTS, SafeEventEmitterProvider, WALLET_ADAPTERS, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { ADAPTER_EVENTS, getChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 import type { LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin";
 
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-import { NetworkSwitch } from "@web3auth/ui";
+// import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
+import { WalletConnectV2Adapter, getWalletConnectV2Settings } from "@web3auth/wallet-connect-v2-adapter";
+
+// import { NetworkSwitch } from "@web3auth/ui";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -105,16 +107,23 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           clientId,
         });
         subscribeAuthEvents(web3AuthInstance);
-        const networkUi = new NetworkSwitch();
+        // const networkUi = new NetworkSwitch();
 
         const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
-        const wcAdapter = new WalletConnectV1Adapter({
-          adapterSettings: { qrcodeModal: QRCodeModal, networkSwitchModal: networkUi },
+        // const wcAdapter = new WalletConnectV1Adapter({
+        //   adapterSettings: { qrcodeModal: QRCodeModal, networkSwitchModal: networkUi },
+        //   chainConfig: currentChainConfig,
+        // });
+        const defaultWcSettings = await getWalletConnectV2Settings(currentChainConfig.chainNamespace, [parseInt(currentChainConfig.chainId, 16), parseInt("0x89", 16)], "04309ed1007e77d1f119b85205bb779d")
+        console.log("defaultWcSettings", JSON.stringify(defaultWcSettings))
+        const wc2Adapter = new WalletConnectV2Adapter({
+          adapterSettings: { qrcodeModal: QRCodeModal, ...defaultWcSettings.adapterSettings },
           chainConfig: currentChainConfig,
+          loginSettings: defaultWcSettings.loginSettings
         });
 
         web3AuthInstance.configureAdapter(adapter);
-        web3AuthInstance.configureAdapter(wcAdapter);
+        web3AuthInstance.configureAdapter(wc2Adapter);
 
         await web3AuthInstance.init();
         setWeb3Auth(web3AuthInstance);
@@ -151,7 +160,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         uiConsole("web3auth not initialized yet");
         return;
       }
-      const localProvider = await web3Auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1, {});
+      const localProvider = await web3Auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V2, {});
       setWalletProvider(localProvider!);
     } catch (error) {
       console.log("error", error);
@@ -169,6 +178,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await web3Auth.logout();
     setProvider(null);
   };
+
 
   const getUserInfo = async () => {
     if (!web3Auth) {
@@ -204,6 +214,17 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
+
+    if (!web3Auth) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const chainConfig = CHAIN_CONFIG.polygon
+    await web3Auth.addChain(chainConfig)
+    await web3Auth.switchChain({
+      chainId: "0x89"
+    });
     provider.signMessage();
   };
   const signV4Message = async () => {
