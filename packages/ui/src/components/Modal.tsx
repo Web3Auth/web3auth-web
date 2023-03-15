@@ -118,13 +118,6 @@ export default function Modal(props: ModalProps) {
     }
   }, [closeModal, modalState.status]);
 
-  const onExternalWalletClick = useCallback(
-    (params) => {
-      handleExternalWalletClick(params);
-    },
-    [handleExternalWalletClick]
-  );
-
   const preHandleExternalWalletClick = useCallback(
     (params: ExternalWalletEventType) => {
       const { adapter } = params;
@@ -136,9 +129,9 @@ export default function Modal(props: ModalProps) {
       //   setModalState((prevState) => {
       //     return { ...prevState, detailedLoaderAdapter: "" };
       //   });
-      onExternalWalletClick(params);
+      handleExternalWalletClick(params);
     },
-    [onExternalWalletClick]
+    [handleExternalWalletClick]
   );
 
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
