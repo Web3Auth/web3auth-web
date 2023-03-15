@@ -187,9 +187,9 @@ class LoginModal extends SafeEventEmitter {
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
-            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={this.appLogo}
             appName={this.appName}
             web3AuthNetwork={this.web3AuthNetwork}
