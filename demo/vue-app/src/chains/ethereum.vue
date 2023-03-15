@@ -127,7 +127,7 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({
           chainConfig: ethChainConfig,
-          clientId: "BBX-J8_lsJNy4mpQFAAFxZdtLYdCEihdXW-Qh4O0jek7hxIp0xBWcR4ydxSkn3xwx9U90KSMFdYvCYnq8ZtrLbE",
+          clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
           web3AuthNetwork: this.openloginNetwork as any,
@@ -135,7 +135,7 @@ export default Vue.extend({
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-            clientId: "BBX-J8_lsJNy4mpQFAAFxZdtLYdCEihdXW-Qh4O0jek7hxIp0xBWcR4ydxSkn3xwx9U90KSMFdYvCYnq8ZtrLbE",
+            clientId: config.clientId[this.openloginNetwork],
           },
         });
 
