@@ -26,6 +26,7 @@ import {
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import { WalletConnectV2Provider } from "@web3auth/ethereum-provider";
+import merge from "lodash.merge";
 
 import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
@@ -89,7 +90,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       this.adapterOptions.loginSettings = wc2Settings.loginSettings;
     }
 
-    this.adapterOptions.adapterSettings = { ...wc2Settings.adapterSettings, ...this.adapterOptions.adapterSettings };
+    this.adapterOptions.adapterSettings = merge(wc2Settings.adapterSettings, this.adapterOptions.adapterSettings);
 
     const { adapterSettings } = this.adapterOptions;
 
@@ -108,9 +109,11 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
           await this.onConnectHandler();
         } catch (error) {
           log.error("wallet auto connect", error);
-          this.status = ADAPTER_STATUS.NOT_READY;
-          this.emit(ADAPTER_EVENTS.CACHE_CLEAR);
+          this.emit(ADAPTER_EVENTS.ERRORED, error);
         }
+      } else {
+        this.status = ADAPTER_STATUS.NOT_READY;
+        this.emit(ADAPTER_EVENTS.CACHE_CLEAR);
       }
     }
   }

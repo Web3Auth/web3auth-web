@@ -10,6 +10,7 @@ export interface IAdapterSettings {
   walletConnectInitOptions?: SignClientTypes.Options;
   qrcodeModal?: IQRCodeModal;
 }
+
 export interface WalletConnectV2AdapterOptions extends BaseAdapterSettings {
   adapterSettings?: IAdapterSettings;
   loginSettings?: EngineTypes.ConnectParams;

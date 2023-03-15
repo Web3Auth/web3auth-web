@@ -142,7 +142,7 @@ export const getNamespacesFromChains = (chains: string[]) => {
 
 export const getSupportedMethodsByNamespace = (namespace: string) => {
   switch (namespace) {
-    case "eip155":
+    case CHAIN_NAMESPACES.EIP155:
       return Object.values(DEFAULT_EIP155_METHODS);
     default:
       throw new Error(`No default methods for namespace: ${namespace}`);
@@ -151,7 +151,7 @@ export const getSupportedMethodsByNamespace = (namespace: string) => {
 
 export const getSupportedEventsByNamespace = (namespace: string) => {
   switch (namespace) {
-    case "eip155":
+    case CHAIN_NAMESPACES.EIP155:
       return Object.values(DEFAULT_EIP_155_EVENTS);
     default:
       throw new Error(`No default events for namespace: ${namespace}`);
@@ -180,7 +180,7 @@ export const getWalletConnectV2Settings = async (
   adapterSettings: IAdapterSettings;
   loginSettings: EngineTypes.ConnectParams;
 }> => {
-  if (namespace === "eip155") {
+  if (namespace === CHAIN_NAMESPACES.EIP155) {
     const appMetadata = await getSiteMetadata();
     const adapterSettings: IAdapterSettings = {
       walletConnectInitOptions: {

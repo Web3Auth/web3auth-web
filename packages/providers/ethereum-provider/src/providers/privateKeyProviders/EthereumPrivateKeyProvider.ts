@@ -107,7 +107,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
         const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
         this.addChain({
-          chainNamespace: "eip155",
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
           ticker: nativeCurrency?.symbol || "ETH",
           tickerName: nativeCurrency?.name || "Ether",

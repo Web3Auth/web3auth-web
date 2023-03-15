@@ -176,12 +176,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // if both wc1 and wc2 are configured, give precedence to wc2.
     if (this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1] && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
       delete this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
-      adapterNames = adapterNames.filter((ad) => {
-        if (ad !== WALLET_ADAPTERS.WALLET_CONNECT_V1) {
-          return true;
-        }
-        return false;
-      });
+      adapterNames = adapterNames.filter((ad) => ad !== WALLET_ADAPTERS.WALLET_CONNECT_V1);
     }
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {

@@ -1,7 +1,8 @@
 import type { EngineTypes } from "@walletconnect/types";
+import type { ChainNamespaceType } from "@web3auth/base";
 
-export const isChainIdSupported = (chainNamespace: string, chainID: number, loginSettings: EngineTypes.ConnectParams | undefined) => {
-  const supportedNamespaces = loginSettings ? loginSettings.requiredNamespaces || {} : {};
+export const isChainIdSupported = (chainNamespace: ChainNamespaceType, chainID: number, loginSettings: EngineTypes.ConnectParams | undefined) => {
+  const supportedNamespaces = loginSettings?.requiredNamespaces || {};
   const wcChainNamespace = `${chainNamespace}:${chainID}`;
 
   if (!supportedNamespaces[chainNamespace].chains || supportedNamespaces[chainNamespace].chains?.length === 0) {
