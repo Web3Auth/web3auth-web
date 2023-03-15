@@ -91,8 +91,18 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
-      addChain: async (_: AddEthereumChainParameter): Promise<void> => {
-        // not required in wallet connect v2, since chains are added during connection.
+      addChain: async (params: AddEthereumChainParameter): Promise<void> => {
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
+        this.addChain({
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+          chainId,
+          ticker: nativeCurrency?.symbol || "ETH",
+          tickerName: nativeCurrency?.name || "Ether",
+          displayName: chainName,
+          rpcTarget: rpcUrls[0],
+          blockExplorer: blockExplorerUrls?.[0] || "",
+          decimals: nativeCurrency?.decimals || 18,
+        });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
