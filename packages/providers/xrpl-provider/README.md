@@ -1,0 +1,71 @@
+# Web3Auth XRPL Provider
+
+[![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)
+
+> Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
+
+Web3Auth Ethereum Provider can be used to interact with wallet or connected EVM compatible chain using RPC calls. This is an EIP-1193 compatible JRPC provider. This package exposes a class `EthereumPrivateKeyProvider`, which accepts a `secp251k1` private key and returns `EIP1193` compatible provider, which can be used with various wallet sdks.
+
+## 📖 Documentation
+
+Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/evm#getting-a-provider-from-any-secp256k1-private-key).
+
+## 💡 Features
+- Plug and Play, OAuth based Web3 Authentication Service
+- Fully decentralized, non-custodial key infrastructure
+- End to end Whitelabelable solution
+- Threshold Cryptography based Key Reconstruction
+- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Support for WebAuthn & Passwordless Login
+- Support for connecting to multiple wallets
+- DApp Active Session Management
+
+...and a lot more
+
+## 🔗 Installation
+
+```shell
+npm install --save @web3auth/ethereum-provider
+```
+
+## 🩹 Example
+
+```ts
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import type { SafeEventEmitterProvider } from "@web3auth/base";
+const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
+  const web3 = new Web3(provider as any);
+  const accounts = await web3.eth.getAccounts();
+  // hex message
+  const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
+  const signature = await web3.eth.sign(message, accounts[0]);
+  return signature;
+};
+
+(async () => {
+  const provider = await EthereumPrivateKeyProvider.getProviderInstance({
+    chainConfig: {
+      rpcTarget: "https://polygon-rpc.com",
+      chainId: "0x89", // hex chain id
+      networkName: "matic",
+      ticker: "matic",
+      tickerName: "matic",
+    },
+    privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
+  });
+  const signedMessage = await signEthMessage(provider);
+})();
+```
+
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+
+## 🌐 Demo
+
+Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+
+## 💬 Troubleshooting and Support
+
+- Have a look at our [Community Portal](https://community.web3auth.io/) to see if anyone has any questions or issues you might be having. Feel free to reate new topics and we'll help you out as soon as possible.
+- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions.
+- For Priority Support, please have a look at our [Pricing Page](https://web3auth.io/pricing.html) for the plan that suits your needs.
