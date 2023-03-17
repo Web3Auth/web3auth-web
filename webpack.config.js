@@ -8,7 +8,7 @@ function generateWebpackConfig({ alias, module = {}, ssrModule = null, pkgBaseCo
       plugins: [new TsconfigPathsPlugin()],
       alias: {
         "bn.js": require.resolve("bn.js"),
-        lodash: require.resolve("lodash-es"),
+        lodash$: require.resolve("lodash-es"),
         ...alias,
       },
     },
