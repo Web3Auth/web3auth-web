@@ -9,6 +9,10 @@ export const RPC_METHODS = {
   SIGN_MESSAGE: "ripple_signTransaction",
   SIGN_TRANSACTION: "ripple_submitTransaction",
   SUBMIT_TRANSACTION: "ripple_submitMessage",
+  ADD_CHAIN: "ripple_addChain",
+  SWITCH_CHAIN: "ripple_switchChain",
+  CHAIN_ID: "ripple_chainId",
+  PROVIDER_CHAIN_CONFIG: "ripple_providerChainConfig",
 };
 
 export type KeyPair = { publicKey: string; privateKey: string };
@@ -66,5 +70,27 @@ export function createXRPLMiddleware(providerHandlers: IProviderHandlers): JRPCM
     createGenericJRPCMiddleware<void, KeyPair>(RPC_METHODS.GET_KEY_PAIR, getKeyPair),
     createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_PUBLIC_KEY, getPublicKey),
     createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_XRP_BALANCE, getBalance),
+  ]);
+}
+
+export interface AddXRPLChainParameter {
+  chainId: string; // A 0x-prefixed hexadecimal string
+  chainName: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string; // 2-6 characters long
+  };
+  rpcUrls: string[];
+  blockExplorerUrls?: string[];
+}
+
+export interface IChainSwitchHandlers {
+  addChainConfig: (req: JRPCRequest<AddXRPLChainParameter>) => Promise<void>;
+  switchChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
+}
+export function createChainSwitchMiddleware({ addChainConfig, switchChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
+  return mergeMiddleware([
+    createGenericJRPCMiddleware<AddXRPLChainParameter, void>(RPC_METHODS.ADD_CHAIN, addChainConfig),
+    createGenericJRPCMiddleware<{ chainId: string }, void>(RPC_METHODS.SWITCH_CHAIN, switchChain),
   ]);
 }

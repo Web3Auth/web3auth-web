@@ -1,10 +1,19 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
+import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
+import { PingResponse } from "xrpl";
 
-import { createXRPLMiddleware, KeyPair, RPC_METHODS } from "../../rpc/rippleRpcMiddlewares";
+import { createJsonRpcClient } from "../../rpc/JrpcClient";
+import {
+  AddXRPLChainParameter,
+  createChainSwitchMiddleware,
+  createXRPLMiddleware,
+  IChainSwitchHandlers,
+  KeyPair,
+  RPC_METHODS,
+} from "../../rpc/rippleRpcMiddlewares";
 import { getProviderHandlers } from "./xrplWalletUtils";
 
 export interface XrplPrivKeyProviderConfig extends BaseProviderConfig {
@@ -16,7 +25,7 @@ export interface XrplPrivKeyProviderState extends BaseProviderState {
 }
 export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, XrplPrivKeyProviderState, string> {
   constructor({ config, state }: { config: XrplPrivKeyProviderConfig; state?: XrplPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
   }
 
   public static getProviderInstance = async (params: {
@@ -38,12 +47,18 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   public async setupProvider(privKey: string): Promise<void> {
     const providerHandlers = getProviderHandlers({
       privKey,
+      chainConfig: this.config.chainConfig,
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
     const engine = new JRPCEngine();
+    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    engine.push(this.getChainSwitchMiddleware());
     engine.push(xrplWalletMiddleware);
+    engine.push(networkMiddleware);
+
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
+
     // await this.lookupNetwork();
   }
 
@@ -60,19 +75,52 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
 
   protected async lookupNetwork(): Promise<void> {
     if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-    // const { chainId } = this.config.chainConfig;
-    // if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
-    // const network = await this._providerEngineProxy.request<string[], string>({
-    //   method: "net_version",
-    //   params: [],
-    // });
+    const { chainId } = this.config.chainConfig;
+    if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
 
-    // if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
-    // if (this.state.chainId !== chainId) {
-    //   this._providerEngineProxy.emit("chainChanged", chainId);
-    //   this._providerEngineProxy.emit("connect", { chainId });
-    // }
-    // this.update({ chainId });
-    // return network;
+    const pingResponse = await this._providerEngineProxy.request<string[], PingResponse>({
+      method: "ping",
+      params: [],
+    });
+
+    if (pingResponse?.status !== "success") {
+      const { chainConfig } = this.config;
+      throw WalletInitializationError.rpcConnectionError(`Failed to ping network for following rpc target: ${chainConfig.rpcTarget}`);
+    }
+
+    if (this.state.chainId !== chainId) {
+      this._providerEngineProxy.emit("chainChanged", chainId);
+      this._providerEngineProxy.emit("connect", { chainId });
+    }
+    this.update({ chainId });
+  }
+
+  private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
+    const chainSwitchHandlers: IChainSwitchHandlers = {
+      addChainConfig: async (req: JRPCRequest<AddXRPLChainParameter>): Promise<void> => {
+        if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = req.params;
+
+        if (!chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
+        if (!rpcUrls || rpcUrls.length === 0) throw ethErrors.rpc.invalidParams("Missing rpcUrls in chainParams");
+        if (!nativeCurrency) throw ethErrors.rpc.invalidParams("Missing nativeCurrency in chainParams");
+        this.addChain({
+          chainNamespace: CHAIN_NAMESPACES.SOLANA,
+          chainId,
+          ticker: nativeCurrency?.symbol || "SOL",
+          tickerName: nativeCurrency?.name || "Solana",
+          displayName: chainName,
+          rpcTarget: rpcUrls[0],
+          blockExplorer: blockExplorerUrls?.[0] || "",
+        });
+      },
+      switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {
+        if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
+        if (!req.params.chainId) throw ethErrors.rpc.invalidParams("Missing chainId");
+        await this.switchChain(req.params);
+      },
+    };
+    const chainSwitchMiddleware = createChainSwitchMiddleware(chainSwitchHandlers);
+    return chainSwitchMiddleware;
   }
 }

@@ -1,5 +1,5 @@
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import type { CustomChainConfig } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import * as elliptic from "elliptic";
 import { ethErrors } from "eth-rpc-errors";
 import { sign } from "ripple-keypairs";
@@ -7,6 +7,7 @@ import { sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
 
 import { IProviderHandlers, KeyPair } from "../../rpc/rippleRpcMiddlewares";
+import { XRPLNetwork } from "./interface";
 
 const Secp256k1 = elliptic.ec("secp256k1");
 
@@ -26,7 +27,13 @@ const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: st
   return { privateKey: xrplKey, publicKey };
 };
 
-export function getProviderHandlers({ privKey: web3authKey, chainConfig }: { privKey: string; chainConfig: CustomChainConfig }): IProviderHandlers {
+export function getProviderHandlers({
+  privKey: web3authKey,
+  chainConfig,
+}: {
+  privKey: string;
+  chainConfig: Partial<CustomChainConfig>;
+}): IProviderHandlers {
   const client = new Client(chainConfig.rpcTarget);
   return {
     getAccounts: async (_: JRPCRequest<unknown>): Promise<string[]> => {
@@ -75,3 +82,44 @@ export function getProviderHandlers({ privKey: web3authKey, chainConfig }: { pri
     },
   };
 }
+
+export const getXRPLChainConfig = (
+  network: XRPLNetwork,
+  customChainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>
+): CustomChainConfig => {
+  if (network === "mainnet") {
+    const chainConfig: CustomChainConfig = {
+      chainNamespace: CHAIN_NAMESPACES.OTHER,
+      chainId: "0x1",
+      rpcTarget: "https://xrplcluster.com",
+      ticker: "XRP",
+      tickerName: "XRPL",
+      displayName: "XRPL",
+      blockExplorer: "https://livenet.xrpl.org",
+    };
+    return { ...chainConfig, ...customChainConfig };
+  } else if (network === "testnet") {
+    const chainConfig: CustomChainConfig = {
+      chainNamespace: CHAIN_NAMESPACES.OTHER,
+      chainId: "0x2",
+      rpcTarget: "https://s.altnet.rippletest.net:51234",
+      ticker: "XRP",
+      tickerName: "XRPL",
+      displayName: "XRPL",
+      blockExplorer: "https://testnet.xrpl.org",
+    };
+    return { ...chainConfig, ...customChainConfig };
+  } else if (network === "devnet") {
+    const chainConfig: CustomChainConfig = {
+      chainNamespace: CHAIN_NAMESPACES.OTHER,
+      chainId: "0x3",
+      rpcTarget: "https://s.devnet.rippletest.net:51234",
+      ticker: "XRP",
+      tickerName: "XRPL",
+      displayName: "XRPL",
+      blockExplorer: "https://devnet.xrpl.org",
+    };
+    return { ...chainConfig, ...customChainConfig };
+  }
+  throw new Error(`Unsupported xrpl network: ${network}`);
+};

@@ -1,7 +1,6 @@
 export const CHAIN_NAMESPACES = {
   EIP155: "eip155",
   SOLANA: "solana",
-  XRPL: "xrpl",
   OTHER: "other",
 } as const;
 // eip155 for all evm chains

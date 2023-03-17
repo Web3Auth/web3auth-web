@@ -22,18 +22,16 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
+import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
-import type { LoginSettings, OpenloginAdapterOptions } from "./interface";
+import type { LoginSettings, OpenloginAdapterOptions, PrivateKeyProvider } from "./interface";
 
 export type OpenloginLoginParams = LoginParams & {
   // to maintain backward compatibility
   login_hint?: string;
 };
-
-type PrivateKeyProvider = IBaseProvider<string>;
 
 export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
@@ -176,7 +174,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings>): void {
+  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { externalProvider?: PrivateKeyProvider }): void {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
@@ -190,6 +188,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
     if (adapterSettings.useCoreKitKey !== undefined) {
       this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
+    }
+    if (adapterSettings.externalProvider) {
+      this.openloginOptions.externalProvider = adapterSettings.externalProvider;
     }
   }
 
@@ -226,7 +227,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-      this.privKeyProvider = new CommonPrivateKeyProvider();
+      this.privKeyProvider = this.openloginOptions?.externalProvider || new CommonPrivateKeyProvider();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }
