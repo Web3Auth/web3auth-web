@@ -1,0 +1,64 @@
+{
+  "name": "xrpl-react-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@solana/web3.js": "^1.73.0",
+    "@taquito/signer": "^13.0.1",
+    "@taquito/taquito": "^13.0.1",
+    "@taquito/utils": "^13.0.1",
+    "@tezos-core-tools/crypto-utils": "^0.0.7",
+    "@web3auth/base": "file:../../packages/base",
+    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
+    "@web3auth/xrpl-provider": "file:../../packages/providers/xrpl-provider",
+    "@web3auth/modal": "file:../../packages/modal",
+    "path-browserify": "^1.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "web3": "^1.8.1"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "lint": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx'",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.10",
+    "assert": "^2.0.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "react-scripts": "5.0.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "typescript": "^4.9.4",
+    "url": "^0.11.0",
+    "webpack-bundle-analyzer": "^4.7.0"
+  }
+}

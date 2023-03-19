@@ -59,7 +59,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
 
-    // await this.lookupNetwork();
+    await this.lookupNetwork();
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {

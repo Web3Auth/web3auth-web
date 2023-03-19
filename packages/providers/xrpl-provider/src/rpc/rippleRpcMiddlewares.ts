@@ -5,7 +5,6 @@ export const RPC_METHODS = {
   GET_ACCOUNTS: "ripple_getAccounts",
   GET_KEY_PAIR: "ripple_getKeyPair",
   GET_PUBLIC_KEY: "ripple_getPublicKey",
-  GET_XRP_BALANCE: "ripple_xrpBalance",
   SIGN_MESSAGE: "ripple_signTransaction",
   SIGN_TRANSACTION: "ripple_submitTransaction",
   SUBMIT_TRANSACTION: "ripple_submitMessage",
@@ -20,7 +19,6 @@ export interface IProviderHandlers {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getKeyPair: (req: JRPCRequest<unknown>) => Promise<KeyPair>;
   getPublicKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  getBalance: (req: JRPCRequest<unknown>) => Promise<string>;
   signTransaction: (req: JRPCRequest<{ transaction: Transaction; multisign: string | boolean }>) => Promise<{ tx_blob: string; hash: string }>;
   submitTransaction: (req: JRPCRequest<{ transaction: Transaction }>) => Promise<SubmitResponse>;
   signMessage: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
@@ -57,7 +55,7 @@ export function createGenericJRPCMiddleware<T, U>(
 }
 
 export function createXRPLMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, submitTransaction, signTransaction, signMessage, getKeyPair, getPublicKey, getBalance } = providerHandlers;
+  const { getAccounts, submitTransaction, signTransaction, signMessage, getKeyPair, getPublicKey } = providerHandlers;
 
   return mergeMiddleware([
     createGetAccountsMiddleware({ getAccounts }),
@@ -69,7 +67,6 @@ export function createXRPLMiddleware(providerHandlers: IProviderHandlers): JRPCM
     createGenericJRPCMiddleware<{ message: string }, { signature: string }>(RPC_METHODS.SIGN_MESSAGE, signMessage),
     createGenericJRPCMiddleware<void, KeyPair>(RPC_METHODS.GET_KEY_PAIR, getKeyPair),
     createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_PUBLIC_KEY, getPublicKey),
-    createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_XRP_BALANCE, getBalance),
   ]);
 }
 

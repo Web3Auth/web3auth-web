@@ -34,7 +34,7 @@ export function getProviderHandlers({
   privKey: string;
   chainConfig: Partial<CustomChainConfig>;
 }): IProviderHandlers {
-  const client = new Client(chainConfig.rpcTarget);
+  const client = new Client(chainConfig.rpcTarget.replace("http", "ws"));
   return {
     getAccounts: async (_: JRPCRequest<unknown>): Promise<string[]> => {
       const { publicKey } = deriveKeypair(web3authKey);
@@ -47,11 +47,6 @@ export function getProviderHandlers({
     getPublicKey: async (_: JRPCRequest<unknown>): Promise<string> => {
       const keyPair = deriveKeypair(web3authKey);
       return keyPair.publicKey;
-    },
-    getBalance: async (_: JRPCRequest<unknown>): Promise<string> => {
-      const { publicKey } = deriveKeypair(web3authKey);
-      const accAddress = deriveAddress(publicKey);
-      return client.getXrpBalance(accAddress);
     },
     signTransaction: async (
       req: JRPCRequest<{ transaction: Transaction; multisign?: boolean | string }>
@@ -94,7 +89,7 @@ export const getXRPLChainConfig = (
       rpcTarget: "https://xrplcluster.com",
       ticker: "XRP",
       tickerName: "XRPL",
-      displayName: "XRPL",
+      displayName: "xrpl mainnet",
       blockExplorer: "https://livenet.xrpl.org",
     };
     return { ...chainConfig, ...customChainConfig };
@@ -105,7 +100,7 @@ export const getXRPLChainConfig = (
       rpcTarget: "https://s.altnet.rippletest.net:51234",
       ticker: "XRP",
       tickerName: "XRPL",
-      displayName: "XRPL",
+      displayName: "xrpl testnet",
       blockExplorer: "https://testnet.xrpl.org",
     };
     return { ...chainConfig, ...customChainConfig };
@@ -116,7 +111,7 @@ export const getXRPLChainConfig = (
       rpcTarget: "https://s.devnet.rippletest.net:51234",
       ticker: "XRP",
       tickerName: "XRPL",
-      displayName: "XRPL",
+      displayName: "xrpl devnet",
       blockExplorer: "https://devnet.xrpl.org",
     };
     return { ...chainConfig, ...customChainConfig };
