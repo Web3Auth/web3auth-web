@@ -9,13 +9,14 @@
     "@taquito/utils": "^13.0.1",
     "@tezos-core-tools/crypto-utils": "^0.0.7",
     "@web3auth/base": "file:../../packages/base",
+    "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "@web3auth/xrpl-provider": "file:../../packages/providers/xrpl-provider",
-    "@web3auth/modal": "file:../../packages/modal",
     "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web3": "^1.8.1"
+    "web3": "^1.8.1",
+    "xrpl": "^2.7.0"
   },
   "scripts": {
     "start": "react-app-rewired start",

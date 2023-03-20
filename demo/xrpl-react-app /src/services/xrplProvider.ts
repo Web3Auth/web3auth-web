@@ -1,6 +1,7 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
+import { convertStringToHex, Payment, Transaction, xrpToDrops } from "xrpl";
 
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
@@ -10,22 +11,23 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       })
 
       if (accounts) {
-        const accInfo = await provider.request({
-            "method": "account_info",
-            "params": [
-                {
-                    "account": accounts[0],
-                    "strict": true,
-                    "ledger_index": "current",
-                    "queue": true
-                }
-            ]
-        })
-        uiConsole("xrpl account info", accInfo);
+        // const accInfo = await provider.request({
+        //     "method": "account_info",
+        //     "params": [
+        //         {
+        //             "account": accounts[0],
+        //             "strict": true,
+        //             "ledger_index": "current",
+        //             "queue": true
+        //         }
+        //     ]
+        // })
+        uiConsole("xrpl account info", accounts);
 
+      } else {
+        uiConsole("No accounts found, please report this issue.")
       }
 
-      uiConsole("No accounts found, please report this issue.")
      
     } catch (error) {
       console.error("Error", error);
@@ -47,22 +49,17 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
 
   const signMessage = async () => {
     try {
-      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
-      const web3 = new Web3(provider as any);
-      const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-      (web3.currentProvider as any)?.send(
-        {
-          method: "eth_sign",
-          params: [pubKey[0], message],
-          from: pubKey[0],
-        },
-        (err: Error, result: any) => {
-          if (err) {
-            return uiConsole(err);
-          }
-          uiConsole("Eth sign message => true", result);
-        }
-      );
+      
+        const msg = "Hello world";
+        const hexMsg = convertStringToHex(msg);
+        const txSign = await provider.request<string[]>({
+            method: "ripple_signMessage",
+            params: {
+                message: hexMsg
+            }
+            })
+        uiConsole("txRes", txSign);
+       
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
@@ -71,14 +68,27 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
 
   const signAndSendTransaction = async () => {
     try {
-      const web3 = new Web3(provider as any);
-      const accounts = await web3.eth.getAccounts();
-      const txRes = await web3.eth.sendTransaction({
-        from: accounts[0],
-        to: accounts[0],
-        value: web3.utils.toWei("0.01"),
-      });
-      uiConsole("txRes", txRes);
+        const accounts = await provider.request<string[]>({
+            method: "ripple_getAccounts"
+        })
+    
+        if (accounts && accounts.length > 0) {
+            const tx: Payment =  {
+                TransactionType: "Payment",
+                Account: accounts[0] as string,
+                Amount: xrpToDrops(2),
+                Destination: "rJSsXjsLywTNevqLjeXV6L6AXQexnF2N5u",
+            }
+            const txSign = await provider.request<string[]>({
+                method: "ripple_submitTransaction",
+                params: {
+                    transaction: tx
+                }
+              })
+          uiConsole("txRes", txSign);
+        } else {
+            uiConsole("failed to fetch accounts");
+        }
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
@@ -87,15 +97,28 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
   
   const signTransaction = async () => {
     try {
-      const web3 = new Web3(provider as any);
-      const accounts = await web3.eth.getAccounts();
-      // only supported with social logins (openlogin adapter)
-      const txRes = await web3.eth.signTransaction({
-        from: accounts[0],
-        to: accounts[0],
-        value: web3.utils.toWei("0.01"),
-      });
-      uiConsole("txRes", txRes);
+        const accounts = await provider.request<string[]>({
+            method: "ripple_getAccounts"
+        })
+    
+        if (accounts && accounts.length > 0) {
+            const tx: Payment =  {
+                TransactionType: "Payment",
+                Account: accounts[0] as string,
+                Amount: xrpToDrops(2),
+                Destination: "rJSsXjsLywTNevqLjeXV6L6AXQexnF2N5u",
+            }
+            const txSign = await provider.request<string[]>({
+                method: "ripple_signTransaction",
+                params: {
+                    transaction: tx
+                }
+              })
+          uiConsole("txRes", txSign);
+        } else {
+            uiConsole("failed to fetch accounts");
+        }
+       
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
