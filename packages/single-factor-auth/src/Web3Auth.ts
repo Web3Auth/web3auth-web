@@ -1,4 +1,5 @@
 import CustomAuth from "@toruslabs/customauth";
+import { subkey } from "@toruslabs/openlogin-subkey";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -125,6 +126,10 @@ class Web3Auth implements IWeb3Auth {
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
       finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+    }
+    if (this.options.usePnPKey) {
+      const pnpPrivKey = subkey(finalPrivKey, Buffer.from(this.options.clientId, "base64"));
+      finalPrivKey = pnpPrivKey.padStart(64, "0");
     }
     await this.privKeyProvider.setupProvider(finalPrivKey);
     return this.privKeyProvider.provider;
