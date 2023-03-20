@@ -65,7 +65,7 @@ export async function getProviderHandlers({
       }
       const sig = await _providerEngineProxy.request<string>({
         method: "sendTransaction",
-        params: [Buffer.from(transaction.serialize()).toString("base64"), { encoding: "base64" }],
+        params: [Buffer.from(transaction.serialize()).toString("base64"), { encoding: "base64", preflightCommitment: "confirmed" }],
       });
       return { signature: sig };
     },
