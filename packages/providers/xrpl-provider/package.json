@@ -34,6 +34,7 @@
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {
+    "@types/elliptic": "6.4.14",
     "@types/bn.js": "^5.1.1",
     "@types/json-rpc-random-id": "^1.0.1"
   },

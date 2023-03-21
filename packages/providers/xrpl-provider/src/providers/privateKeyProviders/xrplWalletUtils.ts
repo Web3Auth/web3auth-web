@@ -1,6 +1,6 @@
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
-import * as elliptic from "elliptic";
+import { ec as EC } from "elliptic";
 import { ethErrors } from "eth-rpc-errors";
 import { sign } from "ripple-keypairs";
 // import { ethErrors } from "eth-rpc-errors";
@@ -9,7 +9,7 @@ import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl
 import { IProviderHandlers, KeyPair } from "../../rpc/rippleRpcMiddlewares";
 import { XRPLNetwork } from "./interface";
 
-const Secp256k1 = elliptic.ec("secp256k1");
+const Secp256k1 = new EC("secp256k1");
 
 function bytesToHex(a: Iterable<number> | ArrayLike<number>): string {
   return Array.from(a, (byteValue) => {
