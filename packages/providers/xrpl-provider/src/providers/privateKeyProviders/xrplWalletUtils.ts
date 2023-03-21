@@ -87,8 +87,8 @@ export const getXRPLChainConfig = (
     const chainConfig: CustomChainConfig = {
       chainNamespace: CHAIN_NAMESPACES.OTHER,
       chainId: "0x1",
-      rpcTarget: "http://ripple-node.tor.us:51234",
-      wsTarget: "wss://s2.ripple.com/",
+      rpcTarget: "https://ripple-node.tor.us",
+      wsTarget: "wss://s2.ripple.com",
       ticker: "XRP",
       tickerName: "XRPL",
       displayName: "xrpl mainnet",
