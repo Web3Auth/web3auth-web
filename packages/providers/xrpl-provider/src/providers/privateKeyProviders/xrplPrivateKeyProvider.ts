@@ -17,7 +17,7 @@ import {
 import { getProviderHandlers } from "./xrplWalletUtils";
 
 export interface XrplPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: Omit<CustomChainConfig, "chainNamespace"> & Pick<CustomChainConfig, "wsTarget">;
 }
 
 export interface XrplPrivKeyProviderState extends BaseProviderState {
@@ -45,7 +45,11 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   }
 
   public async setupProvider(privKey: string): Promise<void> {
-    const providerHandlers = getProviderHandlers({
+    const { wsTarget } = this.config.chainConfig;
+    if (!wsTarget) {
+      throw WalletInitializationError.invalidParams(`wsTarget is required in chainConfig for xrplProvider`);
+    }
+    const providerHandlers = await getProviderHandlers({
       privKey,
       chainConfig: this.config.chainConfig,
     });

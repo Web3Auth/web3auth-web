@@ -25,6 +25,12 @@ export type CustomChainConfig = {
    * RPC target Url for the chain
    */
   rpcTarget: string;
+
+  /**
+   * web socket target Url for the chain
+   */
+  wsTarget?: string;
+
   /**
    * Display Name for the chain
    */

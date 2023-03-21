@@ -1,7 +1,7 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
-import { convertStringToHex, Payment, Transaction, xrpToDrops } from "xrpl";
+import { convertStringToHex, Payment, xrpToDrops } from "xrpl";
 
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
@@ -11,18 +11,18 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       })
 
       if (accounts) {
-        // const accInfo = await provider.request({
-        //     "method": "account_info",
-        //     "params": [
-        //         {
-        //             "account": accounts[0],
-        //             "strict": true,
-        //             "ledger_index": "current",
-        //             "queue": true
-        //         }
-        //     ]
-        // })
-        uiConsole("xrpl account info", accounts);
+        const accInfo = await provider.request({
+            "method": "account_info",
+            "params": [
+                {
+                    "account": accounts[0],
+                    "strict": true,
+                    "ledger_index": "current",
+                    "queue": true
+                }
+            ]
+        })
+        uiConsole("xrpl account info", accInfo);
 
       } else {
         uiConsole("No accounts found, please report this issue.")
@@ -37,10 +37,29 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
 
   const getBalance = async () => {
     try {
-      const web3 = new Web3(provider as any);
-      const accounts = await web3.eth.getAccounts();
-      const balance = await web3.eth.getBalance(accounts[0]);
-      uiConsole("Eth balance", balance);
+      const accounts = await provider.request<string[]>({
+        method: "ripple_getAccounts"
+      })
+
+      if (accounts) {
+        const accInfo = await provider.request({
+            "method": "account_info",
+            "params": [
+                {
+                    "account": accounts[0],
+                    "strict": true,
+                    "ledger_index": "current",
+                    "queue": true
+                }
+            ]
+        }) as Record<string, Record<string,string>>;
+        uiConsole("xrpl balance", accInfo.account_data?.Balance);
+
+      } else {
+        uiConsole("No accounts found, please report this issue.")
+      }
+
+     
     } catch (error) {
       console.error("Error", error);
       uiConsole("error", error);

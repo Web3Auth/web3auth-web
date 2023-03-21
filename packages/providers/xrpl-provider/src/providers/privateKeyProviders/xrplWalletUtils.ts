@@ -27,14 +27,15 @@ const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: st
   return { privateKey: xrplKey, publicKey };
 };
 
-export function getProviderHandlers({
+export async function getProviderHandlers({
   privKey: web3authKey,
   chainConfig,
 }: {
   privKey: string;
   chainConfig: Partial<CustomChainConfig>;
-}): IProviderHandlers {
-  const client = new Client(chainConfig.rpcTarget.replace("http", "ws"));
+}): Promise<IProviderHandlers> {
+  const client = new Client(chainConfig.wsTarget);
+  await client.connect();
   return {
     getAccounts: async (_: JRPCRequest<unknown>): Promise<string[]> => {
       const { publicKey } = deriveKeypair(web3authKey);
@@ -81,12 +82,13 @@ export function getProviderHandlers({
 export const getXRPLChainConfig = (
   network: XRPLNetwork,
   customChainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>
-): CustomChainConfig => {
+): CustomChainConfig & Pick<CustomChainConfig, "wsTarget"> => {
   if (network === "mainnet") {
     const chainConfig: CustomChainConfig = {
       chainNamespace: CHAIN_NAMESPACES.OTHER,
       chainId: "0x1",
-      rpcTarget: "https://xrplcluster.com",
+      rpcTarget: "http://ripple-node.tor.us:51234",
+      wsTarget: "wss://s2.ripple.com/",
       ticker: "XRP",
       tickerName: "XRPL",
       displayName: "xrpl mainnet",
@@ -97,7 +99,8 @@ export const getXRPLChainConfig = (
     const chainConfig: CustomChainConfig = {
       chainNamespace: CHAIN_NAMESPACES.OTHER,
       chainId: "0x2",
-      rpcTarget: "https://s.altnet.rippletest.net:51234",
+      rpcTarget: "https://testnet-ripple-node.tor.us",
+      wsTarget: "wss://s.altnet.rippletest.net",
       ticker: "XRP",
       tickerName: "XRPL",
       displayName: "xrpl testnet",
@@ -109,6 +112,7 @@ export const getXRPLChainConfig = (
       chainNamespace: CHAIN_NAMESPACES.OTHER,
       chainId: "0x3",
       rpcTarget: "https://s.devnet.rippletest.net:51234",
+      wsTarget: "wss://s.devnet.rippletest.net/",
       ticker: "XRP",
       tickerName: "XRPL",
       displayName: "xrpl devnet",

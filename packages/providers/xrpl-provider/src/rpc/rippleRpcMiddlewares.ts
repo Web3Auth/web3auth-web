@@ -1,3 +1,4 @@
+import { randomId } from "@toruslabs/base-controllers";
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
 import { SubmitResponse, Transaction } from "xrpl";
 
@@ -27,6 +28,11 @@ export interface IProviderHandlers {
 export function createGetAccountsMiddleware({ getAccounts }: { getAccounts: IProviderHandlers["getAccounts"] }): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware(async (request, response, next) => {
     const { method } = request;
+
+    // hack to override big ids from fetch middleware which are not supported in xrpl servers
+    // TODO: fix this for xrpl controllers.
+    request.id = randomId();
+
     if (method !== RPC_METHODS.GET_ACCOUNTS) return next();
 
     if (!getAccounts) throw new Error("WalletMiddleware - opts.getAccounts not provided");
