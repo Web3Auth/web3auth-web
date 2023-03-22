@@ -1,5 +1,4 @@
 import { SafeEventEmitterProvider } from "@web3auth/base";
-import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
 import { convertStringToHex, Payment, xrpToDrops } from "xrpl";
 

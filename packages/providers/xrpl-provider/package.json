@@ -22,21 +22,14 @@
     "@web3auth/base-provider": "^5.0.1",
     "@web3auth/base": "^5.0.1",
     "@toruslabs/base-controllers": "^2.8.0",
-    "@toruslabs/http-helpers": "^3.3.0",
     "@toruslabs/openlogin-jrpc": "^3.2.0",
     "ripple-keypairs": "^1.1.5",
     "xrpl": "^2.7.0",
-    "assert": "^2.0.0",
     "elliptic": "^6.5.4",
-    "bignumber.js": "^9.1.1",
-    "bn.js": "^5.2.1",
-    "eth-rpc-errors": "^4.0.3",
-    "jsonschema": "^1.4.1"
+    "eth-rpc-errors": "^4.0.3"
   },
   "devDependencies": {
-    "@types/elliptic": "6.4.14",
-    "@types/bn.js": "^5.1.1",
-    "@types/json-rpc-random-id": "^1.0.1"
+    "@types/elliptic": "6.4.14"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

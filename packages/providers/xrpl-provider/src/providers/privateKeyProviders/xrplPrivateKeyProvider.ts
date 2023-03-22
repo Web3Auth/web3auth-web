@@ -63,7 +63,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
 
-    // await this.lookupNetwork();
+    await this.lookupNetwork();
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
@@ -103,19 +103,20 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChainConfig: async (req: JRPCRequest<AddXRPLChainParameter>): Promise<void> => {
         if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = req.params;
+        const { chainId, ticker, tickerName, displayName, rpcTarget, wsTarget, blockExplorer } = req.params;
 
         if (!chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
-        if (!rpcUrls || rpcUrls.length === 0) throw ethErrors.rpc.invalidParams("Missing rpcUrls in chainParams");
-        if (!nativeCurrency) throw ethErrors.rpc.invalidParams("Missing nativeCurrency in chainParams");
+        if (!rpcTarget) throw ethErrors.rpc.invalidParams("Missing rpcTarget in chainParams");
+        if (!wsTarget) throw ethErrors.rpc.invalidParams("Missing wsTarget in chainParams");
         this.addChain({
-          chainNamespace: CHAIN_NAMESPACES.SOLANA,
+          chainNamespace: CHAIN_NAMESPACES.OTHER,
           chainId,
-          ticker: nativeCurrency?.symbol || "SOL",
-          tickerName: nativeCurrency?.name || "Solana",
-          displayName: chainName,
-          rpcTarget: rpcUrls[0],
-          blockExplorer: blockExplorerUrls?.[0] || "",
+          ticker: ticker || "XRP",
+          tickerName: tickerName || "XRPL",
+          displayName: displayName || "XRPL",
+          rpcTarget,
+          wsTarget,
+          blockExplorer,
         });
       },
       switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {

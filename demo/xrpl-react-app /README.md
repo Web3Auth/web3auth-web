@@ -18,7 +18,7 @@ npm run bootstrap && npm run build
 > Inside `web3auth-web` directory.
 
 ```bash
-cd demo/react-app
+cd demo/xrpl-react-app
 npm install
 npm run start
 # localhost:3000

@@ -1,5 +1,6 @@
 import { randomId } from "@toruslabs/base-controllers";
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
+import { CustomChainConfig } from "@web3auth/base";
 import { SubmitResponse, Transaction } from "xrpl";
 
 export const RPC_METHODS = {
@@ -76,16 +77,7 @@ export function createXRPLMiddleware(providerHandlers: IProviderHandlers): JRPCM
   ]);
 }
 
-export interface AddXRPLChainParameter {
-  chainId: string; // A 0x-prefixed hexadecimal string
-  chainName: string;
-  nativeCurrency: {
-    name: string;
-    symbol: string; // 2-6 characters long
-  };
-  rpcUrls: string[];
-  blockExplorerUrls?: string[];
-}
+export type AddXRPLChainParameter = Omit<CustomChainConfig, "chainNamespace"> & Pick<CustomChainConfig, "wsTarget">;
 
 export interface IChainSwitchHandlers {
   addChainConfig: (req: JRPCRequest<AddXRPLChainParameter>) => Promise<void>;
