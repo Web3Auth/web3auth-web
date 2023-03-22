@@ -115,7 +115,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         const adapter = new OpenloginAdapter({
           adapterSettings: {
             network: web3AuthNetwork,
-            externalProvider: xrplProvider,
+            provider: xrplProvider,
             clientId,
             loginConfig: {
               facebook: {

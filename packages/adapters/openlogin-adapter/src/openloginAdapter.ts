@@ -174,7 +174,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { externalProvider?: PrivateKeyProvider }): void {
+  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { provider?: PrivateKeyProvider }): void {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
@@ -189,8 +189,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.useCoreKitKey !== undefined) {
       this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
     }
-    if (adapterSettings.externalProvider) {
-      this.openloginOptions.externalProvider = adapterSettings.externalProvider;
+    if (adapterSettings.provider) {
+      this.openloginOptions.provider = adapterSettings.provider;
     }
   }
 
@@ -227,7 +227,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
       this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-      this.privKeyProvider = this.openloginOptions?.externalProvider || new CommonPrivateKeyProvider();
+      this.privKeyProvider = this.openloginOptions?.provider || new CommonPrivateKeyProvider();
     } else {
       throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
     }

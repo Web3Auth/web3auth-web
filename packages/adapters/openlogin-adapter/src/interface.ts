@@ -10,7 +10,7 @@ export type PrivateKeyProvider = IBaseProvider<string>;
 export interface OpenloginAdapterOptions extends BaseAdapterSettings {
   adapterSettings?: MakeOptional<OpenLoginOptions, "clientId" | "network"> & {
     useCoreKitKey?: boolean;
-    externalProvider?: PrivateKeyProvider;
+    provider?: PrivateKeyProvider;
   };
   loginSettings?: LoginSettings;
 }
