@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/single-factor-auth",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Multi chain wallet aggregator silent MFA for web3Auth",
   "keywords": [
     "web3Auth/single-factor-auth",
@@ -41,7 +41,7 @@
     "@web3auth/base": "^5.0.1",
     "@web3auth/base-provider": "^5.0.1",
     "@web3auth/ethereum-provider": "^5.0.1",
-    "@web3auth/solana-provider": "^5.0.1"
+    "@web3auth/solana-provider": "^5.0.2"
   },
   "lint-staged": {
     "!(*d).ts": [
