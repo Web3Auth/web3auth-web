@@ -82,7 +82,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.metamaskProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        if (!this.getChainConfig((this.chainConfig as CustomChainConfig).chainId)) await this.addChain(this.chainConfig as CustomChainConfig, true);
+        await this.addChain(this.chainConfig as CustomChainConfig, true);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;

@@ -92,7 +92,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.coinbaseProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        if (!this.getChainConfig(this.chainConfig.chainId)) await this.addChain(this.chainConfig as CustomChainConfig);
+        await this.addChain(this.chainConfig as CustomChainConfig);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
