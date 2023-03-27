@@ -41,7 +41,7 @@
     "@babel/preset-react": "^7.18.6",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-url": "^8.0.1",
-    "@svgr/rollup": "^6.5.1",
+    "@svgr/rollup": "^7.0.0",
     "@svgr/webpack": "^6.5.1",
     "@toruslabs/eslint-config-react": "^1.4.1",
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
