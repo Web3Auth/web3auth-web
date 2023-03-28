@@ -64,7 +64,11 @@ function App() {
           usePnPKey: false, // Setting this to true returns the same key as PnP Web SDK, By default, this SDK returns CoreKitKey.
         });
         setWeb3authSFAuth(web3authSfa);
-        web3authSfa.init();
+        await web3authSfa.init();
+        if (web3authSfa.provider) {
+          setProvider(web3authSfa.provider)
+          setUsesSfaSDK(true);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -145,10 +149,14 @@ function App() {
 
   const logout = async () => {
     if (usesSfaSDK) {
+      if (!web3authSFAuth) {
+        throw new Error('web3auth sf auth not initialized.');
+      }
       console.log(
         "You are directly using Single Factor Auth SDK to login the user, hence the Web3Auth logout function won't work for you. You can logout the user directly from your login provider, or just clear the provider object."
       );
       setProvider(null);
+      web3authSFAuth.logout();
       return;
     }
   };
