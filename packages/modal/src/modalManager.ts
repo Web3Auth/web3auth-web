@@ -248,7 +248,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         if (this.cachedAdapter === adapterName) {
           return;
         }
-        if (adapter.status === ADAPTER_STATUS.NOT_READY)
+        if (adapter.status === ADAPTER_STATUS.NOT_READY) {
           await adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
             .then(() => {
@@ -257,6 +257,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               return undefined;
             })
             .catch((error) => log.error(error, "error while initializing adapter"));
+        } else if (adapter.status === ADAPTER_STATUS.READY) {
+          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+          this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+        }
       }
     });
   }
