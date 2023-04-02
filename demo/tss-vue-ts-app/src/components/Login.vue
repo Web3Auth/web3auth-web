@@ -1,21 +1,21 @@
 <template>
   <v-form ref="form" v-model="validForm" @submit.prevent="">
-    <v-card class="mx-auto pt-10 sign-in" max-width="600" outlined shaped>
+    <v-card class="pt-10 mx-auto sign-in" max-width="600" outlined shaped>
       <v-list-item-content class="px-8">
         <!-- HEADER -->
-        <v-list-item-title class="text-h5 mb-2 font-weight-black">Sign in</v-list-item-title>
-        <v-list-item-subtitle class="text-subtitle-1 font-weight-bold mb-10">Your blockchain account in one-click</v-list-item-subtitle>
+        <v-list-item-title class="mb-2 text-h5 font-weight-black">Sign in</v-list-item-title>
+        <v-list-item-subtitle class="mb-10 text-subtitle-1 font-weight-bold">Your blockchain account in one-click</v-list-item-subtitle>
 
         <!-- BODY -->
         <v-row class="px-3">
           <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="connectTo">
-            Login
+            Login with google
           </v-btn>
         </v-row>
       </v-list-item-content>
 
       <!-- FOOTER -->
-      <div class="footer text-center text-caption font-weight-regular pa-8 mt-12">
+      <div class="mt-12 text-center footer text-caption font-weight-regular pa-8">
         <div>Self-custodial login by Web3Auth</div>
         <div>Terms of Service | Privacy Policy | Version 1.27.3</div>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <div :class="$vuetify.breakpoint.mdAndUp ? 'mt-16 px-6' : 'px-6'">
-    <div class="d-flex justify-space-between align-center mb-2">
+    <div class="mb-2 d-flex justify-space-between align-center">
       <div class="tag font-weight-black">DKLS19</div>
       <v-progress-linear :value="progressPercent" rounded color="success" class="ml-5" height="20">
         <template v-slot:default="{ value }">
@@ -15,7 +15,7 @@
     <br />
     <br />
 
-    <div class="font-weight-bold mb-1">Message:</div>
+    <div class="mb-1 font-weight-bold">Message:</div>
     <v-form ref="form" v-model="validForm" @submit.prevent="">
       <v-row class="mb-8">
         <v-col cols="12" md="8">
@@ -64,14 +64,7 @@ export default Vue.extend({
     },
   },
   data: () => ({
-    region: { name: "South America", key: "sa" },
-    regions: [
-      { name: "Singapore", key: "sg" },
-      { name: "North America", key: "na" },
-      { name: "South America", key: "sa" },
-      { name: "Europe", key: "eu" },
-    ],
-    message: "Hello Bogota",
+    message: "Hello MPC!!",
     signing: false,
     rules: {
       required: (value: string) => !!value || "Required.",
