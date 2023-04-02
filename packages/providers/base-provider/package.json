@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-provider",
-  "version": "4.3.0",
+  "version": "5.1.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseProvider.cjs.js",
@@ -19,9 +19,9 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^2.5.0",
-    "@toruslabs/openlogin-jrpc": "^2.9.0",
-    "@web3auth/base": "^4.3.0",
+    "@toruslabs/base-controllers": "^2.8.1",
+    "@toruslabs/openlogin-jrpc": "^3.2.0",
+    "@web3auth/base": "^5.1.0",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
   },

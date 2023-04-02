@@ -1,6 +1,7 @@
 import "../css/web3auth.css";
 import "./localeImport";
 
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
   ADAPTER_EVENTS,
@@ -13,6 +14,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletConnectV1Data,
+  WalletConnectV2Data,
   Web3AuthError,
 } from "@web3auth/base";
 import i18n from "i18next";
@@ -20,12 +22,20 @@ import { createRoot } from "react-dom/client";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+import {
+  DEFAULT_LOGO_DARK,
+  DEFAULT_LOGO_LIGHT,
+  ExternalWalletEventType,
+  LOGIN_MODAL_EVENTS,
+  MODAL_STATUS,
+  ModalState,
+  SocialLoginEventType,
+  UIConfig,
+} from "./interfaces";
 
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 function createWrapper(parentZIndex: string): HTMLElement {
-  const existingWrapper = document.getElementById("w3a-container");
-  if (existingWrapper) return existingWrapper;
+  const existingWrapper = document.getElementById("w3a-parent-container");
+  if (existingWrapper) existingWrapper.remove();
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
@@ -53,11 +63,22 @@ class LoginModal extends SafeEventEmitter {
 
   private defaultLanguage: string;
 
-  constructor({ appName, appLogo, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage, modalZIndex = "99998" }: UIConfig) {
+  private web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
+
+  constructor({
+    appName,
+    appLogo,
+    adapterListener,
+    theme = "auto",
+    displayErrorsOnModal = true,
+    defaultLanguage,
+    modalZIndex = "99998",
+    web3AuthNetwork = "mainnet",
+  }: UIConfig) {
     super();
-    this.appLogo = appLogo || DEFAULT_LOGO_URL;
     this.appName = appName || "blockchain";
     this.modalZIndex = modalZIndex || "99998";
+    this.web3AuthNetwork = web3AuthNetwork;
 
     // set theme
     if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -65,6 +86,8 @@ class LoginModal extends SafeEventEmitter {
     } else {
       this.isDark = false;
     }
+
+    this.appLogo = appLogo || (this.isDark ? DEFAULT_LOGO_DARK : DEFAULT_LOGO_LIGHT);
 
     this.stateEmitter = new SafeEventEmitter();
     this.displayErrorsOnModal = displayErrorsOnModal;
@@ -164,26 +187,33 @@ class LoginModal extends SafeEventEmitter {
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
-            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={this.appLogo}
             appName={this.appName}
+            web3AuthNetwork={this.web3AuthNetwork}
           />
         </ThemedContext.Provider>
       );
     });
   };
 
-  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, loginMethods: LoginMethodConfig, loginMethodsOrder: string[]): void => {
+  addSocialLogins = (
+    adapter: WALLET_ADAPTER_TYPE,
+    loginMethods: LoginMethodConfig,
+    loginMethodsOrder: string[],
+    uiConfig: Omit<UIConfig, "adapterListener">
+  ): void => {
     this.setState({
       socialLoginsConfig: {
         adapter,
         loginMethods,
         loginMethodsOrder,
+        uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
+    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
@@ -252,6 +282,9 @@ class LoginModal extends SafeEventEmitter {
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
       const walletConnectData = adapterData.data as WalletConnectV1Data;
+      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+    } else if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     }
   };

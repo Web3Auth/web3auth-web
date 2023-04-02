@@ -12,10 +12,8 @@
       <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
       <button class="rpcBtn" @click="getConnectedChainId" style="cursor: pointer">Get chainId</button>
       <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin'" @click="addChain" style="cursor: pointer">Add Chain</button>
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin' || connectedAdapter === 'metamask'" @click="switchChain" style="cursor: pointer">
-        Switch Chain
-      </button>
+      <button class="rpcBtn" @click="addChain" style="cursor: pointer">Add Chain</button>
+      <button class="rpcBtn" @click="switchChain" style="cursor: pointer">Switch Chain</button>
     </section>
     <section
       :style="{
@@ -35,13 +33,14 @@
 </template>
 
 <script lang="ts">
+import { getEvmChainConfig } from "@web3auth/base";
 import Vue from "vue";
 
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../lib/eth";
 
 export default Vue.extend({
   name: "EthRpc",
-  props: ["provider", "console", "connectedAdapter"],
+  props: ["provider", "console", "connectedAdapter", "web3auth"],
   data() {
     return {};
   },
@@ -71,10 +70,7 @@ export default Vue.extend({
     },
     async switchChain() {
       try {
-        await this.provider.sendAsync({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x4" }],
-        });
+        await this.web3auth.switchChain({ chainId: "0x89" });
         this.console("switchedChain");
       } catch (error) {
         console.log("error while switching chain", error);
@@ -83,22 +79,7 @@ export default Vue.extend({
     },
     async addChain() {
       try {
-        await this.provider.sendAsync({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: "0x4",
-              chainName: "rinkeby",
-              nativeCurrency: {
-                name: "ether",
-                symbol: "ETH",
-                decimals: 18,
-              },
-              rpcUrls: [`https://rpc.ankr.com/eth_rinkeby`],
-              blockExplorerUrls: [`https://rinkeby.etherscan.io/`],
-            },
-          ],
-        });
+        await this.web3auth.addChain(getEvmChainConfig(137));
         this.console("added chain");
       } catch (error) {
         console.log("error while adding chain", error);

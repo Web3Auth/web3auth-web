@@ -17,13 +17,14 @@ import {
   UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
+  WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 
-export interface Web3AuthCoreOptions {
+export interface Web3AuthNoModalOptions {
   /**
    * Client id for web3auth.
    * You can obtain your client id from the web3auth developer dashboard.
@@ -63,12 +64,16 @@ export interface Web3AuthCoreOptions {
    */
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 
+  /**
+   * Uses core-kit key with web3auth provider
+   * @defaultValue false
+   */
   useCoreKitKey?: boolean;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
-export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
-  readonly coreOptions: Web3AuthCoreOptions;
+export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
+  readonly coreOptions: Web3AuthNoModalOptions;
 
   public connectedAdapterName: WALLET_ADAPTER_TYPE | null = null;
 
@@ -82,7 +87,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
 
   private storage: "sessionStorage" | "localStorage" = "localStorage";
 
-  constructor(options: Web3AuthCoreOptions) {
+  constructor(options: Web3AuthNoModalOptions) {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
@@ -144,7 +149,7 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     await Promise.all(initPromises);
   }
 
-  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthCore {
+  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthNoModal {
     this.checkInitRequirements();
     const providedChainConfig = this.coreOptions.chainConfig;
 
@@ -156,6 +161,17 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       throw WalletInitializationError.incompatibleChainNameSpace(
         `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
       );
+
+    if (adapter.name === WALLET_ADAPTERS.WALLET_CONNECT_V2 && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]) {
+      throw WalletInitializationError.invalidParams(
+        "Either one of wallet connect v2 or wallet connect v1 can be used, wallet connect v1 is already added to adapter lists."
+      );
+    }
+    if (adapter.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
+      throw WalletInitializationError.invalidParams(
+        "Either one of wallet connect v2 or wallet connect v1 can be used, wallet connect v2 is already added to adapter lists."
+      );
+    }
 
     if (
       adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
@@ -174,6 +190,16 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     if (!storageAvailable(this.storage)) return;
     window[this.storage].removeItem(ADAPTER_CACHE_KEY);
     this.cachedAdapter = null;
+  }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.walletAdapters[this.connectedAdapterName].switchChain(params);
   }
 
   /**
@@ -220,23 +246,23 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      await Promise.all(
-        Object.values(this.plugins).map(async (plugin) => {
-          try {
-            if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
-              return;
-            }
-            await plugin.initWithWeb3Auth(this);
-            await plugin.connect();
-          } catch (error: unknown) {
-            // swallow error if connector adapter doesn't supports this plugin.
-            if ((error as Web3AuthError).code === 5211) {
-              return;
-            }
-            log.error(error);
+
+      Object.values(this.plugins).map(async (plugin) => {
+        try {
+          if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+            return;
           }
-        })
-      );
+          await plugin.initWithWeb3Auth(this);
+          await plugin.connect();
+        } catch (error: unknown) {
+          // swallow error if connector adapter doesn't supports this plugin.
+          if ((error as Web3AuthError).code === 5211) {
+            return;
+          }
+          log.error(error);
+        }
+      });
+
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
@@ -281,6 +307,13 @@ export class Web3AuthCore extends SafeEventEmitter implements IWeb3Auth {
     walletAdapter.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (data) => {
       log.debug("adapter data updated", data);
       this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, data);
+    });
+
+    walletAdapter.on(ADAPTER_EVENTS.CACHE_CLEAR, (data) => {
+      log.debug("adapter cache clear", data);
+      if (storageAvailable(this.storage)) {
+        this.clearCache();
+      }
     });
   }
 

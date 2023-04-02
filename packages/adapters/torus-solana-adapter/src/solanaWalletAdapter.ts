@@ -134,6 +134,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
   }
@@ -159,5 +160,26 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     const userInfo = await this.torusInstance.getUserInfo();
     return userInfo;
+  }
+
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    // await this.solanaProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    const chainConfig = this.getChainConfig(params.chainId) as CustomChainConfig;
+    await this.torusInstance?.setProvider({
+      rpcTarget: chainConfig.rpcTarget,
+      chainId: chainConfig.chainId,
+      displayName: chainConfig.displayName,
+      blockExplorerUrl: chainConfig.blockExplorer,
+      ticker: chainConfig.ticker,
+      tickerName: chainConfig.tickerName,
+      logo: "https://images.web3auth.io/login-torus-solana.svg",
+    });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 }

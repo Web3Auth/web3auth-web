@@ -1,6 +1,6 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
 import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { createConfigMiddleware } from "../../../rpc/JrpcClient";
@@ -12,7 +12,7 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
   }
 
   public async switchChain(_: { chainId: string }): Promise<void> {
-    return Promise.resolve();
+    throw WalletLoginError.unsupportedOperation("Chain switching is not supported by this adapter");
   }
 
   public async setupProvider(injectedProvider: P): Promise<void> {

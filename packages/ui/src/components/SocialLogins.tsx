@@ -1,3 +1,4 @@
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       loginMethods: {},
       loginMethodsOrder: [],
       adapter: "",
+      uiConfig: {},
     },
     handleSocialLoginClick,
   } = props;
@@ -43,29 +45,42 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   const adapterListClass = classNames("w3a-adapter-list", "w3ajs-socials-adapters", !isExpanded ? " w3a-adapter-list--shrink" : "");
   const adapterButtonClass = classNames("w3a-button-expand", "w3ajs-button-expand", isExpanded ? "w3a-button--rotate" : "");
-  const adapterExpandText = isExpanded ? t("modal.social.view-less-new") : t("modal.social.view-more-new");
+  const adapterExpandText = isExpanded ? t("modal.social.view-less") : t("modal.social.view-more");
+  const loginMethodsCount = Object.keys(socialLoginsConfig.loginMethods).length + 1;
+
+  const restrictedLoginMethods: string[] = [
+    LOGIN_PROVIDER.WEBAUTHN,
+    LOGIN_PROVIDER.JWT,
+    LOGIN_PROVIDER.SMS_PASSWORDLESS,
+    LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
+  ];
+
   return (
     <div className="w3ajs-social-logins w3a-group">
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
           const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method].name || method);
-          const providerIcon = (
-            <Image width="20" imageId={`login-${method}${isDark ? "-light" : "-dark"}`} hoverImageId={`login-${method}-active`} isButton />
-          );
-          if (
-            socialLoginsConfig.loginMethods[method].showOnModal === false ||
-            method === "webauthn" ||
-            method === "jwt" ||
-            method === "email_passwordless"
-          ) {
-            return null;
-          }
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
-          if (order === 1) {
+
+          const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
+          const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+
+          const imageId = `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
+          const hoverId = `login-${method}-active`;
+          const hoverImage = method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB ? imageId : hoverId;
+          const providerIcon = <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
+
+          if (socialLoginsConfig.loginMethods[method].showOnModal === false || restrictedLoginMethods.includes(method)) {
+            return null;
+          }
+
+          const loginMethodSpan = classNames("w3a-adapter-item", socialLoginsConfig?.uiConfig?.loginGridCol === 2 ? "col-span-3" : "col-span-2");
+
+          if (isMainOption || order === 1) {
             return (
-              <li className="w3a-adapter-item col-span-3" key={method} style={{ order }}>
+              <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <button
                   type="button"
                   onClick={() =>
@@ -74,7 +89,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                       loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
-                  className="w3a-button w3a-button--login h-12 w-full"
+                  className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w3a-button--login h-12 w-full`}
                   title={name}
                 >
                   {providerIcon}
@@ -87,7 +102,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             );
           }
           return (
-            <li className="w3a-adapter-item col-span-1" key={method} style={{ order }}>
+            <li className={loginMethodSpan} key={method} style={{ order: order + loginMethodsCount }}>
               <button
                 type="button"
                 onClick={() =>
@@ -96,7 +111,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
-                className="w3a-button w3a-button--login w-full"
+                className="w-full w3a-button w3a-button--login"
                 title={name}
               >
                 {providerIcon}

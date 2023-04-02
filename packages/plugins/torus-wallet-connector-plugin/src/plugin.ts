@@ -1,7 +1,7 @@
 import TorusEmbed, { LOGIN_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
-import type { Web3AuthCore } from "@web3auth/core";
+import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { EthereumRpcError } from "eth-rpc-errors";
 import log from "loglevel";
 
@@ -23,7 +23,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: Web3AuthCore | null = null;
+  private web3auth: Web3AuthNoModal | null = null;
 
   private userInfo: UserInfo | null = null;
 
@@ -47,7 +47,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: Web3AuthCore): Promise<void> {
+  async initWithWeb3Auth(web3auth: Web3AuthNoModal): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw TorusWalletPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw TorusWalletPluginError.unsupportedAdapter();
@@ -57,7 +57,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
     }
     this.web3auth = web3auth;
-    this.subscribeToWeb3AuthCoreEvents(web3auth);
+    this.subscribeToWeb3AuthNoModalEvents(web3auth);
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
     const network = {
       ...web3auth.coreOptions.chainConfig,
@@ -171,7 +171,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     });
   }
 
-  private subscribeToWeb3AuthCoreEvents(web3Auth: Web3AuthCore) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);

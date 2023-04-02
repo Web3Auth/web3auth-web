@@ -169,4 +169,45 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     const userInfo = await this.torusInstance.getUserInfo("");
     return userInfo;
   }
+
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    // TODO: add these in torus wallet.
+    // await this.torusInstance?.provider.request({
+    //   method: "wallet_addEthereumChain",
+    //   params: [
+    //     {
+    //       chainId: chainConfig.chainId,
+    //       chainName: chainConfig.displayName,
+    //       rpcUrls: [chainConfig.rpcTarget],
+    //       blockExplorerUrls: [chainConfig.blockExplorer],
+    //       nativeCurrency: {
+    //         name: chainConfig.tickerName,
+    //         symbol: chainConfig.ticker,
+    //         decimals: chainConfig.decimals || 18,
+    //       },
+    //     },
+    //   ],
+    // });
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    // TODO: add these in torus wallet.
+    // await this.torusInstance?.provider.request({
+    //   method: "wallet_switchEthereumChain",
+    //   params: [{ chainId: params.chainId }],
+    // });
+    const chainConfig = this.getChainConfig(params.chainId) as CustomChainConfig;
+    await this.torusInstance?.setProvider({
+      host: chainConfig.rpcTarget,
+      chainId: parseInt(chainConfig.chainId, 16),
+      networkName: chainConfig.displayName,
+      blockExplorer: chainConfig.blockExplorer,
+      ticker: chainConfig.ticker,
+      tickerName: chainConfig.tickerName,
+    });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
 }

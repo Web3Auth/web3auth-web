@@ -34,6 +34,7 @@ export const ADAPTER_STATUS = {
 export const ADAPTER_EVENTS = {
   ...ADAPTER_STATUS,
   ADAPTER_DATA_UPDATED: "adapter_data_updated",
+  CACHE_CLEAR: "cache_clear",
 } as const;
 export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
 
@@ -64,11 +65,13 @@ export interface IAdapter<T> extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<SafeEventEmitterProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
+  switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
@@ -86,6 +89,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   // should be added in constructor or from setAdapterSettings function
   // before calling init function.
   protected chainConfig: CustomChainConfig | null = null;
+
+  protected knownChainConfigs: Record<CustomChainConfig["chainId"], CustomChainConfig> = {};
 
   public abstract adapterNamespace: AdapterNamespaceType;
 
@@ -131,12 +136,17 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
       const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;
 
       this.chainConfig = finalChainConfig;
+      this.addChainConfig(finalChainConfig);
     }
   }
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
-    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.status === ADAPTER_STATUS.CONNECTING) return;
+    if (
+      (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 || this.name === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
+      this.status === ADAPTER_STATUS.CONNECTING
+    )
+      return;
     else if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
     if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
@@ -165,9 +175,30 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
+  checkAddChainRequirements(init = false): void {
+    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+  }
+
+  checkSwitchChainRequirements({ chainId }: { chainId: string }, init = false): void {
+    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (!this.knownChainConfigs[chainId]) throw WalletLoginError.chainConfigNotAdded("Invalid chainId");
+  }
+
   updateAdapterData(data: unknown): void {
     this.adapterData = data;
     this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  }
+
+  protected addChainConfig(chainConfig: CustomChainConfig): void {
+    const currentConfig = this.knownChainConfigs[chainConfig.chainId];
+    this.knownChainConfigs[chainConfig.chainId] = {
+      ...(currentConfig || {}),
+      ...chainConfig,
+    };
+  }
+
+  protected getChainConfig(chainId: string): CustomChainConfig | null {
+    return this.knownChainConfigs[chainId] || null;
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
@@ -175,6 +206,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
+  abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
+  abstract switchChain(params: { chainId: string }): Promise<void>;
 }
 
 export interface BaseAdapterConfig {
@@ -245,6 +278,7 @@ export interface WalletConnectV1Data {
   extensionAdapters: IWalletConnectExtensionAdapter[];
 }
 
+export type WalletConnectV2Data = WalletConnectV1Data;
 export interface IAdapterDataEvent {
   adapterName: string;
   data: unknown;

@@ -2,10 +2,8 @@ import { memo, useContext } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../interfaces";
 import Icon from "./Icon";
-// import Image from "./Image";
-
-// const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface HeaderProps {
   appName: string;
@@ -19,13 +17,17 @@ function Header(props: HeaderProps) {
 
   const [t] = useTranslation();
 
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+
   return (
     <div className="w3a-modal__header">
       <div className="w3a-header">
-        {/* todo: invert condition to show app logo */}
-        {!appLogo ? <img className="w3a-header__logo" src={appLogo} alt="" /> : <div />}
-
         <div>
+          {headerLogo && (
+            <div className="w3a-header__logo">
+              <img src={headerLogo} alt="" />
+            </div>
+          )}
           <div className="w3a-header__title">{t("modal.header-title")}</div>
           <div className="w3a-header__subtitle">
             {t("modal.header-subtitle-name", { appName })}

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    @apply appearance-none;
+  }
+}
+
 /* cyrillic-ext */
 @font-face {
   font-family: "Inter";
@@ -197,14 +204,7 @@
 
 /* Modal */
 #w3a-modal {
-  @apply fixed
-  font-body
-  inset-0
-  flex
-  items-center
-  justify-center
-  box-border
-  p-4;
+  @apply box-border fixed inset-0 flex items-center justify-center p-4 font-body;
 }
 
 #w3a-modal.w3a-modal--hidden {
@@ -219,7 +219,7 @@
   max-h-[95%]
   min-h-[630px]
   overflow-x-hidden
-  overflow-y-auto
+  overflow-y-hidden
   rounded-[32px]
   opacity-0
   relative
@@ -242,55 +242,41 @@
 }
 
 #w3a-modal .w3a-modal__header {
-  @apply py-2 px-8 relative;
+  @apply relative px-8 py-2;
 }
 #w3a-modal .w3a-modal__content {
-  @apply py-4 px-8;
+  @apply px-8 py-4 overflow-y-auto;
 }
 #w3a-modal .w3a-modal__footer {
-  @apply py-4 px-8 text-center items-center justify-center bg-app-gray-50 dark:bg-app-gray-600 mt-auto;
+  @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
 }
 
 /* Header */
 #w3a-modal .w3a-header {
-  @apply flex items-center;
+  @apply flex items-center pt-8;
 }
 #w3a-modal .w3a-header__logo {
-  @apply h-auto w-10 mr-4;
+  @apply mb-4;
+}
+#w3a-modal .w3a-header__logo img {
+  @apply w-10 h-auto;
 }
 #w3a-modal .w3a-header__title {
-  @apply font-bold
-  text-xl
-  text-app-gray-900
-  dark:text-white
-  pt-8;
+  @apply text-xl font-bold text-app-gray-900 dark:text-white;
 }
 #w3a-modal div.w3a-header__subtitle {
-  @apply font-normal text-sm text-app-gray-500 dark:text-app-gray-400 flex items-center;
+  @apply flex items-center text-sm font-normal text-app-gray-500 dark:text-app-gray-400;
 }
 #w3a-modal div.w3a-header__subtitle img {
   @apply h-[14px] w-[14px] ml-1;
 }
 #w3a-modal button.w3a-header__button {
-  @apply cursor-pointer absolute p-0 border-0 top-5 right-7 
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply absolute p-0 border-0 cursor-pointer top-5 right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 /* BODY */
 #w3a-modal div.w3a-social__policy {
-  @apply text-left
-  text-xs
-  mt-4
-  font-medium
-  text-app-gray-500
-  dark:text-app-gray-400;
+  @apply mt-4 text-xs font-medium text-left text-app-gray-500 dark:text-app-gray-400;
 }
 
 #w3a-modal .w3a-group {
@@ -298,6 +284,14 @@
 }
 #w3a-modal .w3a-group:last-child {
   @apply mb-0;
+}
+
+#w3a-modal .w3ajs-passwordless div.w3a-group__title {
+  @apply flex items-center;
+}
+
+#w3a-modal .w3ajs-passwordless div.w3a-group__title img {
+  @apply h-[14px] w-[14px] ml-1;
 }
 
 #w3a-modal .w3a-group.w3a-group--hidden,
@@ -308,12 +302,12 @@
 }
 
 #w3a-modal div.w3a-group__title {
-  @apply text-sm font-medium mb-2 text-app-gray-900 dark:text-white;
+  @apply mb-2 text-sm font-medium text-app-gray-900 dark:text-white;
 }
 
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-3 overflow-y-hidden gap-x-2 gap-y-4;
+  @apply grid grid-cols-6 overflow-y-hidden gap-x-2 gap-y-4;
   padding: 1px;
   max-height: 500px;
   transition: max-height 0.35s;
@@ -332,6 +326,10 @@
 
 #w3a-modal li.w3a-adapter-item {
   @apply list-none;
+}
+
+#w3a-modal li.w3a-adapter-item--full {
+  @apply col-span-6;
 }
 
 #w3a-modal .w3a-adapter-item--hide {
@@ -355,10 +353,7 @@
 }
 
 #w3a-modal .w3a-external-group {
-  @apply flex
-  flex-wrap
-  gap-3
-  mb-4;
+  @apply flex flex-wrap gap-3 mb-4;
 }
 
 #w3a-modal .w3a-external-group__left {
@@ -366,15 +361,7 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply bg-none border-0 p-0 inline-flex items-center mb-2 cursor-pointer text-app-gray-500 dark:text-app-gray-400
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply inline-flex items-center p-0 mb-2 border-0 cursor-pointer bg-none text-app-gray-500 dark:text-app-gray-400 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
@@ -386,7 +373,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect {
-  @apply block text-center mb-4;
+  @apply block mb-4 text-center;
 }
 
 #w3a-modal .w3a-wallet-connect.w3a-wallet-connect--hidden {
@@ -428,18 +415,11 @@
 
 /* Footer Components */
 #w3a-modal .w3a-footer {
-  @apply flex justify-center items-center text-xs text-app-gray-400;
+  @apply flex items-center justify-center text-xs text-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links a {
-  @apply focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  @apply focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-footer__links span {
@@ -462,36 +442,49 @@
 
 /* Text Field */
 #w3a-modal .w3a-text-field {
-  @apply rounded-full
-  py-3 px-6
+  @apply py-3
+  px-6
+  mt-2
   text-sm
-  /* bg */
-  bg-app-gray-50
-  disabled:bg-[#F2F2F2]
-  dark:bg-app-gray-700
-  dark:disabled:bg-[#242933]
-  /* outline */
   outline-0
-  ring
-  ring-1
-  focus:ring
-  focus:ring-1
-  ring-app-gray-300
-  focus:ring-app-primary-600
-  disabled:ring-[#F2F2F2]
-  dark:ring-app-gray-600
-  dark:focus:ring-app-primary-600
-  dark:disabled:ring-[#242933]
-  /* text */
+  ring-0
+  border
+  rounded-full
+  placeholder-app-gray-500
+  dark:placeholder-app-gray-400
+  bg-app-gray-50
+  border-app-gray-300
   text-app-gray-900
-  focus:text-app-gray-900
-  placeholder:text-app-gray-400
-  disabled:placeholder:text-app-gray-400
+  dark:bg-app-gray-600
+  dark:border-app-gray-500
   dark:text-white
-  dark:focus:text-white
-  dark:disabled:placeholder:text-[#3E444E];
+  disabled:placeholder-app-gray-400
+  dark:disabled:placeholder-app-gray-500
+  disabled:cursor-not-allowed
+  focus:ring-1
+  focus:ring-app-primary-600
+  dark:focus:ring-app-primary-600
+
+  focus:border-transparent
+  dark:focus:border-transparent;
 
   line-height: 1.25em;
+}
+
+#w3a-modal .w3a-text-field--country-code {
+  @apply flex justify-between w-full px-4;
+}
+
+#w3a-modal .w3a-text-field--number {
+  @apply appearance-none;
+}
+
+#w3a-modal .w3a-sms-field--error {
+  @apply text-red-500
+  text-sm
+  -mt-2
+  mb-2
+  ml-1.5;
 }
 
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
@@ -560,10 +553,7 @@
 }
 
 #w3a-modal .w3a-button--login {
-  @apply inline-flex
-  items-center
-  justify-center
-  h-11;
+  @apply inline-flex items-center justify-center h-11;
 }
 
 #w3a-modal button.w3a-button--login:hover > .hover-icon {
@@ -579,31 +569,55 @@
 }
 
 #w3a-modal button.w3a-button-expand {
-  @apply h-auto w-auto
-  ml-auto
-  text-sm
-  mt-4
-  text-app-primary-600
-  hover:text-app-primary-800
-  dark:hover:text-app-primary-500
-  focus-visible:outline-1
-  dark:focus-visible:outline-1
-  focus-visible:outline
-  dark:focus-visible:outline
-  focus-visible:outline-app-gray-50
-  dark:focus-visible:outline-app-gray-400;
+  @apply w-auto h-auto mt-4 ml-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:hover:text-app-primary-500 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
+}
+
+/* SMS */
+#w3a-modal .w3a-sms-field__container {
+  @apply grid grid-cols-12 gap-2;
+}
+
+#w3a-modal .w3a-sms-field__code-selected {
+  @apply flex;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown {
+  @apply absolute z-10 overflow-y-scroll bg-white divide-y divide-gray-100 rounded-lg shadow-modal dark:bg-gray-700 w-[120px] h-[185px];
+  transform: translate(0, -230px);
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown--hidden {
+  @apply hidden;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown ul {
+  @apply py-2 text-sm text-gray-700 dark:text-gray-200;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li {
+  @apply p-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-white;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li button {
+  @apply w-full h-full px-4 py-2 text-left;
+}
+
+#w3a-modal .w3a-sms-field__code-dropdown li button div {
+  @apply flex items-center;
+}
+
+#w3a-modal .w3a-sms-field__code {
+  @apply col-span-5;
+}
+
+#w3a-modal .w3a-sms-field__number {
+  @apply col-span-7;
 }
 
 /* SPINNER */
 /* Loader */
 #w3a-modal .w3a-modal__loader {
-  @apply absolute
-  flex
-  justify-center
-  inset-0
-  z-10
-  bg-white
-  dark:bg-app-gray-700;
+  @apply absolute inset-0 z-10 flex justify-center bg-white dark:bg-app-gray-700;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -648,7 +662,7 @@
   text-[#b7b8bd];
 }
 #w3a-modal .w3a-spinner-power > img {
-  @apply h-8 w-auto inline;
+  @apply inline w-auto h-8;
 }
 
 #w3a-modal .w3a-spinner {
@@ -670,8 +684,7 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-white
-  dark:bg-app-gray-700;
+  @apply bg-white dark:bg-app-gray-700;
   width: 50px;
   height: 50px;
   top: 5px;
@@ -708,27 +721,24 @@
   @apply flex p-2;
 }
 
+#w3a-modal .w3a-modal__loader-app-logo--default {
+  @apply bg-app-primary-600 dark:bg-app-gray-50 w-[72px] h-[72px] rounded-full items-center justify-center;
+}
+
 #w3a-modal .w3a-modal__loader-app-logo img {
-  width: 72px;
-  max-width: 72px;
-  max-height: 72px;
-  height: auto;
+  @apply max-h-[72px] max-w-[72px] w-[72px] h-auto;
+}
+
+#w3a-modal .w3a-modal__loader-app-logo--default img {
+  @apply max-h-[45px] max-w-[45px] w-[45px];
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
-  display: flex;
-  padding: 8px;
-  width: 72px;
-  height: 72px;
-  border-radius: 40px;
-  background: #f3f4f6;
-  align-items: center;
-  justify-content: center;
+  @apply bg-app-gray-100 dark:bg-app-gray-50 w-[72px] h-[72px] flex rounded-full items-center justify-center;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
-  width: 64px;
-  height: 64px;
+  @apply w-16 h-16;
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {

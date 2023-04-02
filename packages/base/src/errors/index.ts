@@ -130,6 +130,9 @@ export class WalletLoginError extends Web3AuthError {
     5113: "Wallet is not connected",
     5114: "Wallet popup has been closed by the user",
     5115: "User has already enabled mfa, please use the @web3auth/web3auth-web sdk for login with mfa",
+    5116: "Chain config has not been added. Please add the chain config before calling switchChain",
+    5117: "Unsupported operation",
+    5118: "useCoreKitKey flag is enabled but coreKitKey is not available",
   };
 
   public constructor(code: number, message?: string) {
@@ -162,5 +165,46 @@ export class WalletLoginError extends Web3AuthError {
 
   public static mfaEnabled(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5115, extraMessage);
+  }
+
+  public static chainConfigNotAdded(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5116, extraMessage);
+  }
+
+  public static unsupportedOperation(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5117, extraMessage);
+  }
+
+  public static coreKitKeyNotFound(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5118, extraMessage);
+  }
+}
+
+export class WalletOperationsError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    5201: "Provided chainId is not allowed",
+    5202: "This operation is not allowed",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletOperationsError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`);
+  }
+
+  // Custom methods
+  public static chainIDNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5201, extraMessage);
+  }
+
+  public static operationNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5202, extraMessage);
   }
 }

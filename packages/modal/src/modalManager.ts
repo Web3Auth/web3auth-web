@@ -7,11 +7,12 @@ import {
   CustomChainConfig,
   getChainConfig,
   log,
+  LoginMethodConfig,
   SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import { Web3AuthCore, Web3AuthCoreOptions } from "@web3auth/core";
+import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -25,7 +26,7 @@ import { getDefaultAdapterModule } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
-export interface Web3AuthOptions extends Web3AuthCoreOptions {
+export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
    * web3auth instance provides different adapters for different type of usages. If you are dapp and want to
    * use external wallets like metamask, then you can use the `DAPP` authMode.
@@ -41,7 +42,7 @@ export interface Web3AuthOptions extends Web3AuthCoreOptions {
   uiConfig?: Omit<UIConfig, "adapterListener">;
 }
 
-export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
+export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
   readonly options: Web3AuthOptions;
@@ -85,6 +86,9 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
+      web3AuthNetwork: this.options.web3AuthNetwork,
+      loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+      primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });
     this.subscribeToLoginModalEvents();
   }
@@ -129,7 +133,6 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
         });
 
         this.walletAdapters[adapterName] = ad;
-
         return adapterName;
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
@@ -155,20 +158,26 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
       }
     });
 
-    const adapterNames = await Promise.all(adapterConfigurationPromises);
+    let adapterNames = await Promise.all(adapterConfigurationPromises);
     const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
-      if (this.modalConfig.adapters[adapter.name].showOnModal !== true) return false;
-      if (!this.modalConfig.adapters[adapter.name].loginMethods) return true;
+      if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
+      if (!this.modalConfig.adapters?.[adapter.name]?.loginMethods) return true;
       const mergedLoginMethods = getAdapterSocialLogins(
         adapter.name,
         this.walletAdapters[adapter.name],
         (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
       );
-      if (Object.values(mergedLoginMethods).some((method) => method.showOnModal)) return true;
+      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
-    log.debug(hasInAppWallets, this.walletAdapters, "hasInAppWallets");
+    log.debug(hasInAppWallets, this.walletAdapters, adapterNames, "hasInAppWallets");
+
+    // if both wc1 and wc2 are configured, give precedence to wc2.
+    if (this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1] && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
+      delete this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      adapterNames = adapterNames.filter((ad) => ad !== WALLET_ADAPTERS.WALLET_CONNECT_V1);
+    }
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
@@ -239,7 +248,7 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
         if (this.cachedAdapter === adapterName) {
           return;
         }
-        if (adapter.status === ADAPTER_STATUS.NOT_READY)
+        if (adapter.status === ADAPTER_STATUS.NOT_READY) {
           await adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
             .then(() => {
@@ -248,6 +257,10 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
               return undefined;
             })
             .catch((error) => log.error(error, "error while initializing adapter"));
+        } else if (adapter.status === ADAPTER_STATUS.READY) {
+          adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+          this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+        }
       }
     });
   }
@@ -262,7 +275,12 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
           this.walletAdapters[adapterName],
           (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
         ),
-        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS
+        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
+        {
+          ...this.options.uiConfig,
+          loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+          primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
+        }
       );
     }
   }
@@ -288,13 +306,19 @@ export class Web3Auth extends Web3AuthCore implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const walletConnectStatus = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.status;
-      if (visibility && walletConnectStatus === ADAPTER_STATUS.READY) {
-        // refreshing session for wallet connect whenever modal is opened.
-        try {
-          this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1].connect();
-        } catch (error) {
-          log.error(`Error while disconnecting to wallet connect in core`, error);
+      const adapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2] || this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1];
+      if (adapter) {
+        const walletConnectStatus = adapter?.status;
+        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+        if (visibility && (walletConnectStatus === ADAPTER_STATUS.READY || walletConnectStatus === ADAPTER_STATUS.CONNECTING)) {
+          log.debug("refreshing wc session");
+
+          // refreshing session for wallet connect whenever modal is opened.
+          try {
+            adapter.connect();
+          } catch (error) {
+            log.error(`Error while disconnecting to wallet connect in core`, error);
+          }
         }
       }
     });

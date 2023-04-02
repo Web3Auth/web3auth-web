@@ -17,6 +17,7 @@ import {
   UserInfo,
   WALLET_ADAPTERS,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
@@ -91,7 +92,8 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.coinbaseProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        await this.switchChain(this.chainConfig as CustomChainConfig);
+        await this.addChain(this.chainConfig as CustomChainConfig);
+        await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -106,6 +108,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with coinbase wallet");
     }
   }
@@ -128,36 +131,34 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  private async switchChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    try {
-      await this.coinbaseProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
-    } catch (switchError: unknown) {
-      // This error code indicates that the chain has not been added to Coinbase Wallet.
-      if ((switchError as { code: number }).code === 4902) {
-        await this.coinbaseProvider.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: chainConfig.chainId,
-              chainName: chainConfig.displayName,
-              rpcUrls: [chainConfig.rpcTarget],
-              blockExplorerUrls: [chainConfig.blockExplorer],
-              nativeCurrency: {
-                name: chainConfig.tickerName,
-                symbol: chainConfig.ticker,
-                decimals: chainConfig.decimals || 18,
-              },
-            },
-          ],
-        });
-      } else {
-        throw switchError;
-      }
-    }
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(init);
+    await this.coinbaseProvider.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+    super.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.coinbaseProvider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: params.chainId }],
+    });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
   }
 }
 

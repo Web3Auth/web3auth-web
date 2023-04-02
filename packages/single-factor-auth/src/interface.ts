@@ -45,4 +45,10 @@ export interface Web3AuthOptions {
    * @defaultValue false
    */
   enableLogging?: boolean;
+
+  /**
+   * setting this to true returns the same key as web sdk (i.e., plug n play key)
+   * By default, this sdk returns CoreKitKey
+   */
+  usePnPKey?: boolean;
 }
