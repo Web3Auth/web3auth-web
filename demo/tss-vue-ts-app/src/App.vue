@@ -34,7 +34,7 @@
           <div class="py-16 text-center" v-if="signingin">
             <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
           </div>
-          <Login v-else-if="currentStep == 1" :set-step="setStep" :connect="connect" />
+          <Login v-else-if="currentStep == 1" :submitting="submitting" :set-step="setStep" :connect="connect" />
           <Sign
             v-if="currentStep == 2"
             :set-step="setStep"
@@ -63,6 +63,7 @@ import { getPubKeyPoint } from "@tkey/common-types";
 import ThresholdKey from "@tkey/default";
 import TorusServiceProvider from "@tkey/service-provider-torus";
 import { MockStorageLayer } from "@tkey/storage-layer-torus";
+import { LOGIN_PROVIDER } from "@toruslabs/base-controllers";
 import TorusSdk, { AggregateLoginParams, TorusAggregateLoginResponse } from "@toruslabs/customauth";
 import { generatePrivate } from "@toruslabs/eccrypto";
 import { post } from "@toruslabs/http-helpers";
@@ -166,6 +167,7 @@ export default Vue.extend({
   data: () => ({
     currentStep: 1,
     loggedIn: false,
+    submitting: false,
     web3auth: null,
     torusDirectSdk: null as TorusSdk | null,
     loginDetails: null as TorusAggregateLoginResponse | null,
@@ -188,6 +190,39 @@ export default Vue.extend({
       tickerName: "Ethereum",
     },
     privateKeyOrSigningProvider: null as PrivateKeyOrSigningProvider | null,
+    loginVerifierMap: {
+      [LOGIN_PROVIDER.GOOGLE]: () =>
+        ({
+          aggregateVerifierType: "single_id_verifier",
+          verifierIdentifier: "sapphire-google-lrc",
+          subVerifierDetailsArray: [
+            {
+              typeOfLogin: "google",
+              verifier: "torus",
+              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+            },
+          ],
+        } as AggregateLoginParams),
+      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: (email?: string) =>
+        ({
+          aggregateVerifierType: "single_id_verifier",
+          verifierIdentifier: "sapphire-email-passwordless-lrc",
+          subVerifierDetailsArray: [
+            {
+              typeOfLogin: "jwt",
+              clientId: "P7PJuBCXIHP41lcyty0NEb7Lgf7Zme8Q",
+              verifier: "torus",
+              jwtParams: {
+                login_hint: email,
+                verifierIdField: "name",
+                isVerifierIdCaseSensitive: false,
+                connection: "email",
+                domain: "https://lrc.auth.openlogin.com",
+              },
+            },
+          ],
+        } as AggregateLoginParams),
+    },
   }),
   computed: {
     landingPage() {
@@ -227,42 +262,23 @@ export default Vue.extend({
       // await this.web3auth?.logout();
       this.setStep(1);
     },
-    async connect() {
+    async connect(loginProvider: string, loginHint?: string) {
       try {
         if (!this.torusDirectSdk) throw new Error("custom auth not initialized.");
-        const emailpassword: AggregateLoginParams = {
-          aggregateVerifierType: "single_id_verifier",
-          verifierIdentifier: "sapphire-email-passwordless-lrc",
-          subVerifierDetailsArray: [
-            {
-              typeOfLogin: "jwt",
-              clientId: "P7PJuBCXIHP41lcyty0NEb7Lgf7Zme8Q",
-              verifier: "torus",
-              jwtParams: {
-                login_hint: "arch1995@gmail.com",
-                verifierIdField: "name",
-                isVerifierIdCaseSensitive: false,
-                connection: "email",
-                domain: "https://lrc.auth.openlogin.com",
-              },
-            },
-          ],
-        };
+        this.submitting = true;
 
-        const google: AggregateLoginParams = {
-          aggregateVerifierType: "single_id_verifier",
-          verifierIdentifier: "sapphire-google-lrc",
-          subVerifierDetailsArray: [
-            {
-              typeOfLogin: "google",
-              verifier: "torus",
-              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-            },
-          ],
-        };
+        if (loginProvider === LOGIN_PROVIDER.EMAIL_PASSWORDLESS && !loginHint) {
+          throw new Error("Please provide a valid email.");
+        }
 
-        const loginDetails = await this.torusDirectSdk.triggerAggregateLogin(google);
-        console.log("loginDetails", loginDetails);
+        const veriferMap = this.loginVerifierMap[loginProvider];
+
+        if (!veriferMap) throw new Error("no valid login provider");
+
+        const verifierConfig = veriferMap(loginHint);
+
+        const loginDetails = await this.torusDirectSdk.triggerAggregateLogin(verifierConfig);
+        this.submitting = false;
         this.loginDetails = loginDetails;
 
         this.setStep(2);
@@ -299,11 +315,10 @@ export default Vue.extend({
       const parties = 4;
       const clientIndex = parties - 1;
       const { endpoints, tssWSEndpoints, partyIndexes } = generateEndpoints(parties, clientIndex);
-
-      const deviceTSSShare = new BN(generatePrivate());
-      const deviceTSSIndex = 3;
-
       const { verifierId, aggregateVerifier } = this.loginDetails.userInfo[0];
+
+      const deviceTSSShare = this.generateDeviceShare(aggregateVerifier as string, verifierId);
+      const deviceTSSIndex = 3;
 
       const randomSessionNonce = keccak256(generatePrivate().toString("hex") + Date.now());
       const vid = `${aggregateVerifier}${DELIMITERS.Delimiter1}${verifierId}`;
@@ -387,6 +402,18 @@ export default Vue.extend({
           return account;
         },
       });
+    },
+    generateDeviceShare(verifier: string, verifierId: string) {
+      const storageKey = `${verifier}_${verifierId}`;
+      const deviceShare = localStorage.getItem(storageKey);
+
+      if (!deviceShare) {
+        const share = new BN(generatePrivate());
+        localStorage.setItem(storageKey, share.toString(16, 64));
+        return share;
+      }
+
+      return new BN(Buffer.from(deviceShare, "hex"));
     },
   },
 });
