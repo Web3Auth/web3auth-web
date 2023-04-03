@@ -66,8 +66,6 @@ import { MockStorageLayer } from "@tkey/storage-layer-torus";
 import { LOGIN_PROVIDER } from "@toruslabs/base-controllers";
 import TorusSdk, { AggregateLoginParams, TorusAggregateLoginResponse } from "@toruslabs/customauth";
 import { generatePrivate } from "@toruslabs/eccrypto";
-import { post } from "@toruslabs/http-helpers";
-import { safeatob } from "@toruslabs/openlogin-utils";
 import { Client } from "@toruslabs/tss-client";
 import * as tss from "@toruslabs/tss-lib";
 import { IBaseProvider } from "@web3auth-mpc/base-provider";
@@ -259,7 +257,6 @@ export default Vue.extend({
       this.currentStep = value;
     },
     async logout() {
-      // await this.web3auth?.logout();
       this.setStep(1);
     },
     async connect(loginProvider: string, loginHint?: string) {

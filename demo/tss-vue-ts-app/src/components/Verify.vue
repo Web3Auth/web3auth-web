@@ -1,6 +1,5 @@
 <template>
   <div class="px-5">
-    <v-btn class="mb-2 px-0" link depressed plain color="#0364FF" @click="goBack">{{ "< Back" }}</v-btn>
     <div>
       <span class="tag font-weight-black">DKLS19</span>
     </div>
@@ -11,21 +10,21 @@
       </a>
     </div>
 
-    <div class="font-weight-bold mt-4 mb-1">Hash:</div>
+    <div class="mt-4 mb-1 font-weight-bold">Hash:</div>
     <v-row>
       <v-col cols="12">
         <TextFieldCopier :text="finalHash" />
       </v-col>
     </v-row>
 
-    <div class="font-weight-bold mb-1">Signature:</div>
+    <div class="mb-1 font-weight-bold">Signature:</div>
     <v-row>
       <v-col cols="12">
         <TextFieldCopier :text="finalSig" />
       </v-col>
     </v-row>
 
-    <div class="font-weight-bold mb-1">Signer:</div>
+    <div class="mb-1 font-weight-bold">Signer:</div>
     <v-row>
       <v-col cols="12">
         <TextFieldCopier :text="finalSigner" />
@@ -84,10 +83,6 @@ export default Vue.extend({
     verified: false,
   }),
   methods: {
-    goBack() {
-      this.setStep(2);
-      this.verified = false;
-    },
     copyToClipboard() {
       this.copied = true;
       setTimeout(() => {
