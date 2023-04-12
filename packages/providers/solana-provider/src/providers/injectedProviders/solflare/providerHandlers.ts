@@ -21,5 +21,10 @@ export const getSolflareHandlers = (injectedProvider: SolflareWallet, getProvide
     const res = await conn.sendRawTransaction(transaction.serialize());
     return { signature: res };
   };
+
+  solflareProviderHandlers.signMessage = async (req: JRPCRequest<{ message: Uint8Array; display?: "utf8" | "hex" }>): Promise<Uint8Array> => {
+    const sigData = await injectedProvider.signMessage(req.params.message, req.params.display);
+    return sigData;
+  };
   return solflareProviderHandlers;
 };
