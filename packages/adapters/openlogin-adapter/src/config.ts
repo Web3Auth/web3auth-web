@@ -1,4 +1,4 @@
-import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-utils";
 
 import { OpenloginAdapterOptions } from "./interface";
 

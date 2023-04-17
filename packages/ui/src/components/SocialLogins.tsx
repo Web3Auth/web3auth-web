@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
