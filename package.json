@@ -5,6 +5,7 @@
     "packages/base",
     "packages/modal",
     "packages/no-modal",
+    "packages/mpc-core-kit",
     "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",

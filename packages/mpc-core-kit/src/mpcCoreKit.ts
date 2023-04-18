@@ -1,0 +1,509 @@
+import { encrypt, getPubKeyECC, getPubKeyPoint, Point, ShareStore } from "@tkey/common-types";
+import ThresholdKey from "@tkey/core";
+import SecurityQuestionsModule from "@tkey/security-questions";
+import { TorusServiceProvider } from "@tkey/service-provider-torus";
+import { ShareSerializationModule } from "@tkey/share-serialization";
+import { TorusStorageLayer } from "@tkey/storage-layer-torus";
+import { AGGREGATE_VERIFIER, AGGREGATE_VERIFIER_TYPE } from "@toruslabs/customauth";
+import { generatePrivate } from "@toruslabs/eccrypto";
+import { keccak256 } from "@toruslabs/metadata-helpers";
+import { Client, utils as tssUtils } from "@toruslabs/tss-client";
+import { CHAIN_NAMESPACES, CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
+import { EthereumSigningProvider } from "@web3auth-mpc/ethereum-provider";
+import BN from "bn.js";
+import EC from "elliptic";
+
+import { DEFAULT_CHAIN_CONFIG, DELIMITERS, ERRORS, FactorKeyTypeShareDescription, USER_PATH, WEB3AUTH_NETWORK } from "./constants";
+import {
+  FactorKeyCloudMetadata,
+  IWeb3Auth,
+  LoginParams,
+  USER_PATH_TYPE,
+  UserInfo,
+  WEB3AUTH_NETWORK_TYPE,
+  Web3AuthOptions,
+  Web3AuthState,
+} from "./interfaces";
+import { generateTSSEndpoints } from "./utils";
+
+export class Web3AuthMPCCoreKit implements IWeb3Auth {
+  private options: Web3AuthOptions;
+
+  private privKeyProvider: EthereumSigningProvider | null = null;
+
+  private torusSp: TorusServiceProvider | null = null;
+
+  private storageLayer: TorusStorageLayer | null = null;
+
+  private tkey: ThresholdKey | null = null;
+
+  private state: Web3AuthState = {};
+
+  constructor(options: Web3AuthOptions) {
+    if (!options.chainConfig) options.chainConfig = DEFAULT_CHAIN_CONFIG;
+    if (typeof options.manualSync !== "boolean") options.manualSync = true;
+    if (!options.web3AuthNetwork) options.web3AuthNetwork = WEB3AUTH_NETWORK.MAINNET;
+    if (!options.tssImportUrl) {
+      if (options.web3AuthNetwork === WEB3AUTH_NETWORK.MAINNET) options.tssImportUrl = `https://sapphire-1.auth.network/tss/v1/clientWasm`;
+      else options.tssImportUrl = `https://sapphire-dev-2-1.authnetwork.dev/tss/v1/clientWasm`;
+    }
+    if (options.chainConfig.chainNamespace !== CHAIN_NAMESPACES.EIP155) {
+      throw new Error("You must specify a eip155 chain config.");
+    }
+
+    this.options = options;
+  }
+
+  get provider(): SafeEventEmitterProvider | null {
+    return this.privKeyProvider?.provider ? this.privKeyProvider.provider : null;
+  }
+
+  private get networkUrl(): string {
+    if (this.options.web3AuthNetwork === WEB3AUTH_NETWORK.TESTNET) return "https://sapphire-dev-2-1.authnetwork.dev";
+    return "https://sapphire-1.auth.network";
+  }
+
+  private get metadataUrl(): string {
+    return `${this.networkUrl}/metadata`;
+  }
+
+  private get verifier(): string {
+    return this.state?.loginInfo?.verifier ? this.state.loginInfo.verifier : "";
+  }
+
+  private get verifierId(): string {
+    return this.state?.loginInfo?.verifierId ? this.state.loginInfo.verifierId : "";
+  }
+
+  private get signatures(): string[] {
+    return this.state?.loginInfo?.signatures ? this.state.loginInfo.signatures : [];
+  }
+
+  public async init(): Promise<void> {
+    this.torusSp = new TorusServiceProvider({
+      useTSS: true,
+      customAuthArgs: {
+        baseUrl: this.options.baseUrl ? this.options.baseUrl : `${window.location.origin}/serviceworker`,
+      },
+    });
+
+    this.storageLayer = new TorusStorageLayer({
+      hostUrl: this.metadataUrl,
+      enableLogging: true,
+    });
+
+    const shareSerializationModule = new ShareSerializationModule();
+    const securityQuestionsModule = new SecurityQuestionsModule();
+
+    this.tkey = new ThresholdKey({
+      enableLogging: true,
+      serviceProvider: this.torusSp,
+      storageLayer: this.storageLayer,
+      manualSync: this.options.manualSync,
+      modules: {
+        shareSerializationModule,
+        securityQuestionsModule,
+      },
+    });
+
+    await (this.tkey.serviceProvider as TorusServiceProvider).init({});
+  }
+
+  public async connect(params: LoginParams): Promise<SafeEventEmitterProvider | null> {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first");
+    }
+
+    try {
+      let privateKey = "";
+      let path: USER_PATH_TYPE | null = null;
+
+      // oAuth login.
+      if (params.subVerifierDetails) {
+        // single verifier login.
+        const loginResponse = await (this.tkey?.serviceProvider as TorusServiceProvider).triggerLogin(params.subVerifierDetails);
+        privateKey = loginResponse.privateKey;
+        this.updateState({
+          loginInfo: {
+            verifier: loginResponse.userInfo.verifier,
+            verifierId: loginResponse.userInfo.verifierId,
+            signatures: loginResponse.signatures.filter((i) => Boolean(i)),
+            userInfo: loginResponse.userInfo,
+          },
+        });
+      } else if (params.subVerifierDetailsArray) {
+        if (params.aggregateVerifierType === AGGREGATE_VERIFIER.SINGLE_VERIFIER_ID && params.subVerifierDetailsArray.length !== 1) {
+          throw new Error("Single id verifier must have exactly one sub verifier");
+        }
+        const loginResponse = await (this.tkey?.serviceProvider as TorusServiceProvider).triggerAggregateLogin({
+          aggregateVerifierType: params.aggregateVerifierType as AGGREGATE_VERIFIER_TYPE,
+          verifierIdentifier: params.aggregateVerifierIdentifier as string,
+          subVerifierDetailsArray: params.subVerifierDetailsArray,
+        });
+        privateKey = loginResponse.privateKey;
+        this.updateState({
+          loginInfo: {
+            verifier: loginResponse.userInfo[0].verifier,
+            verifierId: loginResponse.userInfo[0].verifierId,
+            signatures: loginResponse.signatures.filter((i) => Boolean(i)),
+            userInfo: loginResponse.userInfo[0],
+          },
+        });
+      }
+
+      let factorKey: BN | null = null;
+
+      const tKeyLocalStoreString = localStorage.getItem(`tKeyLocalStore\u001c${this.verifier}\u001c${this.verifierId}`);
+      const tKeyLocalStore = JSON.parse(tKeyLocalStoreString || "{}");
+
+      const existingUser = await this.isMetadataPresent(privateKey);
+
+      if (!existingUser) {
+        // save the device share.
+        factorKey = new BN(generatePrivate());
+        const deviceTSSShare = new BN(generatePrivate());
+        const deviceTSSIndex = 2;
+        const factorPub = getPubKeyPoint(factorKey);
+        await this.tkey.initialize({ useTSS: true, factorPub, deviceTSSShare, deviceTSSIndex });
+        path = USER_PATH.NEW;
+      } else if (tKeyLocalStore.verifier === this.verifier && tKeyLocalStore.verifierId === this.verifierId) {
+        factorKey = new BN(tKeyLocalStore.factorKey, "hex");
+        const deviceShare = await this.checkIfFactorKeyValid(factorKey);
+        await this.tkey.initialize({ neverInitializeNewKey: true });
+        await this.tkey.inputShareStoreSafe(deviceShare, true);
+        path = USER_PATH.EXISTING;
+      } else {
+        await this.tkey.initialize({ neverInitializeNewKey: true });
+        throw new Error(ERRORS.TKEY_SHARES_REQUIRED);
+      }
+
+      localStorage.setItem(
+        `tKeyLocalStore\u001c${this.verifier}\u001c${this.verifierId}`,
+        JSON.stringify({
+          factorKey: factorKey.toString("hex"),
+          verifier: this.verifier,
+          verifierId: this.verifierId,
+        })
+      );
+
+      await this.tkey.reconstructKey();
+      await this.finalizeTkey(path, factorKey);
+
+      return this.provider;
+    } catch (err: unknown) {
+      log.error("login error", err);
+      throw new Error((err as Error).message);
+    }
+  }
+
+  public async exportBackupShare(): Promise<string> {
+    if (!this.tkey) {
+      throw new Error("Tkey not initialized, call init first.");
+    }
+    if (!this.state.factorKey) {
+      throw new Error("local factor not available.");
+    }
+    const backupFactorKey = new BN(generatePrivate());
+    const backupFactorPub = getPubKeyPoint(backupFactorKey);
+
+    await this.copyFactorPub(2, backupFactorPub);
+    const deviceShare = await this.createDeviceShare();
+    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
+    const mnemonic = (await (this.tkey.modules.shareSerializationModule as ShareSerializationModule).serialize(
+      backupFactorKey,
+      "mnemonic"
+    )) as string;
+    await this.tkey.syncLocalMetadataTransitions();
+    return mnemonic;
+  }
+
+  public async inputBackupShare(shareMnemonic: string) {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first");
+    }
+
+    const factorKey = await (this.tkey.modules[FactorKeyTypeShareDescription.ShareSerializationModule] as ShareSerializationModule).deserialize(
+      shareMnemonic,
+      "mnemonic"
+    );
+    if (!factorKey) {
+      throw new Error(ERRORS.INVALID_BACKUP_SHARE);
+    }
+
+    const deviceShare = await this.checkIfFactorKeyValid(factorKey);
+    await this.tkey?.inputShareStoreSafe(deviceShare, true);
+    await this.tkey?.reconstructKey();
+
+    await this.finalizeTkey(USER_PATH.RECOVER, factorKey);
+  }
+
+  public getUserInfo(): UserInfo {
+    if (!this.state.factorKey || !this.state.loginInfo) {
+      throw new Error("user is not logged in.");
+    }
+    return this.state.loginInfo?.userInfo;
+  }
+
+  public async logout(): Promise<void> {
+    throw new Error("Method not implemented");
+  }
+
+  private async finalizeTkey(path: USER_PATH_TYPE, factorKey: BN) {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized.");
+    }
+
+    if (!path || !Object.values(USER_PATH).includes(path)) {
+      throw new Error("Invalid path specified");
+    }
+
+    const { requiredShares } = this.tkey.getKeyDetails();
+    if (requiredShares > 0) {
+      throw new Error(ERRORS.TKEY_SHARES_REQUIRED);
+    }
+
+    const tssNonce: number = (this.tkey.metadata.tssNonces || {})[this.tkey.tssTag];
+
+    const { tssShare: tssShare2, tssIndex: tssShare2Index } = await this.tkey.getTSSShare(factorKey);
+
+    const tssPubKeyPoint = this.tkey.getTSSPub();
+    const tssPubKey = Buffer.from(`${tssPubKeyPoint.x.toString(16, 64)}${tssPubKeyPoint.y.toString(16, 64)}`, "hex");
+    this.updateState({ tssNonce, tssShare2, tssShare2Index, tssPubKey, factorKey });
+
+    if (path === USER_PATH.NEW) {
+      const deviceShare = await this.createDeviceShare();
+      await this.addShareDescriptionDeviceShare(deviceShare, factorKey);
+    }
+    await this.tkey.syncLocalMetadataTransitions();
+    await this.setupProvider();
+  }
+
+  private checkTkeyRequirements() {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first!");
+    }
+  }
+
+  private async isMetadataPresent(privateKey: string) {
+    // TODO define metadata type.
+    const privateKeyBN = new BN(privateKey, "hex");
+    const metadata = await this.tkey?.storageLayer.getMetadata({ privKey: privateKeyBN });
+    if (metadata && Object.keys(metadata).length > 0 && (metadata as any).message !== "KEY_NOT_FOUND") {
+      return true;
+    }
+    return false;
+  }
+
+  private async checkIfFactorKeyValid(factorKey: BN): Promise<ShareStore> {
+    if (factorKey === null) throw new Error("Invalid factor key");
+    this.checkTkeyRequirements();
+    const factorKeyMetadata = await this.tkey?.storageLayer.getMetadata<{ message: string }>({ privKey: factorKey });
+    if (!factorKeyMetadata || factorKeyMetadata.message === "KEY_NOT_FOUND") {
+      throw new Error("no metadata for your factor key, reset your account");
+    }
+    const metadataShare = JSON.parse(factorKeyMetadata.message);
+    if (!metadataShare.deviceShare || !metadataShare.tssShare) throw new Error("Invalid data from metadata");
+    return metadataShare.deviceShare;
+  }
+
+  private addNewShare(newShareIndex: number, backupFactorPub: Point) {
+    if (!this.tkey) throw new Error("tkey not available, call init first");
+    if (!this.state.tssShare2 || !this.state.tssShare2Index) {
+      throw new Error("Input share is not available");
+    }
+    if (newShareIndex !== 2 && newShareIndex !== 3) {
+      throw new Error("tss shares can only be 2 or 3");
+    }
+    return this.tkey.generateNewShare(true, {
+      inputTSSIndex: this.state.tssShare2Index,
+      inputTSSShare: this.state.tssShare2,
+      newFactorPub: backupFactorPub,
+      newTSSIndex: newShareIndex,
+      authSignatures: this.signatures,
+    });
+  }
+
+  private async copyFactorPub(newFactorTSSIndex: number, newFactorPub: Point) {
+    if (!this.tkey) {
+      throw new Error("tkey does not exist, cannot copy factor pub");
+    }
+    if (!this.tkey.metadata.factorPubs || !Array.isArray(this.tkey.metadata.factorPubs[this.tkey.tssTag])) {
+      throw new Error("factorPubs does not exist, failed in copy factor pub");
+    }
+    if (!this.tkey.metadata.factorEncs || typeof this.tkey.metadata.factorEncs[this.tkey.tssTag] !== "object") {
+      throw new Error("factorEncs does not exist, failed in copy factor pub");
+    }
+    if (!this.state.tssShare2Index || !this.state.tssShare2) {
+      throw new Error("factor key does not exist");
+    }
+    if (newFactorTSSIndex !== 2 && newFactorTSSIndex !== 3) {
+      throw new Error("input factor tssIndex must be 2 or 3");
+    }
+
+    const existingFactorPubs = this.tkey.metadata.factorPubs[this.tkey.tssTag].slice();
+    const updatedFactorPubs = existingFactorPubs.concat([newFactorPub]);
+    if (this.state.tssShare2Index !== newFactorTSSIndex) {
+      throw new Error("retrieved tssIndex does not match input factor tssIndex");
+    }
+    const factorEncs = JSON.parse(JSON.stringify(this.tkey.metadata.factorEncs[this.tkey.tssTag]));
+    const factorPubID = newFactorPub.x.toString(16, 64);
+    factorEncs[factorPubID] = {
+      tssIndex: this.state.tssShare2Index,
+      type: "direct",
+      userEnc: await encrypt(
+        Buffer.concat([
+          Buffer.from("04", "hex"),
+          Buffer.from(newFactorPub.x.toString(16, 64), "hex"),
+          Buffer.from(newFactorPub.y.toString(16, 64), "hex"),
+        ]),
+        Buffer.from(this.state.tssShare2.toString(16, 64), "hex")
+      ),
+      serverEncs: [],
+    };
+    this.tkey.metadata.addTSSData({
+      tssTag: this.tkey.tssTag,
+      factorPubs: updatedFactorPubs,
+      factorEncs,
+    });
+  }
+
+  private async createDeviceShare(): Promise<ShareStore> {
+    try {
+      const deviceShare = (await this.fetchDeviceShareFromTkey()) as ShareStore;
+      return deviceShare;
+    } catch (err: unknown) {
+      log.error("create device share error", err);
+      throw new Error((err as Error).message);
+    }
+  }
+
+  private async fetchDeviceShareFromTkey(): Promise<ShareStore | null> {
+    try {
+      const polyId = this.tkey?.metadata.getLatestPublicPolynomial().getPolynomialID();
+      const shares = this.tkey?.shares[polyId as string];
+      let deviceShare = null;
+
+      for (const shareIndex in shares) {
+        if (shareIndex !== "1") {
+          deviceShare = shares[shareIndex];
+        }
+      }
+      return deviceShare;
+    } catch (err: unknown) {
+      log.error("fetch device share error", err);
+      throw new Error((err as Error).message);
+    }
+  }
+
+  private async addShareDescriptionDeviceShare(deviceShare: ShareStore, factorKey: BN) {
+    const factorIndex = getPubKeyECC(factorKey).toString("hex");
+    const metadataToSet: FactorKeyCloudMetadata = {
+      deviceShare,
+      tssShare: this.state.tssShare2 as BN,
+      tssIndex: this.state.tssShare2Index as number,
+    };
+
+    // Set metadata for factor key backup
+    await this.tkey?.addLocalMetadataTransitions({
+      input: [{ message: JSON.stringify(metadataToSet) }],
+      privKey: [factorKey],
+    });
+    const params = {
+      module: FactorKeyTypeShareDescription.DeviceShare,
+      dateAdded: Date.now(),
+      device: navigator.userAgent,
+      tssShareIndex: this.state.tssShare2Index as number,
+    };
+    await this.tkey?.addShareDescription(factorIndex, JSON.stringify(params), true);
+  }
+
+  private async setupProvider() {
+    const signingProvider = new EthereumSigningProvider({ config: { chainConfig: this.options.chainConfig as CustomChainConfig } });
+    const { tssNonce, tssShare2, tssShare2Index, tssPubKey } = this.state;
+
+    if (!tssPubKey) {
+      throw new Error("tssPubKey not available");
+    }
+
+    const vid = `${this.verifier}${DELIMITERS.Delimiter1}${this.verifierId}`;
+    const sessionId = `${vid}${DELIMITERS.Delimiter2}default${DELIMITERS.Delimiter3}${tssNonce}${DELIMITERS.Delimiter4}`;
+
+    const sign = async (msgHash: Buffer) => {
+      const parties = 4;
+      const clientIndex = parties - 1;
+      const tss = await import("@toruslabs/tss-lib");
+      // 1. setup
+      // generate endpoints for servers
+      const { endpoints, tssWSEndpoints, partyIndexes } = generateTSSEndpoints(
+        this.options.web3AuthNetwork as WEB3AUTH_NETWORK_TYPE,
+        parties,
+        clientIndex
+      );
+      // setup mock shares, sockets and tss wasm files.
+      const [sockets] = await Promise.all([
+        tssUtils.setupSockets(tssWSEndpoints.filter((x) => Boolean(x)) as string[]),
+        tss.default(this.options.tssImportUrl),
+      ]);
+
+      const randomSessionNonce = keccak256(generatePrivate().toString("hex") + Date.now());
+
+      // session is needed for authentication to the web3auth infrastructure holding the factor 1
+      const currentSession = `${sessionId}${randomSessionNonce.toString("hex")}`;
+
+      const participatingServerDKGIndexes = [1, 2, 3];
+      const dklsCoeff = tssUtils.getDKLSCoeff(true, participatingServerDKGIndexes, tssShare2Index as number);
+      const denormalisedShare = dklsCoeff.mul(tssShare2 as BN).umod(this.getEc().curve.n);
+      const share = Buffer.from(denormalisedShare.toString(16, 64), "hex").toString("base64");
+
+      if (!currentSession) {
+        throw new Error(`sessionAuth does not exist ${currentSession}`);
+      }
+
+      if (!this.signatures) {
+        throw new Error(`Signature does not exist ${this.signatures}`);
+      }
+
+      const client = new Client(
+        currentSession,
+        clientIndex,
+        partyIndexes,
+        endpoints,
+        sockets,
+        share,
+        tssPubKey.toString("base64"),
+        true,
+        this.options.tssImportUrl as string
+      );
+      const serverCoeffs: Record<number, string> = {};
+      for (let i = 0; i < participatingServerDKGIndexes.length; i++) {
+        const serverIndex = participatingServerDKGIndexes[i];
+        serverCoeffs[serverIndex] = tssUtils
+          .getDKLSCoeff(false, participatingServerDKGIndexes, tssShare2Index as number, serverIndex)
+          .toString("hex");
+      }
+      client.precompute(tss, { signatures: this.signatures, server_coeffs: serverCoeffs });
+      await client.ready();
+      const { r, s, recoveryParam } = await client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256", {
+        signatures: this.signatures,
+      });
+      await client.cleanup(tss, { signatures: this.signatures, server_coeffs: serverCoeffs });
+      return { v: recoveryParam, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
+    };
+
+    const getPublic: () => Promise<Buffer> = async () => {
+      return tssPubKey;
+    };
+
+    await signingProvider.setupProvider({ sign, getPublic });
+    this.privKeyProvider = signingProvider;
+  }
+
+  private updateState(newState: Partial<Web3AuthState>): void {
+    this.state = { ...this.state, ...newState };
+  }
+
+  private getEc(): EC.ec {
+    // eslint-disable-next-line new-cap
+    return new EC.ec("secp256k1");
+  }
+}
