@@ -30,6 +30,10 @@ export interface IWeb3Auth {
   getUserInfo(): UserInfo;
   inputBackupShare(shareMnemonic: string): Promise<void>;
   exportBackupShare(): Promise<string>;
+  addSecurityQuestionShare(question: string, password: string): Promise<void>;
+  changeSecurityQuestionShare(question: string, password: string): Promise<void>;
+  recoverSecurityQuestionShare(question: string, password: string): Promise<void>;
+  deleteSecurityQuestionShare(question: string): Promise<void>;
   logout(): Promise<void>;
 }
 

@@ -1,6 +1,5 @@
-import { encrypt, getPubKeyECC, getPubKeyPoint, Point, ShareStore } from "@tkey/common-types";
+import { decrypt, encrypt, EncryptedMessage, getPubKeyECC, getPubKeyPoint, Point, ShareStore } from "@tkey/common-types";
 import ThresholdKey from "@tkey/core";
-import SecurityQuestionsModule from "@tkey/security-questions";
 import { TorusServiceProvider } from "@tkey/service-provider-torus";
 import { ShareSerializationModule } from "@tkey/share-serialization";
 import { TorusStorageLayer } from "@tkey/storage-layer-torus";
@@ -93,7 +92,6 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     });
 
     const shareSerializationModule = new ShareSerializationModule();
-    const securityQuestionsModule = new SecurityQuestionsModule();
 
     this.tkey = new ThresholdKey({
       enableLogging: true,
@@ -102,7 +100,6 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       manualSync: this.options.manualSync,
       modules: {
         shareSerializationModule,
-        securityQuestionsModule,
       },
     });
 
@@ -235,6 +232,131 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     await this.tkey?.reconstructKey();
 
     await this.finalizeTkey(USER_PATH.RECOVER, factorKey);
+  }
+
+  public async addSecurityQuestionShare(question: string, password: string) {
+    if (!this.tkey) {
+      throw new Error("Tkey not initialized, call init first.");
+    }
+    if (!this.state.factorKey) {
+      throw new Error("local factor not available.");
+    }
+    if (!question || !password) {
+      throw new Error("question and password are required");
+    }
+    if (password.length < 10) {
+      throw new Error("password must be at least 10 characters long");
+    }
+    const backupFactorKey = new BN(generatePrivate());
+    const backupFactorPub = getPubKeyPoint(backupFactorKey);
+
+    await this.copyFactorPub(2, backupFactorPub);
+    const deviceShare = await this.createDeviceShare();
+    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
+    const encryptedFactorKey = encrypt(Buffer.from(password, "hex"), Buffer.from(backupFactorKey.toString("hex"), "hex"));
+    const params = {
+      module: FactorKeyTypeShareDescription.SecurityQuestions,
+      associatedFactor: encryptedFactorKey,
+      dateAdded: Date.now(),
+      device: navigator.userAgent,
+    };
+    await this.tkey?.addShareDescription(question, JSON.stringify(params), true);
+
+    await this.tkey.syncLocalMetadataTransitions();
+  }
+
+  public async recoverSecurityQuestionShare(question: string, password: string) {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first");
+    }
+    if (!question || !password) {
+      throw new Error("question and password are required");
+    }
+    if (password.length < 10) {
+      throw new Error("password must be at least 10 characters long");
+    }
+    let share: EncryptedMessage | null = null;
+
+    const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
+    for (const [key, value] of Object.entries(tKeyShareDescriptions)) {
+      if (key === question) {
+        share = JSON.parse(value[0]).associatedFactor;
+      }
+    }
+
+    if (share === null) {
+      throw new Error("question not found");
+    }
+
+    const factorKeyHex = decrypt(Buffer.from(password, "hex"), share as EncryptedMessage);
+
+    const factorKey = new BN(factorKeyHex.toString(), "hex");
+
+    if (!factorKey) {
+      throw new Error(ERRORS.INVALID_BACKUP_SHARE);
+    }
+
+    const deviceShare = await this.checkIfFactorKeyValid(factorKey);
+    await this.tkey?.inputShareStoreSafe(deviceShare, true);
+    await this.tkey?.reconstructKey();
+
+    await this.finalizeTkey(USER_PATH.RECOVER, factorKey);
+  }
+
+  public async changeSecurityQuestionShare(question: string, password: string): Promise<void> {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first");
+    }
+    if (!question || !password) {
+      throw new Error("question and password are required");
+    }
+    if (password.length < 10) {
+      throw new Error("password must be at least 10 characters long");
+    }
+
+    const backupFactorKey = new BN(generatePrivate());
+    const backupFactorPub = getPubKeyPoint(backupFactorKey);
+
+    await this.copyFactorPub(2, backupFactorPub);
+    const deviceShare = await this.createDeviceShare();
+    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
+    const encryptedFactorKey = encrypt(Buffer.from(password, "hex"), Buffer.from(backupFactorKey.toString("hex"), "hex"));
+    const params = {
+      module: FactorKeyTypeShareDescription.SecurityQuestions,
+      associatedFactor: encryptedFactorKey,
+      dateAdded: Date.now(),
+      device: navigator.userAgent,
+    };
+    const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
+    let oldShareDescription = null;
+    for (const [key, value] of Object.entries(tKeyShareDescriptions)) {
+      if (key === question) {
+        oldShareDescription = value[0];
+      }
+    }
+    await this.tkey?.updateShareDescription(question, oldShareDescription as string, JSON.stringify(params));
+
+    await this.tkey.syncLocalMetadataTransitions();
+  }
+
+  public async deleteSecurityQuestionShare(question: string): Promise<void> {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized, call init first");
+    }
+    if (!question) {
+      throw new Error("question and password are required");
+    }
+
+    const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
+    let oldShareDescription = null;
+    for (const [key, value] of Object.entries(tKeyShareDescriptions)) {
+      if (key === question) {
+        oldShareDescription = value[0];
+      }
+    }
+    await this.tkey?.deleteShareDescription(question, oldShareDescription as string, true);
+
+    await this.tkey.syncLocalMetadataTransitions();
   }
 
   public getUserInfo(): UserInfo {
