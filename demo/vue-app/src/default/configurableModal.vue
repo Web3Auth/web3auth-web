@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div class="w-[80%]">
     <ChainContainer :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
     <div id="console" style="white-space: pre-line">
       <code style="white-space: pre-line"></code>
@@ -8,11 +8,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import ChainContainer from "../chains/chainContainer.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "ConfigurableExample",
   props: {
     chain: {

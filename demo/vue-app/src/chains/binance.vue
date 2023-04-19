@@ -1,29 +1,29 @@
 <template>
-  <div id="app">
-    <h2>Login with Web3Auth and Binance Smart Chain</h2>
-    <Loader :isLoading="loading"></Loader>
-    <section>
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
-    </section>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+  <div v-if="loading" class="flex flex-col items-center justify-center">
+    <Loader useSpinner :size="80" />
+  </div>
+  <div v-else class="flex flex-col items-center justify-center">
+    <h2 class="text-2xl font-bold text-app-gray-900">Login with Web3Auth and Binance Smart Chain</h2>
+    <Button v-if="!provider" variant="secondary" @click="connect" class="connect-btn mt-4 w-[320px]" pill>Connect</Button>
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button v-if="provider" @click="logout" variant="secondary" pill block class="connect-btn">Logout</Button>
+      <Button v-if="provider" @click="getUserInfo" variant="secondary" pill block class="connect-btn">Get User Info</Button>
+    </div>
+    <EthRpc :connectedAdapter="Web3Auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
+    <div id="console" style="white-space: pre-line" class="mt-10 console-container bg-app-gray-200 shadow-md rounded-lg p-4">
+      <p style="white-space: pre-line" class="text-xs font-normal break-words console-inner-container overflow-y-auto overflow-x-auto"></p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { Button, Loader } from "@toruslabs/vue-components";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-import Vue from "vue";
-
-import Loader from "@/components/loader.vue";
+import { defineComponent } from "vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
@@ -38,7 +38,27 @@ const binanceChainConfig: CustomChainConfig = {
   tickerName: "BNB",
 };
 
-export default Vue.extend({
+let web3AuthInstance = null;
+
+const getWeb3Auth = (openloginNetwork: string) => {
+  if (!web3AuthInstance) {
+    web3AuthInstance = new Web3Auth({
+      chainConfig: binanceChainConfig,
+      clientId: config.clientId[openloginNetwork],
+      authMode: "DAPP",
+      enableLogging: true,
+    });
+  }
+  return web3AuthInstance;
+};
+
+const logOutWeb3Auth = () => {
+  if (web3AuthInstance) {
+    web3AuthInstance.logout();
+  }
+};
+
+export default defineComponent({
   name: "BinanceChain",
   props: {
     plugins: {
@@ -59,7 +79,7 @@ export default Vue.extend({
       loading: false,
       loginButtonStatus: "",
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId[this.openloginNetwork] }),
+      Web3Auth: undefined,
     };
   },
   watch: {
@@ -70,6 +90,7 @@ export default Vue.extend({
   components: {
     EthRpc,
     Loader,
+    Button,
   },
   async mounted() {
     await this.initBinanceWeb3Auth();
@@ -100,21 +121,14 @@ export default Vue.extend({
       try {
         this.parseConfig();
         this.loading = true;
-        this.web3auth = new Web3Auth({
-          chainConfig: binanceChainConfig,
-          clientId: config.clientId[this.openloginNetwork],
-          authMode: "DAPP",
-          enableLogging: true,
-        });
+        const web3auth = getWeb3Auth(this.openloginNetwork);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId[this.openloginNetwork],
           },
         });
-
-        this.web3auth.configureAdapter(openloginAdapter);
-
+        web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new TorusWalletConnectorPlugin({
             torusWalletOpts: {},
@@ -128,10 +142,10 @@ export default Vue.extend({
               enableLogging: true,
             },
           });
-          await this.web3auth.addPlugin(torusPlugin);
+          await web3auth.addPlugin(torusPlugin);
         }
-        this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        this.subscribeAuthEvents(web3auth);
+        await web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
@@ -162,8 +176,10 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        const provider = await this.web3auth.connect();
-        this.provider = provider;
+        const web3authProvider = await getWeb3Auth(this.openloginNetwork);
+        const webProvider = await web3authProvider.connect();
+        this.Web3Auth = web3authProvider;
+        this.provider = webProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
@@ -171,11 +187,11 @@ export default Vue.extend({
     },
 
     async logout() {
-      await this.web3auth.logout();
+      await logOutWeb3Auth();
       this.provider = undefined;
     },
     async getUserInfo() {
-      const userInfo = await this.web3auth.getUserInfo();
+      const userInfo = await getWeb3Auth(this.openloginNetwork).getUserInfo();
       this.console(userInfo);
     },
     console(...args: unknown[]): void {
@@ -187,3 +203,18 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+.console-container {
+  width: 500px;
+  height: 350px;
+}
+.console-inner-container {
+  width: 468px;
+  height: 328px;
+}
+</style>

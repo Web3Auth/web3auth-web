@@ -1,29 +1,25 @@
 <template>
-  <div id="app">
-    <h2>Login with Web3Auth and Ethereum</h2>
-    <Loader :isLoading="loading"></Loader>
-
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
-      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console" :web3auth="web3auth"></EthRpc>
-
-      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
-    </section>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+  <div v-if="loading" class="flex flex-col items-center justify-center">
+    <Loader useSpinner :size="80" />
+  </div>
+  <div v-else class="flex flex-col items-center justify-center">
+    <h2 class="text-2xl font-bold text-app-gray-900">Login with Web3Auth and Ethereum</h2>
+    <Button v-if="!provider" variant="secondary" pill class="connect-btn mt-4 w-[320px]" @click="connect">Connect</Button>
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="logout">Logout</Button>
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="getUserInfo">Get User Info</Button>
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="authenticateUser">Get Auth Id token</Button>
+    </div>
+    <EthRpc :connectedAdapter="Web3Auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console" :web3auth="Web3Auth"></EthRpc>
+    <div id="console" style="white-space: pre-line" class="mt-10 console-container bg-app-gray-200 shadow-md rounded-lg p-4">
+      <p style="white-space: pre-line" class="text-xs font-normal break-words console-inner-container overflow-y-auto overflow-x-auto"></p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { Button, Loader } from "@toruslabs/vue-components";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { WALLET_ADAPTERS } from "@web3auth/base";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
@@ -31,10 +27,9 @@ import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
-
+// import Loader from "@/components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
@@ -48,7 +43,28 @@ const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chai
   tickerName: "Ethereum",
 };
 
-export default Vue.extend({
+let web3AuthInstance = null;
+
+const getWeb3Auth = (openloginNetwork: string) => {
+  if (!web3AuthInstance) {
+    web3AuthInstance = new Web3Auth({
+      chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
+      clientId: config.clientId[openloginNetwork],
+      enableLogging: true,
+      authMode: "DAPP",
+      web3AuthNetwork: openloginNetwork as OPENLOGIN_NETWORK_TYPE,
+    });
+  }
+  return web3AuthInstance;
+};
+
+const logOutWeb3Auth = () => {
+  if (web3AuthInstance) {
+    web3AuthInstance.logout();
+  }
+};
+
+export default defineComponent({
   name: "EthereumChain",
   props: {
     plugins: {
@@ -78,28 +94,25 @@ export default Vue.extend({
   data() {
     return {
       modalConfig: {},
+      loginMethods: {},
       loading: false,
       loginButtonStatus: "",
       connecting: false,
-      provider: undefined,
-      web3auth: new Web3Auth({
-        chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
-        clientId: config.clientId[this.openloginNetwork],
-        enableLogging: true,
-        web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-      }),
+      provider: null,
+      Web3Auth: null,
     };
   },
   components: {
     EthRpc,
     Loader,
+    Button,
   },
-
   async mounted() {
     await this.initEthAuth();
   },
   methods: {
     parseConfig() {
+      console.log(this.adapterConfig, "ETH");
       this.adapterConfig.adapter.forEach((adapterConf) => {
         this.modalConfig[adapterConf.id] = {
           name: adapterConf.name,
@@ -119,25 +132,27 @@ export default Vue.extend({
           };
         }
       });
+      // this.adapterConfig.login.forEach((login) => {
+      //   if (login.checked) {
+      //     this.loginMethods[login.id] = {
+      //       name: login.id,
+      //       showOnModal: login.checked,
+      //     };
+      //   }
+      // });
     },
     async initEthAuth() {
       try {
         this.parseConfig();
+        console.log(this.modalConfig, this.loginMethods, "MODAL");
         this.loading = true;
-        this.web3auth = new Web3Auth({
-          chainConfig: ethChainConfig,
-          clientId: config.clientId[this.openloginNetwork],
-          authMode: "DAPP",
-          enableLogging: true,
-          web3AuthNetwork: this.openloginNetwork as any,
-        });
+        const web3auth = getWeb3Auth(this.openloginNetwork);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId[this.openloginNetwork],
           },
         });
-
         // by default, web3auth modal uses wallet connect v1,
         // if you want to use wallet connect v2, configure wallet-connect-v2-adapter
         // as shown below.
@@ -154,9 +169,9 @@ export default Vue.extend({
           loginSettings: defaultWcSettings.loginSettings,
         });
 
-        this.web3auth.configureAdapter(wc2Adapter);
+        web3auth.configureAdapter(wc2Adapter);
 
-        this.web3auth.configureAdapter(openloginAdapter);
+        web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new TorusWalletConnectorPlugin({
             torusWalletOpts: {},
@@ -170,11 +185,11 @@ export default Vue.extend({
               enableLogging: true,
             },
           });
-          await this.web3auth.addPlugin(torusPlugin);
+          await web3auth.addPlugin(torusPlugin);
         }
-        this.subscribeAuthEvents(this.web3auth);
+        this.subscribeAuthEvents(web3auth);
 
-        await this.web3auth.initModal({
+        await web3auth.initModal({
           modalConfig: {
             [WALLET_ADAPTERS.METAMASK]: {
               showOnDesktop: true,
@@ -223,7 +238,7 @@ export default Vue.extend({
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
         this.console("disconnected");
         this.loginButtonStatus = "";
-        this.provider = undefined;
+        // this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
@@ -236,8 +251,10 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        const web3authProvider = await this.web3auth.connect();
-        this.provider = web3authProvider;
+        const web3authProvider = await getWeb3Auth(this.openloginNetwork);
+        const webProvider = await web3authProvider.connect();
+        this.Web3Auth = web3authProvider;
+        this.provider = webProvider;
       } catch (error) {
         console.error(error);
         this.console("error", error);
@@ -245,15 +262,15 @@ export default Vue.extend({
     },
 
     async logout() {
-      await this.web3auth.logout();
+      await logOutWeb3Auth();
       this.provider = undefined;
     },
     async getUserInfo() {
-      const userInfo = await this.web3auth.getUserInfo();
+      const userInfo = await getWeb3Auth(this.openloginNetwork).getUserInfo();
       this.console(userInfo);
     },
     async authenticateUser() {
-      const idTokenDetails = await this.web3auth.authenticateUser();
+      const idTokenDetails = await getWeb3Auth(this.openloginNetwork).authenticateUser();
       this.console(idTokenDetails);
     },
     console(...args: unknown[]): void {
@@ -265,3 +282,18 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+.console-container {
+  width: 500px;
+  height: 350px;
+}
+.console-inner-container {
+  width: 468px;
+  height: 328px;
+}
+</style>

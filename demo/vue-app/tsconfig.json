@@ -16,6 +16,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
+    "types": [
+      "vite/client"
+    ],
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": ["src/*.vue", "src/**/*.vue", "src/*.ts", "src/*.tsx"],

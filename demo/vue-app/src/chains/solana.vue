@@ -1,27 +1,25 @@
 <template>
-  <div id="app">
-    <h2>Login with Web3Auth and Solana</h2>
-    <Loader :isLoading="loading"></Loader>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
-      <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
-      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
-    </section>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+  <div v-if="loading" class="flex flex-col items-center justify-center">
+    <Loader useSpinner :size="80" />
+  </div>
+  <div v-else class="flex flex-col items-center justify-center">
+    <h2 class="text-2xl font-bold text-app-gray-900">Login with Web3Auth and Solana</h2>
+    <Button v-if="!provider" variant="secondary" pill class="connect-btn mt-4 w-[320px]" @click="connect">Connect</Button>
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="logout">Logout</Button>
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="getUserInfo">Get User Info</Button>
+      <Button v-if="provider" variant="secondary" pill block class="connect-btn" @click="authenticateUser">Get Auth Id token</Button>
+    </div>
+    <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
+    <div id="console" style="white-space: pre-line" class="mt-10 console-container bg-app-gray-200 shadow-md rounded-lg p-4">
+      <p style="white-space: pre-line" class="text-xs font-normal break-words console-inner-container overflow-y-auto overflow-x-auto"></p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { Button, Loader } from "@toruslabs/vue-components";
 import {
   ADAPTER_STATUS,
   CHAIN_NAMESPACES,
@@ -37,9 +35,7 @@ import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
 import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import Vue from "vue";
-
-import Loader from "@/components/loader.vue";
+import { defineComponent } from "vue";
 
 import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
@@ -53,7 +49,27 @@ const solanaChainConfig: CustomChainConfig = {
   tickerName: "solana",
 };
 
-export default Vue.extend({
+let web3AuthInstance = null;
+
+const getWeb3Auth = (openloginNetwork: string) => {
+  if (!web3AuthInstance) {
+    web3AuthInstance = new Web3Auth({
+      chainConfig: solanaChainConfig,
+      clientId: config.clientId[openloginNetwork],
+      authMode: "DAPP",
+      enableLogging: true,
+    });
+  }
+  return web3AuthInstance;
+};
+
+const logOutWeb3Auth = () => {
+  if (web3AuthInstance) {
+    web3AuthInstance.logout();
+  }
+};
+
+export default defineComponent({
   name: "SolanaChain",
   props: {
     plugins: {
@@ -81,16 +97,13 @@ export default Vue.extend({
       loading: false,
       loginButtonStatus: "",
       provider: undefined,
-      web3auth: new Web3Auth({
-        chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA },
-        clientId: config.clientId[this.openloginNetwork],
-        enableLogging: true,
-      }),
+      Web3Auth: undefined,
     };
   },
   components: {
     SolanaRpc,
     Loader,
+    Button,
   },
   async mounted() {
     await this.initSolanaAuth();
@@ -122,12 +135,7 @@ export default Vue.extend({
         this.parseConfig();
 
         this.loading = true;
-        this.web3auth = new Web3Auth({
-          chainConfig: solanaChainConfig,
-          clientId: config.clientId[this.openloginNetwork],
-          authMode: "DAPP",
-          enableLogging: true,
-        });
+        const web3auth = getWeb3Auth(this.openloginNetwork);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
@@ -137,10 +145,10 @@ export default Vue.extend({
         const slopeAdapter = new SlopeAdapter();
         const solflareAdapter = new SolflareAdapter();
         const solAdapter = new SolanaWalletAdapter({ initParams: { buildEnv: "testing" } });
-        this.web3auth.configureAdapter(solAdapter);
-        this.web3auth.configureAdapter(solflareAdapter);
-        this.web3auth.configureAdapter(slopeAdapter);
-        this.web3auth.configureAdapter(openloginAdapter);
+        web3auth.configureAdapter(solAdapter);
+        web3auth.configureAdapter(solflareAdapter);
+        web3auth.configureAdapter(slopeAdapter);
+        web3auth.configureAdapter(openloginAdapter);
         if (this.plugins["torusWallet"]) {
           const torusPlugin = new SolanaWalletConnectorPlugin({
             torusWalletOpts: {},
@@ -148,10 +156,10 @@ export default Vue.extend({
               enableLogging: true,
             },
           });
-          await this.web3auth.addPlugin(torusPlugin);
+          await web3auth.addPlugin(torusPlugin);
         }
-        this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal({
+        this.subscribeAuthEvents(web3auth);
+        await web3auth.initModal({
           modalConfig: {
             // to hide social login methods
             [WALLET_ADAPTERS.OPENLOGIN]: {
@@ -198,8 +206,10 @@ export default Vue.extend({
     },
     async connect() {
       try {
-        const provider = await this.web3auth.connect();
-        await this.setupProvider(provider);
+        const web3authProvider = await getWeb3Auth(this.openloginNetwork);
+        const webProvider = await web3authProvider.connect();
+        this.Web3Auth = web3authProvider;
+        await this.setupProvider(webProvider);
       } catch (error) {
         console.error(error);
         this.console("error", error);
@@ -207,15 +217,15 @@ export default Vue.extend({
     },
 
     async logout() {
-      await this.web3auth.logout();
+      await logOutWeb3Auth();
       this.provider = undefined;
     },
     async getUserInfo() {
-      const userInfo = await this.web3auth.getUserInfo();
+      const userInfo = await getWeb3Auth(this.openloginNetwork).getUserInfo();
       this.console(userInfo);
     },
     async authenticateUser() {
-      const idTokenDetails = await this.web3auth.authenticateUser();
+      const idTokenDetails = await getWeb3Auth(this.openloginNetwork).authenticateUser();
       this.console(idTokenDetails);
     },
     console(...args: unknown[]): void {
@@ -227,3 +237,18 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+.console-container {
+  width: 500px;
+  height: 350px;
+}
+.console-inner-container {
+  width: 468px;
+  height: 328px;
+}
+</style>

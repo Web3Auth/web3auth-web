@@ -1,228 +1,197 @@
 <template>
-  <div class="container">
-    <div class="sidebar">
-      <a href="https://github.com/Web3Auth/Web3Auth/tree/master/demo/vue-app" target="blank">
-        <img src="./assets/github-logo.png" width="30px" />
-      </a>
-      <h2>Demo Settings</h2>
+  <div class="flex flex-col lg:flex-row gap-4 p-7 h-full">
+    <div class="form-container w-[462px] bg-app-white p-7 shadow-lg rounded-[20px] relative">
+      <img :src="require('@/assets/demo_logo.svg')" alt="Web3Auth Demo Logo" />
 
-      <div class="flex-vertical-center authMode">
-        <!-- <label class="form-label" for="chain">Chain</label> -->
+      <div class="form-container-inner overflow-y-auto flex flex-col gap-6 mt-9">
+        <Select
+          :options="AuthModeOptions"
+          label="Auth mode"
+          pill
+          :inputClasses="{
+            inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+            input: '!border-0 focus:!border-0 !bg-app-select',
+          }"
+          @on-select="onAuthModeSelection"
+          :model-value="form.authMode"
+        />
+        <Checkbox
+          id="selectPlugin"
+          label="Torus wallet UI plugin"
+          :classes="{ label: '!text-app-gray-500' }"
+          :checked="form.plugins.torusWallet"
+          @on-change="(isChecked) => (form.plugins.torusWallet = isChecked)"
+        />
 
-        <span class="form-label">Auth Mode</span>
-        <span class="form-control radio-group">
-          <label for="hosted" class="radio-button">
-            <input type="radio" id="hosted" value="hosted" v-model="form.authMode" />
-            Hosted
-          </label>
-          <label for="ownAuth" class="radio-button">
-            <input type="radio" id="ownAuth" value="ownAuth" v-model="form.authMode" />
-            Use Your Own Auth
-          </label>
-        </span>
-      </div>
-      <div class="flex-vertical-center plugins">
-        <!-- <label class="form-label" for="chain">Chain</label> -->
+        <div v-if="form.authMode !== 'ownAuth'" class="flex flex-col gap-6">
+          <Select
+            :options="OpenLoginNetworkOptions"
+            label="Openlogin network"
+            pill
+            :inputClasses="{
+              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              input: '!border-0 focus:!border-0 !bg-app-select',
+            }"
+            @on-select="onOpenloginNetworkSelection"
+            :model-value="form.openloginNetwork"
+          />
+          <Select
+            :options="ChainOptions"
+            label="Select chain"
+            pill
+            :inputClasses="{
+              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              input: '!border-0 focus:!border-0 !bg-app-select',
+            }"
+            :model-value="form.chain"
+            @on-select="onChainSelection"
+          />
+          <Select
+            :options="UIOptions"
+            label="Select UI"
+            pill
+            :inputClasses="{
+              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              input: '!border-0 focus:!border-0 !bg-app-select',
+            }"
+            :model-value="form.selectedUiMode"
+            @on-select="onUiSelection"
+          />
 
-        <span class="form-label">Plugins</span>
-        <span class="form-control radio-group">
-          <label for="torusWallet" class="radio-button">
-            <input type="checkbox" id="torusWallet" value="torus wallet plugin" v-model="form.plugins.torusWallet" />
-            Torus Wallet UI Plugin
-          </label>
-        </span>
-      </div>
-
-      <hr />
-
-      <div class="hosted" v-if="config.authMode === 'hosted'">
-        <div class="ui-mode">
-          <div class="flex-vertical-center ui-mode">
-            <span class="form-label">Openlogin Network</span>
-            <span class="form-control radio-group">
-              <label for="mainnet" class="radio-button">
-                <input type="radio" id="mainnet" value="mainnet" v-model="form.openloginNetwork" />
-                Mainnet
-              </label>
-              <label for="testnet" class="radio-button">
-                <input type="radio" id="testnet" value="testnet" v-model="form.openloginNetwork" />
-                Testnet
-              </label>
-              <label for="cyan" class="radio-button">
-                <input type="radio" id="cyan" value="cyan" v-model="form.openloginNetwork" />
-                Cyan
-              </label>
-            </span>
+          <div v-if="form.selectedUiMode === 'whitelabel'" class="flex flex-col gap-6">
+            <TextField
+              label="Logo URL"
+              placeholder="Enter the Logo URL"
+              v-model="form.uiMode.whitelabel.logoUrl"
+              pill
+              :classes="{
+                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                input: '!border-0 focus:!border-0 !bg-app-select',
+              }"
+            />
+            <Select
+              :options="ThemeOptions"
+              label="Select Theme"
+              pill
+              :inputClasses="{
+                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                input: '!border-0 focus:!border-0 !bg-app-select',
+              }"
+              :model-value="form.uiMode.whitelabel.theme"
+              @on-select="onThemeSelection"
+            />
+            <Select
+              :options="languages"
+              label="Select Language"
+              pill
+              :inputClasses="{
+                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                input: '!border-0 focus:!border-0 !bg-app-select',
+              }"
+              :model-value="form.uiMode.whitelabel.defaultLanguage"
+              @on-select="onLanguageSelection"
+            />
+            <div class="text-sm font-medium text-app-gray-900 -mb-4 flex items-center justify-between">
+              <div>Login Methods Order</div>
+              <div class="text-app-primary-600 cursor-pointer" @click="setDefaultLoginMethodsOrder">Set to default</div>
+            </div>
+            <TextArea
+              v-model="tempLoginMethodsOrder"
+              rows="4"
+              :classes="{
+                textAreaInput: '!border-0 focus:!border-0 !bg-app-select',
+              }"
+            />
           </div>
-          <br />
-        </div>
-        <hr />
-        <div class="flex-vertical-center chain">
-          <!-- <label class="form-label" for="chain">Chain</label> -->
+          <div v-else class="flex flex-col gap-6">
+            <p class="text-sm font-medium text-app-gray-900">Social logins</p>
+            <ul class="list">
+              <li v-for="item in form.uiMode.default.login" :key="item.icon" class="list-item">
+                <Checkbox
+                  :id="item.icon"
+                  :label="item.icon"
+                  :checked="item.checked"
+                  @on-change="
+                    (isChecked) => {
+                      item.checked = isChecked;
+                      onSocialLoginChange(item.id);
+                    }
+                  "
+                >
+                  <template #checkboxLabel>
+                    <div class="flex gap-2 items-center ml-2">
+                      <Icon v-if="item.name.toLowerCase() === smsLoginProvider" name="tor-mail-icon" />
+                      <Icon v-else-if="item.name.toLowerCase() === emailLoginProvider" name="tor-mail-icon" />
+                      <img
+                        v-else
+                        class="w-4 h-4"
+                        :src="`https://images.web3auth.io/login-${item?.name.toLowerCase()}-active.svg`"
+                        :alt="`${item?.name} Icon`"
+                      />
+                      <p class="text-sm text-app-gray-500 capitalize">{{ item.name.replace("_passwordless", " ") }}</p>
+                    </div>
+                  </template>
+                </Checkbox>
+              </li>
+            </ul>
 
-          <span class="form-label">Select Chain</span>
-          <span class="form-control radio-group">
-            <label for="ethereum" class="radio-button">
-              <input type="radio" id="ethereum" value="ethereum" v-model="form.chain" />
-              Ethereum
-            </label>
-            <label for="solana" class="radio-button">
-              <input type="radio" id="solana" value="solana" v-model="form.chain" />
-              Solana
-            </label>
-            <label for="binance" class="radio-button">
-              <input type="radio" id="binance" value="binance" v-model="form.chain" />
-              Binance
-            </label>
-            <label for="polygon" class="radio-button">
-              <input type="radio" id="polygon" value="polygon" v-model="form.chain" />
-              Polygon
-            </label>
-          </span>
-        </div>
-        <hr />
-        <div class="ui-mode">
-          <div class="flex-vertical-center ui-mode">
-            <span class="form-label">UI</span>
-            <span class="form-control radio-group">
-              <label for="default" class="radio-button">
-                <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
-                Default
+            <p class="text-sm font-medium text-app-gray-900">External wallet</p>
+            <div class="flex gap-2 items-center flex-wrap mb-6">
+              <label
+                v-for="walletType in form.uiMode.default.adapter"
+                :key="walletType.id"
+                :class="[
+                  'bg-app-white cursor-pointer w-max px-3 py-1 border border-app-gray-200 flex items-center justify-center rounded-full shadow-md text-sm text-app-gray-500',
+                  { 'border-app-primary-600': walletType.checked },
+                ]"
+              >
+                <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" hidden />
+                {{ walletType.name }}
               </label>
-              <!-- <label for="customUi" class="radio-button">
-              <input type="radio" id="customUi" value="customUi" v-model="form.selectedUiMode" />
-              CustomUI
-            </label> -->
-              <label for="whitelabel" class="radio-button">
-                <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
-                WhiteLabel
-              </label>
-            </span>
-          </div>
-          <hr />
-
-          <!-- UI MODE DEFAULT -->
-          <div v-if="form.selectedUiMode == 'default'">
-            <div class="flex-vertical-center">
-              <span class="form-label">Social Logins</span>
-              <div class="form-control">
-                <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
-                  <label :for="loginType.id">
-                    <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
-                    <span>{{ loginType.name }}</span>
-                  </label>
-                </li>
-              </div>
-            </div>
-            <hr />
-            <div class="flex-vertical-center">
-              <span class="form-label">External Wallets</span>
-              <div class="form-control">
-                <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
-                  <label :for="walletType.id">
-                    <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
-                    <span>{{ walletType.name }}</span>
-                  </label>
-                </li>
-              </div>
-            </div>
-          </div>
-
-          <!-- UI MODE YOUR OWN MODAL -->
-          <div v-if="form.selectedUiMode == 'customUi'">
-            <div class="flex-vertical-center">
-              <span class="form-label">Type</span>
-              <span class="form-control">
-                <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
-                <label for="openlogin">OpenLogin</label>
-                <br />
-              </span>
-            </div>
-            <br />
-          </div>
-
-          <!-- UI MODE WHITELABEL -->
-          <div v-if="form.selectedUiMode == 'whitelabel'">
-            <div class="flex-vertical-center">
-              <span class="form-label">Logo URL</span>
-              <span class="form-control">
-                <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
-              </span>
-            </div>
-            <div class="flex-vertical-center">
-              <span class="form-label">Theme</span>
-              <span class="form-control">
-                <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
-                <label for="light">Light</label>
-                <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
-                <label for="dark">Dark</label>
-                <input type="radio" id="auto" name="auto" value="auto" v-model="form.uiMode.whitelabel.theme" />
-                <label for="auto">Auto</label>
-              </span>
-            </div>
-            <div class="flex-vertical-center">
-              <span class="form-label">Default Language</span>
-              <span class="form-control">
-                <select v-model="form.uiMode.whitelabel.defaultLanguage">
-                  <option v-for="language in languages" :value="language.value" :key="language.value">
-                    {{ language.display }}
-                  </option>
-                </select>
-              </span>
-            </div>
-            <div class="order-container">
-              <div class="form-label">
-                <div>Login Methods Order</div>
-                <a @click="setDefaultLoginMethodsOrder">Set to default</a>
-              </div>
-              <div>
-                <textarea rows="5" class="order-list" v-model="tempLoginMethodsOrder" />
-              </div>
-              <div></div>
+              <!-- <pre>{{ form.uiMode.default.adapter }}</pre> -->
             </div>
           </div>
         </div>
       </div>
 
-      <div class="ownAuth" v-else-if="config.authMode === 'ownAuth'">
-        <!-- <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer> -->
-      </div>
-
-      <div class="btn-group">
-        <button class="btn submit-btn" @click="saveConfig">Submit</button>
+      <div class="absolute bottom-7 w-full left-0 px-7">
+        <Button pill block @click="saveConfig">Submit</Button>
       </div>
     </div>
-    <div class="content">
-      <section>
-        <!-- hosted auth -->
-        <ConfigurableExample
-          :plugins="config.plugins"
-          :openloginNetwork="config.openloginNetwork"
-          :adapterConfig="config.uiMode.default"
-          :chain="config.chain"
-          v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
-        />
 
-        <WhitelabelExample
-          :uiConfig="config.uiMode.whitelabel"
-          :chain="config.chain"
-          v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
-        />
-
-        <!-- Custom auth -->
-        <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
-      </section>
+    <div class="flex items-center justify-center flex-1 p-7">
+      <!-- hosted auth -->
+      <ConfigurableExample
+        :plugins="config.plugins"
+        :openloginNetwork="config.openloginNetwork"
+        :adapterConfig="config.uiMode.default"
+        :chain="config.chain"
+        v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
+      />
+      <!-- WhiteLabel -->
+      <WhitelabelExample
+        :uiConfig="config.uiMode.whitelabel"
+        :chain="config.chain"
+        v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
+      />
+      <!-- Custom auth -->
+      <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
-import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
+import { Button, Checkbox, Icon, Select, TextArea, TextField } from "@toruslabs/vue-components";
+import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
 import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
-import Vue from "vue";
+import { defineComponent } from "vue";
+
+import CustomUiContainer from "@/customUi/customUiContainer.vue";
+import ConfigurableExample from "@/default/configurableModal.vue";
+import WhitelabelExample from "@/whitelabel/whitelabel.vue";
 
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
@@ -241,6 +210,7 @@ const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
   LOGIN_PROVIDER.SMS_PASSWORDLESS,
 ];
+
 const defaultLoginProviders = () => {
   return DEFAULT_LOGIN_PROVIDERS.map((provider) => {
     return {
@@ -273,6 +243,7 @@ const defaultFormConfig = {
   uiMode: {
     default: {
       login: [...defaultLoginProviders()],
+      loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
       adapter: defaultAdapters(CHAIN_NAMESPACES.EIP155),
     },
     customUi: {
@@ -296,13 +267,12 @@ const configFromURL = () => {
   const params = new URLSearchParams(document.location.search);
   const chainParams = params.get("chain");
   const authModeParams = params.get("auth");
-  const whitelabelParams = params.get("whitelabel");
+  const whiteLabelParams = params.get("whitelabel");
 
-  // prettier-ignore
   return {
-    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams)  && { chain: chainParams }),
-    ...(authModeParams === "custom"                                         && { authMode: "ownAuth" }),
-    ...(whitelabelParams === "yes"                                          && { selectedUiMode: "whitelabel" }),
+    ...(["ethereum", "solana", "binance", "polygon"].includes(chainParams) && { chain: chainParams }),
+    ...(authModeParams === "custom" && { authMode: "ownAuth" }),
+    ...(whiteLabelParams === "yes" && { selectedUiMode: "whitelabel" }),
   };
 };
 
@@ -312,10 +282,19 @@ const initialFormConfig = {
   ...configFromURL(),
 };
 
-console.log(initialFormConfig);
-
-export default Vue.extend({
-  name: "HomeComponent",
+export default defineComponent({
+  name: "HomePage",
+  components: {
+    Button,
+    Checkbox,
+    Icon,
+    Select,
+    TextArea,
+    TextField,
+    ConfigurableExample,
+    WhitelabelExample,
+    CustomUiContainer,
+  },
   data() {
     return {
       // storing config collected from user input.
@@ -323,46 +302,51 @@ export default Vue.extend({
       // sending to other components
       config: { ...cloneDeep(initialFormConfig) },
       tempLoginMethodsOrder: initialFormConfig.uiMode?.whitelabel.loginMethodsOrder.join(",") ?? "",
+      emailLoginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
+      smsLoginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS,
+      AuthModeOptions: [
+        { name: "hosted", value: "hosted" },
+        { name: "ownAuth", value: "ownAuth" },
+      ],
+      OpenLoginNetworkOptions: [{ name: "mainnet" }, { name: "testnet" }, { name: "cyan" }],
+      ChainOptions: [{ name: "ethereum" }, { name: "solana" }, { name: "binance" }, { name: "polygon" }],
+      UIOptions: [{ name: "default" }, { name: "whitelabel" }],
+      ThemeOptions: [{ name: "default" }, { name: "dark" }, { name: "light" }],
       languages: [
         {
-          value: "en",
-          display: "English",
+          name: "en",
+          value: "English",
         },
         {
-          value: "de",
-          display: "German",
+          name: "de",
+          value: "German",
         },
         {
-          value: "ja",
-          display: "Japanese",
+          name: "ja",
+          value: "Japanese",
         },
         {
-          value: "ko",
-          display: "Korean",
+          name: "ko",
+          value: "Korean",
         },
         {
-          value: "zh",
-          display: "Mandarin",
+          name: "zh",
+          value: "Mandarin",
         },
         {
-          value: "es",
-          display: "Spanish",
+          name: "es",
+          value: "Spanish",
         },
         {
-          value: "fr",
-          display: "French",
+          name: "fr",
+          value: "French",
         },
         {
-          value: "pt",
-          display: "Portuguese",
+          name: "pt",
+          value: "Portuguese",
         },
       ],
     };
-  },
-  components: {
-    ConfigurableExample: () => import("./default/configurableModal.vue"),
-    WhitelabelExample: () => import("./whitelabel/whitelabel.vue"),
-    CustomUiContainer: () => import("./customUi/customUiContainer.vue"),
   },
   watch: {
     "form.authMode"(val) {
@@ -378,22 +362,42 @@ export default Vue.extend({
     },
   },
   methods: {
+    onAuthModeSelection: function (item: string) {
+      console.log(item);
+      this.form.authMode = item;
+    },
+    onOpenloginNetworkSelection: function (item: string) {
+      console.log(item);
+      this.form.openloginNetwork = item;
+    },
+    onChainSelection: function (item: string) {
+      console.log(item);
+      this.form.chain = item;
+    },
+    onUiSelection: function (item: string) {
+      console.log(item);
+      this.form.selectedUiMode = item;
+    },
+    onThemeSelection: function (item: string) {
+      console.log(item);
+      this.form.uiMode.whitelabel.theme = item;
+    },
+    onLanguageSelection: function (item: string) {
+      this.form.uiMode.whitelabel.defaultLanguage = item;
+    },
+    onSocialLoginChange: function (item: string) {
+      if (this.form.uiMode.default.loginMethodsOrder.includes(item)) {
+        this.form.uiMode.default.loginMethodsOrder = this.form.uiMode.default.loginMethodsOrder.filter((login) => login !== item);
+      } else {
+        this.form.uiMode.default.loginMethodsOrder.push(item);
+      }
+    },
     saveConfig: function () {
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
       console.log("config saved", this.config);
-      // // temp hack to hide fb, todo: fix later
-      // this.config.uiMode.default.login.push({
-      //   id: "facebook",
-      //   name: "Facebook",
-      //   checked: false,
-      // });
-    },
-    onChainSelect: function (e) {
-      console.log("e", e.target.value);
-      this.form.uiMode.default.adapter =
-        e.target.value === "solana" ? defaultAdapters(CHAIN_NAMESPACES.SOLANA) : defaultAdapters(CHAIN_NAMESPACES.EIP155);
+      // location.reload();
     },
     setDefaultLoginMethodsOrder: function () {
       this.tempLoginMethodsOrder = DEFAULT_LOGIN_PROVIDERS.join(",");
@@ -408,174 +412,30 @@ export default Vue.extend({
 </script>
 
 <style>
-html,
-body {
-  margin: 0;
-  height: 100%;
+.form-container {
+  height: calc(100vh - 56px);
 }
 
-#app {
-  height: 100%;
+.form-container-inner {
+  height: calc(100% - 140px);
 }
 
-.container {
+.list {
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
-  height: 100%;
 }
 
-.sidebar {
-  flex-grow: 1;
-  flex-basis: 25rem;
-  border-right: 1px solid #ebecf0;
-  background-color: #f4f5f7;
-  padding: 20px;
-  padding-bottom: 60px;
+.list-item {
+  flex: 0 0 50%;
+  margin-bottom: 0.7rem;
 }
 
-.content {
-  flex-basis: 0;
-  flex-grow: 999;
-  min-width: 30%;
-  padding: 20px;
+.selectPlugin {
+  color: #6f717a !important;
 }
 
-.flex-vertical-center {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 20px;
-}
-
-.form-label {
-  flex-basis: 2rem;
-  text-align: right;
-  margin-right: 10px;
-  font-weight: 800;
-}
-
-.form-control {
-  flex-basis: 60%;
-  text-align: left;
-}
-
-.dropdown {
-  width: 100%;
-  font-size: 16px;
-  padding: 6px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  box-sizing: border-box;
-}
-
-.radio-group {
-  flex-basis: 70%;
-  flex-grow: 1;
-}
-
-.radio-button {
-  display: inline-block;
-  margin-right: 10px;
-}
-.radio-button:last-child {
-  margin-right: 0;
-}
-
-.btn-group {
-  text-align: center;
-  position: fixed;
-  bottom: 0;
-}
-
-.btn {
-  padding: 9px 16px;
-  max-height: 40px;
-  border-radius: 6px;
-  font-size: 16px;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
-  min-width: 70%;
-  margin: 30px 0 10px;
-  height: 40px;
-  color: #0364ff;
-  background-color: #fff;
-  border: 3px solid #0364ff;
-  box-sizing: border-box;
-  border-radius: 6px;
-}
-.submit-btn {
-  width: 400px;
-}
-
-.btn:hover {
-  background-color: #f5f7fc;
-  border-color: #005cbf;
-}
-.rpcBtn {
-  padding: 9px 16px;
-  max-height: 80px;
-  max-width: 80px;
-  border-radius: 6px;
-  font-size: 16px;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
-  min-width: 60%;
-  margin-top: 10px;
-  height: 40px;
-  color: #0364ff;
-  background-color: #fff;
-  border: 1px solid #0364ff;
-  box-sizing: border-box;
-  border-radius: 6px;
-}
-
-.rpcBtn:hover {
-  background-color: #f5f7fc;
-  border-color: #005cbf;
-}
-
-.btn:focus {
-  box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 50%);
-}
-
-.chain {
-  margin-bottom: 20px;
-}
-
-.text {
-  width: 100%;
-  font-size: 16px;
-  padding: 6px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  box-sizing: border-box;
-}
-
-.list-style-none {
-  list-style: none;
-}
-
-.order-container {
-  text-align: left;
-}
-.order-container .form-label {
-  text-align: left;
-  display: flex;
-  width: 100%;
-  padding: 0;
-}
-.order-container .form-label a {
-  margin-left: auto;
-  cursor: pointer;
-  font-size: 12px;
-  color: #0364ff;
-  text-align: right;
-}
-.order-list {
-  width: 100%;
+.border-select {
+  border: 0px !important;
 }
 </style>

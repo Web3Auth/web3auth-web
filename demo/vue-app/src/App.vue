@@ -11,12 +11,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 // import DefaultModal from "./default/defaultModal.vue";
 import Home from "./home.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "app",
   data() {
     return {
@@ -35,6 +35,31 @@ export default Vue.extend({
 </script>
 
 <style>
+html,
+body,
+* {
+  padding: 0;
+  margin: 0;
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #f3f3f4;
+}
+</style>
+
+<!-- <style>
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -56,7 +81,6 @@ export default Vue.extend({
   margin: 0.5em;
 }
 
-/* Modal */
 #w3a-example-modal {
   --bg1: #0f1222;
   --bg2: #24262e;
@@ -125,4 +149,4 @@ export default Vue.extend({
 #w3a-example-modal .w3a-spinner-message.w3a-spinner-message--error {
   color: #fb4a61;
 }
-</style>
+</style> -->
