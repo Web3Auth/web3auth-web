@@ -15,8 +15,9 @@ export type LoginParams = {
 
 export interface IWeb3Auth {
   provider: SafeEventEmitterProvider | null;
-  init(): void;
+  init(): Promise<void>;
   connect(loginParams: LoginParams): Promise<SafeEventEmitterProvider | null>;
+  logout(): Promise<void>;
 }
 
 export interface Web3AuthOptions {
@@ -51,4 +52,29 @@ export interface Web3AuthOptions {
    * By default, this sdk returns CoreKitKey
    */
   usePnPKey?: boolean;
+
+  /**
+   * How long should a login session last at a minimum in seconds
+   *
+   * @defaultValue 86400 seconds
+   * @remarks Max value of sessionTime can be 7 * 86400 (7 days)
+   */
+  sessionTime?: number;
+
+  /**
+   * setting to "local" will persist social login session accross browser tabs.
+   *
+   * @defaultValue "local"
+   */
+  storageKey?: "session" | "local";
+
+  /**
+   * Specify a custom storage server url
+   * @defaultValue https://broadcast-server.tor.us
+   */
+  storageServerUrl?: string;
+}
+
+export interface SessionData {
+  privKey: string;
 }

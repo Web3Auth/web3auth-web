@@ -1,5 +1,7 @@
 import CustomAuth from "@toruslabs/customauth";
+import { OpenloginSessionManager } from "@toruslabs/openlogin-session-manager";
 import { subkey } from "@toruslabs/openlogin-subkey";
+import { BrowserStorage, randomId } from "@toruslabs/openlogin-utils";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -12,13 +14,11 @@ import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 
-import { IWeb3Auth, LoginParams, Web3AuthOptions } from "./interface";
+import { IWeb3Auth, LoginParams, SessionData, Web3AuthOptions } from "./interface";
 
 type PrivateKeyProvider = IBaseProvider<string>;
 
 class Web3Auth implements IWeb3Auth {
-  public provider: SafeEventEmitterProvider | null = null;
-
   readonly options: Web3AuthOptions;
 
   public customAuthInstance: CustomAuth | null = null;
@@ -28,6 +28,12 @@ class Web3Auth implements IWeb3Auth {
   private chainConfig: CustomChainConfig | null = null;
 
   private currentChainNamespace: ChainNamespaceType;
+
+  private sessionManager: OpenloginSessionManager<SessionData>;
+
+  private store: BrowserStorage;
+
+  private _storeKey = "sfa_store";
 
   constructor(options: Web3AuthOptions) {
     if (!options?.chainConfig?.chainNamespace) {
@@ -61,10 +67,23 @@ class Web3Auth implements IWeb3Auth {
     this.options = {
       ...options,
       web3AuthNetwork: options.web3AuthNetwork || "mainnet",
+      sessionTime: options.sessionTime || 86400,
+      storageServerUrl: options.storageServerUrl || "https://broadcast-server.tor.us",
+      storageKey: options.storageKey || "local",
     };
+
+    this.sessionManager = new OpenloginSessionManager({
+      sessionServerBaseUrl: this.options.storageServerUrl,
+      sessionTime: this.options.sessionTime,
+    });
+    this.store = BrowserStorage.getInstance(this._storeKey, options.storageKey);
   }
 
-  init(): void {
+  get provider(): SafeEventEmitterProvider | null {
+    return this.privKeyProvider?.provider || null;
+  }
+
+  async init(): Promise<void> {
     this.customAuthInstance = new CustomAuth({
       enableOneKey: true,
       network: this.options.web3AuthNetwork,
@@ -82,6 +101,15 @@ class Web3Auth implements IWeb3Auth {
       throw WalletInitializationError.incompatibleChainNameSpace(
         `Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`
       );
+    }
+
+    const sessionId = this.store.get<string>("sessionId");
+    if (sessionId) {
+      const data = await this.sessionManager.authorizeSession(sessionId);
+      if (data && data.privKey) {
+        const finalPrivKey = await this._getFinalPrivKey(data.privKey);
+        await this.privKeyProvider.setupProvider(finalPrivKey);
+      }
     }
   }
 
@@ -122,17 +150,37 @@ class Web3Auth implements IWeb3Auth {
 
     if (!privKey) throw WalletLoginError.fromCode(5000, "Unable to get private key from torus nodes");
 
+    const finalPrivKey = await this._getFinalPrivKey(privKey);
+    await this.privKeyProvider.setupProvider(finalPrivKey);
+
+    // set up the session in the storage server.
+    const sessionId = randomId();
+    // we are using the original private key so that we can retrieve other keys later on
+    await this.sessionManager.createSession(sessionId, { privKey });
+    this.store.set("sessionId", sessionId);
+    return this.provider;
+  }
+
+  async logout(): Promise<void> {
+    const sessionId = this.store.get<string>("sessionId");
+    if (!sessionId) throw new Error("User not logged in or there is no session");
+
+    await this.sessionManager.invalidateSession(sessionId);
+    this.store.set("sessionId", "");
+  }
+
+  private async _getFinalPrivKey(privKey: string) {
     let finalPrivKey = privKey.padStart(64, "0");
     if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
       finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
     }
+    // get app scoped keys.
     if (this.options.usePnPKey) {
       const pnpPrivKey = subkey(finalPrivKey, Buffer.from(this.options.clientId, "base64"));
       finalPrivKey = pnpPrivKey.padStart(64, "0");
     }
-    await this.privKeyProvider.setupProvider(finalPrivKey);
-    return this.privKeyProvider.provider;
+    return finalPrivKey;
   }
 }
 

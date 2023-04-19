@@ -1,4 +1,5 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams } from "@toruslabs/openlogin";
+import { LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -85,9 +86,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
     let isRedirectResult = false;
 
-    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT || this.openloginOptions.uxMode === UX_MODE.SESSIONLESS_REDIRECT) {
+    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
       const redirectResult = getHashQueryParams();
-      if (Object.keys(redirectResult).length > 0 && redirectResult._pid) {
+      if (Object.keys(redirectResult).length > 0) {
         isRedirectResult = true;
       }
     }
@@ -171,7 +172,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-    const userInfo = await this.openloginInstance.getUserInfo();
+    const userInfo = this.openloginInstance.getUserInfo();
     return userInfo;
   }
 
@@ -210,7 +211,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     let finalPrivKey = this.openloginInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
     if (this.openloginOptions?.useCoreKitKey) {
-      if (!this.openloginInstance.coreKitKey) {
+      // this is to check if the user has already logged in but coreKitKey is not available.
+      // when useCoreKitKey is set to true.
+      // This is to ensure that when there is no user session active, we don't throw an exception.
+      if (!this.openloginInstance.coreKitKey && this.openloginInstance.privKey) {
         throw WalletLoginError.coreKitKeyNotFound();
       }
       finalPrivKey = this.openloginInstance.coreKitKey;

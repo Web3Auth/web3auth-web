@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
