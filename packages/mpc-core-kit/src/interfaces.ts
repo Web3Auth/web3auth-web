@@ -92,6 +92,4 @@ export interface SessionData {
 
 export interface TkeyLocalStoreData {
   factorKey: string;
-  verifier: string;
-  verifierId: string;
 }

@@ -165,9 +165,6 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
       let factorKey: BN | null = null;
 
-      const tKeyLocalStoreString = this.currentStorage.get<string>(`${this.verifier}${DELIMITERS.Delimiter1}${this.verifierId}`);
-      const tKeyLocalStore = JSON.parse(tKeyLocalStoreString || "{}") as TkeyLocalStoreData;
-
       const existingUser = await this.isMetadataPresent(this.state.oAuthKey as string);
 
       if (!existingUser) {
@@ -178,15 +175,21 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         const factorPub = getPubKeyPoint(factorKey);
         await this.tkey.initialize({ useTSS: true, factorPub, deviceTSSShare, deviceTSSIndex });
         path = USER_PATH.NEW;
-      } else if (tKeyLocalStore.verifier === this.verifier && tKeyLocalStore.verifierId === this.verifierId) {
-        factorKey = new BN(tKeyLocalStore.factorKey, "hex");
-        const deviceShare = await this.checkIfFactorKeyValid(factorKey);
-        await this.tkey.initialize({ neverInitializeNewKey: true });
-        await this.tkey.inputShareStoreSafe(deviceShare, true);
-        path = USER_PATH.EXISTING;
       } else {
         await this.tkey.initialize({ neverInitializeNewKey: true });
-        throw new Error(ERRORS.TKEY_SHARES_REQUIRED);
+        const metadata = this.tkey.getMetadata();
+        const tkeyPubX = metadata.pubKey.x.toString(16, 64);
+        const tKeyLocalStoreString = this.currentStorage.get<string>(tkeyPubX);
+        const tKeyLocalStore = JSON.parse(tKeyLocalStoreString || "{}") as TkeyLocalStoreData;
+
+        if (tKeyLocalStore.factorKey) {
+          factorKey = new BN(tKeyLocalStore.factorKey, "hex");
+          const deviceShare = await this.checkIfFactorKeyValid(factorKey);
+          await this.tkey.inputShareStoreSafe(deviceShare, true);
+          path = USER_PATH.EXISTING;
+        } else {
+          throw new Error(ERRORS.TKEY_SHARES_REQUIRED);
+        }
       }
 
       await this.tkey.reconstructKey();
@@ -440,12 +443,12 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       const deviceShare = await this.getShare();
       await this.addShareDescriptionDeviceShare(deviceShare, factorKey);
     }
+    const metadata = this.tkey.getMetadata();
+    const tkeyPubX = metadata.pubKey.x.toString(16, 64);
     this.currentStorage.set(
-      `${this.verifier}${DELIMITERS.Delimiter1}${this.verifierId}`,
+      tkeyPubX,
       JSON.stringify({
         factorKey: factorKey.toString("hex"),
-        verifier: this.verifier,
-        verifierId: this.verifierId,
       } as TkeyLocalStoreData)
     );
     await this.tkey.syncLocalMetadataTransitions();
