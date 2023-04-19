@@ -1,12 +1,14 @@
 import { encrypt, getPubKeyECC, getPubKeyPoint, Point, ShareStore } from "@tkey/common-types";
 import ThresholdKey from "@tkey/core";
-import SecurityQuestionsModule from "@tkey/security-questions";
+import { SecurityQuestionsModule } from "@tkey/security-questions";
 import { TorusServiceProvider } from "@tkey/service-provider-torus";
 import { ShareSerializationModule } from "@tkey/share-serialization";
 import { TorusStorageLayer } from "@tkey/storage-layer-torus";
 import { AGGREGATE_VERIFIER, AGGREGATE_VERIFIER_TYPE } from "@toruslabs/customauth";
 import { generatePrivate } from "@toruslabs/eccrypto";
 import { keccak256 } from "@toruslabs/metadata-helpers";
+import { OpenloginSessionManager } from "@toruslabs/openlogin-session-manager";
+import { BrowserStorage } from "@toruslabs/openlogin-utils";
 import { Client, utils as tssUtils } from "@toruslabs/tss-client";
 import { CHAIN_NAMESPACES, CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import { EthereumSigningProvider } from "@web3auth-mpc/ethereum-provider";
@@ -18,6 +20,7 @@ import {
   FactorKeyCloudMetadata,
   IWeb3Auth,
   LoginParams,
+  SessionData,
   USER_PATH_TYPE,
   UserInfo,
   WEB3AUTH_NETWORK_TYPE,
@@ -39,14 +42,22 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
   private state: Web3AuthState = {};
 
+  private sessionManager!: OpenloginSessionManager<SessionData>;
+
+  private currentStorage!: BrowserStorage;
+
+  private _storageBaseKey = "corekit_store";
+
   constructor(options: Web3AuthOptions) {
     if (!options.chainConfig) options.chainConfig = DEFAULT_CHAIN_CONFIG;
-    if (typeof options.manualSync !== "boolean") options.manualSync = true;
+    if (typeof options.manualSync !== "boolean") options.manualSync = false;
     if (!options.web3AuthNetwork) options.web3AuthNetwork = WEB3AUTH_NETWORK.MAINNET;
     if (!options.tssImportUrl) {
       if (options.web3AuthNetwork === WEB3AUTH_NETWORK.MAINNET) options.tssImportUrl = `https://sapphire-1.auth.network/tss/v1/clientWasm`;
       else options.tssImportUrl = `https://sapphire-dev-2-1.authnetwork.dev/tss/v1/clientWasm`;
     }
+    if (!options.storageKey) options.storageKey = "local";
+    if (!options.sessionTime) options.sessionTime = 86400;
     if (options.chainConfig.chainNamespace !== CHAIN_NAMESPACES.EIP155) {
       throw new Error("You must specify a eip155 chain config.");
     }
@@ -68,18 +79,25 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
   }
 
   private get verifier(): string {
-    return this.state?.loginInfo?.verifier ? this.state.loginInfo.verifier : "";
+    return this.state?.userInfo?.verifier ? this.state.userInfo.verifier : "";
   }
 
   private get verifierId(): string {
-    return this.state?.loginInfo?.verifierId ? this.state.loginInfo.verifierId : "";
+    return this.state?.userInfo?.verifierId ? this.state.userInfo.verifierId : "";
   }
 
   private get signatures(): string[] {
-    return this.state?.loginInfo?.signatures ? this.state.loginInfo.signatures : [];
+    return this.state?.signatures ? this.state.signatures : [];
   }
 
   public async init(): Promise<void> {
+    this.currentStorage = BrowserStorage.getInstance(this._storageBaseKey, this.options.storageKey);
+    const sessionId = this.currentStorage.get<string>("sessionId");
+    this.sessionManager = new OpenloginSessionManager({
+      sessionTime: this.options.sessionTime,
+      sessionId,
+    });
+
     this.torusSp = new TorusServiceProvider({
       useTSS: true,
       customAuthArgs: {
@@ -92,8 +110,12 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       enableLogging: true,
     });
 
-    const shareSerializationModule = new ShareSerializationModule();
-    const securityQuestionsModule = new SecurityQuestionsModule();
+    const deviceShare = new ShareSerializationModule();
+    deviceShare.moduleName = FactorKeyTypeShareDescription.DeviceShare;
+    const passwordShare = new SecurityQuestionsModule();
+    passwordShare.moduleName = FactorKeyTypeShareDescription.PasswordShare;
+    const seedPhrase = new ShareSerializationModule();
+    seedPhrase.moduleName = FactorKeyTypeShareDescription.SeedPhrase;
 
     this.tkey = new ThresholdKey({
       enableLogging: true,
@@ -101,12 +123,17 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       storageLayer: this.storageLayer,
       manualSync: this.options.manualSync,
       modules: {
-        shareSerializationModule,
-        securityQuestionsModule,
+        [FactorKeyTypeShareDescription.DeviceShare]: deviceShare,
+        [FactorKeyTypeShareDescription.SeedPhrase]: seedPhrase,
+        [FactorKeyTypeShareDescription.PasswordShare]: passwordShare,
       },
     });
 
     await (this.tkey.serviceProvider as TorusServiceProvider).init({});
+
+    if (this.sessionManager.sessionKey) {
+      await this.authorizeSession();
+    }
   }
 
   public async connect(params: LoginParams): Promise<SafeEventEmitterProvider | null> {
@@ -124,12 +151,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         const loginResponse = await (this.tkey?.serviceProvider as TorusServiceProvider).triggerLogin(params.subVerifierDetails);
         privateKey = loginResponse.privateKey;
         this.updateState({
-          loginInfo: {
-            verifier: loginResponse.userInfo.verifier,
-            verifierId: loginResponse.userInfo.verifierId,
-            signatures: loginResponse.signatures.filter((i) => Boolean(i)),
-            userInfo: loginResponse.userInfo,
-          },
+          userInfo: loginResponse.userInfo,
+          signatures: loginResponse.signatures.filter((i) => Boolean(i)),
         });
       } else if (params.subVerifierDetailsArray) {
         if (params.aggregateVerifierType === AGGREGATE_VERIFIER.SINGLE_VERIFIER_ID && params.subVerifierDetailsArray.length !== 1) {
@@ -142,12 +165,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         });
         privateKey = loginResponse.privateKey;
         this.updateState({
-          loginInfo: {
-            verifier: loginResponse.userInfo[0].verifier,
-            verifierId: loginResponse.userInfo[0].verifierId,
-            signatures: loginResponse.signatures.filter((i) => Boolean(i)),
-            userInfo: loginResponse.userInfo[0],
-          },
+          userInfo: loginResponse.userInfo[0],
+          signatures: loginResponse.signatures.filter((i) => Boolean(i)),
         });
       }
 
@@ -208,12 +227,12 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
     await this.copyFactorPub(2, backupFactorPub);
     const deviceShare = await this.createDeviceShare();
-    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
-    const mnemonic = (await (this.tkey.modules.shareSerializationModule as ShareSerializationModule).serialize(
+    await this.addShareDescriptionSeedPhrase(deviceShare, backupFactorKey);
+    const mnemonic = (await (this.tkey.modules[FactorKeyTypeShareDescription.SeedPhrase] as ShareSerializationModule).serialize(
       backupFactorKey,
       "mnemonic"
     )) as string;
-    await this.tkey.syncLocalMetadataTransitions();
+    if (!this.options.manualSync) await this.tkey.syncLocalMetadataTransitions();
     return mnemonic;
   }
 
@@ -222,7 +241,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       throw new Error("tkey not initialized, call init first");
     }
 
-    const factorKey = await (this.tkey.modules[FactorKeyTypeShareDescription.ShareSerializationModule] as ShareSerializationModule).deserialize(
+    const factorKey = await (this.tkey.modules[FactorKeyTypeShareDescription.SeedPhrase] as ShareSerializationModule).deserialize(
       shareMnemonic,
       "mnemonic"
     );
@@ -238,14 +257,14 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
   }
 
   public getUserInfo(): UserInfo {
-    if (!this.state.factorKey || !this.state.loginInfo) {
+    if (!this.state.factorKey || !this.state.userInfo) {
       throw new Error("user is not logged in.");
     }
-    return this.state.loginInfo?.userInfo;
+    return this.state.userInfo;
   }
 
   public async logout(): Promise<void> {
-    throw new Error("Method not implemented");
+    this.updateState({});
   }
 
   private async finalizeTkey(path: USER_PATH_TYPE, factorKey: BN) {
@@ -276,11 +295,54 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     }
     await this.tkey.syncLocalMetadataTransitions();
     await this.setupProvider();
+    await this.createSession();
   }
 
   private checkTkeyRequirements() {
     if (!this.tkey) {
       throw new Error("tkey not initialized, call init first!");
+    }
+  }
+
+  private async authorizeSession() {
+    try {
+      if (!this.sessionManager.sessionKey) return {};
+      const result = await this.sessionManager.authorizeSession();
+      this.updateState({
+        factorKey: new BN(result.factorKey, "hex"),
+        tssNonce: result.tssNonce,
+        tssShare2: new BN(result.tssShare, "hex"),
+        tssShare2Index: result.tssShareIndex,
+        tssPubKey: Buffer.from(result.tssPubKey.padStart(64, "0"), "hex"),
+        signatures: result.signatures,
+        userInfo: result.userInfo,
+      });
+      await this.setupProvider();
+    } catch (err) {
+      log.error("error trying to authorize session", err);
+    }
+  }
+
+  private async createSession() {
+    try {
+      const sessionId = OpenloginSessionManager.generateRandomSessionKey();
+      this.sessionManager.sessionKey = sessionId;
+      const { factorKey, userInfo, tssNonce, tssShare2, tssShare2Index, tssPubKey } = this.state;
+      if (!factorKey || !tssNonce || !tssShare2 || !tssPubKey || !userInfo) {
+        throw new Error("User not logged in");
+      }
+      const payload: SessionData = {
+        factorKey: factorKey?.toString("hex"),
+        tssNonce,
+        tssShareIndex: tssShare2Index as number,
+        tssShare: tssShare2.toString("hex"),
+        tssPubKey: Buffer.from(tssPubKey).toString("hex"),
+        signatures: this.signatures,
+        userInfo,
+      };
+      await this.sessionManager.createSession(payload);
+    } catch (err) {
+      log.error("error creating session", err);
     }
   }
 
@@ -302,10 +364,11 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       throw new Error("no metadata for your factor key, reset your account");
     }
     const metadataShare = JSON.parse(factorKeyMetadata.message);
-    if (!metadataShare.deviceShare || !metadataShare.tssShare) throw new Error("Invalid data from metadata");
-    return metadataShare.deviceShare;
+    if (!metadataShare.share || !metadataShare.tssShare) throw new Error("Invalid data from metadata");
+    return metadataShare.share;
   }
 
+  // Not required right now, but could be used in the future.
   private addNewShare(newShareIndex: number, backupFactorPub: Point) {
     if (!this.tkey) throw new Error("tkey not available, call init first");
     if (!this.state.tssShare2 || !this.state.tssShare2Index) {
@@ -395,10 +458,31 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     }
   }
 
+  private async addShareDescriptionSeedPhrase(share: ShareStore, factorKey: BN) {
+    const factorIndex = getPubKeyECC(factorKey).toString("hex");
+    const metadataToSet: FactorKeyCloudMetadata = {
+      share,
+      tssShare: this.state.tssShare2 as BN,
+      tssIndex: this.state.tssShare2Index as number,
+    };
+
+    // Set metadata for factor key backup
+    await this.tkey?.addLocalMetadataTransitions({
+      input: [{ message: JSON.stringify(metadataToSet) }],
+      privKey: [factorKey],
+    });
+    const params = {
+      module: FactorKeyTypeShareDescription.SeedPhrase,
+      dateAdded: Date.now(),
+      tssShareIndex: this.state.tssShare2Index as number,
+    };
+    await this.tkey?.addShareDescription(factorIndex, JSON.stringify(params), true);
+  }
+
   private async addShareDescriptionDeviceShare(deviceShare: ShareStore, factorKey: BN) {
     const factorIndex = getPubKeyECC(factorKey).toString("hex");
     const metadataToSet: FactorKeyCloudMetadata = {
-      deviceShare,
+      share: deviceShare,
       tssShare: this.state.tssShare2 as BN,
       tssIndex: this.state.tssShare2Index as number,
     };

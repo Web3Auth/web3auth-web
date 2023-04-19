@@ -25,9 +25,9 @@ export const USER_PATH = {
 
 export enum FactorKeyTypeShareDescription {
   SecurityQuestions = "securityQuestions",
-  ShareSerializationModule = "shareSerializationModule",
-  EmailBackup = "emailBackup",
   DeviceShare = "deviceShare",
+  SeedPhrase = "seedPhrase",
+  PasswordShare = "passwordShare",
 }
 
 export const DELIMITERS = {

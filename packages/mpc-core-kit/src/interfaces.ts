@@ -49,15 +49,16 @@ export interface Web3AuthOptions {
   web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
 
   tssImportUrl?: string;
+
+  storageKey?: "session" | "local";
+
+  // default 86400.
+  sessionTime?: number;
 }
 
 export interface Web3AuthState {
-  loginInfo?: {
-    verifier: string;
-    verifierId: string;
-    signatures: string[];
-    userInfo: UserInfo;
-  };
+  signatures?: string[];
+  userInfo?: UserInfo;
   tssNonce?: number;
   tssShare2?: BN;
   tssShare2Index?: number;
@@ -66,7 +67,17 @@ export interface Web3AuthState {
 }
 
 export type FactorKeyCloudMetadata = {
-  deviceShare: ShareStore;
+  share: ShareStore;
   tssShare: BN;
   tssIndex: number;
 };
+
+export interface SessionData {
+  factorKey: string;
+  tssNonce: number;
+  tssShare: string;
+  tssShareIndex: number;
+  tssPubKey: string;
+  signatures: string[];
+  userInfo: UserInfo;
+}

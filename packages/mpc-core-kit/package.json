@@ -36,7 +36,8 @@
   "dependencies": {
     "@toruslabs/customauth": "11.4.2-alpha.3",
     "@toruslabs/eccrypto": "2.1.1",
-    "@toruslabs/openlogin-ed25519": "^3.2.0",
+    "@toruslabs/openlogin-utils": "../../../OpenLoginSdk/packages/openlogin-utils",
+    "@toruslabs/openlogin-session-manager": "../../../OpenLoginSdk/packages/session-manager/openlogin-session-manager",
     "@toruslabs/metadata-helpers": "^3.1.0",
     "@toruslabs/tss-client": "^1.5.0-alpha.0",
 		"@toruslabs/tss-lib": "^1.2.1",
