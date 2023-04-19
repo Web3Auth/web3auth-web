@@ -1,4 +1,4 @@
-import { ShareStore } from "@tkey/common-types";
+import { KeyDetails, ShareStore } from "@tkey/common-types";
 import type { AGGREGATE_VERIFIER_TYPE, LoginWindowResponse, SubVerifierDetails, TorusVerifierResponse } from "@toruslabs/customauth";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import BN from "bn.js";
@@ -34,6 +34,8 @@ export interface IWeb3Auth {
   changeSecurityQuestionShare(question: string, password: string): Promise<void>;
   recoverSecurityQuestionShare(question: string, password: string): Promise<void>;
   deleteSecurityQuestionShare(question: string): Promise<void>;
+  getKeyDetails(): KeyDetails;
+  commitChanges(): Promise<void>;
   logout(): Promise<void>;
 }
 
@@ -61,6 +63,7 @@ export interface Web3AuthOptions {
 }
 
 export interface Web3AuthState {
+  oAuthKey?: string;
   signatures?: string[];
   userInfo?: UserInfo;
   tssNonce?: number;
@@ -77,6 +80,7 @@ export type FactorKeyCloudMetadata = {
 };
 
 export interface SessionData {
+  oAuthKey: string;
   factorKey: string;
   tssNonce: number;
   tssShare: string;
@@ -84,4 +88,10 @@ export interface SessionData {
   tssPubKey: string;
   signatures: string[];
   userInfo: UserInfo;
+}
+
+export interface TkeyLocalStoreData {
+  factorKey: string;
+  verifier: string;
+  verifierId: string;
 }

@@ -1,4 +1,4 @@
-import { decrypt, encrypt, EncryptedMessage, getPubKeyECC, getPubKeyPoint, Point, ShareStore } from "@tkey/common-types";
+import { decrypt, encrypt, EncryptedMessage, getPubKeyECC, getPubKeyPoint, KeyDetails, Point, ShareStore, toPrivKeyECC } from "@tkey/common-types";
 import ThresholdKey from "@tkey/core";
 import { TorusServiceProvider } from "@tkey/service-provider-torus";
 import { ShareSerializationModule } from "@tkey/share-serialization";
@@ -20,6 +20,7 @@ import {
   IWeb3Auth,
   LoginParams,
   SessionData,
+  TkeyLocalStoreData,
   USER_PATH_TYPE,
   UserInfo,
   WEB3AUTH_NETWORK_TYPE,
@@ -124,7 +125,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     await (this.tkey.serviceProvider as TorusServiceProvider).init({});
 
     if (this.sessionManager.sessionKey) {
-      await this.authorizeSession();
+      await this.rehydrateSession();
+      if (this.state.factorKey) await this.setupProvider();
     }
   }
 
@@ -134,15 +136,14 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     }
 
     try {
-      let privateKey = "";
       let path: USER_PATH_TYPE | null = null;
 
       // oAuth login.
       if (params.subVerifierDetails) {
         // single verifier login.
         const loginResponse = await (this.tkey?.serviceProvider as TorusServiceProvider).triggerLogin(params.subVerifierDetails);
-        privateKey = loginResponse.privateKey;
         this.updateState({
+          oAuthKey: loginResponse.privateKey,
           userInfo: loginResponse.userInfo,
           signatures: loginResponse.signatures.filter((i) => Boolean(i)),
         });
@@ -155,8 +156,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
           verifierIdentifier: params.aggregateVerifierIdentifier as string,
           subVerifierDetailsArray: params.subVerifierDetailsArray,
         });
-        privateKey = loginResponse.privateKey;
         this.updateState({
+          oAuthKey: loginResponse.privateKey,
           userInfo: loginResponse.userInfo[0],
           signatures: loginResponse.signatures.filter((i) => Boolean(i)),
         });
@@ -164,10 +165,10 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
       let factorKey: BN | null = null;
 
-      const tKeyLocalStoreString = localStorage.getItem(`tKeyLocalStore\u001c${this.verifier}\u001c${this.verifierId}`);
-      const tKeyLocalStore = JSON.parse(tKeyLocalStoreString || "{}");
+      const tKeyLocalStoreString = this.currentStorage.get<string>(`${this.verifier}${DELIMITERS.Delimiter1}${this.verifierId}`);
+      const tKeyLocalStore = JSON.parse(tKeyLocalStoreString || "{}") as TkeyLocalStoreData;
 
-      const existingUser = await this.isMetadataPresent(privateKey);
+      const existingUser = await this.isMetadataPresent(this.state.oAuthKey as string);
 
       if (!existingUser) {
         // save the device share.
@@ -187,15 +188,6 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         await this.tkey.initialize({ neverInitializeNewKey: true });
         throw new Error(ERRORS.TKEY_SHARES_REQUIRED);
       }
-
-      localStorage.setItem(
-        `tKeyLocalStore\u001c${this.verifier}\u001c${this.verifierId}`,
-        JSON.stringify({
-          factorKey: factorKey.toString("hex"),
-          verifier: this.verifier,
-          verifierId: this.verifierId,
-        })
-      );
 
       await this.tkey.reconstructKey();
       await this.finalizeTkey(path, factorKey);
@@ -218,8 +210,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     const backupFactorPub = getPubKeyPoint(backupFactorKey);
 
     await this.copyFactorPub(2, backupFactorPub);
-    const deviceShare = await this.createDeviceShare();
-    await this.addShareDescriptionSeedPhrase(deviceShare, backupFactorKey);
+    const share = await this.getShare();
+    await this.addShareDescriptionSeedPhrase(share, backupFactorKey);
     const mnemonic = (await (this.tkey.modules[FactorKeyTypeShareDescription.SeedPhrase] as ShareSerializationModule).serialize(
       backupFactorKey,
       "mnemonic"
@@ -261,22 +253,26 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     if (password.length < 10) {
       throw new Error("password must be at least 10 characters long");
     }
-    const backupFactorKey = new BN(generatePrivate());
-    const backupFactorPub = getPubKeyPoint(backupFactorKey);
+    try {
+      const backupFactorKey = new BN(generatePrivate());
+      const backupFactorPub = getPubKeyPoint(backupFactorKey);
+      await this.copyFactorPub(2, backupFactorPub);
+      const share = await this.getShare();
+      await this.addShareDescriptionDeviceShare(share, backupFactorKey);
+      const passwordBN = new BN(password, "hex");
+      const encryptedFactorKey = await encrypt(getPubKeyECC(passwordBN), Buffer.from(backupFactorKey.toString("hex"), "hex"));
+      const params = {
+        module: FactorKeyTypeShareDescription.SecurityQuestions,
+        associatedFactor: encryptedFactorKey,
+        dateAdded: Date.now(),
+      };
+      await this.tkey?.addShareDescription(question, JSON.stringify(params), true);
 
-    await this.copyFactorPub(2, backupFactorPub);
-    const deviceShare = await this.createDeviceShare();
-    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
-    const encryptedFactorKey = encrypt(Buffer.from(password, "hex"), Buffer.from(backupFactorKey.toString("hex"), "hex"));
-    const params = {
-      module: FactorKeyTypeShareDescription.SecurityQuestions,
-      associatedFactor: encryptedFactorKey,
-      dateAdded: Date.now(),
-      device: navigator.userAgent,
-    };
-    await this.tkey?.addShareDescription(question, JSON.stringify(params), true);
-
-    await this.tkey.syncLocalMetadataTransitions();
+      if (!this.options.manualSync) await this.tkey.syncLocalMetadataTransitions();
+    } catch (error) {
+      log.error("error creating password share", error);
+      throw error;
+    }
   }
 
   public async recoverSecurityQuestionShare(question: string, password: string) {
@@ -302,9 +298,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       throw new Error("question not found");
     }
 
-    const factorKeyHex = decrypt(Buffer.from(password, "hex"), share as EncryptedMessage);
-
-    const factorKey = new BN(factorKeyHex.toString(), "hex");
+    const factorKeyHex = await decrypt(toPrivKeyECC(password), share as EncryptedMessage);
+    const factorKey = new BN(Buffer.from(factorKeyHex).toString("hex"), "hex");
 
     if (!factorKey) {
       throw new Error(ERRORS.INVALID_BACKUP_SHARE);
@@ -328,19 +323,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       throw new Error("password must be at least 10 characters long");
     }
 
-    const backupFactorKey = new BN(generatePrivate());
-    const backupFactorPub = getPubKeyPoint(backupFactorKey);
-
-    await this.copyFactorPub(2, backupFactorPub);
-    const deviceShare = await this.createDeviceShare();
-    await this.addShareDescriptionDeviceShare(deviceShare, backupFactorKey);
-    const encryptedFactorKey = encrypt(Buffer.from(password, "hex"), Buffer.from(backupFactorKey.toString("hex"), "hex"));
-    const params = {
-      module: FactorKeyTypeShareDescription.SecurityQuestions,
-      associatedFactor: encryptedFactorKey,
-      dateAdded: Date.now(),
-      device: navigator.userAgent,
-    };
+    // check if we have an existing question available or not.
     const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
     let oldShareDescription = null;
     for (const [key, value] of Object.entries(tKeyShareDescriptions)) {
@@ -348,9 +331,26 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         oldShareDescription = value[0];
       }
     }
-    await this.tkey?.updateShareDescription(question, oldShareDescription as string, JSON.stringify(params));
+    if (!oldShareDescription) {
+      throw new Error("No share present for this question");
+    }
 
-    await this.tkey.syncLocalMetadataTransitions();
+    const backupFactorKey = new BN(generatePrivate());
+    const backupFactorPub = getPubKeyPoint(backupFactorKey);
+
+    await this.copyFactorPub(2, backupFactorPub);
+    const share = await this.getShare();
+    await this.addShareDescriptionDeviceShare(share, backupFactorKey);
+    const passwordBN = new BN(password, "hex");
+    const encryptedFactorKey = await encrypt(getPubKeyECC(passwordBN), Buffer.from(backupFactorKey.toString("hex"), "hex"));
+    const params = {
+      module: FactorKeyTypeShareDescription.SecurityQuestions,
+      associatedFactor: encryptedFactorKey,
+      dateAdded: Date.now(),
+    };
+    await this.tkey.updateShareDescription(question, oldShareDescription, JSON.stringify(params));
+
+    if (!this.options.manualSync) await this.tkey.syncLocalMetadataTransitions();
   }
 
   public async deleteSecurityQuestionShare(question: string): Promise<void> {
@@ -358,7 +358,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       throw new Error("tkey not initialized, call init first");
     }
     if (!question) {
-      throw new Error("question and password are required");
+      throw new Error("question is required");
     }
 
     const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
@@ -367,6 +367,9 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       if (key === question) {
         oldShareDescription = value[0];
       }
+    }
+    if (!oldShareDescription) {
+      throw new Error("no share description found for this question");
     }
     await this.tkey?.deleteShareDescription(question, oldShareDescription as string, true);
 
@@ -380,8 +383,35 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     return this.state.userInfo;
   }
 
+  public getKeyDetails(): KeyDetails {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized.");
+    }
+    return this.tkey.getKeyDetails();
+  }
+
+  public async commitChanges(): Promise<void> {
+    if (!this.tkey) {
+      throw new Error("tkey not initialized.");
+    }
+    if (!this.state.factorKey) {
+      throw new Error("factorKey not present.");
+    }
+    try {
+      await this.tkey.syncLocalMetadataTransitions();
+    } catch (error: unknown) {
+      log.error("sync metadata error", error);
+      throw error;
+    }
+  }
+
   public async logout(): Promise<void> {
-    this.updateState({});
+    if (!this.sessionManager.sessionKey) {
+      throw new Error("User is not logged in.");
+    }
+    await this.sessionManager.invalidateSession();
+    this.currentStorage.set("sessionId", "");
+    this.resetState();
   }
 
   private async finalizeTkey(path: USER_PATH_TYPE, factorKey: BN) {
@@ -407,9 +437,17 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     this.updateState({ tssNonce, tssShare2, tssShare2Index, tssPubKey, factorKey });
 
     if (path === USER_PATH.NEW) {
-      const deviceShare = await this.createDeviceShare();
+      const deviceShare = await this.getShare();
       await this.addShareDescriptionDeviceShare(deviceShare, factorKey);
     }
+    this.currentStorage.set(
+      `${this.verifier}${DELIMITERS.Delimiter1}${this.verifierId}`,
+      JSON.stringify({
+        factorKey: factorKey.toString("hex"),
+        verifier: this.verifier,
+        verifierId: this.verifierId,
+      } as TkeyLocalStoreData)
+    );
     await this.tkey.syncLocalMetadataTransitions();
     await this.setupProvider();
     await this.createSession();
@@ -421,10 +459,23 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     }
   }
 
-  private async authorizeSession() {
+  private async rehydrateSession() {
     try {
+      if (!this.tkey || !this.torusSp) {
+        throw new Error("tkey not initialized, call init first!");
+      }
       if (!this.sessionManager.sessionKey) return {};
       const result = await this.sessionManager.authorizeSession();
+      const factorKey = new BN(result.factorKey, "hex");
+      if (!factorKey) {
+        throw new Error("Invalid factor key");
+      }
+      this.torusSp.postboxKey = new BN(result.oAuthKey, "hex");
+      const deviceShare = await this.checkIfFactorKeyValid(factorKey);
+      await this.tkey.initialize({ neverInitializeNewKey: true });
+      await this.tkey.inputShareStoreSafe(deviceShare, true);
+      await this.tkey.reconstructKey();
+
       this.updateState({
         factorKey: new BN(result.factorKey, "hex"),
         tssNonce: result.tssNonce,
@@ -434,7 +485,6 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         signatures: result.signatures,
         userInfo: result.userInfo,
       });
-      await this.setupProvider();
     } catch (err) {
       log.error("error trying to authorize session", err);
     }
@@ -444,13 +494,14 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     try {
       const sessionId = OpenloginSessionManager.generateRandomSessionKey();
       this.sessionManager.sessionKey = sessionId;
-      const { factorKey, userInfo, tssNonce, tssShare2, tssShare2Index, tssPubKey } = this.state;
-      if (!factorKey || !tssNonce || !tssShare2 || !tssPubKey || !userInfo) {
+      const { oAuthKey, factorKey, userInfo, tssNonce, tssShare2, tssShare2Index, tssPubKey } = this.state;
+      if (!oAuthKey || !factorKey || !tssShare2 || !tssPubKey || !userInfo) {
         throw new Error("User not logged in");
       }
       const payload: SessionData = {
+        oAuthKey,
         factorKey: factorKey?.toString("hex"),
-        tssNonce,
+        tssNonce: tssNonce as number,
         tssShareIndex: tssShare2Index as number,
         tssShare: tssShare2.toString("hex"),
         tssPubKey: Buffer.from(tssPubKey).toString("hex"),
@@ -458,6 +509,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         userInfo,
       };
       await this.sessionManager.createSession(payload);
+      this.currentStorage.set("sessionId", sessionId);
     } catch (err) {
       log.error("error creating session", err);
     }
@@ -547,30 +599,20 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     });
   }
 
-  private async createDeviceShare(): Promise<ShareStore> {
-    try {
-      const deviceShare = (await this.fetchDeviceShareFromTkey()) as ShareStore;
-      return deviceShare;
-    } catch (err: unknown) {
-      log.error("create device share error", err);
-      throw new Error((err as Error).message);
-    }
-  }
-
-  private async fetchDeviceShareFromTkey(): Promise<ShareStore | null> {
+  private async getShare(): Promise<ShareStore> {
     try {
       const polyId = this.tkey?.metadata.getLatestPublicPolynomial().getPolynomialID();
       const shares = this.tkey?.shares[polyId as string];
-      let deviceShare = null;
+      let share: ShareStore | null = null;
 
       for (const shareIndex in shares) {
         if (shareIndex !== "1") {
-          deviceShare = shares[shareIndex];
+          share = shares[shareIndex];
         }
       }
-      return deviceShare;
+      return share as ShareStore;
     } catch (err: unknown) {
-      log.error("fetch device share error", err);
+      log.error("create device share error", err);
       throw new Error((err as Error).message);
     }
   }
@@ -641,10 +683,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
         clientIndex
       );
       // setup mock shares, sockets and tss wasm files.
-      const [sockets] = await Promise.all([
-        tssUtils.setupSockets(tssWSEndpoints.filter((x) => Boolean(x)) as string[]),
-        tss.default(this.options.tssImportUrl),
-      ]);
+      const [sockets] = await Promise.all([tssUtils.setupSockets(tssWSEndpoints), tss.default(this.options.tssImportUrl)]);
 
       const randomSessionNonce = keccak256(generatePrivate().toString("hex") + Date.now());
 
@@ -701,6 +740,10 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
   private updateState(newState: Partial<Web3AuthState>): void {
     this.state = { ...this.state, ...newState };
+  }
+
+  private resetState(): void {
+    this.state = {};
   }
 
   private getEc(): EC.ec {

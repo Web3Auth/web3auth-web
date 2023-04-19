@@ -5,6 +5,8 @@
 import BN from "bn.js";
 import { useEffect, useState } from "react";
 import { Web3AuthMPCCoreKit } from "@web3auth/mpc-core-kit"
+import Web3 from 'web3';
+import type { provider } from "web3-core";
 // import swal from "sweetalert";
 
 import "./App.css";
@@ -28,6 +30,7 @@ function App() {
   const [mockVerifierId, setMockVerifierId] = useState<string | null>(null);
   const [showBackupPhraseScreen, setShowBackupPhraseScreen] = useState<boolean>(false);
   const [seedPhrase, setSeedPhrase] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
     if (!mockVerifierId) return;
@@ -46,15 +49,26 @@ function App() {
 
   useEffect(() => {
     const init = async () => {
-      const coreKitInstance = new Web3AuthMPCCoreKit({ web3AuthClientId: 'torus-key-test'  })
+      const coreKitInstance = new Web3AuthMPCCoreKit({ web3AuthClientId: 'torus-key-test', web3AuthNetwork: 'testnet'  })
       await coreKitInstance.init();
       setCoreKitInstance(coreKitInstance);
+      if (coreKitInstance.provider) setProvider(coreKitInstance.provider);
     }
     init()
   }, [])
 
+  useEffect(() => {
+    if(provider) {
+      const web3 = new Web3(provider as provider);
+      setWeb3(web3);
+    }
+  }, [provider])
+
   const keyDetails = async () => {
-    // To be implemented.
+    if (!coreKitInstance) {
+      throw new Error('coreKitInstance not found');
+    }
+    uiConsole(coreKitInstance.getKeyDetails())
   };
 
   const login = async (mockLogin: boolean) => {
@@ -82,7 +96,11 @@ function App() {
     }
   }
 
-  const logout = (): void => {
+  const logout = async () => {
+    if (!coreKitInstance) {
+      throw new Error("coreKitInstance not found");
+    }
+    await coreKitInstance.logout();
     uiConsole("Log out");
     setProvider(null);
     setLoginResponse(null);
@@ -114,6 +132,28 @@ function App() {
     uiConsole('submitted');
     if (coreKitInstance.provider) setProvider(coreKitInstance.provider);
   }
+
+  const savePasswordShare = async () => {
+    try {
+      if (!coreKitInstance) { 
+        throw new Error("coreKitInstance is not set");
+      }
+      await coreKitInstance.addSecurityQuestionShare("What is your password?", password);
+      uiConsole('saved');
+    } catch (err) {
+      uiConsole(err);
+    }
+  }
+
+  const resetViaPassword = async () => {
+    if (!coreKitInstance) { 
+      throw new Error("coreKitInstance is not set");
+    }
+    await coreKitInstance.recoverSecurityQuestionShare("What is your password?", password);
+    uiConsole('submitted');
+    if (coreKitInstance.provider) setProvider(coreKitInstance.provider);
+  }
+  
 
   // const getMetadataKey = (): void => {
   //   uiConsole(metadataKey);
@@ -252,6 +292,11 @@ function App() {
           Export backup share
         </button>
 
+        <input value={password} onChange={(e) => setPassword(e.target.value)}></input>
+        <button onClick={savePasswordShare} className="card">
+          Save Password Share
+        </button>
+
 
         {/* <button onClick={createNewTSSShareIntoManualBackupFactorkey} className="card">
           Create New TSSShare Into Manual Backup Factor
@@ -328,6 +373,13 @@ function App() {
             <textarea value={seedPhrase as string} onChange={(e) => setSeedPhrase(e.target.value)}></textarea>
             <button onClick={submitBackupShare} className="card">
               Submit backup share
+            </button>
+            <hr />
+            OR
+            <hr/>
+            <input value={password} onChange={(e) => setPassword(e.target.value)}></input>
+            <button onClick={resetViaPassword} className="card">
+              Reset using password Share
             </button>
           </>
         )
