@@ -261,8 +261,8 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
       const backupFactorPub = getPubKeyPoint(backupFactorKey);
       await this.copyFactorPub(2, backupFactorPub);
       const share = await this.getShare();
-      await this.addShareDescriptionDeviceShare(share, backupFactorKey);
-      const passwordBN = new BN(password, "hex");
+      await this.addSecurityShareDescription(share, backupFactorKey);
+      const passwordBN = new BN(Buffer.from(password, "utf8"));
       const encryptedFactorKey = await encrypt(getPubKeyECC(passwordBN), Buffer.from(backupFactorKey.toString("hex"), "hex"));
       const params = {
         module: FactorKeyTypeShareDescription.SecurityQuestions,
@@ -293,17 +293,16 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     const tKeyShareDescriptions = this.tkey.getMetadata().getShareDescription();
     for (const [key, value] of Object.entries(tKeyShareDescriptions)) {
       if (key === question) {
-        share = JSON.parse(value[0]).associatedFactor;
+        share = value[0] ? JSON.parse(value[0]).associatedFactor : null;
       }
     }
 
     if (share === null) {
       throw new Error("question not found");
     }
-
-    const factorKeyHex = await decrypt(toPrivKeyECC(password), share as EncryptedMessage);
+    const passwordBN = new BN(Buffer.from(password, "utf8"));
+    const factorKeyHex = await decrypt(toPrivKeyECC(passwordBN), share);
     const factorKey = new BN(Buffer.from(factorKeyHex).toString("hex"), "hex");
-
     if (!factorKey) {
       throw new Error(ERRORS.INVALID_BACKUP_SHARE);
     }
@@ -343,16 +342,15 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
 
     await this.copyFactorPub(2, backupFactorPub);
     const share = await this.getShare();
-    await this.addShareDescriptionDeviceShare(share, backupFactorKey);
-    const passwordBN = new BN(password, "hex");
+    await this.addSecurityShareDescription(share, backupFactorKey);
+    const passwordBN = new BN(Buffer.from(password, "utf8"));
     const encryptedFactorKey = await encrypt(getPubKeyECC(passwordBN), Buffer.from(backupFactorKey.toString("hex"), "hex"));
     const params = {
       module: FactorKeyTypeShareDescription.SecurityQuestions,
       associatedFactor: encryptedFactorKey,
       dateAdded: Date.now(),
     };
-    await this.tkey.updateShareDescription(question, oldShareDescription, JSON.stringify(params));
-
+    await this.tkey.updateShareDescription(question, oldShareDescription, JSON.stringify(params), true);
     if (!this.options.manualSync) await this.tkey.syncLocalMetadataTransitions();
   }
 
@@ -376,7 +374,7 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     }
     await this.tkey?.deleteShareDescription(question, oldShareDescription as string, true);
 
-    await this.tkey.syncLocalMetadataTransitions();
+    if (!this.options.manualSync) await this.tkey.syncLocalMetadataTransitions();
   }
 
   public getUserInfo(): UserInfo {
@@ -656,6 +654,28 @@ export class Web3AuthMPCCoreKit implements IWeb3Auth {
     });
     const params = {
       module: FactorKeyTypeShareDescription.DeviceShare,
+      dateAdded: Date.now(),
+      device: navigator.userAgent,
+      tssShareIndex: this.state.tssShare2Index as number,
+    };
+    await this.tkey?.addShareDescription(factorIndex, JSON.stringify(params), true);
+  }
+
+  private async addSecurityShareDescription(deviceShare: ShareStore, factorKey: BN) {
+    const factorIndex = getPubKeyECC(factorKey).toString("hex");
+    const metadataToSet: FactorKeyCloudMetadata = {
+      share: deviceShare,
+      tssShare: this.state.tssShare2 as BN,
+      tssIndex: this.state.tssShare2Index as number,
+    };
+
+    // Set metadata for factor key backup
+    await this.tkey?.addLocalMetadataTransitions({
+      input: [{ message: JSON.stringify(metadataToSet) }],
+      privKey: [factorKey],
+    });
+    const params = {
+      module: FactorKeyTypeShareDescription.SecurityQuestions,
       dateAdded: Date.now(),
       device: navigator.userAgent,
       tssShareIndex: this.state.tssShare2Index as number,

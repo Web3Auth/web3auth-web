@@ -145,6 +145,30 @@ function App() {
     }
   }
 
+  const updatePasswordShare = async () => {
+    try {
+      if (!coreKitInstance) { 
+        throw new Error("coreKitInstance is not set");
+      }
+      await coreKitInstance.changeSecurityQuestionShare("What is your password?", password);
+      uiConsole('updated');
+    } catch (err) {
+      uiConsole(err);
+    }
+  }
+
+  const deletePasswordShare = async () => {
+    try {
+      if (!coreKitInstance) { 
+        throw new Error("coreKitInstance is not set");
+      }
+      await coreKitInstance.deleteSecurityQuestionShare("What is your password?");
+      uiConsole('deleted');
+    } catch (err) {
+      uiConsole(err);
+    }
+  }
+
   const resetViaPassword = async () => {
     if (!coreKitInstance) { 
       throw new Error("coreKitInstance is not set");
@@ -295,6 +319,16 @@ function App() {
         <input value={password} onChange={(e) => setPassword(e.target.value)}></input>
         <button onClick={savePasswordShare} className="card">
           Save Password Share
+        </button>
+
+
+        <input value={password} onChange={(e) => setPassword(e.target.value)}></input>
+        <button onClick={updatePasswordShare} className="card">
+          Update Password Share
+        </button>
+
+        <button onClick={deletePasswordShare} className="card">
+          Delete Password Share
         </button>
 
 
