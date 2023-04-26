@@ -105,7 +105,7 @@ async function createSockets(wsEndpoints: (string | null | undefined)[], session
     const origin = new URL(wsEndpoint).origin;
     return io(origin, {
       path: "/tss/socket.io",
-      query: { sessionID: session },
+      query: { sessionId: session },
       transports: ["websocket", "polling"],
       withCredentials: true,
       reconnectionDelayMax: 10000,
