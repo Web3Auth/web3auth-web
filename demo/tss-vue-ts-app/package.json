@@ -34,6 +34,7 @@
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-standard": "^8.0.1",
     "@vue/eslint-config-typescript": "^11.0.2",
+    "browserify-zlib": "^0.2.0",
     "eslint": "^8.24.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
