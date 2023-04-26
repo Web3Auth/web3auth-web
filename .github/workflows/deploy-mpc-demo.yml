@@ -44,8 +44,8 @@ jobs:
       - name: Bootstrap Web3Auth dependencies
         run: yarn run bootstrap
 
-      - name: Build Web3Auth packages
-        run: yarn run build
+      # - name: Build Web3Auth packages
+        # run: yarn run build
 
       - name: Build MPC demo app
         if: github.ref == 'refs/heads/feat/tss-demo'
