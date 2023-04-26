@@ -281,6 +281,7 @@ export default Vue.extend({
         this.setStep(2);
       } catch (error) {
         console.error(error);
+        this.submitting = false;
       }
     },
     async signMessage(message: string) {
