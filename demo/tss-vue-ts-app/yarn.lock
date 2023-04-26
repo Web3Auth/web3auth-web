@@ -1828,11 +1828,6 @@
     keccak256 "^1.0.6"
     socket.io-client "^4.5.1"
 
-"@toruslabs/tss-lib@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@toruslabs/tss-lib/-/tss-lib-1.2.1.tgz#66a8ce357aca5d319b37f6c09560bbab98069354"
-  integrity sha512-Cif9fbqmhG37ock7n7qVfSww4ueFn6LWSACwJsq52uEnWSsZ+ZkE3j/Ow1dlNEiI7GTAxaxjKI5H4OIGgvScjA==
-
 "@toruslabs/tss-lib@^1.6.0-alpha.0":
   version "1.6.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@toruslabs/tss-lib/-/tss-lib-1.6.0-alpha.0.tgz#3c896c3cd7cec04bc66f4bb240f65c5f4ffe4400"
