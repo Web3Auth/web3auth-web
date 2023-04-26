@@ -243,7 +243,7 @@ export default Vue.extend({
       postboxKey: PRIVATE_KEY,
       useTSS: true,
       customAuthArgs: {
-        baseUrl: "http://localhost:3000",
+        baseUrl: window.location.origin,
       },
     });
 
