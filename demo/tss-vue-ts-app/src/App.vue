@@ -87,7 +87,7 @@ import { getDKLSCoeff, getTSSPubKey } from "./utils";
 
 const ec = new EC("secp256k1");
 
-const tssImportURL = "https://scripts.toruswallet.io/tss-lib-1.4.0.wasm";
+const tssImportURL = "https://sapphire-dev-2-1.authnetwork.dev/tss/v1/clientWasm";
 
 type PrivateKeyOrSigningProvider = IBaseProvider<
   | string

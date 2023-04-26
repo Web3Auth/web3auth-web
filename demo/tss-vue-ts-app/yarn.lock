@@ -1816,22 +1816,27 @@
     loglevel "^1.8.1"
     web3-utils "^1.8.2"
 
-"@toruslabs/tss-client@^1.5.0-alpha.0":
-  version "1.5.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@toruslabs/tss-client/-/tss-client-1.5.0-alpha.0.tgz#9bcf8cbf484f6ba994f9b3dd6a7a012443de2659"
-  integrity sha512-AvOnaWF4MtofMQWqegVaelYEPuUPTf8nRnKPlAg4alMe6ItzORnQGQN5tW5hn9Y/V37DyTaNCc/DURogsKyhSQ==
+"@toruslabs/tss-client@^1.6.1-alpha.0":
+  version "1.6.1-alpha.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/tss-client/-/tss-client-1.6.1-alpha.0.tgz#876cdc3c1cae0889a29ad3ed7bf6460bf5055ee2"
+  integrity sha512-48nYPc/8v2LkbtgBJw3GRLM0Eb08ASFyK5i3nEDmLg1np7rDn/9TMovPckIKZNsqAb4Rwnsb6FmTNszg3UxYfw==
   dependencies:
     "@toruslabs/eccrypto" "^2.1.1"
-    "@toruslabs/tss-lib" "^1.2.0"
+    "@toruslabs/tss-lib" "^1.6.0-alpha.0"
     bn.js "^5.2.1"
     elliptic "^6.5.4"
     keccak256 "^1.0.6"
     socket.io-client "^4.5.1"
 
-"@toruslabs/tss-lib@^1.2.0", "@toruslabs/tss-lib@^1.2.1":
+"@toruslabs/tss-lib@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@toruslabs/tss-lib/-/tss-lib-1.2.1.tgz#66a8ce357aca5d319b37f6c09560bbab98069354"
   integrity sha512-Cif9fbqmhG37ock7n7qVfSww4ueFn6LWSACwJsq52uEnWSsZ+ZkE3j/Ow1dlNEiI7GTAxaxjKI5H4OIGgvScjA==
+
+"@toruslabs/tss-lib@^1.6.0-alpha.0":
+  version "1.6.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@toruslabs/tss-lib/-/tss-lib-1.6.0-alpha.0.tgz#3c896c3cd7cec04bc66f4bb240f65c5f4ffe4400"
+  integrity sha512-sCkAFRZYMDYDWDkMEo73fyz1NnPdXZTRiQWaUCywmtV8fWQBFgneq3bVZGIMAhUNYY62PD0BubW3XaV6mqMYTg==
 
 "@trysound/sax@0.2.0":
   version "0.2.0"
