@@ -1,21 +1,44 @@
 <template>
   <v-form ref="form" v-model="validForm" @submit.prevent="">
-    <v-card class="mx-auto pt-10 sign-in" max-width="600" outlined shaped>
+    <v-card class="pt-10 mx-auto sign-in" max-width="600" outlined shaped>
       <v-list-item-content class="px-8">
         <!-- HEADER -->
-        <v-list-item-title class="text-h5 mb-2 font-weight-black">Sign in</v-list-item-title>
-        <v-list-item-subtitle class="text-subtitle-1 font-weight-bold mb-10">Your blockchain account in one-click</v-list-item-subtitle>
+        <v-list-item-title class="mb-2 text-h5 font-weight-black">Sign in</v-list-item-title>
+        <v-list-item-subtitle class="mb-10 text-subtitle-1 font-weight-bold">Your blockchain account in one-click</v-list-item-subtitle>
 
         <!-- BODY -->
         <v-row class="px-3">
-          <v-btn block rounded color="primary" class="mt-5" large :disabled="!validForm || submitting" :loading="submitting" @click="connectTo">
-            Login
+          <v-btn block rounded color="primary" class="mt-5" large :disabled="submitting" :loading="submitting" @click="() => connectTo('google')">
+            Login with google
+          </v-btn>
+        </v-row>
+
+        <v-row class="pa-3">
+          <v-divider></v-divider>
+          <div class="px-2">
+            <div class="or-text text3--text">OR</div>
+          </div>
+          <v-divider></v-divider>
+        </v-row>
+
+        <v-row>
+          <v-text-field
+            v-model="email"
+            dense
+            :rules="[rules.required, rules.email]"
+            block
+            outlined
+            placeholder="Please enter your email address"
+            class="pb-0 rounded-pill"
+          ></v-text-field>
+          <v-btn block rounded color="primary" large :disabled="!validForm || submitting" :loading="submitting" @click="connnectWithEmail">
+            Login with email
           </v-btn>
         </v-row>
       </v-list-item-content>
 
       <!-- FOOTER -->
-      <div class="footer text-center text-caption font-weight-regular pa-8 mt-12">
+      <div class="mt-12 text-center footer text-caption font-weight-regular pa-8">
         <div>Self-custodial login by Web3Auth</div>
         <div>Terms of Service | Privacy Policy | Version 1.27.3</div>
       </div>
@@ -24,6 +47,7 @@
 </template>
 
 <script lang="ts">
+import { LOGIN_PROVIDER } from "@toruslabs/base-controllers";
 import Vue from "vue";
 
 export default Vue.extend({
@@ -35,17 +59,24 @@ export default Vue.extend({
     connect: {
       type: Function,
     },
+    submitting: { type: Boolean, default: false },
   },
   data: () => ({
     validForm: true,
+    email: "",
     rules: {
       required: (value: string) => !!value || "Required.",
+      email: (value: string): string | boolean =>
+        /^(([^\s"(),.:;<>@[\\\]]+(\.[^\s"(),.:;<>@[\\\]]+)*)|(".+"))@((\[(?:\d{1,3}\.){3}\d{1,3}])|(([\dA-Za-z-]+\.)+[A-Za-z]{2,}))$/.test(value) ||
+        "Invalid email",
     },
-    submitting: false,
   }),
   methods: {
-    async connectTo() {
-      await this.connect();
+    async connectTo(loginProvider: string, loginHint?: string) {
+      await this.connect(loginProvider, loginHint);
+    },
+    connnectWithEmail() {
+      this.connectTo(LOGIN_PROVIDER.EMAIL_PASSWORDLESS, this.email);
     },
   },
 });

@@ -34,7 +34,7 @@
           <div class="py-16 text-center" v-if="signingin">
             <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
           </div>
-          <Login v-else-if="currentStep == 1" :set-step="setStep" :connect="connect" />
+          <Login v-else-if="currentStep == 1" :submitting="submitting" :set-step="setStep" :connect="connect" />
           <Sign
             v-if="currentStep == 2"
             :set-step="setStep"
@@ -59,15 +59,22 @@
 </template>
 
 <script lang="ts">
-import { post } from "@toruslabs/http-helpers";
-import { safeatob } from "@toruslabs/openlogin-utils";
+import { getPubKeyPoint } from "@tkey/common-types";
+import ThresholdKey from "@tkey/default";
+import TorusServiceProvider from "@tkey/service-provider-torus";
+import { MockStorageLayer } from "@tkey/storage-layer-torus";
+import { LOGIN_PROVIDER } from "@toruslabs/base-controllers";
+import TorusSdk, { AggregateLoginParams, TorusAggregateLoginResponse } from "@toruslabs/customauth";
+import { generatePrivate } from "@toruslabs/eccrypto";
 import { Client } from "@toruslabs/tss-client";
 import * as tss from "@toruslabs/tss-lib";
-import { ADAPTER_STATUS, CONNECTED_EVENT_DATA } from "@web3auth-mpc/base";
-import { OpenloginAdapter } from "@web3auth-mpc/openlogin-adapter";
-import { Web3Auth } from "@web3auth-mpc/web3auth";
+import { IBaseProvider } from "@web3auth-mpc/base-provider";
+import { EthereumSigningProvider } from "@web3auth-mpc/ethereum-provider";
+// import { ADAPTER_STATUS, CONNECTED_EVENT_DATA } from "@web3auth-mpc/base";
+// import { OpenloginAdapter } from "@web3auth-mpc/openlogin-adapter";
 import BN from "bn.js";
 import { ec as EC } from "elliptic";
+import keccak256 from "keccak256";
 import { io, Socket } from "socket.io-client";
 import Vue from "vue";
 import Web3 from "web3";
@@ -76,99 +83,34 @@ import Login from "./components/Login.vue";
 import Sign from "./components/Sign.vue";
 import Stepper from "./components/Stepper.vue";
 import Verify from "./components/Verify.vue";
+import { getDKLSCoeff, getTSSPubKey } from "./utils";
 
 const ec = new EC("secp256k1");
 
-const clientId = "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs";
-const tssServerEndpoint = "https://sapphire-dev-2-1.authnetwork.dev/tss";
+const tssImportURL = "https://scripts.toruswallet.io/tss-lib-1.4.0.wasm";
 
-const tssImportURL = "https://scripts.toruswallet.io/tss-lib-1.2.1.wasm";
-
-async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
-  // check if TSS is available
-  if (!tssShare || !Array.isArray(signatures) || signatures.length === 0) {
-    throw new Error("tssShare or signatures not available");
-  }
-  const parsedTSSShare = {
-    share: tssShare.split("-")[0].split(":")[1],
-    index: tssShare.split("-")[1].split(":")[1],
-  };
-
-  const parsedSignatures = signatures.map((s) => JSON.parse(s));
-  const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)];
-  const { verifier_name: verifierName, verifier_id: verifierId } = JSON.parse(safeatob(chosenSignature.data));
-  if (!verifierName || !verifierId) {
-    throw new Error("verifier_name and verifier_id must be specified");
-  }
-
-  const { share_pub_x: sharePubX, share_pub_y: sharePubY } = await post<{
-    // eslint-disable-next-line camelcase
-    share_pub_x: string;
-    // eslint-disable-next-line camelcase
-    share_pub_y: string;
-  }>(`${tssServerEndpoint}/getOrCreateTSSPub`, {
-    verifier_name: verifierName,
-    verifier_id: verifierId,
-  });
-
-  const getLagrangeCoeff = (partyIndexes: BN[], partyIndex: BN): BN => {
-    let upper = new BN(1);
-    let lower = new BN(1);
-    for (let i = 0; i < partyIndexes.length; i += 1) {
-      const otherPartyIndex = partyIndexes[i];
-      if (!partyIndex.eq(otherPartyIndex)) {
-        upper = upper.mul(otherPartyIndex.neg());
-        upper = upper.umod(ec.curve.n);
-        let temp = partyIndex.sub(otherPartyIndex);
-        temp = temp.umod(ec.curve.n);
-        lower = lower.mul(temp).umod(ec.curve.n);
-      }
+type PrivateKeyOrSigningProvider = IBaseProvider<
+  | string
+  | {
+      sign: (msgHash: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      getPublic: () => Promise<Buffer>;
     }
+>;
 
-    const delta = upper.mul(lower.invm(ec.curve.n)).umod(ec.curve.n);
-    return delta;
-  };
-
-  // TODO: extend
-  const localIndex = 1;
-  const remoteIndex = 0;
-  const parties = [0, 1];
-  const pubKeyPoint = ec
-    .keyFromPublic({ x: sharePubX, y: sharePubY })
-    .getPublic()
-    .mul(
-      getLagrangeCoeff(
-        parties.map((p) => new BN(p + 1)),
-        new BN(remoteIndex + 1)
-      )
-    )
-    .add(
-      ec
-        .keyFromPrivate(Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex"))
-        .getPublic()
-        .mul(
-          getLagrangeCoeff(
-            parties.map((p) => new BN(p + 1)),
-            new BN(localIndex + 1)
-          )
-        )
-    );
-  const pubKeyX = pubKeyPoint.getX().toString(16, 64);
-  const pubKeyY = pubKeyPoint.getY().toString(16, 64);
-  const pubKeyHex = `${pubKeyX}${pubKeyY}`;
-  const pubKey = Buffer.from(pubKeyHex, "hex").toString("base64");
-
-  return pubKey;
-}
-
-async function createSockets(wsEndpoints: (string | null | undefined)[]): Promise<(Socket | null)[]> {
+async function createSockets(wsEndpoints: (string | null | undefined)[], session: string): Promise<(Socket | null)[]> {
   const sockets = wsEndpoints.map((wsEndpoint) => {
     if (wsEndpoint === null || wsEndpoint === undefined) {
       return null;
     }
     const origin = new URL(wsEndpoint).origin;
-    const path = `${new URL(wsEndpoint).pathname}/socket.io/`;
-    return io(origin, { path });
+    return io(origin, {
+      path: "/tss/socket.io",
+      query: { sessionID: session },
+      transports: ["websocket", "polling"],
+      withCredentials: true,
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: 10,
+    });
   });
 
   await new Promise((resolve) => {
@@ -186,23 +128,29 @@ async function createSockets(wsEndpoints: (string | null | undefined)[]): Promis
   return sockets;
 }
 
-async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<Client> {
-  const endpoints = [tssServerEndpoint, null];
-  const wsEndpoints = [tssServerEndpoint, null];
-  const sockets = await createSockets(wsEndpoints);
-  const parsedTSSShare = {
-    share: tssShare.split("-")[0].split(":")[1],
-    index: tssShare.split("-")[1].split(":")[1],
-  };
+const generateEndpoints = (parties: number, clientIndex: number) => {
+  const endpoints: string[] = [];
+  const tssWSEndpoints: string[] = [];
+  const partyIndexes: number[] = [];
+  for (let i = 0; i < parties; i++) {
+    partyIndexes.push(i);
+    if (i === clientIndex) {
+      endpoints.push(null as any);
+      tssWSEndpoints.push(null as any);
+    } else {
+      endpoints.push(`https://sapphire-dev-2-${i + 1}.authnetwork.dev/tss`);
+      tssWSEndpoints.push(`https://sapphire-dev-2-${i + 1}.authnetwork.dev`);
+    }
+  }
+  return { endpoints, tssWSEndpoints, partyIndexes };
+};
 
-  const base64Share = Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex").toString("base64");
-  // TODO: extend
-  const localIndex = 1;
-  const remoteIndex = 0;
-  const parties = [0, 1];
-
-  return new Client(`${verifierName}~${verifierId}:${Date.now()}`, localIndex, parties, endpoints, sockets, base64Share, pubKey, true, tssImportURL);
-}
+const DELIMITERS = {
+  Delimiter1: "\u001c",
+  Delimiter2: "\u0015",
+  Delimiter3: "\u0016",
+  Delimiter4: "\u0017",
+};
 
 export default Vue.extend({
   name: "App",
@@ -217,28 +165,62 @@ export default Vue.extend({
   data: () => ({
     currentStep: 1,
     loggedIn: false,
-    web3auth: new Web3Auth({
-      chainConfig: {
-        chainNamespace: "eip155",
-        chainId: "0x1",
-        // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-        // displayName: "ropsten",
-        // blockExplorer: "https://ropsten.etherscan.io/",
-        ticker: "ETH",
-        tickerName: "Ethereum",
-      },
-      clientId: "BCtbnOamqh0cJFEUYA0NB5YkvBECZ3HLZsKfvSRBvew2EiiKW3UxpyQASSR0artjQkiUOCHeZ_ZeygXpYpxZjOs",
-      authMode: "DAPP",
-      enableLogging: true,
-    }),
+    submitting: false,
+    web3auth: null,
+    torusDirectSdk: null as TorusSdk | null,
+    loginDetails: null as TorusAggregateLoginResponse | null,
     provider: null as any,
-    generatePrecompute: null as any,
     progressPercent: 0,
     progressText: "selecting nearest region",
     finalHash: "",
     finalSig: "",
     finalSigner: "",
     signingin: false,
+    tb: null as ThresholdKey | null,
+    torusSp: null as TorusServiceProvider | null,
+    chainConfig: {
+      chainNamespace: "eip155",
+      chainId: "0x1",
+      rpcTarget: `https://rpc.ankr.com/eth`,
+      displayName: "Ankr",
+      blockExplorer: "https://etherscan.io/",
+      ticker: "ETH",
+      tickerName: "Ethereum",
+    },
+    privateKeyOrSigningProvider: null as PrivateKeyOrSigningProvider | null,
+    loginVerifierMap: {
+      [LOGIN_PROVIDER.GOOGLE]: () =>
+        ({
+          aggregateVerifierType: "single_id_verifier",
+          verifierIdentifier: "sapphire-google-lrc",
+          subVerifierDetailsArray: [
+            {
+              typeOfLogin: "google",
+              verifier: "torus",
+              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+            },
+          ],
+        } as AggregateLoginParams),
+      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: (email?: string) =>
+        ({
+          aggregateVerifierType: "single_id_verifier",
+          verifierIdentifier: "sapphire-email-passwordless-lrc",
+          subVerifierDetailsArray: [
+            {
+              typeOfLogin: "jwt",
+              clientId: "P7PJuBCXIHP41lcyty0NEb7Lgf7Zme8Q",
+              verifier: "torus",
+              jwtParams: {
+                login_hint: email,
+                verifierIdField: "name",
+                isVerifierIdCaseSensitive: false,
+                connection: "email",
+                domain: "https://lrc.auth.openlogin.com",
+              },
+            },
+          ],
+        } as AggregateLoginParams),
+    },
   }),
   computed: {
     landingPage() {
@@ -246,26 +228,64 @@ export default Vue.extend({
     },
   },
   async mounted() {
-    await this.initEthAuth();
+    // await this.initEthAuth();
+    this.torusDirectSdk = new TorusSdk({
+      baseUrl: `${location.origin}/serviceworker`,
+      enableLogging: true,
+      uxMode: "popup",
+    });
+
+    await this.torusDirectSdk.init({ skipSw: false });
+
+    const PRIVATE_KEY = generatePrivate().toString("hex");
+
+    this.torusSp = new TorusServiceProvider({
+      postboxKey: PRIVATE_KEY,
+      useTSS: true,
+      customAuthArgs: {
+        baseUrl: "http://localhost:3000",
+      },
+    });
+
+    const torusSL = new MockStorageLayer();
+
+    this.tb = new ThresholdKey({ serviceProvider: this.torusSp, storageLayer: torusSL, manualSync: true });
+    this.privateKeyOrSigningProvider = new EthereumSigningProvider({ config: { chainConfig: this.chainConfig } });
   },
   methods: {
     setStep(value: number) {
       this.currentStep = value;
     },
     async logout() {
-      await this.web3auth.logout();
       this.setStep(1);
     },
-    async connect() {
+    async connect(loginProvider: string, loginHint?: string) {
       try {
-        const web3authProvider = await this.web3auth.connect();
-        this.provider = web3authProvider;
+        if (!this.torusDirectSdk) throw new Error("custom auth not initialized.");
+        this.submitting = true;
+
+        if (loginProvider === LOGIN_PROVIDER.EMAIL_PASSWORDLESS && !loginHint) {
+          throw new Error("Please provide a valid email.");
+        }
+
+        const veriferMap = this.loginVerifierMap[loginProvider];
+
+        if (!veriferMap) throw new Error("no valid login provider");
+
+        const verifierConfig = veriferMap(loginHint);
+
+        const loginDetails = await this.torusDirectSdk.triggerAggregateLogin(verifierConfig);
+        this.submitting = false;
+        this.loginDetails = loginDetails;
+
+        this.setStep(2);
       } catch (error) {
         console.error(error);
       }
     },
     async signMessage(message: string) {
-      const web3 = new Web3(this.web3auth.provider as any);
+      if (!this.privateKeyOrSigningProvider?.provider) throw new Error("privateKeyOrSigningProvider is not initialized.");
+      const web3 = new Web3(this.privateKeyOrSigningProvider.provider as any);
       const accounts = await web3.eth.getAccounts();
       const typedMessage = [
         {
@@ -274,150 +294,123 @@ export default Vue.extend({
           value: message,
         },
       ];
-
       const params = [JSON.stringify(typedMessage), accounts[0]];
       const method = "eth_signTypedData";
-
-      const signedMessage = await this.web3auth.provider!.request({
+      const signedMessage = await this.privateKeyOrSigningProvider.provider.request({
         method,
         params,
       });
-
       this.finalSig = signedMessage as string;
       this.finalSigner = accounts[0];
     },
-    async initEthAuth() {
-      try {
-        let getTSSData: () => Promise<{
-          tssShare: string;
-          signatures: string[];
-        }>;
-        const tssGetPublic = async () => {
-          if (!getTSSData) {
-            throw new Error("tssShare / sigs are undefined");
-          }
-          const { tssShare, signatures } = await getTSSData();
-          const pubKey = await getPublicKeyFromTSSShare(tssShare, signatures);
-          return Buffer.from(pubKey, "base64");
-        };
-        const clients: { client: Client; allocated: boolean }[] = [];
-        const tssSign = async (msgHash: Buffer) => {
-          if (!getTSSData) {
-            throw new Error("tssShare / sigs are undefined");
-          }
-          const { signatures } = await getTSSData();
-          this.finalHash = `0x${msgHash.toString("hex")}`;
-          let foundClient = null;
+    async generatePrecompute() {
+      if (!this.torusSp) throw new Error("torusSp is not initialized.");
+      if (!this.tb) throw new Error("tb is not initialized.");
+      if (!this.loginDetails) throw new Error("loginDetails is not initialized.");
+      if (!this.privateKeyOrSigningProvider) throw new Error("privateKeyOrSigningProvider is not initialized.");
 
-          while (!foundClient) {
-            for (let i = 0; i < clients.length; i++) {
-              const client = clients[i];
-              if (!client.allocated) {
-                client.allocated = true;
-                foundClient = client;
-              }
-            }
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-          await foundClient.client;
-          await tss.default(tssImportURL);
-          const { r, s, recoveryParam } = await foundClient.client.sign(tss as any, Buffer.from(msgHash).toString("base64"), true, "", "keccak256", {
-            signatures: signatures,
-          });
-          return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
-        };
-        this.generatePrecompute = async () => {
-          this.progressText = "selecting region";
-          this.progressPercent = 0;
-          if (!getTSSData) {
-            throw new Error("tssShare and signatures are not defined");
-          }
-          if (!this.provider) {
-            throw new Error("not initialized");
-          }
-          const { aggregateVerifier: verifierName, verifierId } = await this.web3auth.getUserInfo();
-          if (!verifierName || !verifierId) {
-            throw new Error("not logged in, verifier or verifierId undefined");
-          }
+      const parties = 4;
+      const clientIndex = parties - 1;
+      const { endpoints, tssWSEndpoints, partyIndexes } = generateEndpoints(parties, clientIndex);
+      const { verifierId, aggregateVerifier } = this.loginDetails.userInfo[0];
 
-          console.log("WHAT IS THIS", verifierName, verifierId);
-          const { tssShare, signatures } = await getTSSData();
-          const pubKey = (await tssGetPublic()).toString("base64");
-          const client = await setupTSS(tssShare, pubKey, verifierName, verifierId);
-          client.log = (msg) => {
-            this.progressText = msg;
-            this.progressPercent += 2;
-            console.log("PROGRESS PERCENTAGE", this.progressPercent);
-            console.log(msg);
-          };
-          await tss.default(tssImportURL);
-          client.precompute(tss as any);
-          await client.ready();
-          this.progressPercent = 100;
-          console.log("WHATTTTT WHY 100 HOW CAN IT BE READDYYYY", client);
-          this.progressText = "precomputation complete";
-          clients.push({ client, allocated: false });
-        };
-        const openloginAdapter = new OpenloginAdapter({
-          loginSettings: {
-            mfaLevel: "mandatory",
-          },
-          tssSettings: {
-            useTSS: true,
-            tssGetPublic,
-            tssSign,
-            tssDataCallback: async (tssDataReader) => {
-              getTSSData = tssDataReader;
-            },
-          },
-          adapterSettings: {
-            _iframeUrl: "https://mpc-beta.openlogin.com",
-            network: "development",
-            clientId,
-            uxMode: "redirect",
-          },
-        });
-        (window as any).openloginAdapter = openloginAdapter;
+      const deviceTSSShare = this.generateDeviceShare(aggregateVerifier as string, verifierId);
+      const deviceTSSIndex = 3;
 
-        this.web3auth.configureAdapter(openloginAdapter);
-        this.subscribeAuthEvents(this.web3auth);
+      const randomSessionNonce = keccak256(generatePrivate().toString("hex") + Date.now());
+      const vid = `${aggregateVerifier}${DELIMITERS.Delimiter1}${verifierId}`;
 
-        await this.web3auth.initModal({
-          modalConfig: {
-            "wallet-connect-v1": {
-              label: "Wallet-connect-v1",
-              showOnModal: false,
-            },
-            coinbase: {
-              label: "Coinbase",
-              showOnModal: false,
-            },
-            "torus-evm": {
-              label: "Torus-evm",
-              showOnModal: false,
-            },
-            metamask: {
-              label: "Metamask",
-              showOnModal: false,
-            },
-          },
-        });
-      } catch (error) {
-        console.log("error", error);
+      this.torusSp.verifierName = aggregateVerifier;
+      this.torusSp.verifierId = verifierId;
+
+      // factor key needs to passed from outside of tKey
+      const factorKey = new BN(generatePrivate());
+      const factorPub = getPubKeyPoint(factorKey);
+
+      await this.tb?.initialize({ useTSS: true, factorPub, deviceTSSShare, deviceTSSIndex });
+      await this.tb.syncLocalMetadataTransitions();
+
+      const tssNonce = (this.tb.metadata.tssNonces || {})[this.tb.tssTag];
+      const pubKeyDetails = await this.tb.serviceProvider.getTSSPubKey(this.tb.tssTag, tssNonce);
+
+      const dkgTssPubKey = { x: pubKeyDetails.x.toString("hex"), y: pubKeyDetails.y.toString("hex") };
+
+      this.torusSp.postboxKey = new BN(this.loginDetails.privateKey.toString(), "hex");
+      const { tssShare: userShare, tssIndex: userTSSIndex } = await this.tb.getTSSShare(factorKey);
+
+      console.log("userTSSIndex", userTSSIndex);
+      const session = `${vid}${DELIMITERS.Delimiter2}default${DELIMITERS.Delimiter3}${tssNonce}${DELIMITERS.Delimiter4}${randomSessionNonce.toString(
+        "hex"
+      )}`;
+
+      const [sockets] = await Promise.all([createSockets(tssWSEndpoints, session.split(DELIMITERS.Delimiter4)[1]), tss.default(tssImportURL)]);
+
+      // 3. get user's tss share from tkey.
+      const userSharePub = ec.curve.g.mul(userShare);
+      const userSharePubKey = { x: userSharePub.getX().toString("hex"), y: userSharePub.getY().toString("hex") };
+
+      // 4. derive tss pub key, tss pubkey is implicitly formed using the dkgPubKey and the userShare (as well as userTSSIndex)
+      const tssPubKey = getTSSPubKey(dkgTssPubKey, userSharePubKey, userTSSIndex);
+      const pubKey = Buffer.from(`${tssPubKey.getX().toString(16, 64)}${tssPubKey.getY().toString(16, 64)}`, "hex").toString("base64");
+
+      // 5. Derive coeffs to make user share additive.
+      const participatingServerDKGIndexes = [1, 2, 3];
+      const dklsCoeff = getDKLSCoeff(true, participatingServerDKGIndexes, userTSSIndex);
+      const denormalisedShare = dklsCoeff.mul(userShare).umod(ec.curve.n);
+      const share = Buffer.from(denormalisedShare.toString(16, 64), "hex").toString("base64");
+
+      // 6. Derive coeffs to make server share additive.
+      const serverCoeffs = {} as Record<number, string>;
+      for (let i = 0; i < participatingServerDKGIndexes.length; i++) {
+        const serverIndex = participatingServerDKGIndexes[i];
+        serverCoeffs[serverIndex] = getDKLSCoeff(false, participatingServerDKGIndexes, userTSSIndex, serverIndex).toString("hex");
       }
+
+      const client = new Client(session, clientIndex, partyIndexes, endpoints, sockets, share, pubKey, true, tssImportURL);
+      client.log = (msg) => {
+        this.progressText = msg;
+        this.progressPercent += 0.93;
+        console.log("PROGRESS PERCENTAGE", this.progressPercent);
+        console.log(msg);
+      };
+      // initiate precompute
+      client.precompute(tss, { signatures: this.loginDetails.signatures, server_coeffs: serverCoeffs });
+      await client.ready();
+
+      this.progressPercent = 100;
+
+      await this.privateKeyOrSigningProvider.setupProvider({
+        sign: async (msgHash: Buffer) => {
+          this.finalHash = `0x${msgHash.toString("hex")}`;
+          const { r, s, recoveryParam } = await client.sign(
+            tss,
+            Buffer.from(msgHash).toString("base64"),
+            true,
+            Buffer.from(msgHash).toString(),
+            "keccak256",
+            {
+              signatures: this.loginDetails?.signatures,
+            }
+          );
+          return { v: recoveryParam + 27, r: Buffer.from(r.toString("hex"), "hex"), s: Buffer.from(s.toString("hex"), "hex") };
+        },
+        getPublic: async () => {
+          const account = Buffer.from(pubKey, "base64");
+          return account;
+        },
+      });
     },
-    subscribeAuthEvents(web3auth: Web3Auth) {
-      web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.provider = web3auth.provider;
-        this.setStep(2);
-        this.signingin = false;
-      });
-      web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
-        this.signingin = true;
-      });
-      web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
-        this.provider = undefined;
-      });
+    generateDeviceShare(verifier: string, verifierId: string) {
+      const storageKey = `${verifier}_${verifierId}`;
+      const deviceShare = localStorage.getItem(storageKey);
+
+      if (!deviceShare) {
+        const share = new BN(generatePrivate());
+        localStorage.setItem(storageKey, share.toString(16, 64));
+        return share;
+      }
+
+      return new BN(Buffer.from(deviceShare, "hex"));
     },
   },
 });
