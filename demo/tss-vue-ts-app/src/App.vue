@@ -192,12 +192,12 @@ export default Vue.extend({
       [LOGIN_PROVIDER.GOOGLE]: () =>
         ({
           aggregateVerifierType: "single_id_verifier",
-          verifierIdentifier: "sapphire-google-lrc",
+          verifierIdentifier: "sapphire-google-demo",
           subVerifierDetailsArray: [
             {
               typeOfLogin: "google",
               verifier: "torus",
-              clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
+              clientId: "774338308167-q463s7kpvja16l4l0kko3nb925ikds2p.apps.googleusercontent.com",
             },
           ],
         } as AggregateLoginParams),
