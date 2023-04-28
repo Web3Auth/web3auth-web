@@ -39,9 +39,9 @@
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "../../../../OpenLoginSdk/packages/openlogin",
-    "@toruslabs/openlogin-ed25519": "../../../../OpenLoginSdk/packages/openlogin-ed25519",
-    "@toruslabs/openlogin-utils": "../../../../OpenLoginSdk/packages/openlogin-utils",
+    "@toruslabs/openlogin": "^4.0.0",
+    "@toruslabs/openlogin-ed25519": "^4.0.0",
+    "@toruslabs/openlogin-utils": "^4.0.0",
     "@web3auth/base": "^5.1.0",
     "@web3auth/base-provider": "^5.1.1",
     "@web3auth/ethereum-provider": "^5.1.1",

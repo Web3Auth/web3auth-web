@@ -32,7 +32,7 @@
   "devDependencies": {
     "@svgr/webpack": "^6.5.1",
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@toruslabs/openlogin": "^3.2.1",
+    "@toruslabs/openlogin-utils": "^4.0.0",
     "css-loader": "^6.7.3",
     "postcss-prefix-selector": "^1.16.0",
     "style-loader": "^3.3.2",

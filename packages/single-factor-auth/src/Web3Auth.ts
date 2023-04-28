@@ -1,7 +1,7 @@
 import CustomAuth from "@toruslabs/customauth";
 import { OpenloginSessionManager } from "@toruslabs/openlogin-session-manager";
 import { subkey } from "@toruslabs/openlogin-subkey";
-import { BrowserStorage, randomId } from "@toruslabs/openlogin-utils";
+import { BrowserStorage } from "@toruslabs/openlogin-utils";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -105,7 +105,7 @@ class Web3Auth implements IWeb3Auth {
 
     const sessionId = this.store.get<string>("sessionId");
     if (sessionId) {
-      const data = await this.sessionManager.authorizeSession(sessionId);
+      const data = await this.sessionManager.authorizeSession();
       if (data && data.privKey) {
         const finalPrivKey = await this._getFinalPrivKey(data.privKey);
         await this.privKeyProvider.setupProvider(finalPrivKey);
@@ -154,9 +154,9 @@ class Web3Auth implements IWeb3Auth {
     await this.privKeyProvider.setupProvider(finalPrivKey);
 
     // set up the session in the storage server.
-    const sessionId = randomId();
+    const sessionId = OpenloginSessionManager.generateRandomSessionKey();
     // we are using the original private key so that we can retrieve other keys later on
-    await this.sessionManager.createSession(sessionId, { privKey });
+    await this.sessionManager.createSession({ privKey });
     this.store.set("sessionId", sessionId);
     return this.provider;
   }
@@ -165,7 +165,7 @@ class Web3Auth implements IWeb3Auth {
     const sessionId = this.store.get<string>("sessionId");
     if (!sessionId) throw new Error("User not logged in or there is no session");
 
-    await this.sessionManager.invalidateSession(sessionId);
+    await this.sessionManager.invalidateSession();
     this.store.set("sessionId", "");
   }
 

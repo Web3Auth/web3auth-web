@@ -35,9 +35,9 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "../../../OpenLoginSdk/packages/openlogin",
-    "@toruslabs/openlogin-jrpc": "../../../OpenLoginSdk/packages/openlogin-jrpc",
-    "@toruslabs/openlogin-utils": "../../../OpenLoginSdk/packages/openlogin-utils",
+    "@toruslabs/openlogin": "^4.0.0",
+    "@toruslabs/openlogin-jrpc": "^4.0.0",
+    "@toruslabs/openlogin-utils": "^4.0.0",
     "@web3auth/base": "^5.1.0",
     "@web3auth/base-plugin": "^5.1.0"
   },

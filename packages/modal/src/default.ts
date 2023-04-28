@@ -1,4 +1,4 @@
-import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlogin";
+import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 
 // warning: this function is not compatible with "OTHER" chain namespace.
