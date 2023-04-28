@@ -133,6 +133,7 @@ export class WalletLoginError extends Web3AuthError {
     5116: "Chain config has not been added. Please add the chain config before calling switchChain",
     5117: "Unsupported operation",
     5118: "useCoreKitKey flag is enabled but coreKitKey is not available",
+    5119: "User not logged in.",
   };
 
   public constructor(code: number, message?: string) {
@@ -177,6 +178,10 @@ export class WalletLoginError extends Web3AuthError {
 
   public static coreKitKeyNotFound(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5118, extraMessage);
+  }
+
+  public static userNotLoggedIn(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5119, extraMessage);
   }
 }
 

@@ -29,11 +29,11 @@ class Web3Auth implements IWeb3Auth {
 
   private currentChainNamespace: ChainNamespaceType;
 
-  private sessionManager: OpenloginSessionManager<SessionData>;
+  private sessionManager!: OpenloginSessionManager<SessionData>;
 
-  private store: BrowserStorage;
+  private currentStorage!: BrowserStorage;
 
-  private _storeKey = "sfa_store";
+  private readonly storageKey = "sfa_store";
 
   constructor(options: Web3AuthOptions) {
     if (!options?.chainConfig?.chainNamespace) {
@@ -71,12 +71,6 @@ class Web3Auth implements IWeb3Auth {
       storageServerUrl: options.storageServerUrl || "https://broadcast-server.tor.us",
       storageKey: options.storageKey || "local",
     };
-
-    this.sessionManager = new OpenloginSessionManager({
-      sessionServerBaseUrl: this.options.storageServerUrl,
-      sessionTime: this.options.sessionTime,
-    });
-    this.store = BrowserStorage.getInstance(this._storeKey, options.storageKey);
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -84,6 +78,11 @@ class Web3Auth implements IWeb3Auth {
   }
 
   async init(): Promise<void> {
+    this.currentStorage = BrowserStorage.getInstance(this.storageKey, this.options.storageKey);
+    this.sessionManager = new OpenloginSessionManager({
+      sessionServerBaseUrl: this.options.storageServerUrl,
+      sessionTime: this.options.sessionTime,
+    });
     this.customAuthInstance = new CustomAuth({
       enableOneKey: true,
       network: this.options.web3AuthNetwork,
@@ -103,9 +102,9 @@ class Web3Auth implements IWeb3Auth {
       );
     }
 
-    const sessionId = this.store.get<string>("sessionId");
+    const sessionId = this.currentStorage.get<string>("sessionId");
     if (sessionId) {
-      const data = await this.sessionManager.authorizeSession();
+      const data = await this.sessionManager.authorizeSession().catch(() => {});
       if (data && data.privKey) {
         const finalPrivKey = await this._getFinalPrivKey(data.privKey);
         await this.privKeyProvider.setupProvider(finalPrivKey);
@@ -119,7 +118,9 @@ class Web3Auth implements IWeb3Auth {
    * @returns provider to connect
    */
   async connect(loginParams: LoginParams): Promise<SafeEventEmitterProvider | null> {
-    if (!this.customAuthInstance || !this.privKeyProvider) throw new Error("Please call init first");
+    if (!this.customAuthInstance || !this.privKeyProvider || !this.currentStorage || !this.sessionManager)
+      throw WalletInitializationError.notInstalled("Please call init first.");
+
     const { verifier, verifierId, idToken, subVerifierInfoArray } = loginParams;
     const verifierDetails = { verifier, verifierId };
 
@@ -157,16 +158,16 @@ class Web3Auth implements IWeb3Auth {
     const sessionId = OpenloginSessionManager.generateRandomSessionKey();
     // we are using the original private key so that we can retrieve other keys later on
     await this.sessionManager.createSession({ privKey });
-    this.store.set("sessionId", sessionId);
+    this.currentStorage.set("sessionId", sessionId);
     return this.provider;
   }
 
   async logout(): Promise<void> {
-    const sessionId = this.store.get<string>("sessionId");
-    if (!sessionId) throw new Error("User not logged in or there is no session");
+    const sessionId = this.currentStorage.get<string>("sessionId");
+    if (!sessionId) throw WalletLoginError.userNotLoggedIn();
 
     await this.sessionManager.invalidateSession();
-    this.store.set("sessionId", "");
+    this.currentStorage.set("sessionId", "");
   }
 
   private async _getFinalPrivKey(privKey: string) {
