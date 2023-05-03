@@ -210,7 +210,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.openloginOptions?.useCoreKitKey && this.openloginInstance.coreKitKey) {
+    if (this.openloginOptions?.useCoreKitKey) {
+      if (!this.openloginInstance.coreKitKey) {
+        throw WalletLoginError.coreKitKeyNotFound();
+      }
       finalPrivKey = this.openloginInstance.coreKitKey;
     }
     return finalPrivKey;

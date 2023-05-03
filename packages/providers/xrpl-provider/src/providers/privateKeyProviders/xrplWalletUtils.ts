@@ -1,30 +1,18 @@
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
-import { ec as EC } from "elliptic";
 import { ethErrors } from "eth-rpc-errors";
-import { sign } from "ripple-keypairs";
+import { generateSeed, sign } from "ripple-keypairs";
 // import { ethErrors } from "eth-rpc-errors";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
+import ECDSA from "xrpl/dist/npm/ECDSA";
 
 import { IProviderHandlers, KeyPair } from "../../rpc/rippleRpcMiddlewares";
 import { XRPLNetwork } from "./interface";
 
-const Secp256k1 = new EC("secp256k1");
-
-function bytesToHex(a: Iterable<number> | ArrayLike<number>): string {
-  return Array.from(a, (byteValue) => {
-    const hex = byteValue.toString(16).toUpperCase();
-    return hex.length > 1 ? hex : `0${hex}`;
-  }).join("");
-}
-
 const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: string } => {
-  // reserved xrpl identifier for secp256k1 keys.
-  const prefix = "00";
-  const xrplKey = `${prefix}${web3authKey}`;
-
-  const publicKey = bytesToHex(Secp256k1.keyFromPrivate(xrplKey.slice(2)).getPublic().encodeCompressed());
-  return { privateKey: xrplKey, publicKey };
+  const seed = generateSeed({ entropy: Buffer.from(web3authKey.padStart(64, "0"), "hex"), algorithm: "ecdsa-secp256k1" });
+  const wallet = Wallet.fromSecret(seed, { algorithm: ECDSA.secp256k1 }); // web3auth network currently only supports the secp256k1 key
+  return { privateKey: wallet.privateKey, publicKey: wallet.publicKey };
 };
 
 export async function getProviderHandlers({

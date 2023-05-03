@@ -82,15 +82,17 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.metamaskProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        if (!this.getChainConfig((this.chainConfig as CustomChainConfig).chainId)) await this.addChain(this.chainConfig as CustomChainConfig, true);
+        await this.addChain(this.chainConfig as CustomChainConfig, true);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
-      this.provider.once("disconnect", () => {
+      const disconnectHandler = () => {
         // ready to be connected again
         this.disconnect();
-      });
+        this.provider?.removeListener("disconnect", disconnectHandler);
+      };
+      this.provider.on("disconnect", disconnectHandler);
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {

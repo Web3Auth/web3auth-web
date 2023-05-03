@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/single-factor-auth",
-  "version": "5.0.1",
+  "version": "5.1.1",
   "description": "Multi chain wallet aggregator silent MFA for web3Auth",
   "keywords": [
     "web3Auth/single-factor-auth",
@@ -38,10 +38,11 @@
   "dependencies": {
     "@toruslabs/customauth": "^11.5.0",
     "@toruslabs/openlogin-ed25519": "^3.2.0",
-    "@web3auth/base": "^5.0.1",
-    "@web3auth/base-provider": "^5.0.1",
-    "@web3auth/ethereum-provider": "^5.0.1",
-    "@web3auth/solana-provider": "^5.0.1"
+    "@toruslabs/openlogin-subkey": "^3.0.0",
+    "@web3auth/base": "^5.1.0",
+    "@web3auth/base-provider": "^5.1.1",
+    "@web3auth/ethereum-provider": "^5.1.1",
+    "@web3auth/solana-provider": "^5.1.1"
   },
   "lint-staged": {
     "!(*d).ts": [
