@@ -40,7 +40,7 @@
     "@toruslabs/openlogin-ed25519": "^3.2.0",
     "@toruslabs/openlogin-session-manager": "^0.0.2",
     "@toruslabs/openlogin-subkey": "^3.0.0",
-    "@toruslabs/openlogin-utils": "^4.0.0",
+    "@toruslabs/openlogin-utils": "4.0.0",
     "@web3auth/base": "^5.1.0",
     "@web3auth/base-provider": "^5.1.1",
     "@web3auth/ethereum-provider": "^5.1.1",

@@ -82,7 +82,7 @@ class Web3Auth implements IWeb3Auth {
     this.customAuthInstance = new CustomAuth({
       enableOneKey: true,
       network: this.options.web3AuthNetwork,
-      baseUrl: "https://web3auth.io",
+      baseUrl: window.location.origin,
       enableLogging: this.options.enableLogging,
     });
 

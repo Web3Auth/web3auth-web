@@ -75,5 +75,5 @@ export interface Web3AuthOptions {
 }
 
 export interface SessionData {
-  privKey: string;
+  privKey?: string;
 }
