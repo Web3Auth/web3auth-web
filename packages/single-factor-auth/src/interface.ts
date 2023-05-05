@@ -13,10 +13,15 @@ export type LoginParams = {
   serverTimeOffset?: number;
 };
 
+export type UserAuthInfo = { idToken: string };
+
 export interface IWeb3Auth {
   provider: SafeEventEmitterProvider | null;
-  init(): void;
+  init(): Promise<void>;
   connect(loginParams: LoginParams): Promise<SafeEventEmitterProvider | null>;
+  authenticateUser(): Promise<UserAuthInfo>;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
+  switchChain(params: { chainId: string }): Promise<void>;
 }
 
 export interface Web3AuthOptions {

@@ -5,8 +5,13 @@ import { BrowserStorage } from "@toruslabs/openlogin-utils";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  checkIfTokenIsExpired,
   CustomChainConfig,
+  getSavedToken,
   SafeEventEmitterProvider,
+  saveToken,
+  signChallenge,
+  verifySignedChallenge,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
@@ -14,7 +19,7 @@ import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 
-import { IWeb3Auth, LoginParams, SessionData, Web3AuthOptions } from "./interface";
+import { IWeb3Auth, LoginParams, SessionData, UserAuthInfo, Web3AuthOptions } from "./interface";
 
 type PrivateKeyProvider = IBaseProvider<string>;
 
@@ -113,6 +118,62 @@ class Web3Auth implements IWeb3Auth {
         await this.privKeyProvider.setupProvider(finalPrivKey);
       }
     }
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
+    const { chainNamespace, chainId } = this.chainConfig || {};
+    if (!this.customAuthInstance || !this.privKeyProvider) throw new Error("Please call init first");
+    const accounts = await this.privKeyProvider.provider.request<never, string[]>({
+      method: "eth_accounts",
+    });
+    if (accounts && accounts.length > 0) {
+      const existingToken = getSavedToken(accounts[0] as string, "SFA");
+      if (existingToken) {
+        const isExpired = checkIfTokenIsExpired(existingToken);
+        if (!isExpired) {
+          return { idToken: existingToken };
+        }
+      }
+
+      const payload = {
+        domain: window.location.origin,
+        uri: window.location.href,
+        address: accounts[0],
+        chainId: parseInt(chainId as string, 16),
+        version: "1",
+        nonce: Math.random().toString(36).slice(2),
+        issuedAt: new Date().toISOString(),
+      };
+
+      const challenge = await signChallenge(payload, chainNamespace);
+
+      const signedMessage = await this.privKeyProvider.provider.request<[string, string], string>({
+        method: "personal_sign",
+        params: [challenge, accounts[0]],
+      });
+
+      const idToken = await verifySignedChallenge(
+        chainNamespace,
+        signedMessage as string,
+        challenge,
+        "SFA",
+        this.options.sessionTime,
+        this.options.clientId,
+        this.options.web3AuthNetwork
+      );
+      saveToken(accounts[0] as string, "SFA", idToken);
+      return {
+        idToken,
+      };
+    }
+  }
+
+  async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    return this.privKeyProvider.addChain(chainConfig);
+  }
+
+  switchChain(params: { chainId: string }): Promise<void> {
+    return this.privKeyProvider.switchChain(params);
   }
 
   /**
