@@ -7,8 +7,7 @@
     "packages/ui",
     "packages/providers/*",
     "packages/adapters/*",
-    "packages/plugins/*",
-    "packages/single-factor-auth"
+    "packages/plugins/*"
   ],
   "version": "5.1.1",
   "npmClient": "npm",
