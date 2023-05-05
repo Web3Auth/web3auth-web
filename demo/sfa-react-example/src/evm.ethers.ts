@@ -8,6 +8,17 @@ export default class EthereumRpc {
     this.provider = provider
   }
 
+  async getChainId(): Promise<any> {
+    try {
+      const ethersProvider = new ethers.providers.Web3Provider(this.provider);
+      // Get the connected Chain's ID
+      const networkDetails = await (ethersProvider.getNetwork());
+      return networkDetails.chainId;
+    } catch (error) {
+      return error;
+    }
+  }
+
   async getAccounts(): Promise<string> {
     try {
       const provider = new ethers.providers.Web3Provider(this.provider as any)

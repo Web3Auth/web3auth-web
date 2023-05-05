@@ -147,6 +147,43 @@ function App() {
     }
   };
 
+  const authenticateUser = async () => {
+    if (!web3authSFAuth) {
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const idToken = await web3authSFAuth?.authenticateUser();
+    uiConsole(idToken);
+  };
+
+  const addChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const newChain = {
+      chainId: "0x5",
+      displayName: "Goerli",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      tickerName: "Goerli",
+      ticker: "ETH",
+      decimals: 18,
+      rpcTarget: "https://rpc.ankr.com/eth_goerli",
+      blockExplorer: "https://goerli.etherscan.io",
+    };
+    await web3authSFAuth?.addChain(newChain);
+    uiConsole("New Chain Added");
+  };
+
+  const switchChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await web3authSFAuth?.switchChain({ chainId: "0x5" });
+    uiConsole("Chain Switched");
+  };
+
   const logout = async () => {
     if (usesSfaSDK) {
       if (!web3authSFAuth) {
@@ -201,6 +238,16 @@ function App() {
     uiConsole(result);
   };
 
+  const getChainId = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const rpc = new RPC(provider);
+    const chainId = await rpc.getChainId();
+    uiConsole(chainId);
+  };
+
   function uiConsole(...args: any[]): void {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -222,8 +269,28 @@ function App() {
           </button>
         </div>
         <div>
+          <button onClick={getChainId} className="card">
+            Get Chain ID
+          </button>
+        </div>
+        <div>
+          <button onClick={authenticateUser} className="card">
+            Get ID Token
+          </button>
+        </div>
+        <div>
           <button onClick={getBalance} className="card">
             Get Balance
+          </button>
+        </div>
+        <div>
+          <button onClick={addChain} className="card">
+            Add Chain
+          </button>
+        </div>
+        <div>
+          <button onClick={switchChain} className="card">
+            Switch Chain
           </button>
         </div>
         <div>
