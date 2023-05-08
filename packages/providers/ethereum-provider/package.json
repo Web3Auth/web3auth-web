@@ -24,7 +24,7 @@
     "@ethereumjs/util": "^8.0.5",
     "@metamask/eth-sig-util": "^5.0.2",
     "@toruslabs/base-controllers": "^2.8.1",
-    "@toruslabs/http-helpers": "^3.3.0",
+    "@toruslabs/http-helpers": "^4.0.0",
     "@toruslabs/openlogin-jrpc": "^3.2.0",
     "@walletconnect/legacy-types": "2.0.0",
     "@walletconnect/types": "^2.5.2",
