@@ -7,10 +7,9 @@
     "packages/ui",
     "packages/providers/*",
     "packages/adapters/*",
-    "packages/plugins/*",
-    "packages/single-factor-auth"
+    "packages/plugins/*"
   ],
-  "version": "5.1.1",
+  "version": "5.2.0",
   "npmClient": "npm",
   "useWorkspaces": true
 }

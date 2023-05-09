@@ -223,17 +223,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-      this.privKeyProvider = this.openloginOptions?.provider || new CommonPrivateKeyProvider();
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
     const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
@@ -254,6 +243,18 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+      }
+
+      if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+        const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+        this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+        const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+        this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+      } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
+        this.privKeyProvider = this.openloginOptions?.provider || new CommonPrivateKeyProvider();
+      } else {
+        throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
       }
       await this.privKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
