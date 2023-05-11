@@ -3,7 +3,7 @@
     "adapter-loader.message": "続行するには、{{adapter}} アカウントで確認してください",
     "external.title": "外部ウォレット",
     "social.view-less-new": "表示を減らす",
-    "footer.message": "による自己管理ログイン",
+    "footer.message": "自己管理ログイン by",
     "network.switch-request": "このサイトはネットワークの切り替えを要求しています",
     "footer.terms": "利用規約",
     "footer.message-new": "Web3Authによる自己管理ログイン",
