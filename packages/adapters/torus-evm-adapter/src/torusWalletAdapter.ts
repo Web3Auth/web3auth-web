@@ -111,7 +111,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     try {
       await this.torusInstance.login(this.loginSettings);
       const { chainId } = this.torusInstance.provider;
-      if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
+      if (chainId && parseInt(chainId, 16) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
         const network: NetworkInterface = {
           chainId: Number.parseInt(_chainId, 16),
@@ -128,7 +128,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
           ...network,
         });
         const updatedChainID = await this.torusInstance.ethereum.request<string>({ method: "eth_chainId" });
-        if (updatedChainID && parseInt(updatedChainID) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
+        if (updatedChainID && parseInt(updatedChainID, 16) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
           throw WalletInitializationError.fromCode(
             5000,
             `Not connected to correct chainId. Expected: ${(this.chainConfig as CustomChainConfig).chainId}, Current: ${updatedChainID}`
