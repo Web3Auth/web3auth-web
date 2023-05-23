@@ -1,4 +1,5 @@
 import { providerFromEngine } from "@toruslabs/base-controllers";
+import { getED25519Key } from "@toruslabs/openlogin-ed25519";
 import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
@@ -40,6 +41,10 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
       throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
     return this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" });
+  }
+
+  public getEd25519Key(privateKey: string): string {
+    return getED25519Key(privateKey).sk.toString("hex");
   }
 
   public async setupProvider(privKey: string): Promise<void> {
