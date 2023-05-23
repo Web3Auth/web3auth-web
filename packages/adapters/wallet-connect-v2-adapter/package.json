@@ -45,9 +45,9 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.7",
-    "@walletconnect/sign-client": "^2.7.1",
-    "@walletconnect/types": "^2.7.1",
-    "@walletconnect/utils": "^2.7.1"
+    "@walletconnect/sign-client": "^2.7.6",
+    "@walletconnect/types": "^2.7.6",
+    "@walletconnect/utils": "^2.7.6"
   },
   "lint-staged": {
     "!(*d).ts": [
@@ -64,5 +64,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

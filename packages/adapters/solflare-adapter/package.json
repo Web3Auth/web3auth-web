@@ -45,7 +45,7 @@
     "bn.js": "^5.2.1"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.74.0",
+    "@solana/web3.js": "^1.76.0",
     "@solflare-wallet/sdk": "^1.2.1"
   },
   "lint-staged": {
@@ -63,5 +63,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

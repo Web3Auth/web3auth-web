@@ -36,7 +36,7 @@
     "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^0.3.4",
+    "@toruslabs/solana-embed": "^1.0.0",
     "@web3auth/base": "^5.2.0",
     "@web3auth/base-provider": "^5.2.0",
     "@web3auth/base-solana-adapter": "^5.2.0",
@@ -57,5 +57,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

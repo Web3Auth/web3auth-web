@@ -40,7 +40,7 @@
     "@web3auth/base-evm-adapter": "^5.2.0"
   },
   "devDependencies": {
-    "@coinbase/wallet-sdk": "^3.6.5"
+    "@coinbase/wallet-sdk": "^3.6.6"
   },
   "lint-staged": {
     "!(*d).ts": [
@@ -57,5 +57,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }
