@@ -5,57 +5,47 @@
 
       <div class="form-container-inner overflow-y-auto flex flex-col gap-6 mt-9">
         <Select
+          v-model="form.authMode"
           :options="AuthModeOptions"
           label="Auth mode"
           pill
           :inputClasses="{
-            inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+            inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
             input: '!border-0 focus:!border-0 !bg-app-select',
           }"
-          @on-select="onAuthModeSelection"
-          :model-value="form.authMode"
         />
-        <Checkbox
-          id="selectPlugin"
-          label="Torus wallet UI plugin"
-          :classes="{ label: '!text-app-gray-500' }"
-          :checked="form.plugins.torusWallet"
-          @on-change="(isChecked) => (form.plugins.torusWallet = isChecked)"
-        />
+        <Checkbox :checked="form.plugins.torusWallet" id="selectPlugin" label="Torus wallet UI plugin" :classes="{ label: '!text-app-gray-500' }" />
 
         <div v-if="form.authMode !== 'ownAuth'" class="flex flex-col gap-6">
           <Select
+            v-model="form.openloginNetwork"
             :options="OpenLoginNetworkOptions"
             label="Openlogin network"
             pill
             :inputClasses="{
-              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
               input: '!border-0 focus:!border-0 !bg-app-select',
             }"
-            @on-select="onOpenloginNetworkSelection"
-            :model-value="form.openloginNetwork"
           />
           <Select
+            v-model="form.chain"
             :options="ChainOptions"
             label="Select chain"
             pill
             :inputClasses="{
-              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
               input: '!border-0 focus:!border-0 !bg-app-select',
             }"
-            :model-value="form.chain"
-            @on-select="onChainSelection"
           />
           <Select
+            v-model="form.selectedUiMode"
             :options="UIOptions"
             label="Select UI"
             pill
             :inputClasses="{
-              inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+              inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
               input: '!border-0 focus:!border-0 !bg-app-select',
             }"
-            :model-value="form.selectedUiMode"
-            @on-select="onUiSelection"
           />
 
           <div v-if="form.selectedUiMode === 'whitelabel'" class="flex flex-col gap-6">
@@ -65,31 +55,29 @@
               v-model="form.uiMode.whitelabel.logoUrl"
               pill
               :classes="{
-                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
                 input: '!border-0 focus:!border-0 !bg-app-select',
               }"
             />
             <Select
+              v-model="form.uiMode.whitelabel.theme"
               :options="ThemeOptions"
               label="Select Theme"
               pill
               :inputClasses="{
-                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
                 input: '!border-0 focus:!border-0 !bg-app-select',
               }"
-              :model-value="form.uiMode.whitelabel.theme"
-              @on-select="onThemeSelection"
             />
             <Select
+              v-model="form.uiMode.whitelabel.defaultLanguage"
               :options="languages"
               label="Select Language"
               pill
               :inputClasses="{
-                inputContainer: '!border-0 rounded-full active:!border-0 !bg-app-select',
+                inputContainer: '!border-0 !rounded-full active:!border-0 !bg-app-select',
                 input: '!border-0 focus:!border-0 !bg-app-select',
               }"
-              :model-value="form.uiMode.whitelabel.defaultLanguage"
-              @on-select="onLanguageSelection"
             />
             <div class="text-sm font-medium text-app-gray-900 -mb-4 flex items-center justify-between">
               <div>Login Methods Order</div>
@@ -305,45 +293,61 @@ export default defineComponent({
       emailLoginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
       smsLoginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS,
       AuthModeOptions: [
-        { name: "hosted", value: "hosted" },
-        { name: "ownAuth", value: "ownAuth" },
+        { name: "Hosted", value: "hosted" },
+        { name: "OwnAuth", value: "ownAuth" },
       ],
-      OpenLoginNetworkOptions: [{ name: "mainnet" }, { name: "testnet" }, { name: "cyan" }],
-      ChainOptions: [{ name: "ethereum" }, { name: "solana" }, { name: "binance" }, { name: "polygon" }],
-      UIOptions: [{ name: "default" }, { name: "whitelabel" }],
-      ThemeOptions: [{ name: "default" }, { name: "dark" }, { name: "light" }],
+      OpenLoginNetworkOptions: [
+        { name: "Mainnet", value: "mainnet" },
+        { name: "Testnet", value: "testnet" },
+        { name: "Cyan", value: "cyan" },
+      ],
+      ChainOptions: [
+        { name: "Ethereum", value: "ethereum" },
+        { name: "Solana", value: "solana" },
+        { name: "Binance", value: "binance" },
+        { name: "Polygon", value: "polygon" },
+      ],
+      UIOptions: [
+        { name: "Default", value: "default" },
+        { name: "WhiteLabel", value: "whitelabel" },
+      ],
+      ThemeOptions: [
+        { name: "Default", value: "default" },
+        { name: "Dark", value: "dark" },
+        { name: "Light", value: "light" },
+      ],
       languages: [
         {
-          name: "en",
-          value: "English",
+          value: "en",
+          name: "English",
         },
         {
-          name: "de",
-          value: "German",
+          value: "de",
+          name: "German",
         },
         {
-          name: "ja",
-          value: "Japanese",
+          value: "ja",
+          name: "Japanese",
         },
         {
-          name: "ko",
-          value: "Korean",
+          value: "ko",
+          name: "Korean",
         },
         {
-          name: "zh",
-          value: "Mandarin",
+          value: "zh",
+          name: "Mandarin",
         },
         {
-          name: "es",
-          value: "Spanish",
+          value: "es",
+          name: "Spanish",
         },
         {
-          name: "fr",
-          value: "French",
+          value: "fr",
+          name: "French",
         },
         {
-          name: "pt",
-          value: "Portuguese",
+          value: "pt",
+          name: "Portuguese",
         },
       ],
     };
