@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
@@ -22,7 +22,7 @@
     "@web3auth/base": "^5.2.0",
     "@web3auth/metamask-adapter": "^5.2.0",
     "@web3auth/no-modal": "^5.2.0",
-    "@web3auth/openlogin-adapter": "^5.2.0",
+    "@web3auth/openlogin-adapter": "^5.2.1",
     "@web3auth/phantom-adapter": "^5.2.0",
     "@web3auth/torus-evm-adapter": "^5.2.0",
     "@web3auth/torus-solana-adapter": "^5.2.0",
