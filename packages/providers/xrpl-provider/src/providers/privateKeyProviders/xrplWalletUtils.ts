@@ -6,8 +6,8 @@ import { generateSeed, sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
 import ECDSA from "xrpl/dist/npm/ECDSA";
 
-import { IProviderHandlers, KeyPair } from "../../rpc/rippleRpcMiddlewares";
-import { XRPLNetwork } from "./interface";
+import { IProviderHandlers, KeyPair } from "../../rpc/xrplRpcMiddlewares";
+import { XRPLNetworkType } from "./interface";
 
 const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: string } => {
   const seed = generateSeed({ entropy: Buffer.from(web3authKey.padStart(64, "0"), "hex"), algorithm: "ecdsa-secp256k1" });
@@ -68,7 +68,7 @@ export async function getProviderHandlers({
 }
 
 export const getXRPLChainConfig = (
-  network: XRPLNetwork,
+  network: XRPLNetworkType,
   customChainConfig?: Partial<Omit<CustomChainConfig, "chainNamespace">>
 ): CustomChainConfig & Pick<CustomChainConfig, "wsTarget"> => {
   if (network === "mainnet") {

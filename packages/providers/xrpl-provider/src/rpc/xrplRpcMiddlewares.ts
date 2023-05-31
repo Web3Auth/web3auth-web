@@ -4,16 +4,16 @@ import { CustomChainConfig } from "@web3auth/base";
 import { SubmitResponse, Transaction } from "xrpl";
 
 export const RPC_METHODS = {
-  GET_ACCOUNTS: "ripple_getAccounts",
-  GET_KEY_PAIR: "ripple_getKeyPair",
-  GET_PUBLIC_KEY: "ripple_getPublicKey",
-  SIGN_MESSAGE: "ripple_signMessage",
-  SIGN_TRANSACTION: "ripple_signTransaction",
-  SUBMIT_TRANSACTION: "ripple_submitTransaction",
-  ADD_CHAIN: "ripple_addChain",
-  SWITCH_CHAIN: "ripple_switchChain",
-  CHAIN_ID: "ripple_chainId",
-  PROVIDER_CHAIN_CONFIG: "ripple_providerChainConfig",
+  GET_ACCOUNTS: "xrpl_getAccounts",
+  GET_KEY_PAIR: "xrpl_getKeyPair",
+  GET_PUBLIC_KEY: "xrpl_getPublicKey",
+  SIGN_MESSAGE: "xrpl_signMessage",
+  SIGN_TRANSACTION: "xrpl_signTransaction",
+  SUBMIT_TRANSACTION: "xrpl_submitTransaction",
+  ADD_CHAIN: "xrpl_addChain",
+  SWITCH_CHAIN: "xrpl_switchChain",
+  CHAIN_ID: "xrpl_chainId",
+  PROVIDER_CHAIN_CONFIG: "xrpl_providerChainConfig",
 };
 
 export type KeyPair = { publicKey: string; privateKey: string };

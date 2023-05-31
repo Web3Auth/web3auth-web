@@ -6,7 +6,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
   const getAccounts = async () => {
     try {
       const accounts = await provider.request<string[]>({
-        method: "ripple_getAccounts"
+        method: "xrpl_getAccounts"
       })
 
       if (accounts) {
@@ -37,7 +37,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
   const getBalance = async () => {
     try {
       const accounts = await provider.request<string[]>({
-        method: "ripple_getAccounts"
+        method: "xrpl_getAccounts"
       })
 
       if (accounts) {
@@ -71,7 +71,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
         const msg = "Hello world";
         const hexMsg = convertStringToHex(msg);
         const txSign = await provider.request<{ signature: string }>({
-            method: "ripple_signMessage",
+            method: "xrpl_signMessage",
             params: {
                 message: hexMsg
             }
@@ -87,7 +87,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
   const signAndSendTransaction = async () => {
     try {
         const accounts = await provider.request<string[]>({
-            method: "ripple_getAccounts"
+            method: "xrpl_getAccounts"
         })
     
         if (accounts && accounts.length > 0) {
@@ -98,7 +98,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
                 Destination: "rJSsXjsLywTNevqLjeXV6L6AXQexnF2N5u",
             }
             const txSign = await provider.request({
-                method: "ripple_submitTransaction",
+                method: "xrpl_submitTransaction",
                 params: {
                     transaction: tx
                 }
@@ -116,7 +116,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
   const signTransaction = async () => {
     try {
         const accounts = await provider.request<string[]>({
-            method: "ripple_getAccounts"
+            method: "xrpl_getAccounts"
         })
     
         if (accounts && accounts.length > 0) {
@@ -127,7 +127,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
                 Destination: "rJSsXjsLywTNevqLjeXV6L6AXQexnF2N5u",
             }
             const txSign = await provider.request({
-                method: "ripple_signTransaction",
+                method: "xrpl_signTransaction",
                 params: {
                     transaction: tx
                 }

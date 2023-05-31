@@ -34,7 +34,7 @@ const signMessage = async (provider: SafeEventEmitterProvider): Promise<string> 
   const msg = "Hello world";
   const hexMsg = convertStringToHex(msg);
   const { signature } = await provider.request<{ signature: string }>({
-      method: "ripple_signMessage",
+      method: "xrpl_signMessage",
       params: {
           message: hexMsg
       }

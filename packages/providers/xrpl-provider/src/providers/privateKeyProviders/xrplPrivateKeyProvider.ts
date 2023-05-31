@@ -3,7 +3,7 @@ import { JRPCEngine, JRPCMiddleware, JRPCRequest } from "@toruslabs/openlogin-jr
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
-import { PingResponse } from "xrpl";
+import type { PingResponse } from "xrpl";
 
 import { createJsonRpcClient } from "../../rpc/JrpcClient";
 import {
@@ -13,7 +13,7 @@ import {
   IChainSwitchHandlers,
   KeyPair,
   RPC_METHODS,
-} from "../../rpc/rippleRpcMiddlewares";
+} from "../../rpc/xrplRpcMiddlewares";
 import { getProviderHandlers } from "./xrplWalletUtils";
 
 export interface XrplPrivKeyProviderConfig extends BaseProviderConfig {

@@ -6,9 +6,6 @@ const pkg = require("./package.json");
 
 const currentPath = path.resolve(".");
 
-const config = generateWebpackConfig({
-  currentPath,
-  pkg,
-});
+const config = generateWebpackConfig({ currentPath, pkg });
 
 module.exports = config;

@@ -2,7 +2,7 @@ import { createFetchMiddleware } from "@toruslabs/base-controllers";
 import { JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequest, JRPCResponse, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig } from "@web3auth/base";
 
-import { RPC_METHODS } from "./rippleRpcMiddlewares";
+import { RPC_METHODS } from "./xrplRpcMiddlewares";
 
 export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, unknown> {
   return (req: JRPCRequest<unknown>, res: JRPCResponse<string>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {

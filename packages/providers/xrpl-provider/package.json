@@ -21,17 +21,18 @@
   "dependencies": {
     "@web3auth/base-provider": "^5.0.1",
     "@web3auth/base": "^5.0.1",
-    "@toruslabs/base-controllers": "^3.0.0",
-   "@toruslabs/openlogin-jrpc": "^4.2.0",
+    "@toruslabs/base-controllers": "2.9.0",
+    "@toruslabs/openlogin-jrpc": "4.2.0",
     "ripple-keypairs": "^1.1.5",
-    "xrpl": "^2.7.0",
     "eth-rpc-errors": "^4.0.3"
   },
   "devDependencies": {
-    "@types/elliptic": "6.4.14"
+    "@types/elliptic": "6.4.14",
+    "xrpl": "^2.7.0"
   },
   "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "@babel/runtime": "7.x",
+    "xrpl": "^2.x.x"
   },
   "files": [
     "dist",
