@@ -19,15 +19,15 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^3.1.1",
-    "@ethereumjs/tx": "^4.1.1",
-    "@ethereumjs/util": "^8.0.5",
-    "@metamask/eth-sig-util": "^5.0.2",
-    "@toruslabs/base-controllers": "^2.9.0",
-    "@toruslabs/http-helpers": "^3.3.0",
-    "@toruslabs/openlogin-jrpc": "^4.0.0",
+    "@ethereumjs/common": "^3.1.2",
+    "@ethereumjs/tx": "^4.1.2",
+    "@ethereumjs/util": "^8.0.6",
+    "@metamask/eth-sig-util": "^5.1.0",
+    "@toruslabs/base-controllers": "^3.0.1",
+    "@toruslabs/http-helpers": "^4.0.0",
+    "@toruslabs/openlogin-jrpc": "^4.4.0",
     "@walletconnect/legacy-types": "2.0.0",
-    "@walletconnect/utils": "^2.5.2",
+    "@walletconnect/utils": "^2.7.6",
     "@web3auth/base": "^5.2.0",
     "@web3auth/base-provider": "^5.2.0",
     "assert": "^2.0.0",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
     "@types/json-rpc-random-id": "^1.0.1",
-    "@walletconnect/types": "^2.7.1"
+    "@walletconnect/types": "^2.7.6"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
@@ -64,5 +64,9 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

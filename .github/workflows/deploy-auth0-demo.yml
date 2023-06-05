@@ -9,7 +9,7 @@ jobs:
   auth0-react-app:
     strategy:
       matrix:
-        node: ["16.x"]
+        node: ["18.x"]
         os: [ubuntu-latest]
         demo: [auth0-react-app]
 
@@ -19,14 +19,16 @@ jobs:
       - name: Check out Git repository
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
 
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up node
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+          
       - name: Build ${{ matrix.demo }} demo
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         run: |
@@ -56,7 +58,7 @@ jobs:
             # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -32,9 +32,9 @@ export const getDefaultAdapterModule = async (params: {
     const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
     const adapter = new PhantomAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
     return adapter;
-  } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
-    const { WalletConnectV1Adapter } = await import("@web3auth/wallet-connect-v1-adapter");
-    const adapter = new WalletConnectV1Adapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+  } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+    const { WalletConnectV2Adapter } = await import("@web3auth/wallet-connect-v2-adapter");
+    const adapter = new WalletConnectV2Adapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");

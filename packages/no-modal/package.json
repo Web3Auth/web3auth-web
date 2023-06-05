@@ -35,9 +35,9 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^4.3.2",
-    "@toruslabs/openlogin-jrpc": "^4.3.0",
-    "@toruslabs/openlogin-utils": "^4.3.0",
+    "@toruslabs/openlogin": "^4.4.0",
+    "@toruslabs/openlogin-jrpc": "^4.4.0",
+    "@toruslabs/openlogin-utils": "^4.4.0",
     "@web3auth/base": "^5.2.0",
     "@web3auth/base-plugin": "^5.2.0"
   },
@@ -56,5 +56,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }
