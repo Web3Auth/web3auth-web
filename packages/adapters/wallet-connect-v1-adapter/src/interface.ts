@@ -1,4 +1,4 @@
-import type { IWalletConnectOptions } from "@walletconnect/types";
+import type { IWalletConnectOptions } from "@walletconnect/legacy-types";
 import { BaseAdapterSettings, INetworkSwitch } from "@web3auth/base";
 
 interface IAdapterSettings extends IWalletConnectOptions {

@@ -44,7 +44,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   private metamaskProvider: EthereumProvider | null = null;
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.metamaskProvider) {
+    if (this.status === ADAPTER_STATUS.READY && this.metamaskProvider) {
       return this.metamaskProvider as SafeEventEmitterProvider;
     }
     return null;

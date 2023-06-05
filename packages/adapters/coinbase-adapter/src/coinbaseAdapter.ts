@@ -50,7 +50,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.coinbaseProvider) {
+    if (this.status === ADAPTER_STATUS.READY && this.coinbaseProvider) {
       return this.coinbaseProvider as unknown as SafeEventEmitterProvider;
     }
     return null;
