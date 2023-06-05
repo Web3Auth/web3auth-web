@@ -65,6 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
+  connnected: boolean;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
@@ -109,6 +110,10 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   get chainConfigProxy(): CustomChainConfig | null {
     return this.chainConfig ? { ...this.chainConfig } : null;
+  }
+
+  get connnected(): boolean {
+    return this.status === ADAPTER_STATUS.CONNECTED;
   }
 
   public abstract get provider(): SafeEventEmitterProvider | null;
