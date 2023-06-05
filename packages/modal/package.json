@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
