@@ -1,4 +1,5 @@
-import OpenLogin, { getHashQueryParams, LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin";
+import OpenLogin, { getHashQueryParams } from "@toruslabs/openlogin";
+import { LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -50,7 +51,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  private privKeyProvider: PrivateKeyProvider | null = null;
+  private privateKeyProvider: PrivateKeyProvider | null = null;
 
   constructor(params: OpenloginAdapterOptions = {}) {
     super(params);
@@ -70,7 +71,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.privKeyProvider?.provider || null;
+    if (this.status === ADAPTER_STATUS.READY && this.privateKeyProvider) {
+      return this.privateKeyProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -83,9 +87,9 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
     let isRedirectResult = false;
 
-    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT || this.openloginOptions.uxMode === UX_MODE.SESSIONLESS_REDIRECT) {
+    if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
       const redirectResult = getHashQueryParams();
-      if (Object.keys(redirectResult).length > 0 && redirectResult._pid) {
+      if (Object.keys(redirectResult).length > 0) {
         isRedirectResult = true;
       }
     }
@@ -101,6 +105,20 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     log.debug("initializing openlogin adapter init");
 
     await this.openloginInstance.init();
+
+    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      this.privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      this.privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
+    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
+      this.privateKeyProvider = this.openloginOptions?.privateKeyProvider || new CommonPrivateKeyProvider();
+    } else {
+      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
+    }
 
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN);
@@ -148,7 +166,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
       this.openloginInstance = null;
-      this.privKeyProvider = null;
+      this.privateKeyProvider = null;
     } else {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
@@ -169,12 +187,12 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-    const userInfo = await this.openloginInstance.getUserInfo();
+    const userInfo = this.openloginInstance.getUserInfo();
     return userInfo;
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { provider?: PrivateKeyProvider }): void {
+  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
@@ -189,20 +207,20 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.useCoreKitKey !== undefined) {
       this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
     }
-    if (adapterSettings.provider) {
-      this.openloginOptions.provider = adapterSettings.provider;
+    if (adapterSettings.privateKeyProvider) {
+      this.openloginOptions.privateKeyProvider = adapterSettings.privateKeyProvider;
     }
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(init);
-    this.privKeyProvider?.addChain(chainConfig);
+    this.privateKeyProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.privKeyProvider?.switchChain(params);
+    await this.privateKeyProvider?.switchChain(params);
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
@@ -223,7 +241,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   private async connectWithProvider(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
-    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivKey Provider is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
     const keyAvailable = this._getFinalPrivKey();
@@ -248,18 +266,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
       }
 
-      if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-        this.privKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-        const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-        this.privKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-      } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-        this.privKeyProvider = this.openloginOptions?.provider || new CommonPrivateKeyProvider();
-      } else {
-        throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-      }
-      await this.privKeyProvider.setupProvider(finalPrivKey);
+      await this.privateKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
     }

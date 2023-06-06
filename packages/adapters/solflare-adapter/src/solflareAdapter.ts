@@ -46,7 +46,10 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.solflareProvider?.provider || null;
+    if (this.status === ADAPTER_STATUS.READY && this.solflareProvider) {
+      return this.solflareProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {

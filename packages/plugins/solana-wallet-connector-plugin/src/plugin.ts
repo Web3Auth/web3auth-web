@@ -119,6 +119,9 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
         privateKey,
         userInfo: {
           ...(this.userInfo as Omit<UserInfo, "isNewUser">),
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
         },
       });
       this.torusWalletInstance.showTorusButton();
@@ -205,6 +208,9 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
         privateKey: sessionConfig.privateKey,
         userInfo: {
           ...this.userInfo,
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
         },
       });
     }

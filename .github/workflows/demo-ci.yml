@@ -7,7 +7,7 @@ jobs:
   demo:
     strategy:
       matrix:
-        node: ["16.x"]
+        node: ["18.x"]
         os: [ubuntu-latest]
         demo:
           [
@@ -24,13 +24,15 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
       - name: Build ${{ matrix.demo }} demo
         run: |
           npm i -g npm-check-updates

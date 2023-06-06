@@ -1,5 +1,5 @@
 import { post } from "@toruslabs/http-helpers";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import JwtDecode from "jwt-decode";
 
 import { ChainNamespaceType } from "../chain/IChainInterface";

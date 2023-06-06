@@ -1,8 +1,8 @@
 import "../css/web3auth.css";
 import "./localeImport";
 
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
