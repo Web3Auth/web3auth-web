@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/xrpl-provider",
-  "version": "5.0.1",
+  "version": "5.2.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/xrplProvider.cjs.js",
@@ -19,10 +19,10 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base-provider": "^5.0.1",
-    "@web3auth/base": "^5.0.1",
-    "@toruslabs/base-controllers": "2.9.0",
-    "@toruslabs/openlogin-jrpc": "4.2.0",
+    "@web3auth/base-provider": "^5.2.0",
+    "@web3auth/base": "^5.2.0",
+    "@toruslabs/base-controllers": "^3.0.3",
+    "@toruslabs/openlogin-jrpc": "^4.5.1",
     "ripple-keypairs": "^1.1.5",
     "eth-rpc-errors": "^4.0.3"
   },
