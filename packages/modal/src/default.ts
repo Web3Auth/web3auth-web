@@ -1,5 +1,6 @@
 import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
+import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
 
 // warning: this function is not compatible with "OTHER" chain namespace.
 export const getDefaultAdapterModule = async (params: {
@@ -38,6 +39,22 @@ export const getDefaultAdapterModule = async (params: {
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
+
+    let privateKeyProvider: IBaseProvider<string> | null = null;
+    if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+      privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: finalChainConfig } });
+    } else if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+      privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: finalChainConfig } });
+    } else if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.OTHER) {
+      // Modal doesn't support ripple provider
+      // Can always override this with a custom provider
+      privateKeyProvider = new CommonPrivateKeyProvider();
+    } else {
+      throw new Error(`Invalid chainNamespace: ${finalChainConfig.chainNamespace} found while connecting to wallet`);
+    }
+
     const defaultOptions = getOpenloginDefaultOptions();
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
@@ -46,6 +63,7 @@ export const getDefaultAdapterModule = async (params: {
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork },
       sessionTime,
       web3AuthNetwork,
+      privateKeyProvider,
     });
     return adapter;
   }

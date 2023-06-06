@@ -23,7 +23,6 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import merge from "lodash.merge";
 
 import { getOpenloginDefaultOptions } from "./config";
@@ -64,6 +63,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       useCoreKitKey: params.useCoreKitKey,
     });
     this.loginSettings = params.loginSettings || { loginProvider: "" };
+    this.privateKeyProvider = params.privateKeyProvider || null;
   }
 
   get chainConfigProxy(): CustomChainConfig | null {
@@ -107,18 +107,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     await this.openloginInstance.init();
 
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
-
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      this.privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      this.privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: this.chainConfig } });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.OTHER) {
-      this.privateKeyProvider = this.openloginOptions?.privateKeyProvider || new CommonPrivateKeyProvider();
-    } else {
-      throw new Error(`Invalid chainNamespace: ${this.currentChainNamespace} found while connecting to wallet`);
-    }
 
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN);
@@ -208,7 +196,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
     }
     if (adapterSettings.privateKeyProvider) {
-      this.openloginOptions.privateKeyProvider = adapterSettings.privateKeyProvider;
+      this.privateKeyProvider = adapterSettings.privateKeyProvider;
     }
   }
 

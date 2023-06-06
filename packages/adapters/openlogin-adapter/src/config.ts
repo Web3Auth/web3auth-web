@@ -10,5 +10,6 @@ export const getOpenloginDefaultOptions = (): OpenloginAdapterOptions => {
       uxMode: UX_MODE.POPUP,
     },
     loginSettings: {},
+    privateKeyProvider: undefined,
   };
 };
