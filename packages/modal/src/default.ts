@@ -50,7 +50,18 @@ export const getDefaultAdapterModule = async (params: {
     return adapter;
   } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
     const { WalletConnectV2Adapter } = await import("@web3auth/wallet-connect-v2-adapter");
-    const adapter = new WalletConnectV2Adapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+    const adapter = new WalletConnectV2Adapter({
+      chainConfig: finalChainConfig,
+      clientId,
+      sessionTime,
+      web3AuthNetwork,
+      adapterSettings: {
+        walletConnectInitOptions: {
+          // Using a default wallet connect project id for web3auth modal integration
+          projectId: "d3c63f19f9582f8ba48e982057eb096b",
+        },
+      },
+    });
     return adapter;
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
