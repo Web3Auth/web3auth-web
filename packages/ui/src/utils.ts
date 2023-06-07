@@ -103,4 +103,6 @@ export const languageMap = {
   zh: "mandarin",
   es: "spanish",
   fr: "french",
+  pt: "portuguese",
+  nl: "dutch",
 };

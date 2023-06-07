@@ -11,6 +11,7 @@ export const languageMap = {
   es: "spanish",
   fr: "french",
   pt: "portuguese",
+  nl: "dutch",
 };
 
 export const getUserLanguage = (defaultLanguage: string | undefined) => {
