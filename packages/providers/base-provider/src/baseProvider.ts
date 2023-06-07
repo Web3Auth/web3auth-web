@@ -1,5 +1,5 @@
-import { BaseConfig, BaseController, BaseState, createEventEmitterProxy, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { CustomChainConfig, WalletInitializationError } from "@web3auth/base";
+import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
+import { CustomChainConfig, SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseProvider } from "./IBaseProvider";
@@ -62,11 +62,11 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this._providerEngineProxy;
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+      (this._providerEngineProxy as any).setTarget(provider);
     } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
   }
 

@@ -51,7 +51,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     if (!this.provider) throw ethErrors.provider.custom({ message: "Torus solana provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
 
-    const connectedChainId = await this.provider.request<unknown, string>({
+    const connectedChainId = await this.provider.request<string>({
       method: "solana_chainId",
     });
 

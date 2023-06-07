@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { WALLET_ADAPTERS } from "@web3auth/base";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
@@ -41,9 +41,6 @@ import EthRpc from "../rpc/ethRpc.vue";
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0x1",
-  // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-  // displayName: "ropsten",
-  // blockExplorer: "https://ropsten.etherscan.io/",
   ticker: "ETH",
   tickerName: "Ethereum",
 };

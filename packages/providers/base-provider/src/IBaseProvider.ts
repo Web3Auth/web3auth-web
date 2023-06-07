@@ -1,5 +1,5 @@
-import { SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import type { CustomChainConfig } from "@web3auth/base";
+import type { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+
 export interface IBaseProvider<T> {
   provider: SafeEventEmitterProvider | null;
   setupProvider(provider: T): Promise<void>;

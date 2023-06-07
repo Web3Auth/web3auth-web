@@ -39,12 +39,10 @@
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^3.2.1",
-    "@toruslabs/openlogin-ed25519": "^3.2.0",
+    "@toruslabs/openlogin": "^4.5.2",
+    "@toruslabs/openlogin-utils": "^4.5.1",
     "@web3auth/base": "^5.2.0",
     "@web3auth/base-provider": "^5.2.0",
-    "@web3auth/ethereum-provider": "^5.2.0",
-    "@web3auth/solana-provider": "^5.2.0",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {
@@ -62,5 +60,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

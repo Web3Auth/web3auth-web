@@ -1,6 +1,6 @@
-import { createEventEmitterProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import { createEventEmitterProxy, providerFromEngine } from "@toruslabs/base-controllers";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCEngine, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IBaseProvider } from "./IBaseProvider";
 
@@ -42,11 +42,11 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     return this._providerEngineProxy;
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+      (this._providerEngineProxy as any).setTarget(provider);
     } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
   }
 

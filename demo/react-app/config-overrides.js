@@ -5,20 +5,23 @@ const path = require("path");
 module.exports = function override(config) {
   const fallback = config.resolve.fallback || {};
   Object.assign(fallback, {
-    crypto: require.resolve("crypto-browserify"),
-    stream: require.resolve("stream-browserify"),
-    assert: require.resolve("assert"),
-    http: require.resolve("stream-http"),
-    https: require.resolve("https-browserify"),
-    os: require.resolve("os-browserify"),
-    url: require.resolve("url"),
+    // crypto: require.resolve("crypto-browserify"),
+    // stream: require.resolve("stream-browserify"),
+    // assert: require.resolve("assert"),
+    // http: require.resolve("stream-http"),
+    // https: require.resolve("https-browserify"),
+    // os: require.resolve("os-browserify"),
+    // url: require.resolve("url"),
+    crypto: false,
+    stream: false,
+    assert: false,
+    http: false,
+    https: false,
+    os: false,
+    url: false,
+    zlib: false,
   });
   config.resolve.fallback = fallback;
-  config.resolve.alias = {
-    ...config.resolve.alias,
-    "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
-    lodash: path.resolve(__dirname, "node_modules/lodash"),
-  };
   config.plugins = (config.plugins || []).concat([
     new webpack.ProvidePlugin({
       process: "process/browser",
@@ -29,7 +32,7 @@ module.exports = function override(config) {
       contextRegExp: /@ethereumjs\/common/,
     }),
     new BundleAnalyzerPlugin({
-      analyzerMode: "disabled"
+      analyzerMode: "disabled",
     }),
   ]);
   config.ignoreWarnings = [/Failed to parse source map/];

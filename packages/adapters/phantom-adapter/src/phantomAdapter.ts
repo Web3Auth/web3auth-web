@@ -46,7 +46,10 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.phantomProvider) {
+      return this.phantomProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {

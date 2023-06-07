@@ -1,5 +1,5 @@
-import type { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import type { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
@@ -23,6 +23,7 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+import { CommonJRPCProvider } from "@web3auth/base-provider";
 
 export interface Web3AuthNoModalOptions {
   /**
@@ -83,6 +84,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   protected walletAdapters: Record<string, IAdapter<unknown>> = {};
 
+  protected commonJRPCProvider: CommonJRPCProvider | null = null;
+
   private plugins: Record<string, IPlugin> = {};
 
   private storage: "sessionStorage" | "localStorage" = "localStorage";
@@ -108,9 +111,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
-      const adapter = this.walletAdapters[this.connectedAdapterName];
-      return adapter.provider;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.commonJRPCProvider) {
+      return this.commonJRPCProvider.provider;
     }
     return null;
   }
@@ -145,6 +147,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
   }
@@ -193,13 +196,23 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
+      return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
+
+    if (this.commonJRPCProvider) {
+      return this.commonJRPCProvider.addChain(chainConfig);
+    }
+    throw WalletInitializationError.notReady(`No wallet is ready`);
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].switchChain(params);
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
+      return this.walletAdapters[this.connectedAdapterName].switchChain(params);
+
+    if (this.commonJRPCProvider) {
+      return this.commonJRPCProvider.switchChain(params);
+    }
+    throw WalletInitializationError.notReady(`No wallet is connected`);
   }
 
   /**
@@ -207,10 +220,11 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
    * @param walletName - Key of the walletAdapter to use.
    */
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
-    if (!this.walletAdapters[walletName])
+    if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     const provider = await this.walletAdapters[walletName].connect(loginParams);
-    return provider;
+    this.commonJRPCProvider.updateProviderEngineProxy(provider as SafeEventEmitterProvider);
+    return this.provider;
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
@@ -242,6 +256,9 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+      if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
+      const { provider } = this.walletAdapters[data.adapter];
+      this.commonJRPCProvider.updateProviderEngineProxy(provider as SafeEventEmitterProvider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);

@@ -115,6 +115,9 @@ export class TorusWalletConnectorPlugin implements IPlugin {
         privateKey,
         userInfo: {
           ...(this.userInfo as Omit<UserInfo, "isNewUser">),
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
@@ -217,6 +220,9 @@ export class TorusWalletConnectorPlugin implements IPlugin {
         privateKey: sessionConfig.privateKey,
         userInfo: {
           ...this.userInfo,
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });

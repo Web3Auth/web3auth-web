@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS, getChainConfig, getEvmChainConfig } from "@web3auth/base";
+import { OpenloginAdapter, OpenloginAdapterOptions, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 // import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 // import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-adapter"
+import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
@@ -12,6 +12,7 @@ import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
@@ -32,14 +33,20 @@ function App() {
 
         setWeb3auth(web3auth);
 
-        const openloginAdapter = new OpenloginAdapter();
+        const openloginAdapter = new OpenloginAdapter({
+          privateKeyProvider: new EthereumPrivateKeyProvider({
+            config: {
+              chainConfig: getEvmChainConfig(1) as CustomChainConfig,
+            },
+          }),
+        });
         web3auth.configureAdapter(openloginAdapter);
 
         const adapter = new WalletConnectV1Adapter();
         web3auth.configureAdapter(adapter);
 
         await web3auth.init();
-        if (web3auth.provider) {
+        if (web3auth.connectedAdapterName && web3auth.provider) {
           setProvider(web3auth.provider);
         }
       } catch (error) {
@@ -55,7 +62,7 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1);
+    const web3authProvider = await web3auth.connectTo<OpenloginLoginParams>(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: "google" });
     setProvider(web3authProvider);
   };
 

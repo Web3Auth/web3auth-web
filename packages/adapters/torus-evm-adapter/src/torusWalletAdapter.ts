@@ -56,7 +56,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.torusInstance) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.torusInstance) {
       return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
     }
     return null;
