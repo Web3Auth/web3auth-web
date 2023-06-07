@@ -90,7 +90,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
     if (this.openloginOptions.uxMode === UX_MODE.REDIRECT) {
       const redirectResult = getHashQueryParams();
-      if (Object.keys(redirectResult).length > 0) {
+      if (Object.keys(redirectResult).length > 0 && redirectResult.sessionId) {
         isRedirectResult = true;
       }
     }
