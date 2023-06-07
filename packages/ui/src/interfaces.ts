@@ -37,6 +37,7 @@ export interface UIConfig {
    * es: spanish
    * fr: french
    * pt: portuguese
+   * nl: dutch
    *
    */
   defaultLanguage?: string;
