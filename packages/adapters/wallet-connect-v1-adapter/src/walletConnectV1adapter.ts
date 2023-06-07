@@ -60,7 +60,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.READY && this.wcProvider) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.wcProvider) {
       return this.wcProvider.provider;
     }
     return null;

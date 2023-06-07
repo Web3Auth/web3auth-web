@@ -46,11 +46,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
+  public privateKeyProvider: PrivateKeyProvider | null = null;
+
   private openloginOptions: OpenloginAdapterOptions["adapterSettings"];
 
   private loginSettings: LoginSettings = { loginProvider: "" };
-
-  private privateKeyProvider: PrivateKeyProvider | null = null;
 
   constructor(params: OpenloginAdapterOptions = {}) {
     super(params);
@@ -61,6 +61,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       sessionTime: params.sessionTime,
       web3AuthNetwork: params.web3AuthNetwork,
       useCoreKitKey: params.useCoreKitKey,
+      privateKeyProvider: params.privateKeyProvider,
     });
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.privateKeyProvider = params.privateKeyProvider || null;
@@ -71,7 +72,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.READY && this.privateKeyProvider) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.privateKeyProvider) {
       return this.privateKeyProvider.provider;
     }
     return null;
@@ -245,7 +246,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   private async connectWithProvider(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
-    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivKey Provider is required before initialization");
+    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivateKey Provider is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
 
     const keyAvailable = this._getFinalPrivKey();

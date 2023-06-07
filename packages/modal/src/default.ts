@@ -2,6 +2,21 @@ import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlo
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
 
+export async function getPrivateKeyProvider(chainConfig: CustomChainConfig): Promise<IBaseProvider<string>> {
+  if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+    return new SolanaPrivateKeyProvider({ config: { chainConfig } });
+  } else if (chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
+    return new EthereumPrivateKeyProvider({ config: { chainConfig } });
+  } else if (chainConfig.chainNamespace === CHAIN_NAMESPACES.OTHER) {
+    // Modal doesn't support ripple provider
+    // Can always override this with a custom provider
+    return new CommonPrivateKeyProvider();
+  }
+  throw new Error(`Invalid chainNamespace: ${chainConfig.chainNamespace} found while connecting to wallet`);
+}
+
 // warning: this function is not compatible with "OTHER" chain namespace.
 export const getDefaultAdapterModule = async (params: {
   name: WALLET_ADAPTER_TYPE;
@@ -40,20 +55,7 @@ export const getDefaultAdapterModule = async (params: {
   } else if (name === WALLET_ADAPTERS.OPENLOGIN) {
     const { OpenloginAdapter, getOpenloginDefaultOptions } = await import("@web3auth/openlogin-adapter");
 
-    let privateKeyProvider: IBaseProvider<string> | null = null;
-    if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
-      privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: finalChainConfig } });
-    } else if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const { EthereumPrivateKeyProvider } = await import("@web3auth/ethereum-provider");
-      privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: finalChainConfig } });
-    } else if (finalChainConfig.chainNamespace === CHAIN_NAMESPACES.OTHER) {
-      // Modal doesn't support ripple provider
-      // Can always override this with a custom provider
-      privateKeyProvider = new CommonPrivateKeyProvider();
-    } else {
-      throw new Error(`Invalid chainNamespace: ${finalChainConfig.chainNamespace} found while connecting to wallet`);
-    }
+    const privateKeyProvider: IBaseProvider<string> = await getPrivateKeyProvider(finalChainConfig);
 
     const defaultOptions = getOpenloginDefaultOptions();
     const adapter = new OpenloginAdapter({

@@ -39,11 +39,11 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     await this.setupProvider();
   }
 
-  public updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+      (this._providerEngineProxy as any).setTarget(provider);
     } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
   }
 

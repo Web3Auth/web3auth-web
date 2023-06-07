@@ -42,11 +42,11 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     return this._providerEngineProxy;
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+      (this._providerEngineProxy as any).setTarget(provider);
     } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
   }
 

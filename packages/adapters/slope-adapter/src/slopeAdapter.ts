@@ -47,7 +47,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.READY && this.slopeProxyProvider) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.slopeProxyProvider) {
       return this.slopeProxyProvider.provider;
     }
     return null;
