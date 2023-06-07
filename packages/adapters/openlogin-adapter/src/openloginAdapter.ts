@@ -228,6 +228,22 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     return finalPrivKey;
   }
 
+  private _getFinalEd25519PrivKey() {
+    if (!this.openloginInstance) return "";
+    let finalPrivKey = this.openloginInstance.ed25519PrivKey;
+    // coreKitKey is available only for custom verifiers by default
+    if (this.openloginOptions?.useCoreKitKey) {
+      // this is to check if the user has already logged in but coreKitKey is not available.
+      // when useCoreKitKey is set to true.
+      // This is to ensure that when there is no user session active, we don't throw an exception.
+      if (this.openloginInstance.ed25519PrivKey && !this.openloginInstance.coreKitEd25519Key) {
+        throw WalletLoginError.coreKitKeyNotFound();
+      }
+      finalPrivKey = this.openloginInstance.coreKitEd25519Key;
+    }
+    return finalPrivKey;
+  }
+
   private async connectWithProvider(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
     if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivKey Provider is required before initialization");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
@@ -250,8 +266,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     let finalPrivKey = this._getFinalPrivKey();
     if (finalPrivKey) {
       if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
-        finalPrivKey = getED25519Key(finalPrivKey).sk.toString("hex");
+        finalPrivKey = this._getFinalEd25519PrivKey();
       }
 
       await this.privateKeyProvider.setupProvider(finalPrivKey);
