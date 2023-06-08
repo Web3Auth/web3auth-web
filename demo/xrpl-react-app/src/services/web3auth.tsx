@@ -100,6 +100,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         const web3AuthInstance = new Web3Auth({
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.OTHER,
+            chainId: "0x04",
+            rpcTarget: "https://s.altnet.rippletest.net:51234",
           },
           // get your client id from https://dashboard.web3auth.io
           clientId,
@@ -115,7 +117,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         const adapter = new OpenloginAdapter({
           adapterSettings: {
             network: web3AuthNetwork,
-            provider: xrplProvider,
             clientId,
             loginConfig: {
               facebook: {
@@ -126,6 +127,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               },
             },
           },
+          privateKeyProvider: xrplProvider,
         });
         web3AuthInstance.configureAdapter(adapter);
         subscribeAuthEvents(web3AuthInstance);
