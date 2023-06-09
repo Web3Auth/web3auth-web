@@ -32,6 +32,7 @@
     "popup.phone-body": "Ihr Ländercode wird automatisch erkannt, aber wenn Sie eine Telefonnummer aus einem anderen Land verwenden, müssen Sie den richtigen Ländercode manuell eingeben.",
     "popup.phone-header": "Telefonnummer und Ländercode",
     "social.continue": "Weitermachen mit",
+    "social.continueCustom": "Fahren Sie mit {{adapter}} fort",
     "social.email": "E-Mail",
     "social.email-continue": "Weitermachen mit E-Mail",
     "social.email-new": "name@example.com",

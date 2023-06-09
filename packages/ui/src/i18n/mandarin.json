@@ -32,6 +32,7 @@
     "popup.phone-body": "您的国家代码将自动检测到，但如果您使用其他国家/地区的电话号码，您需要手动输入正确的国家代码。",
     "popup.phone-header": "电话号码和国家代码",
     "social.continue": "继续",
+    "social.continueCustom": "继续使用{{adapter}}",
     "social.email": "电子邮件",
     "social.email-continue": "继续使用电子邮件",
     "social.email-new": "name@example.com",

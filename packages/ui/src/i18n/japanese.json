@@ -32,6 +32,7 @@
     "popup.phone-body": "国コードは自動的に検出されますが、異なる国の電話番号を使用する場合は、正しい国コードを手動で入力する必要があります。",
     "popup.phone-header": "電話番号と国コード",
     "social.continue": "続ける",
+    "social.continueCustom": "{{adapter}}を続けます",
     "social.email": "Eメール",
     "social.email-continue": "メールで続行",
     "social.email-new": "name@example.com",
