@@ -32,6 +32,7 @@
     "popup.phone-body": "Ihr Ländercode wird automatisch erkannt, aber wenn Sie eine Telefonnummer aus einem anderen Land verwenden, müssen Sie den richtigen Ländercode manuell eingeben.",
     "popup.phone-header": "Telefonnummer und Ländercode",
     "social.continue": "Weitermachen mit",
+    "social.continueCustom": "Fahren Sie mit {{adapter}} fort",
     "social.email": "E-Mail",
     "social.email-continue": "Weitermachen mit E-Mail",
     "social.email-new": "name@example.com",
@@ -46,6 +47,8 @@
     "social.view-less": "Weniger Optionen anzeigen",
     "social.view-less-new": "Weniger anzeigen",
     "social.view-more": "Weitere Optionen anzeigen",
-    "social.view-more-new": "Mehr anzeigen"
+    "social.view-more-new": "Mehr anzeigen",
+    "post-loading.connected": "Sie sind mit Ihrem Konto verbunden",
+    "post-loading.something-wrong": "Etwas ist schief gelaufen!"
   }
 }

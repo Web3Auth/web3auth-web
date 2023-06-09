@@ -93,10 +93,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   title={name}
                 >
                   {providerIcon}
-                  <p className="ml-2">
-                    {t("modal.social.continue")}
-                    <span className="w3a-button__adapter">{name}</span>
-                  </p>
+                  <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
                 </button>
               </li>
             );

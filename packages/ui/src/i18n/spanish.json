@@ -32,6 +32,7 @@
     "popup.phone-body": "Su código de país se detectará automáticamente, pero si está utilizando un número de teléfono de otro país, deberá ingresar manualmente el código de país correcto.",
     "popup.phone-header": "Número de teléfono y código de país",
     "social.continue": "Continuar con",
+    "social.continueCustom": "Continuar con {{adapter}}",
     "social.email": "Correo electrónico",
     "social.email-continue": "Continuar con correo electrónico",
     "social.email-new": "nombre@ejemplo.com",
@@ -46,6 +47,8 @@
     "social.view-less": "Ver menos opciones",
     "social.view-less-new": "Ver menos",
     "social.view-more": "Ver más opciones",
-    "social.view-more-new": "Ver más"
+    "social.view-more-new": "Ver más",
+    "post-loading.connected": "Estás conectado con tu cuenta",
+    "post-loading.something-wrong": "¡Algo salió mal!"
   }
 }

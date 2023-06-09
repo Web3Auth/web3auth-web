@@ -356,6 +356,10 @@ export default Vue.extend({
           value: "pt",
           display: "Portuguese",
         },
+        {
+          value: "nl",
+          display: "Dutch",
+        },
       ],
     };
   },

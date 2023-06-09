@@ -32,6 +32,7 @@
     "popup.phone-body": "您的国家代码将自动检测到，但如果您使用其他国家/地区的电话号码，您需要手动输入正确的国家代码。",
     "popup.phone-header": "电话号码和国家代码",
     "social.continue": "继续",
+    "social.continueCustom": "继续使用{{adapter}}",
     "social.email": "电子邮件",
     "social.email-continue": "继续使用电子邮件",
     "social.email-new": "name@example.com",
@@ -46,6 +47,8 @@
     "social.view-less": "查看较少选项",
     "social.view-less-new": "查看较少",
     "social.view-more": "查看更多选项",
-    "social.view-more-new": "查看更多"
+    "social.view-more-new": "查看更多",
+    "post-loading.connected": "您与您的帐户有联系",
+    "post-loading.something-wrong": "出了些问题！"
   }
 }

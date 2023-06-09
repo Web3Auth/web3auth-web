@@ -316,7 +316,7 @@ class LoginModal extends SafeEventEmitter {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,
-          postLoadingMessage: "You are connected with your account",
+          postLoadingMessage: "modal.post-loading.connected",
         });
       } else {
         this.setState({
@@ -330,7 +330,7 @@ class LoginModal extends SafeEventEmitter {
         if (this.displayErrorsOnModal)
           this.setState({
             modalVisibility: true,
-            postLoadingMessage: error.message || "Something went wrong!",
+            postLoadingMessage: error.message || "modal.post-loading.something-wrong",
             status: MODAL_STATUS.ERRORED,
           });
         else

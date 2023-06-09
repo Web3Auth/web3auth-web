@@ -32,6 +32,7 @@
     "popup.phone-body": "Votre code pays sera détecté automatiquement, mais si vous utilisez un numéro de téléphone d'un autre pays, vous devrez saisir manuellement le bon code pays.",
     "popup.phone-header": "Numéro de téléphone et code pays",
     "social.continue": "Continuer avec",
+    "social.continueCustom": "Continuer avec {{adapter}}",
     "social.email": "Email",
     "social.email-continue": "Continuer avec l'email",
     "social.email-new": "nom@exemple.com",
@@ -46,6 +47,8 @@
     "social.view-less": "Voir moins d'options",
     "social.view-less-new": "Voir moins",
     "social.view-more": "Voir plus d'options",
-    "social.view-more-new": "Voir plus"
+    "social.view-more-new": "Voir plus",
+    "post-loading.connected": "Vous êtes connecté avec votre compte",
+    "post-loading.something-wrong": "Quelque chose s'est mal passé!"
   }
 }

@@ -32,6 +32,7 @@
     "popup.phone-body": "Uw landcode wordt automatisch gedetecteerd, maar als u een telefoonnummer uit een ander land gebruikt, moet u handmatig de juiste landcode invoeren.",
     "popup.phone-header": "Telefoonnummer en landcode",
     "social.continue": "Doorgaan met",
+    "social.continueCustom": "Doorgaan met {{adapter}}",
     "social.email": "E-mail",
     "social.email-continue": "Doorgaan met e-mail",
     "social.email-new": "naam@voorbeeld.com",
@@ -46,6 +47,8 @@
     "social.view-less": "Minder opties bekijken",
     "social.view-less-new": "Minder bekijken",
     "social.view-more": "Meer opties bekijken",
-    "social.view-more-new": "Meer bekijken"
+    "social.view-more-new": "Meer bekijken",
+    "post-loading.connected": "U bent verbonden met uw account",
+    "post-loading.something-wrong": "Er is iets fout gegaan!"
   }
 }
