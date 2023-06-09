@@ -110,6 +110,10 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
   }
 
+  get connected(): boolean {
+    return Boolean(this.connectedAdapterName);
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.commonJRPCProvider) {
       return this.commonJRPCProvider.provider;

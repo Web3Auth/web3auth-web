@@ -16,4 +16,5 @@ export interface OpenloginAdapterOptions extends BaseAdapterSettings {
   privateKeyProvider?: PrivateKeyProvider;
 }
 
+export * from "@toruslabs/openlogin-utils";
 export { LoginConfig };

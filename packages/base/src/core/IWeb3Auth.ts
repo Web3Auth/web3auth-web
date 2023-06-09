@@ -6,6 +6,7 @@ import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
 export interface IWeb3Auth extends SafeEventEmitter {
+  connected: boolean;
   connectedAdapterName: string | null;
   status: ADAPTER_STATUS_TYPE;
   cachedAdapter: string | null;
