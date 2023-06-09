@@ -47,6 +47,8 @@
     "social.view-less": "オプションを少なく表示",
     "social.view-less-new": "表示を減らす",
     "social.view-more": "その他のオプションを表示",
-    "social.view-more-new": "もっと見る"
+    "social.view-more-new": "もっと見る",
+    "post-loading.connected": "アカウントに接続されています",
+    "post-loading.something-wrong": "何かがうまくいかなかった！"
   }
 }

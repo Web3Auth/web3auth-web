@@ -202,12 +202,12 @@ export default function Modal(props: ModalProps) {
                 onClose={onCloseLoader}
                 appLogo={appLogo}
                 modalStatus={modalState.status}
-                message={modalState.postLoadingMessage}
+                message={t(modalState.postLoadingMessage)}
                 adapter={modalState.detailedLoaderAdapter}
                 adapterName={modalState.detailedLoaderAdapterName}
               />
               {/* ) : ( */}
-              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} /> */}
+              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
               {/* )} */}
             </div>
           ) : (

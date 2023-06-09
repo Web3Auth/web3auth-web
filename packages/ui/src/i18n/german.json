@@ -47,6 +47,8 @@
     "social.view-less": "Weniger Optionen anzeigen",
     "social.view-less-new": "Weniger anzeigen",
     "social.view-more": "Weitere Optionen anzeigen",
-    "social.view-more-new": "Mehr anzeigen"
+    "social.view-more-new": "Mehr anzeigen",
+    "post-loading.connected": "Sie sind mit Ihrem Konto verbunden",
+    "post-loading.something-wrong": "Etwas ist schief gelaufen!"
   }
 }

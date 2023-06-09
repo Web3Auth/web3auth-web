@@ -47,6 +47,8 @@
     "social.view-less": "더 적은 옵션 보기",
     "social.view-less-new": "더 적게 보기",
     "social.view-more": "더 많은 옵션 보기",
-    "social.view-more-new": "더보기"
+    "social.view-more-new": "더보기",
+    "post-loading.connected": "귀하는 귀하의 계정과 연결되어 있습니다",
+    "post-loading.something-wrong": "뭔가 잘못되었습니다!"
   }
 }

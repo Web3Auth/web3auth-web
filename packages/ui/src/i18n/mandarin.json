@@ -47,6 +47,8 @@
     "social.view-less": "查看较少选项",
     "social.view-less-new": "查看较少",
     "social.view-more": "查看更多选项",
-    "social.view-more-new": "查看更多"
+    "social.view-more-new": "查看更多",
+    "post-loading.connected": "您与您的帐户有联系",
+    "post-loading.something-wrong": "出了些问题！"
   }
 }

@@ -47,6 +47,8 @@
     "social.view-less": "Ver menos opções",
     "social.view-less-new": "Ver menos",
     "social.view-more": "Ver mais opções",
-    "social.view-more-new": "Ver mais"
+    "social.view-more-new": "Ver mais",
+    "post-loading.connected": "Você está conectado com sua conta",
+    "post-loading.something-wrong": "Algo deu errado!"
   }
 }
