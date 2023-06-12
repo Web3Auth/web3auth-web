@@ -75,6 +75,25 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
   async connect(): Promise<SafeEventEmitterProvider | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
+    const { ethereum } = window as any;
+    const isPhantom = Boolean("isPhantom" in ethereum);
+    // check which is the active provider
+    if (ethereum && ethereum.isMetaMask && isPhantom) {
+      // this means phantom is the active provider.
+      if (ethereum.providers && ethereum.providers.length > 0) {
+        const provider = ethereum.providers.find((p: any) => p.isMetaMask && !p.overrideIsMetaMask);
+
+        if (provider) {
+          ethereum.setProvider(provider);
+        }
+      }
+    } else if (ethereum && (ethereum.providers || []).length > 0) {
+      // this means that there are another providers than metamask (like coinbase).
+      const provider = ethereum.providers.find((p: any) => p.isMetaMask);
+      if (provider) {
+        ethereum.setSelectedProvider(provider);
+      }
+    }
 
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
