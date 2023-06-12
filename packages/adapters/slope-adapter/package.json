@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/slope-adapter",
-  "version": "6.0.3-alpha.0",
+  "version": "6.0.4-alpha.0",
   "description": "slope wallet adapter for web3auth",
   "keywords": [
     "web3Auth/slope-adapter",
@@ -37,10 +37,10 @@
     "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@web3auth/base": "^6.0.3-alpha.0",
-    "@web3auth/base-provider": "^6.0.3-alpha.0",
-    "@web3auth/base-solana-adapter": "^6.0.3-alpha.0",
-    "@web3auth/solana-provider": "^6.0.3-alpha.0",
+    "@web3auth/base": "^6.0.4-alpha.0",
+    "@web3auth/base-provider": "^6.0.4-alpha.0",
+    "@web3auth/base-solana-adapter": "^6.0.4-alpha.0",
+    "@web3auth/solana-provider": "^6.0.4-alpha.0",
     "bn.js": "^5.2.1"
   },
   "lint-staged": {
