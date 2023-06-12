@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "6.0.1-alpha.0",
+  "version": "6.0.2-alpha.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
@@ -23,7 +23,7 @@
     "@web3auth/base-provider": "^6.0.1-alpha.0",
     "@web3auth/ethereum-provider": "^6.0.1-alpha.0",
     "@web3auth/metamask-adapter": "^6.0.1-alpha.0",
-    "@web3auth/no-modal": "^6.0.1-alpha.0",
+    "@web3auth/no-modal": "^6.0.2-alpha.0",
     "@web3auth/openlogin-adapter": "^6.0.1-alpha.0",
     "@web3auth/phantom-adapter": "^6.0.1-alpha.0",
     "@web3auth/solana-provider": "^6.0.1-alpha.0",
