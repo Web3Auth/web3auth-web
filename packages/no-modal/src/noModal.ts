@@ -94,7 +94,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
-    else log.disableAll();
+    else log.setLevel("error");
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
     if (options.storageKey === "session") this.storage = "sessionStorage";
