@@ -51,7 +51,7 @@
     "faker": "^5.5.3",
     "husky": "^8.0.3",
     "jsonwebtoken": "^9.0.0",
-    "lerna": "~6.6.2",
+    "lerna": "~7.0.0",
     "lint-staged": "^13.2.2",
     "mocha": "^10.2.0",
     "node-fetch": "^3.3.1",
