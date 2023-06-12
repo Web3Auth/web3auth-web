@@ -126,6 +126,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async init(): Promise<void> {
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
       // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
@@ -151,7 +152,6 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
   }
