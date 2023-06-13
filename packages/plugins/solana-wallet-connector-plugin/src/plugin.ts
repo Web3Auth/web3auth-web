@@ -151,8 +151,8 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       this.setSelectedAddress(data.accounts[0]);
     });
 
-    provider.on("chainChanged", (data: { chainId: string }) => {
-      this.setChainID(parseInt(data.chainId, 16));
+    provider.on("chainChanged", (chainId: string) => {
+      this.setChainID(parseInt(chainId, 16));
     });
     provider.on("disconnect", () => {
       this.torusWalletInstance.hideTorusButton();
