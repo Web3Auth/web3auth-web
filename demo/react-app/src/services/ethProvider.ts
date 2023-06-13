@@ -3,6 +3,15 @@ import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
 
 const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+  const getChainId = async(): Promise<any> => {
+    try {
+      const web3 = new Web3(provider as any);
+      const chainId = await (web3.eth.getChainId());
+      return chainId
+    } catch (error) {
+      return error;
+    }
+  }
   const getAccounts = async () => {
     try {
       const web3 = new Web3(provider as any);
@@ -82,7 +91,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       uiConsole("error", error);
     }
   };
-  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction };
+  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction, getChainId };
 };
 
 export default ethProvider;

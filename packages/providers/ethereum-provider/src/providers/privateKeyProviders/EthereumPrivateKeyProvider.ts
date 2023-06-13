@@ -96,7 +96,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
     if (this.state.chainId !== chainId) {
-      this._providerEngineProxy.emit("chainChanged", chainId);
+      this._providerEngineProxy.emit("chainChanged", { chainId });
       this._providerEngineProxy.emit("connect", { chainId });
     }
     this.update({ chainId });
@@ -118,7 +118,6 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
           decimals: nativeCurrency?.decimals || 18,
         };
         this.addChain(chainConfig);
-        this._providerEngineProxy.emit("chainAdded", chainConfig);
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;

@@ -4,6 +4,7 @@ import solanaProvider from "./solanaProvider";
 import tezosProvider  from "./tezosProvider";
 
 export interface IWalletProvider {
+  getChainId?: () =>   Promise<any>;
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
   signAndSendTransaction: () => Promise<void>;

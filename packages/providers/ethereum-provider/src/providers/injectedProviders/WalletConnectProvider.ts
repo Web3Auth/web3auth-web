@@ -136,7 +136,7 @@ export class WalletConnectProvider extends BaseProvider<BaseProviderConfig, Wall
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.provider.emit("connect", { chainId });
-    this.provider.emit("chainChanged", this.state.chainId);
+    this.provider.emit("chainChanged", { chainId: this.state.chainId });
     return connectedHexChainId;
   }
 

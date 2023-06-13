@@ -17,6 +17,7 @@ const Main = () => {
     chain,
     addChain,
     switchChain,
+    getChainId,
   } = useWeb3Auth();
 
   const loggedInView = (
@@ -40,6 +41,9 @@ const Main = () => {
       )}
       <button onClick={signAndSendTransaction} className={styles.card}>
         Sign and Send Transaction
+      </button>
+      <button onClick={getChainId} className={styles.card}>
+        Get Chain Id
       </button>
       <button onClick={addChain} className={styles.card}>
         Add Chain

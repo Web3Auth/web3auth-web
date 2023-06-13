@@ -236,10 +236,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async setChainID(chainId: number): Promise<void> {
     const sessionConfig = await this.sessionConfig();
     const { chainConfig } = sessionConfig || {};
-    if (chainId !== sessionConfig.chainId && chainConfig) {
+    if (chainId === sessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.provider.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: `0x${chainId.toString(16)}` }],
+        params: { chainId: `0x${chainId.toString(16)}` },
       });
     }
   }
@@ -247,7 +247,17 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async addNewChainConfig(newChainConfig: CustomChainConfig): Promise<void> {
     await this.torusWalletInstance.provider.request({
       method: "wallet_addEthereumChain",
-      params: [newChainConfig],
+      params: {
+        chainId: newChainConfig.chainId,
+        chainName: newChainConfig.displayName,
+        nativeCurrency: {
+          name: newChainConfig.tickerName,
+          symbol: newChainConfig.ticker,
+          decimals: newChainConfig.decimals,
+        },
+        rpcUrls: [newChainConfig.rpcTarget],
+        blockExplorerUrls: [newChainConfig.blockExplorer],
+      },
     });
   }
 }

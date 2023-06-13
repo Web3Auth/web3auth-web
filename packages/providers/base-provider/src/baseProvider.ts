@@ -50,6 +50,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     this.configure({
       networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
     } as C);
+    this._providerEngineProxy.emit("chainAdded", chainConfig);
   }
 
   public getChainConfig(chainId: string): CustomChainConfig | null {

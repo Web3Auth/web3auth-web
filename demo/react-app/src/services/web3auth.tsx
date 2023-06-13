@@ -23,6 +23,7 @@ export interface IWeb3AuthContext {
   signAndSendTransaction: () => Promise<void>;
   addChain: () => Promise<void>;
   switchChain: () => Promise<void>;
+  getChainId: ()  => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -41,6 +42,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   signAndSendTransaction: async () => {},
   addChain: async () => {},
   switchChain: async () => {},
+  getChainId: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -255,6 +257,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
   };
 
+  const getChainId = async () => {
+    if (!provider || !provider.getChainId) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const chainId = await provider.getChainId();
+    uiConsole(chainId);
+  };
+
   const addChain = async () => {
     if (!provider) {
       uiConsole("provider not initialized yet");
@@ -299,6 +310,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     signAndSendTransaction,
     addChain,
     switchChain,
+    getChainId,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };
