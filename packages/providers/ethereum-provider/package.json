@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "6.0.4-alpha.0",
+  "version": "6.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
@@ -28,8 +28,8 @@
     "@toruslabs/openlogin-jrpc": "^4.5.1",
     "@walletconnect/legacy-types": "2.0.0",
     "@walletconnect/utils": "^2.7.8",
-    "@web3auth/base": "^6.0.4-alpha.0",
-    "@web3auth/base-provider": "^6.0.4-alpha.0",
+    "@web3auth/base": "^6.0.0",
+    "@web3auth/base-provider": "^6.0.0",
     "assert": "^2.0.0",
     "bignumber.js": "^9.1.1",
     "bn.js": "^5.2.1",
