@@ -232,7 +232,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async setChainID(chainId: number): Promise<void> {
     const sessionConfig = await this.sessionConfig();
     const { chainConfig } = sessionConfig || {};
-    if (chainId !== sessionConfig.chainId && chainConfig) {
+    if (chainId === sessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
         ...chainConfig,
         chainId,
