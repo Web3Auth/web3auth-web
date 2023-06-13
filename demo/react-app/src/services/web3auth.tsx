@@ -1,10 +1,11 @@
-import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -20,6 +21,8 @@ export interface IWeb3AuthContext {
   getBalance: () => Promise<any>;
   signTransaction: () => Promise<void>;
   signAndSendTransaction: () => Promise<void>;
+  addChain: () => Promise<void>;
+  switchChain: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -36,6 +39,8 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   getBalance: async () => {},
   signTransaction: async () => {},
   signAndSendTransaction: async () => {},
+  addChain: async () => {},
+  switchChain: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -122,7 +127,22 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             },
           },
         });
+        const plugin = new TorusWalletConnectorPlugin({
+          walletInitOptions: {
+            whiteLabel: {
+              logoDark: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+              logoLight: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+              theme: {
+                isDark: true,
+                colors: {},
+              },
+            },
+            buildEnv: "development",
+            useWalletConnect: true,
+          },
+        });
         web3AuthInstance.configureAdapter(adapter);
+        web3AuthInstance.addPlugin(plugin);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal({
@@ -235,6 +255,34 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
   };
 
+  const addChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const newChain = {
+      chainId: "0x19",
+      displayName: "Cronos Mainnet Beta",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      tickerName: "Cronos",
+      ticker: "CRO",
+      decimals: 18,
+      rpcTarget: "https://cronos-evm.publicnode.com",
+      blockExplorer: "https://goerli.etherscan.io",
+    };
+    await web3Auth?.addChain(newChain);
+    uiConsole("New Chain Added");
+  };
+
+  const switchChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await web3Auth?.switchChain({ chainId: "0x19" });
+    uiConsole("Chain Switched");
+  };
+
   const contextProvider = {
     web3Auth,
     chain,
@@ -249,6 +297,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     signMessage,
     signTransaction,
     signAndSendTransaction,
+    addChain,
+    switchChain,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

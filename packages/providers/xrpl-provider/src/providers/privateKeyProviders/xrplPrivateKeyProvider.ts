@@ -108,7 +108,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
         if (!chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
         if (!rpcTarget) throw ethErrors.rpc.invalidParams("Missing rpcTarget in chainParams");
         if (!wsTarget) throw ethErrors.rpc.invalidParams("Missing wsTarget in chainParams");
-        this.addChain({
+        const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.OTHER,
           chainId,
           ticker: ticker || "XRP",
@@ -117,7 +117,9 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
           rpcTarget,
           wsTarget,
           blockExplorer,
-        });
+        };
+        this.addChain(chainConfig);
+        this._providerEngineProxy.emit("chainAdded", chainConfig);
       },
       switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {
         if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");

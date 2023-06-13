@@ -163,6 +163,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.setSelectedAddress(data.accounts[0]);
     });
 
+    provider.on("chainAdded", (data: CustomChainConfig) => {
+      this.addNewChainConfig(data);
+    });
+
     provider.on("chainChanged", (data: { chainId: string }) => {
       this.setChainID(parseInt(data.chainId, 16));
     });
@@ -233,12 +237,17 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     const sessionConfig = await this.sessionConfig();
     const { chainConfig } = sessionConfig || {};
     if (chainId !== sessionConfig.chainId && chainConfig) {
-      await this.torusWalletInstance.setProvider({
-        ...chainConfig,
-        chainId,
-        host: chainConfig.rpcTarget,
-        networkName: chainConfig.displayName,
+      await this.torusWalletInstance.provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: `0x${chainId.toString(16)}` }],
       });
     }
+  }
+
+  private async addNewChainConfig(newChainConfig: CustomChainConfig): Promise<void> {
+    await this.torusWalletInstance.provider.request({
+      method: "wallet_addEthereumChain",
+      params: [newChainConfig],
+    });
   }
 }

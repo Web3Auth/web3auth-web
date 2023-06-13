@@ -114,7 +114,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
         if (!chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
         if (!rpcUrls || rpcUrls.length === 0) throw ethErrors.rpc.invalidParams("Missing rpcUrls in chainParams");
         if (!nativeCurrency) throw ethErrors.rpc.invalidParams("Missing nativeCurrency in chainParams");
-        this.addChain({
+        const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.SOLANA,
           chainId,
           ticker: nativeCurrency?.symbol || "SOL",
@@ -123,7 +123,9 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
           rpcTarget: rpcUrls[0],
           blockExplorer: blockExplorerUrls?.[0] || "",
           decimals: nativeCurrency?.decimals || 9,
-        });
+        };
+        this.addChain(chainConfig);
+        this._providerEngineProxy.emit("chainAdded", chainConfig);
       },
       switchSolanaChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {
         if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
