@@ -171,7 +171,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     // TODO: add these in torus wallet.
     // await this.torusInstance?.provider.request({
     //   method: "wallet_addEthereumChain",

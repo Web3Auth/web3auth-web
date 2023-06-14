@@ -3,7 +3,7 @@ import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@t
 
 import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { WalletInitializationError, WalletLoginError } from "../errors";
+import { WalletInitializationError, WalletLoginError, WalletOperationsError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTERS } from "../wallet";
 
@@ -180,8 +180,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
-  checkAddChainRequirements(init = false): void {
+  checkAddChainRequirements(chainConfig: CustomChainConfig, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (this.currentChainNamespace !== chainConfig.chainNamespace) {
+      throw WalletOperationsError.chainNamespaceNotAllowed("This adapter doesn't support this chainNamespace");
+    }
   }
 
   checkSwitchChainRequirements({ chainId }: { chainId: string }, init = false): void {

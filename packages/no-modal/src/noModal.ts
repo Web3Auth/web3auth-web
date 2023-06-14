@@ -216,7 +216,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     if (this.commonJRPCProvider) {
       return this.commonJRPCProvider.switchChain(params);
     }
-    throw WalletInitializationError.notReady(`No wallet is connected`);
+    throw WalletInitializationError.notReady(`No wallet is ready`);
   }
 
   /**

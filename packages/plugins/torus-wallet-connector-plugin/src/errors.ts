@@ -55,4 +55,8 @@ export class TorusWalletPluginError extends Web3AuthError {
   public static torusWalletNotSet(extraMessage = ""): IWeb3AuthError {
     return TorusWalletPluginError.fromCode(5217, extraMessage);
   }
+
+  public static unsupportedChainNamespace(extraMessage = ""): IWeb3AuthError {
+    return TorusWalletPluginError.fromCode(5218, extraMessage);
+  }
 }

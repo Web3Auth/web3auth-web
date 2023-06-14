@@ -51,6 +51,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     if (this.isInitialized) return;
     if (!web3auth) throw TorusWalletPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw TorusWalletPluginError.unsupportedAdapter();
+    if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw TorusWalletPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
       this.provider = web3auth.provider;
@@ -219,7 +220,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.torusWalletInstance.provider.request<string>({ method: "eth_chainId" }),
     ]);
     return {
-      chainId: parseInt(chainId as string, 16), // TODO: Need to check if it's hex or int
+      chainId: parseInt(chainId as string, 16),
       accounts: accounts as string[],
     };
   }
