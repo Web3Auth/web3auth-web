@@ -212,4 +212,8 @@ export class WalletOperationsError extends Web3AuthError {
   public static operationNotAllowed(extraMessage = ""): IWeb3AuthError {
     return WalletOperationsError.fromCode(5202, extraMessage);
   }
+
+  public static chainNamespaceNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5203, extraMessage);
+  }
 }

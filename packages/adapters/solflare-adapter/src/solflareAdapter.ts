@@ -139,7 +139,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     this.solflareProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

@@ -182,7 +182,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
     if (networkSwitch) {
       await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });

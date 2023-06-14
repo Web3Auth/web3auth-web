@@ -39,6 +39,7 @@ function createWrapper(parentZIndex: string): HTMLElement {
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
+  parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
   const wrapper = document.createElement("section");

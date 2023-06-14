@@ -196,7 +196,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     this.privateKeyProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }
