@@ -210,10 +210,12 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   private _getFinalPrivKey() {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;
-    if (finalPrivKey) {
+
+    if (this.openloginInstance.sessionId) {
+      // if here, user is logged in.
       const { loginConfig } = this.openloginInstance.options;
       const { typeOfLogin } = this.openloginInstance.getUserInfo();
-      if (loginConfig) {
+      if (loginConfig && loginConfig[typeOfLogin]) {
         if ((loginConfig[typeOfLogin] as any).walletVerifier && this.openloginInstance.state.walletKey) {
           return this.openloginInstance.state.walletKey;
         }
