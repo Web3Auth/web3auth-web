@@ -12,7 +12,7 @@ export async function getPrivateKeyProvider(chainConfig: CustomChainConfig): Pro
   } else if (chainConfig.chainNamespace === CHAIN_NAMESPACES.OTHER) {
     // Modal doesn't support ripple provider
     // Can always override this with a custom provider
-    return new CommonPrivateKeyProvider();
+    return new CommonPrivateKeyProvider({ config: { chainConfig } });
   }
   throw new Error(`Invalid chainNamespace: ${chainConfig.chainNamespace} found while connecting to wallet`);
 }

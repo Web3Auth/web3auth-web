@@ -36,6 +36,10 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
+  get currentChainConfig(): Partial<CustomChainConfig> {
+    return this.config.chainConfig;
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
   }
