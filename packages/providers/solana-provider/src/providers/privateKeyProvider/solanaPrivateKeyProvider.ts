@@ -44,7 +44,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public getEd25519Key(privateKey: string): string {
-    return getED25519Key(privateKey).sk.toString("hex");
+    return getED25519Key(privateKey).sk.toString("hex").padStart(128, "0");
   }
 
   public async setupProvider(privKey: string): Promise<void> {
