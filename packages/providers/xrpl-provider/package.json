@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/xrpl-provider",
-  "version": "6.0.1",
+  "version": "6.1.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/xrplProvider.cjs.js",
@@ -22,7 +22,7 @@
     "@toruslabs/base-controllers": "^3.0.3",
     "@toruslabs/openlogin-jrpc": "^4.5.1",
     "@web3auth/base": "^6.0.1",
-    "@web3auth/base-provider": "^6.0.1",
+    "@web3auth/base-provider": "^6.1.0",
     "eth-rpc-errors": "^4.0.3",
     "ripple-keypairs": "^1.1.5"
   },
