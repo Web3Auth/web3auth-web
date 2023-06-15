@@ -36,7 +36,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
-  get chainConfig(): Partial<CustomChainConfig> {
+  get currentChainConfig(): Partial<CustomChainConfig> {
     return this.config.chainConfig;
   }
 
