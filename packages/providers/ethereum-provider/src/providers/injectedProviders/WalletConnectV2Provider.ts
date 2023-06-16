@@ -1,5 +1,4 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletLoginError } from "@web3auth/base";

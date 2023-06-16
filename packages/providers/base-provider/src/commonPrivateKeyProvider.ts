@@ -1,5 +1,13 @@
-import { createEventEmitterProxy, providerFromEngine } from "@toruslabs/base-controllers";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCEngine, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
+import { createEventEmitterProxy } from "@toruslabs/base-controllers";
+import {
+  createAsyncMiddleware,
+  createScaffoldMiddleware,
+  JRPCEngine,
+  JRPCMiddleware,
+  JRPCRequest,
+  JRPCResponse,
+  providerFromEngine,
+} from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";

@@ -10,6 +10,5 @@
     "packages/plugins/*"
   ],
   "version": "6.1.0",
-  "npmClient": "npm",
-  "useWorkspaces": true
+  "npmClient": "npm"
 }

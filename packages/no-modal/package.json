@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@toruslabs/openlogin": "^4.5.4",
-    "@toruslabs/openlogin-jrpc": "^4.5.1",
+    "@toruslabs/openlogin-jrpc": "^4.6.0",
     "@toruslabs/openlogin-utils": "^4.5.1",
     "@web3auth/base": "^6.0.1",
     "@web3auth/base-plugin": "^6.0.1",

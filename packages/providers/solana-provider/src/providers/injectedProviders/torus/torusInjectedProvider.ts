@@ -1,5 +1,4 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";

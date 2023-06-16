@@ -1,5 +1,4 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { IConnector } from "@walletconnect/legacy-types";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, isHexStrict, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
