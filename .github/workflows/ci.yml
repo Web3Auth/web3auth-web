@@ -22,10 +22,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run:  npm install
-
-      - name: Bootstrap dependencies
-        run: npm run bootstrap
+        run: npm install
 
       - name: Build
         run: npm run build

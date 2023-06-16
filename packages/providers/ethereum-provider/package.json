@@ -15,7 +15,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
@@ -23,11 +23,11 @@
     "@ethereumjs/tx": "^4.1.2",
     "@ethereumjs/util": "^8.0.6",
     "@metamask/eth-sig-util": "^5.1.0",
-    "@toruslabs/base-controllers": "^3.0.3",
+    "@toruslabs/base-controllers": "^3.1.0",
     "@toruslabs/http-helpers": "^4.0.0",
-    "@toruslabs/openlogin-jrpc": "^4.5.1",
+    "@toruslabs/openlogin-jrpc": "^4.6.0",
     "@walletconnect/legacy-types": "2.0.0",
-    "@walletconnect/utils": "^2.7.8",
+    "@walletconnect/utils": "^2.8.1",
     "@web3auth/base": "^6.0.1",
     "@web3auth/base-provider": "^6.1.0",
     "assert": "^2.0.0",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
     "@types/json-rpc-random-id": "^1.0.1",
-    "@walletconnect/types": "^2.7.8"
+    "@walletconnect/types": "^2.8.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

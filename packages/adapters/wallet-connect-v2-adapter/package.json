@@ -24,7 +24,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -45,9 +45,9 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.7",
-    "@walletconnect/sign-client": "^2.8.0",
-    "@walletconnect/types": "^2.8.0",
-    "@walletconnect/utils": "^2.8.0"
+    "@walletconnect/sign-client": "^2.8.1",
+    "@walletconnect/types": "^2.8.1",
+    "@walletconnect/utils": "^2.8.1"
   },
   "lint-staged": {
     "!(*d).ts": [
