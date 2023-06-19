@@ -47,7 +47,10 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.slopeProxyProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.slopeProxyProvider) {
+      return this.slopeProxyProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -122,7 +125,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     this.slopeProxyProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

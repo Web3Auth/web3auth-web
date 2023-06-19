@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "5.1.1",
+  "version": "6.1.1",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/openlogin-adapter",
@@ -24,7 +24,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -39,12 +39,10 @@
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^3.2.1",
-    "@toruslabs/openlogin-ed25519": "^3.2.0",
-    "@web3auth/base": "^5.1.0",
-    "@web3auth/base-provider": "^5.1.1",
-    "@web3auth/ethereum-provider": "^5.1.1",
-    "@web3auth/solana-provider": "^5.1.1",
+    "@toruslabs/openlogin": "^4.5.4",
+    "@toruslabs/openlogin-utils": "^4.5.1",
+    "@web3auth/base": "^6.1.1",
+    "@web3auth/base-provider": "^6.1.1",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {
@@ -62,5 +60,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

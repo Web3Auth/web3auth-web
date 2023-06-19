@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/phantom-adapter",
-  "version": "5.1.1",
+  "version": "6.1.1",
   "description": "phantom wallet adapter for web3auth",
   "keywords": [
     "web3Auth/phantom-wallet-adapter",
@@ -25,7 +25,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -37,10 +37,10 @@
     "@solana/web3.js": "^1.x"
   },
   "dependencies": {
-    "@web3auth/base": "^5.1.0",
-    "@web3auth/base-provider": "^5.1.1",
-    "@web3auth/base-solana-adapter": "^5.1.0",
-    "@web3auth/solana-provider": "^5.1.1",
+    "@web3auth/base": "^6.1.1",
+    "@web3auth/base-provider": "^6.1.1",
+    "@web3auth/base-solana-adapter": "^6.1.1",
+    "@web3auth/solana-provider": "^6.1.1",
     "bn.js": "^5.2.1"
   },
   "lint-staged": {
@@ -58,5 +58,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

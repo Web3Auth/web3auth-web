@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "5.1.0",
+  "version": "6.1.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -15,13 +15,14 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^3.3.0",
-    "@toruslabs/openlogin": "^3.2.1",
-    "@toruslabs/openlogin-jrpc": "^3.2.0",
+    "@toruslabs/http-helpers": "^4.0.0",
+    "@toruslabs/openlogin": "^4.5.4",
+    "@toruslabs/openlogin-jrpc": "^4.6.0",
+    "@toruslabs/openlogin-utils": "^4.5.1",
     "jwt-decode": "^3.1.2",
     "loglevel": "^1.8.1",
     "ts-custom-error": "^3.3.1"
@@ -49,5 +50,9 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

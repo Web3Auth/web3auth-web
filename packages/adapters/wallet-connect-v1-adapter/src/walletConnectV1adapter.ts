@@ -1,4 +1,4 @@
-import WalletConnect from "@walletconnect/client";
+import WalletConnect from "@walletconnect/legacy-client";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -60,7 +60,10 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.wcProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.wcProvider) {
+      return this.wcProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -179,7 +182,7 @@ class WalletConnectV1Adapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     const networkSwitch = this.adapterOptions.adapterSettings?.networkSwitchModal;
     if (networkSwitch) {
       await networkSwitch.addNetwork({ chainConfig, appOrigin: window.location.hostname });

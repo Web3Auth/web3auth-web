@@ -59,7 +59,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProvider) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.solanaProvider) {
       return this.solanaProvider?.provider || null;
     }
     return null;
@@ -163,7 +163,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     // await this.solanaProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

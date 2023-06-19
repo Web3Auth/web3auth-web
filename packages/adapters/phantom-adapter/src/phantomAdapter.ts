@@ -46,7 +46,10 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.phantomProvider) {
+      return this.phantomProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -148,7 +151,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     this.phantomProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

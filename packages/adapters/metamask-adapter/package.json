@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/metamask-adapter",
-  "version": "5.1.0",
+  "version": "6.1.1",
   "description": "metamask wallet adapter for web3auth",
   "keywords": [
     "web3Auth/metamask-adapter",
@@ -24,7 +24,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
-    "@web3auth/base": "^5.1.0",
-    "@web3auth/base-evm-adapter": "^5.1.0"
+    "@web3auth/base": "^6.1.1",
+    "@web3auth/base-evm-adapter": "^6.1.1"
   },
   "lint-staged": {
     "!(*d).ts": [
@@ -54,5 +54,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

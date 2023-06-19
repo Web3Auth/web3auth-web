@@ -9,6 +9,7 @@ export type ChainNamespaceType = (typeof CHAIN_NAMESPACES)[keyof typeof CHAIN_NA
 export const ADAPTER_NAMESPACES = {
   EIP155: "eip155",
   SOLANA: "solana",
+  XRPL: "xrpl",
   MULTICHAIN: "multichain",
 } as const;
 // eip155 for all evm chains
@@ -24,6 +25,12 @@ export type CustomChainConfig = {
    * RPC target Url for the chain
    */
   rpcTarget: string;
+
+  /**
+   * web socket target Url for the chain
+   */
+  wsTarget?: string;
+
   /**
    * Display Name for the chain
    */

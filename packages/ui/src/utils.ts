@@ -1,5 +1,5 @@
 import { get, post } from "@toruslabs/http-helpers";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
@@ -103,4 +103,6 @@ export const languageMap = {
   zh: "mandarin",
   es: "spanish",
   fr: "french",
+  pt: "portuguese",
+  nl: "dutch",
 };

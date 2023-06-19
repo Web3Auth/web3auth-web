@@ -217,7 +217,7 @@
 </template>
 
 <script lang="ts">
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
 import { cloneDeep } from "lodash";

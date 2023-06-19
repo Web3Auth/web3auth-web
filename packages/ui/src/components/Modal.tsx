@@ -1,5 +1,5 @@
-import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
@@ -202,12 +202,12 @@ export default function Modal(props: ModalProps) {
                 onClose={onCloseLoader}
                 appLogo={appLogo}
                 modalStatus={modalState.status}
-                message={modalState.postLoadingMessage}
+                message={t(modalState.postLoadingMessage)}
                 adapter={modalState.detailedLoaderAdapter}
                 adapterName={modalState.detailedLoaderAdapterName}
               />
               {/* ) : ( */}
-              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={modalState.postLoadingMessage} /> */}
+              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
               {/* )} */}
             </div>
           ) : (

@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-wallet-connector-plugin",
-  "version": "5.1.0",
+  "version": "6.1.1",
   "description": "Torus wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
     "web3Auth/torus-wallet-connector-plugin",
@@ -24,7 +24,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -35,10 +35,10 @@
     "eth-rpc-errors": "^4.0.3"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.41.1",
-    "@web3auth/base": "^5.1.0",
-    "@web3auth/base-plugin": "^5.1.0",
-    "@web3auth/no-modal": "^5.1.0",
+    "@toruslabs/torus-embed": "^2.1.4",
+    "@web3auth/base": "^6.1.1",
+    "@web3auth/base-plugin": "^6.1.1",
+    "@web3auth/no-modal": "^6.1.1",
     "loglevel": "^1.8.1"
   },
   "peerDependencies": {
@@ -59,5 +59,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

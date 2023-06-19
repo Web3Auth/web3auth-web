@@ -1,6 +1,6 @@
 import { Common, Hardfork } from "@ethereumjs/common";
 import { addHexPrefix, stripHexPrefix } from "@ethereumjs/util";
-import { Block } from "@toruslabs/base-controllers";
+import { Block } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { TransactionParams } from "../../../rpc/interfaces";

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { OPENLOGIN_METHOD_TYPE, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { Button, Loader } from "@toruslabs/vue-components";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";

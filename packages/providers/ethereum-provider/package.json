@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "5.1.1",
+  "version": "6.1.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
@@ -15,22 +15,21 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^3.1.1",
-    "@ethereumjs/tx": "^4.1.1",
-    "@ethereumjs/util": "^8.0.5",
-    "@metamask/eth-sig-util": "^5.0.2",
-    "@toruslabs/base-controllers": "^2.8.1",
-    "@toruslabs/http-helpers": "^3.3.0",
-    "@toruslabs/openlogin-jrpc": "^3.2.0",
+    "@ethereumjs/common": "^3.1.2",
+    "@ethereumjs/tx": "^4.1.2",
+    "@ethereumjs/util": "^8.0.6",
+    "@metamask/eth-sig-util": "^5.1.0",
+    "@toruslabs/base-controllers": "^3.1.0",
+    "@toruslabs/http-helpers": "^4.0.0",
+    "@toruslabs/openlogin-jrpc": "^4.6.0",
     "@walletconnect/legacy-types": "2.0.0",
-    "@walletconnect/types": "^2.5.2",
-    "@walletconnect/utils": "^2.5.2",
-    "@web3auth/base": "^5.1.0",
-    "@web3auth/base-provider": "^5.1.1",
+    "@walletconnect/utils": "^2.8.1",
+    "@web3auth/base": "^6.1.1",
+    "@web3auth/base-provider": "^6.1.1",
     "assert": "^2.0.0",
     "bignumber.js": "^9.1.1",
     "bn.js": "^5.2.1",
@@ -39,7 +38,8 @@
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
-    "@types/json-rpc-random-id": "^1.0.1"
+    "@types/json-rpc-random-id": "^1.0.1",
+    "@walletconnect/types": "^2.8.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
@@ -64,5 +64,9 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=16.18.1",
+    "npm": ">=8.x"
   }
 }

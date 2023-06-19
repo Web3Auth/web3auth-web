@@ -169,7 +169,7 @@
 </template>
 
 <script lang="ts">
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { Button, Checkbox, Icon, Select, TextArea, TextField } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
@@ -348,6 +348,10 @@ export default defineComponent({
         {
           value: "pt",
           name: "Portuguese",
+        },
+        {
+          value: "nl",
+          display: "Dutch",
         },
       ],
     };

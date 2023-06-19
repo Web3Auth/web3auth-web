@@ -66,7 +66,10 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.wcProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.wcProvider) {
+      return this.wcProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -148,7 +151,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     if (!isChainIdSupported(this.currentChainNamespace, parseInt(chainConfig.chainId, 16), this.adapterOptions.loginSettings)) {
       throw WalletOperationsError.chainIDNotAllowed(`Unsupported chainID: ${chainConfig.chainId}`);
     }

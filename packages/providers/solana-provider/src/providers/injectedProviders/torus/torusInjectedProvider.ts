@@ -1,5 +1,4 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { ethErrors } from "eth-rpc-errors";
@@ -51,7 +50,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     if (!this.provider) throw ethErrors.provider.custom({ message: "Torus solana provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
 
-    const connectedChainId = await this.provider.request<unknown, string>({
+    const connectedChainId = await this.provider.request<string>({
       method: "solana_chainId",
     });
 

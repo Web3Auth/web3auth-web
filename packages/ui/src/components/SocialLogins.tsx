@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -93,10 +93,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   title={name}
                 >
                   {providerIcon}
-                  <p className="ml-2">
-                    {t("modal.social.continue")}
-                    <span className="w3a-button__adapter">{name}</span>
-                  </p>
+                  <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
                 </button>
               </li>
             );

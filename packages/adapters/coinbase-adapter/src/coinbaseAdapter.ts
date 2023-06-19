@@ -50,7 +50,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.coinbaseProvider) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.coinbaseProvider) {
       return this.coinbaseProvider as unknown as SafeEventEmitterProvider;
     }
     return null;
@@ -132,7 +132,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [

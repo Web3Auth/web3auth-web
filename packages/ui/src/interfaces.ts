@@ -1,5 +1,5 @@
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
@@ -37,6 +37,7 @@ export interface UIConfig {
    * es: spanish
    * fr: french
    * pt: portuguese
+   * nl: dutch
    *
    */
   defaultLanguage?: string;

@@ -12,7 +12,9 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
+import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
+import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -22,7 +24,7 @@ import {
   defaultSolanaDappModalConfig,
   defaultSolanaWalletModalConfig,
 } from "./config";
-import { getDefaultAdapterModule } from "./default";
+import { getDefaultAdapterModule, getPrivateKeyProvider } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 import { getUserLanguage } from "./utils";
 
@@ -154,6 +156,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.walletAdapters[adapterName].setAdapterSettings({ chainConfig });
         }
 
+        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
+          const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+          if (!openloginAdapter.privateKeyProvider) {
+            const currentPrivateKeyProvider = await getPrivateKeyProvider(openloginAdapter.chainConfigProxy as CustomChainConfig);
+            openloginAdapter.setAdapterSettings({ privateKeyProvider: currentPrivateKeyProvider });
+          }
+        }
+
         return adapterName;
       }
     });
@@ -202,6 +212,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
 
@@ -224,7 +235,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<SafeEventEmitterProvider | null> {
     // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
-    if (this.provider) return this.provider;
+    if (this.connectedAdapterName && this.status === ADAPTER_STATUS.CONNECTED && this.provider) return this.provider;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, () => {

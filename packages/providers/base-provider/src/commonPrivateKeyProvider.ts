@@ -1,12 +1,33 @@
-import { createEventEmitterProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCEngine, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig } from "@web3auth/base";
+import { createEventEmitterProxy } from "@toruslabs/base-controllers";
+import {
+  createAsyncMiddleware,
+  createScaffoldMiddleware,
+  JRPCEngine,
+  JRPCMiddleware,
+  JRPCRequest,
+  JRPCResponse,
+  providerFromEngine,
+} from "@toruslabs/openlogin-jrpc";
+import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 import { IBaseProvider } from "./IBaseProvider";
 
-export class CommonPrivateKeyProvider implements IBaseProvider<string> {
+export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
+  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+}
+
+export interface CommonPrivKeyProviderState extends BaseProviderState {
+  privateKey?: string;
+}
+
+export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, CommonPrivKeyProviderState, string> implements IBaseProvider<string> {
   // should be Assigned in setupProvider
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
+
+  constructor({ config, state }: { config: CommonPrivKeyProviderConfig; state?: CommonPrivKeyProviderState }) {
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
+  }
 
   get provider(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
@@ -16,8 +37,11 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: { privKey: string }): Promise<CommonPrivateKeyProvider> => {
-    const providerFactory = new CommonPrivateKeyProvider();
+  public static getProviderInstance = async (params: {
+    privKey: string;
+    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  }): Promise<CommonPrivateKeyProvider> => {
+    const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
   };
@@ -42,11 +66,15 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     return this._providerEngineProxy;
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
+  protected async lookupNetwork(): Promise<string> {
+    return Promise.resolve("");
+  }
+
+  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
+      (this._providerEngineProxy as any).setTarget(provider);
     } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
   }
 

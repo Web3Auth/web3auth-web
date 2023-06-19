@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { Button, Loader } from "@toruslabs/vue-components";
 import {
   ADAPTER_STATUS,

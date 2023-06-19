@@ -1,9 +1,9 @@
-import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
 
 import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { WalletInitializationError, WalletLoginError } from "../errors";
+import { WalletInitializationError, WalletLoginError, WalletOperationsError } from "../errors";
 import { SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTERS } from "../wallet";
 
@@ -65,6 +65,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   provider: SafeEventEmitterProvider | null;
   adapterData?: unknown;
+  connnected: boolean;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
@@ -109,6 +110,10 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
 
   get chainConfigProxy(): CustomChainConfig | null {
     return this.chainConfig ? { ...this.chainConfig } : null;
+  }
+
+  get connnected(): boolean {
+    return this.status === ADAPTER_STATUS.CONNECTED;
   }
 
   public abstract get provider(): SafeEventEmitterProvider | null;
@@ -175,8 +180,11 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
-  checkAddChainRequirements(init = false): void {
+  checkAddChainRequirements(chainConfig: CustomChainConfig, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (this.currentChainNamespace !== chainConfig.chainNamespace) {
+      throw WalletOperationsError.chainNamespaceNotAllowed("This adapter doesn't support this chainNamespace");
+    }
   }
 
   checkSwitchChainRequirements({ chainId }: { chainId: string }, init = false): void {

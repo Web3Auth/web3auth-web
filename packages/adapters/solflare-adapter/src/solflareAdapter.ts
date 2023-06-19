@@ -46,7 +46,10 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): SafeEventEmitterProvider | null {
-    return this.solflareProvider?.provider || null;
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.solflareProvider) {
+      return this.solflareProvider.provider;
+    }
+    return null;
   }
 
   set provider(_: SafeEventEmitterProvider | null) {
@@ -136,7 +139,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(init);
+    super.checkAddChainRequirements(chainConfig, init);
     this.solflareProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }

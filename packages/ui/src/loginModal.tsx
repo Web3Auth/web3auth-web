@@ -1,8 +1,8 @@
 import "../css/web3auth.css";
 import "./localeImport";
 
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -39,6 +39,7 @@ function createWrapper(parentZIndex: string): HTMLElement {
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
+  parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
   const wrapper = document.createElement("section");
@@ -157,6 +158,15 @@ class LoginModal extends SafeEventEmitter {
         });
     } else if (useLang === "pt") {
       import(`./i18n/portuguese.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "nl") {
+      import(`./i18n/dutch.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
           return i18n.changeLanguage(useLang);
@@ -307,7 +317,7 @@ class LoginModal extends SafeEventEmitter {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,
-          postLoadingMessage: "You are connected with your account",
+          postLoadingMessage: "modal.post-loading.connected",
         });
       } else {
         this.setState({
@@ -321,7 +331,7 @@ class LoginModal extends SafeEventEmitter {
         if (this.displayErrorsOnModal)
           this.setState({
             modalVisibility: true,
-            postLoadingMessage: error.message || "Something went wrong!",
+            postLoadingMessage: error.message || "modal.post-loading.something-wrong",
             status: MODAL_STATUS.ERRORED,
           });
         else
