@@ -16,7 +16,6 @@
   "jsdelivr": "dist/ui.umd.min.js",
   "types": "dist/dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/ui#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
@@ -94,7 +93,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+    "url": "git+https://github.com/jordigiam/web3auth-web"
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
