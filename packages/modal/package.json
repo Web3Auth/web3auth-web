@@ -58,7 +58,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+    "url": "git+https://github.com/jordigiam/web3auth-web"
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
@@ -71,5 +71,5 @@
     "node": ">=16.18.1",
     "npm": ">=8.x"
   },
-  "gitHead": "455403d774aa9712d2e56ebc0585867608c40e7a"
+  "gitHead": "a0e63fbd1ca2653fe4e7176e991a0fb3133fe950"
 }
