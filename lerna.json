@@ -1,7 +1,5 @@
 {
-  "packages": [
-    "packages/ui"
-  ],
-  "version": "10.0.3",
+  "packages": ["packages/ui"],
+  "version": "10.0.4",
   "npmClient": "npm"
 }
