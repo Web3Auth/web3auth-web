@@ -22,10 +22,10 @@
   },
   "devDependencies": {
     "@babel/register": "^7.21.0",
-    "@types/faker": "^5.5.9",
     "@toruslabs/eslint-config-typescript": "^2.0.0",
     "@toruslabs/torus-scripts": "^4.0.0",
     "@types/chai": "^4.3.5",
+    "@types/faker": "^5.5.9",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18",
@@ -83,5 +83,8 @@
   "engines": {
     "node": ">=16.18.1",
     "npm": ">=8.x"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21"
   }
 }
