@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/ui"],
+  "packages": ["packages/modal"],
   "version": "10.1.5",
   "npmClient": "npm"
 }
