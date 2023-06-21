@@ -1,5 +1,5 @@
 {
-  "name": "@auth/base",
+  "name": "@jordiamez/base",
   "version": "10.1.3",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -53,5 +53,6 @@
   "engines": {
     "node": ">=16.18.1",
     "npm": ">=8.x"
-  }
+  },
+  "gitHead": "0fa0a2cf03734884f6e9af81259764a8e134d806"
 }
