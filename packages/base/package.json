@@ -1,6 +1,6 @@
 {
   "name": "@auth/base",
-  "version": "10.1.2",
+  "version": "10.1.3",
   "license": "ISC",
   "main": "dist/base.cjs.js",
   "module": "dist/base.esm.js",
