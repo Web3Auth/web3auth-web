@@ -1,6 +1,6 @@
 {
   "name": "@jordiamez/base",
-  "version": "10.1.3",
+  "version": "10.1.4",
   "license": "ISC",
   "main": "dist/base.cjs.js",
   "module": "dist/base.esm.js",
