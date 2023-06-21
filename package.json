@@ -2,14 +2,7 @@
   "name": "crossmint",
   "private": true,
   "workspaces": [
-    "packages/base",
-    "packages/modal",
-    "packages/no-modal",
-    "packages/adapter-factory",
-    "packages/ui",
-    "packages/providers/*",
-    "packages/adapters/*",
-    "packages/plugins/*"
+    "packages/ui"
   ],
   "description": "Monorepo for web3 auth packages",
   "scripts": {
