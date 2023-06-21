@@ -1,5 +1,5 @@
 {
-  "name": "crossmint",
+  "name": "crossmintt",
   "private": true,
   "workspaces": [
     "packages/ui"
