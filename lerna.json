@@ -1,5 +1,5 @@
 {
   "packages": ["packages/modal"],
-  "version": "10.1.7",
+  "version": "10.1.8",
   "npmClient": "npm"
 }
