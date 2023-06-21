@@ -40,6 +40,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
 
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
+    if (typeof walletInitOptions.showTorusButton === "undefined") walletInitOptions.showTorusButton = true;
     this.walletInitOptions = walletInitOptions;
   }
 
@@ -122,7 +123,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
-      this.torusWalletInstance.showTorusButton();
+      if (this.walletInitOptions?.showTorusButton) this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
     } catch (error) {
@@ -171,7 +172,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.torusWalletInstance.hideTorusButton();
     });
     provider.on("connect", () => {
-      this.torusWalletInstance.showTorusButton();
+      if (this.walletInitOptions?.showTorusButton) this.torusWalletInstance.showTorusButton();
     });
   }
 
