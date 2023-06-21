@@ -1,5 +1,5 @@
 {
-  "name": "crossmintt",
+  "name": "web3auth",
   "private": true,
   "workspaces": [
     "packages/base",
