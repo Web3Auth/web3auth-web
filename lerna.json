@@ -1,5 +1,7 @@
 {
-  "packages": ["packages/provider/base-provider"],
+  "packages": [
+    "packages/modal"
+  ],
   "version": "10.1.9",
   "npmClient": "npm"
 }
