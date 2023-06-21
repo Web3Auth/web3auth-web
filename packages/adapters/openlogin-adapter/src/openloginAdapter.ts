@@ -237,6 +237,16 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   private _getFinalEd25519PrivKey() {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.ed25519PrivKey;
+    if (this.openloginInstance.sessionId) {
+      // if here, user is logged in.
+      const { loginConfig } = this.openloginInstance.options;
+      const { typeOfLogin } = this.openloginInstance.getUserInfo();
+      if (loginConfig && loginConfig[typeOfLogin]) {
+        if ((loginConfig[typeOfLogin] as any).walletVerifier && this.openloginInstance.state.walletKey) {
+          return this.privateKeyProvider?.getEd25519Key(this.openloginInstance.state.walletKey) as string;
+        }
+      }
+    }
     // coreKitKey is available only for custom verifiers by default
     if (this.openloginOptions?.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
