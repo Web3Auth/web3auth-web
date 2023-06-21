@@ -1,14 +1,7 @@
 {
   "packages": [
-    "packages/base",
-    "packages/modal",
-    "packages/no-modal",
-    "packages/adapter-factory",
-    "packages/ui",
-    "packages/providers/*",
-    "packages/adapters/*",
-    "packages/plugins/*"
+    "packages/base"
   ],
-  "version": "10.0.6",
+  "version": "10.1.0",
   "npmClient": "npm"
 }
