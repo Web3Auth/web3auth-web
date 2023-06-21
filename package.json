@@ -65,7 +65,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+    "url": "git+https://github.com/jordigiam/web3auth-web"
   },
   "keywords": [
     "web3",
