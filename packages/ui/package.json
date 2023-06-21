@@ -1,6 +1,6 @@
 {
   "name": "@jordiamez/ui",
-  "version": "10.0.6",
+  "version": "10.1.5",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -68,11 +68,11 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
+    "@jordiamez/base": "^10.1.4",
     "@toruslabs/http-helpers": "^4.0.0",
     "@toruslabs/openlogin": "^4.5.3",
     "@toruslabs/openlogin-jrpc": "^4.5.1",
     "@toruslabs/openlogin-utils": "^4.5.1",
-    "@jordiamez/base": "^10.1.4",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
     "copy-to-clipboard": "^3.3.3",
