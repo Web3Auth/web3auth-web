@@ -1,6 +1,6 @@
 {
   "name": "@auth/ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
