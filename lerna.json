@@ -1,5 +1,14 @@
 {
-  "packages": ["packages/ui"],
+  "packages": [
+    "packages/base",
+    "packages/modal",
+    "packages/no-modal",
+    "packages/adapter-factory",
+    "packages/ui",
+    "packages/providers/*",
+    "packages/adapters/*",
+    "packages/plugins/*"
+  ],
   "version": "10.0.5",
   "npmClient": "npm"
 }
