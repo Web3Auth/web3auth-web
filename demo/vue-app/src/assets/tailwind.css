@@ -1,0 +1,129 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --app-primary-900: #233876;
+    --app-primary-800: #1e429f;
+    --app-primary-700: #1a56db;
+    --app-primary-600: #1c64f2;
+    --app-primary-500: #3f83f8;
+    --app-primary-400: #76a9fa;
+    --app-primary-300: #a4cafe;
+    --app-primary-200: #c3ddfd;
+    --app-primary-100: #e1effe;
+    --app-primary-50: #ebf5ff;
+
+    --app-gray-900: #111928;
+    --app-gray-800: #1f2a37;
+    --app-gray-700: #374151;
+    --app-gray-600: #4b5563;
+    --app-gray-500: #6b7280;
+    --app-gray-400: #9ca3af;
+    --app-gray-300: #d1d5db;
+    --app-gray-200: #e5e7eb;
+    --app-gray-100: #f3f4f6;
+    --app-gray-50: #f9fafb;
+
+    --app-red-900: #771d1d;
+    --app-red-800: #9b1c1c;
+    --app-red-700: #c81e1e;
+    --app-red-600: #e02424;
+    --app-red-500: #f05252;
+    --app-red-400: #f98080;
+    --app-red-300: #f8b4b4;
+    --app-red-200: #fbd5d5;
+    --app-red-100: #fde8e8;
+    --app-red-50: #fdf2f2;
+
+    --app-green-900: #014737;
+    --app-green-800: #03543f;
+    --app-green-700: #046c4e;
+    --app-green-600: #057a55;
+    --app-green-500: #0e9f6e;
+    --app-green-400: #31c48d;
+    --app-green-300: #84e1bc;
+    --app-green-200: #bcf0da;
+    --app-green-100: #def7ec;
+    --app-green-50: #f3faf7;
+
+    --app-yellow-900: #633112;
+    --app-yellow-800: #723b13;
+    --app-yellow-700: #8e4b10;
+    --app-yellow-600: #9f580a;
+    --app-yellow-500: #c27803;
+    --app-yellow-400: #e3a008;
+    --app-yellow-300: #faca15;
+    --app-yellow-200: #fce96a;
+    --app-yellow-100: #fdf6b2;
+    --app-yellow-50: #fdfdea;
+
+    --app-teal-900: #014451;
+    --app-teal-800: #05505c;
+    --app-teal-700: #036672;
+    --app-teal-600: #047481;
+    --app-teal-500: #0694a2;
+    --app-teal-400: #16bdca;
+    --app-teal-300: #7edce2;
+    --app-teal-200: #afecef;
+    --app-teal-100: #d5f5f6;
+    --app-teal-50: #edfafa;
+
+    --app-indigo-900: #362f78;
+    --app-indigo-800: #42389d;
+    --app-indigo-700: #5145cd;
+    --app-indigo-600: #5850ec;
+    --app-indigo-500: #6875f5;
+    --app-indigo-400: #8da2fb;
+    --app-indigo-300: #b4c6fc;
+    --app-indigo-200: #cddbfe;
+    --app-indigo-100: #e5edff;
+    --app-indigo-50: #f0f5ff;
+
+    --app-purple-950: #454071;
+    --app-purple-900: #4a1d96;
+    --app-purple-800: #5521b5;
+    --app-purple-700: #6c2bd9;
+    --app-purple-600: #7e3af2;
+    --app-purple-500: #9061f9;
+    --app-purple-400: #ac94fa;
+    --app-purple-300: #cabffd;
+    --app-purple-200: #dcd7fe;
+    --app-purple-100: #edebfe;
+    --app-purple-50: #f6f5ff;
+
+    --app-pink-950: #573a56;
+    --app-pink-900: #751a3d;
+    --app-pink-800: #99154b;
+    --app-pink-700: #bf125d;
+    --app-pink-600: #d61f69;
+    --app-pink-500: #e74694;
+    --app-pink-400: #f17eb8;
+    --app-pink-300: #f8b4d9;
+    --app-pink-200: #fad1e8;
+    --app-pink-100: #fce8f3;
+    --app-pink-50: #fdf2f8;
+
+    --app-success: #30cca4;
+    --app-warning: #fbc94a;
+    --app-error: #fb4a61;
+    --app-info: #d4d4d4;
+    --app-white: #ffffff;
+  }
+  html body {
+    font-family: Inter, sans-serif;
+    height: 100%;
+  }
+  body {
+    background-color: #f9fafb;
+    min-height: 100vh;
+  }
+
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+}

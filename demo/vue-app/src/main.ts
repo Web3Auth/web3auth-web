@@ -1,9 +1,11 @@
-import Vue from "vue";
+import "@toruslabs/vue-components/dist/style.css";
+import "@/assets/tailwind.css";
+
+import { createApp } from "vue";
 
 import App from "./App.vue";
+import createIcons from "./plugins/iconsPlugin";
 
-Vue.config.productionTip = false;
+const app = createApp(App);
 
-new Vue({
-  render: (h) => h(App),
-}).$mount("#app");
+app.use(createIcons).mount("#app");

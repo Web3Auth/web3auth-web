@@ -1,41 +1,59 @@
 <template>
-  <div id="app">
-    <h2>Login with Web3Auth and {{ web3auth.options.chainConfig.chainNamespace }}</h2>
-    <Loader :isLoading="loading"></Loader>
-    <button v-if="!provider" @click="switchChain" style="cursor: pointer">
-      Switch To {{ web3auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
-    </button>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-
-      <button v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <SolRpc v-if="provider && web3auth.options.chainConfig.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
-      <EthRpc v-if="provider && web3auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
-      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
-    </section>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+  <div v-if="loading" class="flex flex-col items-center justify-center">
+    <Loader useSpinner :size="80" />
+  </div>
+  <div v-else class="flex flex-col items-center justify-center">
+    <h2 class="text-2xl font-bold text-app-gray-900">Login with Web3Auth</h2>
+    <h3 class="text-lg font-normal text-app-gray-500">Connect with {{ Web3Auth.options.chainConfig.chainNamespace }} web3Auth</h3>
+    <div v-if="!provider" class="flex gap-4 items-center w-full mt-4">
+      <Button variant="secondary" @click="switchChain" class="connect-btn mt-4" pill>
+        Switch To {{ Web3Auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
+      </Button>
+      <Button variant="secondary" @click="connect" class="connect-btn mt-4" pill block>Connect</Button>
+    </div>
+    <div v-else class="flex gap-4 items-center w-full mt-4">
+      <Button @click="logout" class="connect-btn">Logout</Button>
+      <Button @click="getUserInfo" class="connect-btn">Get User Info</Button>
+    </div>
+    <SolRpc v-if="provider && Web3Auth.options.chainConfig.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
+    <EthRpc v-if="provider && Web3Auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
+    <div id="console" style="white-space: pre-line" class="mt-10 console-container bg-app-gray-200 shadow-md rounded-lg p-4">
+      <p style="white-space: pre-line" class="text-xs font-normal break-words console-inner-container overflow-y-auto overflow-x-auto"></p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { Button, Loader } from "@toruslabs/vue-components";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import config from "@/config";
 
-import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
 import SolRpc from "../rpc/solanaRpc.vue";
 
-export default Vue.extend({
+let web3AuthInstance = null;
+
+const getWeb3Auth = (chainName: ChainNamespaceType) => {
+  if (!web3AuthInstance) {
+    web3AuthInstance = new Web3Auth({
+      chainConfig: { chainId: "0x3", chainNamespace: chainName },
+      clientId: config.clientId["mainnet"],
+      authMode: "DAPP",
+    });
+  }
+  return web3AuthInstance;
+};
+
+const logOutWeb3Auth = () => {
+  if (web3AuthInstance) {
+    web3AuthInstance.logout();
+  }
+};
+
+export default defineComponent({
   name: "BeginnerExampleMode",
   data() {
     return {
@@ -44,13 +62,14 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
+      Web3Auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
     };
   },
   components: {
     Loader,
     EthRpc,
     SolRpc,
+    Button,
   },
   async mounted() {
     try {
@@ -68,14 +87,10 @@ export default Vue.extend({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({
-          chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.SOLANA },
-          clientId: config.clientId["mainnet"],
-          authMode: "DAPP",
-        });
-        this.subscribeAuthEvents(this.web3auth);
-        await this.web3auth.initModal();
-        console.log("web3auth", this.web3auth);
+        const web3auth = getWeb3Auth(CHAIN_NAMESPACES.SOLANA);
+        this.subscribeAuthEvents(web3auth);
+        await web3auth.initModal();
+        console.log("web3auth", web3auth);
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
@@ -83,9 +98,9 @@ export default Vue.extend({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] });
-        this.subscribeAuthEvents(this.web3auth);
-        await (this.web3auth as Web3Auth).initModal();
+        const web3auth = getWeb3Auth(CHAIN_NAMESPACES.EIP155);
+        this.subscribeAuthEvents(web3auth);
+        await (web3auth as Web3Auth).initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);
@@ -94,12 +109,12 @@ export default Vue.extend({
     async switchChain() {
       try {
         this.loading = true;
-        if (this.web3auth.options.chainConfig.chainNamespace === "solana") {
+        if (this.Web3Auth.options.chainConfig.chainNamespace === "solana") {
           await this.initEthAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
-        } else if (this.web3auth.options.chainConfig.chainNamespace === "eip155") {
+          localStorage.setItem("chainNamespace", this.Web3Auth.options.chainConfig.chainNamespace);
+        } else if (this.Web3Auth.options.chainConfig.chainNamespace === "eip155") {
           await this.initSolanaAuth();
-          localStorage.setItem("chainNamespace", this.web3auth.options.chainConfig.chainNamespace);
+          localStorage.setItem("chainNamespace", this.Web3Auth.options.chainConfig.chainNamespace);
         }
       } finally {
         this.loading = false;
@@ -134,14 +149,22 @@ export default Vue.extend({
         console.error(error);
         this.console("error", error);
       }
+      try {
+        const web3authProvider = await web3AuthInstance.connect();
+        this.Web3Auth = web3AuthInstance;
+        this.provider = web3authProvider;
+      } catch (error) {
+        console.error(error);
+        this.console("error", error);
+      }
     },
 
     async logout() {
-      await this.web3auth.logout();
+      await logOutWeb3Auth();
       this.provider = undefined;
     },
     async getUserInfo() {
-      const userInfo = await this.web3auth.getUserInfo();
+      const userInfo = await web3AuthInstance.getUserInfo();
       this.console(userInfo);
     },
     console(...args: unknown[]): void {
@@ -153,3 +176,18 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+.console-container {
+  width: 500px;
+  height: 350px;
+}
+.console-inner-container {
+  width: 468px;
+  height: 328px;
+}
+</style>

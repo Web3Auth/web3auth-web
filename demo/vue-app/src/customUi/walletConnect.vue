@@ -1,42 +1,53 @@
 <template>
-  <div id="app">
-    <h2>Login With Web3Auth</h2>
-    <Loader :isLoading="loading"></Loader>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    ></section>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button class="rpcBtn" v-if="!provider" name="walletConnect" @click="connect" style="cursor: pointer">Login With Wallet Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
-
-      <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
-    </section>
+  <div v-if="loading" class="flex flex-col items-center justify-center">
+    <Loader useSpinner :size="80" />
+  </div>
+  <div v-else class="flex flex-col items-center justify-center">
+    <h2 class="text-2xl font-bold text-app-gray-900">Login With Web3Auth</h2>
+    <Button v-if="!provider" variant="secondary" name="walletConnect" @click="connect" class="connect-btn mt-4 w-[320px]" pill>
+      Login With Wallet Connect
+    </Button>
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button v-if="provider" variant="secondary" @click="logout" class="connext-btn mt-4" pill block>Logout</Button>
+    </div>
+    <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
     <span>{{ web3auth.status }}</span>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+    <div id="console" style="white-space: pre-line" class="mt-10 console-container bg-app-gray-200 shadow-md rounded-lg p-4">
+      <p style="white-space: pre-line" class="text-xs font-normal break-words console-inner-container overflow-y-auto overflow-x-auto"></p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { Button, Loader } from "@toruslabs/vue-components";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-export default Vue.extend({
+let web3AuthInstance = null;
+
+const getWeb3Auth = () => {
+  if (!web3AuthInstance) {
+    web3AuthInstance = new Web3AuthNoModal({
+      chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 },
+      clientId: config.clientId["mainnet"],
+    });
+  }
+  return web3AuthInstance;
+};
+
+const logOutWeb3Auth = () => {
+  if (web3AuthInstance) {
+    web3AuthInstance.logout();
+  }
+};
+
+export default defineComponent({
   name: "BeginnerExampleMode",
   data() {
     return {
@@ -51,6 +62,7 @@ export default Vue.extend({
   components: {
     Loader,
     EthRpc,
+    Button,
   },
   async mounted() {
     await this.initWeb3Auth();
@@ -58,14 +70,11 @@ export default Vue.extend({
   methods: {
     async initWeb3Auth() {
       try {
-        this.web3auth = new Web3AuthNoModal({
-          chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.EIP155 },
-          clientId: config.clientId["mainnet"],
-        });
-        this.subscribeAuthEvents(this.web3auth);
+        const web3auth = getWeb3Auth();
+        this.subscribeAuthEvents(web3auth);
         const adapter = new WalletConnectV1Adapter({ adapterSettings: { qrcodeModal: QRCodeModal } });
-        this.web3auth.configureAdapter(adapter);
-        await this.web3auth.init();
+        web3auth.configureAdapter(adapter);
+        await web3auth.init();
       } catch (error) {
         console.log("error", error);
         this.console("error", error);
@@ -95,7 +104,7 @@ export default Vue.extend({
     },
     async connect(e) {
       try {
-        await this.web3auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1);
+        this.provider = await getWeb3Auth().connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V1);
       } catch (error) {
         console.error(error);
         this.console("error", error);
@@ -103,11 +112,11 @@ export default Vue.extend({
     },
 
     async logout() {
-      await this.web3auth.logout();
+      await logOutWeb3Auth();
       this.provider = undefined;
     },
     async getUserInfo() {
-      const userInfo = await this.web3auth.getUserInfo();
+      const userInfo = await getWeb3Auth().getUserInfo();
       this.console(userInfo);
     },
     console(...args: unknown[]): void {
@@ -119,3 +128,18 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+.console-container {
+  width: 500px;
+  height: 350px;
+}
+.console-inner-container {
+  width: 468px;
+  height: 328px;
+}
+</style>

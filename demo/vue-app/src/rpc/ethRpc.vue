@@ -1,46 +1,43 @@
 <template>
-  <div>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <button class="rpcBtn" v-if="connectedAdapter === 'openlogin'" @click="onSignTx" style="cursor: pointer">Sign Transaction</button>
+  <div class="mt-4 w-full">
+    <div class="flex gap-4 items-center w-full">
+      <Button variant="secondary" pill block class="connect-btn" v-if="connectedAdapter === 'openlogin'" @click="onSignTx">Sign Transaction</Button>
+      <Button variant="secondary" pill block class="connect-btn" @click="onSendEth">Send Eth</Button>
+      <Button variant="secondary" pill block class="connect-btn" @click="onSignEthMessage">Sign eth message</Button>
+    </div>
 
-      <button class="rpcBtn" @click="onSendEth" style="cursor: pointer">Send Eth</button>
-      <button class="rpcBtn" @click="onSignEthMessage" style="cursor: pointer">Sign eth message</button>
-      <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
-      <button class="rpcBtn" @click="getConnectedChainId" style="cursor: pointer">Get chainId</button>
-      <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
-      <button class="rpcBtn" @click="addChain" style="cursor: pointer">Add Chain</button>
-      <button class="rpcBtn" @click="switchChain" style="cursor: pointer">Switch Chain</button>
-    </section>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-    >
-      <span
-        :style="{
-          fontSize: '20px',
-          fontWeight: 'bold',
-        }"
-      >
-        Connection Status: {{ networkState }}
-      </span>
-    </section>
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button variant="secondary" pill block class="connect-btn" @click="onGetAccounts">Get Account</Button>
+      <Button variant="secondary" pill block class="connect-btn" @click="getConnectedChainId">Get chainId</Button>
+      <Button variant="secondary" pill block class="connect-btn" @click="onGetBalance">Get Balance</Button>
+    </div>
+
+    <div class="flex gap-4 items-center w-full mt-4">
+      <Button variant="secondary" pill block class="connect-btn" @click="addChain">Add Chain</Button>
+      <Button variant="secondary" pill block class="connect-btn" @click="switchChain">Switch Chain</Button>
+    </div>
+
+    <p class="mt-4 text-base font-normal">
+      Connection Status:
+      <Badge variant="success" class="ml-2" pill>{{ networkState }}</Badge>
+    </p>
   </div>
 </template>
 
 <script lang="ts">
+import { Badge, Button } from "@toruslabs/vue-components";
 import { getEvmChainConfig } from "@web3auth/base";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../lib/eth";
 
-export default Vue.extend({
+export default defineComponent({
   name: "EthRpc",
   props: ["provider", "console", "connectedAdapter", "web3auth"],
+  components: {
+    Button,
+    Badge,
+  },
   data() {
     return {};
   },
@@ -89,3 +86,10 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped>
+.connect-btn {
+  border-color: #6f717a !important;
+  color: #6f717a !important;
+}
+</style>
