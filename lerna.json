@@ -1,5 +1,5 @@
 {
   "packages": ["packages/ui"],
-  "version": "10.1.11",
+  "version": "10.1.12",
   "npmClient": "npm"
 }
