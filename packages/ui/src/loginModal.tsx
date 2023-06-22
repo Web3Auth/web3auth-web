@@ -16,7 +16,7 @@ import {
   WalletConnectV1Data,
   WalletConnectV2Data,
   Web3AuthError,
-} from "@web3auth/base";
+} from "@jordiamez/base";
 import i18n from "i18next";
 import { createRoot } from "react-dom/client";
 

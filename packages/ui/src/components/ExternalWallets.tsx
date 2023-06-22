@@ -1,4 +1,4 @@
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@jordiamez/base";
 import bowser from "bowser";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

@@ -1,6 +1,6 @@
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@jordiamez/base";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export interface UIConfig {
   /**

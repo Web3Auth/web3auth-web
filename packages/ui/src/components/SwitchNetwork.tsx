@@ -1,4 +1,4 @@
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig } from "@jordiamez/base";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
