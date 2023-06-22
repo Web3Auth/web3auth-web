@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-col lg:flex-row gap-4 p-7 h-full">
-    <div class="form-container w-[462px] bg-app-white p-7 shadow-lg rounded-[20px] relative">
+    <div class="form-container w-full lg:w-[462px] bg-app-white p-7 shadow-lg rounded-[20px] relative">
       <img :src="require('@/assets/demo_logo.svg')" alt="Web3Auth Demo Logo" />
-
       <div class="form-container-inner overflow-y-auto flex flex-col gap-6 mt-9">
         <Select
           v-model="form.authMode"
