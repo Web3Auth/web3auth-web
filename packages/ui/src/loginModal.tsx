@@ -1,8 +1,6 @@
 import "../css/web3auth.css";
 import "./localeImport";
 
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -17,6 +15,8 @@ import {
   WalletConnectV2Data,
   Web3AuthError,
 } from "@jordiamez/base";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import i18n from "i18next";
 import { createRoot } from "react-dom/client";
 

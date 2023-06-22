@@ -1,6 +1,6 @@
+import { ADAPTER_NAMES, log } from "@jordiamez/base";
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_NAMES, log } from "@jordiamez/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
