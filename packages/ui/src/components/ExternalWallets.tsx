@@ -98,9 +98,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri, deviceType);
-    const walletConnectAdapterName = config[WALLET_ADAPTERS.WALLET_CONNECT_V1]?.showOnModal
-      ? WALLET_ADAPTERS.WALLET_CONNECT_V1
-      : WALLET_ADAPTERS.WALLET_CONNECT_V2;
+    const walletConnectAdapterName = WALLET_ADAPTERS.WALLET_CONNECT_V2;
     const wcAvailable = (config[walletConnectAdapterName]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       setIsLoaded(false);
@@ -156,7 +154,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     }
 
     const adapterBtns = Object.keys(config)
-      .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V1, WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && adapterVisibilityMap[adapter])
+      .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && adapterVisibilityMap[adapter])
       .map((adapter) => ({
         name: adapter,
         isLink: false,
@@ -181,11 +179,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {/* <!-- Other Wallet --> */}
         {Object.keys(config).map((adapter) => {
-          if (
-            walletConnectUri &&
-            deviceDetails.platform === bowser.PLATFORMS_MAP.desktop &&
-            [WALLET_ADAPTERS.WALLET_CONNECT_V1, WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter)
-          ) {
+          if (walletConnectUri && deviceDetails.platform === bowser.PLATFORMS_MAP.desktop && [WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter)) {
             return <WalletConnect key={adapter} walletConnectUri={walletConnectUri} />;
           }
           return null;

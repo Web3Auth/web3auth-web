@@ -121,14 +121,9 @@ export default function Modal(props: ModalProps) {
   const preHandleExternalWalletClick = useCallback(
     (params: ExternalWalletEventType) => {
       const { adapter } = params;
-      // if (DETAILED_ADAPTERS.includes(adapter))
       setModalState((prevState) => {
         return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
       });
-      // else if (adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1)
-      //   setModalState((prevState) => {
-      //     return { ...prevState, detailedLoaderAdapter: "" };
-      //   });
       handleExternalWalletClick(params);
     },
     [handleExternalWalletClick]
