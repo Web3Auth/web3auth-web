@@ -14,7 +14,7 @@
   "module": "dist/index.js",
   "unpkg": "dist/ui.umd.min.js",
   "jsdelivr": "dist/ui.umd.min.js",
-  "types": "dist/dist/types/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/ui#readme",
   "license": "ISC",
