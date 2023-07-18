@@ -55,7 +55,7 @@ export const verifySignedChallenge = async (
     },
     message: challenge,
     issuer,
-    audience: window.location.hostname,
+    audience: typeof window.location !== "undefined" ? window.location.hostname : "com://reactnative",
     timeout: sessionTime,
   };
 
