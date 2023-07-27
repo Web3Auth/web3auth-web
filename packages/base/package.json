@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^4.0.0",
-    "@toruslabs/openlogin": "^4.7.0",
+    "@toruslabs/openlogin": "^4.7.1",
     "@toruslabs/openlogin-jrpc": "^4.7.0",
     "@toruslabs/openlogin-utils": "^4.7.0",
     "jwt-decode": "^3.1.2",
