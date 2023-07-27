@@ -240,6 +240,14 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
         }
       }
 
+      this.connector.events.once("proposal_expire", (args) => {
+        log.info("proposal expired", args);
+        // Handle proposal expiration
+        this.createNewSession({ forceNewSession: true });
+      });
+
+      log.info("awaiting session approval from wallet");
+
       // Await session approval from the wallet.
       const session = await approval();
       this.activeSession = session;
@@ -277,7 +285,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   private subscribeEvents(): void {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
 
-    this.connector.on("session_update", ({ topic, params }) => {
+    this.connector.events.on("session_update", ({ topic, params }) => {
       if (!this.connector) return;
       const { namespaces } = params;
       const _session = this.connector.session.get(topic);
