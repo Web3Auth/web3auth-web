@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/metamask-adapter",
-  "version": "6.1.4",
+  "version": "6.1.6",
   "description": "metamask wallet adapter for web3auth",
   "keywords": [
     "web3Auth/metamask-adapter",
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
-    "@web3auth/base": "^6.1.4",
-    "@web3auth/base-evm-adapter": "^6.1.4"
+    "@web3auth/base": "^6.1.6",
+    "@web3auth/base-evm-adapter": "^6.1.6"
   },
   "lint-staged": {
     "!(*d).ts": [

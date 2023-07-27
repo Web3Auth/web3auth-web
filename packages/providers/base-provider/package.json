@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-provider",
-  "version": "6.1.4",
+  "version": "6.1.6",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseProvider.cjs.js",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@toruslabs/base-controllers": "^3.1.0",
     "@toruslabs/openlogin-jrpc": "^4.7.0",
-    "@web3auth/base": "^6.1.4",
+    "@web3auth/base": "^6.1.6",
     "eth-rpc-errors": "^4.0.3",
     "json-rpc-random-id": "^1.0.1"
   },
