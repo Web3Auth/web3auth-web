@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "6.1.6",
+  "version": "6.1.7",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/openlogin-adapter",
@@ -41,8 +41,8 @@
   "dependencies": {
     "@toruslabs/openlogin": "^4.7.2",
     "@toruslabs/openlogin-utils": "^4.7.0",
-    "@web3auth/base": "^6.1.6",
-    "@web3auth/base-provider": "^6.1.6",
+    "@web3auth/base": "^6.1.7",
+    "@web3auth/base-provider": "^6.1.7",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {

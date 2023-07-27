@@ -9,6 +9,6 @@
     "packages/adapters/*",
     "packages/plugins/*"
   ],
-  "version": "6.1.6",
+  "version": "6.1.7",
   "npmClient": "npm"
 }
