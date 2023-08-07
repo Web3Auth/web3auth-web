@@ -30,7 +30,7 @@
     "@babel/register": "^7.22.5",
     "@types/faker": "^5.5.9",
     "@toruslabs/eslint-config-typescript": "^2.0.0",
-    "@toruslabs/torus-scripts": "^4.0.0",
+    "@toruslabs/torus-scripts": "^5.0.1",
     "@types/chai": "^4.3.5",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/mocha": "^10.0.1",
