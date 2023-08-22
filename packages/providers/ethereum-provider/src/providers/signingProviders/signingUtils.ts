@@ -110,7 +110,7 @@ async function signTypedData(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise
     modifiedV = modifiedV + 27;
   }
 
-  return concatSig(toBuffer(v), r, s);
+  return concatSig(toBuffer(modifiedV), r, s);
 }
 
 export function getProviderHandlers({
