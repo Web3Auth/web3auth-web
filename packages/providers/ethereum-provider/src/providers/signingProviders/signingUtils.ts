@@ -103,7 +103,7 @@ async function signTypedData(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise
   }
   const messageHash =
     version === SignTypedDataVersion.V1 ? Buffer.from(stripHexPrefix(typedSignatureHash(data)), "hex") : TypedDataUtils.eip712Hash(data, version);
-  const {v, r, s} = await sign(Buffer.from(messageHash.buffer));
+  const { v, r, s } = await sign(Buffer.from(messageHash.buffer));
 
   let modifiedV = v;
   if (modifiedV <= 1) {
