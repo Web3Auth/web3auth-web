@@ -1,6 +1,6 @@
 {
   "name": "@web3auth-mpc/wallet-connect-v1-adapter",
-  "version": "2.1.22",
+  "version": "2.2.0",
   "description": "wallet connect v1 adapter for web3auth",
   "keywords": [
     "@web3auth-mpc/wallet-connect-v1-adapter",
@@ -39,7 +39,7 @@
     "@walletconnect/types": "~1.8.0",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-evm-adapter": "^2.1.9",
-    "@web3auth-mpc/ethereum-provider": "^2.1.22"
+    "@web3auth-mpc/ethereum-provider": "^2.2.0"
   },
   "lint-staged": {
     "!(*d).ts": [
