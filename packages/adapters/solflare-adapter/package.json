@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/solflare-adapter",
-  "version": "6.1.7",
+  "version": "6.1.8",
   "description": "solflare wallet adapter for web3auth",
   "keywords": [
     "web3Auth/solflare-adapter",
@@ -41,7 +41,7 @@
     "@web3auth/base": "^6.1.7",
     "@web3auth/base-provider": "^6.1.7",
     "@web3auth/base-solana-adapter": "^6.1.7",
-    "@web3auth/solana-provider": "^6.1.7",
+    "@web3auth/solana-provider": "^6.1.8",
     "bn.js": "^5.2.1"
   },
   "devDependencies": {
