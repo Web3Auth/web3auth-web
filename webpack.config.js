@@ -14,6 +14,7 @@ function generateWebpackConfig({ pkg, currentPath, alias, module = {}, ssrModule
       },
       fallback: {
         "bn.js": require.resolve("bn.js"),
+        zlib: false,
       },
     },
   };
