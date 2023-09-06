@@ -98,9 +98,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setIsLoading(true);
         const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
         const web3AuthInstance = new Web3Auth({
-          chainConfig: {
-            chainNamespace: CHAIN_NAMESPACES.OTHER,
-          },
+          chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
           clientId,
           uiConfig: {
@@ -113,9 +111,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         });
         const xrplProvider = new XrplPrivateKeyProvider({ config: { chainConfig: currentChainConfig } })
         const adapter = new OpenloginAdapter({
+          privateKeyProvider: xrplProvider,
           adapterSettings: {
             network: web3AuthNetwork,
-            provider: xrplProvider,
             clientId,
             loginConfig: {
               facebook: {
