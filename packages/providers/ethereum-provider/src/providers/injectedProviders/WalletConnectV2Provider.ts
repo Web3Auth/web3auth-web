@@ -122,7 +122,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     return undefined;
   }
 
-  private checkIfChainIdAllowed(chainId) {
+  private checkIfChainIdAllowed(chainId: string) {
     if (!this.connector || !this.connectedTopic()) return false;
     const sessionData = this.connector.session.get(this.connectedTopic());
     const allChains = getChainsFromNamespaces(sessionData.namespaces);
@@ -138,7 +138,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     return chainAllowed;
   }
 
-  private checkIfAccountAllowed(address) {
+  private checkIfAccountAllowed(address: string) {
     if (!this.connector || !this.connectedTopic()) return false;
     const sessionData = this.connector.session.get(this.connectedTopic());
     const allAccounts = getAccountsFromNamespaces(sessionData.namespaces);

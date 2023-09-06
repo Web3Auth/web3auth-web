@@ -59,7 +59,22 @@ export class TransactionFormatter {
     if (!this.isEIP1559Compatible && clonedTxParams.gasPrice) {
       if (clonedTxParams.maxFeePerGas) delete clonedTxParams.maxFeePerGas;
       if (clonedTxParams.maxPriorityFeePerGas) delete clonedTxParams.maxPriorityFeePerGas;
+      // if user provides gas Limit, we should use it instead
       // if gas is not provided explicitly, estimate it.
+      if (!clonedTxParams.gasLimit) {
+        if (!clonedTxParams.gas) {
+          const defaultGasLimit = await this.getDefaultGasLimit(clonedTxParams);
+          if (defaultGasLimit) {
+            clonedTxParams.gasLimit = defaultGasLimit;
+          }
+        } else {
+          clonedTxParams.gasLimit = clonedTxParams.gas;
+        }
+      }
+      return clonedTxParams;
+    }
+
+    if (!clonedTxParams.gasLimit) {
       if (!clonedTxParams.gas) {
         const defaultGasLimit = await this.getDefaultGasLimit(clonedTxParams);
         if (defaultGasLimit) {
@@ -68,16 +83,6 @@ export class TransactionFormatter {
       } else {
         clonedTxParams.gasLimit = clonedTxParams.gas;
       }
-      return clonedTxParams;
-    }
-
-    if (!clonedTxParams.gas) {
-      const defaultGasLimit = await this.getDefaultGasLimit(clonedTxParams);
-      if (defaultGasLimit) {
-        clonedTxParams.gasLimit = defaultGasLimit;
-      }
-    } else {
-      clonedTxParams.gasLimit = clonedTxParams.gas;
     }
 
     const {

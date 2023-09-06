@@ -41,6 +41,7 @@ export interface IBaseWalletProvider {
 // NOTE: solflare types fo sign message is broken.
 export type SolflareWallet = Solflare & {
   signMessage(data: Uint8Array, display?: "hex" | "utf8"): Promise<{ signature: Uint8Array; publicKey: BN }>;
+  signAndSendTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }>;
 };
 
 export interface ISlopeProvider extends SafeEventEmitter {

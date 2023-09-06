@@ -131,8 +131,12 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     const buttons: ExternalButton[] = [];
     // add wallet connect links
     if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile) {
-      const mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform);
+      let mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform);
       if (deviceDetails.os === bowser.OS_MAP.iOS) {
+        if ((window as any).ethereum?.isMetaMask) {
+          // if metamask, use the metamask adapter directly
+          mobileLinks = mobileLinks.filter((x) => x.name !== "MetaMask");
+        }
         buttons.push(
           ...mobileLinks.map((link) => ({
             name: link.name,
