@@ -13,7 +13,6 @@ import {
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
-  WalletConnectV1Data,
   WalletConnectV2Data,
   Web3AuthError,
 } from "@web3auth/base";
@@ -290,10 +289,7 @@ class LoginModal extends SafeEventEmitter {
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
-    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
-      const walletConnectData = adapterData.data as WalletConnectV1Data;
-      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
-    } else if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
       const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     }
@@ -304,7 +300,7 @@ class LoginModal extends SafeEventEmitter {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
-      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         // const provider = data?.loginProvider || "";
 
         this.setState({ status: MODAL_STATUS.CONNECTING });

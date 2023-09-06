@@ -17,7 +17,6 @@ import {
   UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
-  WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
@@ -168,17 +167,6 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       throw WalletInitializationError.incompatibleChainNameSpace(
         `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
       );
-
-    if (adapter.name === WALLET_ADAPTERS.WALLET_CONNECT_V2 && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V1]) {
-      throw WalletInitializationError.invalidParams(
-        "Either one of wallet connect v2 or wallet connect v1 can be used, wallet connect v1 is already added to adapter lists."
-      );
-    }
-    if (adapter.name === WALLET_ADAPTERS.WALLET_CONNECT_V1 && this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2]) {
-      throw WalletInitializationError.invalidParams(
-        "Either one of wallet connect v2 or wallet connect v1 can be used, wallet connect v2 is already added to adapter lists."
-      );
-    }
 
     if (
       adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
