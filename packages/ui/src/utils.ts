@@ -1,14 +1,9 @@
 import { get, post } from "@toruslabs/http-helpers";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { IAdapter, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES, PASSWORDLESS_BACKEND } from "./config";
+import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
 
-export const getAdapterSocialLogins = (
-  adapterName: string,
-  adapter: IAdapter<unknown>,
-  loginMethodsConfig: LoginMethodConfig = {}
-): LoginMethodConfig => {
+export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: LoginMethodConfig = {}): LoginMethodConfig => {
   const finalLoginMethodsConfig: LoginMethodConfig = {};
   if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
     OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
@@ -59,13 +54,11 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
   }
 }
 
-export const getPasswordlessBackendUrl = (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE) => {
-  return PASSWORDLESS_BACKEND[web3AuthNetwork] ?? PASSWORDLESS_BACKEND.mainnet;
-};
+export const passwordlessBackendUrl = "https://api-passwordless.web3auth.io";
 
-export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<{ country: string; dialCode: string } | null> => {
+export const getUserCountry = async (): Promise<{ country: string; dialCode: string } | null> => {
   try {
-    const result = await get<{ data: { country: string; dial_code: string } }>(`${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/user/location`);
+    const result = await get<{ data: { country: string; dial_code: string } }>(`${passwordlessBackendUrl}/api/v3/user/location`);
     if (result && result.data.country) return { country: result.data.country, dialCode: result.data.dial_code };
     return null;
   } catch (error) {
@@ -74,14 +67,11 @@ export const getUserCountry = async (web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): P
   }
 };
 
-export const validatePhoneNumber = async (phoneNumber: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<string | boolean> => {
+export const validatePhoneNumber = async (phoneNumber: string): Promise<string | boolean> => {
   try {
-    const result = await post<{ success: boolean; parsed_number: string }>(
-      `${getPasswordlessBackendUrl(web3AuthNetwork)}/api/v2/phone_number/validate`,
-      {
-        phone_number: phoneNumber,
-      }
-    );
+    const result = await post<{ success: boolean; parsed_number: string }>(`${passwordlessBackendUrl}/api/v3/phone_number/validate`, {
+      phone_number: phoneNumber,
+    });
     if (result && result.success) return result.parsed_number;
     return false;
   } catch (error: unknown) {

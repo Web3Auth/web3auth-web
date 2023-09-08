@@ -10,15 +10,14 @@ export class SolanaWallet implements ISolanaWallet {
   }
 
   public async requestAccounts(): Promise<string[]> {
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "requestAccounts",
-      params: {},
     });
     return accounts;
   }
 
   public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }> {
-    const { signature } = await this.provider.request<{ signature: string }>({
+    const { signature } = await this.provider.request<{ message: T }, { signature: string }>({
       method: "signAndSendTransaction",
       params: {
         message: transaction,
@@ -48,7 +47,7 @@ export class SolanaWallet implements ISolanaWallet {
   }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {
-    const response = await this.provider.request<Uint8Array>({
+    const response = await this.provider.request<{ message: Uint8Array }, Uint8Array>({
       method: "signMessage",
       params: {
         message: data,
@@ -58,7 +57,7 @@ export class SolanaWallet implements ISolanaWallet {
   }
 
   public async request<T>(args: RequestArguments): Promise<T> {
-    const result = await this.provider.request<T>(args);
+    const result = await this.provider.request<unknown, T>(args);
     return result as T;
   }
 }

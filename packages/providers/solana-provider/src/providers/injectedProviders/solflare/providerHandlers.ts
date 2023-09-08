@@ -16,14 +16,14 @@ export const getSolflareHandlers = (injectedProvider: SolflareWallet, getProvide
     if (!provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
 
     const transaction = await injectedProvider.signTransaction(req.params.message);
-    const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
+    const chainConfig = (await provider.request<never, CustomChainConfig>({ method: "solana_provider_config" })) as CustomChainConfig;
     const conn = new Connection(chainConfig.rpcTarget);
     const res = await conn.sendRawTransaction(transaction.serialize());
     return { signature: res };
   };
 
-  solflareProviderHandlers.signMessage = async (req: JRPCRequest<{ message: Uint8Array; display?: "utf8" | "hex" }>): Promise<Uint8Array> => {
-    const sigData = await injectedProvider.signMessage(req.params.message, req.params.display);
+  solflareProviderHandlers.signMessage = async (req: JRPCRequest<{ message: Uint8Array; display?: string }>): Promise<Uint8Array> => {
+    const sigData = await injectedProvider.signMessage(req.params.message, req.params.display as "utf8" | "hex");
     return sigData;
   };
   return solflareProviderHandlers;

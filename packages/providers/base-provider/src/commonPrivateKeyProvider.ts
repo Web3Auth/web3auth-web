@@ -72,6 +72,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
 
   protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
@@ -87,13 +88,13 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     return this.createPrivKeyMiddleware(middleware);
   }
 
-  private createPrivKeyMiddleware({ getPrivatekey }): JRPCMiddleware<unknown, unknown> {
+  private createPrivKeyMiddleware({ getPrivatekey }: { getPrivatekey: () => Promise<string> }): JRPCMiddleware<unknown, unknown> {
     async function getPrivatekeyHandler(_: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
       res.result = await getPrivatekey();
     }
 
     return createScaffoldMiddleware({
-      private_key: createAsyncMiddleware(getPrivatekeyHandler),
+      private_key: createAsyncMiddleware(getPrivatekeyHandler) as JRPCMiddleware<unknown, unknown>,
     });
   }
 }

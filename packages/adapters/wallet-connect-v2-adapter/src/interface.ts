@@ -2,7 +2,7 @@ import type { EngineTypes, SignClientTypes } from "@walletconnect/types";
 import { BaseAdapterSettings } from "@web3auth/base";
 
 export interface IQRCodeModal {
-  open(uri: string, cb: any, opts?: any): void;
+  open(uri: string, cb: unknown, opts?: unknown): void;
   close(): void;
 }
 

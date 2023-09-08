@@ -5,7 +5,7 @@ import { OpenloginAdapterOptions } from "./interface";
 export const getOpenloginDefaultOptions = (): OpenloginAdapterOptions => {
   return {
     adapterSettings: {
-      network: OPENLOGIN_NETWORK.MAINNET,
+      network: OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
       clientId: "",
       uxMode: UX_MODE.POPUP,
     },

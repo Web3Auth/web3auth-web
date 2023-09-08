@@ -59,7 +59,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "engines": {
-    "node": ">=16.18.1",
-    "npm": ">=8.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

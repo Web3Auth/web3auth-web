@@ -3,11 +3,6 @@
   "include": ["src", "test", "css", "assets"],
   "compilerOptions": {
     "resolveJsonModule": true,
-    "jsx": "react-jsx",
-    "module": "esnext",
-    "target": "es6",
-    "declarationDir": "./types",
-    // "rootDir": ".",
-    // "strict": true
+    "jsx": "react-jsx"
   }
 }

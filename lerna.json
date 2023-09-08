@@ -1,14 +1,4 @@
 {
-  "packages": [
-    "packages/base",
-    "packages/modal",
-    "packages/no-modal",
-    "packages/adapter-factory",
-    "packages/ui",
-    "packages/providers/*",
-    "packages/adapters/*",
-    "packages/plugins/*"
-  ],
   "version": "6.1.8",
   "npmClient": "npm"
 }

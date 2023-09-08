@@ -39,7 +39,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
     if (!this.state.privateKey)
       throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
-    return this._providerEngineProxy.request<string[]>({ method: "eth_accounts" });
+    return this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
   }
 
   public getEd25519Key(privateKey: string): string {
@@ -67,11 +67,11 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
     if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-    const existingKey = await this._providerEngineProxy.request<string>({ method: "solanaPrivateKey" });
+    const existingKey = await this._providerEngineProxy.request<never, string>({ method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
       this._providerEngineProxy.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<string[]>({ method: "requestAccounts" }),
+        accounts: await this._providerEngineProxy.request<never, string[]>({ method: "requestAccounts" }),
       });
     }
   }
@@ -83,13 +83,13 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerEngineProxy.request<string>({ method: "solanaPrivateKey" });
+    const privKey = await this._providerEngineProxy.request<never, string>({ method: "solanaPrivateKey" });
     await this.setupProvider(privKey);
   }
 
   protected async lookupNetwork(): Promise<string> {
     if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
-    const health = await this._providerEngineProxy.request<string>({
+    const health = await this._providerEngineProxy.request<[], string>({
       method: "getHealth",
       params: [],
     });

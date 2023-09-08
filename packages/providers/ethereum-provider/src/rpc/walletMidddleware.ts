@@ -74,9 +74,11 @@ export function createWalletMiddleware({
       throw ethErrors.rpc.methodNotSupported();
     }
 
-    const txParams: TransactionParams = (req.params as TransactionParams[])[0] || {
-      from: "",
-    };
+    const txParams: TransactionParams =
+      (req.params as TransactionParams[])[0] ||
+      ({
+        from: "",
+      } as TransactionParams);
     txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
     res.result = await processTransaction(txParams, req);
   }
@@ -86,9 +88,11 @@ export function createWalletMiddleware({
       throw ethErrors.rpc.methodNotSupported();
     }
 
-    const txParams: TransactionParams = (req.params as TransactionParams[])[0] || {
-      from: "",
-    };
+    const txParams: TransactionParams =
+      (req.params as TransactionParams[])[0] ||
+      ({
+        from: "",
+      } as TransactionParams);
     txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
     res.result = await processSignTransaction(txParams, req);
   }
@@ -190,7 +194,7 @@ export function createWalletMiddleware({
       warning += `[message, address]. This was previously handled incorrectly, `;
       warning += `and has been corrected automatically. `;
       warning += `Please switch this param order for smooth behavior in the future.`;
-      (res as any).warning = warning;
+      (res as { warning: string }).warning = warning;
 
       address = firstParam;
       message = secondParam;

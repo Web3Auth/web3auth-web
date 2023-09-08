@@ -30,9 +30,9 @@ export type FallbackGasData = {
   gasPrice: string;
 };
 
-export type TxType = typeof TRANSACTION_TYPES[keyof typeof TRANSACTION_TYPES];
+export type TxType = (typeof TRANSACTION_TYPES)[keyof typeof TRANSACTION_TYPES];
 
-export type GasType = typeof GAS_ESTIMATE_TYPES[keyof typeof GAS_ESTIMATE_TYPES];
+export type GasType = (typeof GAS_ESTIMATE_TYPES)[keyof typeof GAS_ESTIMATE_TYPES];
 
 export type GasData = {
   gasEstimateType: string;

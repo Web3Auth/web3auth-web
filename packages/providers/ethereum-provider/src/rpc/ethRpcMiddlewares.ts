@@ -41,7 +41,7 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processPersonalMessage,
       processEncryptionPublicKey,
       processDecryptMessage,
-    }),
+    }) as JRPCMiddleware<unknown, unknown>,
   ]);
   return ethMiddleware;
 }
@@ -63,8 +63,8 @@ export function createChainSwitchMiddleware({ addChain, switchChain }: IChainSwi
   }
 
   return createScaffoldMiddleware({
-    wallet_addEthereumChain: createAsyncMiddleware(addNewChain),
-    wallet_switchEthereumChain: createAsyncMiddleware(updateChain),
+    wallet_addEthereumChain: createAsyncMiddleware(addNewChain) as JRPCMiddleware<unknown, unknown>,
+    wallet_switchEthereumChain: createAsyncMiddleware(updateChain) as JRPCMiddleware<unknown, unknown>,
   });
 }
 
@@ -77,7 +77,7 @@ export function createAccountMiddleware({ updatePrivatekey }: IAccountHandlers):
   }
 
   return createScaffoldMiddleware({
-    wallet_updateAccount: createAsyncMiddleware(updateAccount),
+    wallet_updateAccount: createAsyncMiddleware(updateAccount) as JRPCMiddleware<unknown, unknown>,
   });
 }
 

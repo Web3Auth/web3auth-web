@@ -59,7 +59,7 @@ export const getSlopeHandlers = (injectedProvider: ISlopeProvider, getProviderEn
       const publicKey = new PublicKey(data.publicKey);
       const signature = bs58.decode(data.signature);
       txMessage.addSignature(publicKey, Buffer.from(signature));
-      const chainConfig = (await provider.request<CustomChainConfig>({ method: "solana_provider_config", params: [] })) as CustomChainConfig;
+      const chainConfig = (await provider.request<never, CustomChainConfig>({ method: "solana_provider_config" })) as CustomChainConfig;
       const conn = new Connection(chainConfig.rpcTarget);
       const res = await conn.sendRawTransaction(txMessage.serialize());
       return { signature: res };

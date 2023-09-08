@@ -108,7 +108,7 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
 
     try {
       // it should throw if provider doesn't support `solanaSecretKey` function
-      privateKey = (await this.provider.request<string>({ method: "solanaSecretKey" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "solanaSecretKey" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, SolanaWalletPluginError.unsupportedAdapter());
       if ((error as EthereumRpcError<unknown>)?.code === -32004) throw SolanaWalletPluginError.unsupportedAdapter();
@@ -188,10 +188,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "requestAccounts" }),
-      this.provider.request<string>({ method: "solana_chainId" }),
-      this.provider.request<string>({ method: "solanaSecretKey" }),
-      this.provider.request<CustomChainConfig>({ method: "solana_provider_config" }),
+      this.provider.request<never, string[]>({ method: "requestAccounts" }),
+      this.provider.request<never, string>({ method: "solana_chainId" }),
+      this.provider.request<never, string>({ method: "solanaSecretKey" }),
+      this.provider.request<never, CustomChainConfig>({ method: "solana_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),

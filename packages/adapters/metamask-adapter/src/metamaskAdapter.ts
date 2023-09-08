@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import detectEthereumProvider from "@metamask/detect-provider";
 import {
   ADAPTER_CATEGORY,

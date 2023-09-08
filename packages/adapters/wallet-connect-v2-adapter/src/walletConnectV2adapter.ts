@@ -1,4 +1,4 @@
-import SignClient from "@walletconnect/sign-client";
+import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
 import {
@@ -50,7 +50,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS,
   };
 
-  public connector: SignClient | null = null;
+  public connector: Client | null = null;
 
   public activeSession: SessionTypes.Struct | null = null;
 
@@ -97,7 +97,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     const { adapterSettings } = this.adapterOptions;
 
-    this.connector = await SignClient.init(adapterSettings?.walletConnectInitOptions);
+    this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);

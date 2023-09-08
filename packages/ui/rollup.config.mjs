@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import json from "@rollup/plugin-json";
 import url from "@rollup/plugin-url";
 import svgr from "@svgr/rollup";
@@ -9,7 +10,7 @@ const config = {
   plugins: [
     postcss({
       config: {
-        path: require.resolve("./postcss.config.js"),
+        path: path.resolve("./postcss.config.js"),
       },
       extensions: [".css"],
       minimize: true,

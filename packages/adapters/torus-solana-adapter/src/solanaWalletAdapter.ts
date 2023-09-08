@@ -110,8 +110,12 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       try {
         const torusInpageProvider = this.torusInstance.provider as unknown as ITorusWalletProvider;
         torusInpageProvider.sendTransaction = this.torusInstance.sendTransaction.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signAllTransactions = this.torusInstance.signAllTransactions.bind(this.torusInstance);
         torusInpageProvider.signMessage = this.torusInstance.signMessage.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signTransaction = this.torusInstance.signTransaction.bind(this.torusInstance);
         await this.solanaProvider.setupProvider(torusInpageProvider);
       } catch (error: unknown) {

@@ -44,10 +44,7 @@ export function createGetAccountsMiddleware({ getAccounts }: { getAccounts: IPro
   });
 }
 
-export function createGenericJRPCMiddleware<T, U>(
-  targetMethod: string,
-  handler: (req: JRPCRequest<T>) => Promise<U>
-): JRPCMiddleware<unknown, unknown> {
+export function createGenericJRPCMiddleware<T, U>(targetMethod: string, handler: (req: JRPCRequest<T>) => Promise<U>): JRPCMiddleware<T, unknown> {
   return createAsyncMiddleware<T, unknown>(async (request, response, next) => {
     const { method } = request;
     if (method !== targetMethod) return next();
@@ -69,11 +66,17 @@ export function createXRPLMiddleware(providerHandlers: IProviderHandlers): JRPCM
     createGenericJRPCMiddleware<{ transaction: Transaction; multisign: string | boolean }, { tx_blob: string; hash: string }>(
       RPC_METHODS.SIGN_TRANSACTION,
       signTransaction
-    ),
-    createGenericJRPCMiddleware<{ transaction: Transaction }, SubmitResponse>(RPC_METHODS.SUBMIT_TRANSACTION, submitTransaction),
-    createGenericJRPCMiddleware<{ message: string }, { signature: string }>(RPC_METHODS.SIGN_MESSAGE, signMessage),
-    createGenericJRPCMiddleware<void, KeyPair>(RPC_METHODS.GET_KEY_PAIR, getKeyPair),
-    createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_PUBLIC_KEY, getPublicKey),
+    ) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<{ transaction: Transaction }, SubmitResponse>(RPC_METHODS.SUBMIT_TRANSACTION, submitTransaction) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
+    createGenericJRPCMiddleware<{ message: string }, { signature: string }>(RPC_METHODS.SIGN_MESSAGE, signMessage) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
+    createGenericJRPCMiddleware<void, KeyPair>(RPC_METHODS.GET_KEY_PAIR, getKeyPair) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_PUBLIC_KEY, getPublicKey) as JRPCMiddleware<unknown, unknown>,
   ]);
 }
 
@@ -85,7 +88,7 @@ export interface IChainSwitchHandlers {
 }
 export function createChainSwitchMiddleware({ addChainConfig, switchChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   return mergeMiddleware([
-    createGenericJRPCMiddleware<AddXRPLChainParameter, void>(RPC_METHODS.ADD_CHAIN, addChainConfig),
-    createGenericJRPCMiddleware<{ chainId: string }, void>(RPC_METHODS.SWITCH_CHAIN, switchChain),
+    createGenericJRPCMiddleware<AddXRPLChainParameter, void>(RPC_METHODS.ADD_CHAIN, addChainConfig) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<{ chainId: string }, void>(RPC_METHODS.SWITCH_CHAIN, switchChain) as JRPCMiddleware<unknown, unknown>,
   ]);
 }

@@ -95,7 +95,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.openloginInstance = new OpenLogin({
       ...this.openloginOptions,
       clientId: this.clientId,
-      network: this.openloginOptions.network || this.web3AuthNetwork || OPENLOGIN_NETWORK.MAINNET,
+      network: this.openloginOptions.network || this.web3AuthNetwork || OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
     });
     log.debug("initializing openlogin adapter init");
 

@@ -1,7 +1,6 @@
 /* eslint-disable promise/always-return */
-/* eslint-disable import/no-extraneous-dependencies */
+
 import fs from "fs";
-import fetch from "node-fetch";
 import path from "path";
 
 const args = process.argv.slice(2);

@@ -105,7 +105,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     let privateKey: string | undefined;
     try {
       // it should throw if provider doesn't support `eth_private_key` function
-      privateKey = (await this.provider.request<string>({ method: "eth_private_key" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "eth_private_key" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, TorusWalletPluginError.unsupportedAdapter());
       if ((error as EthereumRpcError<unknown>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
@@ -201,10 +201,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw TorusWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "eth_accounts" }),
-      this.provider.request<string>({ method: "eth_chainId" }),
-      this.provider.request<string>({ method: "eth_private_key" }),
-      this.provider.request<CustomChainConfig>({ method: "eth_provider_config" }),
+      this.provider.request<never, string[]>({ method: "eth_accounts" }),
+      this.provider.request<never, string>({ method: "eth_chainId" }),
+      this.provider.request<never, string>({ method: "eth_private_key" }),
+      this.provider.request<never, CustomChainConfig>({ method: "eth_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),

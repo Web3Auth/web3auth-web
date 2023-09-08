@@ -41,6 +41,7 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
 
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);

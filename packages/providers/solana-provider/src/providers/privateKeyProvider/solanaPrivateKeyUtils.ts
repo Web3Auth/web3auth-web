@@ -63,7 +63,7 @@ export async function getProviderHandlers({
       } else {
         transaction.partialSign(keyPair);
       }
-      const sig = await _providerEngineProxy.request<string>({
+      const sig = await _providerEngineProxy.request<[string, { encoding: string; preflightCommitment: string }], string>({
         method: "sendTransaction",
         params: [Buffer.from(transaction.serialize()).toString("base64"), { encoding: "base64", preflightCommitment: "confirmed" }],
       });

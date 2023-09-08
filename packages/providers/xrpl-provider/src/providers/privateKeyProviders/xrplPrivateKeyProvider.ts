@@ -72,7 +72,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const { privateKey } = await this._providerEngineProxy.request<KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
+    const { privateKey } = await this._providerEngineProxy.request<never, KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
     await this.setupProvider(privateKey);
   }
 
@@ -81,7 +81,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const { chainId } = this.config.chainConfig;
     if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
 
-    const pingResponse = await this._providerEngineProxy.request<PingResponse>({
+    const pingResponse = await this._providerEngineProxy.request<[], PingResponse>({
       method: "ping",
       params: [],
     });

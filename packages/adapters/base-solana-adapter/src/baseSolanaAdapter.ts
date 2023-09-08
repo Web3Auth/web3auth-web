@@ -26,7 +26,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
     const { chainNamespace, chainId } = this.chainConfig;
 
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "getAccounts",
     });
     if (accounts && accounts.length > 0) {
@@ -50,7 +50,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
       const challenge = await signChallenge(payload, chainNamespace);
       const encodedMessage = new TextEncoder().encode(challenge);
-      const signedMessage = await this.provider.request<Uint8Array>({
+      const signedMessage = await this.provider.request<{ message: Uint8Array; display: string }, Uint8Array>({
         method: "signMessage",
         params: {
           message: encodedMessage,
@@ -76,7 +76,7 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "getAccounts",
     });
     if (accounts && accounts.length > 0) {
