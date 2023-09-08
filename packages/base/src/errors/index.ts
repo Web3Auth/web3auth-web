@@ -217,3 +217,37 @@ export class WalletOperationsError extends Web3AuthError {
     return WalletOperationsError.fromCode(5203, extraMessage);
   }
 }
+
+export class WalletProviderError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    5301: "Expected a single, non-array, object argument.",
+    5302: "'args.method' must be a non-empty string.",
+    5303: "'args.params' must be an object or array if provided.",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletProviderError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletProviderError.messages[code]}, ${extraMessage}`);
+  }
+
+  // Custom methods
+  public static invalidRequestArgs(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5301, extraMessage);
+  }
+
+  public static invalidRequestMethod(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5302, extraMessage);
+  }
+
+  public static invalidRequestParams(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5303, extraMessage);
+  }
+}

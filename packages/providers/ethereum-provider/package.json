@@ -33,7 +33,7 @@
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
-    "eth-rpc-errors": "^4.0.3",
+    "@metamask/rpc-errors": "^6.0.0",
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {

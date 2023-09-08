@@ -8,10 +8,9 @@ import {
   JRPCResponse,
   providerFromEngine,
 } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
-import { IBaseProvider } from "./IBaseProvider";
 
 export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: Omit<CustomChainConfig, "chainNamespace">;

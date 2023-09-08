@@ -11,7 +11,7 @@
       <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
+      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :uiConsole="uiConsole"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -27,7 +27,7 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConf
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
 import EthRpc from "@/rpc/ethRpc.vue";
@@ -43,7 +43,7 @@ const polygonMumbaiConfig: CustomChainConfig = {
   tickerName: "matic",
 };
 
-export default Vue.extend({
+export default defineComponent({
   name: "PolygonChain",
   props: {
     plugins: {
@@ -143,29 +143,29 @@ export default Vue.extend({
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       } finally {
         this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
-        this.console("connected to wallet", data);
+        this.uiConsole("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
-        this.console("connecting");
+        this.uiConsole("connecting");
         this.loginButtonStatus = "Connecting...";
       });
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
-        this.console("disconnected");
+        this.uiConsole("disconnected");
         this.loginButtonStatus = "";
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
-        this.console("errored", error);
+        this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
     },
@@ -175,7 +175,7 @@ export default Vue.extend({
         this.provider = provider;
       } catch (error) {
         console.error(error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       }
     },
 
@@ -185,12 +185,12 @@ export default Vue.extend({
     },
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
-      this.console(userInfo);
+      this.uiConsole(userInfo);
     },
-    console(...args: unknown[]): void {
+    uiConsole(...args: unknown[]): void {
       const el = document.querySelector("#console>p");
       if (el) {
-        el.innerHTML = JSON.stringify(args || {}, null, 2);
+        el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
       }
     },
   },

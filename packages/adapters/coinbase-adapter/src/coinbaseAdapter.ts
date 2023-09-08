@@ -13,7 +13,7 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  SafeEventEmitterProvider,
+  IProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletLoginError,
@@ -49,14 +49,14 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.setAdapterSettings(adapterOptions);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.coinbaseProvider) {
-      return this.coinbaseProvider as unknown as SafeEventEmitterProvider;
+      return this.coinbaseProvider as unknown as IProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -83,7 +83,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Adapter is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;

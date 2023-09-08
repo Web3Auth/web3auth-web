@@ -1,7 +1,7 @@
+import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { ethErrors } from "eth-rpc-errors";
 
 import { ITorusWalletProvider } from "../../../interface";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
@@ -47,7 +47,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Torus solana provider is not initialized", code: 4902 });
+    if (!this.provider) throw providerErrors.custom({ message: "Torus solana provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
 
     const connectedChainId = await this.provider.request<never, string>({
@@ -59,8 +59,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.provider.emit("connect", { chainId: this.state.chainId });
-    this.provider.emit("chainChanged", this.state.chainId);
+    this.emit("connect", { chainId: this.state.chainId });
+    this.emit("chainChanged", this.state.chainId);
     return this.state.chainId;
   }
 
@@ -78,7 +78,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   private async handleInjectedProviderUpdate(injectedProvider: ITorusWalletProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
-      this.provider.emit("accountsChanged", accounts);
+      this.emit("accountsChanged", accounts);
     });
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;

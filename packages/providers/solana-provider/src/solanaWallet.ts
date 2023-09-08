@@ -56,8 +56,8 @@ export class SolanaWallet implements ISolanaWallet {
     return response as Uint8Array;
   }
 
-  public async request<T>(args: RequestArguments): Promise<T> {
-    const result = await this.provider.request<unknown, T>(args);
-    return result as T;
+  public async request<T, U>(args: RequestArguments<T>): Promise<U> {
+    const result = await this.provider.request<T, U>(args);
+    return result as U;
   }
 }

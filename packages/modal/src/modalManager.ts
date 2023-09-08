@@ -6,9 +6,9 @@ import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
+  IProvider,
   log,
   LoginMethodConfig,
-  SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -225,7 +225,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  public async connect(): Promise<SafeEventEmitterProvider | null> {
+  public async connect(): Promise<IProvider | null> {
     // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
     if (this.connectedAdapterName && this.status === ADAPTER_STATUS.CONNECTED && this.provider) return this.provider;

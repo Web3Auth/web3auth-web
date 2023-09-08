@@ -11,12 +11,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 // import DefaultModal from "./default/defaultModal.vue";
 import Home from "./home.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "app",
   data() {
     return {

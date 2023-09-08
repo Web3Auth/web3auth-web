@@ -14,8 +14,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -24,7 +24,7 @@ import {
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
-interface EthereumProvider extends SafeEventEmitterProvider {
+interface EthereumProvider extends IProvider {
   isMetaMask?: boolean;
   isConnected: () => boolean;
   chainId: string;
@@ -44,14 +44,14 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
 
   private metamaskProvider: EthereumProvider | null = null;
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.metamaskProvider) {
-      return this.metamaskProvider as SafeEventEmitterProvider;
+      return this.metamaskProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -73,7 +73,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
     const { ethereum } = window as any;

@@ -1,6 +1,5 @@
 import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-utils";
-import { BaseAdapterSettings } from "@web3auth/base";
-import type { IBaseProvider } from "@web3auth/base-provider";
+import { BaseAdapterSettings, IBaseProvider } from "@web3auth/base";
 
 export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 

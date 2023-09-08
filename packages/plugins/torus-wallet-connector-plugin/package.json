@@ -32,7 +32,7 @@
     "src"
   ],
   "devDependencies": {
-    "eth-rpc-errors": "^4.0.3"
+    "@metamask/rpc-errors": "^6.0.0"
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^2.2.9",

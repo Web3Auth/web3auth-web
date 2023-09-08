@@ -1,6 +1,6 @@
+import { rpcErrors } from "@metamask/rpc-errors";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import bs58 from "bs58";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
@@ -12,10 +12,10 @@ export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): 
     },
     getAccounts: async () => (injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : []),
     getPrivateKey: async () => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     getSecretKey: async () => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
       const transaction = await injectedProvider.signTransaction(req.params.message);
@@ -27,7 +27,7 @@ export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): 
     },
     signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const transaction = await injectedProvider.signAllTransactions(req.params.message);
       return transaction;

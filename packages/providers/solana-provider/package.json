@@ -27,7 +27,7 @@
     "@web3auth/base-provider": "^6.1.7",
     "bn.js": "^5.2.1",
     "bs58": "^5.0.0",
-    "eth-rpc-errors": "^4.0.3",
+    "@metamask/rpc-errors": "^6.0.0",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {

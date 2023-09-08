@@ -1,8 +1,8 @@
 import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
+import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 
@@ -17,7 +17,7 @@ async function getLastActiveSession(signClient: ISignClient): Promise<SessionTyp
 export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: number, method: string, params: U): Promise<T> {
   const session = await getLastActiveSession(signClient);
   if (!session) {
-    throw ethErrors.provider.disconnected();
+    throw providerErrors.disconnected();
   }
   return signClient.request<T>({
     topic: session.topic,
@@ -32,7 +32,7 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: nu
 export async function getAccounts(signClient: ISignClient): Promise<string[]> {
   const session = await getLastActiveSession(signClient);
   if (!session) {
-    throw ethErrors.provider.disconnected();
+    throw providerErrors.disconnected();
   }
   const accounts = getAccountsFromNamespaces(session.namespaces);
   if (accounts && accounts.length) {
@@ -50,7 +50,7 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
 export function getProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IProviderHandlers {
   return {
     getPrivateKey: async () => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     getAccounts: async (_: JRPCRequest<unknown>) => {
       return getAccounts(connector);
@@ -84,10 +84,10 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
       return methodRes;
     },
     processEncryptionPublicKey: async (_: string): Promise<string> => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     processDecryptMessage: (_: MessageParams<string>): string => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
   };
 }

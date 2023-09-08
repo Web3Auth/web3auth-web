@@ -22,7 +22,7 @@
     "@toruslabs/base-controllers": "^4.0.1",
     "@toruslabs/openlogin-jrpc": "^5.0.2",
     "@web3auth/base": "^6.1.7",
-    "eth-rpc-errors": "^4.0.3",
+    "@metamask/rpc-errors": "^6.0.0",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {

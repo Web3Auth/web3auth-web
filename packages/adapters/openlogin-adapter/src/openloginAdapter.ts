@@ -15,8 +15,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -71,14 +71,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     return this.chainConfig ? { ...this.chainConfig } : null;
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.privateKeyProvider) {
-      return this.privateKeyProvider.provider;
+      return this.privateKeyProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -121,7 +121,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  async connect(params: OpenloginLoginParams = { loginProvider: "" }): Promise<SafeEventEmitterProvider | null> {
+  async connect(params: OpenloginLoginParams = { loginProvider: "" }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });

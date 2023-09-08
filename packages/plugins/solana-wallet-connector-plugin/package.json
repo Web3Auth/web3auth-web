@@ -32,7 +32,7 @@
     "src"
   ],
   "devDependencies": {
-    "eth-rpc-errors": "^4.0.3"
+    "@metamask/rpc-errors": "^6.0.0"
   },
   "dependencies": {
     "@toruslabs/solana-embed": "^1.0.0",

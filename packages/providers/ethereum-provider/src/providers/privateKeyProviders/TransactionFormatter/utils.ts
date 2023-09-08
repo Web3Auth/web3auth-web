@@ -7,11 +7,11 @@ import {
   TypedMessage,
   typedSignatureHash,
 } from "@metamask/eth-sig-util";
+import { rpcErrors } from "@metamask/rpc-errors";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
-import { ethErrors } from "eth-rpc-errors";
 import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
@@ -127,7 +127,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
         assert.fail(`Unknown typed data version "${(parameters as TypedMessageParams<unknown>).version}"`);
     }
   } catch (error) {
-    throw ethErrors.rpc.invalidInput({
+    throw rpcErrors.invalidInput({
       message: (error as Error)?.message,
     });
   }

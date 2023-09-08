@@ -1,8 +1,8 @@
+import type { JsonRpcError } from "@metamask/rpc-errors";
 import TorusEmbed, { LOGIN_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { EthereumRpcError } from "eth-rpc-errors";
 import log from "loglevel";
 
 import { TorusWalletPluginError } from "./errors";
@@ -108,7 +108,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       privateKey = (await this.provider.request<never, string>({ method: "eth_private_key" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, TorusWalletPluginError.unsupportedAdapter());
-      if ((error as EthereumRpcError<unknown>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
+      if ((error as JsonRpcError<never>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
       throw error;
     }
     if (!privateKey) throw TorusWalletPluginError.web3AuthNotConnected();

@@ -13,8 +13,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -55,14 +55,14 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     this.loginSettings = params.loginSettings || {};
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.torusInstance) {
-      return this.torusInstance.provider as unknown as SafeEventEmitterProvider;
+      return this.torusInstance.provider as unknown as IProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -103,7 +103,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;

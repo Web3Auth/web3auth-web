@@ -11,10 +11,10 @@ import {
   TypedDataV1,
   TypedMessage,
 } from "@metamask/eth-sig-util";
+import { providerErrors } from "@metamask/rpc-errors";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter";
@@ -45,7 +45,7 @@ export function getProviderHandlers({
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -59,7 +59,7 @@ export function getProviderHandlers({
     processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -80,7 +80,7 @@ export function getProviderHandlers({
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -100,7 +100,7 @@ export function getProviderHandlers({
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -116,7 +116,7 @@ export function getProviderHandlers({
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });

@@ -11,7 +11,7 @@
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
-      <SolanaRpc v-if="provider" :provider="provider" :console="console"></SolanaRpc>
+      <SolanaRpc v-if="provider" :provider="provider" :uiConsole="uiConsole"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -37,7 +37,7 @@ import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
 import { SolflareAdapter } from "@web3auth/solflare-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
 
@@ -53,7 +53,7 @@ const solanaChainConfig: CustomChainConfig = {
   tickerName: "solana",
 };
 
-export default Vue.extend({
+export default defineComponent({
   name: "SolanaChain",
   props: {
     plugins: {
@@ -167,7 +167,7 @@ export default Vue.extend({
         });
       } catch (error) {
         console.log("error", error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       } finally {
         this.loading = false;
       }
@@ -177,22 +177,22 @@ export default Vue.extend({
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.console("connected to wallet", data);
+        this.uiConsole("connected to wallet", data);
         await this.setupProvider(web3auth.provider);
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
-        this.console("connecting");
+        this.uiConsole("connecting");
         this.loginButtonStatus = "Connecting...";
       });
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
-        this.console("disconnected");
+        this.uiConsole("disconnected");
         this.loginButtonStatus = "";
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
-        this.console("errored", error);
+        this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
     },
@@ -202,7 +202,7 @@ export default Vue.extend({
         await this.setupProvider(provider);
       } catch (error) {
         console.error(error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       }
     },
 
@@ -212,16 +212,16 @@ export default Vue.extend({
     },
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
-      this.console(userInfo);
+      this.uiConsole(userInfo);
     },
     async authenticateUser() {
       const idTokenDetails = await this.web3auth.authenticateUser();
-      this.console(idTokenDetails);
+      this.uiConsole(idTokenDetails);
     },
-    console(...args: unknown[]): void {
+    uiConsole(...args: unknown[]): void {
       const el = document.querySelector("#console>p");
       if (el) {
-        el.innerHTML = JSON.stringify(args || {}, null, 2);
+        el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
       }
     },
   },

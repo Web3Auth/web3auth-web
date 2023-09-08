@@ -1,7 +1,7 @@
+import { providerErrors } from "@metamask/rpc-errors";
 import { Connection } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseWalletProvider, SolflareWallet, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
@@ -13,7 +13,7 @@ export const getSolflareHandlers = (injectedProvider: SolflareWallet, getProvide
     req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>
   ): Promise<{ signature: string }> => {
     const provider = getProviderEngineProxy();
-    if (!provider) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!provider) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
 
     const transaction = await injectedProvider.signTransaction(req.params.message);
     const chainConfig = (await provider.request<never, CustomChainConfig>({ method: "solana_provider_config" })) as CustomChainConfig;

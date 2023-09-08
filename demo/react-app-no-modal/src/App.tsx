@@ -184,7 +184,7 @@ function App() {
   function uiConsole(...args: any[]): void {
     const el = document.querySelector("#console>p");
     if (el) {
-      el.innerHTML = JSON.stringify(args || {}, null, 2);
+      el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
     }
   }
 

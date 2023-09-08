@@ -1,9 +1,15 @@
 import type { EngineTypes, SignClientTypes } from "@walletconnect/types";
 import { BaseAdapterSettings } from "@web3auth/base";
 
+export interface OpenOptions {
+  uri: string;
+  chains?: string[];
+}
+
 export interface IQRCodeModal {
-  open(uri: string, cb: unknown, opts?: unknown): void;
-  close(): void;
+  openModal: (options?: OpenOptions) => Promise<void>;
+
+  closeModal: () => void;
 }
 
 export interface IAdapterSettings {

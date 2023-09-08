@@ -24,7 +24,7 @@
     "@web3auth/base": "^6.1.7",
     "@web3auth/base-provider": "^6.1.7",
     "lodash": "^4.17.21",
-    "eth-rpc-errors": "^4.0.3",
+    "@metamask/rpc-errors": "^6.0.0",
     "ripple-keypairs": "^1.3.0"
   },
   "devDependencies": {
