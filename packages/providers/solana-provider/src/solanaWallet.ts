@@ -1,11 +1,11 @@
-import { RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import { IProvider, RequestArguments } from "@web3auth/base";
 
 import { ISolanaWallet, TransactionOrVersionedTransaction } from "./interface";
 
 export class SolanaWallet implements ISolanaWallet {
-  public provider: SafeEventEmitterProvider;
+  public provider: IProvider;
 
-  constructor(provider: SafeEventEmitterProvider) {
+  constructor(provider: IProvider) {
     this.provider = provider;
   }
 

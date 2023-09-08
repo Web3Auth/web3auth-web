@@ -1,11 +1,11 @@
-import { SafeEventEmitterProvider } from "@web3auth/base";
+import { IProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
 
-const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
     try {
-      const web3 = new Web3(provider as any);
+      const web3 = new Web3(provider);
       const accounts = await web3.eth.getAccounts();
       uiConsole("Eth accounts", accounts);
     } catch (error) {
@@ -16,7 +16,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
 
   const getBalance = async () => {
     try {
-      const web3 = new Web3(provider as any);
+      const web3 = new Web3(provider);
       const accounts = await web3.eth.getAccounts();
       const balance = await web3.eth.getBalance(accounts[0]);
       uiConsole("Eth balance", balance);
@@ -28,22 +28,13 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
 
   const signMessage = async () => {
     try {
-      const pubKey = (await provider.request({ method: "eth_accounts" })) as string[];
-      const web3 = new Web3(provider as any);
-      const message = `0x${Buffer.from("hello world", "utf8").toString("hex")}`;
-      (web3.currentProvider as any)?.send(
-        {
-          method: "personal_sign",
-          params: [message, pubKey[0]],
-          from: pubKey[0],
-        },
-        (err: Error, result: any) => {
-          if (err) {
-            return uiConsole(err);
-          }
-          uiConsole("Eth sign message => true", result);
-        }
-      );
+      const web3 = new Web3(provider);
+      const message = "Some string";
+      const hash = web3.utils.sha3(message) as string;
+      const fromAddress = (await web3.eth.getAccounts())[0];
+      const sig = await web3.eth.personal.sign(hash, fromAddress, "");
+      uiConsole("personal sign", sig);
+      uiConsole("Eth sign message => true", sig);
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
@@ -57,7 +48,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       const txRes = await web3.eth.sendTransaction({
         from: accounts[0],
         to: accounts[0],
-        value: web3.utils.toWei("0.01"),
+        value: web3.utils.toWei("0.01", "ether"),
       });
       uiConsole("txRes", txRes);
     } catch (error) {
@@ -74,7 +65,7 @@ const ethProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: un
       const txRes = await web3.eth.signTransaction({
         from: accounts[0],
         to: accounts[0],
-        value: web3.utils.toWei("0.01"),
+        value: web3.utils.toWei("0.01", "ether"),
       });
       uiConsole("txRes", txRes);
     } catch (error) {
