@@ -39,7 +39,7 @@
     "chai": "^4.3.8",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "faker": "^5.5.3",
     "husky": "^8.0.3",
     "jsonwebtoken": "^9.0.2",
