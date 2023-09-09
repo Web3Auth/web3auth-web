@@ -1,24 +1,23 @@
-import { RequestArguments, SafeEventEmitterProvider } from "@web3auth/base";
+import { IProvider, RequestArguments } from "@web3auth/base";
 
 import { ISolanaWallet, TransactionOrVersionedTransaction } from "./interface";
 
 export class SolanaWallet implements ISolanaWallet {
-  public provider: SafeEventEmitterProvider;
+  public provider: IProvider;
 
-  constructor(provider: SafeEventEmitterProvider) {
+  constructor(provider: IProvider) {
     this.provider = provider;
   }
 
   public async requestAccounts(): Promise<string[]> {
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "requestAccounts",
-      params: {},
     });
     return accounts;
   }
 
   public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }> {
-    const { signature } = await this.provider.request<{ signature: string }>({
+    const { signature } = await this.provider.request<{ message: T }, { signature: string }>({
       method: "signAndSendTransaction",
       params: {
         message: transaction,
@@ -48,7 +47,7 @@ export class SolanaWallet implements ISolanaWallet {
   }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {
-    const response = await this.provider.request<Uint8Array>({
+    const response = await this.provider.request<{ message: Uint8Array }, Uint8Array>({
       method: "signMessage",
       params: {
         message: data,
@@ -57,8 +56,8 @@ export class SolanaWallet implements ISolanaWallet {
     return response as Uint8Array;
   }
 
-  public async request<T>(args: RequestArguments): Promise<T> {
-    const result = await this.provider.request<T>(args);
-    return result as T;
+  public async request<T, U>(args: RequestArguments<T>): Promise<U> {
+    const result = await this.provider.request<T, U>(args);
+    return result as U;
   }
 }

@@ -192,7 +192,7 @@ export const getRequiredNamespaces = (chains: string[]): ProposalTypes.RequiredN
       {
         methods: getSupportedMethodsByNamespace(namespace),
         chains: chains.filter((chain) => chain.startsWith(namespace)),
-        events: getSupportedEventsByNamespace(namespace) as any[],
+        events: getSupportedEventsByNamespace(namespace),
       },
     ])
   );

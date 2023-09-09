@@ -1,5 +1,5 @@
+import { rpcErrors } from "@metamask/rpc-errors";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-import { ethErrors } from "eth-rpc-errors";
 
 import { ITorusWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
@@ -7,7 +7,7 @@ import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
 export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {
     requestAccounts: async () => {
-      const accounts = await injectedProvider.request<string[]>({
+      const accounts = await injectedProvider.request<unknown, string[]>({
         method: "solana_requestAccounts",
         params: {},
       });
@@ -15,7 +15,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
     },
 
     getAccounts: async () => {
-      const accounts = await injectedProvider.request<string[]>({
+      const accounts = await injectedProvider.request<unknown, string[]>({
         method: "solana_requestAccounts",
         params: {},
       });
@@ -23,14 +23,14 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
     },
 
     getPrivateKey: async () => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     getSecretKey: async () => {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const message = await injectedProvider.signMessage(req.params.message);
       return message;
@@ -38,7 +38,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
 
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const txMessage = req.params.message;
       const response = await injectedProvider.signTransaction(txMessage);
@@ -47,7 +47,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
 
     signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const txMessage = req.params.message;
       const response = await injectedProvider.sendTransaction(txMessage);
@@ -56,7 +56,7 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
 
     signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const transactions = req.params.message;
       const response = await injectedProvider.signAllTransactions(transactions);

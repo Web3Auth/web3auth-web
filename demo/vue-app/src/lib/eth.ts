@@ -1,15 +1,16 @@
-import { SafeEventEmitterProvider } from "@web3auth/base";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { IProvider } from "@web3auth/base";
 import Web3 from "web3";
 
-export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     console.log("pubKey", accounts);
     const txRes = await web3.eth.sendTransaction({
       from: accounts[0],
       to: accounts[0],
-      value: web3.utils.toWei("0.01"),
+      value: web3.utils.toWei("0.01", "ether"),
     });
     uiConsole("txRes", txRes);
   } catch (error) {
@@ -18,10 +19,10 @@ export const sendEth = async (provider: SafeEventEmitterProvider, uiConsole: any
   }
 };
 
-export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
   try {
     const web3 = new Web3();
-    web3.setProvider(provider as any);
+    web3.setProvider(provider);
     // hex message
     // const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
     const fromAddress = (await web3.eth.getAccounts())[0];
@@ -113,9 +114,9 @@ export const signEthMessage = async (provider: SafeEventEmitterProvider, uiConso
   }
 };
 
-export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[] | undefined> => {
+export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<string[] | undefined> => {
   try {
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     uiConsole("accounts", accounts);
     return accounts;
@@ -124,9 +125,9 @@ export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole:
     uiConsole("error", error);
   }
 };
-export const getChainId = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string | undefined> => {
+export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
   try {
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
     uiConsole(chainId.toString());
     return chainId.toString();
@@ -135,9 +136,9 @@ export const getChainId = async (provider: SafeEventEmitterProvider, uiConsole: 
     uiConsole("error", error);
   }
 };
-export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const getBalance = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     const balance = await web3.eth.getBalance(accounts[0]);
     uiConsole("balance", balance);
@@ -147,16 +148,16 @@ export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: 
   }
 };
 
-export const signTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signTransaction = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
 
     // only supported with social logins (openlogin adapter)
     const txRes = await web3.eth.signTransaction({
       from: accounts[0],
       to: accounts[0],
-      value: web3.utils.toWei("0.01"),
+      value: web3.utils.toWei("0.01", "ether"),
     });
     uiConsole("txRes", txRes);
   } catch (error) {

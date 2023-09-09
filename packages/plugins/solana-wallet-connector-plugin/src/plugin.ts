@@ -1,8 +1,8 @@
+import type { JsonRpcError } from "@metamask/rpc-errors";
 import TorusEmbed, { PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { EthereumRpcError } from "eth-rpc-errors";
 import log from "loglevel";
 
 import { SolanaWalletPluginError } from "./errors";
@@ -108,10 +108,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
 
     try {
       // it should throw if provider doesn't support `solanaSecretKey` function
-      privateKey = (await this.provider.request<string>({ method: "solanaSecretKey" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "solanaSecretKey" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, SolanaWalletPluginError.unsupportedAdapter());
-      if ((error as EthereumRpcError<unknown>)?.code === -32004) throw SolanaWalletPluginError.unsupportedAdapter();
+      if ((error as JsonRpcError<never>)?.code === -32004) throw SolanaWalletPluginError.unsupportedAdapter();
       throw error;
     }
     if (!privateKey) throw SolanaWalletPluginError.web3AuthNotConnected();
@@ -188,10 +188,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "requestAccounts" }),
-      this.provider.request<string>({ method: "solana_chainId" }),
-      this.provider.request<string>({ method: "solanaSecretKey" }),
-      this.provider.request<CustomChainConfig>({ method: "solana_provider_config" }),
+      this.provider.request<never, string[]>({ method: "requestAccounts" }),
+      this.provider.request<never, string>({ method: "solana_chainId" }),
+      this.provider.request<never, string>({ method: "solanaSecretKey" }),
+      this.provider.request<never, CustomChainConfig>({ method: "solana_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),

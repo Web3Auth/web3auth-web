@@ -1,4 +1,4 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, JRPCResponse, Maybe, RequestArguments, SafeEventEmitter, SendCallBack } from "@toruslabs/openlogin-jrpc";
 import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
 
 import { getChainConfig } from "../chain/config";
@@ -53,6 +53,22 @@ export interface BaseAdapterSettings {
   useCoreKitKey?: boolean;
 }
 
+export interface IProvider extends SafeEventEmitter {
+  get chainId(): string;
+  request<S, R>(args: RequestArguments<S>): Promise<Maybe<R>>;
+  sendAsync<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;
+  sendAsync<T, U>(req: JRPCRequest<T>): Promise<JRPCResponse<U>>;
+  send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;
+}
+
+export interface IBaseProvider<T> extends IProvider {
+  provider: SafeEventEmitterProvider | null;
+  currentChainConfig: Partial<CustomChainConfig>;
+  setupProvider(provider: T): Promise<void>;
+  addChain(chainConfig: CustomChainConfig): void;
+  switchChain(params: { chainId: string }): Promise<void>;
+}
+
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
   currentChainNamespace: ChainNamespaceType;
@@ -63,13 +79,13 @@ export interface IAdapter<T> extends SafeEventEmitter {
   web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   clientId: string;
   status: ADAPTER_STATUS_TYPE;
-  provider: SafeEventEmitterProvider | null;
+  provider: IProvider | null;
   adapterData?: unknown;
   connnected: boolean;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params?: T): Promise<SafeEventEmitterProvider | null>;
+  connect(params?: T): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
   switchChain(params: { chainId: string }): Promise<void>;
@@ -116,7 +132,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     return this.status === ADAPTER_STATUS.CONNECTED;
   }
 
-  public abstract get provider(): SafeEventEmitterProvider | null;
+  public abstract get provider(): IProvider | null;
 
   public setAdapterSettings(options: BaseAdapterSettings): void {
     if (this.status === ADAPTER_STATUS.READY) return;
@@ -206,7 +222,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<SafeEventEmitterProvider | null>;
+  abstract connect(params?: T): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract authenticateUser(): Promise<UserAuthInfo>;

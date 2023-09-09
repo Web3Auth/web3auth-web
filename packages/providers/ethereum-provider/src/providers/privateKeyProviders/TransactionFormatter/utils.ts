@@ -1,10 +1,17 @@
 import { isValidAddress } from "@ethereumjs/util";
-import { SignTypedDataVersion, TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
+import {
+  MessageTypeProperty,
+  SignTypedDataVersion,
+  TYPED_MESSAGE_SCHEMA,
+  TypedDataV1Field,
+  TypedMessage,
+  typedSignatureHash,
+} from "@metamask/eth-sig-util";
+import { rpcErrors } from "@metamask/rpc-errors";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
-import { ethErrors } from "eth-rpc-errors";
 import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
@@ -72,7 +79,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
       typeof parameters.from === "string" && isValidAddress(parameters.from),
       '"from" field must be a valid, lowercase, hexadecimal Ethereum address string.'
     );
-    let data = null;
+    let data: unknown = null;
     let chainId = null;
     switch ((parameters as TypedMessageParams<unknown>).version) {
       case SignTypedDataVersion.V1:
@@ -90,7 +97,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
         }, "Signing data must be valid EIP-712 typed data.");
         break;
       case SignTypedDataVersion.V3:
-      case SignTypedDataVersion.V4:
+      case SignTypedDataVersion.V4: {
         if (typeof parameters.data === "string") {
           assert.doesNotThrow(() => {
             data = JSON.parse(parameters.data as string);
@@ -99,11 +106,14 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
           // for backward compatiblity we validate for both string and object type.
           data = parameters.data;
         }
+        const typedData = data as TypedMessage<{
+          EIP712Domain: MessageTypeProperty[];
+        }>;
 
-        assert.ok(data.primaryType in data.types, `Primary type of "${data.primaryType}" has no type definition.`);
-        const validation = jsonschema.validate(data, TYPED_MESSAGE_SCHEMA.properties);
+        assert.ok(typedData.primaryType in typedData.types, `Primary type of "${typedData.primaryType}" has no type definition.`);
+        const validation = jsonschema.validate(typedData, TYPED_MESSAGE_SCHEMA.properties);
         assert.strictEqual(validation.errors.length, 0, "Signing data must conform to EIP-712 schema. See https://git.io/fNtcx.");
-        chainId = data.domain?.chainId;
+        chainId = typedData.domain?.chainId;
         if (chainId) {
           assert.ok(!Number.isNaN(activeChainId), `Cannot sign messages for chainId "${chainId}", because Web3Auth is switching networks.`);
           if (typeof chainId === "string") {
@@ -112,12 +122,13 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
           assert.strictEqual(chainId, activeChainId, `Provided chainId "${chainId}" must match the active chainId "${activeChainId}"`);
         }
         break;
+      }
       default:
         assert.fail(`Unknown typed data version "${(parameters as TypedMessageParams<unknown>).version}"`);
     }
   } catch (error) {
-    throw ethErrors.rpc.invalidInput({
-      message: error?.message,
+    throw rpcErrors.invalidInput({
+      message: (error as Error)?.message,
     });
   }
 };

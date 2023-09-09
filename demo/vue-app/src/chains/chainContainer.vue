@@ -6,9 +6,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-export default Vue.extend({
+import Binance from "./binance.vue";
+import Ethereum from "./ethereum.vue";
+import Matic from "./matic.vue";
+import Solana from "./solana.vue";
+
+export default defineComponent({
   name: "ChainContainer",
   props: {
     plugins: {
@@ -30,10 +35,10 @@ export default Vue.extend({
     return {};
   },
   components: {
-    Ethereum: () => import("./ethereum.vue"),
-    Solana: () => import("./solana.vue"),
-    Matic: () => import("./matic.vue"),
-    Binance: () => import("./binance.vue"),
+    Ethereum,
+    Solana,
+    Matic,
+    Binance,
   },
   async mounted() {
     console.log("chain", this.chain);

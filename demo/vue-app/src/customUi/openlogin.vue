@@ -30,13 +30,13 @@
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "BeginnerExampleMode",
   data() {
     return {

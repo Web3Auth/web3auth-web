@@ -27,7 +27,7 @@
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import config from "@/config";
 
@@ -35,7 +35,7 @@ import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
 import SolRpc from "../rpc/solanaRpc.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "BeginnerExampleMode",
   data() {
     return {

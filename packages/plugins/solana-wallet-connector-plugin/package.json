@@ -32,10 +32,10 @@
     "src"
   ],
   "devDependencies": {
-    "eth-rpc-errors": "^4.0.3"
+    "@metamask/rpc-errors": "^6.0.0"
   },
   "dependencies": {
-    "@toruslabs/solana-embed": "^1.0.0",
+    "@toruslabs/solana-embed": "^2.0.0",
     "@web3auth/base": "^6.1.7",
     "@web3auth/base-plugin": "^6.1.7",
     "@web3auth/no-modal": "^6.1.7",
@@ -61,7 +61,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "engines": {
-    "node": ">=16.18.1",
-    "npm": ">=8.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

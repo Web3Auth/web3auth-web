@@ -1,4 +1,4 @@
-import SignClient from "@walletconnect/sign-client";
+import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
 import {
@@ -14,8 +14,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletConnectV2Data,
@@ -50,7 +50,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS,
   };
 
-  public connector: SignClient | null = null;
+  public connector: Client | null = null;
 
   public activeSession: SessionTypes.Struct | null = null;
 
@@ -65,14 +65,14 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     return !!this.activeSession;
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.wcProvider) {
-      return this.wcProvider.provider;
+      return this.wcProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -97,7 +97,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     const { adapterSettings } = this.adapterOptions;
 
-    this.connector = await SignClient.init(adapterSettings?.walletConnectInitOptions);
+    this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
@@ -121,7 +121,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     try {
@@ -230,11 +230,14 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {
         if (qrcodeModal) {
-          qrcodeModal.open(uri, () => {
+          try {
+            await qrcodeModal.openModal({ uri });
             log.debug("EVENT", "QR Code Modal closed");
             this.status = ADAPTER_STATUS.READY;
             this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
-          });
+          } catch (error) {
+            log.error("unable to open qr code modal");
+          }
         } else {
           this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV2Data);
         }
@@ -254,7 +257,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       // Handle the returned session (e.g. update UI to "connected" state).
       await this.onConnectHandler();
       if (qrcodeModal) {
-        qrcodeModal.close();
+        qrcodeModal.closeModal();
       }
     } catch (error) {
       log.error("error while creating new wallet connect session", error);

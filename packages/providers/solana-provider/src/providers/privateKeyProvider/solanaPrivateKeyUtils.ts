@@ -1,9 +1,9 @@
+import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { Keypair, VersionedTransaction } from "@solana/web3.js";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
 import { SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import bs58 from "bs58";
-import { ethErrors } from "eth-rpc-errors";
 
 import { TransactionOrVersionedTransaction } from "../../interface";
 import { IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
@@ -31,7 +31,7 @@ export async function getProviderHandlers({
 
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const transaction = req.params.message;
       if ((transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction) {
@@ -44,7 +44,7 @@ export async function getProviderHandlers({
 
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const signedMsg = nacl.sign.detached(req.params.message, keyPair.secretKey);
       return signedMsg;
@@ -52,10 +52,10 @@ export async function getProviderHandlers({
 
     signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
       if (!req.params?.message) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
       const _providerEngineProxy = getProviderEngineProxy();
-      if (!_providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+      if (!_providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
 
       const transaction = req.params.message;
       if ((transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction) {
@@ -63,7 +63,7 @@ export async function getProviderHandlers({
       } else {
         transaction.partialSign(keyPair);
       }
-      const sig = await _providerEngineProxy.request<string>({
+      const sig = await _providerEngineProxy.request<[string, { encoding: string; preflightCommitment: string }], string>({
         method: "sendTransaction",
         params: [Buffer.from(transaction.serialize()).toString("base64"), { encoding: "base64", preflightCommitment: "confirmed" }],
       });
@@ -72,7 +72,7 @@ export async function getProviderHandlers({
 
     signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
       if (!req.params?.message || !req.params?.message.length) {
-        throw ethErrors.rpc.invalidParams("message");
+        throw rpcErrors.invalidParams("message");
       }
 
       const txns = req.params?.message;

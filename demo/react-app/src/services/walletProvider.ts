@@ -1,4 +1,4 @@
-import { SafeEventEmitterProvider } from "@web3auth/base";
+import { IProvider } from "@web3auth/base";
 import ethProvider from "./ethProvider";
 import solanaProvider from "./solanaProvider";
 import tezosProvider  from "./tezosProvider";
@@ -11,7 +11,7 @@ export interface IWalletProvider {
   signMessage: () => Promise<void>;
 }
 
-export const getWalletProvider = (chain: string, provider: SafeEventEmitterProvider, uiConsole: any): IWalletProvider => {
+export const getWalletProvider = (chain: string, provider: IProvider, uiConsole: any): IWalletProvider => {
   if (chain === "solana") {
     return solanaProvider(provider, uiConsole);
   } else if (chain === "tezos") {

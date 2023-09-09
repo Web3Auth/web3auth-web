@@ -14,8 +14,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletLoginError,
@@ -45,14 +45,14 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.solflareProvider) {
-      return this.solflareProvider.provider;
+      return this.solflareProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -75,7 +75,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -150,7 +150,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
-  private async connectWithProvider(injectedProvider: SolflareWallet): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(injectedProvider: SolflareWallet): Promise<IProvider | null> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;

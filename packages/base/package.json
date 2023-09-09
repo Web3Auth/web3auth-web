@@ -19,10 +19,10 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^4.0.0",
-    "@toruslabs/openlogin": "^4.7.2",
-    "@toruslabs/openlogin-jrpc": "^4.7.2",
-    "@toruslabs/openlogin-utils": "^4.7.0",
+    "@toruslabs/http-helpers": "^5.0.0",
+    "@toruslabs/openlogin": "^5.0.3",
+    "@toruslabs/openlogin-jrpc": "^5.0.2",
+    "@toruslabs/openlogin-utils": "^5.0.2",
     "jwt-decode": "^3.1.2",
     "loglevel": "^1.8.1",
     "ts-custom-error": "^3.3.1"
@@ -52,7 +52,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=16.18.1",
-    "npm": ">=8.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

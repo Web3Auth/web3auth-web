@@ -14,34 +14,34 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import { getAccounts, getBalance, signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../lib/sol";
 
-export default Vue.extend({
+export default defineComponent({
   name: "SolanaRpc",
-  props: ["provider", "console"],
+  props: ["provider", "uiConsole"],
   data() {
     return {};
   },
   methods: {
     async onSignAndSendTransaction() {
-      await signAndSendTransaction(this.provider, this.console);
+      await signAndSendTransaction(this.provider, this.uiConsole);
     },
     async onSignTransaction() {
-      await signTransaction(this.provider, this.console);
+      await signTransaction(this.provider, this.uiConsole);
     },
     async onSignMessage() {
-      await signMessage(this.provider, this.console);
+      await signMessage(this.provider, this.uiConsole);
     },
     async onSignAllTransactions() {
-      await signAllTransactions(this.provider, this.console);
+      await signAllTransactions(this.provider, this.uiConsole);
     },
     async onGetAccounts() {
-      await getAccounts(this.provider, this.console);
+      await getAccounts(this.provider, this.uiConsole);
     },
     async onGetBalance() {
-      return await getBalance(this.provider, this.console);
+      return await getBalance(this.provider, this.uiConsole);
     },
   },
 });

@@ -1,4 +1,4 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
@@ -65,7 +65,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [isLoading, setIsLoading] = useState(false);
 
   const setWalletProvider = useCallback(
-    (web3authProvider: SafeEventEmitterProvider) => {
+    (web3authProvider: IProvider) => {
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
       setProvider(walletProvider);
     },
@@ -139,6 +139,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             },
             buildEnv: "production",
             useWalletConnect: true,
+            enableLogging: true,
           },
         });
         web3AuthInstance.addPlugin(plugin);
@@ -277,7 +278,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
-      el.innerHTML = JSON.stringify(args || {}, null, 2);
+      el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
     }
   };
 

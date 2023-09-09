@@ -34,13 +34,13 @@
 
 <script lang="ts">
 import { getEvmChainConfig } from "@web3auth/base";
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../lib/eth";
 
-export default Vue.extend({
+export default defineComponent({
   name: "EthRpc",
-  props: ["provider", "console", "connectedAdapter", "web3auth"],
+  props: ["provider", "uiConsole", "connectedAdapter", "web3auth"],
   data() {
     return {};
   },
@@ -51,39 +51,39 @@ export default Vue.extend({
   },
   methods: {
     async onSendEth() {
-      await sendEth(this.provider, this.console);
+      await sendEth(this.provider, this.uiConsole);
     },
     async onSignTx() {
-      await signTransaction(this.provider, this.console);
+      await signTransaction(this.provider, this.uiConsole);
     },
     async onSignEthMessage() {
-      await signEthMessage(this.provider, this.console);
+      await signEthMessage(this.provider, this.uiConsole);
     },
     async onGetAccounts() {
-      await getAccounts(this.provider, this.console);
+      await getAccounts(this.provider, this.uiConsole);
     },
     async getConnectedChainId() {
-      await getChainId(this.provider, this.console);
+      await getChainId(this.provider, this.uiConsole);
     },
     async onGetBalance() {
-      await getBalance(this.provider, this.console);
+      await getBalance(this.provider, this.uiConsole);
     },
     async switchChain() {
       try {
         await this.web3auth.switchChain({ chainId: "0x89" });
-        this.console("switchedChain");
+        this.uiConsole("switchedChain");
       } catch (error) {
         console.log("error while switching chain", error);
-        this.console("switchedChain error", error);
+        this.uiConsole("switchedChain error", error);
       }
     },
     async addChain() {
       try {
         await this.web3auth.addChain(getEvmChainConfig(137));
-        this.console("added chain");
+        this.uiConsole("added chain");
       } catch (error) {
         console.log("error while adding chain", error);
-        this.console("add chain error", error);
+        this.uiConsole("add chain error", error);
       }
     },
   },

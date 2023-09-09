@@ -1,12 +1,12 @@
 //@ts-ignore
 import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
-import { SafeEventEmitterProvider } from "@web3auth/base";
+import { IProvider } from "@web3auth/base";
 import { TezosToolkit } from '@taquito/taquito';
 import { hex2buf } from '@taquito/utils';
 import { InMemorySigner } from '@taquito/signer';
 import { IWalletProvider } from "./walletProvider";
 
-const tezosProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+const tezosProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   // List of available RPC Nodes -- https://tezostaquito.io/docs/rpc_nodes
   const tezos = new TezosToolkit('https://ithacanet.ecadinfra.com');
 

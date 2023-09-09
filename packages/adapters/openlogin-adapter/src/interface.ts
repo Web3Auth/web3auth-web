@@ -1,6 +1,5 @@
-import { BaseRedirectParams, LoginConfig, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-utils";
-import { BaseAdapterSettings } from "@web3auth/base";
-import type { IBaseProvider } from "@web3auth/base-provider";
+import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-utils";
+import { BaseAdapterSettings, IBaseProvider } from "@web3auth/base";
 
 export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 
@@ -17,4 +16,4 @@ export interface OpenloginAdapterOptions extends BaseAdapterSettings {
 }
 
 export * from "@toruslabs/openlogin-utils";
-export { LoginConfig };
+export { type LoginConfig } from "@toruslabs/openlogin-utils";

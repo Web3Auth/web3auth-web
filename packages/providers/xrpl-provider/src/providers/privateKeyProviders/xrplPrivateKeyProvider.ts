@@ -1,7 +1,7 @@
+import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { ethErrors } from "eth-rpc-errors";
 import type { PingResponse } from "xrpl";
 
 import { createJsonRpcClient } from "../../rpc/JrpcClient";
@@ -38,7 +38,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
-      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
+      throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey);
     return this._providerEngineProxy.request({ method: RPC_METHODS.GET_ACCOUNTS });
   }
@@ -66,22 +66,22 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const { privateKey } = await this._providerEngineProxy.request<KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
+    const { privateKey } = await this._providerEngineProxy.request<never, KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
     await this.setupProvider(privateKey);
   }
 
   protected async lookupNetwork(): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
-    if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
+    if (!chainId) throw rpcErrors.invalidParams("chainId is required while lookupNetwork");
 
-    const pingResponse = await this._providerEngineProxy.request<PingResponse>({
+    const pingResponse = await this._providerEngineProxy.request<[], PingResponse>({
       method: "ping",
       params: [],
     });
@@ -92,8 +92,8 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     }
 
     if (this.state.chainId !== chainId) {
-      this._providerEngineProxy.emit("chainChanged", chainId);
-      this._providerEngineProxy.emit("connect", { chainId });
+      this.emit("chainChanged", chainId);
+      this.emit("connect", { chainId });
     }
     this.update({ chainId });
   }
@@ -101,12 +101,12 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChainConfig: async (req: JRPCRequest<AddXRPLChainParameter>): Promise<void> => {
-        if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
+        if (!req.params) throw rpcErrors.invalidParams("Missing request params");
         const { chainId, ticker, tickerName, displayName, rpcTarget, wsTarget, blockExplorer } = req.params;
 
-        if (!chainId) throw ethErrors.rpc.invalidParams("Missing chainId in chainParams");
-        if (!rpcTarget) throw ethErrors.rpc.invalidParams("Missing rpcTarget in chainParams");
-        if (!wsTarget) throw ethErrors.rpc.invalidParams("Missing wsTarget in chainParams");
+        if (!chainId) throw rpcErrors.invalidParams("Missing chainId in chainParams");
+        if (!rpcTarget) throw rpcErrors.invalidParams("Missing rpcTarget in chainParams");
+        if (!wsTarget) throw rpcErrors.invalidParams("Missing wsTarget in chainParams");
         this.addChain({
           chainNamespace: CHAIN_NAMESPACES.OTHER,
           chainId,
@@ -119,8 +119,8 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
         });
       },
       switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {
-        if (!req.params) throw ethErrors.rpc.invalidParams("Missing request params");
-        if (!req.params.chainId) throw ethErrors.rpc.invalidParams("Missing chainId");
+        if (!req.params) throw rpcErrors.invalidParams("Missing request params");
+        if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
         await this.switchChain(req.params);
       },
     };

@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,11 +11,10 @@ interface SocialLoginPasswordlessProps {
   isEmailVisible: boolean;
   isSmsVisible: boolean;
   adapter: string;
-  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, adapter, web3AuthNetwork, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
+  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
   const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
@@ -32,7 +31,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       return handleSocialLoginClick({ adapter, loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" } });
     }
     const number = value.startsWith("+") ? value : `${countryCode}${value}`;
-    const result = await validatePhoneNumber(number, web3AuthNetwork);
+    const result = await validatePhoneNumber(number);
     if (result) {
       return handleSocialLoginClick({
         adapter,
@@ -46,13 +45,13 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
   useEffect(() => {
     const getLocation = async () => {
-      const result = await getUserCountry(web3AuthNetwork);
+      const result = await getUserCountry();
       if (result && result.dialCode) {
         setCountryCode(result.dialCode);
       }
     };
     if (isSmsVisible) getLocation();
-  }, [isSmsVisible, web3AuthNetwork]);
+  }, [isSmsVisible]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFieldValue(e.target.value);

@@ -103,7 +103,7 @@ await web3auth.connect();
 ## ⏪ Requirements
 
 - All packages require a peer dependency of `@babel/runtime`
-- Node 14+
+- Node 18+
 
 ## 🧳 Bundling
 

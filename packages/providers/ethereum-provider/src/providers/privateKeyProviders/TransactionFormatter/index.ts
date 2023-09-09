@@ -1,5 +1,5 @@
 import { Common, Hardfork } from "@ethereumjs/common";
-import { addHexPrefix, stripHexPrefix } from "@ethereumjs/util";
+import { addHexPrefix, AddressLike, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 
@@ -26,14 +26,14 @@ export class TransactionFormatter {
   }
 
   async init(): Promise<void> {
-    this.chainConfig = (await this.providerProxy.request<CustomChainConfig>({ method: "eth_provider_config", params: [] })) as CustomChainConfig;
+    this.chainConfig = (await this.providerProxy.request<never, CustomChainConfig>({ method: "eth_provider_config" })) as CustomChainConfig;
     this.isEIP1559Compatible = await this.getEIP1559Compatibility();
   }
 
   async getCommonConfiguration(): Promise<Common> {
     if (!this.chainConfig) throw new Error("Chain config not initialized");
     const { displayName: name, chainId } = this.chainConfig;
-    const hardfork = this.isEIP1559Compatible ? Hardfork.London : Hardfork.Berlin;
+    const hardfork = this.isEIP1559Compatible ? Hardfork.Paris : Hardfork.Berlin;
     const customChainParams = {
       name,
       chainId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
@@ -51,7 +51,7 @@ export class TransactionFormatter {
     };
 
     if (clonedTxParams.nonce === undefined)
-      clonedTxParams.nonce = (await this.providerProxy.request<number>({
+      clonedTxParams.nonce = (await this.providerProxy.request<[string, string], number>({
         method: "eth_getTransactionCount",
         params: [txParams.from, "latest"],
       })) as number;
@@ -157,14 +157,14 @@ export class TransactionFormatter {
   }
 
   private async fetchEthGasPriceEstimate(): Promise<{ gasPrice: string }> {
-    const gasPrice = (await this.providerProxy.request<string>({ method: "eth_gasPrice", params: [] })) as string;
+    const gasPrice = (await this.providerProxy.request<[], string>({ method: "eth_gasPrice", params: [] })) as string;
     return {
       gasPrice: hexWEIToDecGWEI(gasPrice).toString(),
     };
   }
 
   private async getEIP1559Compatibility(): Promise<boolean> {
-    const latestBlock = await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
+    const latestBlock = await this.providerProxy.request<[string, boolean], Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
     const supportsEIP1559 = latestBlock && latestBlock.baseFeePerGas !== undefined;
 
     return !!supportsEIP1559;
@@ -260,7 +260,7 @@ export class TransactionFormatter {
     delete txParams.gasPrice;
     delete txParams.maxFeePerGas;
     delete txParams.maxPriorityFeePerGas;
-    const gas = (await this.providerProxy.request<string>({ method: "eth_estimateGas", params: [txParams] })) as string;
+    const gas = (await this.providerProxy.request<[TransactionParams], string>({ method: "eth_estimateGas", params: [txParams] })) as string;
     return gas;
   }
 
@@ -268,7 +268,10 @@ export class TransactionFormatter {
     blockGasLimit: string;
     estimatedGasHex: string;
   }> {
-    const block = (await this.providerProxy.request<Block>({ method: "eth_getBlockByNumber", params: ["latest", false] })) as Block;
+    const block = (await this.providerProxy.request<[string, boolean], Block>({
+      method: "eth_getBlockByNumber",
+      params: ["latest", false],
+    })) as Block;
     // fallback to block gasLimit
     const blockGasLimitBN = hexToBn(block.gasLimit as string);
     const saferGasLimitBN = BnMultiplyByFraction(blockGasLimitBN, 19, 20);
@@ -309,7 +312,7 @@ export class TransactionFormatter {
       txCategory = TRANSACTION_TYPES.DEPLOY_CONTRACT;
     } else {
       try {
-        code = (await this.providerProxy.request<string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
+        code = (await this.providerProxy.request<[AddressLike, string], string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
       } catch (error) {
         log.warn(error);
       }

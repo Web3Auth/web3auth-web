@@ -1,8 +1,8 @@
+import type { JsonRpcError } from "@metamask/rpc-errors";
 import TorusEmbed, { LOGIN_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
 import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { EthereumRpcError } from "eth-rpc-errors";
 import log from "loglevel";
 
 import { TorusWalletPluginError } from "./errors";
@@ -105,10 +105,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     let privateKey: string | undefined;
     try {
       // it should throw if provider doesn't support `eth_private_key` function
-      privateKey = (await this.provider.request<string>({ method: "eth_private_key" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "eth_private_key" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, TorusWalletPluginError.unsupportedAdapter());
-      if ((error as EthereumRpcError<unknown>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
+      if ((error as JsonRpcError<never>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
       throw error;
     }
     if (!privateKey) throw TorusWalletPluginError.web3AuthNotConnected();
@@ -201,10 +201,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw TorusWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "eth_accounts" }),
-      this.provider.request<string>({ method: "eth_chainId" }),
-      this.provider.request<string>({ method: "eth_private_key" }),
-      this.provider.request<CustomChainConfig>({ method: "eth_provider_config" }),
+      this.provider.request<never, string[]>({ method: "eth_accounts" }),
+      this.provider.request<never, string>({ method: "eth_chainId" }),
+      this.provider.request<never, string>({ method: "eth_private_key" }),
+      this.provider.request<never, CustomChainConfig>({ method: "eth_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),

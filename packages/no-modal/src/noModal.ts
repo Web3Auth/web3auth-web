@@ -10,9 +10,10 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  IBaseProvider,
+  IProvider,
   IWeb3Auth,
   log,
-  SafeEventEmitterProvider,
   storageAvailable,
   UserAuthInfo,
   UserInfo,
@@ -113,14 +114,14 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return Boolean(this.connectedAdapterName);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.commonJRPCProvider) {
-      return this.commonJRPCProvider.provider;
+      return this.commonJRPCProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -211,11 +212,11 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<SafeEventEmitterProvider | null> {
+  async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null> {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     const provider = await this.walletAdapters[walletName].connect(loginParams);
-    this.commonJRPCProvider.updateProviderEngineProxy(provider as SafeEventEmitterProvider);
+    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
     return this.provider;
   }
 
@@ -250,7 +251,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = this.walletAdapters[data.adapter];
-      this.commonJRPCProvider.updateProviderEngineProxy(provider as SafeEventEmitterProvider);
+      this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);

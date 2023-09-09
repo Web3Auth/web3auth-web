@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.77.3",
+    "@solana/web3.js": "^1.78.4",
     "@taquito/signer": "^13.0.1",
     "@taquito/taquito": "^13.0.1",
     "@taquito/utils": "^13.0.1",
@@ -13,10 +13,9 @@
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",
-    "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web3": "^1.10.0"
+    "web3": "^4.1.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -44,22 +43,20 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
+  },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.2.8",
-    "@types/react-dom": "^18.2.4",
-    "assert": "^2.0.0",
+    "@types/node": "^20.5.9",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
     "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.0",
-    "https-browserify": "^1.0.0",
-    "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
     "react-scripts": "5.0.1",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "typescript": "^4.9.4",
-    "url": "^0.11.0",
-    "webpack-bundle-analyzer": "^4.9.0"
+    "typescript": "^5.2.2",
+    "webpack-bundle-analyzer": "^4.9.1"
   }
 }

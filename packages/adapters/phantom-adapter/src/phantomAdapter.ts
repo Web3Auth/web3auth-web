@@ -12,8 +12,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -45,14 +45,14 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.phantomProvider) {
-      return this.phantomProvider.provider;
+      return this.phantomProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -77,7 +77,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -87,7 +87,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
       if (!this._wallet.isConnected) {
         const handleDisconnect = this._wallet._handleDisconnect;
         try {
-          await new Promise<SafeEventEmitterProvider | null>((resolve, reject) => {
+          await new Promise<IProvider | null>((resolve, reject) => {
             const connect = async () => {
               await this.connectWithProvider(this._wallet as IPhantomWalletProvider);
               resolve(this.provider);
@@ -162,7 +162,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
-  private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<SafeEventEmitterProvider | null> {
+  private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<IProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;

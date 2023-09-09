@@ -1,9 +1,9 @@
+import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { ethErrors } from "eth-rpc-errors";
 
 import { createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { AddEthereumChainParameter, IChainSwitchHandlers } from "../../rpc/interfaces";
@@ -41,7 +41,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public async enable(): Promise<string[]> {
     if (!this.connector)
-      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
+      throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     await this.setupProvider(this.connector);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
@@ -53,10 +53,11 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
     if (!this.connector)
-      throw ethErrors.provider.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
+      throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
     this.configure({ chainConfig: currentChainConfig });
     await this.setupEngine(this.connector);
+    this.lookupNetwork(this.connector);
   }
 
   async addChain(chainConfig: CustomChainConfig): Promise<void> {
@@ -65,6 +66,10 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   // no need to implement this method in wallet connect v2.
   protected async lookupNetwork(_: ISignClient): Promise<string> {
+    const newChainId = this.config.chainConfig.chainId;
+    this.update({ chainId: newChainId });
+    this.emit("chainChanged", newChainId);
+    this.emit("connect", { chainId: newChainId });
     return this.config.chainConfig.chainId;
   }
 
@@ -164,7 +169,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         this.update({
           accounts: data,
         });
-        this.provider.emit("accountsChanged", data);
+        this.emit("accountsChanged", data);
       }
 
       if (event.name === "chainChanged") {

@@ -9,6 +9,14 @@ import Image from "./Image";
 import Loader from "./Loader";
 import WalletConnect from "./WalletConnect";
 
+declare global {
+  interface Window {
+    ethereum: {
+      isMetaMask?: boolean;
+    };
+  }
+}
+
 interface ExternalWalletsProps {
   hideExternalWallets: () => void;
   handleExternalWalletClick: (params: { adapter: string }) => void;
@@ -54,7 +62,7 @@ function formatMobileRegistryEntry(
   entry: IWalletConnectExtensionAdapter,
   walletConnectUri: string,
   os: os,
-  platform: platform = "mobile"
+  platform: "mobile" | "desktop" = "mobile"
 ): IMobileRegistryEntry {
   const universalLink = entry[platform].universal || "";
   const deepLink = entry[platform].native || "";
@@ -71,7 +79,7 @@ function formatMobileRegistry(
   registry: IWalletConnectExtensionAdapter[],
   walletConnectUri: string,
   os: os,
-  platform: platform = "mobile"
+  platform: "mobile" | "desktop" = "mobile"
 ): IMobileRegistryEntry[] {
   return Object.values<IWalletConnectExtensionAdapter>(registry)
     .filter((entry) => !!entry[platform].universal || !!entry[platform].native)
@@ -131,9 +139,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     const buttons: ExternalButton[] = [];
     // add wallet connect links
     if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile) {
-      let mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform);
+      let mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform as "mobile" | "desktop");
       if (deviceDetails.os === bowser.OS_MAP.iOS) {
-        if ((window as any).ethereum?.isMetaMask) {
+        if (window.ethereum?.isMetaMask) {
           // if metamask, use the metamask adapter directly
           mobileLinks = mobileLinks.filter((x) => x.name !== "MetaMask");
         }

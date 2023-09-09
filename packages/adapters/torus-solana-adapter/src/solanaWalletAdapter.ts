@@ -13,8 +13,8 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -58,14 +58,14 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     this.loginSettings = params.loginSettings || {};
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.solanaProvider) {
-      return this.solanaProvider?.provider || null;
+      return this.solanaProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
@@ -99,7 +99,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     if (!this.solanaProvider) throw WalletInitializationError.notReady("Torus wallet is not initialized");
@@ -110,8 +110,12 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       try {
         const torusInpageProvider = this.torusInstance.provider as unknown as ITorusWalletProvider;
         torusInpageProvider.sendTransaction = this.torusInstance.sendTransaction.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signAllTransactions = this.torusInstance.signAllTransactions.bind(this.torusInstance);
         torusInpageProvider.signMessage = this.torusInstance.signMessage.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signTransaction = this.torusInstance.signTransaction.bind(this.torusInstance);
         await this.solanaProvider.setupProvider(torusInpageProvider);
       } catch (error: unknown) {

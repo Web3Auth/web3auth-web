@@ -6,9 +6,9 @@ import {
   CHAIN_NAMESPACES,
   CustomChainConfig,
   getChainConfig,
+  IProvider,
   log,
   LoginMethodConfig,
-  SafeEventEmitterProvider,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -88,7 +88,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
       defaultLanguage,
       modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
-      web3AuthNetwork: this.options.web3AuthNetwork,
       loginGridCol: this.options.uiConfig?.loginGridCol || 3,
       primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });
@@ -175,7 +174,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (!this.modalConfig.adapters?.[adapter.name]?.loginMethods) return true;
       const mergedLoginMethods = getAdapterSocialLogins(
         adapter.name,
-        this.walletAdapters[adapter.name],
         (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
       );
       if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
@@ -227,7 +225,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  public async connect(): Promise<SafeEventEmitterProvider | null> {
+  public async connect(): Promise<IProvider | null> {
     // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
     // if already connected return provider
     if (this.connectedAdapterName && this.status === ADAPTER_STATUS.CONNECTED && this.provider) return this.provider;
@@ -276,11 +274,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (this.walletAdapters[adapterName].type === ADAPTER_CATEGORY.IN_APP) {
       this.loginModal.addSocialLogins(
         adapterName,
-        getAdapterSocialLogins(
-          adapterName,
-          this.walletAdapters[adapterName],
-          (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods
-        ),
+        getAdapterSocialLogins(adapterName, (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods),
         this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
         {
           ...this.options.uiConfig,

@@ -23,7 +23,7 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     const { chainNamespace, chainId } = this.chainConfig;
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "eth_accounts",
     });
     if (accounts && accounts.length > 0) {
@@ -47,7 +47,7 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
 
       const challenge = await signChallenge(payload, chainNamespace);
 
-      const signedMessage = await this.provider.request<string>({
+      const signedMessage = await this.provider.request<[string, string], string>({
         method: "personal_sign",
         params: [challenge, accounts[0]],
       });
@@ -71,7 +71,7 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<string[]>({
+    const accounts = await this.provider.request<never, string[]>({
       method: "eth_accounts",
     });
     if (accounts && accounts.length > 0) {

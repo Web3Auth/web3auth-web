@@ -1,7 +1,8 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
+// TODO: change whitelabel settings and pass ui whitelabel to openlogin.
+// capture whitelabel only once
 export interface UIConfig {
   /**
    * App name to display in the UI.
@@ -71,7 +72,6 @@ export interface UIConfig {
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
   adapterListener: SafeEventEmitter;
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
 }
 
 export const LOGIN_MODAL_EVENTS = {

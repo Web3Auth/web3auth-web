@@ -1,8 +1,8 @@
+import { rpcErrors } from "@metamask/rpc-errors";
 import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
-import { ethErrors } from "eth-rpc-errors";
 import { generateSeed, sign } from "ripple-keypairs";
-// import { ethErrors } from "eth-rpc-errors";
+// import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
 import ECDSA from "xrpl/dist/npm/ECDSA";
 
@@ -44,14 +44,14 @@ export async function getProviderHandlers({
       hash: string;
     }> => {
       const { transaction, multisign } = req.params || {};
-      if (!transaction) throw ethErrors.rpc.invalidParams("Invalid params, req.params.transaction is required");
+      if (!transaction) throw rpcErrors.invalidParams("Invalid params, req.params.transaction is required");
       const { publicKey, privateKey } = deriveKeypair(web3authKey);
       const wallet = new Wallet(publicKey, privateKey);
       return wallet.sign(transaction, multisign);
     },
     submitTransaction: async (req: JRPCRequest<{ transaction: Transaction }>): Promise<SubmitResponse> => {
       const { transaction } = req.params || {};
-      if (!transaction) throw ethErrors.rpc.invalidParams("Invalid params, req.params.transaction is required");
+      if (!transaction) throw rpcErrors.invalidParams("Invalid params, req.params.transaction is required");
       const { publicKey, privateKey } = deriveKeypair(web3authKey);
       const wallet = new Wallet(publicKey, privateKey);
       const res = await client.submit(transaction, { wallet });
@@ -59,7 +59,7 @@ export async function getProviderHandlers({
     },
     signMessage: async (req: JRPCRequest<{ message: string }>): Promise<{ signature: string }> => {
       const { message } = req.params || {};
-      if (!message) throw ethErrors.rpc.invalidParams("Invalid params, req.params.message is required");
+      if (!message) throw rpcErrors.invalidParams("Invalid params, req.params.message is required");
       const keyPair = deriveKeypair(web3authKey);
       const signature = sign(message, keyPair.privateKey);
       return { signature };

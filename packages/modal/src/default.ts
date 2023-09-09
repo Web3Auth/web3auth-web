@@ -1,6 +1,6 @@
 import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlogin-utils";
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
-import { CommonPrivateKeyProvider, IBaseProvider } from "@web3auth/base-provider";
+import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IBaseProvider, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
+import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 
 export async function getPrivateKeyProvider(chainConfig: CustomChainConfig): Promise<IBaseProvider<string>> {
   if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {

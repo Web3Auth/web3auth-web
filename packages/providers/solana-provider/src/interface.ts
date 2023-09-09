@@ -14,7 +14,7 @@ export interface ISolanaWallet {
   signTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
   signAllTransactions?<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
   signMessage(message: Uint8Array, display?: string): Promise<Uint8Array>;
-  request<T>(args: RequestArguments): Promise<T>;
+  request<T, U>(args: RequestArguments<T>): Promise<U>;
 }
 
 export interface IPhantomWalletProvider extends SafeEventEmitter {
@@ -24,7 +24,7 @@ export interface IPhantomWalletProvider extends SafeEventEmitter {
   signTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
   signAllTransactions?<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
   signMessage(message: Uint8Array): Promise<{ signature: Uint8Array; publicKey: BN }>;
-  request<T>(args: RequestArguments): Promise<T>;
+  request<T, U>(args: RequestArguments<T>): Promise<U>;
   _handleDisconnect(...args: unknown[]): void;
   connect(): Promise<void>;
   disconnect(): Promise<void>;

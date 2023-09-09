@@ -39,8 +39,8 @@
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^4.7.2",
-    "@toruslabs/openlogin-utils": "^4.7.0",
+    "@toruslabs/openlogin": "^5.0.3",
+    "@toruslabs/openlogin-utils": "^5.0.2",
     "@web3auth/base": "^6.1.7",
     "@web3auth/base-provider": "^6.1.7",
     "lodash.merge": "^4.6.2"
@@ -62,7 +62,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "engines": {
-    "node": ">=16.18.1",
-    "npm": ">=8.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

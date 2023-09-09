@@ -1,7 +1,7 @@
+import { providerErrors } from "@metamask/rpc-errors";
 import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
-import { ethErrors } from "eth-rpc-errors";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 import { createJsonRpcClient } from "./jrpcClient";
@@ -27,10 +27,16 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
+    const newChainId = this.config.chainConfig.chainId;
+    if (this.state.chainId !== newChainId) {
+      this.emit("chainChanged", newChainId);
+      this.emit("connect", { chainId: newChainId });
+    }
+    this.update({ chainId: this.config.chainConfig.chainId });
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
@@ -41,6 +47,7 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
 
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);

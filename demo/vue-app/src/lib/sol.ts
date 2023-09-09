@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
 const getConnection = async (provider: SafeEventEmitterProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
-  const connectionConfig = await solanaWallet.request<CustomChainConfig>({ method: "solana_provider_config", params: [] });
+  const connectionConfig = await solanaWallet.request<never, CustomChainConfig>({ method: "solana_provider_config" });
   const conn = new Connection(connectionConfig.rpcTarget);
   return conn;
 };
