@@ -15,7 +15,7 @@ import {
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { getAdapterSocialLogins, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
   defaultEvmDappModalConfig,
@@ -26,7 +26,6 @@ import {
 } from "./config";
 import { getDefaultAdapterModule, getPrivateKeyProvider } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
-import { getUserLanguage } from "./utils";
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
@@ -77,19 +76,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       throw new Error(`Invalid chainNamespace provided: ${providedChainConfig.chainNamespace}`);
     }
 
-    // get userLanguage
-    const defaultLanguage = getUserLanguage(this.options.uiConfig?.defaultLanguage);
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
 
     this.loginModal = new LoginModal({
-      theme: this.options.uiConfig?.theme,
-      appName: this.options.uiConfig?.appName || "blockchain",
-      appLogo: this.options.uiConfig?.appLogo || "",
+      ...this.options.uiConfig,
       adapterListener: this,
-      displayErrorsOnModal: this.options.uiConfig?.displayErrorsOnModal,
-      defaultLanguage,
-      modalZIndex: this.options.uiConfig?.modalZIndex || "99998",
-      loginGridCol: this.options.uiConfig?.loginGridCol || 3,
-      primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
     });
     this.subscribeToLoginModalEvents();
   }
@@ -131,6 +123,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           clientId: this.options.clientId,
           sessionTime: this.options.sessionTime,
           web3AuthNetwork: this.options.web3AuthNetwork,
+          uiConfig: this.options.uiConfig,
         });
 
         this.walletAdapters[adapterName] = ad;
@@ -159,7 +152,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
           if (!openloginAdapter.privateKeyProvider) {
             const currentPrivateKeyProvider = await getPrivateKeyProvider(openloginAdapter.chainConfigProxy as CustomChainConfig);
-            openloginAdapter.setAdapterSettings({ privateKeyProvider: currentPrivateKeyProvider });
+            openloginAdapter.setAdapterSettings({ privateKeyProvider: currentPrivateKeyProvider, whiteLabel: this.options.uiConfig });
           }
         }
 

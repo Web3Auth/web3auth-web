@@ -30,6 +30,7 @@ import {
   SocialLoginEventType,
   UIConfig,
 } from "./interfaces";
+import { getUserLanguage } from "./utils";
 
 function createWrapper(parentZIndex: string): HTMLElement {
   const existingWrapper = document.getElementById("w3a-parent-container");
@@ -48,44 +49,37 @@ function createWrapper(parentZIndex: string): HTMLElement {
 }
 
 class LoginModal extends SafeEventEmitter {
-  private appName: string;
-
-  private appLogo: string;
-
-  private modalZIndex: string;
-
-  private isDark: boolean;
+  private uiConfig: UIConfig;
 
   private stateEmitter: SafeEventEmitter;
 
-  private displayErrorsOnModal = true;
-
-  private defaultLanguage: string;
-
-  constructor({ appName, appLogo, adapterListener, theme = "auto", displayErrorsOnModal = true, defaultLanguage, modalZIndex = "99998" }: UIConfig) {
+  constructor(uiConfig: UIConfig) {
     super();
-    this.appName = appName || "blockchain";
-    this.modalZIndex = modalZIndex || "99998";
+    this.uiConfig = uiConfig;
 
-    // set theme
-    if (theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      this.isDark = true;
-    } else {
-      this.isDark = false;
-    }
-
-    this.appLogo = appLogo || (this.isDark ? DEFAULT_LOGO_DARK : DEFAULT_LOGO_LIGHT);
+    if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
+    if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
+    if (!uiConfig.mode) this.uiConfig.mode = "auto";
+    if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
+    if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
+    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = "en";
+    if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
+    if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
+    if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
+    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
     this.stateEmitter = new SafeEventEmitter();
-    this.displayErrorsOnModal = displayErrorsOnModal;
-    this.defaultLanguage = defaultLanguage;
-    this.subscribeCoreEvents(adapterListener);
+    this.subscribeCoreEvents(this.uiConfig.adapterListener);
+  }
+
+  get isDark(): boolean {
+    return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
 
-    const useLang = this.defaultLanguage || "en";
+    const useLang = this.uiConfig.defaultLanguage || "en";
     // Load new language resource
 
     if (useLang === "de") {
@@ -170,7 +164,7 @@ class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      const container = createWrapper(this.modalZIndex);
+      const container = createWrapper(this.uiConfig.modalZIndex);
       if (darkState.isDark) {
         container.classList.add("dark");
       } else {
@@ -186,8 +180,8 @@ class LoginModal extends SafeEventEmitter {
             handleShowExternalWallets={this.handleShowExternalWallets}
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
-            appLogo={this.appLogo}
-            appName={this.appName}
+            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+            appName={this.uiConfig.appName}
           />
         </ThemedContext.Provider>
       );
@@ -310,7 +304,7 @@ class LoginModal extends SafeEventEmitter {
     listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
       if (error.code === 5000) {
-        if (this.displayErrorsOnModal)
+        if (this.uiConfig.displayErrorsOnModal)
           this.setState({
             modalVisibility: true,
             postLoadingMessage: error.message || "modal.post-loading.something-wrong",

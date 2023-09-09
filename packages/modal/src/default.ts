@@ -1,6 +1,7 @@
 import type { OPENLOGIN_NETWORK_TYPE, OpenLoginOptions } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IBaseProvider, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
+import { UIConfig } from "@web3auth/ui";
 
 export async function getPrivateKeyProvider(chainConfig: CustomChainConfig): Promise<IBaseProvider<string>> {
   if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
@@ -24,8 +25,9 @@ export const getDefaultAdapterModule = async (params: {
   customChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
   sessionTime?: number;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+  uiConfig?: Omit<UIConfig, "adapterListener">;
 }): Promise<IAdapter<unknown>> => {
-  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork } = params;
+  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork, uiConfig } = params;
   if (!Object.values(CHAIN_NAMESPACES).includes(customChainConfig.chainNamespace))
     throw new Error(`Invalid chainNamespace: ${customChainConfig.chainNamespace}`);
   const finalChainConfig = {
@@ -73,7 +75,7 @@ export const getDefaultAdapterModule = async (params: {
       ...defaultOptions,
       clientId,
       chainConfig: { ...finalChainConfig },
-      adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork },
+      adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork, whiteLabel: uiConfig },
       sessionTime,
       web3AuthNetwork,
       privateKeyProvider,

@@ -1,47 +1,16 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 // TODO: change whitelabel settings and pass ui whitelabel to openlogin.
 // capture whitelabel only once
-export interface UIConfig {
-  /**
-   * App name to display in the UI.
-   */
-  appName?: string;
-
-  /**
-   * Logo for your app.
-   */
-  appLogo?: string;
-
-  /**
-   * theme for the modal
-   *
-   * @defaultValue `auto`
-   */
-  theme?: "light" | "dark" | "auto";
-
+export interface UIConfig extends WhiteLabelData {
   /**
    * order of how login methods are shown
    *
    * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
    */
   loginMethodsOrder?: string[];
-
-  /**
-   * language which will be used by web3auth. app will use browser language if not specified. if language is not supported it will use "en"
-   * en: english
-   * de: german
-   * ja: japanese
-   * ko: korean
-   * zh: mandarin
-   * es: spanish
-   * fr: french
-   * pt: portuguese
-   * nl: dutch
-   *
-   */
-  defaultLanguage?: string;
 
   /**
    * Z-index of the modal and iframe
