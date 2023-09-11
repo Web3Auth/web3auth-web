@@ -67,6 +67,7 @@ export interface IBaseProvider<T> extends IProvider {
   setupProvider(provider: T): Promise<void>;
   addChain(chainConfig: CustomChainConfig): void;
   switchChain(params: { chainId: string }): Promise<void>;
+  updateProviderEngineProxy(provider: SafeEventEmitterProvider): void;
 }
 
 export interface IAdapter<T> extends SafeEventEmitter {
