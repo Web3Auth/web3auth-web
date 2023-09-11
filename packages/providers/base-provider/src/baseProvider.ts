@@ -114,17 +114,17 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return chainConfig;
   }
 
-  protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
-    return this._providerEngineProxy;
-  }
-
-  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
+  }
+
+  protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
+    return this._providerEngineProxy;
   }
 
   abstract setupProvider(provider: P): Promise<void>;

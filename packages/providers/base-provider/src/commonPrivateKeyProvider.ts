@@ -57,6 +57,15 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     this.updateProviderEngineProxy(provider);
   }
 
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
+    if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this._providerEngineProxy as any).setTarget(provider);
+    } else {
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
+    }
+  }
+
   public async switchChain(_: { chainId: string }): Promise<void> {
     return Promise.resolve();
   }
@@ -67,15 +76,6 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
 
   protected async lookupNetwork(): Promise<string> {
     return Promise.resolve("");
-  }
-
-  protected updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
-    }
   }
 
   private getPrivKeyMiddleware(privKey: string): JRPCMiddleware<unknown, unknown> {
