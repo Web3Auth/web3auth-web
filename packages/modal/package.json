@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/modal.cjs.js",
@@ -19,18 +19,18 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^7.0.0",
-    "@web3auth/base-provider": "^7.0.0",
-    "@web3auth/ethereum-provider": "^7.0.0",
-    "@web3auth/metamask-adapter": "^7.0.0",
-    "@web3auth/no-modal": "^7.0.0",
-    "@web3auth/openlogin-adapter": "^7.0.0",
-    "@web3auth/phantom-adapter": "^7.0.0",
-    "@web3auth/solana-provider": "^7.0.0",
-    "@web3auth/torus-evm-adapter": "^7.0.0",
-    "@web3auth/torus-solana-adapter": "^7.0.0",
-    "@web3auth/ui": "^7.0.0",
-    "@web3auth/wallet-connect-v2-adapter": "^7.0.0"
+    "@web3auth/base": "^7.0.1",
+    "@web3auth/base-provider": "^7.0.1",
+    "@web3auth/ethereum-provider": "^7.0.1",
+    "@web3auth/metamask-adapter": "^7.0.1",
+    "@web3auth/no-modal": "^7.0.1",
+    "@web3auth/openlogin-adapter": "^7.0.1",
+    "@web3auth/phantom-adapter": "^7.0.1",
+    "@web3auth/solana-provider": "^7.0.1",
+    "@web3auth/torus-evm-adapter": "^7.0.1",
+    "@web3auth/torus-solana-adapter": "^7.0.1",
+    "@web3auth/ui": "^7.0.1",
+    "@web3auth/wallet-connect-v2-adapter": "^7.0.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
