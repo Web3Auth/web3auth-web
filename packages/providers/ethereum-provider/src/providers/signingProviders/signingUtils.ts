@@ -82,7 +82,7 @@ async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<
   const sig = await sign(msgHash, Buffer.concat([prefix, message]));
   let modifiedV = sig.v;
   if (modifiedV <= 1) {
-    modifiedV = modifiedV = 27;
+    modifiedV = modifiedV + 27;
   }
   const serialized = concatSig(toBuffer(modifiedV), sig.r, sig.s);
   return serialized;
