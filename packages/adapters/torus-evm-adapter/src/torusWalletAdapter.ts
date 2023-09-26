@@ -110,7 +110,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.TORUS_EVM });
     try {
       await this.torusInstance.login(this.loginSettings);
-      const { chainId } = this.torusInstance.provider;
+      const chainId = await this.torusInstance.provider.request<string>({ method: "eth_chainId" });
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
         const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
         const network: NetworkInterface = {

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
-const getConnection = async (provider: SafeEventEmitterProvider): Promise<Connection> => {
+const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
   const connectionConfig = await solanaWallet.request<never, CustomChainConfig>({ method: "solana_provider_config" });
@@ -19,7 +19,7 @@ function getNewTx(publicKeys, blockhash) {
   return new Transaction({ recentBlockhash: blockhash, feePayer: new PublicKey(publicKeys![0]) }).add(inst);
 }
 
-export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<string[] | undefined> => {
+export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<string[] | undefined> => {
   try {
     const solWeb3 = new SolanaWallet(provider);
     const acc = await solWeb3.requestAccounts();
@@ -30,7 +30,7 @@ export const getAccounts = async (provider: SafeEventEmitterProvider, uiConsole:
     uiConsole("error", error);
   }
 };
-export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: any): Promise<void> => {
+export const getBalance = async (provider: IProvider, uiConsole: any): Promise<void> => {
   try {
     const conn = await getConnection(provider);
     const solanaWallet = new SolanaWallet(provider);
@@ -44,7 +44,7 @@ export const getBalance = async (provider: SafeEventEmitterProvider, uiConsole: 
   }
 };
 
-export const signAndSendTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signAndSendTransaction = async (provider: IProvider, uiConsole: any) => {
   try {
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
@@ -71,7 +71,7 @@ export const signAndSendTransaction = async (provider: SafeEventEmitterProvider,
   }
 };
 
-export const signTransaction = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signTransaction = async (provider: IProvider, uiConsole: any) => {
   try {
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
@@ -101,7 +101,7 @@ export const signTransaction = async (provider: SafeEventEmitterProvider, uiCons
   }
 };
 
-export const signMessage = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signMessage = async (provider: IProvider, uiConsole: any) => {
   try {
     const solWeb3 = new SolanaWallet(provider);
     const msg = Buffer.from("Test Signing Message ", "utf8");
@@ -113,7 +113,7 @@ export const signMessage = async (provider: SafeEventEmitterProvider, uiConsole:
   }
 };
 
-export const signAllTransactions = async (provider: SafeEventEmitterProvider, uiConsole: any) => {
+export const signAllTransactions = async (provider: IProvider, uiConsole: any) => {
   try {
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);

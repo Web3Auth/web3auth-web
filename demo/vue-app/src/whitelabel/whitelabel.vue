@@ -77,7 +77,8 @@ export default defineComponent({
         this.loading = true;
         this.web3auth = new Web3Auth({
           uiConfig: {
-            appLogo: this.uiConfig.logoUrl,
+            logoLight: this.uiConfig.logoUrl,
+            logoDark: this.uiConfig.logoUrl,
             theme: this.uiConfig.theme,
             loginMethodsOrder: this.uiConfig.loginMethodsOrder,
             defaultLanguage: this.uiConfig.defaultLanguage,
