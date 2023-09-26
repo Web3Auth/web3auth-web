@@ -15,7 +15,7 @@
     "react-dom": "^18.2.0",
     "react-loader-spinner": "^5.3.3",
     "web3": "^1.7.5",
-    "webpack-bundle-analyzer": "^4.6.1"
+    "webpack-bundle-analyzer": "^4.9.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
