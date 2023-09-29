@@ -1,6 +1,7 @@
-import { BaseConfig, BaseController, BaseState, createEventEmitterProxy, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import { rpcErrors } from "@metamask/rpc-errors";
+import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
+import { SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, WalletInitializationError } from "@web3auth-mpc/base";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IBaseProvider } from "./IBaseProvider";
 
@@ -45,8 +46,8 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw ethErrors.rpc.invalidParams("chainId is required");
-    if (!chainConfig.rpcTarget) throw ethErrors.rpc.invalidParams("chainId is required");
+    if (!chainConfig.chainId) throw rpcErrors.invalidParams("chainId is required");
+    if (!chainConfig.rpcTarget) throw rpcErrors.invalidParams("chainId is required");
     this.configure({
       networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
     } as C);
@@ -54,7 +55,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   public getChainConfig(chainId: string): CustomChainConfig | null {
     const chainConfig = this.config.networks?.[chainId];
-    if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
+    if (!chainConfig) throw rpcErrors.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
     return chainConfig;
   }
 

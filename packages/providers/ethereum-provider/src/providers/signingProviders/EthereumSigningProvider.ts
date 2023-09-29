@@ -1,8 +1,7 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine, JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
+import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
+import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth-mpc/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth-mpc/base-provider";
-import { ethErrors } from "eth-rpc-errors";
 
 import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers } from "../../rpc/interfaces";
@@ -47,12 +46,18 @@ export class EthereumSigningProvider extends BaseProvider<
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
-      throw ethErrors.provider.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
+      throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.signMethods);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
-  public async setupProvider({ sign, getPublic }): Promise<void> {
+  public async setupProvider({
+    sign,
+    getPublic,
+  }: {
+    sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+    getPublic: () => Promise<Buffer>;
+  }): Promise<void> {
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
@@ -83,10 +88,10 @@ export class EthereumSigningProvider extends BaseProvider<
       getPublic: () => Promise<Buffer>;
     };
   }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const currentSignMethods = this.state.signMethods;
     if (!currentSignMethods) {
-      throw ethErrors.provider.custom({ message: "signing methods are unavailable ", code: 4092 });
+      throw providerErrors.custom({ message: "signing methods are unavailable ", code: 4092 });
     }
     const currentPubKey = (await currentSignMethods.getPublic()).toString("hex");
     const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
@@ -99,28 +104,28 @@ export class EthereumSigningProvider extends BaseProvider<
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const chainConfig = this.getChainConfig(params.chainId);
     this.update({
       chainId: "loading",
     });
     this.configure({ chainConfig });
     if (!this.state.signMethods) {
-      throw ethErrors.provider.custom({ message: "sign methods are undefined", code: 4902 });
+      throw providerErrors.custom({ message: "sign methods are undefined", code: 4902 });
     }
     await this.setupProvider(this.state.signMethods);
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this._providerEngineProxy) throw ethErrors.provider.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
-    if (!chainId) throw ethErrors.rpc.invalidParams("chainId is required while lookupNetwork");
+    if (!chainId) throw rpcErrors.invalidParams("chainId is required while lookupNetwork");
     const network = await this._providerEngineProxy.request<string[], string>({
       method: "net_version",
       params: [],
     });
 
-    if (parseInt(chainId, 16) !== parseInt(network, 10)) throw ethErrors.provider.chainDisconnected(`Invalid network, net_version is: ${network}`);
+    if (parseInt(chainId, 16) !== parseInt(network, 10)) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
     if (this.state.chainId !== chainId) {
       this._providerEngineProxy.emit("chainChanged", chainId);
       this._providerEngineProxy.emit("connect", { chainId });

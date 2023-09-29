@@ -1,10 +1,10 @@
 import { isValidAddress } from "@ethereumjs/util";
 import { SignTypedDataVersion, TYPED_MESSAGE_SCHEMA, TypedDataV1Field, typedSignatureHash } from "@metamask/eth-sig-util";
+import { rpcErrors } from "@metamask/rpc-errors";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth-mpc/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
-import { ethErrors } from "eth-rpc-errors";
 import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../rpc/interfaces";
@@ -72,7 +72,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
       typeof parameters.from === "string" && isValidAddress(parameters.from),
       '"from" field must be a valid, lowercase, hexadecimal Ethereum address string.'
     );
-    let data = null;
+    let data: any = null;
     let chainId = null;
     switch ((parameters as TypedMessageParams<unknown>).version) {
       case SignTypedDataVersion.V1:
@@ -115,9 +115,9 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
       default:
         assert.fail(`Unknown typed data version "${(parameters as TypedMessageParams<unknown>).version}"`);
     }
-  } catch (error) {
-    throw ethErrors.rpc.invalidInput({
-      message: error?.message,
+  } catch (error: unknown) {
+    throw rpcErrors.invalidInput({
+      message: (error as Error)?.message,
     });
   }
 };

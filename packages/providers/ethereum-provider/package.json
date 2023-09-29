@@ -19,25 +19,25 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^3.0.0",
-    "@ethereumjs/rlp": "^4.0.0",
-    "@ethereumjs/tx": "^4.0.0",
-    "@ethereumjs/util": "^8.0.0",
-    "@metamask/eth-sig-util": "^5.0.0",
-    "@toruslabs/base-controllers": "^2.2.6",
-    "@toruslabs/http-helpers": "^3.2.0",
-    "@toruslabs/openlogin-jrpc": "^2.6.0",
-    "@walletconnect/types": "~1.8.0",
+    "@ethereumjs/common": "^4.0.0",
+    "@ethereumjs/rlp": "^5.0.0",
+    "@ethereumjs/tx": "^5.0.0",
+    "@ethereumjs/util": "^9.0.0",
+    "@metamask/rpc-errors": "^6.0.0",
+    "@metamask/eth-sig-util": "^7.0.0",
+    "@toruslabs/base-controllers": "^4.1.0",
+    "@toruslabs/http-helpers": "^5.0.0",
+    "@toruslabs/openlogin-jrpc": "^5.1.0",
+    "@walletconnect/types": "~2.10.1",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-provider": "^2.1.9",
-    "assert": "^2.0.0",
-    "bignumber.js": "^9.1.0",
+    "assert": "^2.1.0",
+    "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
-    "eth-rpc-errors": "^4.0.3",
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {
-    "@types/bn.js": "^5.1.1",
+    "@types/bn.js": "^5.1.2",
     "@types/json-rpc-random-id": "^1.0.1"
   },
   "peerDependencies": {

@@ -1,11 +1,11 @@
-import { RLP } from "@ethereumjs/rlp";
+// import { RLP } from "@ethereumjs/rlp";
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
-import { bufArrToArr, hashPersonalMessage, intToBuffer, isHexString, publicToAddress, stripHexPrefix, toBuffer } from "@ethereumjs/util";
+import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
-import { concatSig, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { providerErrors } from "@metamask/rpc-errors";
+import { concatSig } from "@toruslabs/base-controllers";
+import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth-mpc/base";
-import { ethErrors } from "eth-rpc-errors";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "../TransactionFormatter";
@@ -32,14 +32,14 @@ async function signTx(
     hackApplied = true;
   }
 
-  const msgHash = unsignedEthTx.getMessageToSign(true);
-  let rawMessage = unsignedEthTx.getMessageToSign(false);
-  if (Array.isArray(rawMessage)) {
-    // legacy tx, rlp encode it
-    rawMessage = Buffer.from(RLP.encode(bufArrToArr(rawMessage)));
-  }
+  const msgHash = unsignedEthTx.getMessageToSign() as any;
+  // let rawMessage = unsignedEthTx.getMessageToSign();
+  // if (Array.isArray(rawMessage)) {
+  //   // legacy tx, rlp encode it
+  //   rawMessage = Buffer.from(RLP.encode(bufArrToArr(rawMessage)));
+  // }
 
-  const { v, r, s } = await sign(msgHash, rawMessage);
+  const { v, r, s } = await sign(Buffer.from(msgHash));
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
@@ -65,12 +65,12 @@ async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
   }
-  const rawMsgSig = concatSig(intToBuffer(modifiedV), msgSig.r, msgSig.s);
+  const rawMsgSig = concatSig(Buffer.from(intToBytes(modifiedV)), msgSig.r, msgSig.s);
   return rawMsgSig;
 }
 
-function legacyToBuffer(value) {
-  return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBuffer(value);
+function legacyToBuffer(value: any) {
+  return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBytes(value);
 }
 async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   if (data === null || data === undefined) {
@@ -79,16 +79,16 @@ async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<
   const message = legacyToBuffer(data);
   const msgHash = hashPersonalMessage(message);
   const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${message.length}`, "utf-8");
-  const sig = await sign(msgHash, Buffer.concat([prefix, message]));
+  const sig = await sign(Buffer.from(msgHash), Buffer.concat([prefix, message]));
   let modifiedV = sig.v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
   }
-  const serialized = concatSig(toBuffer(modifiedV), sig.r, sig.s);
+  const serialized = concatSig(Buffer.from(toBytes(modifiedV)), sig.r, sig.s);
   return serialized;
 }
 
-function validateVersion(version, allowedVersions) {
+function validateVersion(version: string, allowedVersions: string[]) {
   if (!Object.keys(SignTypedDataVersion).includes(version)) {
     throw new Error(`Invalid version: '${version}'`);
   } else if (allowedVersions && !allowedVersions.includes(version)) {
@@ -96,7 +96,11 @@ function validateVersion(version, allowedVersions) {
   }
 }
 
-async function signTypedData(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data, version) {
+async function signTypedData(
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
+  data: any,
+  version: SignTypedDataVersion
+) {
   validateVersion(version, undefined); // Note: this is intentional;
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
@@ -110,7 +114,7 @@ async function signTypedData(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise
     modifiedV = modifiedV + 27;
   }
 
-  return concatSig(toBuffer(modifiedV), r, s);
+  return concatSig(Buffer.from(toBytes(modifiedV)), r, s);
 }
 
 export function getProviderHandlers({
@@ -127,10 +131,10 @@ export function getProviderHandlers({
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => {
       const pubKey = await getPublic();
-      return [`0x${publicToAddress(pubKey).toString("hex")}`];
+      return [`0x${Buffer.from(publicToAddress(pubKey)).toString("hex")}`];
     },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
-      throw ethErrors.provider.custom({
+      throw providerErrors.custom({
         message: "Provider cannot return private key",
         code: 4902,
       });
@@ -138,7 +142,7 @@ export function getProviderHandlers({
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -152,7 +156,7 @@ export function getProviderHandlers({
     processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -171,7 +175,7 @@ export function getProviderHandlers({
       log.debug("processTypedMessage", msgParams);
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -190,7 +194,7 @@ export function getProviderHandlers({
       log.debug("processTypedMessageV3", msgParams);
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -205,7 +209,7 @@ export function getProviderHandlers({
       log.debug("processTypedMessageV4", msgParams);
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
-        throw ethErrors.provider.custom({
+        throw providerErrors.custom({
           message: "Provider is not initialized",
           code: 4902,
         });
@@ -218,14 +222,14 @@ export function getProviderHandlers({
     },
     processEncryptionPublicKey: async (address: string, _: JRPCRequest<unknown>): Promise<string> => {
       log.info("processEncryptionPublicKey", address);
-      throw ethErrors.provider.custom({
+      throw providerErrors.custom({
         message: "Provider cannot encryption public key",
         code: 4902,
       });
     },
     processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
       log.info("processDecryptMessage", msgParams);
-      throw ethErrors.provider.custom({
+      throw providerErrors.custom({
         message: "Provider cannot decrypt",
         code: 4902,
       });

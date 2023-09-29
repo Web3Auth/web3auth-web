@@ -4,7 +4,7 @@ export const CHAIN_NAMESPACES = {
   OTHER: "other",
 } as const;
 // eip155 for all evm chains
-export type ChainNamespaceType = typeof CHAIN_NAMESPACES[keyof typeof CHAIN_NAMESPACES];
+export type ChainNamespaceType = (typeof CHAIN_NAMESPACES)[keyof typeof CHAIN_NAMESPACES];
 
 export const ADAPTER_NAMESPACES = {
   EIP155: "eip155",
@@ -12,7 +12,7 @@ export const ADAPTER_NAMESPACES = {
   MULTICHAIN: "multichain",
 } as const;
 // eip155 for all evm chains
-export type AdapterNamespaceType = typeof ADAPTER_NAMESPACES[keyof typeof ADAPTER_NAMESPACES];
+export type AdapterNamespaceType = (typeof ADAPTER_NAMESPACES)[keyof typeof ADAPTER_NAMESPACES];
 
 export type CustomChainConfig = {
   chainNamespace: ChainNamespaceType;

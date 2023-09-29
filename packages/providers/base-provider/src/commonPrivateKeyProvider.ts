@@ -1,5 +1,14 @@
-import { createEventEmitterProxy, providerFromEngine, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCEngine, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
+import { createEventEmitterProxy } from "@toruslabs/base-controllers";
+import {
+  createAsyncMiddleware,
+  createScaffoldMiddleware,
+  JRPCEngine,
+  JRPCMiddleware,
+  JRPCRequest,
+  JRPCResponse,
+  providerFromEngine,
+  SafeEventEmitterProvider,
+} from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig } from "@web3auth-mpc/base";
 
 import { IBaseProvider } from "./IBaseProvider";
@@ -59,13 +68,13 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     return this.createPrivKeyMiddleware(middleware);
   }
 
-  private createPrivKeyMiddleware({ getPrivatekey }): JRPCMiddleware<unknown, unknown> {
-    async function getPrivatekeyHandler(_: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
+  private createPrivKeyMiddleware({ getPrivatekey }: { getPrivatekey: () => Promise<string> }): JRPCMiddleware<unknown, unknown> {
+    async function getPrivatekeyHandler(_: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
       res.result = await getPrivatekey();
     }
 
     return createScaffoldMiddleware({
       private_key: createAsyncMiddleware(getPrivatekeyHandler),
-    });
+    }) as JRPCMiddleware<unknown, unknown>;
   }
 }

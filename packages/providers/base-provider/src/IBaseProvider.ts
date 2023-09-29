@@ -1,4 +1,4 @@
-import { SafeEventEmitterProvider } from "@toruslabs/base-controllers";
+import type { SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import type { CustomChainConfig } from "@web3auth-mpc/base";
 export interface IBaseProvider<T> {
   provider: SafeEventEmitterProvider | null;
