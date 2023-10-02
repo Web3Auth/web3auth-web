@@ -25,7 +25,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -33,7 +33,8 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x"
+    "@babel/runtime": "^7.x",
+    "@solana/web3.js": "^1.x"
   },
   "dependencies": {
     "@web3auth-mpc/base": "^2.1.9",
@@ -57,5 +58,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

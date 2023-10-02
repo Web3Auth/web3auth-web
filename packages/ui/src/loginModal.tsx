@@ -1,4 +1,5 @@
 import "../css/web3auth.css";
+import "./localeImport";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
@@ -11,46 +12,149 @@ import {
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
-  WalletConnectV1Data,
+  WalletConnectV2Data,
   Web3AuthError,
 } from "@web3auth-mpc/base";
-import { render } from "react-dom";
+import i18n from "i18next";
+import { createRoot } from "react-dom/client";
 
 import Modal from "./components/Modal";
 import { ThemedContext } from "./context/ThemeContext";
-import { ExternalWalletEventType, LOGIN_MODAL_EVENTS, MODAL_STATUS, ModalState, SocialLoginEventType, UIConfig } from "./interfaces";
+import {
+  DEFAULT_LOGO_DARK,
+  DEFAULT_LOGO_LIGHT,
+  ExternalWalletEventType,
+  LOGIN_MODAL_EVENTS,
+  MODAL_STATUS,
+  ModalState,
+  SocialLoginEventType,
+  UIConfig,
+} from "./interfaces";
+import { getUserLanguage } from "./utils";
 
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
-function createWrapper(): HTMLElement {
+function createWrapper(parentZIndex: string): HTMLElement {
+  const existingWrapper = document.getElementById("w3a-parent-container");
+  if (existingWrapper) existingWrapper.remove();
+
+  const parent = document.createElement("section");
+  parent.classList.add("w3a-parent-container");
+  parent.setAttribute("id", "w3a-parent-container");
+  parent.style.zIndex = parentZIndex;
+  parent.style.position = "relative";
   const wrapper = document.createElement("section");
   wrapper.setAttribute("id", "w3a-container");
-  document.body.appendChild(wrapper);
+  parent.appendChild(wrapper);
+  document.body.appendChild(parent);
   return wrapper;
 }
 
-export default class LoginModal extends SafeEventEmitter {
-  private appLogo: string;
-
-  private version: string;
-
-  private isDark: boolean;
+class LoginModal extends SafeEventEmitter {
+  private uiConfig: UIConfig;
 
   private stateEmitter: SafeEventEmitter;
 
-  private displayErrorsOnModal = true;
-
-  constructor({ appLogo, version, adapterListener, theme = "light", displayErrorsOnModal = true }: UIConfig) {
+  constructor(uiConfig: UIConfig) {
     super();
-    this.appLogo = appLogo || DEFAULT_LOGO_URL;
-    this.version = version;
-    this.isDark = theme === "dark";
+    this.uiConfig = uiConfig;
+
+    if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
+    if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
+    if (!uiConfig.mode) this.uiConfig.mode = "auto";
+    if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
+    if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
+    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = "en";
+    if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
+    if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
+    if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
+    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+
     this.stateEmitter = new SafeEventEmitter();
-    this.displayErrorsOnModal = displayErrorsOnModal;
-    this.subscribeCoreEvents(adapterListener);
+    this.subscribeCoreEvents(this.uiConfig.adapterListener);
+  }
+
+  get isDark(): boolean {
+    return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
+
+    const useLang = this.uiConfig.defaultLanguage || "en";
+    // Load new language resource
+
+    if (useLang === "de") {
+      import("./i18n/german.json")
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "ja") {
+      import(`./i18n/japanese.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "ko") {
+      import(`./i18n/korean.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "zh") {
+      import(`./i18n/mandarin.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "es") {
+      import(`./i18n/spanish.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "fr") {
+      import(`./i18n/french.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "pt") {
+      import(`./i18n/portuguese.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === "nl") {
+      import(`./i18n/dutch.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    }
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
@@ -60,33 +164,45 @@ export default class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
+      const container = createWrapper(this.uiConfig.modalZIndex);
+      if (darkState.isDark) {
+        container.classList.add("dark");
+      } else {
+        container.classList.remove("dark");
+      }
 
-      render(
+      const root = createRoot(container);
+      root.render(
         <ThemedContext.Provider value={darkState}>
           <Modal
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={(externalWalletsInitialized: boolean) => this.handleShowExternalWallets(externalWalletsInitialized)}
-            handleExternalWalletClick={(params) => this.handleExternalWalletClick(params)}
-            handleSocialLoginClick={(params) => this.handleSocialLoginClick(params)}
-            appLogo={this.appLogo}
-            version={this.version}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
+            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+            appName={this.uiConfig.appName}
           />
-        </ThemedContext.Provider>,
-        createWrapper()
+        </ThemedContext.Provider>
       );
     });
   };
 
-  addSocialLogins = (adapter: WALLET_ADAPTER_TYPE, loginMethods: LoginMethodConfig, loginMethodsOrder: string[]): void => {
+  addSocialLogins = (
+    adapter: WALLET_ADAPTER_TYPE,
+    loginMethods: LoginMethodConfig,
+    loginMethodsOrder: string[],
+    uiConfig: Omit<UIConfig, "adapterListener">
+  ): void => {
     this.setState({
       socialLoginsConfig: {
         adapter,
         loginMethods,
         loginMethodsOrder,
+        uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder);
+    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
@@ -136,7 +252,7 @@ export default class LoginModal extends SafeEventEmitter {
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
-      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint },
+      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
     });
   };
 
@@ -153,8 +269,8 @@ export default class LoginModal extends SafeEventEmitter {
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
-    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V1) {
-      const walletConnectData = adapterData.data as WalletConnectV1Data;
+    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     }
   };
@@ -164,7 +280,7 @@ export default class LoginModal extends SafeEventEmitter {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
-      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V1 && data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         // const provider = data?.loginProvider || "";
 
         this.setState({ status: MODAL_STATUS.CONNECTING });
@@ -177,7 +293,7 @@ export default class LoginModal extends SafeEventEmitter {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,
-          postLoadingMessage: "You are connected with your account",
+          postLoadingMessage: "modal.post-loading.connected",
         });
       } else {
         this.setState({
@@ -188,10 +304,10 @@ export default class LoginModal extends SafeEventEmitter {
     listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
       if (error.code === 5000) {
-        if (this.displayErrorsOnModal)
+        if (this.uiConfig.displayErrorsOnModal)
           this.setState({
             modalVisibility: true,
-            postLoadingMessage: error.message || "Something went wrong!",
+            postLoadingMessage: error.message || "modal.post-loading.something-wrong",
             status: MODAL_STATUS.ERRORED,
           });
         else
@@ -214,3 +330,5 @@ export default class LoginModal extends SafeEventEmitter {
     });
   };
 }
+
+export default LoginModal;

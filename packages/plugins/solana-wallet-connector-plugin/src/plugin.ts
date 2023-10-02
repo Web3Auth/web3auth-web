@@ -1,8 +1,8 @@
+import type { JsonRpcError } from "@metamask/rpc-errors";
 import TorusEmbed, { PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth-mpc/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth-mpc/base-plugin";
-import type { Web3AuthCore } from "@web3auth-mpc/core";
-import type { EthereumRpcError } from "eth-rpc-errors";
+import type { Web3AuthNoModal } from "@web3auth-mpc/no-modal";
 import log from "loglevel";
 
 import { SolanaWalletPluginError } from "./errors";
@@ -15,13 +15,15 @@ export type ProviderInfo = {
 export class SolanaWalletConnectorPlugin implements IPlugin {
   name = "SOLANA_WALLET_CONNECTOR_PLUGIN";
 
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
+
   readonly pluginNamespace = PLUGIN_NAMESPACES.SOLANA;
 
   public torusWalletInstance: TorusEmbed;
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: Web3AuthCore | null = null;
+  private web3auth: Web3AuthNoModal | null = null;
 
   private userInfo: UserInfo | null = null;
 
@@ -45,17 +47,18 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: Web3AuthCore): Promise<void> {
+  async initWithWeb3Auth(web3auth: Web3AuthNoModal): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw SolanaWalletPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
+    if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw SolanaWalletPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
       this.provider = web3auth.provider;
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
     }
     this.web3auth = web3auth;
-    this.subscribeToWeb3AuthCoreEvents(web3auth);
+    this.subscribeToWeb3AuthNoModalEvents(web3auth);
 
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
 
@@ -105,10 +108,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
 
     try {
       // it should throw if provider doesn't support `solanaSecretKey` function
-      privateKey = (await this.provider.request<string>({ method: "solanaSecretKey" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "solanaSecretKey" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, SolanaWalletPluginError.unsupportedAdapter());
-      if ((error as EthereumRpcError<unknown>)?.code === -32004) throw SolanaWalletPluginError.unsupportedAdapter();
+      if ((error as JsonRpcError<never>)?.code === -32004) throw SolanaWalletPluginError.unsupportedAdapter();
       throw error;
     }
     if (!privateKey) throw SolanaWalletPluginError.web3AuthNotConnected();
@@ -117,6 +120,9 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
         privateKey,
         userInfo: {
           ...(this.userInfo as Omit<UserInfo, "isNewUser">),
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
         },
       });
       this.torusWalletInstance.showTorusButton();
@@ -146,8 +152,8 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       this.setSelectedAddress(data.accounts[0]);
     });
 
-    provider.on("chainChanged", (data: { chainId: string }) => {
-      this.setChainID(parseInt(data.chainId, 16));
+    provider.on("chainChanged", (chainId: string) => {
+      this.setChainID(parseInt(chainId, 16));
     });
     provider.on("disconnect", () => {
       this.torusWalletInstance.hideTorusButton();
@@ -157,7 +163,7 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     });
   }
 
-  private subscribeToWeb3AuthCoreEvents(web3Auth: Web3AuthCore) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);
@@ -182,10 +188,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "requestAccounts" }),
-      this.provider.request<string>({ method: "solana_chainId" }),
-      this.provider.request<string>({ method: "solanaSecretKey" }),
-      this.provider.request<CustomChainConfig>({ method: "solana_provider_config" }),
+      this.provider.request<never, string[]>({ method: "requestAccounts" }),
+      this.provider.request<never, string>({ method: "solana_chainId" }),
+      this.provider.request<never, string>({ method: "solanaSecretKey" }),
+      this.provider.request<never, CustomChainConfig>({ method: "solana_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),
@@ -195,23 +201,38 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     };
   }
 
+  private async torusWalletSessionConfig(): Promise<{ chainId: number; accounts: string[] }> {
+    if (!this.torusWalletInstance.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
+    const [accounts, chainId] = await Promise.all([
+      this.torusWalletInstance.provider.request<never, string[]>({ method: "solana_accounts" }),
+      this.torusWalletInstance.provider.request<never, string>({ method: "solana_chainId" }),
+    ]);
+    return {
+      chainId: parseInt(chainId as string, 16),
+      accounts: accounts as string[],
+    };
+  }
+
   private async setSelectedAddress(address: string): Promise<void> {
     if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw SolanaWalletPluginError.web3AuthNotConnected();
-    const sessionConfig = await this.sessionConfig();
-    if (address !== sessionConfig.accounts?.[0]) {
+    const [sessionConfig, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
+    if (address !== torusWalletSessionConfig.accounts?.[0]) {
       await this.torusWalletInstance.loginWithPrivateKey({
         privateKey: sessionConfig.privateKey,
         userInfo: {
           ...this.userInfo,
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
         },
       });
     }
   }
 
   private async setChainID(chainId: number): Promise<void> {
-    const sessionConfig = await this.sessionConfig();
+    const [sessionConfig, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
     const { chainConfig } = sessionConfig || {};
-    if (chainId !== sessionConfig.chainId && chainConfig) {
+    if (chainId !== torusWalletSessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
         ...chainConfig,
         blockExplorerUrl: chainConfig.blockExplorer,

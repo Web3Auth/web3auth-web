@@ -1,12 +1,12 @@
-export type { JRPCRequest, JRPCResponse, SafeEventEmitter, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
-
-export type SendCallBack<U> = (err: unknown, providerRes: U) => void;
-export interface RequestArguments {
-  method: string;
-  params?: unknown[] | object;
-}
-
-export type Maybe<T> = T | Partial<T> | null | undefined;
+export type {
+  JRPCRequest,
+  JRPCResponse,
+  Maybe,
+  RequestArguments,
+  SafeEventEmitter,
+  SafeEventEmitterProvider,
+  SendCallBack,
+} from "@toruslabs/openlogin-jrpc";
 
 export const PROVIDER_EVENTS = {
   INITIALIZED: "initialized",

@@ -1,6 +1,14 @@
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
-import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
+import {
+  type MessageTypes,
+  SignTypedDataVersion,
+  TypedDataUtils,
+  type TypedDataV1,
+  type TypedDataV1Field,
+  type TypedMessage,
+  typedSignatureHash,
+} from "@metamask/eth-sig-util";
 import { providerErrors } from "@metamask/rpc-errors";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
@@ -27,6 +35,7 @@ async function signTx(
   // 2021-06-23
   let hackApplied = false;
   if (unsignedEthTx.type === 0 && unsignedEthTx.common.gteHardfork("spuriousDragon") && !unsignedEthTx.supports(Capability.EIP155ReplayProtection)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (unsignedEthTx as any).activeCapabilities.push(Capability.EIP155ReplayProtection);
     hackApplied = true;
   }
@@ -40,12 +49,15 @@ async function signTx(
     modifiedV = modifiedV + 27;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
 
   // Hack part 2
   if (hackApplied) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const index = (unsignedEthTx as any).activeCapabilities.indexOf(Capability.EIP155ReplayProtection);
     if (index > -1) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (unsignedEthTx as any).activeCapabilities.splice(index, 1);
     }
   }
@@ -64,9 +76,10 @@ async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{
   return rawMsgSig;
 }
 
-function legacyToBuffer(value: any) {
+function legacyToBuffer(value: unknown) {
   return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBytes(value);
 }
+
 async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
@@ -93,7 +106,7 @@ function validateVersion(version: string, allowedVersions: string[]) {
 
 async function signTypedData(
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
-  data: any,
+  data: unknown,
   version: SignTypedDataVersion
 ) {
   validateVersion(version, undefined); // Note: this is intentional;
@@ -101,7 +114,9 @@ async function signTypedData(
     throw new Error("Missing data parameter");
   }
   const messageHash =
-    version === SignTypedDataVersion.V1 ? Buffer.from(stripHexPrefix(typedSignatureHash(data)), "hex") : TypedDataUtils.eip712Hash(data, version);
+    version === SignTypedDataVersion.V1
+      ? Buffer.from(stripHexPrefix(typedSignatureHash(data as TypedDataV1Field[])), "hex")
+      : TypedDataUtils.eip712Hash(data as TypedMessage<MessageTypes>, version);
   const { v, r, s } = await sign(Buffer.from(messageHash.buffer));
 
   let modifiedV = v;

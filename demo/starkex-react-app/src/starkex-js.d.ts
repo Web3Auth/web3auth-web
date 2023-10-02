@@ -1,1 +1,0 @@
-declare module '@starkware-industries/starkex-js/dist/browser';

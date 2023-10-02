@@ -11,6 +11,19 @@ Web3Auth Base contains the basic typescript types and interfaces for Web3Auth. T
 
 Read more about the Web3Auth in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/).
 
+## 💡 Features
+
+- Plug and Play, OAuth based Web3 Authentication Service
+- Fully decentralized, non-custodial key infrastructure
+- End to end Whitelabelable solution
+- Threshold Cryptography based Key Reconstruction
+- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Support for WebAuthn & Passwordless Login
+- Support for connecting to multiple wallets
+- DApp Active Session Management
+
+...and a lot more
+
 ## 🔗 Installation
 
 ```shell
@@ -20,7 +33,7 @@ npm install --save @web3auth-mpc/base
 ## 🩹 Example
 
 ```ts
-import { Web3Auth } from "@web3auth-mpc/web3auth";
+import { Web3Auth } from "@web3auth-mpc/modal";
 import { CHAIN_NAMESPACES } from "@web3auth-mpc/base";
 
 const web3auth = new Web3Auth({
@@ -41,8 +54,8 @@ Checkout the examples for your preferred blockchain and platform in our [example
 
 Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
 
-## 💬 Troubleshooting and Discussions
+## 💬 Troubleshooting and Support
 
-- Have a look at our [GitHub Discussions](https://github.com/Web3Auth/Web3Auth/discussions?discussions_q=sort%3Atop) to see if anyone has any questions or issues you might be having.
-- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions
-- Join our [Discord](https://discord.gg/web3auth) to join our community and get private integration support or help with your integration.
+- Have a look at our [Community Portal](https://community.web3auth.io/) to see if anyone has any questions or issues you might be having. Feel free to reate new topics and we'll help you out as soon as possible.
+- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions.
+- For Priority Support, please have a look at our [Pricing Page](https://web3auth.io/pricing.html) for the plan that suits your needs.

@@ -129,6 +129,11 @@ export class WalletLoginError extends Web3AuthError {
     5112: "Failed to disconnect from wallet",
     5113: "Wallet is not connected",
     5114: "Wallet popup has been closed by the user",
+    5115: "User has already enabled mfa, please use the @web3auth/web3auth-web sdk for login with mfa",
+    5116: "Chain config has not been added. Please add the chain config before calling switchChain",
+    5117: "Unsupported operation",
+    5118: "useCoreKitKey flag is enabled but coreKitKey is not available",
+    5119: "User not logged in.",
   };
 
   public constructor(code: number, message?: string) {
@@ -140,7 +145,7 @@ export class WalletLoginError extends Web3AuthError {
   }
 
   public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletLoginError(code, `${WalletLoginError.messages[code]}${extraMessage}`);
+    return new WalletLoginError(code, `${WalletLoginError.messages[code]}. ${extraMessage}`);
   }
 
   public static connectionError(extraMessage = ""): IWeb3AuthError {
@@ -157,5 +162,92 @@ export class WalletLoginError extends Web3AuthError {
 
   public static popupClosed(extraMessage = ""): IWeb3AuthError {
     return WalletLoginError.fromCode(5114, extraMessage);
+  }
+
+  public static mfaEnabled(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5115, extraMessage);
+  }
+
+  public static chainConfigNotAdded(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5116, extraMessage);
+  }
+
+  public static unsupportedOperation(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5117, extraMessage);
+  }
+
+  public static coreKitKeyNotFound(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5118, extraMessage);
+  }
+
+  public static userNotLoggedIn(extraMessage = ""): IWeb3AuthError {
+    return WalletLoginError.fromCode(5119, extraMessage);
+  }
+}
+
+export class WalletOperationsError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    5201: "Provided chainId is not allowed",
+    5202: "This operation is not allowed",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletOperationsError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`);
+  }
+
+  // Custom methods
+  public static chainIDNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5201, extraMessage);
+  }
+
+  public static operationNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5202, extraMessage);
+  }
+
+  public static chainNamespaceNotAllowed(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5203, extraMessage);
+  }
+}
+
+export class WalletProviderError extends Web3AuthError {
+  protected static messages: ErrorCodes = {
+    5000: "Custom",
+    5301: "Expected a single, non-array, object argument.",
+    5302: "'args.method' must be a non-empty string.",
+    5303: "'args.params' must be an object or array if provided.",
+  };
+
+  public constructor(code: number, message?: string) {
+    // takes care of stack and proto
+    super(code, message);
+
+    // Set name explicitly as minification can mangle class names
+    Object.defineProperty(this, "name", { value: "WalletProviderError" });
+  }
+
+  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletProviderError.messages[code]}, ${extraMessage}`);
+  }
+
+  // Custom methods
+  public static invalidRequestArgs(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5301, extraMessage);
+  }
+
+  public static invalidRequestMethod(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5302, extraMessage);
+  }
+
+  public static invalidRequestParams(extraMessage = ""): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5303, extraMessage);
   }
 }

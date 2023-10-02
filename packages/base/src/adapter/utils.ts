@@ -1,4 +1,5 @@
 import { post } from "@toruslabs/http-helpers";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import JwtDecode from "jwt-decode";
 
 import { ChainNamespaceType } from "../chain/IChainInterface";
@@ -43,7 +44,8 @@ export const verifySignedChallenge = async (
   challenge: string,
   issuer: string,
   sessionTime: number,
-  clientId?: string
+  clientId?: string,
+  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE
 ): Promise<string> => {
   const t = chainNamespace === "solana" ? "sip99" : "eip191";
   const sigData = {
@@ -53,7 +55,7 @@ export const verifySignedChallenge = async (
     },
     message: challenge,
     issuer,
-    audience: window.location.hostname,
+    audience: typeof window.location !== "undefined" ? window.location.hostname : "com://reactnative",
     timeout: sessionTime,
   };
 
@@ -61,6 +63,7 @@ export const verifySignedChallenge = async (
     headers: {
       client_id: clientId,
       wallet_provider: issuer,
+      web3auth_network: web3AuthNetwork,
     },
   });
   if (!idTokenRes.success) {

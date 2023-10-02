@@ -12,8 +12,13 @@
       <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
       <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
       <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
-      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :console="console"></EthRpc>
-      <span>{{ connecting }}</span>
+      <EthRpc
+        :connectedAdapter="web3auth.connectedAdapterName"
+        v-if="provider"
+        :provider="provider"
+        :uiConsole="uiConsole"
+        :web3auth="web3auth"
+      ></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -24,23 +29,15 @@
 </template>
 
 <script lang="ts">
-import { post } from "@toruslabs/http-helpers";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin";
-import { safeatob, safebtoa } from "@toruslabs/openlogin-utils";
+import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 // import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import { Web3Auth } from "@web3auth/web3auth";
-// import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-import BN from "bn.js";
-import { ec as EC } from "elliptic";
-import { Client } from "tss-client";
-import * as tss from "tss-lib";
-import Vue from "vue";
-const ec = new EC("secp256k1");
-
-import { io, Socket } from "socket.io-client";
+import { Web3Auth } from "@web3auth/modal";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { WALLET_ADAPTERS } from "@web3auth-mpc/base";
+import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
 
@@ -53,132 +50,11 @@ const tssImportURL = "https://cloudflare-ipfs.com/ipfs/QmWxSMacBkunyAcKkjuDTU9yC
 const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0x1",
-  // rpcTarget: `https://ropsten.infura.io/v3/776218ac4734478c90191dde8cae483c`,
-  // displayName: "ropsten",
-  // blockExplorer: "https://ropsten.etherscan.io/",
   ticker: "ETH",
   tickerName: "Ethereum",
 };
 
-async function getPublicKeyFromTSSShare(tssShare: string, signatures: string[]): Promise<string> {
-  // check if TSS is available
-  if (!tssShare || !Array.isArray(signatures) || signatures.length === 0) {
-    throw new Error("tssShare or signatures not available");
-  }
-  const parsedTSSShare = {
-    share: tssShare.split("-")[0].split(":")[1],
-    index: tssShare.split("-")[1].split(":")[1],
-  };
-
-  const parsedSignatures = signatures.map((s) => JSON.parse(s));
-  const chosenSignature = parsedSignatures[Math.floor(Math.random() * parsedSignatures.length)];
-  const { verifier_name: verifierName, verifier_id: verifierId } = JSON.parse(safeatob(chosenSignature.data));
-  if (!verifierName || !verifierId) {
-    throw new Error("verifier_name and verifier_id must be specified");
-  }
-
-  const { share_pub_x: sharePubX, share_pub_y: sharePubY } = await post<{
-    share_pub_x: string;
-    share_pub_y: string;
-  }>(`${tssServerEndpoint}/getOrCreateTSSPub`, {
-    verifier_name: verifierName,
-    verifier_id: verifierId,
-  });
-
-  const getLagrangeCoeff = (partyIndexes: BN[], partyIndex: BN): BN => {
-    let upper = new BN(1);
-    let lower = new BN(1);
-    for (let i = 0; i < partyIndexes.length; i += 1) {
-      const otherPartyIndex = partyIndexes[i];
-      if (!partyIndex.eq(otherPartyIndex)) {
-        upper = upper.mul(otherPartyIndex.neg());
-        upper = upper.umod(ec.curve.n);
-        let temp = partyIndex.sub(otherPartyIndex);
-        temp = temp.umod(ec.curve.n);
-        lower = lower.mul(temp).umod(ec.curve.n);
-      }
-    }
-
-    const delta = upper.mul(lower.invm(ec.curve.n)).umod(ec.curve.n);
-    return delta;
-  };
-
-  // TODO: extend
-  const localIndex = 1;
-  const remoteIndex = 0;
-  const parties = [0, 1];
-  const pubKeyPoint = ec
-    .keyFromPublic({ x: sharePubX, y: sharePubY })
-    .getPublic()
-    .mul(
-      getLagrangeCoeff(
-        parties.map((p) => new BN(p + 1)),
-        new BN(remoteIndex + 1)
-      )
-    )
-    .add(
-      ec
-        .keyFromPrivate(Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex"))
-        .getPublic()
-        .mul(
-          getLagrangeCoeff(
-            parties.map((p) => new BN(p + 1)),
-            new BN(localIndex + 1)
-          )
-        )
-    );
-  const pubKeyX = pubKeyPoint.getX().toString(16, 64);
-  const pubKeyY = pubKeyPoint.getY().toString(16, 64);
-  const pubKeyHex = `${pubKeyX}${pubKeyY}`;
-  const pubKey = Buffer.from(pubKeyHex, "hex").toString("base64");
-
-  return pubKey;
-}
-
-async function createSockets(wsEndpoints: (string | null | undefined)[]): Promise<(Socket | null)[]> {
-  const sockets = wsEndpoints.map((wsEndpoint) => {
-    if (wsEndpoint === null || wsEndpoint === undefined) {
-      return null;
-    }
-    const origin = new URL(wsEndpoint).origin;
-    const path = `${new URL(wsEndpoint).pathname}/socket.io/`;
-    return io(origin, { path });
-  });
-
-  await new Promise((resolve) => {
-    const timer = setInterval(() => {
-      for (let i = 0; i < sockets.length; i++) {
-        const socket = sockets[i];
-        if (socket === null) continue;
-        if (!socket.id) return;
-      }
-      clearInterval(timer);
-      resolve(true);
-    }, 500);
-  });
-
-  return sockets;
-}
-
-async function setupTSS(tssShare: string, pubKey: string, verifierName: string, verifierId: string): Promise<Client> {
-  const endpoints = [tssServerEndpoint, null];
-  const wsEndpoints = [tssServerEndpoint, null];
-  const sockets = await createSockets(wsEndpoints);
-  const parsedTSSShare = {
-    share: tssShare.split("-")[0].split(":")[1],
-    index: tssShare.split("-")[1].split(":")[1],
-  };
-
-  const base64Share = Buffer.from(parsedTSSShare.share.padStart(64, "0"), "hex").toString("base64");
-  // TODO: extend
-  const localIndex = 1;
-  const remoteIndex = 0;
-  const parties = [0, 1];
-
-  return new Client(`${verifierName}~${verifierId}:${Date.now()}`, localIndex, parties, endpoints, sockets, base64Share, pubKey, true, tssImportURL);
-}
-
-export default Vue.extend({
+export default defineComponent({
   name: "EthereumChain",
   props: {
     plugins: {
@@ -212,7 +88,12 @@ export default Vue.extend({
       loginButtonStatus: "",
       connecting: false,
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId, enableLogging: true }),
+      web3auth: new Web3Auth({
+        chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
+        clientId: config.clientId[this.openloginNetwork],
+        enableLogging: true,
+        web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
+      }),
     };
   },
   components: {
@@ -251,9 +132,10 @@ export default Vue.extend({
         this.loading = true;
         this.web3auth = new Web3Auth({
           chainConfig: ethChainConfig,
-          clientId: config.clientId,
+          clientId: config.clientId[this.openloginNetwork],
           authMode: "DAPP",
           enableLogging: true,
+          web3AuthNetwork: this.openloginNetwork,
         });
 
         let getTSSData: () => Promise<{
@@ -308,63 +190,102 @@ export default Vue.extend({
             },
           },
           adapterSettings: {
-            _iframeUrl: "https://mpc-beta.openlogin.com",
-            network: "development",
-            clientId: config.clientId,
+            network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
+            clientId: config.clientId[this.openloginNetwork],
           },
         });
         (window as any).openloginAdapter = openloginAdapter;
 
-        const coinbaseAdapter = new CoinbaseAdapter({
-          adapterSettings: { appName: "Web3Auth Example" },
+        // by default, web3auth modal uses wallet connect v1,
+        // if you want to use wallet connect v2, configure wallet-connect-v2-adapter
+        // as shown below.
+        // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
+        const defaultWcSettings = await getWalletConnectV2Settings(
+          ethChainConfig.chainNamespace,
+          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16), 5],
+          "04309ed1007e77d1f119b85205bb779d"
+        );
+        console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));
+        const wc2Adapter = new WalletConnectV2Adapter({
+          adapterSettings: { ...defaultWcSettings.adapterSettings },
+          chainConfig: ethChainConfig,
+          loginSettings: defaultWcSettings.loginSettings,
         });
 
+        this.web3auth.configureAdapter(wc2Adapter);
+
         this.web3auth.configureAdapter(openloginAdapter);
-        this.web3auth.configureAdapter(coinbaseAdapter);
-        // if (this.plugins["torusWallet"]) {
-        //   const torusPlugin = new TorusWalletConnectorPlugin({
-        //     torusWalletOpts: {},
-        //     walletInitOptions: {
-        //       whiteLabel: {
-        //         theme: { isDark: true, colors: { primary: "#00a8ff" } },
-        //         logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-        //         logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-        //       },
-        //       useWalletConnect: true,
-        //       enableLogging: true,
-        //     },
-        //   });
-        //   await this.web3auth.addPlugin(torusPlugin);
-        // }
+        if (this.plugins["torusWallet"]) {
+          const torusPlugin = new TorusWalletConnectorPlugin({
+            torusWalletOpts: {},
+            walletInitOptions: {
+              whiteLabel: {
+                theme: { isDark: true, colors: { primary: "#00a8ff" } },
+                logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+                logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+              },
+              useWalletConnect: true,
+              enableLogging: true,
+            },
+          });
+          await this.web3auth.addPlugin(torusPlugin);
+        }
         this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal({ modalConfig: this.modalConfig });
+        await this.web3auth.initModal({
+          modalConfig: {
+            [WALLET_ADAPTERS.METAMASK]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "Metamask",
+            },
+            [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "Wallet Connect",
+            },
+            [WALLET_ADAPTERS.TORUS_EVM]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "Torus",
+            },
+            [WALLET_ADAPTERS.OPENLOGIN]: {
+              showOnDesktop: true,
+              showOnModal: true,
+              showOnMobile: true,
+              label: "OpenLogin",
+            },
+          },
+        });
       } catch (error) {
         console.log("error", error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       } finally {
         this.loading = false;
       }
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.console("connected to wallet", data);
+        this.uiConsole("connected to wallet", data);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
       web3auth.on(ADAPTER_STATUS.CONNECTING, () => {
-        this.console("connecting");
+        this.uiConsole("connecting");
         this.connecting = true;
         this.loginButtonStatus = "Connecting...";
       });
       web3auth.on(ADAPTER_STATUS.DISCONNECTED, () => {
-        this.console("disconnected");
+        this.uiConsole("disconnected");
         this.loginButtonStatus = "";
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
         console.log("error", error);
-        this.console("errored", error);
+        this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
       // web3auth.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (isVisible) => {
@@ -377,7 +298,7 @@ export default Vue.extend({
         this.provider = web3authProvider;
       } catch (error) {
         console.error(error);
-        this.console("error", error);
+        this.uiConsole("error", error);
       }
     },
 
@@ -387,16 +308,16 @@ export default Vue.extend({
     },
     async getUserInfo() {
       const userInfo = await this.web3auth.getUserInfo();
-      this.console(userInfo);
+      this.uiConsole(userInfo);
     },
     async authenticateUser() {
       const idTokenDetails = await this.web3auth.authenticateUser();
-      this.console(idTokenDetails);
+      this.uiConsole(idTokenDetails);
     },
-    console(...args: unknown[]): void {
+    uiConsole(...args: unknown[]): void {
       const el = document.querySelector("#console>p");
       if (el) {
-        el.innerHTML = JSON.stringify(args || {}, null, 2);
+        el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
       }
     },
   },

@@ -15,7 +15,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
@@ -28,7 +28,8 @@
     "@toruslabs/base-controllers": "^4.1.0",
     "@toruslabs/http-helpers": "^5.0.0",
     "@toruslabs/openlogin-jrpc": "^5.1.0",
-    "@walletconnect/types": "~2.10.1",
+    "@walletconnect/legacy-types": "~2.0.0",
+    "@walletconnect/utils": "^2.10.1",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-provider": "^2.1.9",
     "assert": "^2.1.0",
@@ -63,5 +64,9 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

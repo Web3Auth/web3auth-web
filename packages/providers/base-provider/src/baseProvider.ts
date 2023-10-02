@@ -1,9 +1,15 @@
 import { rpcErrors } from "@metamask/rpc-errors";
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, WalletInitializationError } from "@web3auth-mpc/base";
-
-import { IBaseProvider } from "./IBaseProvider";
+import { JRPCRequest, JRPCResponse, SendCallBack } from "@toruslabs/openlogin-jrpc";
+import {
+  CustomChainConfig,
+  IBaseProvider,
+  Maybe,
+  RequestArguments,
+  SafeEventEmitterProvider,
+  WalletInitializationError,
+  WalletProviderError,
+} from "@web3auth-mpc/base";
 
 export interface BaseProviderState extends BaseState {
   chainId: string;
@@ -37,12 +43,61 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
+  get currentChainConfig(): Partial<CustomChainConfig> {
+    return this.config.chainConfig;
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
   }
 
+  get chainId(): string {
+    return this.state.chainId;
+  }
+
   set provider(_) {
     throw new Error("Method not implemented.");
+  }
+
+  async request<T, R>(args: RequestArguments<T>): Promise<Maybe<R>> {
+    if (!args || typeof args !== "object" || Array.isArray(args)) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestArgs().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestArgs().message },
+      });
+    }
+
+    const { method, params } = args;
+
+    if (typeof method !== "string" || method.length === 0) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestMethod().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestMethod().message },
+      });
+    }
+
+    if (params !== undefined && !Array.isArray(params) && (typeof params !== "object" || params === null)) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestParams().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestParams().message },
+      });
+    }
+
+    return this.provider?.request(args);
+  }
+
+  sendAsync<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;
+  sendAsync<T, U>(req: JRPCRequest<T>): Promise<JRPCResponse<U>>;
+
+  sendAsync<T, U>(req: JRPCRequest<T>, callback?: SendCallBack<JRPCResponse<U>>): void | Promise<JRPCResponse<U>> {
+    if (callback) return this.send(req, callback);
+    return this.request(req);
+  }
+
+  send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void {
+    this.request(req)
+      .then((res) => callback(null, { result: res } as JRPCResponse<U>))
+      .catch((err) => callback(err, null));
   }
 
   public addChain(chainConfig: CustomChainConfig): void {
@@ -59,16 +114,17 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return chainConfig;
   }
 
-  protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
-    return this._providerEngineProxy;
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
+    if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this._providerEngineProxy as any).setTarget(provider);
+    } else {
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
+    }
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
-    }
+  protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
+    return this._providerEngineProxy;
   }
 
   abstract setupProvider(provider: P): Promise<void>;

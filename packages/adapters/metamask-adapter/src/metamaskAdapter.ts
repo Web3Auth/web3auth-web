@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import detectEthereumProvider from "@metamask/detect-provider";
 import {
   ADAPTER_CATEGORY,
@@ -8,30 +9,27 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth-mpc/base";
 import { BaseEvmAdapter } from "@web3auth-mpc/base-evm-adapter";
 
-interface EthereumProvider extends SafeEventEmitterProvider {
+interface EthereumProvider extends IProvider {
   isMetaMask?: boolean;
   isConnected: () => boolean;
   chainId: string;
 }
-export interface MetamaskAdapterOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type MetamaskAdapterOptions = BaseAdapterSettings;
 
 class MetamaskAdapter extends BaseEvmAdapter<void> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -44,28 +42,21 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  private rehydrated = false;
-
   private metamaskProvider: EthereumProvider | null = null;
 
-  constructor(adapterOptions: MetamaskAdapterOptions) {
-    super(adapterOptions);
-    this.chainConfig = adapterOptions?.chainConfig || null;
-    this.sessionTime = adapterOptions?.sessionTime || 86400;
-  }
-
-  get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.metamaskProvider) {
-      return this.metamaskProvider as SafeEventEmitterProvider;
+  get provider(): IProvider | null {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.metamaskProvider) {
+      return this.metamaskProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
     this.metamaskProvider = (await detectEthereumProvider({ mustBeMetaMask: true })) as EthereumProvider;
     if (!this.metamaskProvider) throw WalletInitializationError.notInstalled("Metamask extension is not installed");
@@ -82,36 +73,46 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     }
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    // set default to mainnet
-    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
+    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
+    const { ethereum } = window as any;
+    const isPhantom = Boolean("isPhantom" in ethereum);
+    // check which is the active provider
+    if (ethereum && ethereum.isMetaMask && isPhantom) {
+      // this means phantom is the active provider.
+      if (ethereum.providers && ethereum.providers.length > 0) {
+        const provider = ethereum.providers.find((p: any) => p.isMetaMask && !p.overrideIsMetaMask);
+
+        if (provider) {
+          ethereum.setProvider(provider);
+        }
+      }
+    } else if (ethereum && (ethereum.providers || []).length > 0) {
+      // this means that there are another providers than metamask (like coinbase).
+      const provider = ethereum.providers.find((p: any) => p.isMetaMask);
+      if (provider) {
+        ethereum.setSelectedProvider(provider);
+      }
+    }
 
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.METAMASK });
-    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not able to connect with metamask");
     try {
       await this.metamaskProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.metamaskProvider;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        await this.switchChain(this.chainConfig as CustomChainConfig);
+        await this.addChain(this.chainConfig as CustomChainConfig, true);
+        await this.switchChain(this.chainConfig as CustomChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
-      this.provider.once("disconnect", () => {
+      const disconnectHandler = () => {
         // ready to be connected again
         this.disconnect();
-      });
+        this.provider?.removeListener("disconnect", disconnectHandler);
+      };
+      this.provider.on("disconnect", disconnectHandler);
       this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {
@@ -119,12 +120,13 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with metamask wallet");
     }
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    await super.disconnectSession();
     this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
@@ -133,9 +135,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       // ready to be connected again
       this.status = ADAPTER_STATUS.READY;
     }
-
-    this.rehydrated = false;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -143,24 +143,34 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  private async switchChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    try {
-      await this.metamaskProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
-    } catch (switchError: unknown) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if ((switchError as { code: number }).code === 4902) {
-        await this.metamaskProvider.request({
-          method: "wallet_addEthereumChain",
-          params: [{ chainId: chainConfig.chainId, chainName: chainConfig.displayName, rpcUrls: [chainConfig.rpcTarget] }],
-        });
-      } else {
-        throw switchError;
-      }
-    }
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(chainConfig, init);
+    await this.metamaskProvider?.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.metamaskProvider?.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: params.chainId }],
+    });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 }
 

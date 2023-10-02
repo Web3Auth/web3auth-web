@@ -19,28 +19,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
-    };
-  }
-  if (chainId === 3) {
-    return {
-      chainNamespace,
-      chainId: "0x3",
-      rpcTarget: `https://rpc.ankr.com/eth_ropsten`,
-      displayName: "Ropsten Testnet",
-      blockExplorer: "https://ropsten.etherscan.io/",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    };
-  }
-  if (chainId === 4) {
-    return {
-      chainNamespace,
-      chainId: "0x4",
-      rpcTarget: `https://rpc.ankr.com/eth_rinkeby`,
-      displayName: "Rinkeby Testnet",
-      blockExplorer: "https://rinkeby.etherscan.io/",
-      ticker: "ETH",
-      tickerName: "Ethereum",
+      decimals: 18,
     };
   }
   if (chainId === 5) {
@@ -52,6 +31,19 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://goerli.etherscan.io/",
       ticker: "ETH",
       tickerName: "Ethereum",
+      decimals: 18,
+    };
+  }
+  if (chainId === 11155111) {
+    return {
+      chainNamespace,
+      chainId: "0xaa36a7",
+      rpcTarget: `https://rpc.ankr.com/eth_sepolia`,
+      displayName: "Sepolia Testnet",
+      blockExplorer: "https://sepolia.etherscan.io/",
+      ticker: "ETH",
+      tickerName: "Ethereum",
+      decimals: 18,
     };
   }
   if (chainId === 137) {
@@ -74,6 +66,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://mumbai.polygonscan.com/",
       ticker: "MATIC",
       tickerName: "Polygon",
+      decimals: 18,
     };
   }
   if (chainId === 56) {
@@ -85,6 +78,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://bscscan.com",
       ticker: "BNB",
       tickerName: "Binance SmartChain",
+      decimals: 18,
     };
   }
   if (chainId === 97) {
@@ -96,6 +90,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://testnet.bscscan.com",
       ticker: "BNB",
       tickerName: "Binance SmartChain",
+      decimals: 18,
     };
   }
   if (chainId === 25) {
@@ -118,6 +113,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://cronoscan.com/",
       ticker: "CRO",
       tickerName: "Cronos",
+      decimals: 18,
     };
   }
   if (chainId === 8217) {
@@ -129,6 +125,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorer: "https://scope.klaytn.com",
       ticker: "KLAY",
       tickerName: "Klaytn",
+      decimals: 18,
     };
   }
 
@@ -146,6 +143,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       blockExplorer: "https://explorer.solana.com",
       ticker: "SOL",
       tickerName: "Solana",
+      decimals: 9,
     };
   } else if (chainId === 2) {
     return {
@@ -156,6 +154,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       blockExplorer: "https://explorer.solana.com?cluster=testnet",
       ticker: "SOL",
       tickerName: "Solana",
+      decimals: 9,
     };
   } else if (chainId === 3) {
     return {
@@ -166,6 +165,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       blockExplorer: "https://explorer.solana.com?cluster=devnet",
       ticker: "SOL",
       tickerName: "Solana",
+      decimals: 9,
     };
   }
 

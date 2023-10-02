@@ -29,21 +29,21 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/web3auth";
-import Vue from "vue";
+import { Web3Auth } from "@web3auth/modal";
+import { defineComponent } from "vue";
 
 import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "WhitelabelExample",
   props: {
     uiConfig: {
       type: Object,
       default: () => ({
         theme: "light",
-        logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+        logoUrl: "https://images.web3auth.io/example-hello.svg",
       }),
     },
   },
@@ -61,7 +61,7 @@ export default Vue.extend({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId }),
+      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
     };
   },
   components: {
@@ -76,12 +76,19 @@ export default Vue.extend({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
-          uiConfig: { appLogo: this.uiConfig.logoUrl, theme: this.uiConfig.theme, loginMethodsOrder: this.uiConfig.loginMethodsOrder },
+          uiConfig: {
+            logoLight: this.uiConfig.logoUrl,
+            logoDark: this.uiConfig.logoUrl,
+            theme: this.uiConfig.theme,
+            loginMethodsOrder: this.uiConfig.loginMethodsOrder,
+            defaultLanguage: this.uiConfig.defaultLanguage,
+          },
+          web3AuthNetwork: "testnet",
           chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
-          clientId: config.clientId,
+          clientId: config.clientId["mainnet"],
         });
         this.subscribeAuthEvents(this.web3auth);
-        await (this.web3auth as Web3Auth).initModal({});
+        await this.web3auth.initModal();
       } catch (error) {
         console.log("error", error);
         this.console("error sss", error);

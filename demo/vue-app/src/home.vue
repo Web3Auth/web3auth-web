@@ -149,19 +149,27 @@
                 <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
               </span>
             </div>
-            <br />
             <div class="flex-vertical-center">
               <span class="form-label">Theme</span>
               <span class="form-control">
                 <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
                 <label for="light">Light</label>
-                <br />
                 <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
                 <label for="dark">Dark</label>
-                <br />
+                <input type="radio" id="auto" name="auto" value="auto" v-model="form.uiMode.whitelabel.theme" />
+                <label for="auto">Auto</label>
               </span>
             </div>
-            <br />
+            <div class="flex-vertical-center">
+              <span class="form-label">Default Language</span>
+              <span class="form-control">
+                <select v-model="form.uiMode.whitelabel.defaultLanguage">
+                  <option v-for="language in languages" :value="language.value" :key="language.value">
+                    {{ language.display }}
+                  </option>
+                </select>
+              </span>
+            </div>
             <div class="order-container">
               <div class="form-label">
                 <div>Login Methods Order</div>
@@ -209,12 +217,16 @@
 </template>
 
 <script lang="ts">
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
-import { CHAIN_NAMESPACES, ChainNamespaceType, EVM_ADAPTERS } from "@web3auth/base";
-import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/web3auth";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
+import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
 import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
-import Vue from "vue";
+import { defineComponent } from "vue";
+
+import CustomUiContainer from "./customUi/customUiContainer.vue";
+import ConfigurableExample from "./default/configurableModal.vue";
+import WhitelabelExample from "./whitelabel/whitelabel.vue";
 
 const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.GOOGLE,
@@ -231,6 +243,7 @@ const DEFAULT_LOGIN_PROVIDERS = [
   LOGIN_PROVIDER.WEIBO,
   LOGIN_PROVIDER.WECHAT,
   LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
+  LOGIN_PROVIDER.SMS_PASSWORDLESS,
 ];
 const defaultLoginProviders = () => {
   return DEFAULT_LOGIN_PROVIDERS.map((provider) => {
@@ -244,14 +257,6 @@ const defaultLoginProviders = () => {
 
 const defaultAdapters = (chainNamespace: ChainNamespaceType) => {
   const adaptersConfig = chainNamespace === CHAIN_NAMESPACES.SOLANA ? defaultSolanaDappModalConfig : defaultEvmDappModalConfig;
-  if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
-    adaptersConfig.adapters[EVM_ADAPTERS.COINBASE] = {
-      label: "Coinbase",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    };
-  }
   return Object.keys(adaptersConfig.adapters).map((adapterName) => {
     return {
       id: adapterName,
@@ -278,9 +283,10 @@ const defaultFormConfig = {
       type: "openlogin",
     },
     whitelabel: {
-      logoUrl: "https://cryptologos.cc/logos/solana-sol-logo.svg",
+      logoUrl: "https://images.web3auth.io/example-hello.svg",
       theme: "light",
       loginMethodsOrder: DEFAULT_LOGIN_PROVIDERS,
+      defaultLanguage: "en",
     },
   },
 };
@@ -310,7 +316,14 @@ const initialFormConfig = {
   ...configFromURL(),
 };
 
-export default Vue.extend({
+console.log(initialFormConfig);
+
+export default defineComponent({
+  components: {
+    CustomUiContainer,
+    ConfigurableExample,
+    WhitelabelExample,
+  },
   name: "HomeComponent",
   data() {
     return {
@@ -319,12 +332,45 @@ export default Vue.extend({
       // sending to other components
       config: { ...cloneDeep(initialFormConfig) },
       tempLoginMethodsOrder: initialFormConfig.uiMode?.whitelabel.loginMethodsOrder.join(",") ?? "",
+      languages: [
+        {
+          value: "en",
+          display: "English",
+        },
+        {
+          value: "de",
+          display: "German",
+        },
+        {
+          value: "ja",
+          display: "Japanese",
+        },
+        {
+          value: "ko",
+          display: "Korean",
+        },
+        {
+          value: "zh",
+          display: "Mandarin",
+        },
+        {
+          value: "es",
+          display: "Spanish",
+        },
+        {
+          value: "fr",
+          display: "French",
+        },
+        {
+          value: "pt",
+          display: "Portuguese",
+        },
+        {
+          value: "nl",
+          display: "Dutch",
+        },
+      ],
     };
-  },
-  components: {
-    ConfigurableExample: () => import("./default/configurableModal.vue"),
-    WhitelabelExample: () => import("./whitelabel/whitelabel.vue"),
-    CustomUiContainer: () => import("./customUi/customUiContainer.vue"),
   },
   watch: {
     "form.authMode"(val) {

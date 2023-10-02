@@ -1,16 +1,15 @@
-import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-mpc";
-import { ChainNamespaceType, getChainConfig } from "@web3auth-mpc/base";
+import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-utils";
 
 import { OpenloginAdapterOptions } from "./interface";
 
-export const getOpenloginDefaultOptions = (chainNamespace?: ChainNamespaceType, chainId?: number | string): OpenloginAdapterOptions => {
+export const getOpenloginDefaultOptions = (): OpenloginAdapterOptions => {
   return {
     adapterSettings: {
-      network: OPENLOGIN_NETWORK.MAINNET,
+      network: OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
       clientId: "",
       uxMode: UX_MODE.POPUP,
     },
-    chainConfig: chainNamespace ? getChainConfig(chainNamespace, chainId) : null,
     loginSettings: {},
+    privateKeyProvider: undefined,
   };
 };

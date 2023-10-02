@@ -9,13 +9,25 @@ import {
   providerFromEngine,
   SafeEventEmitterProvider,
 } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig } from "@web3auth-mpc/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, IBaseProvider } from "@web3auth-mpc/base";
 
-import { IBaseProvider } from "./IBaseProvider";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
-export class CommonPrivateKeyProvider implements IBaseProvider<string> {
+export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
+  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+}
+
+export interface CommonPrivKeyProviderState extends BaseProviderState {
+  privateKey?: string;
+}
+
+export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, CommonPrivKeyProviderState, string> implements IBaseProvider<string> {
   // should be Assigned in setupProvider
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
+
+  constructor({ config, state }: { config: CommonPrivKeyProviderConfig; state?: CommonPrivKeyProviderState }) {
+    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
+  }
 
   get provider(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
@@ -25,8 +37,11 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: { privKey: string }): Promise<CommonPrivateKeyProvider> => {
-    const providerFactory = new CommonPrivateKeyProvider();
+  public static getProviderInstance = async (params: {
+    privKey: string;
+    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  }): Promise<CommonPrivateKeyProvider> => {
+    const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
   };
@@ -43,6 +58,15 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     this.updateProviderEngineProxy(provider);
   }
 
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
+    if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this._providerEngineProxy as any).setTarget(provider);
+    } else {
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
+    }
+  }
+
   public async switchChain(_: { chainId: string }): Promise<void> {
     return Promise.resolve();
   }
@@ -51,12 +75,8 @@ export class CommonPrivateKeyProvider implements IBaseProvider<string> {
     return this._providerEngineProxy;
   }
 
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
-    }
+  protected async lookupNetwork(): Promise<string> {
+    return Promise.resolve("");
   }
 
   private getPrivKeyMiddleware(privKey: string): JRPCMiddleware<unknown, unknown> {

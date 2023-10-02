@@ -1,8 +1,7 @@
-import { providerFromEngine } from "@toruslabs/base-controllers";
-import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, isHexStrict, WalletInitializationError } from "@web3auth-mpc/base";
+import { providerErrors } from "@metamask/rpc-errors";
+import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth-mpc/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth-mpc/base-provider";
-import { ethErrors } from "eth-rpc-errors";
 
 import { ITorusWalletProvider } from "../../../interface";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
@@ -14,8 +13,32 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public async switchChain(_: { chainId: string }): Promise<void> {
-    return Promise.resolve();
+  public async switchChain(params: { chainId: string }): Promise<void> {
+    // overrides the base provider implementation
+    await this.provider.request({
+      method: "switchSolanaChain",
+      params: [{ chainId: params.chainId }],
+    });
+  }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    super.addChain(chainConfig);
+    await this.provider.request({
+      method: "addNewChainConfig",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorer],
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+        },
+      ],
+    });
   }
 
   public async setupProvider(injectedProvider: ITorusWalletProvider): Promise<void> {
@@ -24,10 +47,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
   }
 
   protected async lookupNetwork(): Promise<string> {
-    if (!this.provider) throw ethErrors.provider.custom({ message: "Torus solana provider is not initialized", code: 4902 });
+    if (!this.provider) throw providerErrors.custom({ message: "Torus solana provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
 
-    const connectedChainId = await this.provider.request<unknown, string>({
+    const connectedChainId = await this.provider.request<never, string>({
       method: "solana_chainId",
     });
 
@@ -36,8 +59,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
     this.update({ chainId: connectedHexChainId });
-    this.provider.emit("connect", { chainId: this.state.chainId });
-    this.provider.emit("chainChanged", this.state.chainId);
+    this.emit("connect", { chainId: this.state.chainId });
+    this.emit("chainChanged", this.state.chainId);
     return this.state.chainId;
   }
 
@@ -55,7 +78,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   private async handleInjectedProviderUpdate(injectedProvider: ITorusWalletProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
-      this.provider.emit("accountsChanged", accounts);
+      this.emit("accountsChanged", accounts);
     });
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;

@@ -3,7 +3,7 @@ import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain } = useWeb3Auth();
+  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain, addChain, switchChain } = useWeb3Auth();
 
   const loggedInView = (
     <>
@@ -18,6 +18,12 @@ const Main = () => {
       </button>
       <button onClick={signMessage} className={styles.card}>
         Sign Message
+      </button>
+      <button onClick={addChain} className={styles.card}>
+        Add Chain
+      </button>
+      <button onClick={switchChain} className={styles.card}>
+        Switch Chain
       </button>
       {
         (web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") &&

@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/base",
-    "packages/core",
     "packages/modal",
+    "packages/no-modal",
     "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
@@ -13,8 +13,7 @@
   ],
   "description": "Monorepo for web3 auth packages",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
+    "publish:lerna": "npm run clean && npm install && lerna publish",
     "just:publish:lerna": "lerna publish",
     "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
     "build": "cross-env FORCE_COLOR=1 lerna run --stream build",
@@ -24,20 +23,32 @@
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "locale": "node locales/importLocales.mjs"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@babel/register": "^7.22.15",
+    "@toruslabs/config": "^2.0.2",
     "@toruslabs/eslint-config-typescript": "^3.0.1",
     "@toruslabs/torus-scripts": "^5.0.5",
+    "@types/chai": "^4.3.6",
+    "@types/faker": "^5.5.9",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/mocha": "^10.0.1",
     "@types/node": "^20",
-    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "chai": "^4.3.8",
     "cross-env": "^7.0.3",
-    "eslint": "^8.50.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.49.0",
+    "faker": "^5.5.3",
     "husky": "^8.0.3",
+    "jsonwebtoken": "^9.0.2",
     "lerna": "^7.3.0",
     "lint-staged": "^14.0.1",
+    "mocha": "^10.2.0",
     "prettier": "^3.0.3",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
@@ -69,10 +80,7 @@
   },
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "engines": {
-    "node": ">=18",
+    "node": ">=18.x",
     "npm": ">=9.x"
-  },
-  "resolutions": {
-    "@typescript-eslint/eslint-plugin": "^5.38.1"
   }
 }

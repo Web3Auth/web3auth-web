@@ -16,6 +16,7 @@ export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {
 export interface EthereumPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
 }
+
 export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig, EthereumPrivKeyProviderState, string> {
   constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: EthereumPrivKeyProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
@@ -63,11 +64,11 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
-    const existingKey = await this._providerEngineProxy.request<unknown, string>({ method: "eth_private_key" });
+    const existingKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this._providerEngineProxy.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" }),
+      this.emit("accountsChanged", {
+        accounts: await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" }),
       });
     }
   }
@@ -79,7 +80,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       chainId: "loading",
     });
     this.configure({ chainConfig });
-    const privKey = await this._providerEngineProxy.request<unknown, string>({ method: "eth_private_key" });
+    const privKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     await this.setupProvider(privKey);
   }
 
@@ -87,15 +88,15 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const { chainId } = this.config.chainConfig;
     if (!chainId) throw rpcErrors.invalidParams("chainId is required while lookupNetwork");
-    const network = await this._providerEngineProxy.request<string[], string>({
+    const network = await this._providerEngineProxy.request<[], string>({
       method: "net_version",
       params: [],
     });
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
     if (this.state.chainId !== chainId) {
-      this._providerEngineProxy.emit("chainChanged", chainId);
-      this._providerEngineProxy.emit("connect", { chainId });
+      this.emit("chainChanged", chainId);
+      this.emit("connect", { chainId });
     }
     this.update({ chainId });
     return network;
@@ -106,13 +107,14 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
         const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
         this.addChain({
-          chainNamespace: "eip155",
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
           ticker: nativeCurrency?.symbol || "ETH",
           tickerName: nativeCurrency?.name || "Ether",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
           blockExplorer: blockExplorerUrls?.[0] || "",
+          decimals: nativeCurrency?.decimals || 18,
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {

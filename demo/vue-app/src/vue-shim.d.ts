@@ -1,5 +1,5 @@
 declare module "*.vue" {
-  import Vue from "vue";
+  import { defineComponent } from "vue";
   export default Vue;
 }
 declare module "*.svg" {

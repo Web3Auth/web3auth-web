@@ -1,7 +1,0 @@
-{
-  "include": ["src", "css", "assets"],
-  "compilerOptions": {
-    "jsx": "react-jsx"
-    // "rootDir": "."
-  }
-}

@@ -194,7 +194,7 @@ export function createWalletMiddleware({
       warning += `[message, address]. This was previously handled incorrectly, `;
       warning += `and has been corrected automatically. `;
       warning += `Please switch this param order for smooth behavior in the future.`;
-      (res as any).warning = warning;
+      (res as { warning: string }).warning = warning;
 
       address = firstParam;
       message = secondParam;
@@ -252,6 +252,7 @@ export function createWalletMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
+    private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),

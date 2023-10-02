@@ -7,13 +7,13 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -24,11 +24,7 @@ import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
 import { IPhantomWalletProvider, PhantomInjectedProvider } from "@web3auth-mpc/solana-provider";
 
 import { detectProvider } from "./utils";
-export interface PhantomAdapterOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type PhantomAdapterOptions = BaseAdapterSettings;
 
 export class PhantomAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.PHANTOM;
@@ -45,42 +41,24 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
 
   private phantomProvider: PhantomInjectedProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(options: PhantomAdapterOptions) {
-    super(options);
-    this.chainConfig = options?.chainConfig || null;
-    this.sessionTime = options?.sessionTime || 86400;
-  }
-
   get isWalletConnected(): boolean {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
-    return this.phantomProvider?.provider || null;
+  get provider(): IProvider | null {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.phantomProvider) {
+      return this.phantomProvider;
+    }
+    return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
     this._wallet = await detectProvider({ interval: 500, count: 3 });
     if (!this._wallet) throw WalletInitializationError.notInstalled();
     this.phantomProvider = new PhantomInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
@@ -99,7 +77,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -109,12 +87,15 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
       if (!this._wallet.isConnected) {
         const handleDisconnect = this._wallet._handleDisconnect;
         try {
-          await new Promise<SafeEventEmitterProvider | null>((resolve, reject) => {
+          await new Promise<IProvider | null>((resolve, reject) => {
             const connect = async () => {
               await this.connectWithProvider(this._wallet as IPhantomWalletProvider);
               resolve(this.provider);
             };
-            if (!this._wallet) return reject(WalletInitializationError.notInstalled());
+            if (!this._wallet) {
+              reject(WalletInitializationError.notInstalled());
+              return;
+            }
             this._wallet.once("connect", connect);
             // Raise an issue on phantom that if window is closed, disconnect event is not fired
             (this._wallet as IPhantomWalletProvider)._handleDisconnect = (...args: unknown[]) => {
@@ -150,7 +131,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    await super.disconnectSession();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
@@ -158,7 +139,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
         this.phantomProvider = null;
         this._wallet = null;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }
@@ -169,7 +150,19 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
-  private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<SafeEventEmitterProvider | null> {
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(chainConfig, init);
+    this.phantomProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.phantomProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
+  private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<IProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
