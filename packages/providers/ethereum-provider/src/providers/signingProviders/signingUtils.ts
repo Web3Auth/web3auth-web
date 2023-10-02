@@ -11,7 +11,7 @@ import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams
 import { TransactionFormatter } from "../TransactionFormatter";
 import { validateTypedMessageParams } from "../TransactionFormatter/utils";
 
-async function signTx(
+async function signLegacyTx(
   txParams: TransactionParams & { gas?: string },
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
@@ -43,6 +43,53 @@ async function signTx(
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
+  }
+
+  const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
+
+  // Hack part 2
+  if (hackApplied) {
+    const index = (unsignedEthTx as any).activeCapabilities.indexOf(Capability.EIP155ReplayProtection);
+    if (index > -1) {
+      (unsignedEthTx as any).activeCapabilities.splice(index, 1);
+    }
+  }
+
+  return tx.serialize();
+}
+
+async function signTx(
+  txParams: TransactionParams & { maxPriorityFeePerGas?: bigint; maxFeePerGas?: bigint; chainId?: bigint },
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
+  txFormatter: TransactionFormatter
+): Promise<Buffer> {
+  const finalTxParams = await txFormatter.formatTransaction(txParams);
+  const common = await txFormatter.getCommonConfiguration();
+  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
+    common,
+  });
+
+  // Hack for the constellation that we have got a legacy tx after spuriousDragon with a non-EIP155 conforming signature
+  // and want to recreate a signature (where EIP155 should be applied)
+  // Leaving this hack lets the legacy.spec.ts -> sign(), verifySignature() test fail
+  // 2021-06-23
+  let hackApplied = false;
+  if (unsignedEthTx.type === 0 && unsignedEthTx.common.gteHardfork("spuriousDragon") && !unsignedEthTx.supports(Capability.EIP155ReplayProtection)) {
+    (unsignedEthTx as any).activeCapabilities.push(Capability.EIP155ReplayProtection);
+    hackApplied = true;
+  }
+
+  const msgHash = unsignedEthTx.getMessageToSign(true);
+  let rawMessage = unsignedEthTx.getMessageToSign(false);
+  if (Array.isArray(rawMessage)) {
+    // legacy tx, rlp encode it
+    rawMessage = Buffer.from(RLP.encode(bufArrToArr(rawMessage)));
+  }
+
+  const { v, r, s } = await sign(msgHash, rawMessage);
+  let modifiedV = v;
+  if (modifiedV <= 35) {
+    modifiedV = Number(txParams.chainId) * 2 + (modifiedV + 35);
   }
 
   const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
@@ -135,7 +182,34 @@ export function getProviderHandlers({
         code: 4902,
       });
     },
-    processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+    processLegacyTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signLegacyTx(txParams, sign, txFormatter);
+      const txHash = await providerEngineProxy.request<string[], string>({
+        method: "eth_sendRawTransaction",
+        params: ["0x".concat(signedTx.toString("hex"))],
+      });
+      return txHash;
+    },
+    processLegacySignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw ethErrors.provider.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+      const signedTx = await signLegacyTx(txParams, sign, txFormatter);
+      return `0x${signedTx.toString("hex")}`;
+    },
+    processTransaction: async (
+      txParams: TransactionParams & { maxPriorityFeePerGas?: bigint; maxFeePerGas?: bigint; chainId?: bigint },
+      _: JRPCRequest<unknown>
+    ): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
         throw ethErrors.provider.custom({
@@ -149,7 +223,10 @@ export function getProviderHandlers({
       });
       return txHash;
     },
-    processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
+    processSignTransaction: async (
+      txParams: TransactionParams & { maxPriorityFeePerGas?: bigint; maxFeePerGas?: bigint; chainId?: bigint },
+      _: JRPCRequest<unknown>
+    ): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
         throw ethErrors.provider.custom({
