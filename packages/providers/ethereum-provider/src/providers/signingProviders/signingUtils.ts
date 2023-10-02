@@ -1,4 +1,3 @@
-// import { RLP } from "@ethereumjs/rlp";
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { MessageTypes, SignTypedDataVersion, TypedDataUtils, TypedDataV1, TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
@@ -32,14 +31,10 @@ async function signTx(
     hackApplied = true;
   }
 
-  const msgHash = unsignedEthTx.getMessageToSign() as any;
-  // let rawMessage = unsignedEthTx.getMessageToSign();
-  // if (Array.isArray(rawMessage)) {
-  //   // legacy tx, rlp encode it
-  //   rawMessage = Buffer.from(RLP.encode(bufArrToArr(rawMessage)));
-  // }
+  const msgHash = unsignedEthTx.getHashedMessageToSign();
+  const rawMessage = unsignedEthTx.getHashedMessageToSign();
 
-  const { v, r, s } = await sign(Buffer.from(msgHash));
+  const { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage));
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
@@ -146,10 +141,10 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
-      const signedTx = await signTx(txParams, sign, txFormatter);
+      const serializedTxn = await signTx(txParams, sign, txFormatter);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
-        params: ["0x".concat(signedTx.toString("hex"))],
+        params: ["0x".concat(serializedTxn.toString("hex"))],
       });
       return txHash;
     },
@@ -160,8 +155,8 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
-      const signedTx = await signTx(txParams, sign, txFormatter);
-      return `0x${signedTx.toString("hex")}`;
+      const serializedTxn = await signTx(txParams, sign, txFormatter);
+      return Buffer.from(serializedTxn).toString("hex");
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const rawMessageSig = signMessage(sign, msgParams.data);
