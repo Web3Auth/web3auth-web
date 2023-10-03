@@ -15,7 +15,7 @@ function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
   const { onClose, appLogo, appName } = props;
 
-  const [t] = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
@@ -34,8 +34,17 @@ function Header(props: HeaderProps) {
             <div className="relative flex flex-col items-center group cursor-pointer">
               <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
               <div className="absolute top-4 z-20 flex-col items-center hidden mb-5 group-hover:flex">
-                <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
-                <div className="relative -ml-[100px] p-4 w-[300px] text-xs leading-none text-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg">
+                <div
+                  className={[i18n.dir() === "ltr" ? "ml-[3px]" : "mr-[3px]", "w-3 h-3 -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600"].join(
+                    " "
+                  )}
+                />
+                <div
+                  className={[
+                    i18n.dir() === "ltr" ? "-ml-[100px]" : "-mr-[100px]",
+                    "relative  p-4 w-[300px] text-xs leading-none text-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg",
+                  ].join(" ")}
+                >
                   <div className="text-xs font-medium mb-1 text-app-gray-900 dark:text-white">{t("modal.header-tooltip-title")}</div>
                   <div className="text-xs text-app-gray-400">{t("modal.header-tooltip-desc")}</div>
                 </div>

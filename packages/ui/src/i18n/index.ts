@@ -1,3 +1,4 @@
+import ar from "./arabic.json";
 import nl from "./dutch.json";
 import en from "./english.json";
 import fr from "./french.json";
@@ -8,4 +9,4 @@ import zh from "./mandarin.json";
 import pt from "./portuguese.json";
 import es from "./spanish.json";
 
-export { de, en, es, fr, ja, ko, nl, pt, zh };
+export { ar, de, en, es, fr, ja, ko, nl, pt, zh };

@@ -87,6 +87,7 @@ export const validatePhoneNumber = async (phoneNumber: string): Promise<string |
 };
 
 export const languageMap: Record<LANGUAGE_TYPE, string> = {
+  ar: "arabic",
   en: "english",
   de: "german",
   ja: "japanese",

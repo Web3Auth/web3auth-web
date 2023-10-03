@@ -21,7 +21,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
   const [countryCode, setCountryCode] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean | null>(null);
 
-  const [t] = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +78,9 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
           <div className="relative flex flex-col items-center cursor-pointer group">
             <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
             <div className="absolute z-20 flex-col items-center hidden mb-5 top-4 group-hover:flex">
-              <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
+              <div
+                className={[i18n.dir() === "ltr" ? "ml-[3px]" : "mr-[3px]", "w-3 h-3 -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600"].join(" ")}
+              />
               <div className="relative p-4 w-[300px] text-xs leading-none text-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg">
                 <div className="mb-1 text-xs font-medium text-app-gray-900 dark:text-white">{t("modal.popup.phone-header")}</div>
                 <div className="text-xs text-app-gray-400">{t("modal.popup.phone-body")}</div>

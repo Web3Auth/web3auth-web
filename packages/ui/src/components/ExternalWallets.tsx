@@ -102,7 +102,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     return { platform: browser.getPlatformType() as platform, os: browser.getOSName() as os };
   }, []);
 
-  const [t] = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri, deviceType);
@@ -207,7 +207,11 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               const isBlock = externalButtons.length === 1 || button.block;
 
-              const label = isBlock ? <p className="ml-2 text-left">{config[button.name]?.label || button.name}</p> : "";
+              const label = isBlock ? (
+                <p className={[i18n.dir() === "ltr" ? "ml-2" : "mr-2", "text-left"].join(" ")}>{config[button.name]?.label || button.name}</p>
+              ) : (
+                ""
+              );
               return (
                 <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : "col-span-2"].join(" ")} key={button.name}>
                   {button.isLink ? (
