@@ -9,13 +9,13 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletLoginError,
@@ -24,11 +24,7 @@ import {
 import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
 import { SolflareInjectedProvider, SolflareWallet } from "@web3auth-mpc/solana-provider";
 
-export interface SolflareWalletOptions {
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
-}
+export type SolflareWalletOptions = BaseAdapterSettings;
 
 export class SolflareAdapter extends BaseSolanaAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.SOLFLARE;
@@ -45,42 +41,24 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
 
   private solflareProvider: SolflareInjectedProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(options: SolflareWalletOptions) {
-    super(options);
-    this.chainConfig = options?.chainConfig || null;
-    this.sessionTime = options?.sessionTime || 86400;
-  }
-
   get isWalletConnected(): boolean {
     return !!(this._wallet?.isConnected && this.status === ADAPTER_STATUS.CONNECTED);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
-    return this.solflareProvider?.provider || null;
+  get provider(): IProvider | null {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.solflareProvider) {
+      return this.solflareProvider;
+    }
+    return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-  }
-
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-    }
     this.solflareProvider = new SolflareInjectedProvider({ config: { chainConfig: this.chainConfig as CustomChainConfig } });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.SOLFLARE);
@@ -97,7 +75,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     try {
       super.checkConnectionRequirements();
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -139,15 +117,17 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnect();
+    await await super.disconnectSession();
     try {
       await this._wallet?.disconnect();
       if (options.cleanup) {
         this.status = ADAPTER_STATUS.NOT_READY;
         this.solflareProvider = null;
         this._wallet = null;
+      } else {
+        this.status = ADAPTER_STATUS.READY;
       }
-      this.emit(ADAPTER_EVENTS.DISCONNECTED);
+      await super.disconnect();
     } catch (error: unknown) {
       this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
     }
@@ -158,7 +138,19 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
-  private async connectWithProvider(injectedProvider: SolflareWallet): Promise<SafeEventEmitterProvider | null> {
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(chainConfig, init);
+    this.solflareProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    await this.solflareProvider?.switchChain(params);
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
+  private async connectWithProvider(injectedProvider: SolflareWallet): Promise<IProvider | null> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;

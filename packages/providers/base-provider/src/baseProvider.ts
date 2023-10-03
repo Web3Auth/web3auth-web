@@ -1,8 +1,15 @@
-import { BaseConfig, BaseController, BaseState, createEventEmitterProxy, SafeEventEmitterProvider } from "@toruslabs/base-controllers";
-import { CustomChainConfig, WalletInitializationError } from "@web3auth-mpc/base";
-import { ethErrors } from "eth-rpc-errors";
-
-import { IBaseProvider } from "./IBaseProvider";
+import { rpcErrors } from "@metamask/rpc-errors";
+import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
+import { JRPCRequest, JRPCResponse, SendCallBack } from "@toruslabs/openlogin-jrpc";
+import {
+  CustomChainConfig,
+  IBaseProvider,
+  Maybe,
+  RequestArguments,
+  SafeEventEmitterProvider,
+  WalletInitializationError,
+  WalletProviderError,
+} from "@web3auth-mpc/base";
 
 export interface BaseProviderState extends BaseState {
   chainId: string;
@@ -36,17 +43,66 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
+  get currentChainConfig(): Partial<CustomChainConfig> {
+    return this.config.chainConfig;
+  }
+
   get provider(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
+  }
+
+  get chainId(): string {
+    return this.state.chainId;
   }
 
   set provider(_) {
     throw new Error("Method not implemented.");
   }
 
+  async request<T, R>(args: RequestArguments<T>): Promise<Maybe<R>> {
+    if (!args || typeof args !== "object" || Array.isArray(args)) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestArgs().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestArgs().message },
+      });
+    }
+
+    const { method, params } = args;
+
+    if (typeof method !== "string" || method.length === 0) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestMethod().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestMethod().message },
+      });
+    }
+
+    if (params !== undefined && !Array.isArray(params) && (typeof params !== "object" || params === null)) {
+      throw rpcErrors.invalidRequest({
+        message: WalletProviderError.invalidRequestParams().message,
+        data: { ...(args || {}), cause: WalletProviderError.invalidRequestParams().message },
+      });
+    }
+
+    return this.provider?.request(args);
+  }
+
+  sendAsync<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;
+  sendAsync<T, U>(req: JRPCRequest<T>): Promise<JRPCResponse<U>>;
+
+  sendAsync<T, U>(req: JRPCRequest<T>, callback?: SendCallBack<JRPCResponse<U>>): void | Promise<JRPCResponse<U>> {
+    if (callback) return this.send(req, callback);
+    return this.request(req);
+  }
+
+  send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void {
+    this.request(req)
+      .then((res) => callback(null, { result: res } as JRPCResponse<U>))
+      .catch((err) => callback(err, null));
+  }
+
   public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw ethErrors.rpc.invalidParams("chainId is required");
-    if (!chainConfig.rpcTarget) throw ethErrors.rpc.invalidParams("chainId is required");
+    if (!chainConfig.chainId) throw rpcErrors.invalidParams("chainId is required");
+    if (!chainConfig.rpcTarget) throw rpcErrors.invalidParams("chainId is required");
     this.configure({
       networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
     } as C);
@@ -54,20 +110,21 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   public getChainConfig(chainId: string): CustomChainConfig | null {
     const chainConfig = this.config.networks?.[chainId];
-    if (!chainConfig) throw ethErrors.rpc.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
+    if (!chainConfig) throw rpcErrors.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
     return chainConfig;
+  }
+
+  public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
+    if (this._providerEngineProxy) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this._providerEngineProxy as any).setTarget(provider);
+    } else {
+      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
+    }
   }
 
   protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
-  }
-
-  protected updateProviderEngineProxy(providerEngineProxy: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      (this._providerEngineProxy as any).setTarget(providerEngineProxy);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(providerEngineProxy);
-    }
   }
 
   abstract setupProvider(provider: P): Promise<void>;

@@ -1,6 +1,7 @@
-import { ADAPTER_EVENTS, SafeEventEmitterProvider } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/web3auth";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
+import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -20,6 +21,8 @@ export interface IWeb3AuthContext {
   getBalance: () => Promise<any>;
   signTransaction: () => Promise<void>;
   signAndSendTransaction: () => Promise<void>;
+  addChain: () => Promise<void>;
+  switchChain: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -36,6 +39,8 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   getBalance: async () => {},
   signTransaction: async () => {},
   signAndSendTransaction: async () => {},
+  addChain: async () => {},
+  switchChain: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -60,7 +65,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [isLoading, setIsLoading] = useState(false);
 
   const setWalletProvider = useCallback(
-    (web3authProvider: SafeEventEmitterProvider) => {
+    (web3authProvider: IProvider) => {
       const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
       setProvider(walletProvider);
     },
@@ -90,22 +95,75 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       });
     };
 
-    const currentChainConfig = CHAIN_CONFIG[chain];
-
     async function init() {
       try {
+        const currentChainConfig = CHAIN_CONFIG[chain];
         setIsLoading(true);
         const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
           clientId,
+          uiConfig: {
+            defaultLanguage: "en",
+            theme: "light",
+            loginGridCol: 3,
+            primaryButton: "socialLogin",
+          },
+          enableLogging: true,
         });
-        const adapter = new OpenloginAdapter({ adapterSettings: { network: web3AuthNetwork, clientId } });
+        const adapter = new OpenloginAdapter({
+          adapterSettings: {
+            network: web3AuthNetwork,
+            clientId,
+            loginConfig: {
+              facebook: {
+                name: "Custom Auth Login",
+                verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
+                typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
+                showOnModal: false,
+              },
+            },
+          },
+        });
         web3AuthInstance.configureAdapter(adapter);
+        const plugin = new TorusWalletConnectorPlugin({
+          walletInitOptions: {
+            whiteLabel: {
+              logoDark: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+              logoLight: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+              theme: {
+                isDark: true,
+                colors: {},
+              },
+            },
+            buildEnv: "production",
+            useWalletConnect: true,
+            enableLogging: true,
+          },
+        });
+        web3AuthInstance.addPlugin(plugin);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
-        await web3AuthInstance.initModal();
+        await web3AuthInstance.initModal({
+          modalConfig: {
+            openlogin: {
+              label: "openlogin",
+              loginMethods: {
+                google: {
+                  name: "google",
+                  mainOption: true,
+                },
+                apple: {
+                  name: "apple",
+                  mainOption: true,
+                },
+              },
+              // setting it to false will hide all social login methods from modal.
+              showOnModal: true,
+            },
+          },
+        });
       } catch (error) {
         console.error(error);
       } finally {
@@ -143,6 +201,33 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     const user = await web3Auth.getUserInfo();
     uiConsole(user);
+  };
+
+  const addChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const newChain = {
+      chainId: "0x19",
+      displayName: "Cronos Mainnet Beta",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      tickerName: "Cronos",
+      ticker: "CRO",
+      decimals: 18,
+      rpcTarget: "https://cronos-evm.publicnode.com",
+      blockExplorer: "https://goerli.etherscan.io",
+    };
+    await web3Auth?.addChain(newChain);
+    uiConsole("New Chain Added");
+  };
+  const switchChain = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await web3Auth?.switchChain({ chainId: "0x19" });
+    uiConsole("Chain Switched");
   };
 
   const getAccounts = async () => {
@@ -193,7 +278,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
-      el.innerHTML = JSON.stringify(args || {}, null, 2);
+      el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
     }
   };
 
@@ -211,6 +296,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     signMessage,
     signTransaction,
     signAndSendTransaction,
+    addChain,
+    switchChain,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

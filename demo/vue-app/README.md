@@ -1,17 +1,25 @@
-## Web3Auth Vue Example
+# Web3Auth x Vue Demo App
 
-- ### Pre requirements:-
+## Quickstart
 
-  - Install yarn:- `npm i -g yarn`
+To use this demo app, you'll first have to build the Web3Auth packages.
 
-  - Build packages:-
+### Build the `Web3Auth` packages
 
-    - Go to project root folder: `cd ../../`
-    - Install deps: `yarn` && `yarn run bootstrap`
-    - Build project:- `yarn run build`
+```bash
+git clone https://github.com/Web3Auth/web3auth-web.git
+cd web3auth-web
+npm install
+npm run bootstrap && npm run build
+```
 
-  - Run the example:-
+### Start the demo app
 
-    - Go to example: `cd demo/vue-app`
-    - Install deps: `npm install`
-    - Run example:- `npm run serve`
+> Inside `web3auth-web` directory.
+
+```bash
+cd demo/vue-app
+npm install
+npm run serve
+# localhost:3000
+```

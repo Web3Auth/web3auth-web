@@ -1,24 +1,11 @@
 {
+  "extends": "@toruslabs/config/tsconfig.default.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "strict": false,
-    "module": "esnext",
-    "target": "es6",
-    "lib": ["ES2020", "DOM"],
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "noImplicitThis": true,
-    "declaration": true,
-    "declarationDir": "./types",
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
     "paths": {
-      "@web3auth-mpc/*-adapter": ["packages/adapters/*-adapter/src"],
-      "@web3auth-mpc/*-provider": ["packages/providers/*-provider/src"],
-      "@web3auth-mpc/*": ["packages/*/src"],
-      "@web3auth-mpc/*-plugin": ["packages/plugins/*-plugin/src"]
+      "@web3auth/*-adapter": ["./packages/adapters/*-adapter"],
+      "@web3auth/*-provider": ["./packages/providers/*-provider"],
+      "@web3auth/*": ["./packages/*"],
+      "@web3auth/*-plugin": ["./packages/plugins/*-plugin"]
     }
   }
 }

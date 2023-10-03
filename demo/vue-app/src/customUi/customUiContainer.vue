@@ -4,12 +4,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import Openlogin from "./openlogin.vue";
 // import WalletConnect from "./walletConnect.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "CustomUiContainer",
   props: {
     authType: {

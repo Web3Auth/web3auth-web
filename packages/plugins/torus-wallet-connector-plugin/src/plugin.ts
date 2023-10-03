@@ -1,8 +1,8 @@
+import type { JsonRpcError } from "@metamask/rpc-errors";
 import TorusEmbed, { LOGIN_TYPE, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/torus-embed";
-import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth-mpc/base";
+import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth-mpc/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth-mpc/base-plugin";
-import type { Web3AuthCore } from "@web3auth-mpc/core";
-import type { EthereumRpcError } from "eth-rpc-errors";
+import type { Web3AuthNoModal } from "@web3auth-mpc/no-modal";
 import log from "loglevel";
 
 import { TorusWalletPluginError } from "./errors";
@@ -15,13 +15,15 @@ export type ProviderInfo = {
 export class TorusWalletConnectorPlugin implements IPlugin {
   name = "TORUS_WALLET_CONNECTOR_PLUGIN";
 
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
+
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
   public torusWalletInstance: TorusEmbed;
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: Web3AuthCore | null = null;
+  private web3auth: Web3AuthNoModal | null = null;
 
   private userInfo: UserInfo | null = null;
 
@@ -38,6 +40,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
 
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
+    if (typeof walletInitOptions.showTorusButton === "undefined") walletInitOptions.showTorusButton = true;
     this.walletInitOptions = walletInitOptions;
   }
 
@@ -45,17 +48,18 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: Web3AuthCore): Promise<void> {
+  async initWithWeb3Auth(web3auth: Web3AuthNoModal): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw TorusWalletPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw TorusWalletPluginError.unsupportedAdapter();
+    if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw TorusWalletPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
       this.provider = web3auth.provider;
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
     }
     this.web3auth = web3auth;
-    this.subscribeToWeb3AuthCoreEvents(web3auth);
+    this.subscribeToWeb3AuthNoModalEvents(web3auth);
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
     const network = {
       ...web3auth.coreOptions.chainConfig,
@@ -101,10 +105,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     let privateKey: string | undefined;
     try {
       // it should throw if provider doesn't support `eth_private_key` function
-      privateKey = (await this.provider.request<string>({ method: "eth_private_key" })) as string;
+      privateKey = (await this.provider.request<never, string>({ method: "eth_private_key" })) as string;
     } catch (error: unknown) {
       log.warn("unsupported method", error, TorusWalletPluginError.unsupportedAdapter());
-      if ((error as EthereumRpcError<unknown>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
+      if ((error as JsonRpcError<never>)?.code === -32004) throw TorusWalletPluginError.unsupportedAdapter();
       throw error;
     }
     if (!privateKey) throw TorusWalletPluginError.web3AuthNotConnected();
@@ -113,10 +117,13 @@ export class TorusWalletConnectorPlugin implements IPlugin {
         privateKey,
         userInfo: {
           ...(this.userInfo as Omit<UserInfo, "isNewUser">),
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
-      this.torusWalletInstance.showTorusButton();
+      if (this.walletInitOptions?.showTorusButton) this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
     } catch (error) {
@@ -148,7 +155,7 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     this.torusWalletInstance?.provider.on("accountsChanged", (accounts = []) => {
       if ((accounts as string[]).length === 0) {
         this.torusWalletInstance.hideTorusButton();
-        this.web3auth?.logout();
+        if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
       }
     });
   }
@@ -158,18 +165,18 @@ export class TorusWalletConnectorPlugin implements IPlugin {
       this.setSelectedAddress(data.accounts[0]);
     });
 
-    provider.on("chainChanged", (data: { chainId: string }) => {
-      this.setChainID(parseInt(data.chainId, 16));
+    provider.on("chainChanged", (chainId: string) => {
+      this.setChainID(parseInt(chainId, 16));
     });
     provider.on("disconnect", () => {
       this.torusWalletInstance.hideTorusButton();
     });
     provider.on("connect", () => {
-      this.torusWalletInstance.showTorusButton();
+      if (this.walletInitOptions?.showTorusButton) this.torusWalletInstance.showTorusButton();
     });
   }
 
-  private subscribeToWeb3AuthCoreEvents(web3Auth: Web3AuthCore) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);
@@ -194,10 +201,10 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   private async sessionConfig(): Promise<{ chainId: number; accounts: string[]; privateKey: string; chainConfig: CustomChainConfig }> {
     if (!this.provider) throw TorusWalletPluginError.web3AuthNotConnected();
     const [accounts, chainId, privateKey, chainConfig] = await Promise.all([
-      this.provider.request<string[]>({ method: "eth_accounts" }),
-      this.provider.request<string>({ method: "eth_chainId" }),
-      this.provider.request<string>({ method: "eth_private_key" }),
-      this.provider.request<CustomChainConfig>({ method: "eth_provider_config" }),
+      this.provider.request<never, string[]>({ method: "eth_accounts" }),
+      this.provider.request<never, string>({ method: "eth_chainId" }),
+      this.provider.request<never, string>({ method: "eth_private_key" }),
+      this.provider.request<never, CustomChainConfig>({ method: "eth_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),
@@ -207,14 +214,29 @@ export class TorusWalletConnectorPlugin implements IPlugin {
     };
   }
 
+  private async torusWalletSessionConfig(): Promise<{ chainId: number; accounts: string[] }> {
+    if (!this.torusWalletInstance.provider) throw TorusWalletPluginError.web3AuthNotConnected();
+    const [accounts, chainId] = await Promise.all([
+      this.torusWalletInstance.provider.request<string[]>({ method: "eth_accounts" }),
+      this.torusWalletInstance.provider.request<string>({ method: "eth_chainId" }),
+    ]);
+    return {
+      chainId: parseInt(chainId as string, 16),
+      accounts: accounts as string[],
+    };
+  }
+
   private async setSelectedAddress(address: string): Promise<void> {
     if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw TorusWalletPluginError.web3AuthNotConnected();
-    const sessionConfig = await this.sessionConfig();
-    if (address !== sessionConfig.accounts?.[0]) {
+    const [sessionConfig, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
+    if (address !== torusWalletSessionConfig.accounts?.[0]) {
       await this.torusWalletInstance.loginWithPrivateKey({
         privateKey: sessionConfig.privateKey,
         userInfo: {
           ...this.userInfo,
+          email: this.userInfo?.email as string,
+          name: this.userInfo?.name as string,
+          profileImage: this.userInfo?.profileImage as string,
           typeOfLogin: this.userInfo?.typeOfLogin as LOGIN_TYPE, // openlogin's login type is subset of torus embed, so it is safe to cast.
         },
       });
@@ -222,9 +244,9 @@ export class TorusWalletConnectorPlugin implements IPlugin {
   }
 
   private async setChainID(chainId: number): Promise<void> {
-    const sessionConfig = await this.sessionConfig();
+    const [sessionConfig, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
     const { chainConfig } = sessionConfig || {};
-    if (chainId !== sessionConfig.chainId && chainConfig) {
+    if (chainId !== torusWalletSessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
         ...chainConfig,
         chainId,

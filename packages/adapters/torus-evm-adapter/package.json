@@ -3,7 +3,7 @@
   "version": "2.1.9",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
-    "web3Auth/core",
+    "web3Auth/torus-evm-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
@@ -16,7 +16,7 @@
   "jsdelivr": "dist/torusEvmAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/main/packages/core#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/torus-evm-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -24,7 +24,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^1.36.2",
+    "@toruslabs/torus-embed": "^4.0.0",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-evm-adapter": "^2.1.9"
   },
@@ -54,5 +54,9 @@
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

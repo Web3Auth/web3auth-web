@@ -1,16 +1,16 @@
 import { ADAPTER_STATUS, log } from "@web3auth-mpc/base";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
-import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Image from "./Image";
-
-const DEFAULT_LOGO_URL = "https://images.web3auth.io/web3auth-logo.svg";
 
 interface DetailedLoaderProps {
   message?: string;
   appLogo?: string;
   adapter: string;
+  adapterName: string;
   modalStatus: ModalStatusType;
   onClose: () => void;
 }
@@ -18,9 +18,11 @@ interface DetailedLoaderProps {
 const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
-  const { adapter, appLogo = DEFAULT_LOGO_URL, message, modalStatus, onClose } = props;
+  const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
+  const [t] = useTranslation();
+  const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
@@ -38,7 +40,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
-                <div className="w3a-modal__loader-app-logo">
+                <div className={["w3a-modal__loader-app-logo", isDefaultLogo ? "w3a-modal__loader-app-logo--default" : ""].join(" ")}>
                   <img src={appLogo} alt="" />
                 </div>
                 <div className="w3a-modal__connector">
@@ -50,22 +52,26 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                     <div />
                   </div>
                 </div>
-                <div className="w3a-modal__loader-adapter">{providerIcon}</div>
+                <div className="w3a-modal__loader-social-logo">{providerIcon}</div>
               </div>
               <div>
-                <div className="w3a-modal__loader-bridge-message">
-                  Verify on your <span>{adapter}</span> account to continue
-                </div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter: adapterName })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter: adapterName })}</div>
               </div>
             </>
           )}
-          {modalStatus === ADAPTER_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
+          {modalStatus === ADAPTER_STATUS.CONNECTED && (
+            <div className="flex flex-col items-center">
+              <Icon iconName="connected" />
+              <div className="w3ajs-modal-loader__message w3a-spinner-message mt-4">{message}</div>
+            </div>
+          )}
           {modalStatus === ADAPTER_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
         <div className="w3a-spinner-power">
-          <div>Self-custodial login by</div>
+          <div>{t("modal.footer.message")}</div>
           {web3authIcon}
         </div>
       </div>

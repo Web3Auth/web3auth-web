@@ -55,4 +55,8 @@ export class SolanaWalletPluginError extends Web3AuthError {
   public static torusWalletNotSet(extraMessage = ""): IWeb3AuthError {
     return SolanaWalletPluginError.fromCode(5217, extraMessage);
   }
+
+  public static unsupportedChainNamespace(extraMessage = ""): IWeb3AuthError {
+    return SolanaWalletPluginError.fromCode(5218, extraMessage);
+  }
 }

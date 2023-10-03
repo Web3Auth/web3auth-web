@@ -1,6 +1,6 @@
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
+import { rpcErrors } from "@metamask/rpc-errors";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
-import { ethErrors } from "eth-rpc-errors";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
 
@@ -47,7 +47,7 @@ export function createWalletMiddleware({
         return normalizedAddress;
       }
     }
-    throw ethErrors.rpc.invalidParams({
+    throw rpcErrors.invalidParams({
       message: `Invalid parameters: must provide an Ethereum address.`,
     });
   }
@@ -71,24 +71,28 @@ export function createWalletMiddleware({
 
   async function sendTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTransaction) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
-    const txParams: TransactionParams = (req.params as TransactionParams[])[0] || {
-      from: "",
-    };
+    const txParams: TransactionParams =
+      (req.params as TransactionParams[])[0] ||
+      ({
+        from: "",
+      } as TransactionParams);
     txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
     res.result = await processTransaction(txParams, req);
   }
 
   async function signTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processSignTransaction) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
-    const txParams: TransactionParams = (req.params as TransactionParams[])[0] || {
-      from: "",
-    };
+    const txParams: TransactionParams =
+      (req.params as TransactionParams[])[0] ||
+      ({
+        from: "",
+      } as TransactionParams);
     txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
     res.result = await processSignTransaction(txParams, req);
   }
@@ -99,7 +103,7 @@ export function createWalletMiddleware({
 
   async function ethSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processEthSignMessage) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
@@ -116,7 +120,7 @@ export function createWalletMiddleware({
 
   async function signTypedData(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTypedMessage) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const message: TypedDataV1 = (req.params as TypedDataV1[])[0];
@@ -134,7 +138,7 @@ export function createWalletMiddleware({
 
   async function signTypedDataV3(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTypedMessageV3) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
@@ -151,7 +155,7 @@ export function createWalletMiddleware({
 
   async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTypedMessageV4) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
@@ -168,7 +172,7 @@ export function createWalletMiddleware({
 
   async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processPersonalMessage) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     // process normally
@@ -190,7 +194,7 @@ export function createWalletMiddleware({
       warning += `[message, address]. This was previously handled incorrectly, `;
       warning += `and has been corrected automatically. `;
       warning += `Please switch this param order for smooth behavior in the future.`;
-      (res as any).warning = warning;
+      (res as { warning: string }).warning = warning;
 
       address = firstParam;
       message = secondParam;
@@ -212,7 +216,7 @@ export function createWalletMiddleware({
 
   async function encryptionPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processEncryptionPublicKey) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const address: string = await validateAndNormalizeKeyholder((req.params as string)[0], req);
@@ -222,7 +226,7 @@ export function createWalletMiddleware({
 
   async function decryptMessage(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processDecryptMessage) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
 
     const ciphertext: string = (req.params as string)[0];
@@ -239,7 +243,7 @@ export function createWalletMiddleware({
 
   async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!getPrivateKey) {
-      throw ethErrors.rpc.methodNotSupported();
+      throw rpcErrors.methodNotSupported();
     }
     res.result = getPrivateKey(req);
   }
@@ -248,6 +252,7 @@ export function createWalletMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
+    private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),

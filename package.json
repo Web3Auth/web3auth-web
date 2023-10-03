@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/base",
-    "packages/core",
     "packages/modal",
+    "packages/no-modal",
     "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
@@ -13,8 +13,7 @@
   ],
   "description": "Monorepo for web3 auth packages",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "publish:lerna": "yarn clean && yarn bootstrap && lerna publish",
+    "publish:lerna": "npm run clean && npm install && lerna publish",
     "just:publish:lerna": "lerna publish",
     "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
     "build": "cross-env FORCE_COLOR=1 lerna run --stream build",
@@ -24,32 +23,37 @@
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
     "pack:lerna": "lerna exec 'yarn pack'",
     "pre-commit": "lerna run pre-commit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "locale": "node locales/importLocales.mjs"
   },
   "devDependencies": {
-    "@toruslabs/eslint-config-typescript": "^1.1.2",
-    "@toruslabs/torus-scripts": "^1.2.2",
-    "@types/node": "^16",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@babel/register": "^7.22.15",
+    "@toruslabs/config": "^2.0.2",
+    "@toruslabs/eslint-config-typescript": "^3.0.1",
+    "@toruslabs/torus-scripts": "^5.0.5",
+    "@types/chai": "^4.3.6",
+    "@types/faker": "^5.5.9",
+    "@types/jsonwebtoken": "^9.0.3",
+    "@types/mocha": "^10.0.2",
+    "@types/node": "^20",
+    "chai": "^4.3.10",
     "cross-env": "^7.0.3",
-    "eslint": "^8.24.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-mocha": "^10.1.0",
-    "eslint-plugin-n": "^15.3.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.0.1",
-    "eslint-plugin-simple-import-sort": "^8.0.0",
-    "eslint-plugin-tsdoc": "^0.2.17",
-    "husky": "^8.0.1",
-    "lerna": "^5.5.4",
-    "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
-    "rimraf": "^3.0.2",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.50.0",
+    "faker": "^5.5.3",
+    "husky": "^8.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "lerna": "^7.3.0",
+    "lint-staged": "^14.0.1",
+    "mocha": "^10.2.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.1.0",
-    "tsconfig-paths-webpack-plugin": "^4.0.0",
-    "tslib": "^2.4.0",
-    "typescript": "^4.8.4"
+    "tsconfig-paths": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
   },
   "repository": {
     "type": "git",
@@ -74,12 +78,9 @@
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "engines": {
-    "node": ">=14.17.0",
-    "npm": ">=6.x"
-  },
-  "resolutions": {
-    "@typescript-eslint/eslint-plugin": "^5.38.1"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

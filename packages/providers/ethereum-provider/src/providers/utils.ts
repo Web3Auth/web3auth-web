@@ -2,7 +2,7 @@ import { addHexPrefix, stripHexPrefix } from "@ethereumjs/util";
 import { BigNumber } from "bignumber.js";
 import BN from "bn.js";
 
-export function bnLessThan(a, b) {
+export function bnLessThan(a: string | number, b: string | number) {
   if (a === null || a === undefined || b === null || b === undefined) {
     return null;
   }

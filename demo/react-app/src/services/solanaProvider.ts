@@ -1,13 +1,13 @@
-import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { SolanaWallet } from "@web3auth/solana-provider";
 import { IWalletProvider } from "./walletProvider";
 
-const solanaProvider = (provider: SafeEventEmitterProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
+const solanaProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const solanaWallet = new SolanaWallet(provider);
 
   const getConnection = async (): Promise<Connection> => {
-    const connectionConfig = await solanaWallet.request<CustomChainConfig>({ method: "solana_provider_config", params: [] });
+    const connectionConfig = await solanaWallet.request<never, CustomChainConfig>({ method: "solana_provider_config" });
     const conn = new Connection(connectionConfig.rpcTarget);
     return conn
   }

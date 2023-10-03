@@ -1,7 +1,7 @@
 {
   "name": "@web3auth-mpc/base-solana-adapter",
   "version": "2.1.9",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/baseSolanaAdapter.cjs.js",
   "module": "dist/baseSolanaAdapter.esm.js",
@@ -15,7 +15,7 @@
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "yarn run build",
+    "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
@@ -28,6 +28,9 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x"
+  },
+  "devDependencies": {
+    "@types/bs58": "^4.0.2"
   },
   "lint-staged": {
     "!(*d).ts": [
@@ -45,5 +48,9 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

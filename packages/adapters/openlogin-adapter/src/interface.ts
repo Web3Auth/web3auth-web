@@ -1,19 +1,19 @@
-import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-mpc";
-import { CustomChainConfig } from "@web3auth-mpc/base";
+import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-utils";
+import { BaseAdapterSettings, IBaseProvider } from "@web3auth-mpc/base";
 
-export type LoginSettings = LoginParams & Partial<BaseRedirectParams>;
+export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 
 type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick<Type, Key>>;
-export interface OpenloginAdapterOptions {
-  chainConfig?: CustomChainConfig | null;
-  adapterSettings?: MakeOptional<OpenLoginOptions, "clientId">;
-  loginSettings?: LoginSettings;
-  tssSettings?: {
-    useTSS: boolean;
-    tssSign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
-    tssGetPublic: () => Promise<Buffer>;
-    tssDataCallback: (
-      tssDataReader: () => Promise<{ tssShare: string; signatures: string[]; verifierName: string; verifierId: string }>
-    ) => Promise<void>;
+
+export type PrivateKeyProvider = IBaseProvider<string>;
+
+export interface OpenloginAdapterOptions extends BaseAdapterSettings {
+  adapterSettings?: MakeOptional<OpenLoginOptions, "clientId" | "network"> & {
+    useCoreKitKey?: boolean;
   };
+  loginSettings?: LoginSettings;
+  privateKeyProvider?: PrivateKeyProvider;
 }
+
+export * from "@toruslabs/openlogin-utils";
+export { type LoginConfig } from "@toruslabs/openlogin-utils";

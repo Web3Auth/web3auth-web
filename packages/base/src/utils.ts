@@ -3,7 +3,7 @@ export function storageAvailable(type: "sessionStorage" | "localStorage"): boole
   let storageLength = 0;
   let storage: Storage;
   try {
-    storage = (window as any)[type];
+    storage = window[type];
     storageExists = true;
     storageLength = storage.length;
     const x = "__storage_test__";

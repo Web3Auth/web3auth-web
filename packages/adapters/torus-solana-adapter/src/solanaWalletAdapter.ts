@@ -8,13 +8,13 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  getChainConfig,
+  IProvider,
   log,
-  SafeEventEmitterProvider,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -24,13 +24,10 @@ import {
 import { BaseSolanaAdapter } from "@web3auth-mpc/base-solana-adapter";
 import { ITorusWalletProvider, TorusInjectedProvider } from "@web3auth-mpc/solana-provider";
 
-export interface SolanaWalletOptions {
+export interface SolanaWalletOptions extends BaseAdapterSettings {
   adapterSettings?: TorusCtorArgs;
   loginSettings?: TorusLoginParams;
   initParams?: Omit<TorusParams, "network">;
-  chainConfig?: CustomChainConfig;
-  sessionTime?: number;
-  clientId?: string;
 }
 
 export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
@@ -54,40 +51,30 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
 
   private solanaProvider: TorusInjectedProvider | null = null;
 
-  private rehydrated = false;
-
-  constructor(params: SolanaWalletOptions) {
+  constructor(params: SolanaWalletOptions = {}) {
     super(params);
     this.torusWalletOptions = params.adapterSettings || {};
     this.initParams = params.initParams || {};
     this.loginSettings = params.loginSettings || {};
-    this.chainConfig = params.chainConfig || null;
-    this.sessionTime = params.sessionTime || 86400;
   }
 
-  get provider(): SafeEventEmitterProvider | null {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.solanaProvider) {
-      return this.solanaProvider?.provider || null;
+  get provider(): IProvider | null {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.solanaProvider) {
+      return this.solanaProvider;
     }
     return null;
   }
 
-  set provider(_: SafeEventEmitterProvider | null) {
+  set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: AdapterInitOptions = {}): Promise<void> {
+    await super.init(options);
     super.checkInitializationRequirements();
-    // set chainConfig for mainnet by default if not set
-    let network: NetworkInterface;
-    if (!this.chainConfig) {
-      this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, "0x1");
-      const { blockExplorer, displayName, ticker, tickerName, rpcTarget, chainId } = this.chainConfig as CustomChainConfig;
-      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, ticker, tickerName, logo: "" };
-    } else {
-      const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-      network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
-    }
+    const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+    const network: NetworkInterface = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus solana adapter init");
     await this.torusInstance.init({ showTorusButton: false, ...this.initParams, network });
@@ -112,7 +99,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<SafeEventEmitterProvider | null> {
+  async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
     if (!this.solanaProvider) throw WalletInitializationError.notReady("Torus wallet is not initialized");
@@ -123,8 +110,12 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       try {
         const torusInpageProvider = this.torusInstance.provider as unknown as ITorusWalletProvider;
         torusInpageProvider.sendTransaction = this.torusInstance.sendTransaction.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signAllTransactions = this.torusInstance.signAllTransactions.bind(this.torusInstance);
         torusInpageProvider.signMessage = this.torusInstance.signMessage.bind(this.torusInstance);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         torusInpageProvider.signTransaction = this.torusInstance.signTransaction.bind(this.torusInstance);
         await this.solanaProvider.setupProvider(torusInpageProvider);
       } catch (error: unknown) {
@@ -147,13 +138,14 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
+      if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
     }
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    await super.disconnectSession();
     if (!this.torusInstance) throw WalletInitializationError.notReady("Torus wallet is not initialized");
-    await super.disconnect();
     await this.torusInstance.logout();
     if (options.cleanup) {
       // ready to connect again
@@ -164,8 +156,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       // ready to connect again
       this.status = ADAPTER_STATUS.READY;
     }
-
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -175,13 +166,24 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     return userInfo;
   }
 
-  setAdapterSettings(options: { sessionTime?: number; clientId?: string }): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
+  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+    super.checkAddChainRequirements(chainConfig, init);
+    // await this.solanaProvider?.addChain(chainConfig);
+    this.addChainConfig(chainConfig);
+  }
+
+  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+    super.checkSwitchChainRequirements(params, init);
+    const chainConfig = this.getChainConfig(params.chainId) as CustomChainConfig;
+    await this.torusInstance?.setProvider({
+      rpcTarget: chainConfig.rpcTarget,
+      chainId: chainConfig.chainId,
+      displayName: chainConfig.displayName,
+      blockExplorerUrl: chainConfig.blockExplorer,
+      ticker: chainConfig.ticker,
+      tickerName: chainConfig.tickerName,
+      logo: "https://images.web3auth.io/login-torus-solana.svg",
+    });
+    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 }
