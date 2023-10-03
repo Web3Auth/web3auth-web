@@ -1,7 +1,7 @@
 {
   "name": "@web3auth-mpc/ethereum-provider",
   "version": "2.3.0",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
   "module": "dist/ethereumProvider.esm.js",

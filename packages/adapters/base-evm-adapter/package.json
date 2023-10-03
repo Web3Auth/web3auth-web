@@ -1,7 +1,7 @@
 {
   "name": "@web3auth-mpc/base-evm-adapter",
   "version": "2.1.9",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/baseEvmAdapter.cjs.js",
   "module": "dist/baseEvmAdapter.esm.js",

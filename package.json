@@ -78,7 +78,7 @@
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"

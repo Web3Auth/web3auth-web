@@ -1,7 +1,7 @@
 {
   "name": "@web3auth/xrpl-provider",
   "version": "7.0.1",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/xrplProvider.cjs.js",
   "module": "dist/xrplProvider.esm.js",

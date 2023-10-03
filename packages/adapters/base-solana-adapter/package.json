@@ -1,7 +1,7 @@
 {
   "name": "@web3auth-mpc/base-solana-adapter",
   "version": "2.1.9",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/baseSolanaAdapter.cjs.js",
   "module": "dist/baseSolanaAdapter.esm.js",

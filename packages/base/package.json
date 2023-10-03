@@ -1,7 +1,7 @@
 {
   "name": "@web3auth-mpc/base",
   "version": "2.1.9",
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth-web#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
   "module": "dist/base.esm.js",
@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^5.0.0",
-    "@toruslabs/openlogin": "^5.0.3",
     "@toruslabs/openlogin-jrpc": "^5.0.2",
     "@toruslabs/openlogin-utils": "^5.0.2",
     "jwt-decode": "^3.1.2",
