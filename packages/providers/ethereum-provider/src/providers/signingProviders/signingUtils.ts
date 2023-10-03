@@ -1,3 +1,4 @@
+import { Hardfork } from "@ethereumjs/common";
 import { Capability, TransactionFactory } from "@ethereumjs/tx";
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import {
@@ -34,16 +35,20 @@ async function signTx(
   // Leaving this hack lets the legacy.spec.ts -> sign(), verifySignature() test fail
   // 2021-06-23
   let hackApplied = false;
-  if (unsignedEthTx.type === 0 && unsignedEthTx.common.gteHardfork("spuriousDragon") && !unsignedEthTx.supports(Capability.EIP155ReplayProtection)) {
+  if (
+    unsignedEthTx.type === 0 &&
+    unsignedEthTx.common.gteHardfork(Hardfork.SpuriousDragon) &&
+    !unsignedEthTx.supports(Capability.EIP155ReplayProtection)
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (unsignedEthTx as any).activeCapabilities.push(Capability.EIP155ReplayProtection);
     hackApplied = true;
   }
 
   const msgHash = unsignedEthTx.getHashedMessageToSign();
-  const rawMessage = unsignedEthTx.getHashedMessageToSign();
+  const rawMessage = unsignedEthTx.getMessageToSign();
 
-  const { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage));
+  const { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
   let modifiedV = v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
