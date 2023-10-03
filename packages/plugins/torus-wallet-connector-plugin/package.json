@@ -35,7 +35,7 @@
     "@metamask/rpc-errors": "^6.0.0"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^3.0.0",
+    "@toruslabs/torus-embed": "^4.0.0",
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-plugin": "^2.1.9",
     "@web3auth-mpc/no-modal": "^2.1.9",

@@ -36,7 +36,7 @@
     "@solana/web3.js": "^1.x"
   },
   "devDependencies": {
-    "@types/elliptic": "^6.4.14",
+    "@types/elliptic": "^6.4.15",
     "@types/lodash.merge": "^4.6.7"
   },
   "dependencies": {

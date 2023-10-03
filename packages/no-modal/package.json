@@ -37,9 +37,9 @@
   "dependencies": {
     "@web3auth-mpc/base": "^2.1.9",
     "@web3auth-mpc/base-plugin": "^2.1.9",
-    "@toruslabs/openlogin": "^5.0.3",
-    "@toruslabs/openlogin-jrpc": "^5.0.2",
-    "@toruslabs/openlogin-utils": "^5.0.2",
+    "@toruslabs/openlogin": "^5.1.1",
+    "@toruslabs/openlogin-jrpc": "^5.1.0",
+    "@toruslabs/openlogin-utils": "^5.1.0",
     "@web3auth-mpc/base-provider": "^2.1.9"
   },
   "lint-staged": {

@@ -30,7 +30,7 @@
     "@babel/runtime": "^7.x"
   },
   "devDependencies": {
-    "@types/bs58": "^4.0.1"
+    "@types/bs58": "^4.0.2"
   },
   "lint-staged": {
     "!(*d).ts": [
