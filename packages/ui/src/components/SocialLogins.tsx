@@ -29,7 +29,7 @@ export default function SocialLogins(props: SocialLoginProps) {
   } = props;
   const { isDark } = useContext(ThemedContext);
 
-  const [t] = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Too small a function to use `useCallback`
   const expandClickHandler = () => {
@@ -93,7 +93,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   title={name}
                 >
                   {providerIcon}
-                  <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
+                  <p className={i18n.dir() === "ltr" ? "ml-2" : "mr-2"}>{t("modal.social.continueCustom", { adapter: name })}</p>
                 </button>
               </li>
             );

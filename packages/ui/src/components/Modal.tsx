@@ -55,7 +55,7 @@ export default function Modal(props: ModalProps) {
     wcAdapters: [],
   });
   const { isDark } = useContext(ThemedContext);
-  const [t] = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
@@ -177,7 +177,7 @@ export default function Modal(props: ModalProps) {
 
   return (
     modalState.modalVisibilityDelayed && (
-      <div id="w3a-modal" className={modalClassName}>
+      <div id="w3a-modal" className={modalClassName} dir={i18n.dir()}>
         <div className={modalTransitionClasses.join(" ")}>
           <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (

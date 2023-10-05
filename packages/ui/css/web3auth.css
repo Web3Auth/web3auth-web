@@ -268,7 +268,7 @@
   @apply flex items-center text-sm font-normal text-app-gray-500 dark:text-app-gray-400;
 }
 #w3a-modal div.w3a-header__subtitle img {
-  @apply h-[14px] w-[14px] ml-1;
+  @apply h-[14px] w-[14px] ml-1 mr-1;
 }
 #w3a-modal button.w3a-header__button {
   @apply absolute p-0 border-0 cursor-pointer top-5 right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
@@ -291,7 +291,7 @@
 }
 
 #w3a-modal .w3ajs-passwordless div.w3a-group__title img {
-  @apply h-[14px] w-[14px] ml-1;
+  @apply h-[14px] w-[14px] ml-1 mr-1;
 }
 
 #w3a-modal .w3a-group.w3a-group--hidden,
@@ -365,7 +365,7 @@
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
-  @apply text-app-gray-400 mb-0 ml-[5px];
+  @apply text-app-gray-400 mb-0 ml-[5px] mr-[5px];
 }
 
 #w3a-modal .w3a-external-loader {
@@ -484,7 +484,7 @@
   text-sm
   -mt-2
   mb-2
-  ml-1.5;
+  ml-1.5 mr-1.5;
 }
 
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
@@ -569,7 +569,7 @@
 }
 
 #w3a-modal button.w3a-button-expand {
-  @apply w-auto h-auto mt-4 ml-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:hover:text-app-primary-500 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
+  @apply w-auto h-auto mt-4 ml-auto mr-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:hover:text-app-primary-500 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
 }
 
 /* SMS */

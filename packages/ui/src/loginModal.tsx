@@ -154,6 +154,15 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
+    } else if (useLang === "ar") {
+      import(`./i18n/arabic.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
     }
 
     return new Promise((resolve) => {
