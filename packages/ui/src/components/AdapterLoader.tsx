@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, MODAL_STATUS, ModalStatusType } from "../interfaces";
+import i18n from "../localeImport";
 import Icon from "./Icon";
 import Image from "./Image";
 
@@ -21,7 +22,7 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = <Image imageId={`login-${adapter}`} />;
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
   const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
 
   useEffect(() => {

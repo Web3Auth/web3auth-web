@@ -1,8 +1,10 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
 
+import i18n from "../localeImport";
+
 function Footer() {
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   return (
     <div className="w3a-modal__footer">

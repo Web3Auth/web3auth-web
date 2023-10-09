@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
+import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
@@ -55,7 +56,7 @@ export default function Modal(props: ModalProps) {
     wcAdapters: [],
   });
   const { isDark } = useContext(ThemedContext);
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 

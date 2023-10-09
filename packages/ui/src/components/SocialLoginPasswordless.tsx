@@ -3,6 +3,7 @@ import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from
 import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
+import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
 import Icon from "./Icon";
 
@@ -21,7 +22,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
   const [countryCode, setCountryCode] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean | null>(null);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
