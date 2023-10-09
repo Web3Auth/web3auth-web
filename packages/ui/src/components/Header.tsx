@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../interfaces";
+import i18n from "../localeImport";
 import Icon from "./Icon";
 
 interface HeaderProps {
@@ -15,7 +16,7 @@ function Header(props: HeaderProps) {
   const { isDark } = useContext(ThemedContext);
   const { onClose, appLogo, appName } = props;
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 

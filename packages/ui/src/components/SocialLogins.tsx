@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { capitalizeFirstLetter } from "../config";
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
+import i18n from "../localeImport";
 import Image from "./Image";
 
 // const hasLightIcons = ["apple", "github"];
@@ -29,7 +30,7 @@ export default function SocialLogins(props: SocialLoginProps) {
   } = props;
   const { isDark } = useContext(ThemedContext);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   // Too small a function to use `useCallback`
   const expandClickHandler = () => {

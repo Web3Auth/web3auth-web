@@ -2,6 +2,7 @@ import { CustomChainConfig } from "@web3auth/base";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import i18n from "../localeImport";
 import { getNetworkIconId } from "../utils";
 import Image from "./Image";
 
@@ -20,7 +21,7 @@ function SwitchNetwork(props: SwitchNetworkProps) {
   const [fromNetworkIconId, setFromNetworkIconId] = useState("network-default");
   const [toNetworkIconId, setToNetworkIconId] = useState("network-default");
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
     getNetworkIconId(currentChainConfig.ticker)

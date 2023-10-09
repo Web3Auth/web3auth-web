@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
+import i18n from "../localeImport";
 import Icon from "./Icon";
 import Image from "./Image";
 
@@ -19,7 +20,7 @@ const closeIcon = <Icon iconName="close" />;
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose, canEmit = true } = props;
   const web3authIcon = <Image imageId="web3auth" />;
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
     log.debug("loader re-rendering");

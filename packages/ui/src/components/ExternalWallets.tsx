@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType, WALLET_CONNECT_LOGO } from "../interfaces";
+import i18n from "../localeImport";
 import Icon from "./Icon";
 import Image from "./Image";
 import Loader from "./Loader";
@@ -102,7 +103,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     return { platform: browser.getPlatformType() as platform, os: browser.getOSName() as os };
   }, []);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri, deviceType);

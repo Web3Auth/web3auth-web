@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
 import { WALLET_CONNECT_LOGO } from "../interfaces";
+import i18n from "../localeImport";
 
 interface WalletConnectProps {
   walletConnectUri: string;
@@ -12,7 +13,7 @@ interface WalletConnectProps {
 function WalletConnect(props: WalletConnectProps) {
   const { walletConnectUri } = props;
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   // TODO: show only wcAdapters of current chain
   return (
