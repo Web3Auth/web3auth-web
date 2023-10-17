@@ -128,6 +128,30 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       decimals: 18,
     };
   }
+  if (chainId === 1482601649) {
+    return {
+      chainNamespace,
+      chainId: "0x585eb4b1",
+      rpcTarget: "https://mainnet.skalenodes.com/v1/green-giddy-denebola",
+      displayName: "SKALE Nebula Gaming Hub",
+      blockExplorer: "https://green-giddy-denebola.explorer.mainnet.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 503129905) {
+    return {
+      chainNamespace,
+      chainId: "0x1dfd2731",
+      rpcTarget: "https://staging-v3.skalenodes.com/#/chains/staging-faint-slimy-achird",
+      displayName: "Testnet SKALE Nebula Gaming Hub",
+      blockExplorer: "https://staging-faint-slimy-achird.explorer.staging-v3.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
 
   return null;
 };
