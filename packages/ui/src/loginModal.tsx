@@ -1,5 +1,4 @@
 import "../css/web3auth.css";
-import "./localeImport";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import {
@@ -15,7 +14,6 @@ import {
   WalletConnectV2Data,
   Web3AuthError,
 } from "@web3auth/base";
-import i18n from "i18next";
 import { createRoot } from "react-dom/client";
 
 import Modal from "./components/Modal";
@@ -30,6 +28,7 @@ import {
   SocialLoginEventType,
   UIConfig,
 } from "./interfaces";
+import i18n from "./localeImport";
 import { getUserLanguage } from "./utils";
 
 function createWrapper(parentZIndex: string): HTMLElement {
