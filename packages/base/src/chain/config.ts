@@ -144,9 +144,69 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
     return {
       chainNamespace,
       chainId: "0x1dfd2731",
-      rpcTarget: "https://staging-v3.skalenodes.com/#/chains/staging-faint-slimy-achird",
-      displayName: "Testnet SKALE Nebula Gaming Hub",
+      rpcTarget: "https://staging-v3.skalenodes.com/v1/staging-faint-slimy-achird",
+      displayName: "SKALE Nebula Gaming Hub Testnet",
       blockExplorer: "https://staging-faint-slimy-achird.explorer.staging-v3.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 2046399126) {
+    return {
+      chainNamespace,
+      chainId: "0x79f99296",
+      rpcTarget: "https://mainnet.skalenodes.com/v1/elated-tan-skat",
+      displayName: "SKALE Europa DeFi Hub",
+      blockExplorer: "https://elated-tan-skat.explorer.mainnet.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 476158412) {
+    return {
+      chainNamespace,
+      chainId: "0x1c6199cc",
+      rpcTarget: "https://staging-v3.skalenodes.com/v1/staging-legal-crazy-castor",
+      displayName: "SKALE Europa DeFi Hub Testnet",
+      blockExplorer: "https://staging-legal-crazy-castor.explorer.staging-v3.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 1564830818) {
+    return {
+      chainNamespace,
+      chainId: "0x5d456c62",
+      rpcTarget: "https://mainnet.skalenodes.com/v1/honorable-steel-rasalhague",
+      displayName: "SKALE Calypso NFT Hub",
+      blockExplorer: "https://honorable-steel-rasalhague.explorer.mainnet.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 344106930) {
+    return {
+      chainNamespace,
+      chainId: "0x1482a7b2",
+      rpcTarget: "https://staging-v3.skalenodes.com/v1/staging-utter-unripe-menkar",
+      displayName: "SKALE Calypso NFT Hub Testnet",
+      blockExplorer: "https://staging-utter-unripe-menkar.explorer.staging-v3.skalenodes.com/",
+      ticker: "sFUEL",
+      tickerName: "SKALE",
+      decimals: 18,
+    };
+  }
+  if (chainId === 1351057110) {
+    return {
+      chainNamespace,
+      chainId: "0x50877ed6",
+      rpcTarget: "https://staging-v3.skalenodes.com/v1/staging-fast-active-bellatrix",
+      displayName: "SKALE Chaos Testnet",
+      blockExplorer: "https://staging-fast-active-bellatrix.explorer.staging-v3.skalenodes.com/",
       ticker: "sFUEL",
       tickerName: "SKALE",
       decimals: 18,
