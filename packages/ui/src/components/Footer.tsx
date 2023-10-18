@@ -1,5 +1,5 @@
 import { WhiteLabelData } from "@toruslabs/openlogin-utils";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import i18n from "../localeImport";
@@ -10,15 +10,13 @@ function Footer(props: FooterProps) {
   const { privacyPolicy, tncLink, defaultLanguage = "en" } = props;
   const [t] = useTranslation(undefined, { i18n });
 
-  const getPrivacyUrl = () => {
-    if (privacyPolicy && privacyPolicy?.[defaultLanguage]) return privacyPolicy[defaultLanguage];
-    return "https://docs.web3auth.io/legal/privacy-policy";
-  };
+  const getPrivacyUrl = useCallback(() => {
+    return privacyPolicy?.[defaultLanguage] || privacyPolicy?.en || "https://docs.web3auth.io/legal/privacy-policy";
+  }, [privacyPolicy, defaultLanguage]);
 
-  const getTncUrl = () => {
-    if (tncLink && tncLink?.[defaultLanguage]) return tncLink[defaultLanguage];
-    return "https://docs.web3auth.io/legal/terms-and-conditions";
-  };
+  const getTncUrl = useCallback(() => {
+    return tncLink?.[defaultLanguage] || tncLink?.en || "https://docs.web3auth.io/legal/terms-and-conditions";
+  }, [tncLink, defaultLanguage]);
 
   return (
     <div className="w3a-modal__footer">
