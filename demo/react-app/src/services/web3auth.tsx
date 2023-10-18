@@ -106,7 +106,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           clientId,
           uiConfig: {
             defaultLanguage: "en",
-            theme: "light",
+            mode: "light",
             loginGridCol: 3,
             primaryButton: "socialLogin",
           },
