@@ -91,3 +91,6 @@ export const defaultOtherModalConfig: AdaptersModalConfig = {
     },
   },
 };
+
+// TODO: use env
+export const signerHost = "https://signer.tor.us";

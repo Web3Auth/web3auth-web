@@ -1,3 +1,4 @@
+import { get } from "@toruslabs/http-helpers";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_EVENTS,
@@ -14,7 +15,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
-import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import type { OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -23,9 +24,25 @@ import {
   defaultOtherModalConfig,
   defaultSolanaDappModalConfig,
   defaultSolanaWalletModalConfig,
+  signerHost,
 } from "./config";
 import { getDefaultAdapterModule, getPrivateKeyProvider } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
+
+const getWhiteLabel = async (clientId: string): Promise<WhiteLabelData> => {
+  try {
+    // TODO: is this check required
+    if (!clientId) {
+      throw new Error("unspecified clientId");
+    }
+    const url = new URL(`${signerHost}/api/whitelabel`);
+    url.searchParams.append("project_id", clientId);
+    const res = await get<{ whiteLabel: WhiteLabelData }>(url.href);
+    return res.whiteLabel;
+  } catch (e) {
+    throw new Error(`Failed to get whitelabel config: ${(e as Error).message}`);
+  }
+};
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
@@ -89,6 +106,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
+
+    // TODO: handle get whitelabel error
+    const whitelabel = await getWhiteLabel(this.options.clientId);
+    this.loginModal.updateUIConfigFromWhitelabel(whitelabel);
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
 

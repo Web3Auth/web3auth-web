@@ -4,6 +4,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
+    "@toruslabs/http-helpers": "^5.0.0",
     "@web3auth/base": "^7.0.4",
     "@web3auth/base-provider": "^7.0.4",
     "@web3auth/ethereum-provider": "^7.0.4",
