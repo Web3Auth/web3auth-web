@@ -37,8 +37,8 @@ const getWhiteLabel = async (clientId: string): Promise<WhiteLabelData> => {
     }
     const url = new URL(`${signerHost}/api/whitelabel`);
     url.searchParams.append("project_id", clientId);
-    const res = await get<{ whiteLabel: WhiteLabelData }>(url.href);
-    return res.whiteLabel;
+    const res = await get<{ whitelabel: WhiteLabelData }>(url.href);
+    return res.whitelabel;
   } catch (e) {
     throw new Error(`Failed to get whitelabel config: ${(e as Error).message}`);
   }
