@@ -1,7 +1,6 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -75,13 +74,6 @@ class LoginModal extends SafeEventEmitter {
   get isDark(): boolean {
     return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
-
-  updateUIConfigFromWhitelabel = (whitelabel: WhiteLabelData) => {
-    this.uiConfig = {
-      ...this.uiConfig,
-      ...whitelabel,
-    };
-  };
 
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
@@ -188,8 +180,6 @@ class LoginModal extends SafeEventEmitter {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            whiteLabel={this.uiConfig}
           />
         </ThemedContext.Provider>
       );

@@ -1,5 +1,5 @@
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { LOGIN_PROVIDER, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
@@ -20,12 +20,10 @@ import SocialLogins from "./SocialLogins";
 interface ModalProps {
   stateListener: SafeEventEmitter;
   appLogo?: string;
-  appName?: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  whiteLabel?: WhiteLabelData;
 }
 
 log.enableAll();
@@ -59,8 +57,7 @@ export default function Modal(props: ModalProps) {
   const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation(undefined, { i18n });
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal, whiteLabel } =
-    props;
+  const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -132,7 +129,11 @@ export default function Modal(props: ModalProps) {
 
   const isEmailPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
-  const primaryColor = whiteLabel?.theme?.primary || "";
+  const primaryColor = modalState.socialLoginsConfig?.uiConfig?.theme?.primary || "";
+  const privacyPolicy = modalState.socialLoginsConfig?.uiConfig?.privacyPolicy;
+  const tncLink = modalState.socialLoginsConfig?.uiConfig?.tncLink;
+  const defaultLanguage = modalState.socialLoginsConfig?.uiConfig?.defaultLanguage;
+  const appName = modalState.socialLoginsConfig?.uiConfig?.appName;
 
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
@@ -177,8 +178,7 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
-  // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
-  const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
+  const modalClassName = `w3a-modal`;
 
   return (
     modalState.modalVisibilityDelayed && (
@@ -244,7 +244,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer privacyPolicy={whiteLabel?.privacyPolicy} tncLink={whiteLabel?.tncLink} defaultLanguage={whiteLabel.defaultLanguage} />
+          <Footer privacyPolicy={privacyPolicy} tncLink={tncLink} defaultLanguage={defaultLanguage} />
         </div>
       </div>
     )

@@ -96,20 +96,24 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
-
-    this.loginModal = new LoginModal({
-      ...this.options.uiConfig,
-      adapterListener: this,
-    });
-    this.subscribeToLoginModalEvents();
   }
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
 
-    // TODO: handle get whitelabel error
     const whitelabel = await getWhiteLabel(this.options.clientId);
-    this.loginModal.updateUIConfigFromWhitelabel(whitelabel);
+    this.options.uiConfig = {
+      // TODO: should whitelabel override?
+      // TODO: will we remove specifying via code in future?
+      ...this.options.uiConfig,
+      ...whitelabel,
+    };
+    this.loginModal = new LoginModal({
+      ...this.options.uiConfig,
+      adapterListener: this,
+    });
+    this.subscribeToLoginModalEvents();
+
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
 
