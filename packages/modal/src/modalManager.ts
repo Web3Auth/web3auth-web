@@ -33,10 +33,6 @@ import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 
 const fetchWhitelabel = async (clientId: string, web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): Promise<WhiteLabelData> => {
   try {
-    // TODO: is this check required
-    if (!clientId) {
-      throw new Error("unspecified clientId");
-    }
     const url = new URL(`${signerHost(web3AuthNetwork)}/api/whitelabel`);
     url.searchParams.append("project_id", clientId);
     const res = await get<{ whitelabel: WhiteLabelData }>(url.href);
