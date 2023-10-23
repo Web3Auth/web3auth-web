@@ -92,8 +92,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
-    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
-    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
   }
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
@@ -101,6 +99,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     const whitelabel = await fetchWhitelabel(this.options.clientId);
     this.options.uiConfig = cloneDeep(deepmerge(whitelabel, this.options.uiConfig));
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
+
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
