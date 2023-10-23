@@ -15,7 +15,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
-import type { OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
+import type { OPENLOGIN_NETWORK_TYPE, OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 
 import {
@@ -29,13 +29,13 @@ import {
 import { getDefaultAdapterModule, getPrivateKeyProvider } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 
-const getWhiteLabel = async (clientId: string): Promise<WhiteLabelData> => {
+const fetchWhitelabel = async (clientId: string, web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): Promise<WhiteLabelData> => {
   try {
     // TODO: is this check required
     if (!clientId) {
       throw new Error("unspecified clientId");
     }
-    const url = new URL(`${signerHost}/api/whitelabel`);
+    const url = new URL(`${signerHost(web3AuthNetwork)}/api/whitelabel`);
     url.searchParams.append("project_id", clientId);
     const res = await get<{ whitelabel: WhiteLabelData }>(url.href);
     return res.whitelabel;
@@ -101,7 +101,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
 
-    const whitelabel = await getWhiteLabel(this.options.clientId);
+    const whitelabel = await fetchWhitelabel(this.options.clientId);
     this.options.uiConfig = {
       // TODO: should whitelabel override?
       // TODO: will we remove specifying via code in future?

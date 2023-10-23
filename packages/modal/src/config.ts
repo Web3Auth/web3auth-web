@@ -1,3 +1,5 @@
+import { SIGNER_MAP } from "@toruslabs/constants";
+import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, EVM_ADAPTERS, SOLANA_ADAPTERS } from "@web3auth/base";
 
 import { AdaptersModalConfig } from "./interface";
@@ -92,5 +94,6 @@ export const defaultOtherModalConfig: AdaptersModalConfig = {
   },
 };
 
-// TODO: use env
-export const signerHost = "https://signer.tor.us";
+export const signerHost = (web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE) => {
+  return SIGNER_MAP[web3AuthNetwork ?? OPENLOGIN_NETWORK.sapphire_mainnet];
+};
