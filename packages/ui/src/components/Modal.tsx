@@ -54,7 +54,6 @@ export default function Modal(props: ModalProps) {
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
-  const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation(undefined, { i18n });
 
   const { stateListener, appLogo, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
