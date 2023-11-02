@@ -77,7 +77,9 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
       const contract = new web3.eth.Contract(erc20Abi, tokenAddress);
-      const txRes = await contract.methods.transfer(accounts[0], web3.utils.toWei("0.01", "ether")).send({ from: accounts[0] });
+      const txRes = await contract.methods
+        .transfer("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", web3.utils.toWei("0.01", "ether"))
+        .send({ from: accounts[0] });
       uiConsole("txRes", txRes);
     } catch (error) {
       console.log("error", error);
