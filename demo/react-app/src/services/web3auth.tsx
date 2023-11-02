@@ -1,7 +1,7 @@
 import { ADAPTER_EVENTS, CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+// import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -25,6 +25,7 @@ export interface IWeb3AuthContext {
   switchChain: () => Promise<void>;
   getTokenBalance: () => Promise<void>;
   signAndSendTokenTransaction: () => Promise<void>;
+  randomContractInteraction: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -45,6 +46,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   switchChain: async () => {},
   getTokenBalance: async () => {},
   signAndSendTokenTransaction: async () => {},
+  randomContractInteraction: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -297,6 +299,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await provider.signAndSendTokenTransaction?.();
   };
 
+  const randomContractInteraction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.randomContractInteraction?.();
+  };
+
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -322,6 +333,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     switchChain,
     signAndSendTokenTransaction,
     getTokenBalance,
+    randomContractInteraction,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

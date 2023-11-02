@@ -1,7 +1,7 @@
 import { IProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
-import { erc20Abi } from "../config/abi";
+import { erc20Abi, randomContractAbi } from "../config/abi";
 const tokenAddress = "0x655F2166b0709cd575202630952D71E2bB0d61Af";
 
 const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
@@ -85,6 +85,19 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     }
   };
 
+  const randomContractInteraction = async () => {
+    try {
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(randomContractAbi, "0x04cA407965D60C2B39d892a1DFB1d1d9C30d0334", { dataInputFill: "data" });
+      const txRes = await contract.methods.update(`Hello world ${Math.random().toString(36).substring(1, 5)}`).send({ from: accounts[0] });
+      uiConsole("txRes", txRes);
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
+
   const signTransaction = async () => {
     try {
       const web3 = new Web3(provider as any);
@@ -101,7 +114,16 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       uiConsole("error", error);
     }
   };
-  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction, getTokenBalance, signAndSendTokenTransaction };
+  return {
+    getAccounts,
+    getBalance,
+    signMessage,
+    signAndSendTransaction,
+    signTransaction,
+    getTokenBalance,
+    signAndSendTokenTransaction,
+    randomContractInteraction,
+  };
 };
 
 export default ethProvider;

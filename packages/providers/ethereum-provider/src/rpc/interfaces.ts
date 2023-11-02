@@ -35,7 +35,7 @@ export interface ExtendedTxData extends TxData {
   from: string;
 }
 
-export type TransactionParams = ExtendedFeeMarketEIP1559Transaction & ExtendedAccessListEIP2930TxData & ExtendedTxData;
+export type TransactionParams = ExtendedFeeMarketEIP1559Transaction & ExtendedAccessListEIP2930TxData & ExtendedTxData & { input?: string };
 
 export interface MessageParams<T> {
   from: string;

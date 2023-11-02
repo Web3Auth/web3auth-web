@@ -19,6 +19,7 @@ const Main = () => {
     switchChain,
     getTokenBalance,
     signAndSendTokenTransaction,
+    randomContractInteraction,
   } = useWeb3Auth();
 
   const loggedInView = (
@@ -54,6 +55,9 @@ const Main = () => {
       </button>
       <button onClick={signAndSendTokenTransaction} className={styles.card}>
         Sign and Send Token Transaction
+      </button>
+      <button onClick={randomContractInteraction} className={styles.card}>
+        Contract Interaction
       </button>
       <button onClick={logout} className={styles.card}>
         Log Out

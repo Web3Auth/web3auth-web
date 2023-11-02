@@ -11,6 +11,7 @@ export interface IWalletProvider {
   signMessage: () => Promise<void>;
   getTokenBalance?: () => Promise<void>;
   signAndSendTokenTransaction?: () => Promise<void>;
+  randomContractInteraction?: () => Promise<void>;
 }
 
 export const getWalletProvider = (chain: string, provider: IProvider, uiConsole: any): IWalletProvider => {
