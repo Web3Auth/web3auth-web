@@ -1,6 +1,6 @@
 import { post } from "@toruslabs/http-helpers";
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import JwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 import { ChainNamespaceType } from "../chain/IChainInterface";
 import { authServer } from "../constants";
@@ -8,7 +8,7 @@ import log from "../loglevel";
 import { storageAvailable } from "../utils";
 
 export const checkIfTokenIsExpired = (token: string) => {
-  const decoded = JwtDecode<{ exp: number }>(token);
+  const decoded = jwtDecode<{ exp: number }>(token);
   if (!decoded.exp) {
     return true;
   }

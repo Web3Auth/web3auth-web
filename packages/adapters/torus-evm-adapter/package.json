@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "^4.0.2",
+    "@toruslabs/torus-embed": "^4.0.4",
     "@web3auth/base": "^7.0.4",
     "@web3auth/base-evm-adapter": "^7.0.4"
   },
