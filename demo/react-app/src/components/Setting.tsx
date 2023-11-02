@@ -7,9 +7,11 @@ import { Web3AuthContext } from "../services/web3auth";
 interface IProps {
   setNetwork: (network: WEB3AUTH_NETWORK_TYPE) => void;
   setChain: (chain: CHAIN_CONFIG_TYPE) => void;
+  chain: CHAIN_CONFIG_TYPE;
+  network: WEB3AUTH_NETWORK_TYPE;
 }
 
-const Setting = ({ setNetwork, setChain }: IProps) => {
+const Setting = ({ setNetwork, setChain, chain, network }: IProps) => {
   const networkChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("Settings", e.target.value);
     setNetwork(e.target.value as WEB3AUTH_NETWORK_TYPE);
@@ -28,7 +30,7 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
         <label htmlFor="network" className={styles.label}>
           Web3Auth Network
         </label>
-        <select id="network" onChange={networkChangeHandler} className={styles.select} disabled={isLoggedIn}>
+        <select id="network" value={network} onChange={networkChangeHandler} className={styles.select} disabled={isLoggedIn}>
           {Object.keys(WEB3AUTH_NETWORK).map((x: string) => {
             return (
               <option key={x} value={x}>
@@ -42,7 +44,7 @@ const Setting = ({ setNetwork, setChain }: IProps) => {
         <label htmlFor="network" className={styles.label}>
           Blockchain
         </label>
-        <select onChange={chainChangeHandler} className={styles.select} disabled={isLoggedIn}>
+        <select value={chain} onChange={chainChangeHandler} className={styles.select} disabled={isLoggedIn}>
           {Object.keys(CHAIN_CONFIG).map((x: string) => {
             return (
               <option key={x} value={x}>

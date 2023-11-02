@@ -3,7 +3,23 @@ import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, login, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, signAndSendTransaction, web3Auth, chain, addChain, switchChain } = useWeb3Auth();
+  const {
+    provider,
+    login,
+    logout,
+    getUserInfo,
+    getAccounts,
+    getBalance,
+    signMessage,
+    signTransaction,
+    signAndSendTransaction,
+    web3Auth,
+    chain,
+    addChain,
+    switchChain,
+    getTokenBalance,
+    signAndSendTokenTransaction,
+  } = useWeb3Auth();
 
   const loggedInView = (
     <>
@@ -16,6 +32,9 @@ const Main = () => {
       <button onClick={getBalance} className={styles.card}>
         Get Balance
       </button>
+      <button onClick={getTokenBalance} className={styles.card}>
+        Get Token Balance
+      </button>
       <button onClick={signMessage} className={styles.card}>
         Sign Message
       </button>
@@ -25,14 +44,16 @@ const Main = () => {
       <button onClick={switchChain} className={styles.card}>
         Switch Chain
       </button>
-      {
-        (web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") &&
-        (<button onClick={signTransaction} className={styles.card}>
+      {(web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") && (
+        <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
-      </button>)
-      }
+        </button>
+      )}
       <button onClick={signAndSendTransaction} className={styles.card}>
         Sign and Send Transaction
+      </button>
+      <button onClick={signAndSendTokenTransaction} className={styles.card}>
+        Sign and Send Token Transaction
       </button>
       <button onClick={logout} className={styles.card}>
         Log Out

@@ -1,6 +1,8 @@
 import { IProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
+import { erc20Abi } from "../config/abi";
+const tokenAddress = "0x655F2166b0709cd575202630952D71E2bB0d61Af";
 
 const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {
@@ -20,6 +22,19 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const accounts = await web3.eth.getAccounts();
       const balance = await web3.eth.getBalance(accounts[0]);
       uiConsole("Eth balance", balance);
+    } catch (error) {
+      console.error("Error", error);
+      uiConsole("error", error);
+    }
+  };
+
+  const getTokenBalance = async () => {
+    try {
+      const web3 = new Web3(provider);
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(erc20Abi, tokenAddress);
+      const balance = await contract.methods.balanceOf(accounts[0]).call();
+      uiConsole("Token balance", balance);
     } catch (error) {
       console.error("Error", error);
       uiConsole("error", error);
@@ -57,6 +72,19 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     }
   };
 
+  const signAndSendTokenTransaction = async () => {
+    try {
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(erc20Abi, tokenAddress);
+      const txRes = await contract.methods.transfer(accounts[0], web3.utils.toWei("0.01", "ether")).send({ from: accounts[0] });
+      uiConsole("txRes", txRes);
+    } catch (error) {
+      console.log("error", error);
+      uiConsole("error", error);
+    }
+  };
+
   const signTransaction = async () => {
     try {
       const web3 = new Web3(provider as any);
@@ -73,7 +101,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       uiConsole("error", error);
     }
   };
-  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction };
+  return { getAccounts, getBalance, signMessage, signAndSendTransaction, signTransaction, getTokenBalance, signAndSendTokenTransaction };
 };
 
 export default ethProvider;
