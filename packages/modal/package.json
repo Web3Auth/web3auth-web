@@ -5,17 +5,17 @@
   },
   "dependencies": {
     "@web3auth/base": "^7.1.0",
-    "@web3auth/base-provider": "^7.1.0",
-    "@web3auth/ethereum-provider": "^7.1.0",
+    "@web3auth/base-provider": "^7.1.1",
+    "@web3auth/ethereum-provider": "^7.1.1",
     "@web3auth/metamask-adapter": "^7.1.0",
-    "@web3auth/no-modal": "^7.1.0",
-    "@web3auth/openlogin-adapter": "^7.1.0",
-    "@web3auth/phantom-adapter": "^7.1.0",
-    "@web3auth/solana-provider": "^7.1.0",
+    "@web3auth/no-modal": "^7.1.1",
+    "@web3auth/openlogin-adapter": "^7.1.1",
+    "@web3auth/phantom-adapter": "^7.1.1",
+    "@web3auth/solana-provider": "^7.1.1",
     "@web3auth/torus-evm-adapter": "^7.1.0",
-    "@web3auth/torus-solana-adapter": "^7.1.0",
+    "@web3auth/torus-solana-adapter": "^7.1.1",
     "@web3auth/ui": "^7.1.0",
-    "@web3auth/wallet-connect-v2-adapter": "^7.1.0"
+    "@web3auth/wallet-connect-v2-adapter": "^7.1.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
@@ -70,5 +70,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "7.1.0"
+  "version": "7.1.1"
 }
