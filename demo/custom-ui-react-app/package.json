@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.73.0",
+    "@solana/web3.js": "^1.77.3",
     "@walletconnect/qrcode-modal": "^1.7.8",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/no-modal": "file:../../packages/no-modal",
