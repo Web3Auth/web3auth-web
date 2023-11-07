@@ -36,8 +36,8 @@
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {
-    "@types/bn.js": "^5.1.4",
-    "@types/json-rpc-random-id": "^1.0.2",
+    "@types/bn.js": "^5.1.5",
+    "@types/json-rpc-random-id": "^1.0.3",
     "@walletconnect/types": "^2.10.4"
   },
   "peerDependencies": {
