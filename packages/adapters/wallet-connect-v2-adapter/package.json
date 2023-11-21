@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -40,7 +40,7 @@
   "dependencies": {
     "@web3auth/base": "^7.1.0",
     "@web3auth/base-evm-adapter": "^7.1.0",
-    "@web3auth/ethereum-provider": "^7.1.1",
+    "@web3auth/ethereum-provider": "^7.1.2",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
