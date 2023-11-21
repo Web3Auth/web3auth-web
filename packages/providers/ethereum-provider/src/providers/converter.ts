@@ -82,7 +82,7 @@ function decGWEIToHexWEI(decGWEI: string | BigNumber): string {
   }) as string;
 }
 
-function hexWEIToDecGWEI(decGWEI: string | BigNumber): string {
+function hexWEIToDecGWEI(decGWEI: string | BigNumber): string | BigNumber {
   return conversionUtil(decGWEI, {
     fromNumericBase: "hex",
     toNumericBase: "dec",

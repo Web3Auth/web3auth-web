@@ -46,6 +46,15 @@ export const CHAIN_CONFIG = {
     ticker: "eth",
     tickerName: "Eth",
   } as CustomChainConfig,
+  arbitrum_sepolia: {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    rpcTarget: "https://arbitrum-sepolia.infura.io/v3/4efda295156d477f959dcef8ebc33c5f",
+    blockExplorer: "https://sepolia.arbiscan.io/",
+    chainId: "0x66eee",
+    displayName: "Arbitrum Sepolia",
+    ticker: "eth",
+    tickerName: "Eth",
+  } as CustomChainConfig,
   tezos: {
     chainNamespace: CHAIN_NAMESPACES.OTHER,
     displayName: "Tezos Ithacanet",
