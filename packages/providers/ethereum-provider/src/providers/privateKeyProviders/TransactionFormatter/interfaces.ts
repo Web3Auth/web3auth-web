@@ -13,11 +13,14 @@ export type EIP1559GasDataItem = {
   maxWaitTimeEstimate: number;
 };
 
-export type EIP1159GasData = {
+export type EthereumGasFeeEstimates = {
+  estimatedBaseFee: string;
   low: EIP1559GasDataItem;
   medium: EIP1559GasDataItem;
   high: EIP1559GasDataItem;
-  estimatedBaseFee: string;
+};
+
+export type EIP1159GasData = EthereumGasFeeEstimates & {
   networkCongestion: number;
   latestPriorityFeeRange: string[];
   historicalPriorityFeeRange: string[];
@@ -36,5 +39,12 @@ export type GasType = (typeof GAS_ESTIMATE_TYPES)[keyof typeof GAS_ESTIMATE_TYPE
 
 export type GasData = {
   gasEstimateType: string;
-  gasFeeEstimates: LegacyGasData | EIP1159GasData | FallbackGasData;
+  gasFeeEstimates: LegacyGasData | EthereumGasFeeEstimates | FallbackGasData;
 };
+
+export interface FeeHistoryResponse {
+  baseFeePerGas: string[];
+  gasUsedRatio: string[];
+  oldestBlock: string;
+  reward: string[][];
+}

@@ -60,10 +60,13 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     try {
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
+      const gasestimate = await web3.eth.estimateGas({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.001", "ether") });
+      // console.log("gasestimate", gasestimate);
       const txRes = await web3.eth.sendTransaction({
         from: accounts[0],
         to: accounts[0],
-        value: web3.utils.toWei("0.01", "ether"),
+        value: web3.utils.toWei("0.001", "ether"),
+        gas: gasestimate,
       });
       uiConsole("txRes", txRes);
     } catch (error) {
@@ -108,7 +111,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const txRes = await web3.eth.signTransaction({
         from: accounts[0],
         to: accounts[0],
-        value: web3.utils.toWei("0.01", "ether"),
+        value: web3.utils.toWei("0.001", "ether"),
       });
       uiConsole("txRes", txRes);
     } catch (error) {
