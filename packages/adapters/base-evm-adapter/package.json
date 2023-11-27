@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-evm-adapter",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseEvmAdapter.cjs.js",
@@ -19,7 +19,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^7.1.0"
+    "@web3auth/base": "^7.2.0"
   },
   "files": [
     "dist",
