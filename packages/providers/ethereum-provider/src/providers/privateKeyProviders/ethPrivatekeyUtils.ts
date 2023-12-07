@@ -49,6 +49,7 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
+      if (txParams.input && !txParams.data) txParams.data = txParams.input;
       const signedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<[string], string>({
         method: "eth_sendRawTransaction",
@@ -63,6 +64,7 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
+      if (txParams.input && !txParams.data) txParams.data = txParams.input;
       const signedTx = await signTx(txParams, privKey, txFormatter);
       return `0x${signedTx.toString("hex")}`;
     },

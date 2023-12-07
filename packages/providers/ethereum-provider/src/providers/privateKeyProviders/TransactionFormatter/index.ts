@@ -2,15 +2,19 @@ import { Common, Hardfork } from "@ethereumjs/common";
 import { addHexPrefix, AddressLike, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
+import BigNumber from "bignumber.js";
 
 import { TransactionParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
 import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../../utils";
 import { EIP1559APIEndpoint, GAS_ESTIMATE_TYPES, LegacyGasAPIEndpoint, TRANSACTION_ENVELOPE_TYPES, TRANSACTION_TYPES } from "./constants";
-import { EIP1159GasData, FallbackGasData, GasData, LegacyGasData, TxType } from "./interfaces";
+import { EIP1159GasData, EthereumGasFeeEstimates, FallbackGasData, FeeHistoryResponse, GasData, LegacyGasData, TxType } from "./interfaces";
 import { fetchEip1159GasEstimates, fetchLegacyGasPriceEstimates } from "./utils";
 
 export class TransactionFormatter {
+  // https://0x.org/docs/introduction/0x-cheat-sheet#swap-api-endpoints
+  readonly API_SUPPORTED_CHAINIDS = new Set(["0x1", "0x5", "0x13881", "0xa4b1", "0xa86a", "0x2105", "0x38", "0xfa", "0xa", "0x89"]);
+
   private chainConfig: CustomChainConfig | null = null;
 
   private getProviderEngineProxy: () => SafeEventEmitterProvider;
@@ -163,6 +167,52 @@ export class TransactionFormatter {
     };
   }
 
+  private async fetchGasEstimatesViaEthFeeHistory(): Promise<EthereumGasFeeEstimates> {
+    const noOfBlocks = 10;
+    const newestBlock = "latest";
+    // get the 10, 50 and 95th percentile of the tip fees from the last 10 blocks
+    const percentileValues = [10, 50, 95];
+    const feeHistory = await this.providerProxy.request<[number, string, number[]], FeeHistoryResponse>({
+      method: "eth_feeHistory",
+      params: [noOfBlocks, newestBlock, percentileValues],
+    });
+
+    // this is in hex wei
+    const finalBaseFeePerGas = feeHistory.baseFeePerGas[feeHistory.baseFeePerGas.length - 1];
+    // this is in hex wei
+    const priorityFeeCalcs = feeHistory.reward.reduce(
+      (acc, curr) => {
+        return {
+          slow: acc.slow.plus(new BigNumber(curr[0], 16)),
+          average: acc.average.plus(new BigNumber(curr[1], 16)),
+          fast: acc.fast.plus(new BigNumber(curr[2], 16)),
+        };
+      },
+      { slow: new BigNumber(0), average: new BigNumber(0), fast: new BigNumber(0) }
+    );
+    return {
+      estimatedBaseFee: hexWEIToDecGWEI(finalBaseFeePerGas).toString(),
+      high: {
+        maxWaitTimeEstimate: 30_000,
+        minWaitTimeEstimate: 15_000,
+        suggestedMaxFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.fast.plus(finalBaseFeePerGas).toString(16)).toString(),
+        suggestedMaxPriorityFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.fast.toString(16)).toString(),
+      },
+      medium: {
+        maxWaitTimeEstimate: 45_000,
+        minWaitTimeEstimate: 15_000,
+        suggestedMaxFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.average.plus(finalBaseFeePerGas).toString(16)).toString(),
+        suggestedMaxPriorityFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.average.toString(16)).toString(),
+      },
+      low: {
+        maxWaitTimeEstimate: 60_000,
+        minWaitTimeEstimate: 15_000,
+        suggestedMaxFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.slow.plus(finalBaseFeePerGas).toString(16)).toString(),
+        suggestedMaxPriorityFeePerGas: hexWEIToDecGWEI(priorityFeeCalcs.slow.toString(16)).toString(),
+      },
+    };
+  }
+
   private async getEIP1559Compatibility(): Promise<boolean> {
     const latestBlock = await this.providerProxy.request<[string, boolean], Block>({ method: "eth_getBlockByNumber", params: ["latest", false] });
     const supportsEIP1559 = latestBlock && latestBlock.baseFeePerGas !== undefined;
@@ -180,8 +230,16 @@ export class TransactionFormatter {
 
     try {
       if (this.isEIP1559Compatible) {
-        // TODO: kovan is not working due to a bug in metamask api
-        const estimates = await fetchEip1159GasEstimates(EIP1559APIEndpoint.replace("<chain_id>", `${chainId}`));
+        let estimates: EthereumGasFeeEstimates;
+        try {
+          if (this.API_SUPPORTED_CHAINIDS.has(this.chainConfig.chainId)) {
+            estimates = await fetchEip1159GasEstimates(EIP1559APIEndpoint.replace("<chain_id>", `${chainId}`));
+          } else {
+            throw new Error("Chain id not supported by api");
+          }
+        } catch (error) {
+          estimates = await this.fetchGasEstimatesViaEthFeeHistory();
+        }
         gasData = {
           gasFeeEstimates: estimates,
           gasEstimateType: GAS_ESTIMATE_TYPES.FEE_MARKET,

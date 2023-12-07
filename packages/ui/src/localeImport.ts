@@ -3,7 +3,7 @@ import { initReactI18next } from "react-i18next";
 
 import { en } from "./i18n";
 
-const i18nInstance = i18n.createInstance();
+const i18nInstance = i18n.createInstance() as typeof i18n;
 i18nInstance.use(initReactI18next).init({
   resources: {
     en: { translation: en },

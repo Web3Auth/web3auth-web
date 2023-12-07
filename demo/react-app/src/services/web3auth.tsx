@@ -1,7 +1,7 @@
 import { ADAPTER_EVENTS, CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+// import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
@@ -23,6 +23,9 @@ export interface IWeb3AuthContext {
   signAndSendTransaction: () => Promise<void>;
   addChain: () => Promise<void>;
   switchChain: () => Promise<void>;
+  getTokenBalance: () => Promise<void>;
+  signAndSendTokenTransaction: () => Promise<void>;
+  randomContractInteraction: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -41,6 +44,9 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   signAndSendTransaction: async () => {},
   addChain: async () => {},
   switchChain: async () => {},
+  getTokenBalance: async () => {},
+  signAndSendTokenTransaction: async () => {},
+  randomContractInteraction: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -99,7 +105,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
         setIsLoading(true);
-        const clientId = "BKPxkCtfC9gZ5dj-eg-W6yb5Xfr3XkxHuGZl2o2Bn8gKQ7UYike9Dh6c-_LaXlUN77x0cBoPwcSx-IVm0llVsLA";
+        const clientId = "BJzfDwF4iBpFNyXran_VrW0sF0gfEacKrXXP1HcKsBw1d5IuCvDQ7obo56d30tCJd6geqJubj77D7x0aUFC5BcU";
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
@@ -127,22 +133,22 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           },
         });
         web3AuthInstance.configureAdapter(adapter);
-        const plugin = new TorusWalletConnectorPlugin({
-          walletInitOptions: {
-            whiteLabel: {
-              logoDark: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
-              logoLight: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
-              theme: {
-                isDark: true,
-                colors: {},
-              },
-            },
-            buildEnv: "production",
-            useWalletConnect: true,
-            enableLogging: true,
-          },
-        });
-        web3AuthInstance.addPlugin(plugin);
+        // const plugin = new TorusWalletConnectorPlugin({
+        //   walletInitOptions: {
+        //     whiteLabel: {
+        //       logoDark: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+        //       logoLight: "https://avatars.githubusercontent.com/u/37784849?s=200&v=4",
+        //       theme: {
+        //         isDark: true,
+        //         colors: {},
+        //       },
+        //     },
+        //     buildEnv: "production",
+        //     useWalletConnect: true,
+        //     enableLogging: true,
+        //   },
+        // });
+        // web3AuthInstance.addPlugin(plugin);
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
         await web3AuthInstance.initModal({
@@ -248,6 +254,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await provider.getBalance();
   };
 
+  const getTokenBalance = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.getTokenBalance?.();
+  };
+
   const signMessage = async () => {
     if (!provider) {
       console.log("provider not initialized yet");
@@ -275,6 +290,24 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await provider.signAndSendTransaction();
   };
 
+  const signAndSendTokenTransaction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.signAndSendTokenTransaction?.();
+  };
+
+  const randomContractInteraction = async () => {
+    if (!provider) {
+      console.log("provider not initialized yet");
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    await provider.randomContractInteraction?.();
+  };
+
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -298,6 +331,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     signAndSendTransaction,
     addChain,
     switchChain,
+    signAndSendTokenTransaction,
+    getTokenBalance,
+    randomContractInteraction,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

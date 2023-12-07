@@ -16,17 +16,17 @@ import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
-import { EIP1159GasData, LegacyGasData } from "./interfaces";
+import { EIP1159GasData, EthereumGasFeeEstimates, LegacyGasData } from "./interfaces";
 
 export function normalizeGWEIDecimalNumbers(n: string | BigNumber): string {
   const numberAsWEIHex = decGWEIToHexWEI(n);
-  const numberAsGWEI = hexWEIToDecGWEI(numberAsWEIHex);
+  const numberAsGWEI = hexWEIToDecGWEI(numberAsWEIHex).toString();
   return numberAsGWEI;
 }
 
-export async function fetchEip1159GasEstimates(url: string): Promise<EIP1159GasData> {
+export async function fetchEip1159GasEstimates(url: string): Promise<EthereumGasFeeEstimates> {
   const estimates = await get<EIP1159GasData>(url);
-  const normalizedEstimates = {
+  const normalizedEstimates: EthereumGasFeeEstimates = {
     ...estimates,
     estimatedBaseFee: normalizeGWEIDecimalNumbers(estimates.estimatedBaseFee),
     low: {
