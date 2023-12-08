@@ -16,6 +16,7 @@ import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import { type WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
 import {
   defaultEvmDappModalConfig,
@@ -226,6 +227,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, () => {
+        // disconnect wallet connect here
+        const adapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2];
+        if (adapter && this.connectedAdapterName !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+          (adapter as WalletConnectV2Adapter).cleanupEvents?.();
+        }
         return resolve(this.provider);
       });
       this.once(ADAPTER_EVENTS.ERRORED, (err: unknown) => {

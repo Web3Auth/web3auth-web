@@ -191,6 +191,14 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     await super.disconnect();
   }
 
+  public cleanupEvents(): void {
+    if (this.connector) {
+      this.connector.events.removeAllListeners("proposal_expire");
+      this.connector.events.removeAllListeners("session_update");
+      this.connector.events.removeAllListeners("session_delete");
+    }
+  }
+
   private cleanupPendingPairings(): void {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const inactivePairings = this.connector.pairing.getAll({ active: false });
