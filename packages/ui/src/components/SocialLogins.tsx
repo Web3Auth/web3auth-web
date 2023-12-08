@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { capitalizeFirstLetter } from "../config";
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
+import i18n from "../localeImport";
 import Image from "./Image";
 
 // const hasLightIcons = ["apple", "github"];
@@ -29,7 +30,7 @@ export default function SocialLogins(props: SocialLoginProps) {
   } = props;
   const { isDark } = useContext(ThemedContext);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   // Too small a function to use `useCallback`
   const expandClickHandler = () => {
@@ -66,6 +67,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
           const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+          const primaryColor = socialLoginsConfig?.uiConfig?.theme?.primary || "";
 
           const imageId = `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
           const hoverId = `login-${method}-active`;
@@ -90,6 +92,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     })
                   }
                   className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w3a-button--login h-12 w-full`}
+                  style={{ backgroundColor: isPrimaryBtn ? primaryColor : "" }}
                   title={name}
                 >
                   {providerIcon}

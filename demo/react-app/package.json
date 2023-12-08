@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/web3.js": "^1.78.4",
+    "@solana/web3.js": "^1.87.3",
     "@taquito/signer": "^13.0.1",
     "@taquito/taquito": "^13.0.1",
     "@taquito/utils": "^13.0.1",
@@ -15,7 +15,7 @@
     "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web3": "^4.1.1"
+    "web3": "^4.2.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -49,9 +49,9 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.5.9",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
     "buffer": "^6.0.3",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",

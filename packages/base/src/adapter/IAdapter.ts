@@ -9,6 +9,10 @@ import { WALLET_ADAPTERS } from "../wallet";
 
 export type UserInfo = OpenloginUserInfo;
 
+export type WEB3AUTH_NETWORK_TYPE = OPENLOGIN_NETWORK_TYPE;
+export const WEB3AUTH_NETWORK = OPENLOGIN_NETWORK;
+export { OPENLOGIN_NETWORK, type OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
+
 export const ADAPTER_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",

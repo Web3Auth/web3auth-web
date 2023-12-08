@@ -226,7 +226,7 @@ export const getWalletConnectV2Settings = async (
     });
 
     const loginSettings: EngineTypes.ConnectParams = {
-      requiredNamespaces: getRequiredNamespaces(chainNamespaces),
+      optionalNamespaces: getRequiredNamespaces(chainNamespaces),
     };
     return {
       adapterSettings,

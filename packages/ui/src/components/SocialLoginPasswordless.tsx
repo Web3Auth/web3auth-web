@@ -3,6 +3,7 @@ import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from
 import { useTranslation } from "react-i18next";
 
 import { ThemedContext } from "../context/ThemeContext";
+import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
 import Icon from "./Icon";
 
@@ -12,16 +13,17 @@ interface SocialLoginPasswordlessProps {
   isSmsVisible: boolean;
   adapter: string;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  primaryColor?: string;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
+  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible, primaryColor } = props;
   const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean | null>(null);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(undefined, { i18n });
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,7 +102,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
         {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
 
-        <button disabled={fieldValue === ""} className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w-full`} type="submit">
+        <button
+          disabled={fieldValue === ""}
+          className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w-full`}
+          style={{ backgroundColor: isPrimaryBtn ? primaryColor || "" : "" }}
+          type="submit"
+        >
           {t("modal.social.passwordless-cta")}
         </button>
       </form>

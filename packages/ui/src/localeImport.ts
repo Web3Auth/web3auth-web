@@ -3,7 +3,8 @@ import { initReactI18next } from "react-i18next";
 
 import { en } from "./i18n";
 
-i18n.use(initReactI18next).init({
+const i18nInstance = i18n.createInstance() as typeof i18n;
+i18nInstance.use(initReactI18next).init({
   resources: {
     en: { translation: en },
   },
@@ -16,4 +17,4 @@ i18n.use(initReactI18next).init({
   },
 });
 
-export default i18n;
+export default i18nInstance;
