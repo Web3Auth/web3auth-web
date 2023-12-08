@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer utilities {
+
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     @apply appearance-none;
@@ -18,6 +19,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
+
 /* cyrillic */
 @font-face {
   font-family: "Inter";
@@ -27,6 +29,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
+
 /* greek-ext */
 @font-face {
   font-family: "Inter";
@@ -36,6 +39,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+1F00-1FFF;
 }
+
 /* greek */
 @font-face {
   font-family: "Inter";
@@ -45,6 +49,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0370-03FF;
 }
+
 /* vietnamese */
 @font-face {
   font-family: "Inter";
@@ -54,6 +59,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
 }
+
 /* latin-ext */
 @font-face {
   font-family: "Inter";
@@ -63,6 +69,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+
 /* latin */
 @font-face {
   font-family: "Inter";
@@ -73,6 +80,7 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
     U+2215, U+FEFF, U+FFFD;
 }
+
 /* cyrillic-ext */
 @font-face {
   font-family: "Inter";
@@ -82,6 +90,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
+
 /* cyrillic */
 @font-face {
   font-family: "Inter";
@@ -91,6 +100,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
+
 /* greek-ext */
 @font-face {
   font-family: "Inter";
@@ -100,6 +110,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+1F00-1FFF;
 }
+
 /* greek */
 @font-face {
   font-family: "Inter";
@@ -109,6 +120,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0370-03FF;
 }
+
 /* vietnamese */
 @font-face {
   font-family: "Inter";
@@ -118,6 +130,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
 }
+
 /* latin-ext */
 @font-face {
   font-family: "Inter";
@@ -127,6 +140,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+
 /* latin */
 @font-face {
   font-family: "Inter";
@@ -137,6 +151,7 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
     U+2215, U+FEFF, U+FFFD;
 }
+
 /* cyrillic-ext */
 @font-face {
   font-family: "Inter";
@@ -146,6 +161,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
+
 /* cyrillic */
 @font-face {
   font-family: "Inter";
@@ -155,6 +171,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa0ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
+
 /* greek-ext */
 @font-face {
   font-family: "Inter";
@@ -164,6 +181,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+1F00-1FFF;
 }
+
 /* greek */
 @font-face {
   font-family: "Inter";
@@ -173,6 +191,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0370-03FF;
 }
+
 /* vietnamese */
 @font-face {
   font-family: "Inter";
@@ -182,6 +201,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2pL7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
 }
+
 /* latin-ext */
 @font-face {
   font-family: "Inter";
@@ -191,6 +211,7 @@
   src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7W0Q5n-wU.woff2) format("woff2");
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+
 /* latin */
 @font-face {
   font-family: "Inter";
@@ -212,23 +233,7 @@
 }
 
 #w3a-modal .w3a-modal__inner {
-  @apply flex
-  flex-col
-  w-full
-  max-w-[392px]
-  max-h-[95%]
-  min-h-[630px]
-  overflow-x-hidden
-  overflow-y-hidden
-  rounded-[32px]
-  opacity-0
-  relative
-  bg-white
-  dark:bg-app-gray-700
-  shadow-modal
-  border
-  border-app-gray-100
-  dark:border-app-gray-700;
+  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-white dark:bg-app-gray-700 shadow-modal border border-app-gray-100 dark:border-app-gray-700;
   transform: scale(0);
   transition: all 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
@@ -244,9 +249,11 @@
 #w3a-modal .w3a-modal__header {
   @apply relative px-8 py-2;
 }
+
 #w3a-modal .w3a-modal__content {
   @apply px-8 py-4 overflow-y-auto;
 }
+
 #w3a-modal .w3a-modal__footer {
   @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
 }
@@ -255,21 +262,27 @@
 #w3a-modal .w3a-header {
   @apply flex items-center pt-8;
 }
+
 #w3a-modal .w3a-header__logo {
   @apply mb-4;
 }
+
 #w3a-modal .w3a-header__logo img {
   @apply w-10 h-auto;
 }
+
 #w3a-modal .w3a-header__title {
   @apply text-xl font-bold text-app-gray-900 dark:text-white;
 }
+
 #w3a-modal div.w3a-header__subtitle {
   @apply flex items-center text-sm font-normal text-app-gray-500 dark:text-app-gray-400;
 }
+
 #w3a-modal div.w3a-header__subtitle img {
   @apply h-[14px] w-[14px] ml-1;
 }
+
 #w3a-modal button.w3a-header__button {
   @apply absolute p-0 border-0 cursor-pointer top-5 right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
@@ -282,6 +295,7 @@
 #w3a-modal .w3a-group {
   @apply mb-4;
 }
+
 #w3a-modal .w3a-group:last-child {
   @apply mb-0;
 }
@@ -381,7 +395,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-  @apply bg-white rounded-[10px]  text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
+  @apply bg-white rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
 }
 
 #w3a-modal .w3a-wallet-connect__container-desktop,
@@ -400,8 +414,9 @@
 #w3a-modal .w3a-wallet-connect-qr {
   @apply m-4;
 }
-#w3a-modal .w3a-wallet-connect-qr > canvas,
-#w3a-modal .w3a-wallet-connect-qr > svg {
+
+#w3a-modal .w3a-wallet-connect-qr>canvas,
+#w3a-modal .w3a-wallet-connect-qr>svg {
   @apply m-auto;
 }
 
@@ -409,7 +424,7 @@
   @apply no-underline;
 }
 
-#w3a-modal .w3a-wallet-connect__logo > img {
+#w3a-modal .w3a-wallet-connect__logo>img {
   @apply mt-0 mx-auto mb-4 w-[115px];
 }
 
@@ -442,31 +457,7 @@
 
 /* Text Field */
 #w3a-modal .w3a-text-field {
-  @apply py-3
-  px-6
-  mt-2
-  text-sm
-  outline-0
-  ring-0
-  border
-  rounded-full
-  placeholder-app-gray-500
-  dark:placeholder-app-gray-400
-  bg-app-gray-50
-  border-app-gray-300
-  text-app-gray-900
-  dark:bg-app-gray-600
-  dark:border-app-gray-500
-  dark:text-white
-  disabled:placeholder-app-gray-400
-  dark:disabled:placeholder-app-gray-500
-  disabled:cursor-not-allowed
-  focus:ring-1
-  focus:ring-app-primary-600
-  dark:focus:ring-app-primary-600
-
-  focus:border-transparent
-  dark:focus:border-transparent;
+  @apply py-3 px-6 mt-2 text-sm outline-0 ring-0 border rounded-full placeholder-app-gray-500 dark:placeholder-app-gray-400 bg-app-gray-50 border-app-gray-300 text-app-gray-900 dark:bg-app-gray-600 dark:border-app-gray-500 dark:text-white disabled:placeholder-app-gray-400 dark:disabled:placeholder-app-gray-500 disabled:cursor-not-allowed focus:ring-1 focus:ring-app-primary-600 dark:focus:ring-app-primary-500 focus:border-transparent dark:focus:border-transparent;
 
   line-height: 1.25em;
 }
@@ -480,11 +471,7 @@
 }
 
 #w3a-modal .w3a-sms-field--error {
-  @apply text-red-500
-  text-sm
-  -mt-2
-  mb-2
-  ml-1.5;
+  @apply text-red-500 text-sm -mt-2 mb-2 ml-1.5;
 }
 
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
@@ -494,6 +481,7 @@
   @apply shadow-autofill;
   -webkit-text-fill-color: #111928 !important;
 }
+
 #w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill,
 #w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill:hover,
 #w3a-container.dark #w3a-modal input.w3a-text-field:-webkit-autofill:focus,
@@ -504,72 +492,37 @@
 
 /* Buttons */
 #w3a-modal .w3a-button {
-  @apply rounded-full
-  py-3 px-6
-  text-base
-  font-medium
+  @apply rounded-full py-3 px-6 text-base font-medium
   /* background */
-  bg-app-gray-100
-  hover:bg-app-gray-300
-  focus:bg-app-gray-100
-  disabled:bg-app-gray-50
-  dark:bg-app-gray-900
-  dark:focus:bg-app-gray-900
-  dark:hover:bg-app-gray-800
-  dark:disabled:bg-[#3B4555]
+  bg-app-gray-100 hover:bg-app-gray-300 focus:bg-app-gray-100 disabled:bg-app-gray-50 dark:bg-app-gray-900 dark:focus:bg-app-gray-900 dark:hover:bg-app-gray-800 dark:disabled:bg-[#3B4555]
   /* text */
-  text-app-gray-900
-  focus:text-app-gray-700
-  disabled:text-app-gray-300
-  dark:text-white
-  dark:focus:text-white
-  dark:disabled:text-app-gray-500
+  text-app-gray-900 focus:text-app-gray-700 disabled:text-app-gray-300 dark:text-white dark:focus:text-white dark:disabled:text-app-gray-500
   /* outline */
-  focus:outline-app-gray-50
-  active:outline-app-gray-50
-  dark:focus:outline
-  dark:focus:outline-1
-  dark:active:outline
-  dark:active:outline-1
-  dark:focus:outline-app-gray-400
-  dark:active:outline-app-gray-400;
+  focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-button--primary {
-  @apply bg-app-primary-600
-  hover:bg-app-primary-800
-  focus:bg-app-primary-600
-  dark:bg-app-primary-600
-  dark:hover:bg-app-primary-800
-  dark:focus:bg-app-primary-600
-  disabled:bg-app-primary-200
-  dark:disabled:bg-app-primary-950
-  text-white
-  focus:text-white
-  disabled:text-[#EBF5FF]
-  dark:disabled:text-app-gray-500
-  focus:outline-app-primary-300
-  active:outline-app-primary-300;
+  @apply bg-app-primary-600 hover:bg-app-primary-800 focus:bg-app-primary-600 dark:bg-app-primary-500 dark:hover:bg-app-primary-800 dark:focus:bg-app-primary-500 disabled:bg-app-primary-200 dark:disabled:bg-app-primary-950 text-white focus:text-white disabled:text-[#EBF5FF] dark:disabled:text-app-gray-500 focus:outline-app-primary-300 active:outline-app-primary-300;
 }
 
 #w3a-modal .w3a-button--login {
   @apply inline-flex items-center justify-center h-11;
 }
 
-#w3a-modal button.w3a-button--login:hover > .hover-icon {
+#w3a-modal button.w3a-button--login:hover>.hover-icon {
   display: block;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal button.w3a-button--login:hover > .image-icon {
+#w3a-modal button.w3a-button--login:hover>.image-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
 #w3a-modal button.w3a-button-expand {
-  @apply w-auto h-auto mt-4 ml-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:hover:text-app-primary-500 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
+  @apply w-auto h-auto mt-4 ml-auto text-sm text-app-primary-600 hover:text-app-primary-800 dark:text-app-primary-500 dark:hover:text-app-primary-400 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400;
 }
 
 /* SMS */
@@ -625,48 +578,35 @@
 }
 
 #w3a-modal .w3a-modal__loader-content {
-  @apply text-center
-  mb-[50px]
-  relative
-  flex
-  flex-col;
+  @apply text-center mb-[50px] relative flex flex-col;
 }
 
 #w3a-modal .w3a-modal__loader-info {
-  @apply flex
-  flex-grow
-  flex-col
-  justify-center
-  items-center
-  py-0
-  px-[30px];
+  @apply flex flex-grow flex-col justify-center items-center py-0 px-[30px];
 }
 
 #w3a-modal .w3a-spinner-label {
-  @apply text-base
-  font-medium
-  text-app-primary-600
-  mt-[10px];
+  @apply text-base font-medium text-app-primary-600 dark:text-app-primary-500 mt-[10px];
 }
 
 #w3a-modal .w3a-spinner-message {
   @apply mt-[10px] text-base text-app-gray-500 dark:text-white first-letter:capitalize;
 }
+
 #w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
   @apply text-red-500;
 }
 
 #w3a-modal .w3a-spinner-power {
-  @apply mt-auto
-  text-xs
-  text-[#b7b8bd];
+  @apply mt-auto text-xs text-[#b7b8bd];
 }
-#w3a-modal .w3a-spinner-power > img {
+
+#w3a-modal .w3a-spinner-power>img {
   @apply inline w-auto h-8;
 }
 
 #w3a-modal .w3a-spinner {
-  @apply bg-app-primary-600;
+  @apply bg-app-primary-600 dark:text-app-primary-500;
   display: inline-block;
   position: relative;
   height: 60px;
@@ -692,7 +632,7 @@
 }
 
 #w3a-modal .w3a-spinner__head {
-  @apply bg-app-primary-600;
+  @apply bg-app-primary-600 dark:text-app-primary-500;
   height: 5px;
   width: 5px;
   top: 0;
@@ -703,6 +643,7 @@
   from {
     transform: rotateZ(0);
   }
+
   to {
     transform: rotateZ(360deg);
   }
