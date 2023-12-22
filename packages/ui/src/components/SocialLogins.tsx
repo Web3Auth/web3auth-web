@@ -69,9 +69,13 @@ export default function SocialLogins(props: SocialLoginProps) {
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
           const primaryColor = socialLoginsConfig?.uiConfig?.theme?.primary || "";
 
-          const imageId = `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
+          const imageId =
+            method === LOGIN_PROVIDER.TWITTER
+              ? `login-twitter-x${isDark || isPrimaryBtn ? "-light" : "-dark"}`
+              : `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
           const hoverId = `login-${method}-active`;
-          const hoverImage = method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB ? imageId : hoverId;
+          const hoverImage =
+            method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : hoverId;
           const providerIcon = <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
 
           if (socialLoginsConfig.loginMethods[method].showOnModal === false || restrictedLoginMethods.includes(method)) {
