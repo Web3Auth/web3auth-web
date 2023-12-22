@@ -21,7 +21,7 @@ const closeIcon = <Icon iconName="close" />;
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
   const web3authIcon = <Image imageId="web3auth" />;
-  const providerIcon = <Image imageId={`login-${adapter}`} />;
+  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation(undefined, { i18n });
   const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
 
