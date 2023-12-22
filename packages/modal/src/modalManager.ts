@@ -231,6 +231,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.once(ADAPTER_EVENTS.ERRORED, (err: unknown) => {
         return reject(err);
       });
+      this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (visibility: boolean) => {
+        // modal is closed but user is not connected to any wallet.
+        if (!visibility && this.status !== ADAPTER_STATUS.CONNECTED) {
+          return reject(new Error("User closed the modal"));
+        }
+      });
     });
   }
 
