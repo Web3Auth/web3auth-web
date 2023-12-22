@@ -314,6 +314,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             log.error(`Error while disconnecting to wallet connect in core`, error);
           }
         }
+        if (
+          !visibility &&
+          this.status === ADAPTER_STATUS.CONNECTED &&
+          (walletConnectStatus === ADAPTER_STATUS.READY || walletConnectStatus === ADAPTER_STATUS.CONNECTING)
+        ) {
+          log.debug("this stops wc adapter from trying to reconnect once proposal expires");
+          adapter.status = ADAPTER_STATUS.READY;
+        }
       }
     });
   }
