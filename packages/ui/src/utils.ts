@@ -96,6 +96,7 @@ export const languageMap: Record<LANGUAGE_TYPE, string> = {
   fr: "french",
   pt: "portuguese",
   nl: "dutch",
+  tk: "turkish",
 };
 
 interface NavigatorLanguage {
