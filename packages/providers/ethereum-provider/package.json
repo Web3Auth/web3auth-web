@@ -26,7 +26,7 @@
     "@metamask/rpc-errors": "^6.1.0",
     "@toruslabs/base-controllers": "^4.11.0",
     "@toruslabs/http-helpers": "^6.0.0",
-    "@toruslabs/openlogin-jrpc": "^6.1.0",
+    "@toruslabs/openlogin-jrpc": "^6.2.2",
     "@walletconnect/utils": "^2.11.0",
     "@web3auth/base": "^7.2.1",
     "@web3auth/base-provider": "^7.2.1",
