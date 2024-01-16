@@ -74,7 +74,7 @@
     "i18next": "^23.7.16",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^13.5.0",
+    "react-i18next": "^14.0.0",
     "react-qrcode-logo": "^2.9.0"
   },
   "lint-staged": {
