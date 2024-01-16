@@ -82,7 +82,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   public cachedAdapter: string | null = null;
 
-  protected walletAdapters: Record<string, IAdapter<unknown>> = {};
+  public walletAdapters: Record<string, IAdapter<unknown>> = {};
 
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 

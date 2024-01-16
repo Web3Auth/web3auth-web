@@ -1,6 +1,6 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
-import { ADAPTER_STATUS_TYPE, IProvider, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
+import { ADAPTER_STATUS_TYPE, IAdapter, IProvider, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
@@ -10,6 +10,7 @@ export interface IWeb3Auth extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   cachedAdapter: string | null;
   provider: IProvider | null;
+  walletAdapters: Record<string, IAdapter<unknown>>;
   init(): Promise<void>;
   /**
    * Connect to a specific wallet adapter
