@@ -5,7 +5,6 @@
   "keywords": [
     "web3Auth/wallet-services-connector-plugin",
     "web3Auth",
-    "multichainWallet",
     "blockchain",
     "ethereum",
     "metamask"
@@ -35,7 +34,7 @@
     "@metamask/rpc-errors": "^6.1.0"
   },
   "dependencies": {
-    "@web3auth/ws-embed": "../../../../wallet-services/packages/ws-embed",
+    "@web3auth/ws-embed": "/Users/architgupta/Desktop/web3auth/wallet-services/packages/ws-embed/web3auth-ws-embed-0.0.0.tgz",
     "@web3auth/base": "^7.2.1",
     "@web3auth/base-plugin": "^7.2.1",
     "@web3auth/no-modal": "^7.2.1",

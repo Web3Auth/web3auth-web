@@ -10,6 +10,8 @@ export class WalletServicesPluginError extends Web3AuthError {
     5215: "UserInfo is required.",
     5216: "Plugin is already initialized",
     5217: "Wallet services instance is not set.",
+    5218: "Unsupported chain namespace.",
+    5219: "Plugin network different than web3auth instance network.",
   };
 
   public constructor(code: number, message?: string) {
@@ -58,5 +60,9 @@ export class WalletServicesPluginError extends Web3AuthError {
 
   public static unsupportedChainNamespace(extraMessage = ""): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5218, extraMessage);
+  }
+
+  public static differentWeb3authNetwork(extraMessage = ""): IWeb3AuthError {
+    return WalletServicesPluginError.fromCode(5219, extraMessage);
   }
 }
