@@ -7,6 +7,6 @@ import ko from "./korean.json";
 import zh from "./mandarin.json";
 import pt from "./portuguese.json";
 import es from "./spanish.json";
-import tk from "./turkish.json";
+import tr from "./turkish.json";
 
-export { de, en, es, fr, ja, ko, nl, pt, tk, zh };
+export { de, en, es, fr, ja, ko, nl, pt, tr, zh };

@@ -153,7 +153,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "tk") {
+    } else if (useLang === "tr") {
       import(`./i18n/turkish.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
