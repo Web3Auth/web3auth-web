@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@metamask/rpc-errors": "^6.1.0",
-    "@toruslabs/base-controllers": "^4.11.0",
+    "@toruslabs/base-controllers": "^5.2.15",
     "@toruslabs/openlogin-ed25519": "^6.0.0",
     "@toruslabs/openlogin-jrpc": "^6.2.2",
     "@toruslabs/tweetnacl-js": "^1.0.4",
