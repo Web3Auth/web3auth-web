@@ -250,6 +250,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.once(ADAPTER_EVENTS.ERRORED, (err: unknown) => {
         return reject(err);
       });
+      this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (visibility: boolean) => {
+        // modal is closed but user is not connected to any wallet.
+        if (!visibility && this.status !== ADAPTER_STATUS.CONNECTED) {
+          return reject(new Error("User closed the modal"));
+        }
+      });
     });
   }
 
@@ -332,6 +338,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           } catch (error) {
             log.error(`Error while disconnecting to wallet connect in core`, error);
           }
+        }
+        if (
+          !visibility &&
+          this.status === ADAPTER_STATUS.CONNECTED &&
+          (walletConnectStatus === ADAPTER_STATUS.READY || walletConnectStatus === ADAPTER_STATUS.CONNECTING)
+        ) {
+          log.debug("this stops wc adapter from trying to reconnect once proposal expires");
+          adapter.status = ADAPTER_STATUS.READY;
         }
       }
     });

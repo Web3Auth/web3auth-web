@@ -243,12 +243,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
         }
       }
 
-      this.connector.events.once("proposal_expire", (args) => {
-        log.info("proposal expired", args);
-        // Handle proposal expiration
-        this.createNewSession({ forceNewSession: true });
-      });
-
       log.info("awaiting session approval from wallet");
 
       // Await session approval from the wallet.
@@ -259,7 +253,19 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      if ((error as Error).message?.toLowerCase().includes("proposal expired")) {
+        // Retry if adapter status is still connecting
+        log.info("current adapter status: ", this.status);
+        if (this.status === ADAPTER_STATUS.CONNECTING) {
+          log.info("retrying to create new wallet connect session since proposal expired");
+          return this.createNewSession({ forceNewSession: true });
+        }
+        if (this.status === ADAPTER_STATUS.READY) {
+          log.info("ignoring proposal expired error since some other adapter is connected");
+          return;
+        }
+      }
       log.error("error while creating new wallet connect session", error);
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       throw error;
