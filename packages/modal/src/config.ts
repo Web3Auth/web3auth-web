@@ -94,6 +94,6 @@ export const defaultOtherModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const signerHost = (web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE) => {
-  return SIGNER_MAP[web3AuthNetwork ?? OPENLOGIN_NETWORK.sapphire_mainnet];
+export const signerHost = (web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): string => {
+  return SIGNER_MAP[web3AuthNetwork ?? OPENLOGIN_NETWORK.SAPPHIRE_MAINNET];
 };
