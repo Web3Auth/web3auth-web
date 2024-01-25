@@ -187,9 +187,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
     }
-    if (adapterSettings.useCoreKitKey !== undefined) {
-      this.openloginOptions.useCoreKitKey = adapterSettings.useCoreKitKey;
-    }
     if (adapterSettings.privateKeyProvider) {
       this.privateKeyProvider = adapterSettings.privateKeyProvider;
     }
@@ -211,7 +208,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.openloginOptions?.useCoreKitKey) {
+    if (this.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
@@ -227,7 +224,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.ed25519PrivKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.openloginOptions?.useCoreKitKey) {
+    if (this.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.

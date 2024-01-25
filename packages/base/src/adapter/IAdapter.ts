@@ -82,6 +82,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   name: string;
   sessionTime: number;
   web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
+  useCoreKitKey: boolean | undefined;
   clientId: string;
   status: ADAPTER_STATUS_TYPE;
   provider: IProvider | null;
@@ -105,6 +106,8 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   public clientId: string;
 
   public web3AuthNetwork: OPENLOGIN_NETWORK_TYPE = OPENLOGIN_NETWORK.MAINNET;
+
+  public useCoreKitKey: boolean = undefined;
 
   protected rehydrated = false;
 
@@ -149,6 +152,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     }
     if (options?.web3AuthNetwork) {
       this.web3AuthNetwork = options.web3AuthNetwork;
+    }
+    if (options?.useCoreKitKey !== undefined) {
+      this.useCoreKitKey = options.useCoreKitKey;
     }
     const customChainConfig = options.chainConfig;
     if (customChainConfig) {

@@ -8,9 +8,7 @@ type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick
 export type PrivateKeyProvider = IBaseProvider<string>;
 
 export interface OpenloginAdapterOptions extends BaseAdapterSettings {
-  adapterSettings?: MakeOptional<OpenLoginOptions, "clientId" | "network"> & {
-    useCoreKitKey?: boolean;
-  };
+  adapterSettings?: MakeOptional<OpenLoginOptions, "clientId" | "network">;
   loginSettings?: LoginSettings;
   privateKeyProvider?: PrivateKeyProvider;
 }
