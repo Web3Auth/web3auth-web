@@ -3,10 +3,9 @@ import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
