@@ -53,7 +53,7 @@
     "css-loader": "^6.9.0",
     "live-server": "^1.2.2",
     "postcss": "^8.4.33",
-    "postcss-loader": "^7.3.4",
+    "postcss-loader": "^8.0.0",
     "postcss-prefix-selector": "^1.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
