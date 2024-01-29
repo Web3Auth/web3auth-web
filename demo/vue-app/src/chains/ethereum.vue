@@ -142,6 +142,8 @@ export default defineComponent({
             buildEnv: "testing",
           },
         });
+        const defaultadapters = getDefaultAdapters("evm");
+        Web3Auth.configureAdapter(...defaultadapters);
 
         // by default, web3auth modal uses wallet connect v1,
         // if you want to use wallet connect v2, configure wallet-connect-v2-adapter

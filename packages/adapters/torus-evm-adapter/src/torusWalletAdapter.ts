@@ -70,11 +70,11 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     await super.init(options);
     super.checkInitializationRequirements();
 
-    const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+    const { chainId, blockExplorerUrl, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
     const network: NetworkInterface = {
       chainId: Number.parseInt(chainId, 16),
       host: rpcTarget,
-      blockExplorer,
+      blockExplorer: blockExplorerUrl,
       networkName: displayName,
       ticker,
       tickerName,
@@ -112,11 +112,11 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       await this.torusInstance.login(this.loginSettings);
       const chainId = await this.torusInstance.provider.request<string>({ method: "eth_chainId" });
       if (chainId && parseInt(chainId) !== parseInt((this.chainConfig as CustomChainConfig).chainId, 16)) {
-        const { chainId: _chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+        const { chainId: _chainId, blockExplorerUrl, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
         const network: NetworkInterface = {
           chainId: Number.parseInt(_chainId, 16),
           host: rpcTarget,
-          blockExplorer,
+          blockExplorer: blockExplorerUrl,
           networkName: displayName,
           tickerName,
           ticker,
@@ -204,7 +204,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       host: chainConfig.rpcTarget,
       chainId: parseInt(chainConfig.chainId, 16),
       networkName: chainConfig.displayName,
-      blockExplorer: chainConfig.blockExplorer,
+      blockExplorer: chainConfig.blockExplorerUrl,
       ticker: chainConfig.ticker,
       tickerName: chainConfig.tickerName,
     });

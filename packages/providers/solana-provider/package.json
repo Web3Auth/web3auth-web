@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@metamask/rpc-errors": "^6.1.0",
-    "@toruslabs/base-controllers": "^4.11.0",
+    "@toruslabs/base-controllers": "^5.3.3",
     "@toruslabs/openlogin-ed25519": "^6.0.0",
-    "@toruslabs/openlogin-jrpc": "^6.2.2",
+    "@toruslabs/openlogin-jrpc": "^6.2.8",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@web3auth/base": "^7.3.1",
     "@web3auth/base-provider": "^7.3.1",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@solana/web3.js": "^1.89.1",
-    "@solflare-wallet/sdk": "^1.4.1",
+    "@solflare-wallet/sdk": "^1.4.2",
     "@types/bn.js": "^5.1.5",
     "@types/bs58": "^4.0.4",
     "@types/json-rpc-random-id": "^1.0.3"

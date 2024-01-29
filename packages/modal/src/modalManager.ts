@@ -16,6 +16,7 @@ import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
 import {
   defaultEvmDappModalConfig,
@@ -157,6 +158,16 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             const currentPrivateKeyProvider = await getPrivateKeyProvider(openloginAdapter.chainConfigProxy as CustomChainConfig);
             openloginAdapter.setAdapterSettings({ privateKeyProvider: currentPrivateKeyProvider, whiteLabel: this.options.uiConfig });
           }
+        } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+          const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
+          walletConnectAdapter.setAdapterSettings({
+            adapterSettings: {
+              walletConnectInitOptions: {
+                // Using a default wallet connect project id for web3auth modal integration
+                projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
+              },
+            },
+          });
         }
 
         return adapterName;

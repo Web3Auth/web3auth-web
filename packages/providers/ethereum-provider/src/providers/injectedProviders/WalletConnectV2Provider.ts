@@ -96,7 +96,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
         this.addChain({
           chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
@@ -104,8 +104,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
           tickerName: nativeCurrency?.name || "Ether",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
-          blockExplorer: blockExplorerUrls?.[0] || "",
+          blockExplorerUrl: blockExplorerUrls?.[0] || "",
           decimals: nativeCurrency?.decimals || 18,
+          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {

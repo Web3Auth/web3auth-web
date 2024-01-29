@@ -24,19 +24,10 @@ export class WalletServicesConnectorPlugin implements IPlugin {
 
   private walletInitOptions: WsEmbedParams | null = null;
 
-  private wsEmbedOpts: CtorArgs;
-
-  constructor(options: { wsEmbedOpts: CtorArgs; walletInitOptions: Partial<WsEmbedParams> & Required<Pick<WsEmbedParams, "whiteLabel">> }) {
+  constructor(options: { wsEmbedOpts: Partial<CtorArgs>; walletInitOptions: Partial<WsEmbedParams> }) {
     const { wsEmbedOpts, walletInitOptions } = options;
-    const whiteLabel = walletInitOptions?.whiteLabel;
-
-    if (!wsEmbedOpts.web3AuthClientId) throw new Error("web3AuthClientId is required");
-    if (!wsEmbedOpts.web3AuthNetwork) throw new Error("web3AuthNetwork is required");
-    if (!whiteLabel) throw new Error("whiteLabel is required");
-    const { logoDark, logoLight } = whiteLabel;
-    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
-    this.wsEmbedInstance = new WsEmbed(wsEmbedOpts);
-    this.wsEmbedOpts = wsEmbedOpts;
+    // we fake these checks here and get them from web3auth instance
+    this.wsEmbedInstance = new WsEmbed(wsEmbedOpts as CtorArgs);
     this.walletInitOptions = walletInitOptions;
   }
 
@@ -49,30 +40,26 @@ export class WalletServicesConnectorPlugin implements IPlugin {
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
-    if (web3auth.coreOptions.web3AuthNetwork !== this.wsEmbedOpts.web3AuthNetwork)
-      throw WalletServicesPluginError.differentWeb3authNetwork(
-        `Expected ${this.wsEmbedOpts.web3AuthNetwork} got ${web3auth.coreOptions.web3AuthNetwork}`
-      );
     // Not connected yet to openlogin
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
+    // get whitelabel from openlogin adapter
+    const { options } = (this.web3auth.walletAdapters[this.web3auth.connectedAdapterName] as OpenloginAdapter).openloginInstance || {};
+    const { logoDark, logoLight } = options.whiteLabel || {};
+    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
+
+    this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
+    this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
     this.subscribeToWeb3AuthNoModalEvents(web3auth);
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
-    const network = {
-      blockExplorerUrl: connectedChainConfig.blockExplorer,
-      logo: "",
-      displayName: connectedChainConfig.displayName,
-      rpcTarget: connectedChainConfig.rpcTarget,
-      chainId: connectedChainConfig.chainId,
-      ticker: connectedChainConfig.ticker,
-      tickerName: connectedChainConfig.tickerName,
-      chainNamespace: this.pluginNamespace,
-    };
     await this.wsEmbedInstance.init({
       ...(this.walletInitOptions || {}),
-      chainConfig: network,
+      chainConfig: connectedChainConfig,
+      buildEnv: options?.buildEnv,
+      enableLogging: this.web3auth.coreOptions?.enableLogging,
+      whiteLabel: options.whiteLabel,
     });
     this.isInitialized = true;
   }
@@ -90,7 +77,8 @@ export class WalletServicesConnectorPlugin implements IPlugin {
     let sessionId: string | null = null;
     let sessionNamespace: string = "";
     if (this.web3auth?.provider) {
-      sessionId = (this.web3auth.walletAdapters[connectedAdapterName] as OpenloginAdapter).openloginInstance.sessionId;
+      const { openloginInstance } = this.web3auth.walletAdapters[connectedAdapterName] as OpenloginAdapter;
+      sessionId = openloginInstance.sessionId;
       sessionNamespace = (this.web3auth.walletAdapters[connectedAdapterName] as OpenloginAdapter).openloginInstance.sessionNamespace;
     } else if (this.web3auth) {
       throw WalletServicesPluginError.web3AuthNotConnected();
@@ -168,7 +156,7 @@ export class WalletServicesConnectorPlugin implements IPlugin {
   private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
-        log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);
+        log.warn(`${web3Auth.connectedAdapterName} is not compatible with wallet services connector plugin`);
         return;
       }
       this.provider = web3Auth.provider;
@@ -228,13 +216,28 @@ export class WalletServicesConnectorPlugin implements IPlugin {
     const [sessionConfig, walletServicesSessionConfig] = await Promise.all([this.sessionConfig(), this.walletServicesSessionConfig()]);
     const { chainConfig } = sessionConfig || {};
     if (chainId !== walletServicesSessionConfig.chainId && chainConfig) {
-      // TODO: add this method to update the provider.
-      // await this.wsEmbedInstance.setProvider({
-      //   ...chainConfig,
-      //   chainId,
-      //   host: chainConfig.rpcTarget,
-      //   networkName: chainConfig.displayName,
-      // });
+      await this.wsEmbedInstance.provider?.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: chainConfig.chainId,
+            chainName: chainConfig.displayName,
+            rpcUrls: [chainConfig.rpcTarget],
+            blockExplorerUrls: [chainConfig.blockExplorerUrl],
+            nativeCurrency: {
+              name: chainConfig.tickerName,
+              symbol: chainConfig.ticker,
+              decimals: chainConfig.decimals || 18,
+            },
+            iconUrls: [chainConfig.logo],
+          },
+        ],
+      });
+
+      await this.wsEmbedInstance.provider?.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainConfig.chainId }],
+      });
     }
   }
 }

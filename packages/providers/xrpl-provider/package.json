@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@metamask/rpc-errors": "^6.1.0",
-    "@toruslabs/base-controllers": "^4.11.0",
-    "@toruslabs/openlogin-jrpc": "^6.2.2",
+    "@toruslabs/base-controllers": "^5.3.0",
+    "@toruslabs/openlogin-jrpc": "^6.2.8",
     "@web3auth/base": "^7.3.1",
     "@web3auth/base-provider": "^7.3.1",
     "lodash": "^4.17.21",

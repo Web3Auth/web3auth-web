@@ -7,9 +7,7 @@ export class WalletServicesPluginError extends Web3AuthError {
     5212: "Provider is required..",
     5213: "Web3Auth instance is required while initialization.",
     5214: "Web3Auth is not connected.",
-    5215: "UserInfo is required.",
     5216: "Plugin is already initialized",
-    5217: "Wallet services instance is not set.",
     5218: "Unsupported chain namespace.",
     5219: "Plugin network different than web3auth instance network.",
   };
@@ -46,16 +44,8 @@ export class WalletServicesPluginError extends Web3AuthError {
     return WalletServicesPluginError.fromCode(5214, extraMessage);
   }
 
-  public static userInfoRequired(extraMessage = ""): IWeb3AuthError {
-    return WalletServicesPluginError.fromCode(5215, extraMessage);
-  }
-
   public static alreadyInitialized(extraMessage = ""): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5216, extraMessage);
-  }
-
-  public static torusWalletNotSet(extraMessage = ""): IWeb3AuthError {
-    return WalletServicesPluginError.fromCode(5217, extraMessage);
   }
 
   public static unsupportedChainNamespace(extraMessage = ""): IWeb3AuthError {

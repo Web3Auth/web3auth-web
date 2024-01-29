@@ -39,8 +39,8 @@
     "@types/lodash.merge": "^4.6.9"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^6.2.2",
-    "@toruslabs/openlogin-utils": "^6.2.2",
+    "@toruslabs/openlogin": "^6.2.5",
+    "@toruslabs/openlogin-utils": "^6.2.5",
     "@web3auth/base": "^7.3.1",
     "@web3auth/base-provider": "^7.3.1",
     "lodash.merge": "^4.6.2"

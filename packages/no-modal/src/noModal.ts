@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import type { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
+import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
@@ -18,12 +18,15 @@ import {
   UserAuthInfo,
   UserInfo,
   WALLET_ADAPTER_TYPE,
+  WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
+import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
 export interface Web3AuthNoModalOptions {
   /**
@@ -70,6 +73,11 @@ export interface Web3AuthNoModalOptions {
    * @defaultValue false
    */
   useCoreKitKey?: boolean;
+
+  /**
+   * WhiteLabel options for web3auth
+   */
+  uiConfig?: WhiteLabelData;
 }
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -127,9 +135,11 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   public async init(): Promise<void> {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
+    // TODO: get stuff from dashboard here
+    // disable sms login
     const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-      // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
+      // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
         const providedChainConfig = this.coreOptions.chainConfig;
@@ -147,6 +157,20 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
           clientId: this.coreOptions.clientId,
           web3AuthNetwork: this.coreOptions.web3AuthNetwork,
           useCoreKitKey: this.coreOptions.useCoreKitKey,
+        });
+      }
+      if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
+        const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+        openloginAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
+      } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+        const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
+        walletConnectAdapter.setAdapterSettings({
+          adapterSettings: {
+            walletConnectInitOptions: {
+              // Using a default wallet connect project id for web3auth modal integration
+              projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
+            },
+          },
         });
       }
 

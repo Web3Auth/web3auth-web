@@ -30,7 +30,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
           chainId: chainConfig.chainId,
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorer],
+          blockExplorerUrls: [chainConfig.blockExplorerUrl],
+          iconUrls: [chainConfig.logo],
           nativeCurrency: {
             name: chainConfig.tickerName,
             symbol: chainConfig.ticker,

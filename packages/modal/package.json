@@ -20,8 +20,8 @@
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@toruslabs/openlogin-utils": "^6.2.2",
-    "css-loader": "^6.9.0",
+    "@toruslabs/openlogin-utils": "^6.2.5",
+    "css-loader": "^6.9.1",
     "postcss-prefix-selector": "^1.16.0",
     "style-loader": "^3.3.4",
     "tailwindcss": "^3.4.1",

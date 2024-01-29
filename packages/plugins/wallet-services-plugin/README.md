@@ -1,17 +1,18 @@
-# Web3Auth Torus Wallet Connector Plugin
+# Web3Auth Wallet Services Plugin
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/torus-wallet-connector-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/torus-wallet-connector-plugin/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-wallet-connector-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/torus-wallet-connector-plugin@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth/wallet-services-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/wallet-services-plugin/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/wallet-services-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/wallet-services-plugin@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Torus Wallet Connector Plugin helps you get the functionalities of the Torus Wallet into your Web3Auth Instance. It helps you use your Web3Auth key in the Torus Wallet, making it easier for your end user to make transactions, add money into their wallet and even use it across different applications using Torus Wallet.
+Web3Auth Wallet Services Plugin helps you get the functionalities of the wallet services into your Web3Auth Instance. It helps you use your Web3Auth key in the wallet, making it easier for your end user to make transactions, add money into their wallet and even use it across different applications using wallet services.
 
 ## 📖 Documentation
 
-Read more about the Web3Auth Torus Wallet Connector Plugin in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/plugins/torus-wallet).
+Read more about the Web3Auth Wallet Services Plugin in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/plugins/wallet-services).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -26,7 +27,7 @@ Read more about the Web3Auth Torus Wallet Connector Plugin in the [official Web3
 ## 🔗 Installation
 
 ```shell
-npm i --save @web3auth/torus-wallet-connector-plugin
+npm i --save @web3auth/wallet-services-plugin
 ```
 
 ## 🩹 Example
