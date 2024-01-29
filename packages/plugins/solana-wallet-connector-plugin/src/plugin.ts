@@ -234,7 +234,8 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     const { chainConfig } = sessionConfig || {};
     if (chainId !== torusWalletSessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
-        ...chainConfig,
+        ticker: chainConfig.ticker,
+        tickerName: chainConfig.tickerName,
         blockExplorerUrl: chainConfig.blockExplorer,
         logo: "",
         chainId: `0x${chainId.toString(16)}`,

@@ -68,6 +68,7 @@ export class WalletServicesConnectorPlugin implements IPlugin {
       chainId: connectedChainConfig.chainId,
       ticker: connectedChainConfig.ticker,
       tickerName: connectedChainConfig.tickerName,
+      chainNamespace: this.pluginNamespace,
     };
     await this.wsEmbedInstance.init({
       ...(this.walletInitOptions || {}),
