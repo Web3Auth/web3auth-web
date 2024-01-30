@@ -41,7 +41,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  readonly adapterOptions: WalletConnectV2AdapterOptions;
+  adapterOptions: WalletConnectV2AdapterOptions = {};
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
