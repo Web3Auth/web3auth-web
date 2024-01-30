@@ -26,8 +26,9 @@ export const getDefaultAdapterModule = async (params: {
   sessionTime?: number;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
   uiConfig?: Omit<UIConfig, "adapterListener">;
+  useCoreKitKey?: boolean;
 }): Promise<IAdapter<unknown>> => {
-  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork, uiConfig } = params;
+  const { name, customChainConfig, clientId, sessionTime, web3AuthNetwork, uiConfig, useCoreKitKey } = params;
   if (!Object.values(CHAIN_NAMESPACES).includes(customChainConfig.chainNamespace))
     throw new Error(`Invalid chainNamespace: ${customChainConfig.chainNamespace}`);
   const finalChainConfig = {
@@ -36,19 +37,19 @@ export const getDefaultAdapterModule = async (params: {
   };
   if (name === WALLET_ADAPTERS.TORUS_EVM) {
     const { TorusWalletAdapter } = await import("@web3auth/torus-evm-adapter");
-    const adapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+    const adapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
     return adapter;
   } else if (name === WALLET_ADAPTERS.TORUS_SOLANA) {
     const { SolanaWalletAdapter } = await import("@web3auth/torus-solana-adapter");
-    const adapter = new SolanaWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+    const adapter = new SolanaWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
     return adapter;
   } else if (name === WALLET_ADAPTERS.METAMASK) {
     const { MetamaskAdapter } = await import("@web3auth/metamask-adapter");
-    const adapter = new MetamaskAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+    const adapter = new MetamaskAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
     return adapter;
   } else if (name === WALLET_ADAPTERS.PHANTOM) {
     const { PhantomAdapter } = await import("@web3auth/phantom-adapter");
-    const adapter = new PhantomAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork });
+    const adapter = new PhantomAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
     return adapter;
   } else if (name === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
     const { WalletConnectV2Adapter } = await import("@web3auth/wallet-connect-v2-adapter");
@@ -57,6 +58,7 @@ export const getDefaultAdapterModule = async (params: {
       clientId,
       sessionTime,
       web3AuthNetwork,
+      useCoreKitKey,
       adapterSettings: {
         walletConnectInitOptions: {
           // Using a default wallet connect project id for web3auth modal integration
@@ -74,6 +76,7 @@ export const getDefaultAdapterModule = async (params: {
     const adapter = new OpenloginAdapter({
       ...defaultOptions,
       clientId,
+      useCoreKitKey,
       chainConfig: { ...finalChainConfig },
       adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork, whiteLabel: uiConfig },
       sessionTime,

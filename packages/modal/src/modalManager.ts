@@ -110,7 +110,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
-
+    // TODO: get stuff from dashboard here
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
@@ -144,6 +144,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           sessionTime: this.options.sessionTime,
           web3AuthNetwork: this.options.web3AuthNetwork,
           uiConfig: this.options.uiConfig,
+          useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
 
         this.walletAdapters[adapterName] = ad;
@@ -156,6 +157,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           clientId: this.options.clientId,
           sessionTime: this.options.sessionTime,
           web3AuthNetwork: this.options.web3AuthNetwork,
+          useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
