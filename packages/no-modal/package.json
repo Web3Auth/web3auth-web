@@ -33,8 +33,8 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@web3auth/openlogin-adapter": "^7.x",
-    "@web3auth/wallet-connect-v2-adapter": "^7.x"
+    "@web3auth/openlogin-adapter": "^8.x",
+    "@web3auth/wallet-connect-v2-adapter": "^8.x"
   },
   "dependencies": {
     "@toruslabs/openlogin": "^6.2.5",

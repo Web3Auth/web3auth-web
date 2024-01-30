@@ -17,7 +17,9 @@
     "postcss-prefix-selector": "^1.16.0",
     "style-loader": "^3.3.4",
     "tailwindcss": "^3.4.1",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "@web3auth/openlogin-adapter": "^8.0.0-alpha.0",
+    "@web3auth/wallet-connect-v2-adapter": "^8.0.0-alpha.0"
   },
   "engines": {
     "node": ">=18.x",
@@ -41,7 +43,17 @@
   "module": "dist/modal.esm.js",
   "name": "@web3auth/modal",
   "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "@babel/runtime": "^7.x",
+    "@web3auth/openlogin-adapter": "^8.x",
+    "@web3auth/wallet-connect-v2-adapter": "^8.x"
+  },
+  "peerDependenciesMeta": {
+    "@web3auth/openlogin-adapter": {
+      "optional": true
+    },
+    "@web3auth/wallet-connect-v2-adapter": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"
