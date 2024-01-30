@@ -2,7 +2,8 @@ import { IProvider } from "@web3auth/base";
 import Web3 from "web3";
 import { IWalletProvider } from "./walletProvider";
 import { erc20Abi, randomContractAbi } from "../config/abi";
-const tokenAddress = "0x655F2166b0709cd575202630952D71E2bB0d61Af";
+// Link Token
+const tokenAddress = "0x779877A7B0D9E8603169DdbD7836e478b4624789";
 
 const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
   const getAccounts = async () => {

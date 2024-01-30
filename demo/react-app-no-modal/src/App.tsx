@@ -10,7 +10,7 @@ import RPC from "./web3RPC"; // for using web3.js
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
+//import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v2-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
@@ -41,9 +41,6 @@ function App() {
           }),
         });
         web3auth.configureAdapter(openloginAdapter);
-
-        const adapter = new WalletConnectV1Adapter();
-        web3auth.configureAdapter(adapter);
 
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
@@ -108,17 +105,8 @@ function App() {
       uiConsole("provider not initialized yet");
       return;
     }
-    const newChain = {
-      chainId: "0x5",
-      displayName: "Goerli",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      tickerName: "Goerli",
-      ticker: "ETH",
-      decimals: 18,
-      rpcTarget: "https://rpc.ankr.com/eth_goerli",
-      blockExplorer: "https://goerli.etherscan.io",
-    };
-    await web3auth?.addChain(newChain);
+
+    await web3auth?.addChain(getEvmChainConfig(11155111) as CustomChainConfig);
     uiConsole("New Chain Added");
   };
 
@@ -127,7 +115,7 @@ function App() {
       uiConsole("provider not initialized yet");
       return;
     }
-    await web3auth?.switchChain({ chainId: "0x5" });
+    await web3auth?.switchChain({ chainId: "0xaa36a7" });
     uiConsole("Chain Switched");
   };
 

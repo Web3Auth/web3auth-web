@@ -37,12 +37,12 @@ export const CHAIN_CONFIG = {
     ticker: "matic",
     tickerName: "Matic",
   } as CustomChainConfig,
-  goerli: {
+  sepolia: {
     chainNamespace: CHAIN_NAMESPACES.EIP155,
-    rpcTarget: "https://rpc.ankr.com/eth_goerli",
-    blockExplorer: "https://goerli.etherscan.io/",
-    chainId: "0x5",
-    displayName: "Goerli",
+    rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+    blockExplorer: "https://sepolia.etherscan.io/",
+    chainId: "0xaa36a7",
+    displayName: "Sepolia",
     ticker: "eth",
     tickerName: "Eth",
   } as CustomChainConfig,
