@@ -55,7 +55,7 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^17.2.8",
+    "@nx/nx-linux-x64-gnu": "^17.3.0",
     "@rollup/rollup-linux-x64-gnu": "^4.9.6"
   },
   "repository": {
