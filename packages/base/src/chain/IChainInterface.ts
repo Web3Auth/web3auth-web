@@ -1,6 +1,7 @@
 export const CHAIN_NAMESPACES = {
   EIP155: "eip155",
   SOLANA: "solana",
+  XRPL: "xrpl",
   OTHER: "other",
 } as const;
 // eip155 for all evm chains
@@ -38,7 +39,7 @@ export type CustomChainConfig = {
   /**
    * Url of the block explorer
    */
-  blockExplorer: string;
+  blockExplorerUrl: string;
   /**
    * Default currency ticker of the network (e.g: ETH)
    */
@@ -51,4 +52,12 @@ export type CustomChainConfig = {
    * Number of decimals for the currency ticker (e.g: 18)
    */
   decimals?: number;
+  /**
+   * Logo for the token
+   */
+  logo: string;
+  /**
+   * Whether the network is testnet or not
+   */
+  isTestnet?: boolean;
 };

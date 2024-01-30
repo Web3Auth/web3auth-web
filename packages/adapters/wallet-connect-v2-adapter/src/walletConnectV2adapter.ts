@@ -150,6 +150,21 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
   }
 
+  // should be called only before initialization.
+  setAdapterSettings(adapterSettings: Partial<WalletConnectV2AdapterOptions>): void {
+    super.setAdapterSettings(adapterSettings);
+    const { qrcodeModal, walletConnectInitOptions } = adapterSettings?.adapterSettings || {};
+    if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
+    if (walletConnectInitOptions)
+      this.adapterOptions.adapterSettings.walletConnectInitOptions = {
+        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions || {}),
+        ...walletConnectInitOptions,
+      };
+
+    const { loginSettings } = adapterSettings;
+    if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
+  }
+
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(chainConfig, init);
     if (!isChainIdSupported(this.currentChainNamespace, parseInt(chainConfig.chainId, 16), this.adapterOptions.loginSettings)) {

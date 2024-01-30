@@ -29,8 +29,8 @@ npm install --save @web3auth/xrpl-provider
 ## 🩹 Example
 
 ```ts
-import { XrplPrivateKeyProvider, getXRPLChainConfig } from "@web3auth/xrpl-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
+import { XrplPrivateKeyProvider } from "@web3auth/xrpl-provider";
+import { SafeEventEmitterProvider, getXRPLChainConfig } from "@web3auth/base";
 const signMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
   const msg = "Hello world";
   const hexMsg = convertStringToHex(msg);

@@ -31,6 +31,12 @@
             Torus Wallet UI Plugin
           </label>
         </span>
+        <span class="form-control radio-group">
+          <label for="walletServices" class="radio-button">
+            <input type="checkbox" id="walletServices" value="wallet services plugin" v-model="form.plugins.walletServices" />
+            Wallet Services Plugin
+          </label>
+        </span>
       </div>
 
       <hr />
@@ -196,7 +202,7 @@
       <section>
         <!-- hosted auth -->
         <ConfigurableExample
-          :plugins="config.plugins"
+          :plugins="form.plugins"
           :openloginNetwork="config.openloginNetwork"
           :adapterConfig="config.uiMode.default"
           :chain="config.chain"
@@ -272,7 +278,8 @@ const defaultFormConfig = {
   selectedUiMode: "default",
   openloginNetwork: "testnet",
   plugins: {
-    torusWallet: true,
+    torusWallet: false,
+    walletServices: true,
   },
   uiMode: {
     default: {
