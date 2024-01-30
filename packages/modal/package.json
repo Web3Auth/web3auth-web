@@ -4,10 +4,10 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
-    "@web3auth/base": "^7.3.1",
-    "@web3auth/no-modal": "^7.3.1",
-    "@web3auth/ui": "^7.3.1",
-    "@web3auth/base-provider": "^7.3.1"
+    "@web3auth/base": "^8.0.0-alpha.0",
+    "@web3auth/base-provider": "^8.0.0-alpha.0",
+    "@web3auth/no-modal": "^8.0.0-alpha.0",
+    "@web3auth/ui": "^8.0.0-alpha.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
@@ -61,5 +61,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "7.3.1"
+  "version": "8.0.0-alpha.0"
 }

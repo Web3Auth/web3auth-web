@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-solana-adapter",
-  "version": "7.3.1",
+  "version": "8.0.0-alpha.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/defaultSolanaAdapter.cjs.js",
@@ -19,10 +19,10 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^7.3.1",
-    "@web3auth/openlogin-adapter": "^7.3.1",
-    "@web3auth/phantom-adapter": "^7.3.1",
-    "@web3auth/torus-solana-adapter": "^7.3.1"
+    "@web3auth/base": "^8.0.0-alpha.0",
+    "@web3auth/openlogin-adapter": "^8.0.0-alpha.0",
+    "@web3auth/phantom-adapter": "^8.0.0-alpha.0",
+    "@web3auth/torus-solana-adapter": "^8.0.0-alpha.0"
   },
   "files": [
     "dist",
