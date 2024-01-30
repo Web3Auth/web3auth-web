@@ -1,5 +1,4 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
@@ -22,63 +21,12 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
+  Web3AuthNoModalOptions,
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-
-export interface Web3AuthNoModalOptions {
-  /**
-   * Client id for web3auth.
-   * You can obtain your client id from the web3auth developer dashboard.
-   * You can set any random string for this on localhost.
-   */
-  clientId: string;
-  /**
-   * custom chain configuration for chainNamespace
-   *
-   * @defaultValue mainnet config of provided chainNamespace
-   */
-  chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
-
-  /**
-   * setting to true will enable logs
-   *
-   * @defaultValue false
-   */
-  enableLogging?: boolean;
-  /**
-   * setting to "local" will persist social login session accross browser tabs.
-   *
-   * @defaultValue "local"
-   */
-  storageKey?: "session" | "local";
-
-  /**
-   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
-   * @defaultValue 86400
-   *
-   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
-   */
-  sessionTime?: number;
-  /**
-   * Web3Auth Network to use for the session & the issued idToken
-   * @defaultValue mainnet
-   */
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
-
-  /**
-   * Uses core-kit key with web3auth provider
-   * @defaultValue false
-   */
-  useCoreKitKey?: boolean;
-
-  /**
-   * WhiteLabel options for web3auth
-   */
-  uiConfig?: WhiteLabelData;
-}
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
@@ -161,7 +109,18 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       }
       if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
         const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+        if (this.coreOptions.privateKeyProvider) {
+          if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+            throw WalletInitializationError.incompatibleChainNameSpace(
+              "private key provider is not compatible with provided chainNamespace for openlogin adapter"
+            );
+          }
+          openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
+        }
         openloginAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
+        if (!openloginAdapter.privateKeyProvider) {
+          throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
+        }
       } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
         walletConnectAdapter.setAdapterSettings({
