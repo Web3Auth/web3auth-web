@@ -102,7 +102,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChainConfig: async (req: JRPCRequest<AddXRPLChainParameter>): Promise<void> => {
         if (!req.params) throw rpcErrors.invalidParams("Missing request params");
-        const { chainId, ticker, tickerName, displayName, rpcTarget, wsTarget, blockExplorer } = req.params;
+        const { chainId, ticker, tickerName, displayName, rpcTarget, wsTarget, blockExplorerUrl, logo } = req.params;
 
         if (!chainId) throw rpcErrors.invalidParams("Missing chainId in chainParams");
         if (!rpcTarget) throw rpcErrors.invalidParams("Missing rpcTarget in chainParams");
@@ -115,7 +115,8 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
           displayName: displayName || "XRPL",
           rpcTarget,
           wsTarget,
-          blockExplorer,
+          blockExplorerUrl,
+          logo,
         });
       },
       switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {

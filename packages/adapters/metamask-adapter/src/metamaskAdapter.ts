@@ -152,12 +152,13 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
           chainId: chainConfig.chainId,
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorer],
+          blockExplorerUrls: [chainConfig.blockExplorerUrl],
           nativeCurrency: {
             name: chainConfig.tickerName,
             symbol: chainConfig.ticker,
             decimals: chainConfig.decimals || 18,
           },
+          iconUrls: [chainConfig.logo],
         },
       ],
     });

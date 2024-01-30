@@ -108,7 +108,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addNewChainConfig: async (req: JRPCRequest<AddSolanaChainParameter>): Promise<void> => {
         if (!req.params) throw rpcErrors.invalidParams("Missing request params");
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = req.params;
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = req.params;
 
         if (!chainId) throw rpcErrors.invalidParams("Missing chainId in chainParams");
         if (!rpcUrls || rpcUrls.length === 0) throw rpcErrors.invalidParams("Missing rpcUrls in chainParams");
@@ -120,8 +120,9 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
           tickerName: nativeCurrency?.name || "Solana",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
-          blockExplorer: blockExplorerUrls?.[0] || "",
+          blockExplorerUrl: blockExplorerUrls?.[0] || "",
           decimals: nativeCurrency?.decimals || 9,
+          logo: iconUrls?.[0] || "https://images.toruswallet.io/sol.svg",
         });
       },
       switchSolanaChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {

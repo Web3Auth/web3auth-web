@@ -66,8 +66,8 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       ...(this.walletInitOptions || {}),
       network: {
         ...connectedChainConfig,
-        blockExplorerUrl: connectedChainConfig.blockExplorer,
-        logo: "",
+        blockExplorerUrl: connectedChainConfig.blockExplorerUrl,
+        logo: connectedChainConfig.logo,
         chainId: connectedChainConfig.chainId,
         rpcTarget: connectedChainConfig.rpcTarget,
         displayName: connectedChainConfig.displayName,
@@ -234,9 +234,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     const { chainConfig } = sessionConfig || {};
     if (chainId !== torusWalletSessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
-        ...chainConfig,
-        blockExplorerUrl: chainConfig.blockExplorer,
-        logo: "",
+        ticker: chainConfig.ticker,
+        tickerName: chainConfig.tickerName,
+        blockExplorerUrl: chainConfig.blockExplorerUrl,
+        logo: chainConfig.logo,
         chainId: `0x${chainId.toString(16)}`,
         rpcTarget: chainConfig.rpcTarget,
         displayName: chainConfig.displayName,

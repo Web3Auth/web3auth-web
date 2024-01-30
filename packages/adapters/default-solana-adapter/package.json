@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/ethereum-provider",
+  "name": "@web3auth/default-solana-adapter",
   "version": "7.3.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/ethereumProvider.cjs.js",
-  "module": "dist/ethereumProvider.esm.js",
-  "unpkg": "dist/ethereumProvider.umd.min.js",
-  "jsdelivr": "dist/ethereumProvider.umd.min.js",
+  "main": "dist/defaultSolanaAdapter.cjs.js",
+  "module": "dist/defaultSolanaAdapter.esm.js",
+  "unpkg": "dist/defaultSolanaAdapter.umd.min.js",
+  "jsdelivr": "dist/defaultSolanaAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
@@ -19,34 +19,18 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^4.1.0",
-    "@ethereumjs/tx": "^5.1.0",
-    "@ethereumjs/util": "^9.0.1",
-    "@metamask/eth-sig-util": "^7.0.1",
-    "@metamask/rpc-errors": "^6.1.0",
-    "@toruslabs/base-controllers": "^5.3.3",
-    "@toruslabs/http-helpers": "^6.0.0",
-    "@toruslabs/openlogin-jrpc": "^6.2.8",
-    "@walletconnect/utils": "^2.11.0",
     "@web3auth/base": "^7.3.1",
-    "@web3auth/base-provider": "^7.3.1",
-    "assert": "^2.1.0",
-    "bignumber.js": "^9.1.2",
-    "bn.js": "^5.2.1",
-    "jsonschema": "^1.4.1"
-  },
-  "devDependencies": {
-    "@types/bn.js": "^5.1.5",
-    "@types/json-rpc-random-id": "^1.0.3",
-    "@walletconnect/types": "^2.11.0"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "@web3auth/openlogin-adapter": "^7.3.1",
+    "@web3auth/phantom-adapter": "^7.3.1",
+    "@web3auth/torus-solana-adapter": "^7.3.1"
   },
   "files": [
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@babel/runtime": "^7.x"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

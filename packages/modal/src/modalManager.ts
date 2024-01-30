@@ -11,11 +11,14 @@ import {
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
+  WalletInitializationError,
+  Web3AuthNoModalOptions,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
-import { Web3AuthNoModal, Web3AuthNoModalOptions } from "@web3auth/no-modal";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
 import {
   defaultEvmDappModalConfig,
@@ -24,7 +27,6 @@ import {
   defaultSolanaDappModalConfig,
   defaultSolanaWalletModalConfig,
 } from "./config";
-import { getDefaultAdapterModule, getPrivateKeyProvider } from "./default";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
@@ -91,7 +93,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     super.checkInitRequirements();
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
-
+    // TODO: get stuff from dashboard here
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
@@ -117,18 +119,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
-        // if adapter is not configured and some default configuration is available, use it.
-        const ad = await getDefaultAdapterModule({
-          name: adapterName,
-          customChainConfig: this.options.chainConfig,
-          clientId: this.options.clientId,
-          sessionTime: this.options.sessionTime,
-          web3AuthNetwork: this.options.web3AuthNetwork,
-          uiConfig: this.options.uiConfig,
-        });
-
-        this.walletAdapters[adapterName] = ad;
-        return adapterName;
+        // Adapters to be shown on modal should be pre-configured.
+        throw WalletInitializationError.invalidParams(`Adapter ${adapterName} is not configured`);
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
         // add client id to adapter, same web3auth client id can be used in adapter.
@@ -137,6 +129,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           clientId: this.options.clientId,
           sessionTime: this.options.sessionTime,
           web3AuthNetwork: this.options.web3AuthNetwork,
+          useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
 
         // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
@@ -151,10 +144,28 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
         if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
           const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
-          if (!openloginAdapter.privateKeyProvider) {
-            const currentPrivateKeyProvider = await getPrivateKeyProvider(openloginAdapter.chainConfigProxy as CustomChainConfig);
-            openloginAdapter.setAdapterSettings({ privateKeyProvider: currentPrivateKeyProvider, whiteLabel: this.options.uiConfig });
+          if (this.coreOptions.privateKeyProvider) {
+            if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+              throw WalletInitializationError.incompatibleChainNameSpace(
+                "private key provider is not compatible with provided chainNamespace for openlogin adapter"
+              );
+            }
+            openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
           }
+          openloginAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
+          if (!openloginAdapter.privateKeyProvider) {
+            throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
+          }
+        } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+          const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
+          walletConnectAdapter.setAdapterSettings({
+            adapterSettings: {
+              walletConnectInitOptions: {
+                // Using a default wallet connect project id for web3auth modal integration
+                projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
+              },
+            },
+          });
         }
 
         return adapterName;
