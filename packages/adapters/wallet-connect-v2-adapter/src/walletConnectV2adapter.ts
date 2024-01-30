@@ -59,6 +59,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   constructor(options: WalletConnectV2AdapterOptions = {}) {
     super(options);
     this.adapterOptions = { ...options };
+    this.setAdapterSettings(options);
   }
 
   get connected(): boolean {
