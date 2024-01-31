@@ -27,8 +27,8 @@ export class WalletServicesPlugin implements IPlugin {
   constructor(options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Partial<WsEmbedParams> } = {}) {
     const { wsEmbedOpts, walletInitOptions } = options;
     // we fake these checks here and get them from web3auth instance
-    this.wsEmbedInstance = new WsEmbed(wsEmbedOpts as CtorArgs);
-    this.walletInitOptions = walletInitOptions;
+    this.wsEmbedInstance = new WsEmbed((wsEmbedOpts || {}) as CtorArgs);
+    this.walletInitOptions = walletInitOptions || {};
   }
 
   get proxyProvider(): SafeEventEmitterProvider | null {
