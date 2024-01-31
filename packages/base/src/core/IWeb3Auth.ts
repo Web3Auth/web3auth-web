@@ -13,6 +13,8 @@ export interface IWeb3Auth extends SafeEventEmitter {
   provider: IProvider | null;
   walletAdapters: Record<string, IAdapter<unknown>>;
   init(): Promise<void>;
+  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
+  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.

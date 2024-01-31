@@ -139,6 +139,10 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     await Promise.all(initPromises);
   }
 
+  public getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null {
+    return this.walletAdapters[adapterName] || null;
+  }
+
   public configureAdapter(adapter: IAdapter<unknown>): Web3AuthNoModal {
     this.checkInitRequirements();
     const providedChainConfig = this.coreOptions.chainConfig;
@@ -219,7 +223,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return this.walletAdapters[this.connectedAdapterName].authenticateUser();
   }
 
-  public async addPlugin(plugin: IPlugin): Promise<IWeb3Auth> {
+  public addPlugin(plugin: IPlugin): IWeb3Auth {
     if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
     if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
       throw new Error(
