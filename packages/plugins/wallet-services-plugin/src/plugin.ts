@@ -124,7 +124,7 @@ export class WalletServicesPlugin implements IPlugin {
     if (this.wsEmbedInstance.isLoggedIn) {
       await this.wsEmbedInstance.logout();
     } else {
-      throw new Error("Torus Wallet plugin is not connected");
+      throw new Error("Wallet Services plugin is not connected");
     }
   }
 
