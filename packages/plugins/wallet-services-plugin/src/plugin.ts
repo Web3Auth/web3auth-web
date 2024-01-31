@@ -7,8 +7,8 @@ import log from "loglevel";
 
 import { WalletServicesPluginError } from "./errors";
 
-export class WalletServicesConnectorPlugin implements IPlugin {
-  name = "WALLET_SERVICES_CONNECTOR_PLUGIN";
+export class WalletServicesPlugin implements IPlugin {
+  name = "WALLET_SERVICES_PLUGIN";
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
 
