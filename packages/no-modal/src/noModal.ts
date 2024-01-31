@@ -46,7 +46,7 @@ export interface Web3AuthNoModalOptions {
    */
   enableLogging?: boolean;
   /**
-   * setting to "local" will persist social login session accross browser tabs.
+   * setting to "local" will persist social login session across browser tabs.
    *
    * @defaultValue "local"
    */
@@ -129,7 +129,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-      // if adapter doesn't have any chain config yet thn set it based on provided namespace and chainId.
+      // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
       if (!this.walletAdapters[adapterName].chainConfigProxy) {
         const providedChainConfig = this.coreOptions.chainConfig;
