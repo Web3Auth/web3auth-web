@@ -24,7 +24,7 @@ export class WalletServicesConnectorPlugin implements IPlugin {
 
   private walletInitOptions: WsEmbedParams | null = null;
 
-  constructor(options: { wsEmbedOpts: Partial<CtorArgs>; walletInitOptions: Partial<WsEmbedParams> }) {
+  constructor(options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Partial<WsEmbedParams> } = {}) {
     const { wsEmbedOpts, walletInitOptions } = options;
     // we fake these checks here and get them from web3auth instance
     this.wsEmbedInstance = new WsEmbed(wsEmbedOpts as CtorArgs);

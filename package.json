@@ -21,7 +21,7 @@
     "test": "cross-env FORCE_COLOR=1 lerna run test --parallel",
     "test-debugger": "cross-env FORCE_COLOR=1 lerna run test-debugger --parallel",
     "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
-    "pack:lerna": "lerna exec 'yarn pack'",
+    "pack:lerna": "lerna exec 'npm pack'",
     "pre-commit": "lerna run pre-commit",
     "prepare": "husky install",
     "locale": "node locales/importLocales.mjs"
