@@ -9,7 +9,7 @@ import Main from "./components/Main";
 
 function App() {
   const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("sapphire_mainnet");
-  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("goerli");
+  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("sepolia");
 
   return (
     <div className={styles.container}>

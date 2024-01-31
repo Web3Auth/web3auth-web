@@ -1,7 +1,7 @@
 import { IProvider } from "@web3auth/base";
 import ethProvider from "./ethProvider";
 import solanaProvider from "./solanaProvider";
-import tezosProvider from "./tezosProvider";
+// import tezosProvider from "./tezosProvider";
 
 export interface IWalletProvider {
   getAccounts: () => Promise<any>;
@@ -17,8 +17,9 @@ export interface IWalletProvider {
 export const getWalletProvider = (chain: string, provider: IProvider, uiConsole: any): IWalletProvider => {
   if (chain === "solana") {
     return solanaProvider(provider, uiConsole);
-  } else if (chain === "tezos") {
-    return tezosProvider(provider, uiConsole);
   }
+  // } else if (chain === "tezos") {
+  //   return tezosProvider(provider, uiConsole);
+  // }
   return ethProvider(provider, uiConsole);
 };
