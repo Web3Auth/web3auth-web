@@ -7,8 +7,8 @@
     "@web3auth/base": "^8.0.0-alpha.0",
     "@web3auth/base-provider": "^8.0.0-alpha.0",
     "@web3auth/no-modal": "^8.0.0-alpha.4",
-    "@web3auth/ui": "^8.0.0-alpha.0",
-    "@web3auth/openlogin-adapter": "^8.0.0-alpha.0"
+    "@web3auth/openlogin-adapter": "^8.0.0-alpha.0",
+    "@web3auth/ui": "^8.0.0-alpha.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
@@ -69,5 +69,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "8.0.0-alpha.4"
+  "version": "8.0.0-alpha.7"
 }
