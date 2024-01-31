@@ -151,6 +151,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             }
             openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
           }
+          if (this.options.uiConfig?.uxMode) {
+            openloginAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });
+          }
           openloginAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
           if (!openloginAdapter.privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
