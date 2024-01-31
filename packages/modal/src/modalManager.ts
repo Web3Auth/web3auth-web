@@ -16,7 +16,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
@@ -120,6 +120,29 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
         // Adapters to be shown on modal should be pre-configured.
+        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
+          const defaultOptions = getOpenloginDefaultOptions();
+          const { clientId, useCoreKitKey, chainConfig, web3AuthNetwork, uiConfig, sessionTime, privateKeyProvider } = this.coreOptions;
+          const finalChainConfig = {
+            ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
+            ...chainConfig,
+          } as CustomChainConfig;
+          if (!privateKeyProvider) {
+            throw WalletInitializationError.invalidParams("privateKeyProvider is required");
+          }
+          const openloginAdapter = new OpenloginAdapter({
+            ...defaultOptions,
+            clientId,
+            useCoreKitKey,
+            chainConfig: { ...finalChainConfig },
+            adapterSettings: { ...defaultOptions.adapterSettings, clientId, network: web3AuthNetwork, whiteLabel: uiConfig },
+            sessionTime,
+            web3AuthNetwork,
+            privateKeyProvider,
+          });
+          this.walletAdapters[adapterName] = openloginAdapter;
+          return adapterName;
+        }
         throw WalletInitializationError.invalidParams(`Adapter ${adapterName} is not configured`);
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
