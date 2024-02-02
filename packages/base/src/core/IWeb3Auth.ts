@@ -81,5 +81,5 @@ export interface Web3AuthNoModalOptions {
   /**
    * Private key provider for your chain namespace
    */
-  privateKeyProvider?: IBaseProvider<string>;
+  privateKeyProvider: IBaseProvider<string>;
 }
