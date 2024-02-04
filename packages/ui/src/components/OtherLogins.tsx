@@ -2,7 +2,7 @@ import { ExternalWalletEventType, ModalState } from "../interfaces";
 import ExternalWallets from "./ExternalWallets";
 import FarcasterLogin from "./FarcasterLogin";
 
-function ExternalWalletButtons({
+function OtherLogins({
   modalState,
   areSocialLoginsVisible,
   preHandleExternalWalletClick,
@@ -36,4 +36,4 @@ function ExternalWalletButtons({
   );
 }
 
-export default ExternalWalletButtons;
+export default OtherLogins;

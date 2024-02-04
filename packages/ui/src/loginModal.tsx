@@ -224,12 +224,6 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 
-  addFarcasterLogin = (): void => {
-    this.setState({
-      showFarcasterLogin: true,
-    });
-  };
-
   open = () => {
     this.setState({
       modalVisibility: true,

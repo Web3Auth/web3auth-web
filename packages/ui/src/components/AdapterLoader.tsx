@@ -58,7 +58,6 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
               <div>
                 <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter: adapterName })}</div>
                 <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter: adapterName })}</div>
-                <div>Adapter loader message 3</div>
               </div>
             </>
           )}

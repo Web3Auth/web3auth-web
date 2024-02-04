@@ -15,7 +15,7 @@
   "jsdelivr": "dist/farcasterAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/metamask-adapter#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/farcaster-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",

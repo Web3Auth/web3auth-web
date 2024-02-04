@@ -10,10 +10,9 @@ import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
-import ExternalWalletButtons from "./ExternalWalletButtons";
 import Footer from "./Footer";
 import Header from "./Header";
-// import Loader from "./Loader";
+import OtherLogins from "./OtherLogins";
 import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 
@@ -257,7 +256,7 @@ export default function Modal(props: ModalProps) {
                   {modalState.hasExternalWallets && externalWalletButton}
                 </>
               ) : (
-                <ExternalWalletButtons
+                <OtherLogins
                   modalState={modalState}
                   areSocialLoginsVisible={areSocialLoginsVisible}
                   preHandleExternalWalletClick={preHandleExternalWalletClick}
