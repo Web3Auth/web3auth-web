@@ -92,3 +92,5 @@ export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w-li
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w.svg";
 
 export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
+
+export const FARCASTER_LOGIN_LOGO = "https://warpcast.com/~/images/fc-purple-sm.png";

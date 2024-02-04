@@ -3,6 +3,7 @@ import {
   createAppClient,
   CreateChannelAPIResponse,
   CreateChannelArgs,
+  StatusAPIResponse,
   viemConnector,
   WatchStatusArgs,
   WatchStatusResponse,
@@ -18,12 +19,19 @@ export interface FarcasterAppClient {}
 export class FarcasterAuthClientProvider extends BaseProvider<FarcasterAuthClientProviderConfig, FarcasterAuthClientProviderState, AppClient> {
   appClient: AppClient | null = null;
 
+  // includes the generated Sign in With Farcaster message, a signature from the user's custody address, the user's verified fid, and user profile information.
+  statusData: StatusAPIResponse | null = null;
+
   constructor({ config }: { config: FarcasterAuthClientProviderConfig }) {
     super({ config });
     this.appClient = createAppClient({
       relay: "https://relay.farcaster.xyz",
       ethereum: viemConnector(),
     });
+  }
+
+  get status(): StatusAPIResponse | null {
+    return this.statusData;
   }
 
   async createChannel(args: CreateChannelArgs): Promise<CreateChannelAPIResponse> {
@@ -33,6 +41,7 @@ export class FarcasterAuthClientProvider extends BaseProvider<FarcasterAuthClien
 
   async watchStatus(args: WatchStatusArgs): Promise<WatchStatusResponse> {
     const status = await this.appClient.watchStatus(args);
+    this.statusData = status.data;
     return status;
   }
 

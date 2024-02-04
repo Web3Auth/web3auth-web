@@ -15,7 +15,13 @@ function ExternalWalletButtons({
 }) {
   const { showFarcasterLogin, status, walletConnectUri, wcAdapters, externalWalletsConfig } = modalState;
   if (showFarcasterLogin) {
-    return <FarcasterLogin connectUri={modalState.farcasterConnectUri} handleExternalWalletClick={preHandleExternalWalletClick} />;
+    return (
+      <FarcasterLogin
+        connectUri={modalState.farcasterConnectUri}
+        handleExternalWalletClick={preHandleExternalWalletClick}
+        hideExternalWallets={hideExternalWallets}
+      />
+    );
   }
   return (
     <ExternalWallets

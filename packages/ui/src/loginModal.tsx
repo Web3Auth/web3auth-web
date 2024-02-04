@@ -240,6 +240,7 @@ class LoginModal extends SafeEventEmitter {
     this.setState({
       modalVisibility: false,
       externalWalletsVisibility: false,
+      showFarcasterLogin: false,
     });
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
   };
@@ -294,7 +295,6 @@ class LoginModal extends SafeEventEmitter {
       if (farcasterConnectData.farcasterConnectUri !== "") {
         this.setState({
           farcasterConnectUri: farcasterConnectData.farcasterConnectUri,
-          showFarcasterLogin: true,
         });
       }
     }

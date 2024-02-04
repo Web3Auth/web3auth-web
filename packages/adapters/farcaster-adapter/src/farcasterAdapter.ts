@@ -31,6 +31,10 @@ export class FarcasterAdapter extends BaseEvmAdapter<void> {
 
   fcProvider: FarcasterAuthClientProvider | null = null;
 
+  userInfo: Partial<UserInfo> = {};
+
+  // private farcasterStatus:;
+
   get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY && this.fcProvider) {
       return this.fcProvider;
@@ -66,28 +70,36 @@ export class FarcasterAdapter extends BaseEvmAdapter<void> {
       this.updateAdapterData({ farcasterConnectUri: chanResponse.url, farcasterLogin: true });
     }
 
-    const status = await this.fcProvider.watchStatus({ channelToken: chanResponse.channelToken });
-    log.debug("status", status);
+    const fcStatus = await this.fcProvider.watchStatus({ channelToken: chanResponse.channelToken });
+    log.debug("status", fcStatus);
+    this.userInfo = fcStatus.data as Partial<UserInfo>;
+    // const s = fcStatus.data
 
     this.status = ADAPTER_STATUS.CONNECTED;
     this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.FARCASTER });
     return this.provider;
   }
 
-  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+  async disconnect(_options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     await super.disconnectSession();
     this.fcProvider?.removeAllListeners();
-    if (options.cleanup) {
-      this.status = ADAPTER_STATUS.NOT_READY;
-      this.fcProvider = null;
-    } else {
-      this.status = ADAPTER_STATUS.READY;
-    }
+    // if (options.cleanup) {
+    //   this.status = ADAPTER_STATUS.NOT_READY;
+    //   this.fcProvider = null;
+    // } else {
+    //   this.status = ADAPTER_STATUS.READY;
+    // }
+    this.status = ADAPTER_STATUS.NOT_READY;
+    this.fcProvider = null;
     await super.disconnect();
   }
 
-  getUserInfo(): Promise<Partial<UserInfo>> {
-    throw new Error("Method not implemented.");
+  async getUserInfo(): Promise<Partial<UserInfo>> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) {
+      throw new Error("Noted connected with farcaster. Please login/connect first");
+    }
+    log.debug("farcasterAdapter::getUserInfo", this.fcProvider.status);
+    return this.fcProvider.status as Partial<UserInfo>;
   }
 
   addChain(_chainConfig: CustomChainConfig): Promise<void> {

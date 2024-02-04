@@ -263,7 +263,7 @@ export default function Modal(props: ModalProps) {
                   preHandleExternalWalletClick={preHandleExternalWalletClick}
                   hideExternalWallets={() => {
                     setModalState((prevState) => {
-                      return { ...prevState, externalWalletsVisibility: false };
+                      return { ...prevState, externalWalletsVisibility: false, showFarcasterLogin: false };
                     });
                   }}
                 />
