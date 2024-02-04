@@ -259,6 +259,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             .init({ autoConnect: this.cachedAdapter === adapterName })
             .then(() => {
               adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
+              log.debug(`adaptersConfig[${adapterName}]: ${adaptersConfig[adapterName]}`);
               this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
               return undefined;
             })
@@ -329,6 +330,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         ) {
           log.debug("this stops wc adapter from trying to reconnect once proposal expires");
           adapter.status = ADAPTER_STATUS.READY;
+        }
+      }
+
+      const fcAdapter = this.walletAdapters[WALLET_ADAPTERS.FARCASTER];
+      if (fcAdapter) {
+        const fcStatus = fcAdapter.status;
+        log.debug("setting up farcaster adapter");
+        if (visibility && (fcStatus === ADAPTER_STATUS.READY || fcStatus === ADAPTER_STATUS.CONNECTING)) {
+          try {
+            log.debug("connecting to farcaster");
+            fcAdapter.connect();
+          } catch (e: unknown) {
+            log.error(`Error while connecting to farcaster: ${e}`);
+          }
         }
       }
     });

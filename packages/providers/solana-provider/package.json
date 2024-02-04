@@ -25,7 +25,7 @@
     "@toruslabs/openlogin-jrpc": "^6.2.2",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@web3auth/base": "^7.3.1",
-    "@web3auth/base-provider": "^7.3.1",
+    "@web3auth/base-provider": "file:../base-provider",
     "bn.js": "^5.2.1",
     "bs58": "^5.0.0",
     "json-rpc-random-id": "^1.0.1"

@@ -122,14 +122,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           adapterSettings: {
             network: web3AuthNetwork,
             clientId,
-            loginConfig: {
-              facebook: {
-                name: "Custom Auth Login",
-                verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
-                typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
-                showOnModal: false,
-              },
-            },
+            // loginConfig: {
+            //   facebook: {
+            //     name: "Custom Auth Login",
+            //     verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
+            //     typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
+            //     showOnModal: false,
+            //   },
+            // },
           },
         });
         web3AuthInstance.configureAdapter(adapter);
@@ -164,6 +164,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                   name: "apple",
                   mainOption: true,
                 },
+                banana: {
+                  name: "banana",
+                  mainOption: true,
+                }
               },
               // setting it to false will hide all social login methods from modal.
               showOnModal: true,
@@ -180,13 +184,22 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   }, [chain, web3AuthNetwork, setWalletProvider]);
 
   const login = async () => {
-    if (!web3Auth) {
-      console.log("web3auth not initialized yet");
-      uiConsole("web3auth not initialized yet");
-      return;
+    try {
+      if (!web3Auth) {
+        console.log("web3auth not initialized yet");
+        uiConsole("web3auth not initialized yet");
+        return;
+      }
+      let localProvider;
+      try {
+        localProvider = await web3Auth.connect();
+        setWalletProvider(localProvider!);
+      } catch (err: unknown) {
+        console.log(err)
+      }
+    } catch (err: unknown) {
+      console.error(err);
     }
-    const localProvider = await web3Auth.connect();
-    setWalletProvider(localProvider!);
   };
 
   const logout = async () => {

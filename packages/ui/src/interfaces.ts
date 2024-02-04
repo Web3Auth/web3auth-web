@@ -48,6 +48,7 @@ export const LOGIN_MODAL_EVENTS = {
   LOGIN: "LOGIN",
   DISCONNECT: "DISCONNECT",
   MODAL_VISIBILITY: "MODAL_VISIBILITY",
+  FARCASTER_LOGIN: "FARCASTER_LOGIN",
 };
 
 export type SocialLoginsConfig = {
@@ -74,11 +75,13 @@ export interface ModalState {
   modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
   walletConnectUri: string;
+  farcasterConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseAdapterConfig>;
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
+  showFarcasterLogin: boolean;
   wcAdapters: IWalletConnectExtensionAdapter[];
 }
 

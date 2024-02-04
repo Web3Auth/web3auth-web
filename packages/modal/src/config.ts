@@ -53,6 +53,10 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
       showOnMobile: true,
       showOnDesktop: true,
     },
+    [EVM_ADAPTERS.FARCASTER]: {
+      label: "Farcaster",
+      showOnModal: true,
+    },
   },
 };
 

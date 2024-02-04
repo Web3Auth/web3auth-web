@@ -10,7 +10,7 @@ import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
-import ExternalWallets from "./ExternalWallets";
+import ExternalWalletButtons from "./ExternalWalletButtons";
 import Footer from "./Footer";
 import Header from "./Header";
 // import Loader from "./Loader";
@@ -44,6 +44,7 @@ export default function Modal(props: ModalProps) {
     modalVisibilityDelayed: false,
     postLoadingMessage: "",
     walletConnectUri: "",
+    farcasterConnectUri: "",
     socialLoginsConfig: {
       loginMethods: {},
       loginMethodsOrder: [],
@@ -54,6 +55,7 @@ export default function Modal(props: ModalProps) {
     detailedLoaderAdapter: "",
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
+    showFarcasterLogin: false,
     wcAdapters: [],
   });
   const { isDark } = useContext(ThemedContext);
@@ -134,6 +136,31 @@ export default function Modal(props: ModalProps) {
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
   const primaryColor = whiteLabel?.theme?.primary || "";
 
+  const farcasterLoginButton = (
+    <div className="w3ajs-external-wallet w3a-group">
+      <div className="w3a-external-toggle w3ajs-external-toggle">
+        <div className="w3a-group__title">{t("modal.external.title")}</div>
+        <button
+          type="button"
+          className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
+          style={{ backgroundColor: isExternalPrimary ? primaryColor : "" }}
+          onClick={() => {
+            handleShowExternalWallets(modalState.externalWalletsInitialized);
+            setModalState((prevState) => {
+              return {
+                ...prevState,
+                showFarcasterLogin: true,
+                externalWalletsVisibility: false,
+              };
+            });
+          }}
+        >
+          Login with Farcaster
+        </button>
+      </div>
+    </div>
+  );
+
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
@@ -148,6 +175,7 @@ export default function Modal(props: ModalProps) {
               return {
                 ...prevState,
                 externalWalletsVisibility: true,
+                showFarcasterLogin: false,
               };
             });
           }}
@@ -203,7 +231,8 @@ export default function Modal(props: ModalProps) {
           ) : (
             <div className="w3a-modal__content w3ajs-content">
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
-              !modalState.externalWalletsVisibility ? (
+              !modalState.externalWalletsVisibility &&
+              !modalState.showFarcasterLogin ? (
                 <>
                   {areSocialLoginsVisible ? (
                     <SocialLogins
@@ -222,23 +251,21 @@ export default function Modal(props: ModalProps) {
                       primaryColor={primaryColor}
                     />
                   )}
-
+                  {/* Farcaster login button */}
+                  {farcasterLoginButton}
                   {/* button to show external wallets */}
                   {modalState.hasExternalWallets && externalWalletButton}
                 </>
               ) : (
-                <ExternalWallets
-                  modalStatus={modalState.status}
-                  showBackButton={areSocialLoginsVisible}
-                  handleExternalWalletClick={preHandleExternalWalletClick}
-                  walletConnectUri={modalState.walletConnectUri}
-                  wcAdapters={modalState.wcAdapters}
-                  config={modalState.externalWalletsConfig}
-                  hideExternalWallets={() =>
+                <ExternalWalletButtons
+                  modalState={modalState}
+                  areSocialLoginsVisible={areSocialLoginsVisible}
+                  preHandleExternalWalletClick={preHandleExternalWalletClick}
+                  hideExternalWallets={() => {
                     setModalState((prevState) => {
                       return { ...prevState, externalWalletsVisibility: false };
-                    })
-                  }
+                    });
+                  }}
                 />
               )}
             </div>

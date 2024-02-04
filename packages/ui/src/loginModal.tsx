@@ -223,6 +223,12 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 
+  addFarcasterLogin = (): void => {
+    this.setState({
+      showFarcasterLogin: true,
+    });
+  };
+
   open = () => {
     this.setState({
       modalVisibility: true,
@@ -274,6 +280,7 @@ class LoginModal extends SafeEventEmitter {
     this.setState({
       walletConnectUri,
       wcAdapters,
+      showFarcasterLogin: false,
     });
   };
 
@@ -281,6 +288,15 @@ class LoginModal extends SafeEventEmitter {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
       const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+    } else if (adapterData.adapterName === WALLET_ADAPTERS.FARCASTER) {
+      type FarcasterConnectData = { farcasterConnectUri: string; farcasterLogin: boolean };
+      const farcasterConnectData = adapterData.data as FarcasterConnectData;
+      if (farcasterConnectData.farcasterConnectUri !== "") {
+        this.setState({
+          farcasterConnectUri: farcasterConnectData.farcasterConnectUri,
+          showFarcasterLogin: true,
+        });
+      }
     }
   };
 
@@ -289,7 +305,7 @@ class LoginModal extends SafeEventEmitter {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
-      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2 && data?.adapter !== WALLET_ADAPTERS.FARCASTER) {
         // const provider = data?.loginProvider || "";
 
         this.setState({ status: MODAL_STATUS.CONNECTING });

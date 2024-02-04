@@ -15,6 +15,7 @@ export const EVM_ADAPTERS = {
   TORUS_EVM: "torus-evm",
   METAMASK: "metamask",
   COINBASE: "coinbase",
+  FARCASTER: "farcaster",
   ...MULTI_CHAIN_ADAPTERS,
 };
 
@@ -37,4 +38,5 @@ export const ADAPTER_NAMES = {
   [EVM_ADAPTERS.TORUS_EVM]: "Torus",
   [EVM_ADAPTERS.METAMASK]: "Metamask",
   [EVM_ADAPTERS.COINBASE]: "Coinbase",
+  [EVM_ADAPTERS.FARCASTER]: "Farcaster",
 };
