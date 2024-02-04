@@ -310,11 +310,7 @@ export type WalletConnectV2Data = {
   extensionAdapters: IWalletConnectExtensionAdapter[];
 };
 
-export interface FarcasterChannelData {
-  token: string;
-  nonce: string;
-  url: string;
-}
+export type FarcasterConnectData = { farcasterConnectUri: string };
 
 export interface IAdapterDataEvent {
   adapterName: string;

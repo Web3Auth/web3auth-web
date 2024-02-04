@@ -5,6 +5,7 @@ import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
   CONNECTED_EVENT_DATA,
+  FarcasterConnectData,
   IAdapterDataEvent,
   IWalletConnectExtensionAdapter,
   log,
@@ -290,7 +291,6 @@ class LoginModal extends SafeEventEmitter {
       const walletConnectData = adapterData.data as WalletConnectV2Data;
       this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
     } else if (adapterData.adapterName === WALLET_ADAPTERS.FARCASTER) {
-      type FarcasterConnectData = { farcasterConnectUri: string; farcasterLogin: boolean };
       const farcasterConnectData = adapterData.data as FarcasterConnectData;
       if (farcasterConnectData.farcasterConnectUri !== "") {
         this.setState({

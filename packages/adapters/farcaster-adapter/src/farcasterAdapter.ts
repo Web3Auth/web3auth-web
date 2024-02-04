@@ -80,17 +80,15 @@ export class FarcasterAdapter extends BaseEvmAdapter<void> {
     return this.provider;
   }
 
-  async disconnect(_options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     await super.disconnectSession();
     this.fcProvider?.removeAllListeners();
-    // if (options.cleanup) {
-    //   this.status = ADAPTER_STATUS.NOT_READY;
-    //   this.fcProvider = null;
-    // } else {
-    //   this.status = ADAPTER_STATUS.READY;
-    // }
-    this.status = ADAPTER_STATUS.NOT_READY;
-    this.fcProvider = null;
+    if (options.cleanup) {
+      this.status = ADAPTER_STATUS.NOT_READY;
+      this.fcProvider = null;
+    } else {
+      this.status = ADAPTER_STATUS.READY;
+    }
     await super.disconnect();
   }
 

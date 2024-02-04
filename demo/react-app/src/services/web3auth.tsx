@@ -122,14 +122,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           adapterSettings: {
             network: web3AuthNetwork,
             clientId,
-            // loginConfig: {
-            //   facebook: {
-            //     name: "Custom Auth Login",
-            //     verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
-            //     typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
-            //     showOnModal: false,
-            //   },
-            // },
+            loginConfig: {
+              facebook: {
+                name: "Custom Auth Login",
+                verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
+                typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
+                showOnModal: false,
+              },
+            },
           },
         });
         web3AuthInstance.configureAdapter(adapter);
