@@ -41,7 +41,7 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.56.0",
     "faker": "^5.5.3",
-    "husky": "^8.0.3",
+    "husky": "^9.0.10",
     "jsonwebtoken": "^9.0.2",
     "lerna": "^8.0.2",
     "lint-staged": "^15.2.0",
