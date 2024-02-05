@@ -1,10 +1,5 @@
-import { post } from "@toruslabs/http-helpers";
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
 import { jwtDecode } from "jwt-decode";
 
-import { ChainNamespaceType } from "../chain/IChainInterface";
-import { authServer } from "../constants";
-import log from "../loglevel";
 import { storageAvailable } from "../utils";
 
 export const checkIfTokenIsExpired = (token: string) => {
@@ -16,61 +11,6 @@ export const checkIfTokenIsExpired = (token: string) => {
     return true;
   }
   return false;
-};
-
-export const signChallenge = async (payload: Record<string, string | number>, chainNamespace: ChainNamespaceType): Promise<string> => {
-  const t = chainNamespace === "solana" ? "sip99" : "eip191";
-  const header = {
-    t,
-  };
-
-  const network = chainNamespace === "solana" ? "solana" : "ethereum";
-  const data = {
-    payload,
-    header,
-    network,
-  };
-  const res = await post<{ success: boolean; challenge: string }>(`${authServer}/siww/get`, data);
-  if (!res.success) {
-    throw new Error("Failed to authenticate user, Please reach out to Web3Auth Support team");
-  }
-
-  return res.challenge;
-};
-
-export const verifySignedChallenge = async (
-  chainNamespace: ChainNamespaceType,
-  signedMessage: string,
-  challenge: string,
-  issuer: string,
-  sessionTime: number,
-  clientId?: string,
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE
-): Promise<string> => {
-  const t = chainNamespace === "solana" ? "sip99" : "eip191";
-  const sigData = {
-    signature: {
-      s: signedMessage,
-      t,
-    },
-    message: challenge,
-    issuer,
-    audience: typeof window.location !== "undefined" ? window.location.hostname : "com://reactnative",
-    timeout: sessionTime,
-  };
-
-  const idTokenRes = await post<{ success: boolean; token: string; error?: string }>(`${authServer}/siww/verify`, sigData, {
-    headers: {
-      client_id: clientId,
-      wallet_provider: issuer,
-      web3auth_network: web3AuthNetwork,
-    },
-  });
-  if (!idTokenRes.success) {
-    log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
-    throw new Error("Failed to authenticate user, ,message verification failed");
-  }
-  return idTokenRes.token;
 };
 
 export const getSavedToken = (userAddress: string, issuer: string) => {
