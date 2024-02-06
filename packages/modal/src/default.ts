@@ -85,13 +85,19 @@ export const getDefaultAdapterModule = async (params: {
     });
     return adapter;
   } else if (name === WALLET_ADAPTERS.FARCASTER) {
-    const { FarcasterAdapter } = await import("@web3auth/farcaster-adapter");
+    const { FarcasterAdapter, getOpenloginDefaultOptions } = await import("@web3auth/farcaster-adapter");
+    const privateKeyProvider: IBaseProvider<string> = await getPrivateKeyProvider(finalChainConfig);
+
+    const defaultOptions = getOpenloginDefaultOptions();
     const adapter = new FarcasterAdapter({
-      chainConfig: finalChainConfig,
+      ...defaultOptions,
       clientId,
+      useCoreKitKey,
+      chainConfig: { ...finalChainConfig },
+      adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork, whiteLabel: uiConfig },
       sessionTime,
       web3AuthNetwork,
-      useCoreKitKey,
+      privateKeyProvider,
     });
     return adapter;
   }

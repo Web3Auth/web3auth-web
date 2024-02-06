@@ -164,10 +164,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                   name: "apple",
                   mainOption: true,
                 },
-                banana: {
-                  name: "banana",
-                  mainOption: true,
-                }
               },
               // setting it to false will hide all social login methods from modal.
               showOnModal: true,

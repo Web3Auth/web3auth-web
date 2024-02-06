@@ -49,6 +49,24 @@ export type CONNECTED_EVENT_DATA = {
 
 export type UserAuthInfo = { idToken: string };
 
+export type FarcasterSIWEMessage = {
+  domain: string;
+  address: string;
+  statement: string;
+  uri: string;
+  version: string;
+  nonce: string;
+  issuedAt: string;
+  chainId: number;
+  resources: string[];
+};
+
+export type FarcasterVerifyResult = {
+  token: string;
+  fid: string;
+  userinfo: FarcasterSIWEMessage;
+};
+
 export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
