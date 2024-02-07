@@ -7,7 +7,6 @@
     "@web3auth/base": "file:../base",
     "@web3auth/base-provider": "^7.3.1",
     "@web3auth/ethereum-provider": "file:../providers/ethereum-provider",
-    "@web3auth/farcaster-adapter": "file:../adapters/farcaster-adapter",
     "@web3auth/metamask-adapter": "^7.3.1",
     "@web3auth/no-modal": "^7.3.1",
     "@web3auth/openlogin-adapter": "^7.3.1",

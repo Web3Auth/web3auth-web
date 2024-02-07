@@ -6,7 +6,6 @@ import { ChainNamespaceType } from "../chain/IChainInterface";
 import { authServer } from "../constants";
 import log from "../loglevel";
 import { storageAvailable } from "../utils";
-import { FarcasterSIWEMessage, FarcasterVerifyResult, VerifyFarcasterLoginParams } from ".";
 
 export const checkIfTokenIsExpired = (token: string) => {
   const decoded = jwtDecode<{ exp: number }>(token);
@@ -72,40 +71,6 @@ export const verifySignedChallenge = async (
     throw new Error("Failed to authenticate user, ,message verification failed");
   }
   return idTokenRes.token;
-};
-
-export const getSiwfNonce = async (sessionId: string, domain: string, expirationTime: string): Promise<string> => {
-  const body = { sessionId, domain, expirationTime };
-  const siwfGetResponse = await post<{ success: boolean; nonce?: string; error?: string }>(`${authServer}/siwf/get`, body);
-  if (!siwfGetResponse.success) {
-    throw new Error(siwfGetResponse.error);
-  }
-  return siwfGetResponse.nonce;
-};
-
-export const verifyFarcasterLogin = async (params: VerifyFarcasterLoginParams, clientId: string, network: string): Promise<FarcasterVerifyResult> => {
-  const body = params;
-  const idTokenRes = await post<{ success: boolean; token?: string; fid?: string; userinfo: FarcasterSIWEMessage; error?: string }>(
-    `${authServer}/siwf/verify`,
-    body,
-    {
-      headers: {
-        client_id: clientId,
-        wallet_provider: params.issuer,
-        web3auth_network: network,
-      },
-    }
-  );
-  if (!idTokenRes.success) {
-    log.error("Failed to authenticate user, ,message verification failed", idTokenRes.error);
-    throw new Error("Failed to authenticate user, ,message verification failed");
-  }
-
-  return {
-    token: idTokenRes.token,
-    fid: idTokenRes.fid,
-    userinfo: idTokenRes.userinfo,
-  };
 };
 
 export const getSavedToken = (userAddress: string, issuer: string) => {

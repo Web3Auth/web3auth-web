@@ -1,15 +1,11 @@
-import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-utils";
+import { FarcasterAdapterSettings } from "./interface";
+export const DEFAULT_FARCASTER_VERIFIER = "farcaster-test-verifier";
 
-import { FarcasterAdapterOptions } from "./interface";
-
-export const getOpenloginDefaultOptions = (): FarcasterAdapterOptions => {
+export const getFarcasterDefaultOptions = (): FarcasterAdapterSettings => {
   return {
-    adapterSettings: {
-      network: OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
-      clientId: "",
-      uxMode: UX_MODE.POPUP,
-    },
-    loginSettings: {},
-    privateKeyProvider: undefined,
+    verifier: DEFAULT_FARCASTER_VERIFIER,
+    domain: window.location.host,
+    siweUri: `${window.location.host}/login`,
+    siweServer: "https://authjs.web3auth.io",
   };
 };

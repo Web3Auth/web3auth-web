@@ -84,22 +84,6 @@ export const getDefaultAdapterModule = async (params: {
       privateKeyProvider,
     });
     return adapter;
-  } else if (name === WALLET_ADAPTERS.FARCASTER) {
-    const { FarcasterAdapter, getOpenloginDefaultOptions } = await import("@web3auth/farcaster-adapter");
-    const privateKeyProvider: IBaseProvider<string> = await getPrivateKeyProvider(finalChainConfig);
-
-    const defaultOptions = getOpenloginDefaultOptions();
-    const adapter = new FarcasterAdapter({
-      ...defaultOptions,
-      clientId,
-      useCoreKitKey,
-      chainConfig: { ...finalChainConfig },
-      adapterSettings: { ...(defaultOptions.adapterSettings as OpenLoginOptions), clientId, network: web3AuthNetwork, whiteLabel: uiConfig },
-      sessionTime,
-      web3AuthNetwork,
-      privateKeyProvider,
-    });
-    return adapter;
   }
   throw new Error("Invalid wallet adapter name");
 };

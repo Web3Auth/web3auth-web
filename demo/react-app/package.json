@@ -10,7 +10,7 @@
     "@tezos-core-tools/crypto-utils": "^0.0.7",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/modal": "file:../../packages/modal",
-    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
+    "@web3auth/farcaster-adapter": "file:../../packages/adapters/farcaster-adapter",
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
     "@web3auth/torus-wallet-connector-plugin": "file:../../packages/plugins/torus-wallet-connector-plugin",
     "react": "^18.2.0",

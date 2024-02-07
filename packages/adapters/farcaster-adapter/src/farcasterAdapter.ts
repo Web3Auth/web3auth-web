@@ -1,6 +1,6 @@
 import { StatusAPIResponse } from "@farcaster/auth-client";
 import OpenLogin from "@toruslabs/openlogin";
-import { LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES } from "@toruslabs/openlogin-utils";
+import { LoginParams } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -13,9 +13,8 @@ import {
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
-  FarcasterVerifyResult,
-  getSiwfNonce,
   IProvider,
   log,
   UserInfo,
@@ -26,13 +25,17 @@ import {
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import { FarcasterAuthClientProvider } from "@web3auth/ethereum-provider";
-import merge from "lodash.merge";
 
-import { getOpenloginDefaultOptions } from "./config";
-import { FarcasterAdapterOptions, FarcasterLoginParams, LoginSettings, PrivateKeyProvider } from "./interface";
-
-// const DEFAULT_FARCASTER_VERIFIER = "farcaster-test-verifier";
-const SIWE_URI = "https://example.com/login";
+import { getFarcasterDefaultOptions } from "./config";
+import {
+  FarcasterAdapterOptions,
+  FarcasterAdapterSettings,
+  FarcasterLoginParams,
+  FarcasterVerifyResult,
+  LoginSettings,
+  PrivateKeyProvider,
+} from "./interface";
+import { getSiwfNonce } from "./siwf";
 
 export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -55,7 +58,7 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
 
   public loginSettings: LoginSettings = { loginProvider: "" };
 
-  private openloginOptions: FarcasterAdapterOptions["adapterSettings"];
+  private farcasterAdapterSettings: FarcasterAdapterOptions["adapterSettings"];
 
   constructor(params: FarcasterAdapterOptions) {
     super(params);
@@ -66,10 +69,9 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
       sessionTime: params.sessionTime,
       web3AuthNetwork: params.web3AuthNetwork,
       useCoreKitKey: params.useCoreKitKey,
-      privateKeyProvider: params.privateKeyProvider,
     });
-    this.loginSettings = params.loginSettings || { loginProvider: "" };
-    this.privateKeyProvider = params.privateKeyProvider || null;
+    this.loginSettings = params.loginSettings;
+    this.privateKeyProvider = params.privateKeyProvider;
   }
 
   get provider(): IProvider | null {
@@ -85,18 +87,18 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
     super.checkInitializationRequirements();
 
     if (!this.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
-    if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
+    if (!this.farcasterAdapterSettings) throw WalletInitializationError.invalidParams("openloginOptions is required before adapter's initialization");
+    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required before adapter's initialization");
 
     this.openLoginInstance = new OpenLogin({
-      ...this.openloginOptions,
       clientId: this.clientId,
-      network: OPENLOGIN_NETWORK.SAPPHIRE_DEVNET,
+      network: this.web3AuthNetwork,
       loginConfig: {
         jwt: {
           name: "Farcaster Login",
-          verifier: "farcaster-test-verifier",
+          verifier: this.farcasterAdapterSettings.verifier,
           typeOfLogin: "jwt",
-          clientId: "sdfsdfsdf",
+          clientId: this.clientId,
         },
       },
     });
@@ -107,57 +109,44 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
 
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.FARCASTER);
+
+    try {
+      log.debug("initializing openlogin adapter");
+
+      const finalPrivKey = this._getFinalPrivKey();
+      // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
+      if (finalPrivKey && options.autoConnect) {
+        this.rehydrated = true;
+        if (finalPrivKey) {
+          await this.privateKeyProvider.setupProvider(finalPrivKey);
+          this.status = ADAPTER_STATUS.CONNECTED;
+          this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.FARCASTER, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+        }
+      }
+    } catch (error) {
+      log.error("Failed to connect with cached openlogin provider", error);
+      this.emit("ERRORED", error);
+    }
   }
 
-  async connect(params: FarcasterLoginParams): Promise<IProvider> {
+  async connect(params: FarcasterLoginParams = {}): Promise<IProvider> {
     super.checkConnectionRequirements();
     if (!this.fcProvider) throw new Error("Not able to connect to farcaster");
 
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.FARCASTER });
+    const { domain } = this.farcasterAdapterSettings;
 
-    const domain = "example.com";
-    const sessionId = Math.random().toString(36).slice(2);
+    const { data: userFarcasterData, sessionId } = await this.loginWithFarcaster();
+    const verifyResponse = await this.verifyLogin(userFarcasterData, sessionId, domain);
+    log.debug("verifyResponse", verifyResponse);
 
-    const now = new Date();
-    const exp = new Date(now.setMinutes(now.getMinutes() + 5));
-
-    const nonce = await getSiwfNonce(sessionId, domain, exp.toISOString());
-
-    // create channel
-    const chanResponse = await this.fcProvider.createChannel({
-      siweUri: SIWE_URI,
-      domain,
-      nonce,
-    });
-
-    log.debug("farcaster channel response", chanResponse);
-    if (chanResponse.url) {
-      this.updateAdapterData({ farcasterConnectUri: chanResponse.url, farcasterLogin: true });
-    }
-
-    // get status from login
-    const fcStatus = await this.fcProvider.watchStatus({ channelToken: chanResponse.channelToken });
-    log.debug("status", fcStatus);
-
-    if (!fcStatus.error && !fcStatus.isError && fcStatus.data) {
-      const verifyResponse = await this.verifyLogin(fcStatus.data, sessionId, domain);
-      log.debug("verifyResponse", verifyResponse);
-
-      if (verifyResponse.token) {
-        params = {
-          ...params,
-          loginProvider: "jwt",
-          extraLoginOptions: {
-            ...params.extraLoginOptions,
-            id_token: verifyResponse.token,
-            verifierIdField: "sub",
-          },
-        };
-        await this.connectWithProvider(params);
-      }
+    if (verifyResponse.token) {
+      await this.connectWithW3A(params, verifyResponse.token);
     } else {
-      throw new Error(`error connecting to farcaster: ${fcStatus.error}`);
+      // TODO: any way to propagate this error to modal
+      // and show a restart button
+      throw new Error("Failed to fetch token from siwe server after signature validation");
     }
 
     this.status = ADAPTER_STATUS.CONNECTED;
@@ -194,20 +183,90 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
+  setAdapterSettings(adapterSettings: Partial<FarcasterAdapterSettings & BaseAdapterSettings>): void {
     super.setAdapterSettings(adapterSettings);
-    const defaultOptions = getOpenloginDefaultOptions();
+    const defaultOptions = getFarcasterDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
-    this.openloginOptions = {
-      ...defaultOptions.adapterSettings,
-      ...this.openloginOptions,
+    this.farcasterAdapterSettings = {
+      ...defaultOptions,
       ...adapterSettings,
     };
-    if (adapterSettings.web3AuthNetwork) {
-      this.openloginOptions.network = adapterSettings.web3AuthNetwork;
+  }
+
+  private async loginWithFarcaster(): Promise<{
+    data: StatusAPIResponse;
+    sessionId: string;
+  }> {
+    const { domain, siweServer, siweUri, requestId, notBefore, expirationTime } = this.farcasterAdapterSettings;
+    const sessionId = requestId || Math.random().toString(36).slice(2);
+    const verificationStartTime = notBefore ? new Date(notBefore) : new Date();
+    const verificationExpiryTime = expirationTime
+      ? new Date(expirationTime)
+      : new Date(verificationStartTime.setMinutes(verificationStartTime.getMinutes() + 5));
+
+    const nonce = await getSiwfNonce(siweServer, {
+      sessionId,
+      domain,
+      expirationTime: verificationExpiryTime.toISOString(),
+    });
+
+    // create channel
+    const chanResponse = await this.fcProvider.createChannel({
+      siweUri,
+      domain,
+      nonce,
+    });
+
+    log.debug("farcaster channel response", chanResponse, siweUri, domain, nonce);
+    if (chanResponse.url) {
+      this.updateAdapterData({ farcasterConnectUri: chanResponse.url, farcasterLogin: true });
     }
-    if (adapterSettings.privateKeyProvider) {
-      this.privateKeyProvider = adapterSettings.privateKeyProvider;
+
+    // get status from login
+    const fcStatus = await this.fcProvider.watchStatus({ channelToken: chanResponse.channelToken });
+    log.debug("status", fcStatus);
+    if (fcStatus.error) {
+      // TODO: any way to propagate this error to modal
+      // and show a restart button
+      throw fcStatus.error;
+    } else if (fcStatus.data) {
+      return {
+        data: fcStatus.data,
+        sessionId,
+      };
+    }
+    // TODO: any way to propagate this error to modal
+    // and show a restart button
+    throw new Error("Unknown error, failed to fetch user's profile data from farcaster login");
+  }
+
+  private async connectWithW3A(params: FarcasterLoginParams, jwtToken: string) {
+    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required before initialization");
+    if (!this.openLoginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
+
+    const keyAvailable = this._getFinalPrivKey();
+    // if not logged in then login
+    if (!keyAvailable) {
+      // TODO: integrate sfa sdk here if possible.
+      // login with openlogin sdk
+      const openLoginParams = {
+        ...params,
+        loginProvider: "jwt",
+        extraLoginOptions: {
+          ...params.extraLoginOptions,
+          id_token: jwtToken,
+          verifierIdField: "sub",
+        },
+      };
+      await this.openLoginInstance.login(openLoginParams);
+    }
+    const finalPrivKey = this._getFinalPrivKey();
+    if (finalPrivKey) {
+      await this.privateKeyProvider.setupProvider(finalPrivKey);
+      this.status = ADAPTER_STATUS.CONNECTED;
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.FARCASTER, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    } else {
+      throw WalletLoginError.notConnectedError("Unable to fetch private key after login");
     }
   }
 
@@ -226,24 +285,6 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
       this.web3AuthNetwork
     );
     return res;
-  }
-
-  private async connectWithProvider(params: FarcasterLoginParams) {
-    if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivateKey Provider is required before initialization");
-    if (!this.openLoginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-
-    const keyAvailable = this._getFinalPrivKey();
-    if (!keyAvailable || params.extraLoginOptions?.id_token) {
-      this.loginSettings.curve = SUPPORTED_KEY_CURVES.SECP256K1;
-      if (!params.loginProvider && !this.loginSettings.loginProvider)
-        throw WalletInitializationError.invalidParams("loginProvider is required for login");
-
-      const p = merge(this.loginSettings, params, {
-        extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-      });
-
-      await this.openLoginInstance.login(p);
-    }
   }
 
   private _getFinalPrivKey() {

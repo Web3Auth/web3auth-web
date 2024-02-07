@@ -1,11 +1,12 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, getEvmChainConfig, IProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { FarcasterAdapter } from "@web3auth/farcaster-adapter";
 // import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { WEB3AUTH_NETWORK_TYPE } from "../config/web3AuthNetwork";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -96,7 +97,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setUser(null);
       });
 
-      web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
+      web3auth.on(ADAPTER_EVENTS.ERRORED, (error: any) => {
         console.error("some error or user has cancelled login request", error);
       });
     };
@@ -119,24 +120,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           },
           enableLogging: true,
         });
-        const adapter = new OpenloginAdapter({
-          adapterSettings: {
-            network: web3AuthNetwork,
+        const adapter = new FarcasterAdapter({
+            privateKeyProvider: new EthereumPrivateKeyProvider({
+              config: {
+                chainConfig: getEvmChainConfig(1) as CustomChainConfig,
+              },
+            }),
+            web3AuthNetwork: web3AuthNetwork,
             clientId,
-            loginConfig: {
-              facebook: {
-                name: "Custom Auth Login",
-                verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
-                typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
-                showOnModal: false,
-              },
-              jwt: {
-                name: "Farcaster Login",
-                verifier: "farcaster-test-verifier",
-                typeOfLogin: "jwt",
-              },
-            },
-          },
         });
         web3AuthInstance.configureAdapter(adapter);
         // const plugin = new TorusWalletConnectorPlugin({
