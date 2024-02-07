@@ -67,6 +67,17 @@ export type FarcasterVerifyResult = {
   userinfo: FarcasterSIWEMessage;
 };
 
+export interface VerifyFarcasterLoginParams {
+  nonce: string;
+  sessionId: string;
+  message: string;
+  signature: string;
+  domain: string;
+  issuer?: string;
+  audience?: string;
+  timeout?: number;
+}
+
 export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;

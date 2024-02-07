@@ -105,7 +105,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
         setIsLoading(true);
-        const clientId = "BJzfDwF4iBpFNyXran_VrW0sF0gfEacKrXXP1HcKsBw1d5IuCvDQ7obo56d30tCJd6geqJubj77D7x0aUFC5BcU";
+        // const clientId = "BJzfDwF4iBpFNyXran_VrW0sF0gfEacKrXXP1HcKsBw1d5IuCvDQ7obo56d30tCJd6geqJubj77D7x0aUFC5BcU";
+        const clientId = "BIu6q5W2xQr6xhyX6TMjshAJHUtbYH_ICmgHaAjr7bB9UyV1NJTgwWtS6F6-YVgOzLFfofMzQq55FtOgP_osvU4";
         const web3AuthInstance = new Web3Auth({
           chainConfig: currentChainConfig,
           // get your client id from https://dashboard.web3auth.io
@@ -128,6 +129,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                 verifier: "facebook", // Please create a verifier on the developer dashboard and pass the name here
                 typeOfLogin: "facebook", // Pass on the login provider of the verifier you've created
                 showOnModal: false,
+              },
+              jwt: {
+                name: "Farcaster Login",
+                verifier: "farcaster-test-verifier",
+                typeOfLogin: "jwt",
               },
             },
           },

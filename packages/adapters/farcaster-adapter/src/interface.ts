@@ -12,3 +12,7 @@ export interface FarcasterAdapterOptions extends BaseAdapterSettings {
   loginSettings?: LoginSettings;
   privateKeyProvider?: PrivateKeyProvider;
 }
+
+export interface FarcasterLoginParams extends LoginParams {
+  login_hint?: string;
+}

@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { memo, useEffect, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 
+import { capitalizeFirstLetter } from "../config";
 import { ExternalWalletEventType, FARCASTER_LOGIN_LOGO, MODAL_STATUS } from "../interfaces";
 import Icon from "./Icon";
 import Loader from "./Loader";
@@ -17,13 +18,17 @@ interface FarcasterLoginProps {
 function FarcasterLogin({ connectUri, handleExternalWalletClick, hideExternalWallets }: FarcasterLoginProps) {
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
-    if (!connectUri || connectUri === "") {
-      handleExternalWalletClick({ adapter: WALLET_ADAPTERS.FARCASTER });
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
-  }, [connectUri, handleExternalWalletClick]);
+    setLoading(true);
+    handleExternalWalletClick({
+      adapter: WALLET_ADAPTERS.FARCASTER,
+      loginParams: {
+        loginProvider: "jwt",
+        login_hint: "",
+        name: capitalizeFirstLetter(WALLET_ADAPTERS.FARCASTER),
+      },
+    });
+    setLoading(false);
+  }, [handleExternalWalletClick]);
 
   return (
     <div>

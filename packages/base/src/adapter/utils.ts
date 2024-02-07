@@ -6,7 +6,7 @@ import { ChainNamespaceType } from "../chain/IChainInterface";
 import { authServer } from "../constants";
 import log from "../loglevel";
 import { storageAvailable } from "../utils";
-import { FarcasterSIWEMessage, FarcasterVerifyResult } from ".";
+import { FarcasterSIWEMessage, FarcasterVerifyResult, VerifyFarcasterLoginParams } from ".";
 
 export const checkIfTokenIsExpired = (token: string) => {
   const decoded = jwtDecode<{ exp: number }>(token);
@@ -74,32 +74,25 @@ export const verifySignedChallenge = async (
   return idTokenRes.token;
 };
 
-export const verifyFarcasterLogin = async (
-  nonce: string,
-  message: string,
-  signature: string,
-  domain: string,
-  issuer: string,
-  timeout: number,
-  clientId?: string,
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE
-): Promise<FarcasterVerifyResult> => {
-  const body = {
-    nonce,
-    message,
-    signature,
-    domain,
-    issuer,
-    timeout,
-  };
+export const getSiwfNonce = async (sessionId: string, domain: string, expirationTime: string): Promise<string> => {
+  const body = { sessionId, domain, expirationTime };
+  const siwfGetResponse = await post<{ success: boolean; nonce?: string; error?: string }>(`${authServer}/siwf/get`, body);
+  if (!siwfGetResponse.success) {
+    throw new Error(siwfGetResponse.error);
+  }
+  return siwfGetResponse.nonce;
+};
+
+export const verifyFarcasterLogin = async (params: VerifyFarcasterLoginParams, clientId: string, network: string): Promise<FarcasterVerifyResult> => {
+  const body = params;
   const idTokenRes = await post<{ success: boolean; token?: string; fid?: string; userinfo: FarcasterSIWEMessage; error?: string }>(
     `${authServer}/siwf/verify`,
     body,
     {
       headers: {
         client_id: clientId,
-        wallet_provider: issuer,
-        web3auth_network: web3AuthNetwork,
+        wallet_provider: params.issuer,
+        web3auth_network: network,
       },
     }
   );
