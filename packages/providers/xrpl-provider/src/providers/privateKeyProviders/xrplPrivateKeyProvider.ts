@@ -26,7 +26,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.XRPL;
 
   constructor({ config, state }: { config: XrplPrivKeyProviderConfig; state?: XrplPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
+    super({ config, state });
   }
 
   public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<XrplPrivateKeyProvider> => {
@@ -108,7 +108,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
         if (!rpcTarget) throw rpcErrors.invalidParams("Missing rpcTarget in chainParams");
         if (!wsTarget) throw rpcErrors.invalidParams("Missing wsTarget in chainParams");
         this.addChain({
-          chainNamespace: CHAIN_NAMESPACES.OTHER,
+          chainNamespace: CHAIN_NAMESPACES.XRPL,
           chainId,
           ticker: ticker || "XRP",
           tickerName: tickerName || "XRPL",

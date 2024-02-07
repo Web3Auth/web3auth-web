@@ -21,7 +21,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
   constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: EthereumPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
+    super({ config, state });
   }
 
   public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<EthereumPrivateKeyProvider> => {

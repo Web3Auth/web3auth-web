@@ -25,7 +25,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
     super({
-      config: { chainConfig: { ...config.chainConfig }, skipLookupNetwork: !!config.skipLookupNetwork },
+      config: { chainConfig: config.chainConfig, skipLookupNetwork: !!config.skipLookupNetwork },
       state: { ...(state || {}), chainId: "loading", accounts: [] },
     });
     this.connector = connector || null;

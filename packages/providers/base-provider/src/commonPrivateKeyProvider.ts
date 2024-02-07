@@ -8,7 +8,7 @@ import {
   JRPCResponse,
   providerFromEngine,
 } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
@@ -25,7 +25,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
 
   constructor({ config, state }: { config: CommonPrivKeyProviderConfig; state?: CommonPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
+    super({ config, state });
   }
 
   get provider(): SafeEventEmitterProvider | null {

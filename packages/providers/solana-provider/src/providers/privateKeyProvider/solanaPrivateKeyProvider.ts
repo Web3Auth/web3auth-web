@@ -25,7 +25,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.SOLANA;
 
   constructor({ config, state }: { config: SolanaPrivKeyProviderConfig; state?: BaseProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
+    super({ config, state });
   }
 
   public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<SolanaPrivateKeyProvider> => {
