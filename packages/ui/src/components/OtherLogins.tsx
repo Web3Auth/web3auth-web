@@ -21,6 +21,8 @@ function OtherLogins({
         handleExternalWalletClick={preHandleExternalWalletClick}
         hideExternalWallets={hideExternalWallets}
         config={farcasterLoginConfig}
+        status={modalState.status}
+        errorMessage={modalState.postLoadingMessage}
       />
     );
   }

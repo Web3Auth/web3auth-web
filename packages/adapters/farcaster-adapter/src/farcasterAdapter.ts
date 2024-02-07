@@ -146,6 +146,8 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
     } else {
       // TODO: any way to propagate this error to modal
       // and show a restart button
+      const error = new Error("unable to verify farcaster login.");
+      this.emit("ERRORED", error);
       throw new Error("Failed to fetch token from siwe server after signature validation");
     }
 
@@ -228,6 +230,7 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
     if (fcStatus.error) {
       // TODO: any way to propagate this error to modal
       // and show a restart button
+      this.emit("ERRORED", fcStatus.error);
       throw fcStatus.error;
     } else if (fcStatus.data) {
       return {
@@ -237,6 +240,7 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
     }
     // TODO: any way to propagate this error to modal
     // and show a restart button
+    this.emit("ERRORED", new Error("Unknown error, failed to fetch user's profile data from farcaster login"));
     throw new Error("Unknown error, failed to fetch user's profile data from farcaster login");
   }
 

@@ -242,6 +242,7 @@ class LoginModal extends SafeEventEmitter {
       modalVisibility: false,
       externalWalletsVisibility: false,
       showFarcasterLogin: false,
+      farcasterConnectUri: "",
     });
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
   };

@@ -1,29 +1,29 @@
-import { BaseAdapterConfig, log, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_STATUS, BaseAdapterConfig, log, WALLET_ADAPTERS } from "@web3auth/base";
 import copyToClipboard from "copy-to-clipboard";
 import { t } from "i18next";
 import { memo, useCallback, useEffect, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 
 import { capitalizeFirstLetter } from "../config";
-import { ExternalWalletEventType, FARCASTER_LOGIN_LOGO, MODAL_STATUS } from "../interfaces";
+import { ExternalWalletEventType, FARCASTER_LOGIN_LOGO, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import Icon from "./Icon";
 import Loader from "./Loader";
 
 interface FarcasterLoginProps {
   connectUri: string;
   config: Partial<BaseAdapterConfig>;
+  errorMessage: string;
+  status: ModalStatusType;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   hideExternalWallets: () => void;
 }
 
-function FarcasterLogin({ connectUri, handleExternalWalletClick, hideExternalWallets, config }: FarcasterLoginProps) {
+function FarcasterLogin({ connectUri, handleExternalWalletClick, hideExternalWallets, config, errorMessage, status }: FarcasterLoginProps) {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchConnectUri = useCallback(
     (refresh?: boolean) => {
-      log.debug("fetchConnectUri");
       const isConfigReady = config ? Object.keys(config).length > 0 : false;
-      log.debug("isConfigReady", isConfigReady);
       if (isConfigReady && (connectUri === "" || refresh)) {
         setLoading(true);
         log.debug("FarcasterLogin::connecting to farcaster!");
@@ -57,12 +57,14 @@ function FarcasterLogin({ connectUri, handleExternalWalletClick, hideExternalWal
             <div className="w3a-group__title">{t("modal.external.back")}</div>
           </button>
           <div className="w3ajs-wallet-connect w3a-wallet-connect">
-            <div>
-              <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">Error! Something wong!</div>
-              <button type="button" onClick={() => fetchConnectUri(true)}>
-                Refresh
-              </button>
-            </div>
+            {status === ADAPTER_STATUS.ERRORED && (
+              <div>
+                <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{errorMessage}</div>
+                <button type="button" onClick={() => fetchConnectUri(true)}>
+                  Refresh
+                </button>
+              </div>
+            )}
             <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">
               <div className="w3a-wallet-connect__container-desktop">
                 <div>Scan QR with Warpcast</div>
