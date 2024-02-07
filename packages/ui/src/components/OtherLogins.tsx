@@ -13,13 +13,14 @@ function OtherLogins({
   preHandleExternalWalletClick: (params: ExternalWalletEventType) => void;
   hideExternalWallets: () => void;
 }) {
-  const { showFarcasterLogin, status, walletConnectUri, wcAdapters, externalWalletsConfig } = modalState;
+  const { showFarcasterLogin, status, walletConnectUri, farcasterLoginConfig, wcAdapters, externalWalletsConfig } = modalState;
   if (showFarcasterLogin) {
     return (
       <FarcasterLogin
         connectUri={modalState.farcasterConnectUri}
         handleExternalWalletClick={preHandleExternalWalletClick}
         hideExternalWallets={hideExternalWallets}
+        config={farcasterLoginConfig}
       />
     );
   }

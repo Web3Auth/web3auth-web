@@ -198,6 +198,12 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 
+  addFarcasterLogins = (farcasterModalConfig: BaseAdapterConfig): void => {
+    this.setState({
+      farcasterLoginConfig: farcasterModalConfig,
+    });
+  };
+
   addSocialLogins = (
     adapter: WALLET_ADAPTER_TYPE,
     loginMethods: LoginMethodConfig,

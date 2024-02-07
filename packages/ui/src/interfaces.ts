@@ -82,6 +82,7 @@ export interface ModalState {
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
   showFarcasterLogin: boolean;
+  farcasterLoginConfig: Partial<BaseAdapterConfig>;
   wcAdapters: IWalletConnectExtensionAdapter[];
 }
 

@@ -259,8 +259,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             .init({ autoConnect: this.cachedAdapter === adapterName })
             .then(() => {
               adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
-              log.debug(`adaptersConfig[${adapterName}]: ${adaptersConfig[adapterName]}`);
-              this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+              if (adapterName === WALLET_ADAPTERS.FARCASTER) {
+                log.debug(`adding farcaster login: ${adaptersConfig[adapterName]}`);
+                this.loginModal.addFarcasterLogins((this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]);
+              } else {
+                log.debug(`adaptersConfig[${adapterName}]: ${adaptersConfig[adapterName]}`);
+                this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+              }
               return undefined;
             })
             .catch((error) => log.error(error, "error while initializing adapter"));

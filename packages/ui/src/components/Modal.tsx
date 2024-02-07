@@ -51,6 +51,7 @@ export default function Modal(props: ModalProps) {
       uiConfig: {},
     },
     externalWalletsConfig: {},
+    farcasterLoginConfig: {},
     detailedLoaderAdapter: "",
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
@@ -107,7 +108,7 @@ export default function Modal(props: ModalProps) {
     }
     if (modalState.status === MODAL_STATUS.ERRORED) {
       setModalState((prevState) => {
-        return { ...prevState, modalVisibility: true, status: MODAL_STATUS.INITIALIZED };
+        return { ...prevState, modalVisibility: true, status: MODAL_STATUS.ERRORED };
       });
     }
   }, [closeModal, modalState.status]);
@@ -144,6 +145,7 @@ export default function Modal(props: ModalProps) {
           className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
           style={{ backgroundColor: isExternalPrimary ? primaryColor : "" }}
           onClick={() => {
+            log.debug("Modal::modalState.externalWalletsInitialized", modalState.externalWalletsInitialized);
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
               return {
@@ -169,6 +171,7 @@ export default function Modal(props: ModalProps) {
           className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
           style={{ backgroundColor: isExternalPrimary ? primaryColor : "" }}
           onClick={() => {
+            log.debug("Modal::modalState.externalWalletsInitialized", modalState.externalWalletsInitialized);
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
               return {
