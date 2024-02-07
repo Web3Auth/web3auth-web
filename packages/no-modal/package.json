@@ -37,9 +37,9 @@
     "@web3auth/wallet-connect-v2-adapter": "^8.x"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^6.2.5",
-    "@toruslabs/openlogin-jrpc": "^6.2.8",
-    "@toruslabs/openlogin-utils": "^6.2.5",
+    "@toruslabs/openlogin": "^6.2.9",
+    "@toruslabs/openlogin-jrpc": "^6.2.9",
+    "@toruslabs/openlogin-utils": "^6.2.9",
     "@web3auth/base": "^8.0.0-alpha.8",
     "@web3auth/base-plugin": "^8.0.0-alpha.8",
     "@web3auth/base-provider": "^8.0.0-alpha.8"
