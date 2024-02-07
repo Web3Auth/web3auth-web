@@ -47,12 +47,12 @@
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^18.2.53",
+    "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.17",
     "css-loader": "^6.10.0",
     "live-server": "^1.2.2",
-    "postcss": "^8.4.33",
+    "postcss": "^8.4.34",
     "postcss-loader": "^8.1.0",
     "postcss-prefix-selector": "^1.16.0",
     "react": "^18.2.0",
@@ -74,7 +74,7 @@
     "i18next": "^23.8.2",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^14.0.3",
+    "react-i18next": "^14.0.5",
     "react-qrcode-logo": "^2.9.0"
   },
   "lint-staged": {
