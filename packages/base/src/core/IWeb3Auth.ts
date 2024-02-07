@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { UX_MODE_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 
 import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, OPENLOGIN_NETWORK_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
@@ -76,12 +76,7 @@ export interface Web3AuthNoModalOptions {
   /**
    * WhiteLabel options for web3auth
    */
-  uiConfig?: WhiteLabelData & {
-    /**
-     * UX Mode for the openlogin adapter
-     */
-    uxMode?: UX_MODE_TYPE;
-  };
+  uiConfig?: WhiteLabelData;
 
   /**
    * Private key provider for your chain namespace
