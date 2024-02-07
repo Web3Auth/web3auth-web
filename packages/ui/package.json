@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "8.0.0-alpha.13",
+  "version": "8.0.0-alpha.15",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -67,7 +67,7 @@
     "@toruslabs/openlogin": "^7.0.3",
     "@toruslabs/openlogin-jrpc": "^7.0.0",
     "@toruslabs/openlogin-utils": "^7.0.3",
-    "@web3auth/base": "^8.0.0-alpha.13",
+    "@web3auth/base": "^8.0.0-alpha.15",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
