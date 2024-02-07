@@ -43,10 +43,10 @@
     "faker": "^5.5.3",
     "husky": "^9.0.10",
     "jsonwebtoken": "^9.0.2",
-    "lerna": "^8.0.2",
-    "lint-staged": "^15.2.1",
+    "lerna": "^8.1.2",
+    "lint-staged": "^15.2.2",
     "mocha": "^10.2.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -55,7 +55,7 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^18.0.0",
+    "@nx/nx-linux-x64-gnu": "^18.0.2",
     "@rollup/rollup-linux-x64-gnu": "^4.9.6"
   },
   "repository": {
