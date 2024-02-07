@@ -64,9 +64,9 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^6.0.0",
-    "@toruslabs/openlogin": "^6.2.9",
-    "@toruslabs/openlogin-jrpc": "^6.2.9",
-    "@toruslabs/openlogin-utils": "^6.2.9",
+    "@toruslabs/openlogin": "^7.0.3",
+    "@toruslabs/openlogin-jrpc": "^7.0.0",
+    "@toruslabs/openlogin-utils": "^7.0.3",
     "@web3auth/base": "^8.0.0-alpha.13",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
