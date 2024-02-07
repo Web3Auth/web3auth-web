@@ -52,7 +52,7 @@ export type UserAuthInfo = { idToken: string };
 export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
-  chainConfig?: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
+  chainConfig?: CustomChainConfig;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
   useCoreKitKey?: boolean;
 }
@@ -67,7 +67,7 @@ export interface IProvider extends SafeEventEmitter {
 
 export interface IBaseProvider<T> extends IProvider {
   provider: SafeEventEmitterProvider | null;
-  currentChainConfig: Partial<CustomChainConfig>;
+  currentChainConfig: CustomChainConfig;
   setupProvider(provider: T): Promise<void>;
   addChain(chainConfig: CustomChainConfig): void;
   switchChain(params: { chainId: string }): Promise<void>;
@@ -319,15 +319,11 @@ export interface INetworkSwitchProvider {
 }
 export interface INetworkSwitch {
   addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
-  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: Partial<CustomChainConfig>; appOrigin: string }): Promise<boolean>;
+  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 }
 
 export abstract class BaseNetworkSwitch implements INetworkSwitch {
-  abstract switchNetwork(params: {
-    currentChainConfig: CustomChainConfig;
-    newChainConfig: Partial<CustomChainConfig>;
-    appOrigin: string;
-  }): Promise<boolean>;
+  abstract switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 
   abstract addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 }

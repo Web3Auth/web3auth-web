@@ -39,7 +39,7 @@ export interface Web3AuthNoModalOptions {
    *
    * @defaultValue mainnet config of provided chainNamespace
    */
-  chainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
+  chainConfig?: CustomChainConfig;
 
   /**
    * setting to true will enable logs
@@ -81,5 +81,5 @@ export interface Web3AuthNoModalOptions {
   /**
    * Private key provider for your chain namespace
    */
-  privateKeyProvider: IBaseProvider<string>;
+  privateKeyProvider?: IBaseProvider<string>;
 }

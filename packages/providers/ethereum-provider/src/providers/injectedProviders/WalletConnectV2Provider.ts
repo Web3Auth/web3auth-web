@@ -178,13 +178,13 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       }
 
       if (event.name === "chainChanged") {
-        const { chainId: connectedChainId, rpcUrl } = data;
+        const { chainId: connectedChainId, rpcUrl } = data as { chainId: number; rpcUrl: string };
         const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
 
         if (!this.checkIfChainIdAllowed(connectedHexChainId)) return;
         // Check if chainId changed and trigger event
         if (connectedHexChainId && this.state.chainId !== connectedHexChainId) {
-          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId) || {};
+          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId);
           // Handle rpcUrl update
           this.configure({
             chainConfig: { ...maybeConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl, chainNamespace: CHAIN_NAMESPACES.EIP155 },

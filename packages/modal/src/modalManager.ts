@@ -5,6 +5,7 @@ import {
   BaseAdapterConfig,
   CustomChainConfig,
   getChainConfig,
+  IBaseProvider,
   IProvider,
   log,
   LoginMethodConfig,
@@ -27,6 +28,11 @@ export interface Web3AuthOptions extends Web3AuthNoModalOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
+
+  /**
+   * Private key provider for your chain namespace
+   */
+  privateKeyProvider: IBaseProvider<string>;
 }
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
@@ -43,6 +49,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
+    if (!this.coreOptions.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required");
 
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
