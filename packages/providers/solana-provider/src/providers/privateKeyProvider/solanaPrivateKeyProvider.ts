@@ -16,20 +16,19 @@ import {
 import { getProviderHandlers } from "./solanaPrivateKeyUtils";
 
 export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: CustomChainConfig;
 }
 export interface SolanaPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
 }
 export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, SolanaPrivKeyProviderState, string> {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.SOLANA;
+
   constructor({ config, state }: { config: SolanaPrivKeyProviderConfig; state?: BaseProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
   }
 
-  public static getProviderInstance = async (params: {
-    privKey: string;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<SolanaPrivateKeyProvider> => {
+  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<SolanaPrivateKeyProvider> => {
     const providerFactory = new SolanaPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -47,6 +46,8 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public async setupProvider(privKey: string): Promise<void> {
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const providerHandlers = await getProviderHandlers({ privKey, getProviderEngineProxy: this.getProviderEngineProxy.bind(this) });
 
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
