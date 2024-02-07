@@ -13,7 +13,7 @@ import { CHAIN_NAMESPACES, CustomChainConfig, IBaseProvider, SafeEventEmitterPro
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
 export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: CustomChainConfig;
 }
 
 export interface CommonPrivKeyProviderState extends BaseProviderState {
@@ -36,10 +36,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: {
-    privKey: string;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<CommonPrivateKeyProvider> => {
+  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<CommonPrivateKeyProvider> => {
     const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;

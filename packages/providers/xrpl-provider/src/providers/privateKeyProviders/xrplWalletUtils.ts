@@ -19,7 +19,7 @@ export async function getProviderHandlers({
   chainConfig,
 }: {
   privKey: string;
-  chainConfig: Partial<CustomChainConfig>;
+  chainConfig: CustomChainConfig;
 }): Promise<IProviderHandlers> {
   const client = new Client(chainConfig.wsTarget);
   await client.connect();

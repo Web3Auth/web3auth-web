@@ -16,21 +16,20 @@ import {
 import { getProviderHandlers } from "./xrplWalletUtils";
 
 export interface XrplPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace"> & Pick<CustomChainConfig, "wsTarget">;
+  chainConfig: CustomChainConfig & Pick<CustomChainConfig, "wsTarget">;
 }
 
 export interface XrplPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
 }
 export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, XrplPrivKeyProviderState, string> {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.XRPL;
+
   constructor({ config, state }: { config: XrplPrivKeyProviderConfig; state?: XrplPrivKeyProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
   }
 
-  public static getProviderInstance = async (params: {
-    privKey: string;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<XrplPrivateKeyProvider> => {
+  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<XrplPrivateKeyProvider> => {
     const providerFactory = new XrplPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -44,7 +43,8 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
   }
 
   public async setupProvider(privKey: string): Promise<void> {
-    const { wsTarget } = this.config.chainConfig;
+    const { wsTarget, chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     if (!wsTarget) {
       throw WalletInitializationError.invalidParams(`wsTarget is required in chainConfig for xrplProvider`);
     }

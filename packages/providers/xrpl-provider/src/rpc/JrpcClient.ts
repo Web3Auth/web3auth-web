@@ -22,15 +22,8 @@ export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown
   };
 }
 
-export function createProviderConfigMiddleware(
-  providerConfig: Omit<CustomChainConfig, "chainNamespace">
-): JRPCMiddleware<unknown, Omit<CustomChainConfig, "chainNamespace">> {
-  return (
-    req: JRPCRequest<unknown>,
-    res: JRPCResponse<Omit<CustomChainConfig, "chainNamespace">>,
-    next: JRPCEngineNextCallback,
-    end: JRPCEngineEndCallback
-  ) => {
+export function createProviderConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, CustomChainConfig> {
+  return (req: JRPCRequest<unknown>, res: JRPCResponse<CustomChainConfig>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
     if (req.method === RPC_METHODS.PROVIDER_CHAIN_CONFIG) {
       res.result = providerConfig;
       return end();
@@ -39,7 +32,7 @@ export function createProviderConfigMiddleware(
   };
 }
 
-export function createConfigMiddleware(providerConfig: Omit<CustomChainConfig, "chainNamespace">): JRPCMiddleware<unknown, unknown> {
+export function createConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, unknown> {
   const { chainId } = providerConfig;
 
   return mergeMiddleware([
@@ -48,7 +41,7 @@ export function createConfigMiddleware(providerConfig: Omit<CustomChainConfig, "
   ]);
 }
 
-export function createJsonRpcClient(providerConfig: Omit<CustomChainConfig, "chainNamespace">): {
+export function createJsonRpcClient(providerConfig: CustomChainConfig): {
   networkMiddleware: JRPCMiddleware<unknown, unknown>;
   fetchMiddleware: JRPCMiddleware<string[], Block>;
 } {
