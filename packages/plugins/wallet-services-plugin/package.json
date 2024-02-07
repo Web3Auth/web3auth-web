@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-services-plugin",
-  "version": "8.0.0-alpha.11",
+  "version": "8.0.0-alpha.12",
   "description": "Wallet services for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
     "web3Auth/wallet-services-plugin",
@@ -32,12 +32,12 @@
   ],
   "devDependencies": {
     "@metamask/rpc-errors": "^6.1.0",
-    "@web3auth/openlogin-adapter": "^8.0.0-alpha.11"
+    "@web3auth/openlogin-adapter": "^8.0.0-alpha.12"
   },
   "dependencies": {
-    "@web3auth/base": "^8.0.0-alpha.11",
-    "@web3auth/base-plugin": "^8.0.0-alpha.11",
-    "@web3auth/no-modal": "^8.0.0-alpha.11",
+    "@web3auth/base": "^8.0.0-alpha.12",
+    "@web3auth/base-plugin": "^8.0.0-alpha.12",
+    "@web3auth/no-modal": "^8.0.0-alpha.12",
     "@web3auth/ws-embed": "^1.0.0",
     "loglevel": "^1.9.1"
   },
