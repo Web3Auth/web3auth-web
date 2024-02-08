@@ -18,7 +18,6 @@ import {
   IProvider,
   log,
   UserInfo,
-  verifyFarcasterLogin,
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
@@ -35,7 +34,7 @@ import {
   LoginSettings,
   PrivateKeyProvider,
 } from "./interface";
-import { getSiwfNonce } from "./siwf";
+import { getSiwfNonce, verifyFarcasterLogin } from "./siwf";
 
 export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
@@ -135,10 +134,9 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
 
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.FARCASTER });
-    const { domain } = this.farcasterAdapterSettings;
 
     const { data: userFarcasterData, sessionId } = await this.loginWithFarcaster();
-    const verifyResponse = await this.verifyLogin(userFarcasterData, sessionId, domain);
+    const verifyResponse = await this.verifyLogin(userFarcasterData, sessionId);
     log.debug("verifyResponse", verifyResponse);
 
     if (verifyResponse.token) {
@@ -274,8 +272,10 @@ export class FarcasterAdapter extends BaseEvmAdapter<LoginParams> {
     }
   }
 
-  private async verifyLogin(args: StatusAPIResponse, sessionId: string, domain: string): Promise<FarcasterVerifyResult> {
+  private async verifyLogin(args: StatusAPIResponse, sessionId: string): Promise<FarcasterVerifyResult> {
+    const { domain, siweServer } = this.farcasterAdapterSettings;
     const res = await verifyFarcasterLogin(
+      siweServer,
       {
         nonce: args.nonce,
         sessionId,
