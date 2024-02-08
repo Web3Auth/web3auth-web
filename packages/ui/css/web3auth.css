@@ -233,7 +233,7 @@
 }
 
 #w3a-modal .w3a-modal__inner {
-  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-white dark:bg-app-gray-700 shadow-modal border border-app-gray-100 dark:border-app-gray-700;
+  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-app-white dark:bg-app-gray-700 shadow-modal border border-app-gray-100 dark:border-app-gray-700;
   transform: scale(0);
   transition: all 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
@@ -272,7 +272,7 @@
 }
 
 #w3a-modal .w3a-header__title {
-  @apply text-xl font-bold text-app-gray-900 dark:text-white;
+  @apply text-xl font-bold text-app-gray-900 dark:text-app-white;
 }
 
 #w3a-modal div.w3a-header__subtitle {
@@ -316,7 +316,7 @@
 }
 
 #w3a-modal div.w3a-group__title {
-  @apply mb-2 text-sm font-medium text-app-gray-900 dark:text-white;
+  @apply mb-2 text-sm font-medium text-app-gray-900 dark:text-app-white;
 }
 
 /* Adapter List */
@@ -395,7 +395,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-  @apply bg-white rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
+  @apply bg-app-white rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
 }
 
 #w3a-modal .w3a-wallet-connect__container-desktop,
@@ -457,7 +457,7 @@
 
 /* Text Field */
 #w3a-modal .w3a-text-field {
-  @apply py-3 px-6 mt-2 text-sm outline-0 ring-0 border rounded-full placeholder-app-gray-500 dark:placeholder-app-gray-400 bg-app-gray-50 border-app-gray-300 text-app-gray-900 dark:bg-app-gray-600 dark:border-app-gray-500 dark:text-white disabled:placeholder-app-gray-400 dark:disabled:placeholder-app-gray-500 disabled:cursor-not-allowed focus:ring-1 focus:ring-app-primary-600 dark:focus:ring-app-primary-500 focus:border-transparent dark:focus:border-transparent;
+  @apply py-3 px-6 mt-2 text-sm outline-0 ring-0 border rounded-full placeholder-app-gray-500 dark:placeholder-app-gray-400 bg-app-gray-50 border-app-gray-300 text-app-gray-900 dark:bg-app-gray-600 dark:border-app-gray-500 dark:text-app-white disabled:placeholder-app-gray-400 dark:disabled:placeholder-app-gray-500 disabled:cursor-not-allowed focus:ring-1 focus:ring-app-primary-600 dark:focus:ring-app-primary-500 focus:border-transparent dark:focus:border-transparent;
 
   line-height: 1.25em;
 }
@@ -471,7 +471,7 @@
 }
 
 #w3a-modal .w3a-sms-field--error {
-  @apply text-red-500 text-sm -mt-2 mb-2 ml-1.5;
+  @apply text-app-red-500 text-sm -mt-2 mb-2 ml-1.5;
 }
 
 #w3a-container #w3a-modal input.w3a-text-field:-webkit-autofill,
@@ -496,13 +496,13 @@
   /* background */
   bg-app-gray-100 hover:bg-app-gray-300 focus:bg-app-gray-100 disabled:bg-app-gray-50 dark:bg-app-gray-900 dark:focus:bg-app-gray-900 dark:hover:bg-app-gray-800 dark:disabled:bg-[#3B4555]
   /* text */
-  text-app-gray-900 focus:text-app-gray-700 disabled:text-app-gray-300 dark:text-white dark:focus:text-white dark:disabled:text-app-gray-500
+  text-app-gray-900 focus:text-app-gray-700 disabled:text-app-gray-300 dark:text-app-white dark:focus:text-app-white dark:disabled:text-app-gray-500
   /* outline */
   focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-button--primary {
-  @apply bg-app-primary-600 hover:bg-app-primary-800 focus:bg-app-primary-600 dark:bg-app-primary-500 dark:hover:bg-app-primary-800 dark:focus:bg-app-primary-500 disabled:bg-app-primary-200 dark:disabled:bg-app-primary-950 text-white focus:text-white disabled:text-[#EBF5FF] dark:disabled:text-app-gray-500 focus:outline-app-primary-300 active:outline-app-primary-300;
+  @apply bg-app-primary-600 hover:bg-app-primary-800 focus:bg-app-primary-600 dark:bg-app-primary-500 dark:hover:bg-app-primary-800 dark:focus:bg-app-primary-500 disabled:bg-app-primary-200 dark:disabled:bg-app-primary-950 text-app-white focus:text-app-white disabled:text-[#EBF5FF] dark:disabled:text-app-gray-500 focus:outline-app-primary-300 active:outline-app-primary-300;
 }
 
 #w3a-modal .w3a-button--login {
@@ -535,7 +535,7 @@
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown {
-  @apply absolute z-10 overflow-y-scroll bg-white divide-y divide-gray-100 rounded-lg shadow-modal dark:bg-gray-700 w-[120px] h-[185px];
+  @apply absolute z-10 overflow-y-scroll bg-app-white divide-y divide-app-gray-100 rounded-lg shadow-modal dark:bg-app-gray-700 w-[120px] h-[185px];
   transform: translate(0, -230px);
 }
 
@@ -544,11 +544,11 @@
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown ul {
-  @apply py-2 text-sm text-gray-700 dark:text-gray-200;
+  @apply py-2 text-sm text-app-gray-700 dark:text-app-gray-200;
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown li {
-  @apply p-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-white;
+  @apply p-0 cursor-pointer hover:bg-app-gray-100 dark:hover:bg-app-gray-900 dark:hover:text-app-white;
 }
 
 #w3a-modal .w3a-sms-field__code-dropdown li button {
@@ -570,7 +570,7 @@
 /* SPINNER */
 /* Loader */
 #w3a-modal .w3a-modal__loader {
-  @apply absolute inset-0 z-10 flex justify-center bg-white dark:bg-app-gray-700;
+  @apply absolute inset-0 z-10 flex justify-center bg-app-white dark:bg-app-gray-700;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -590,11 +590,11 @@
 }
 
 #w3a-modal .w3a-spinner-message {
-  @apply mt-[10px] text-base text-app-gray-500 dark:text-white first-letter:capitalize;
+  @apply mt-[10px] text-base text-app-gray-500 dark:text-app-white first-letter:capitalize;
 }
 
 #w3a-modal .w3a-spinner-message.w3a-spinner-message--error {
-  @apply text-red-500;
+  @apply text-app-red-500;
 }
 
 #w3a-modal .w3a-spinner-power {
@@ -624,7 +624,7 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-white dark:bg-app-gray-700;
+  @apply bg-app-white dark:bg-app-gray-700;
   width: 50px;
   height: 50px;
   top: 5px;
@@ -655,7 +655,7 @@
 }
 
 #w3a-modal .w3a-modal__loader-bridge-message {
-  @apply text-app-gray-500 dark:text-white first-letter:capitalize;
+  @apply text-app-gray-500 dark:text-app-white first-letter:capitalize;
 }
 
 #w3a-modal .w3a-modal__loader-app-logo {
