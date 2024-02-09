@@ -200,7 +200,7 @@ export const getRequiredNamespaces = (chains: string[]): ProposalTypes.RequiredN
 
 export const getWalletConnectV2Settings = async (
   namespace: ChainNamespaceType,
-  chainIds: number[],
+  chainIds: string[],
   projectID: string
 ): Promise<{
   adapterSettings: IAdapterSettings;
@@ -222,7 +222,7 @@ export const getWalletConnectV2Settings = async (
     };
 
     const chainNamespaces = chainIds.map((chainId) => {
-      return `${namespace}:${chainId}`;
+      return `${namespace}:${parseInt(chainId, 16)}`;
     });
 
     const loginSettings: EngineTypes.ConnectParams = {

@@ -151,7 +151,7 @@ export default defineComponent({
         // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
         const defaultWcSettings = await getWalletConnectV2Settings(
           ethChainConfig.chainNamespace,
-          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16), 5],
+          [ethChainConfig.chainId, "0x89", "0x5"],
           "04309ed1007e77d1f119b85205bb779d",
         );
         console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));

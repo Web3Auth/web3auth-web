@@ -87,7 +87,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     const wc2Settings = await getWalletConnectV2Settings(
       this.chainConfig?.chainNamespace as ChainNamespaceType,
-      [parseInt(this.chainConfig?.chainId as string, 16)],
+      [this.chainConfig?.chainId as string],
       projectId
     );
     if (!this.adapterOptions.loginSettings) {

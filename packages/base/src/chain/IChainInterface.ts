@@ -37,19 +37,19 @@ export type CustomChainConfig = {
   /**
    * Display Name for the chain
    */
-  displayName: string;
+  displayName?: string;
   /**
    * Url of the block explorer
    */
-  blockExplorerUrl: string;
+  blockExplorerUrl?: string;
   /**
    * Default currency ticker of the network (e.g: ETH)
    */
-  ticker: string;
+  ticker?: string;
   /**
    * Name for currency ticker (e.g: `Ethereum`)
    */
-  tickerName: string;
+  tickerName?: string;
   /**
    * Number of decimals for the currency ticker (e.g: 18)
    */
@@ -57,7 +57,7 @@ export type CustomChainConfig = {
   /**
    * Logo for the token
    */
-  logo: string;
+  logo?: string;
   /**
    * Whether the network is testnet or not
    */

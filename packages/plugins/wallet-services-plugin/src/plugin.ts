@@ -1,3 +1,4 @@
+import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
@@ -54,9 +55,15 @@ export class WalletServicesPlugin implements IPlugin {
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
     this.subscribeToWeb3AuthNoModalEvents(web3auth);
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
+    if (!connectedChainConfig.blockExplorerUrl) throw WalletServicesPluginError.invalidParams("blockExplorerUrl is required in chainConfig");
+    if (!connectedChainConfig.displayName) throw WalletServicesPluginError.invalidParams("displayName is required in chainConfig");
+    if (!connectedChainConfig.logo) throw WalletServicesPluginError.invalidParams("logo is required in chainConfig");
+    if (!connectedChainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
+    if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
+
     await this.wsEmbedInstance.init({
       ...(this.walletInitOptions || {}),
-      chainConfig: connectedChainConfig,
+      chainConfig: connectedChainConfig as EthereumProviderConfig,
       buildEnv: options?.buildEnv,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
       whiteLabel: options.whiteLabel,
@@ -215,6 +222,12 @@ export class WalletServicesPlugin implements IPlugin {
   private async setChainID(chainId: number): Promise<void> {
     const [sessionConfig, walletServicesSessionConfig] = await Promise.all([this.sessionConfig(), this.walletServicesSessionConfig()]);
     const { chainConfig } = sessionConfig || {};
+    if (!chainConfig.blockExplorerUrl) throw WalletServicesPluginError.invalidParams("blockExplorerUrl is required in chainConfig");
+    if (!chainConfig.displayName) throw WalletServicesPluginError.invalidParams("displayName is required in chainConfig");
+    if (!chainConfig.logo) throw WalletServicesPluginError.invalidParams("logo is required in chainConfig");
+    if (!chainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
+    if (!chainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
+
     if (chainId !== walletServicesSessionConfig.chainId && chainConfig) {
       await this.wsEmbedInstance.provider?.request({
         method: "wallet_addEthereumChain",
