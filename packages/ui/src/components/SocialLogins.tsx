@@ -7,6 +7,7 @@ import { capitalizeFirstLetter } from "../config";
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
 import i18n from "../localeImport";
+import Button from "./Button";
 import Image from "./Image";
 
 // const hasLightIcons = ["apple", "github"];
@@ -87,39 +88,38 @@ export default function SocialLogins(props: SocialLoginProps) {
           if (isMainOption || order === 1) {
             return (
               <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
-                <button
-                  type="button"
+                <Button
+                  variant="primary"
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
                       loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
-                  className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w3a-button--login h-12 w-full`}
+                  className="w-full"
                   style={{ backgroundColor: isPrimaryBtn ? primaryColor : "" }}
-                  title={name}
                 >
                   {providerIcon}
                   <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
-                </button>
+                </Button>
               </li>
             );
           }
           return (
             <li className={loginMethodSpan} key={method} style={{ order: order + loginMethodsCount }}>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() =>
                   handleSocialLoginClick({
                     adapter: socialLoginsConfig.adapter,
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
-                className="w-full w3a-button w3a-button--login"
+                className="w-full"
                 title={name}
               >
                 {providerIcon}
-              </button>
+              </Button>
             </li>
           );
         })}

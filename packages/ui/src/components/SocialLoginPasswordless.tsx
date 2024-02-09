@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ThemedContext } from "../context/ThemeContext";
 import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
+import Button from "./Button";
 import Icon from "./Icon";
 
 interface SocialLoginPasswordlessProps {
@@ -102,14 +103,15 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
         {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
 
-        <button
+        <Button
+          variant={isPrimaryBtn ? "primary" : "tertiary"}
           disabled={fieldValue === ""}
-          className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w-full`}
+          className="w-full"
           style={{ backgroundColor: isPrimaryBtn ? primaryColor || "" : "" }}
           type="submit"
         >
           {t("modal.social.passwordless-cta")}
-        </button>
+        </Button>
       </form>
     </div>
   );
