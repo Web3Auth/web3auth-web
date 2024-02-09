@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
+import Button from "./Button";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -130,16 +131,15 @@ export default function Modal(props: ModalProps) {
 
   const isEmailPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
-  const primaryColor = whiteLabel?.theme?.primary || "";
 
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         <div className="w3a-group__title">{t("modal.external.title")}</div>
-        <button
+        <Button
+          variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
-          className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
-          style={{ backgroundColor: isExternalPrimary ? primaryColor : "" }}
+          className="w-full w3ajs-external-toggle__button"
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
@@ -151,7 +151,7 @@ export default function Modal(props: ModalProps) {
           }}
         >
           {t("modal.external.connect")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -214,7 +214,6 @@ export default function Modal(props: ModalProps) {
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                       isPrimaryBtn={isEmailPrimary}
-                      primaryColor={primaryColor}
                     />
                   )}
 

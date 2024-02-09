@@ -68,7 +68,6 @@ export default function SocialLogins(props: SocialLoginProps) {
 
           const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
-          const primaryColor = socialLoginsConfig?.uiConfig?.theme?.primary || "";
 
           const imageId =
             method === LOGIN_PROVIDER.TWITTER
@@ -89,7 +88,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             return (
               <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <Button
-                  variant="primary"
+                  variant={isPrimaryBtn ? "primary" : "secondary"}
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
@@ -97,7 +96,6 @@ export default function SocialLogins(props: SocialLoginProps) {
                     })
                   }
                   className="w-full"
-                  style={{ backgroundColor: isPrimaryBtn ? primaryColor : "" }}
                 >
                   {providerIcon}
                   <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>

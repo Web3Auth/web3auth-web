@@ -14,10 +14,9 @@ interface SocialLoginPasswordlessProps {
   isSmsVisible: boolean;
   adapter: string;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
-  primaryColor?: string;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible, primaryColor } = props;
+  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
   const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
@@ -103,13 +102,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
         {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
 
-        <Button
-          variant={isPrimaryBtn ? "primary" : "tertiary"}
-          disabled={fieldValue === ""}
-          className="w-full"
-          style={{ backgroundColor: isPrimaryBtn ? primaryColor || "" : "" }}
-          type="submit"
-        >
+        <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w-full" type="submit">
           {t("modal.social.passwordless-cta")}
         </Button>
       </form>
