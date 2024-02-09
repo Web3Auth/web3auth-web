@@ -1,4 +1,4 @@
-import { CustomChainConfig } from "@web3auth/base";
+import { CustomChainConfig, CHAIN_NAMESPACES } from "@web3auth/base";
 
 export const CHAIN_CONFIG = {
   mainnet: {
@@ -9,6 +9,7 @@ export const CHAIN_CONFIG = {
     ticker: "ETH",
     tickerName: "Ethereum",
     logo: "https://images.toruswallet.io/eth.svg",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
   solana: {
     rpcTarget: "https://api.mainnet-beta.solana.com",
@@ -18,6 +19,7 @@ export const CHAIN_CONFIG = {
     ticker: "SOL",
     tickerName: "Solana",
     logo: "https://images.toruswallet.io/sol.svg",
+    chainNamespace: CHAIN_NAMESPACES.SOLANA,
   } as CustomChainConfig,
   polygon: {
     rpcTarget: "https://rpc.ankr.com/polygon",
@@ -27,6 +29,7 @@ export const CHAIN_CONFIG = {
     ticker: "matic",
     tickerName: "Matic",
     logo: "https://images.toruswallet.io/matic.svg",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
   "polygon-mumbai": {
     rpcTarget: "https://rpc.ankr.com/polygon_mumbai",
@@ -36,6 +39,7 @@ export const CHAIN_CONFIG = {
     ticker: "matic",
     tickerName: "Matic",
     logo: "https://images.toruswallet.io/matic.svg",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
   goerli: {
     rpcTarget: "https://rpc.ankr.com/eth_goerli",
@@ -45,6 +49,7 @@ export const CHAIN_CONFIG = {
     ticker: "eth",
     tickerName: "Eth",
     logo: "https://images.toruswallet.io/eth.svg",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
   sepolia: {
     chainId: "0xaa36a7",
@@ -54,6 +59,7 @@ export const CHAIN_CONFIG = {
     ticker: "eth",
     tickerName: "Ethereum",
     logo: "https://images.toruswallet.io/eth.svg",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
   arbitrum_sepolia: {
     rpcTarget: "https://arbitrum-sepolia.infura.io/v3/4efda295156d477f959dcef8ebc33c5f",
@@ -62,6 +68,7 @@ export const CHAIN_CONFIG = {
     displayName: "Arbitrum Sepolia",
     ticker: "eth",
     tickerName: "Eth",
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
 } as const;
 

@@ -109,7 +109,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
         let privateKeyProvider;
-        if (currentChainConfig.displayName === "Solana") {
+        if (currentChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
           privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         } else {
           privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
@@ -117,17 +117,12 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setIsLoading(true);
         const clientId = "BJzfDwF4iBpFNyXran_VrW0sF0gfEacKrXXP1HcKsBw1d5IuCvDQ7obo56d30tCJd6geqJubj77D7x0aUFC5BcU";
 
-        const web3authChainConfig =
-          currentChainConfig.displayName === "Solana"
-            ? { ...currentChainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA }
-            : { ...currentChainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 };
-
         const web3AuthInstance = new Web3Auth({
           // get your client id from https://dashboard.web3auth.io
           clientId,
           web3AuthNetwork,
           privateKeyProvider,
-          chainConfig: web3authChainConfig,
+          chainConfig: currentChainConfig,
           uiConfig: {
             uxMode: "redirect",
             appName: "W3A Heroes",
@@ -185,7 +180,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         web3AuthInstance.configureAdapter(openloginAdapter);
 
         // Wallet Services Plugin
-        if (currentChainConfig.displayName !== "Solana") {
+        if (currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
             walletInitOptions: { whiteLabel: { showWidgetButton: true } },

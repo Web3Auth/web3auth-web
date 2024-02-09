@@ -45,10 +45,10 @@ const Setting = ({ setNetwork, setChain, chain, network }: IProps) => {
           Blockchain
         </label>
         <select value={chain} onChange={chainChangeHandler} className={styles.select} disabled={isLoggedIn}>
-          {Object.keys(CHAIN_CONFIG).map((x: string) => {
+          {(Object.entries(CHAIN_CONFIG)).map(([chain, config]) => {
             return (
-              <option key={x} value={x}>
-                {CHAIN_CONFIG[x as CHAIN_CONFIG_TYPE].displayName}
+              <option key={chain} value={chain}>
+                {config.displayName}
               </option>
             );
           })}
