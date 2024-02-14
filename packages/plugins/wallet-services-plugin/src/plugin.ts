@@ -166,7 +166,7 @@ export class WalletServicesPlugin implements IPlugin {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with wallet services connector plugin`);
         return;
       }
-      this.provider = web3Auth.provider;
+      this.provider = web3Auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN].provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
