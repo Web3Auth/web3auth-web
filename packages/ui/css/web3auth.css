@@ -449,7 +449,7 @@
   outline: 1px solid #0f1222;
 }
 
-.hover-icon {
+#w3a-modal .hover-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
