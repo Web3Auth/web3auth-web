@@ -67,6 +67,7 @@ export default function SocialLogins(props: SocialLoginProps) {
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
           const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
+          const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
           const imageId =
             method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
@@ -85,7 +86,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             return (
               <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <Button
-                  variant="secondary"
+                  variant={isPrimaryBtn ? "primary" : "secondary"}
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
