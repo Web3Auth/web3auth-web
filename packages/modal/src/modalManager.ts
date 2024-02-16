@@ -18,10 +18,13 @@ import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { applyWhiteLabelTheme, getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
-import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import cloneDeep from "lodash.clonedeep";
+import deepmerge from "lodash.merge";
 
 import { defaultOtherModalConfig } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
+import { fetchProjectConfig } from "./utils";
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
@@ -65,13 +68,50 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
+    // TODO: gating
+    // super.validateFeatureAccess();
+    const { white_label, sms_otp_enabled, wallet_connect_enabled, wallet_connect_project_id } = await fetchProjectConfig(this.options.clientId);
+
+    if (sms_otp_enabled !== undefined) {
+      const adapterConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {
+        [WALLET_ADAPTERS.OPENLOGIN]: {
+          label: WALLET_ADAPTERS.OPENLOGIN,
+          loginMethods: {
+            // TODO: turn into constant
+            sms_passwordless: {
+              name: "sms_passwordless",
+              showOnModal: sms_otp_enabled,
+            },
+          },
+        },
+      };
+      // TODO: handle modal config `undefined` case
+      params.modalConfig = cloneDeep(deepmerge(adapterConfig, params.modalConfig ?? {}));
+    }
+
+    if (wallet_connect_enabled && wallet_connect_project_id) {
+      const walletConnectAdapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2] as WalletConnectV2Adapter | undefined;
+      const defaultWcSettings = await getWalletConnectV2Settings("eip155", ["1"], wallet_connect_project_id);
+      const adapterSettings = {
+        adapterSettings: { ...defaultWcSettings.adapterSettings },
+        loginSettings: { ...defaultWcSettings.loginSettings },
+      };
+      if (!walletConnectAdapter) {
+        const walletConnectV2Adapter = new WalletConnectV2Adapter(adapterSettings);
+        this.configureAdapter(walletConnectV2Adapter);
+      } else {
+        walletConnectAdapter.setAdapterSettings(adapterSettings);
+      }
+    }
+
+    this.options.uiConfig = cloneDeep(deepmerge(white_label, this.options.uiConfig));
+
     await this.loginModal.initModal();
     if (this.options.uiConfig?.theme) {
       const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;
       applyWhiteLabelTheme(rootElement, this.options.uiConfig.theme);
     }
     const providedChainConfig = this.options.chainConfig;
-    // TODO: get stuff from dashboard here
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
@@ -169,16 +209,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (!openloginAdapter.privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
           }
-        } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-          const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
-          walletConnectAdapter.setAdapterSettings({
-            adapterSettings: {
-              walletConnectInitOptions: {
-                // Using a default wallet connect project id for web3auth modal integration
-                projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
-              },
-            },
-          });
         }
 
         return adapterName;
