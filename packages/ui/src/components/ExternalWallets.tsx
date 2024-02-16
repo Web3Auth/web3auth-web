@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType, WALLET_CONNECT_LOGO } from "../interfaces";
 import i18n from "../localeImport";
+import Button from "./Button";
 import Icon from "./Icon";
 import Image from "./Image";
 import Loader from "./Loader";
@@ -213,21 +214,22 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                 <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : "col-span-2"].join(" ")} key={button.name}>
                   {button.isLink ? (
                     <a key={button.name} href={button.href} rel="noopener noreferrer" target="_blank">
-                      <button type="button" className="w-full w3a-button w3a-button--login">
+                      <Button type="button" variant="tertiary" className="w-full">
                         {providerIcon}
                         {label}
-                      </button>
+                      </Button>
                     </a>
                   ) : (
-                    <button
+                    <Button
+                      variant="tertiary"
                       type="button"
                       onClick={() => handleExternalWalletClick({ adapter: button.name })}
-                      className="w-full w3a-button w3a-button--login"
+                      className="w-full"
                       title={config[button.name]?.label || button.name}
                     >
                       {providerIcon}
                       {label}
-                    </button>
+                    </Button>
                   )}
                 </li>
               );
