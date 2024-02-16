@@ -21,6 +21,8 @@ module.exports = {
       },
       backgroundImage: {
         select: `url('data:image/svg + xml;charset=utf-8,%3Csvgxmlns="http://www.w3.org/2000/svg"fill="none"viewBox="002020"%3E%3Cpathstroke="%236B7280"stroke-linecap="round"stroke-linejoin="round"stroke-width="1.5"d="m68444-4"/%3E%3C/svg%3E')`,
+        // TODO: import via design system
+        "gradient-conic": "conic-gradient(transparent, var(--tw-gradient-to))",
       },
     },
     variables: {

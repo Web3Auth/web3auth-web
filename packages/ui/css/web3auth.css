@@ -606,13 +606,12 @@
 }
 
 #w3a-modal .w3a-spinner {
-  @apply bg-app-primary-600 dark:text-app-primary-500;
+  @apply bg-gradient-conic to-app-primary-600 dark:to-app-primary-500;
   display: inline-block;
   position: relative;
   height: 60px;
   width: 60px;
   border-radius: 50%;
-  background: conic-gradient(transparent, #0364ff);
   animation: rotate 1s linear infinite;
 }
 
@@ -624,7 +623,7 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-app-white dark:bg-app-gray-700;
+  @apply bg-app-white dark:bg-app-gray-800;
   width: 50px;
   height: 50px;
   top: 5px;
@@ -632,7 +631,7 @@
 }
 
 #w3a-modal .w3a-spinner__head {
-  @apply bg-app-primary-600 dark:text-app-primary-500;
+  @apply bg-app-primary-600 dark:bg-app-primary-500;
   height: 5px;
   width: 5px;
   top: 0;
