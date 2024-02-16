@@ -71,9 +71,9 @@ a.t-btn:not(.t-btn-text) {
   height: 52px;
   padding: 14px !important;
 }
-#w3a-modal .block {
+/* #w3a-modal .block {
   width: 100%;
-}
+} */
 #w3a-modal .t-btn.t-btn-primary {
   @apply outline-none
     bg-app-primary-600
