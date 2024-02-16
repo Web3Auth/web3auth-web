@@ -578,7 +578,7 @@
 }
 
 #w3a-modal .w3a-modal__loader-content {
-  @apply text-center mb-[50px] relative flex flex-col;
+  @apply text-center relative flex flex-col;
 }
 
 #w3a-modal .w3a-modal__loader-info {
