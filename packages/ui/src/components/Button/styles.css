@@ -153,8 +153,8 @@ a.t-btn:not(.t-btn-text) {
     dark:text-app-primary-500
     dark:hover:text-app-primary-400
     dark:disabled:text-app-gray-600;
-/* }
-#w3a-modal .t-btn .t-icon {
+}
+/* #w3a-modal .t-btn .t-icon {
   color: inherit;
 } */
 #w3a-modal .btn-link {
