@@ -1,5 +1,5 @@
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { LOGIN_PROVIDER, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
@@ -25,7 +25,6 @@ interface ModalProps {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  whiteLabel?: WhiteLabelData;
 }
 
 log.enableAll();
@@ -58,8 +57,7 @@ export default function Modal(props: ModalProps) {
   });
   const [t] = useTranslation(undefined, { i18n });
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal, whiteLabel } =
-    props;
+  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");

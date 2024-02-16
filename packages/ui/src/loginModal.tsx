@@ -190,7 +190,6 @@ class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
-            whiteLabel={this.uiConfig}
           />
         </ThemedContext.Provider>
       );
