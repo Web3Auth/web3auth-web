@@ -43,7 +43,7 @@ a.t-btn:not(.t-btn-text) {
   height: 52px;
   @apply px-6 py-3.5 text-base;
 }
-#w3a-modal .icon {
+/* #w3a-modal .icon {
   @apply rounded-full;
 }
 #w3a-modal .icon-xs {
@@ -70,7 +70,7 @@ a.t-btn:not(.t-btn-text) {
   width: 52px;
   height: 52px;
   padding: 14px !important;
-}
+} */
 /* #w3a-modal .block {
   width: 100%;
 } */
@@ -153,14 +153,13 @@ a.t-btn:not(.t-btn-text) {
     dark:text-app-primary-500
     dark:hover:text-app-primary-400
     dark:disabled:text-app-gray-600;
-}
+/* }
 #w3a-modal .t-btn .t-icon {
   color: inherit;
-}
+} */
 #w3a-modal .btn-link {
   @apply no-underline;
 }
-
 #w3a-modal button.t-btn:hover>.hover-icon {
   display: block;
   transition: display 150ms;
