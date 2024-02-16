@@ -55,4 +55,8 @@ export class WalletServicesPluginError extends Web3AuthError {
   public static differentWeb3authNetwork(extraMessage = ""): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5219, extraMessage);
   }
+
+  public static invalidParams(extraMessage = ""): IWeb3AuthError {
+    return WalletServicesPluginError.fromCode(5220, extraMessage);
+  }
 }

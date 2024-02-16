@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-evm-adapter",
-  "version": "8.0.0-alpha.15",
+  "version": "8.0.0-alpha.18",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseEvmAdapter.cjs.js",
@@ -19,8 +19,8 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^5.4.0",
-    "@web3auth/base": "^8.0.0-alpha.15"
+    "@toruslabs/base-controllers": "^5.5.0",
+    "@web3auth/base": "^8.0.0-alpha.17"
   },
   "files": [
     "dist",

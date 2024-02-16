@@ -45,7 +45,7 @@
     "jsonwebtoken": "^9.0.2",
     "lerna": "^8.1.2",
     "lint-staged": "^15.2.2",
-    "mocha": "^10.2.0",
+    "mocha": "^10.3.0",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
@@ -55,8 +55,8 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^18.0.2",
-    "@rollup/rollup-linux-x64-gnu": "^4.9.6"
+    "@nx/nx-linux-x64-gnu": "^18.0.4",
+    "@rollup/rollup-linux-x64-gnu": "^4.10.0"
   },
   "repository": {
     "type": "git",
