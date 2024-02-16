@@ -1,11 +1,9 @@
 import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
-import i18n from "../localeImport";
+import Footer from "./Footer";
 import Icon from "./Icon";
-import Image from "./Image";
 
 interface LoaderProps {
   message?: string;
@@ -19,8 +17,6 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function Loader(props: LoaderProps) {
   const { message, modalStatus, label, onClose, canEmit = true } = props;
-  const web3authIcon = <Image imageId="web3auth" />;
-  const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
     log.debug("loader re-rendering");
@@ -48,10 +44,8 @@ export default function Loader(props: LoaderProps) {
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
-        <div className="w3a-spinner-power">
-          <div>{t("modal.footer.message")}</div>
-          {web3authIcon}
-        </div>
+
+        <Footer />
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>

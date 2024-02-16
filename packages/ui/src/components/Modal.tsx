@@ -238,7 +238,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer privacyPolicy={whiteLabel?.privacyPolicy} tncLink={whiteLabel?.tncLink} defaultLanguage={whiteLabel.defaultLanguage} />
+          <Footer />
         </div>
       </div>
     )

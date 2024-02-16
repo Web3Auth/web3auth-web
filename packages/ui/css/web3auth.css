@@ -255,7 +255,7 @@
 }
 
 #w3a-modal .w3a-modal__footer {
-  @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
+  @apply items-center justify-center px-8 py-4 mt-auto text-center;
 }
 
 /* Header */

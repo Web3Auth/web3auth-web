@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Click on the QR Code to copy to clipboard",
     "external.walletconnect-subtitle": "Scan the QR code with a WalletConnect-compatible wallet",
     "footer.message": "Self-custodial login by",
-    "footer.message-new": "Self-custodial login by Web3Auth",
+    "footer.message-new": "Self-custody via",
     "footer.policy": "Privacy Policy",
     "footer.terms": "Terms of Use",
     "footer.terms-service": "Terms of Service",
