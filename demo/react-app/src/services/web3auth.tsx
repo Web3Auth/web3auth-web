@@ -129,6 +129,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             appUrl: "https://web3auth.io/",
             theme: {
               primary: "#5f27cd",
+              onPrimary: "white"
             },
             logoLight: "https://web3auth.io/images/web3auth-logo.svg",
             logoDark: "https://web3auth.io/images/web3auth-logo---Dark.svg",
