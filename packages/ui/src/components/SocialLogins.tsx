@@ -86,7 +86,7 @@ export default function SocialLogins(props: SocialLoginProps) {
             return (
               <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <Button
-                  variant={isPrimaryBtn ? "primary" : "secondary"}
+                  variant="secondary"
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
