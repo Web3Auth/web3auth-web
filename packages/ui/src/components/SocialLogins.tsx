@@ -101,6 +101,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     })
                   }
                   className="w-full"
+                  title={name}
                 >
                   {providerIcon}
                   <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
