@@ -25,7 +25,9 @@ export class WalletServicesPlugin implements IPlugin {
 
   private walletInitOptions: WsEmbedParams | null = null;
 
-  constructor(options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Partial<WsEmbedParams> } = {}) {
+  constructor(
+    options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig"> } = {}
+  ) {
     const { wsEmbedOpts, walletInitOptions } = options;
     // we fake these checks here and get them from web3auth instance
     this.wsEmbedInstance = new WsEmbed((wsEmbedOpts || {}) as CtorArgs);
@@ -62,11 +64,14 @@ export class WalletServicesPlugin implements IPlugin {
     if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
     await this.wsEmbedInstance.init({
-      ...(this.walletInitOptions || {}),
+      ...this.walletInitOptions,
       chainConfig: connectedChainConfig as EthereumProviderConfig,
       buildEnv: options?.buildEnv,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
-      whiteLabel: options.whiteLabel,
+      whiteLabel: {
+        ...options.whiteLabel,
+        ...(this.walletInitOptions.whiteLabel || {}),
+      },
     });
     this.isInitialized = true;
   }

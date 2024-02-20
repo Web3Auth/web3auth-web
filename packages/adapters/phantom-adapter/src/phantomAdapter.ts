@@ -162,6 +162,10 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
   private async connectWithProvider(injectedProvider: IPhantomWalletProvider): Promise<IProvider | null> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);

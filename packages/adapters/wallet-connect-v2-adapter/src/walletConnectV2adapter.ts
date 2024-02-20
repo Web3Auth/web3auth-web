@@ -210,6 +210,10 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     await super.disconnect();
   }
 
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
   private cleanupPendingPairings(): void {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const inactivePairings = this.connector.pairing.getAll({ active: false });

@@ -142,6 +142,20 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
+  public async enableMFA(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
+    try {
+      await this.openloginInstance.enableMFA(params);
+    } catch (error: unknown) {
+      log.error("Failed to enable MFA with openlogin provider", error);
+      if (error instanceof Web3AuthError) {
+        throw error;
+      }
+      throw WalletLoginError.connectionError((error as Error).message || "Failed to enable MFA with openlogin");
+    }
+  }
+
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");

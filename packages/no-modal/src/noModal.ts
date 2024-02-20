@@ -216,6 +216,13 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return this.walletAdapters[this.connectedAdapterName].getUserInfo();
   }
 
+  async enableMFA<T>(loginParams?: T): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN)
+      throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this adapter.`);
+    return this.walletAdapters[this.connectedAdapterName].enableMFA(loginParams);
+  }
+
   async authenticateUser(): Promise<UserAuthInfo> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.walletAdapters[this.connectedAdapterName].authenticateUser();
