@@ -205,7 +205,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           return;
         }
         // in-app wallets or cached wallet (being connected or already connected) are initialized first.
-        // if adapter is configured thn only initialize in app or cached adapter.
+        // if adapter is configured then only initialize in app or cached adapter.
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
         this.subscribeToAdapterEvents(adapter);
         if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
