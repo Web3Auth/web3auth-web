@@ -44,10 +44,8 @@
     "social.sms-continue": "モバイルで続行",
     "social.sms-invalid-number": "無効な電話番号",
     "social.sms-placeholder-text": "例:",
-    "social.view-less": "オプションを少なく表示",
-    "social.view-less-new": "表示を減らす",
-    "social.view-more": "その他のオプションを表示",
-    "social.view-more-new": "もっと見る",
+    "social.view-less": "表示が少なくなります",
+    "social.view-more": "もっと見る",
     "post-loading.connected": "アカウントに接続されています",
     "post-loading.something-wrong": "何かがうまくいかなかった！"
   }

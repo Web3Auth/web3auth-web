@@ -44,10 +44,8 @@
     "social.sms-continue": "Mit Mobilgerät fortfahren",
     "social.sms-invalid-number": "Ungültige Telefonnummer",
     "social.sms-placeholder-text": "Z.B.:",
-    "social.view-less": "Weniger Optionen anzeigen",
-    "social.view-less-new": "Weniger anzeigen",
-    "social.view-more": "Weitere Optionen anzeigen",
-    "social.view-more-new": "Mehr anzeigen",
+    "social.view-less": "Weniger anzeigen",
+    "social.view-more": "Mehr anzeigen",
     "post-loading.connected": "Sie sind mit Ihrem Konto verbunden",
     "post-loading.something-wrong": "Etwas ist schief gelaufen!"
   }

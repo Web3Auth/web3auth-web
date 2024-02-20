@@ -44,10 +44,8 @@
     "social.sms-continue": "Continuar con móvil",
     "social.sms-invalid-number": "Número de teléfono inválido",
     "social.sms-placeholder-text": "Por ej.:",
-    "social.view-less": "Ver menos opciones",
-    "social.view-less-new": "Ver menos",
-    "social.view-more": "Ver más opciones",
-    "social.view-more-new": "Ver más",
+    "social.view-less": "Ver menos",
+    "social.view-more": "Ver más",
     "post-loading.connected": "Estás conectado con tu cuenta",
     "post-loading.something-wrong": "¡Algo salió mal!"
   }

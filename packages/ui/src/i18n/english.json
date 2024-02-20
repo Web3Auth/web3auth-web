@@ -44,10 +44,8 @@
     "social.sms-continue": "Continue with Mobile",
     "social.sms-invalid-number": "Invalid phone number",
     "social.sms-placeholder-text": "E.g.:",
-    "social.view-less": "View fewer options",
-    "social.view-less-new": "View fewer",
-    "social.view-more": "View more options",
-    "social.view-more-new": "View more",
+    "social.view-less": "View less",
+    "social.view-more": "View more",
     "post-loading.connected": "You are connected with your account",
     "post-loading.something-wrong": "Something went wrong!"
   }

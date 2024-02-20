@@ -44,10 +44,8 @@
     "social.sms-continue": "Doorgaan met mobiel",
     "social.sms-invalid-number": "Ongeldig telefoonnummer",
     "social.sms-placeholder-text": "Bijv.:",
-    "social.view-less": "Minder opties bekijken",
-    "social.view-less-new": "Minder bekijken",
-    "social.view-more": "Meer opties bekijken",
-    "social.view-more-new": "Meer bekijken",
+    "social.view-less": "Minder bekijken",
+    "social.view-more": "Meer bekijken",
     "post-loading.connected": "U bent verbonden met uw account",
     "post-loading.something-wrong": "Er is iets fout gegaan!"
   }

@@ -44,10 +44,8 @@
     "social.sms-continue": "Telefon ile devam et",
     "social.sms-invalid-number": "Geçersiz telefon numarası",
     "social.sms-placeholder-text": "Örneğin:",
-    "social.view-less": "Daha az seçenek görüntüle",
-    "social.view-less-new": "Daha az görüntüle",
-    "social.view-more": "Daha fazla seçenek görüntüle",
-    "social.view-more-new": "Daha fazla görüntüle",
+    "social.view-less": "Daha az görüntüle",
+    "social.view-more": "Daha fazla görüntüle",
     "post-loading.connected": "Hesabınızla bağlandınız",
     "post-loading.something-wrong": "Bir şeyler ters gitti!"
   }
