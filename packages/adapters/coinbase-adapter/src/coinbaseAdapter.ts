@@ -161,6 +161,10 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
   }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
 }
 
 export { CoinbaseAdapter };

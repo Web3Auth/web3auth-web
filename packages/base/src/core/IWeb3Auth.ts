@@ -25,6 +25,7 @@ export interface IWeb3Auth extends SafeEventEmitter {
   authenticateUser(): Promise<UserAuthInfo>;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
+  enableMFA<T>(params: T): Promise<void>;
 }
 
 export interface Web3AuthNoModalOptions {

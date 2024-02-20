@@ -186,4 +186,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
 }

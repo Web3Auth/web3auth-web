@@ -28,6 +28,7 @@ export interface IWeb3AuthContext {
   signAndSendTokenTransaction: () => Promise<void>;
   randomContractInteraction: () => Promise<void>;
   showWalletConnectScanner: () => Promise<void>;
+  enableMFA: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -50,6 +51,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   signAndSendTokenTransaction: async () => {},
   randomContractInteraction: async () => {},
   showWalletConnectScanner: async () => {},
+  enableMFA: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -115,7 +117,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         }
         setIsLoading(true);
-        const clientId = "BJzfDwF4iBpFNyXran_VrW0sF0gfEacKrXXP1HcKsBw1d5IuCvDQ7obo56d30tCJd6geqJubj77D7x0aUFC5BcU";
+        const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
 
         const web3AuthInstance = new Web3Auth({
           // get your client id from https://dashboard.web3auth.io
@@ -131,10 +133,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               primary: "#5f27cd",
             },
             logoLight: "https://web3auth.io/images/web3auth-logo.svg",
-            logoDark: "https://web3auth.io/images/web3auth-logo---Dark.svg",
+            logoDark: "https://web3auth.io/images/web3auth-logo.svg",
             defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
             mode: "auto", // whether to enable dark mode. defaultValue: auto
-            useLogoLoader: true,
+            // useLogoLoader: true,
             loginGridCol: 3,
             primaryButton: "socialLogin",
           },
@@ -149,7 +151,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             // uxMode: "redirect", // "redirect" | "popup"
             whiteLabel: {
               logoLight: "https://web3auth.io/images/web3auth-logo.svg",
-              logoDark: "https://web3auth.io/images/web3auth-logo---Dark.svg",
+              logoDark: "https://web3auth.io/images/web3auth-logo.svg",
               defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
               mode: "dark", // whether to enable dark, light or auto mode. defaultValue: auto [ system theme]
             },
@@ -173,6 +175,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
                 enable: true,
                 priority: 4,
                 mandatory: false,
+              },
+            },
+            loginConfig: {
+              google: {
+                verifier: "w3a-google-demo",
+                clientId: "519228911939-cri01h55lsjbsia1k7ll6qpalrus75ps.apps.googleusercontent.com",
+                typeOfLogin: "google",
               },
             },
           },
@@ -249,6 +258,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     }
     const user = await web3Auth.getUserInfo();
     uiConsole(user);
+  };
+
+  const enableMFA = async () => {
+    if (!web3Auth) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    await web3Auth.enableMFA();
   };
 
   const addChain = async () => {
@@ -386,6 +404,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getTokenBalance,
     randomContractInteraction,
     showWalletConnectScanner,
+    enableMFA,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

@@ -150,6 +150,10 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
   private async connectWithProvider(injectedProvider: SolflareWallet): Promise<IProvider | null> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);

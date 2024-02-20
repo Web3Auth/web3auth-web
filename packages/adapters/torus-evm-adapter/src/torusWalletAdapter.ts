@@ -210,4 +210,8 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
 }
