@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Panoya kopyalamak için QR koduna tıkla",
     "external.walletconnect-subtitle": "QR kodunu WalletConnect uyumlu bir cüzdanla tarayın",
     "footer.message": "Öz-yönetimli giriş yapan:",
-    "footer.message-new": "Web3Auth tatafından öz-yönetimli giriş",
+    "footer.message-new": "Kendi kendine velayet",
     "footer.policy": "Gizlilik Politikası",
     "footer.terms": "Kullanım Şartları",
     "footer.terms-service": "Hizmet Şartları",
@@ -44,10 +44,8 @@
     "social.sms-continue": "Telefon ile devam et",
     "social.sms-invalid-number": "Geçersiz telefon numarası",
     "social.sms-placeholder-text": "Örneğin:",
-    "social.view-less": "Daha az seçenek görüntüle",
-    "social.view-less-new": "Daha az görüntüle",
-    "social.view-more": "Daha fazla seçenek görüntüle",
-    "social.view-more-new": "Daha fazla görüntüle",
+    "social.view-less": "Daha az görüntüle",
+    "social.view-more": "Daha fazla görüntüle",
     "post-loading.connected": "Hesabınızla bağlandınız",
     "post-loading.something-wrong": "Bir şeyler ters gitti!"
   }

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ThemedContext } from "../context/ThemeContext";
 import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
+import Button from "./Button";
 import Icon from "./Icon";
 
 interface SocialLoginPasswordlessProps {
@@ -13,10 +14,9 @@ interface SocialLoginPasswordlessProps {
   isSmsVisible: boolean;
   adapter: string;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
-  primaryColor?: string;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible, primaryColor } = props;
+  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
   const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
@@ -102,14 +102,9 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
         {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
 
-        <button
-          disabled={fieldValue === ""}
-          className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w-full`}
-          style={{ backgroundColor: isPrimaryBtn ? primaryColor || "" : "" }}
-          type="submit"
-        >
+        <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w-full" type="submit">
           {t("modal.social.passwordless-cta")}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
+import Footer from "./Footer";
 import Icon from "./Icon";
 import Image from "./Image";
 
@@ -20,7 +21,6 @@ const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
-  const web3authIcon = <Image imageId="web3auth" />;
   const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation(undefined, { i18n });
   const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
@@ -71,10 +71,8 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
-        <div className="w3a-spinner-power">
-          <div>{t("modal.footer.message")}</div>
-          {web3authIcon}
-        </div>
+
+        <Footer />
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>

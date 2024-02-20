@@ -1,6 +1,7 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { applyWhiteLabelTheme } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -190,10 +191,14 @@ class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
-            whiteLabel={this.uiConfig}
           />
         </ThemedContext.Provider>
       );
+
+      if (this.uiConfig?.theme) {
+        const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;
+        applyWhiteLabelTheme(rootElement, this.uiConfig.theme);
+      }
     });
   };
 

@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Cliquez sur le code QR pour le copier dans le presse-papiers",
     "external.walletconnect-subtitle": "Scannez le code QR avec un portefeuille compatible WalletConnect",
     "footer.message": "Connexion en autonomie par",
-    "footer.message-new": "Connexion en autonomie par Web3Auth",
+    "footer.message-new": "Auto-cuir via",
     "footer.policy": "Politique de confidentialité",
     "footer.terms": "Conditions d'utilisation",
     "footer.terms-service": "Conditions d'utilisation",
@@ -44,10 +44,8 @@
     "social.sms-continue": "Continuer avec le mobile",
     "social.sms-invalid-number": "Numéro de téléphone invalide",
     "social.sms-placeholder-text": "Par exemple :",
-    "social.view-less": "Voir moins d'options",
-    "social.view-less-new": "Voir moins",
-    "social.view-more": "Voir plus d'options",
-    "social.view-more-new": "Voir plus",
+    "social.view-less": "Voir moins",
+    "social.view-more": "Voir plus",
     "post-loading.connected": "Vous êtes connecté avec votre compte",
     "post-loading.something-wrong": "Quelque chose s'est mal passé!"
   }

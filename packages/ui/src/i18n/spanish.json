@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Haz clic en el código QR para copiarlo al portapapeles",
     "external.walletconnect-subtitle": "Escanear el código QR con una billetera compatible con WalletConnect",
     "footer.message": "Inicio de sesión con autogestión por",
-    "footer.message-new": "Inicio de sesión con autogestión por Web3Auth",
+    "footer.message-new": "Autocustody a través de",
     "footer.policy": "Política de privacidad",
     "footer.terms": "Términos de Uso",
     "footer.terms-service": "Términos de servicio",
@@ -44,10 +44,8 @@
     "social.sms-continue": "Continuar con móvil",
     "social.sms-invalid-number": "Número de teléfono inválido",
     "social.sms-placeholder-text": "Por ej.:",
-    "social.view-less": "Ver menos opciones",
-    "social.view-less-new": "Ver menos",
-    "social.view-more": "Ver más opciones",
-    "social.view-more-new": "Ver más",
+    "social.view-less": "Ver menos",
+    "social.view-more": "Ver más",
     "post-loading.connected": "Estás conectado con tu cuenta",
     "post-loading.something-wrong": "¡Algo salió mal!"
   }

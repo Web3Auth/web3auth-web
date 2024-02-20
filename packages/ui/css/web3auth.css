@@ -233,7 +233,7 @@
 }
 
 #w3a-modal .w3a-modal__inner {
-  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-app-white dark:bg-app-gray-700 shadow-modal border border-app-gray-100 dark:border-app-gray-700;
+  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-app-white dark:bg-app-gray-800 shadow-modal border border-app-gray-100 dark:border-app-gray-800;
   transform: scale(0);
   transition: all 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
@@ -255,7 +255,7 @@
 }
 
 #w3a-modal .w3a-modal__footer {
-  @apply items-center justify-center px-8 py-4 mt-auto text-center bg-app-gray-50 dark:bg-app-gray-600;
+  @apply items-center justify-center px-8 py-4 mt-auto text-center;
 }
 
 /* Header */
@@ -449,7 +449,7 @@
   outline: 1px solid #0f1222;
 }
 
-.hover-icon {
+#w3a-modal .hover-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
@@ -570,7 +570,7 @@
 /* SPINNER */
 /* Loader */
 #w3a-modal .w3a-modal__loader {
-  @apply absolute inset-0 z-10 flex justify-center bg-app-white dark:bg-app-gray-700;
+  @apply absolute inset-0 z-10 flex justify-center bg-app-white dark:bg-app-gray-800;
 }
 
 #w3a-modal .w3a-modal__loader.w3a-modal__loader--hidden {
@@ -578,7 +578,7 @@
 }
 
 #w3a-modal .w3a-modal__loader-content {
-  @apply text-center mb-[50px] relative flex flex-col;
+  @apply text-center relative flex flex-col;
 }
 
 #w3a-modal .w3a-modal__loader-info {
@@ -606,13 +606,12 @@
 }
 
 #w3a-modal .w3a-spinner {
-  @apply bg-app-primary-600 dark:text-app-primary-500;
+  @apply bg-gradient-conic to-app-primary-600 dark:to-app-primary-500;
   display: inline-block;
   position: relative;
   height: 60px;
   width: 60px;
   border-radius: 50%;
-  background: conic-gradient(transparent, #0364ff);
   animation: rotate 1s linear infinite;
 }
 
@@ -624,7 +623,7 @@
 }
 
 #w3a-modal .w3a-spinner__mask {
-  @apply bg-app-white dark:bg-app-gray-700;
+  @apply bg-app-white dark:bg-app-gray-800;
   width: 50px;
   height: 50px;
   top: 5px;
@@ -632,7 +631,7 @@
 }
 
 #w3a-modal .w3a-spinner__head {
-  @apply bg-app-primary-600 dark:text-app-primary-500;
+  @apply bg-app-primary-600 dark:bg-app-primary-500;
   height: 5px;
   width: 5px;
   top: 0;
