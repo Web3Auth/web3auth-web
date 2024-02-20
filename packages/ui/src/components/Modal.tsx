@@ -3,10 +3,9 @@ import { LOGIN_PROVIDER, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
@@ -56,7 +55,6 @@ export default function Modal(props: ModalProps) {
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
-  const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation(undefined, { i18n });
 
   const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal, whiteLabel } =
@@ -177,12 +175,9 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
-  // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
-  const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
-
   return (
     modalState.modalVisibilityDelayed && (
-      <div id="w3a-modal" className={modalClassName}>
+      <div id="w3a-modal" className="w3a-modal">
         <div className={modalTransitionClasses.join(" ")}>
           <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
