@@ -16,7 +16,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { applyWhiteLabelTheme, getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
@@ -66,10 +66,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
     await this.loginModal.initModal();
-    if (this.options.uiConfig?.theme) {
-      const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;
-      applyWhiteLabelTheme(rootElement, this.options.uiConfig.theme);
-    }
     const providedChainConfig = this.options.chainConfig;
     // TODO: get stuff from dashboard here
     // merge default adapters with the custom configured adapters.
