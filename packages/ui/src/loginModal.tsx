@@ -1,7 +1,7 @@
 import "../css/web3auth.css";
 
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { applyWhiteLabelTheme } from "@toruslabs/openlogin-utils";
+import { applyWhiteLabelTheme, LANGUAGES } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -62,7 +62,7 @@ class LoginModal extends SafeEventEmitter {
     if (!uiConfig.mode) this.uiConfig.mode = "auto";
     if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
     if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
-    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = "en";
+    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = LANGUAGES.en;
     if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
@@ -79,10 +79,10 @@ class LoginModal extends SafeEventEmitter {
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
 
-    const useLang = this.uiConfig.defaultLanguage || "en";
+    const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
     // Load new language resource
 
-    if (useLang === "de") {
+    if (useLang === LANGUAGES.de) {
       import("./i18n/german.json")
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -91,7 +91,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "ja") {
+    } else if (useLang === LANGUAGES.ja) {
       import(`./i18n/japanese.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -100,7 +100,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "ko") {
+    } else if (useLang === LANGUAGES.ko) {
       import(`./i18n/korean.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -109,7 +109,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "zh") {
+    } else if (useLang === LANGUAGES.zh) {
       import(`./i18n/mandarin.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -118,7 +118,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "es") {
+    } else if (useLang === LANGUAGES.es) {
       import(`./i18n/spanish.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -127,7 +127,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "fr") {
+    } else if (useLang === LANGUAGES.fr) {
       import(`./i18n/french.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -136,7 +136,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "pt") {
+    } else if (useLang === LANGUAGES.pt) {
       import(`./i18n/portuguese.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -145,7 +145,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "nl") {
+    } else if (useLang === LANGUAGES.nl) {
       import(`./i18n/dutch.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
@@ -154,7 +154,7 @@ class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
-    } else if (useLang === "tr") {
+    } else if (useLang === LANGUAGES.tr) {
       import(`./i18n/turkish.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
