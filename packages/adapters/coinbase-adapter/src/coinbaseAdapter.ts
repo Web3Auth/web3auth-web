@@ -140,12 +140,13 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
           chainId: chainConfig.chainId,
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorer],
+          blockExplorerUrls: [chainConfig.blockExplorerUrl],
           nativeCurrency: {
             name: chainConfig.tickerName,
             symbol: chainConfig.ticker,
             decimals: chainConfig.decimals || 18,
           },
+          iconUrls: [chainConfig.logo],
         },
       ],
     });
@@ -159,6 +160,10 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       params: [{ chainId: params.chainId }],
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
+  }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
   }
 }
 

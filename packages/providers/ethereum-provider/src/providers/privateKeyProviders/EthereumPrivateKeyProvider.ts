@@ -1,6 +1,6 @@
 import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
@@ -10,7 +10,7 @@ import { getProviderHandlers } from "./ethPrivatekeyUtils";
 import { TransactionFormatter } from "./TransactionFormatter";
 
 export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: CustomChainConfig;
 }
 
 export interface EthereumPrivKeyProviderState extends BaseProviderState {
@@ -18,14 +18,13 @@ export interface EthereumPrivKeyProviderState extends BaseProviderState {
 }
 
 export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig, EthereumPrivKeyProviderState, string> {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
+
   constructor({ config, state }: { config: EthereumPrivKeyProviderConfig; state?: EthereumPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
+    super({ config, state });
   }
 
-  public static getProviderInstance = async (params: {
-    privKey: string;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<EthereumPrivateKeyProvider> => {
+  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<EthereumPrivateKeyProvider> => {
     const providerFactory = new EthereumPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
@@ -39,6 +38,8 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   }
 
   public async setupProvider(privKey: string): Promise<void> {
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
@@ -105,7 +106,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
         this.addChain({
           chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
@@ -113,8 +114,9 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
           tickerName: nativeCurrency?.name || "Ether",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
-          blockExplorer: blockExplorerUrls?.[0] || "",
+          blockExplorerUrl: blockExplorerUrls?.[0] || "",
           decimals: nativeCurrency?.decimals || 18,
+          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {

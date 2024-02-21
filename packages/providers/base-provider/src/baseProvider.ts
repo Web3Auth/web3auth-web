@@ -16,7 +16,7 @@ export interface BaseProviderState extends BaseState {
 }
 
 export interface BaseProviderConfig extends BaseConfig {
-  chainConfig: Partial<CustomChainConfig>;
+  chainConfig: CustomChainConfig;
   networks?: Record<string, CustomChainConfig>;
   skipLookupNetwork?: boolean;
 }
@@ -43,7 +43,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     super.initialize();
   }
 
-  get currentChainConfig(): Partial<CustomChainConfig> {
+  get currentChainConfig(): CustomChainConfig {
     return this.config.chainConfig;
   }
 

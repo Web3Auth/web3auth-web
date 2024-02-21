@@ -1,5 +1,5 @@
 import type { JsonRpcError } from "@metamask/rpc-errors";
-import TorusEmbed, { PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
@@ -61,17 +61,22 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     this.subscribeToWeb3AuthNoModalEvents(web3auth);
 
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
+    if (!connectedChainConfig.blockExplorerUrl) throw SolanaWalletPluginError.invalidParams("blockExplorerUrl is required in chainConfig");
+    if (!connectedChainConfig.displayName) throw SolanaWalletPluginError.invalidParams("displayName is required in chainConfig");
+    if (!connectedChainConfig.logo) throw SolanaWalletPluginError.invalidParams("logo is required in chainConfig");
+    if (!connectedChainConfig.ticker) throw SolanaWalletPluginError.invalidParams("ticker is required in chainConfig");
+    if (!connectedChainConfig.tickerName) throw SolanaWalletPluginError.invalidParams("tickerName is required in chainConfig");
 
     await this.torusWalletInstance.init({
       ...(this.walletInitOptions || {}),
       network: {
         ...connectedChainConfig,
-        blockExplorerUrl: connectedChainConfig.blockExplorer,
-        logo: "",
+        blockExplorerUrl: connectedChainConfig.blockExplorerUrl,
+        logo: connectedChainConfig.logo,
         chainId: connectedChainConfig.chainId,
         rpcTarget: connectedChainConfig.rpcTarget,
         displayName: connectedChainConfig.displayName,
-      },
+      } as NetworkInterface,
       showTorusButton: false,
     });
     this.isInitialized = true;
@@ -234,9 +239,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     const { chainConfig } = sessionConfig || {};
     if (chainId !== torusWalletSessionConfig.chainId && chainConfig) {
       await this.torusWalletInstance.setProvider({
-        ...chainConfig,
-        blockExplorerUrl: chainConfig.blockExplorer,
-        logo: "",
+        ticker: chainConfig.ticker,
+        tickerName: chainConfig.tickerName,
+        blockExplorerUrl: chainConfig.blockExplorerUrl,
+        logo: chainConfig.logo,
         chainId: `0x${chainId.toString(16)}`,
         rpcTarget: chainConfig.rpcTarget,
         displayName: chainConfig.displayName,

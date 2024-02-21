@@ -1,6 +1,6 @@
 import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
+import { CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { ITorusWalletProvider } from "../../../interface";
@@ -9,8 +9,10 @@ import { createInjectedProviderProxyMiddleware } from "../injectedProviderProxy"
 import { getTorusHandlers } from "./providerHandlers";
 
 export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, ITorusWalletProvider> {
+  readonly PROVIDER_CHAIN_NAMESPACE = "solana";
+
   constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
+    super({ config, state });
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
@@ -30,7 +32,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
           chainId: chainConfig.chainId,
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorer],
+          blockExplorerUrls: [chainConfig.blockExplorerUrl],
+          iconUrls: [chainConfig.logo],
           nativeCurrency: {
             name: chainConfig.tickerName,
             symbol: chainConfig.ticker,
@@ -43,6 +46,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   public async setupProvider(injectedProvider: ITorusWalletProvider): Promise<void> {
     this.handleInjectedProviderUpdate(injectedProvider);
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     await this.setupEngine(injectedProvider);
   }
 

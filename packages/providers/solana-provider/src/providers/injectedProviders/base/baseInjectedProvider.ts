@@ -1,5 +1,5 @@
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig, WalletLoginError } from "@web3auth/base";
+import { CustomChainConfig, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { createConfigMiddleware } from "../../../rpc/JrpcClient";
@@ -7,7 +7,7 @@ import { createSolanaMiddleware, IProviderHandlers } from "../../../rpc/solanaRp
 
 export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderConfig, BaseProviderState, P> {
   constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.SOLANA } }, state });
+    super({ config, state });
   }
 
   public async switchChain(_: { chainId: string }): Promise<void> {

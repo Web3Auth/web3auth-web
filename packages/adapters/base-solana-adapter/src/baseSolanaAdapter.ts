@@ -1,3 +1,4 @@
+import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -9,9 +10,7 @@ import {
   getChainConfig,
   getSavedToken,
   saveToken,
-  signChallenge,
   UserAuthInfo,
-  verifySignedChallenge,
   WalletLoginError,
 } from "@web3auth/base";
 import bs58 from "bs58";

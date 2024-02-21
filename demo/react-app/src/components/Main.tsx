@@ -20,6 +20,8 @@ const Main = () => {
     getTokenBalance,
     signAndSendTokenTransaction,
     randomContractInteraction,
+    showWalletConnectScanner,
+    enableMFA,
   } = useWeb3Auth();
 
   const loggedInView = (
@@ -45,6 +47,9 @@ const Main = () => {
       <button onClick={switchChain} className={styles.card}>
         Switch Chain
       </button>
+      <button onClick={enableMFA} className={styles.card}>
+        Enable MFA
+      </button>
       {(web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") && (
         <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
@@ -58,6 +63,9 @@ const Main = () => {
       </button>
       <button onClick={randomContractInteraction} className={styles.card}>
         Contract Interaction
+      </button>
+      <button onClick={showWalletConnectScanner} className={styles.card}>
+        Show WalletConnect Scanner
       </button>
       <button onClick={logout} className={styles.card}>
         Log Out

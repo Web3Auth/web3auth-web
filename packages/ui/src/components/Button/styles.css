@@ -1,0 +1,173 @@
+#w3a-modal button.t-btn,
+a.t-btn {
+  @apply flex
+    items-center
+    justify-center
+    ease-linear
+    transition-all
+    duration-150;
+}
+
+#w3a-modal button.t-btn:not(.t-btn-text),
+a.t-btn:not(.t-btn-text) {
+  @apply disabled:bg-app-gray-300
+    disabled:border-0
+    disabled:hover:bg-app-gray-300
+    disabled:hover:border-app-gray-300
+    disabled:hover:text-app-gray-400
+    disabled:active:bg-app-gray-300
+    disabled:active:ring-offset-0
+    disabled:active:outline-0
+    disabled:active:ring-0
+    disabled:text-app-gray-400
+    dark:disabled:bg-app-gray-700
+    dark:disabled:text-app-gray-600;
+}
+#w3a-modal .size-xs {
+  height: 32px;
+  @apply px-3 py-2 text-xs;
+}
+#w3a-modal .size-sm {
+  height: 36px;
+  @apply px-3 py-2 text-sm;
+}
+#w3a-modal .size-md {
+  height: 42px;
+  @apply px-5 py-2.5 text-sm;
+}
+#w3a-modal .size-lg {
+  height: 48px;
+  @apply px-5 py-3 text-base;
+}
+#w3a-modal .size-xl {
+  height: 52px;
+  @apply px-6 py-3.5 text-base;
+}
+/* #w3a-modal .icon {
+  @apply rounded-full;
+}
+#w3a-modal .icon-xs {
+  width: 32px;
+  height: 32px;
+  padding: 4px !important;
+}
+#w3a-modal .icon-sm {
+  width: 36px;
+  height: 36px;
+  padding: 4px !important;
+}
+#w3a-modal .icon-md {
+  width: 42px;
+  height: 42px;
+  padding: 10px !important;
+}
+#w3a-modal .icon-lg {
+  width: 48px;
+  height: 48px;
+  padding: 14px !important;
+}
+#w3a-modal .icon-xl {
+  width: 52px;
+  height: 52px;
+  padding: 14px !important;
+} */
+/* #w3a-modal .block {
+  width: 100%;
+} */
+#w3a-modal .t-btn.t-btn-primary {
+  @apply outline-none
+    bg-app-primary-600
+    text-app-onPrimary
+    hover:bg-app-primary-700
+    active:bg-app-primary-600
+    active:outline
+    active:outline-offset-1
+    active:outline-1
+    active:outline-app-primary-600
+    focus-visible:outline
+    focus-visible:outline-offset-1
+    focus-visible:outline-1
+    focus-visible:outline-app-primary-600
+
+    dark:bg-app-primary-500
+    dark:hover:bg-app-primary-400
+    dark:active:bg-app-primary-500
+    dark:active:outline-app-primary-500
+    dark:focus-visible:outline-app-primary-500;
+}
+#w3a-modal .t-btn.t-btn-secondary {
+  @apply outline-none
+    bg-transparent
+    text-app-gray-500
+    border
+    border-app-gray-500
+    hover:bg-app-gray-200
+    active:bg-transparent
+    active:border-app-primary-600
+    active:ring-1
+    active:ring-app-primary-600
+    focus-visible:border-app-primary-600
+    focus-visible:bg-transparent
+    focus-visible:ring-1
+    focus-visible:ring-app-primary-600
+
+    dark:text-app-white
+    dark:border-app-gray-300
+    dark:hover:bg-app-gray-700
+    dark:active:bg-transparent
+    dark:active:border-app-primary-500
+    dark:active:ring-app-primary-500
+    dark:focus-visible:border-app-primary-500
+    dark:focus-visible:bg-transparent
+    dark:focus-visible:ring-app-primary-500;
+}
+#w3a-modal .t-btn.t-btn-tertiary {
+  @apply bg-app-gray-200
+    text-app-gray-800
+    hover:bg-app-gray-300
+    active:bg-app-gray-200
+    active:ring-2
+    active:ring-app-primary-600
+    focus-visible:ring-2
+    focus-visible:ring-app-primary-600
+
+    dark:bg-app-gray-500
+    dark:text-app-white
+    dark:hover:bg-app-gray-400
+    dark:active:bg-app-gray-500
+    dark:active:ring-app-primary-500
+    dark:focus-visible:ring-app-primary-500;
+}
+#w3a-modal .t-btn.t-btn-text {
+  @apply text-app-primary-600
+    hover:text-app-primary-800
+    hover:underline
+    active:text-app-primary-600
+    active:ring-2
+    active:ring-app-primary-600
+    focus-visible:ring-2
+    focus-visible:ring-app-primary-600
+    disabled:text-app-gray-400
+    disabled:no-underline
+
+    dark:text-app-primary-500
+    dark:hover:text-app-primary-400
+    dark:disabled:text-app-gray-600;
+}
+/* #w3a-modal .t-btn .t-icon {
+  color: inherit;
+} */
+#w3a-modal .btn-link {
+  @apply no-underline;
+}
+#w3a-modal button.t-btn:hover>.hover-icon {
+  display: block;
+  transition: display 150ms;
+  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
+}
+
+#w3a-modal button.t-btn:hover>.image-icon {
+  display: none;
+  transition: display 150ms;
+  transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
+}

@@ -1,15 +1,15 @@
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { LOGIN_PROVIDER, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { ADAPTER_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../context/ThemeContext";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
+import Button from "./Button";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -25,7 +25,6 @@ interface ModalProps {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  whiteLabel?: WhiteLabelData;
 }
 
 log.enableAll();
@@ -56,11 +55,9 @@ export default function Modal(props: ModalProps) {
     showExternalWalletsOnly: false,
     wcAdapters: [],
   });
-  const { isDark } = useContext(ThemedContext);
   const [t] = useTranslation(undefined, { i18n });
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal, whiteLabel } =
-    props;
+  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -132,16 +129,15 @@ export default function Modal(props: ModalProps) {
 
   const isEmailPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
-  const primaryColor = whiteLabel?.theme?.primary || "";
 
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         <div className="w3a-group__title">{t("modal.external.title")}</div>
-        <button
+        <Button
+          variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
-          className={`w3a-button ${isExternalPrimary ? "w3a-button--primary" : ""} w-full w3ajs-external-toggle__button`}
-          style={{ backgroundColor: isExternalPrimary ? primaryColor : "" }}
+          className="w-full w3ajs-external-toggle__button"
           onClick={() => {
             handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
@@ -153,7 +149,7 @@ export default function Modal(props: ModalProps) {
           }}
         >
           {t("modal.external.connect")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -177,12 +173,9 @@ export default function Modal(props: ModalProps) {
     return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
-  // const modalClassName = `w3a-modal ${isDark ? "" : " w3a-modal--light"}`;
-  const modalClassName = `w3a-modal ${isDark ? "" : ""}`;
-
   return (
     modalState.modalVisibilityDelayed && (
-      <div id="w3a-modal" className={modalClassName}>
+      <div id="w3a-modal" className="w3a-modal">
         <div className={modalTransitionClasses.join(" ")}>
           <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
@@ -219,7 +212,6 @@ export default function Modal(props: ModalProps) {
                       adapter={modalState.socialLoginsConfig?.adapter}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                       isPrimaryBtn={isEmailPrimary}
-                      primaryColor={primaryColor}
                     />
                   )}
 
@@ -244,7 +236,7 @@ export default function Modal(props: ModalProps) {
             </div>
           )}
 
-          <Footer privacyPolicy={whiteLabel?.privacyPolicy} tncLink={whiteLabel?.tncLink} defaultLanguage={whiteLabel.defaultLanguage} />
+          <Footer />
         </div>
       </div>
     )

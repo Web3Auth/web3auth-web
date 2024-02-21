@@ -7,6 +7,7 @@ import { capitalizeFirstLetter } from "../config";
 import { ThemedContext } from "../context/ThemeContext";
 import { SocialLoginsConfig } from "../interfaces";
 import i18n from "../localeImport";
+import Button from "./Button";
 import Image from "./Image";
 
 // const hasLightIcons = ["apple", "github"];
@@ -14,6 +15,18 @@ import Image from "./Image";
 interface SocialLoginProps {
   socialLoginsConfig: SocialLoginsConfig;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+}
+
+function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
+  if (isPrimaryBtn) {
+    return <Image width="20" imageId={`login-${method}-active`} hoverImageId={`login-${method}-active`} isButton />;
+  }
+
+  const imageId =
+    method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+  const hoverImage =
+    method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
+  return <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
 }
 
 export default function SocialLogins(props: SocialLoginProps) {
@@ -67,16 +80,8 @@ export default function SocialLogins(props: SocialLoginProps) {
 
           const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
-          const primaryColor = socialLoginsConfig?.uiConfig?.theme?.primary || "";
 
-          const imageId =
-            method === LOGIN_PROVIDER.TWITTER
-              ? `login-twitter-x${isDark || isPrimaryBtn ? "-light" : "-dark"}`
-              : `login-${method}${isDark || isPrimaryBtn ? "-light" : "-dark"}`;
-          const hoverId = `login-${method}-active`;
-          const hoverImage =
-            method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : hoverId;
-          const providerIcon = <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
+          const providerIcon = getProviderIcon(method, isDark, isPrimaryBtn);
 
           if (socialLoginsConfig.loginMethods[method].showOnModal === false || restrictedLoginMethods.includes(method)) {
             return null;
@@ -87,39 +92,38 @@ export default function SocialLogins(props: SocialLoginProps) {
           if (isMainOption || order === 1) {
             return (
               <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() =>
                     handleSocialLoginClick({
                       adapter: socialLoginsConfig.adapter,
                       loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
-                  className={`w3a-button ${isPrimaryBtn ? "w3a-button--primary" : ""} w3a-button--login h-12 w-full`}
-                  style={{ backgroundColor: isPrimaryBtn ? primaryColor : "" }}
+                  className="w-full"
                   title={name}
                 >
                   {providerIcon}
                   <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
-                </button>
+                </Button>
               </li>
             );
           }
           return (
             <li className={loginMethodSpan} key={method} style={{ order: order + loginMethodsCount }}>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() =>
                   handleSocialLoginClick({
                     adapter: socialLoginsConfig.adapter,
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
-                className="w-full w3a-button w3a-button--login"
+                className="w-full"
                 title={name}
               >
                 {providerIcon}
-              </button>
+              </Button>
             </li>
           );
         })}

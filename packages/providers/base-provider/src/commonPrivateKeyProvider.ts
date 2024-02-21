@@ -8,12 +8,12 @@ import {
   JRPCResponse,
   providerFromEngine,
 } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
 export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: CustomChainConfig;
 }
 
 export interface CommonPrivKeyProviderState extends BaseProviderState {
@@ -25,7 +25,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
 
   constructor({ config, state }: { config: CommonPrivKeyProviderConfig; state?: CommonPrivKeyProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.OTHER } }, state });
+    super({ config, state });
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -36,10 +36,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: {
-    privKey: string;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
-  }): Promise<CommonPrivateKeyProvider> => {
+  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<CommonPrivateKeyProvider> => {
     const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;

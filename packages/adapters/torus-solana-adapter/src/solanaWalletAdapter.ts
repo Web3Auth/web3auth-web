@@ -72,8 +72,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
-    const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-    const network: NetworkInterface = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+    const { chainId, blockExplorerUrl, displayName, rpcTarget, ticker, tickerName, logo } = this.chainConfig as CustomChainConfig;
+    const network: NetworkInterface = { chainId, rpcTarget, blockExplorerUrl, displayName, tickerName, ticker, logo };
 
     this.torusInstance = new Torus(this.torusWalletOptions);
     log.debug("initializing torus solana adapter init");
@@ -122,8 +122,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
         // some issue in solana wallet, always connecting to mainnet on init.
         // fallback to change network if not connected to correct one on login.
         if (error instanceof Web3AuthError && error.code === 5010) {
-          const { chainId, blockExplorer, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
-          const network = { chainId, rpcTarget, blockExplorerUrl: blockExplorer, displayName, tickerName, ticker, logo: "" };
+          const { chainId, blockExplorerUrl, logo, displayName, rpcTarget, ticker, tickerName } = this.chainConfig as CustomChainConfig;
+          const network = { chainId, rpcTarget, blockExplorerUrl, displayName, tickerName, ticker, logo };
           await this.torusInstance.setProvider(network);
         } else {
           throw error;
@@ -179,11 +179,15 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       rpcTarget: chainConfig.rpcTarget,
       chainId: chainConfig.chainId,
       displayName: chainConfig.displayName,
-      blockExplorerUrl: chainConfig.blockExplorer,
+      blockExplorerUrl: chainConfig.blockExplorerUrl,
       ticker: chainConfig.ticker,
       tickerName: chainConfig.tickerName,
-      logo: "https://images.web3auth.io/login-torus-solana.svg",
+      logo: chainConfig.logo || "https://images.web3auth.io/login-torus-solana.svg",
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+  }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
   }
 }

@@ -37,6 +37,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { WalletServicesConnectorPlugin } from "@web3auth/wallet-services-connector-plugin";
 import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
@@ -138,8 +139,11 @@ export default defineComponent({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
             clientId: config.clientId[this.openloginNetwork],
+            buildEnv: "testing",
           },
         });
+        const defaultadapters = getDefaultAdapters("evm");
+        Web3Auth.configureAdapter(...defaultadapters);
 
         // by default, web3auth modal uses wallet connect v1,
         // if you want to use wallet connect v2, configure wallet-connect-v2-adapter
@@ -147,7 +151,7 @@ export default defineComponent({
         // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
         const defaultWcSettings = await getWalletConnectV2Settings(
           ethChainConfig.chainNamespace,
-          [parseInt(ethChainConfig.chainId, 16), parseInt("0x89", 16), 5],
+          [ethChainConfig.chainId, "0x89", "0x5"],
           "04309ed1007e77d1f119b85205bb779d",
         );
         console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));
@@ -175,6 +179,27 @@ export default defineComponent({
           });
           await this.web3auth.addPlugin(torusPlugin);
         }
+
+        if (this.plugins["walletServices"]) {
+          const walletServicesPlugin = new WalletServicesConnectorPlugin({
+            wsEmbedOpts: {
+              web3AuthClientId: config.clientId[this.openloginNetwork],
+              web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
+            },
+            walletInitOptions: {
+              whiteLabel: {
+                logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+                logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+                showWidgetButton: true,
+              },
+              enableLogging: true,
+              buildEnv: "development",
+            },
+          });
+
+          await this.web3auth.addPlugin(walletServicesPlugin);
+        }
+
         this.subscribeAuthEvents(this.web3auth);
 
         await this.web3auth.initModal({

@@ -16,6 +16,7 @@ export interface AddEthereumChainParameter {
   };
   rpcUrls: string[];
   blockExplorerUrls?: string[];
+  iconUrls?: string[];
 }
 
 export interface IChainSwitchHandlers {

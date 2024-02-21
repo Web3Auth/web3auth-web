@@ -2,7 +2,7 @@ import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletLoginError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
 import { createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
@@ -11,7 +11,7 @@ import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { getAccounts, getProviderHandlers } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
-  chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+  chainConfig: CustomChainConfig;
 }
 
 export interface WalletConnectV2ProviderState extends BaseProviderState {
@@ -19,11 +19,13 @@ export interface WalletConnectV2ProviderState extends BaseProviderState {
 }
 
 export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, WalletConnectV2ProviderState, ISignClient> {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
+
   private connector: ISignClient | null = null;
 
   constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
     super({
-      config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 }, skipLookupNetwork: !!config.skipLookupNetwork },
+      config: { chainConfig: config.chainConfig, skipLookupNetwork: !!config.skipLookupNetwork },
       state: { ...(state || {}), chainId: "loading", accounts: [] },
     });
     this.connector = connector || null;
@@ -31,7 +33,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public static getProviderInstance = async (params: {
     connector: ISignClient;
-    chainConfig: Omit<CustomChainConfig, "chainNamespace">;
+    chainConfig: CustomChainConfig;
     skipLookupNetwork: boolean;
   }): Promise<WalletConnectV2Provider> => {
     const providerFactory = new WalletConnectV2Provider({ config: { chainConfig: params.chainConfig, skipLookupNetwork: params.skipLookupNetwork } });
@@ -47,6 +49,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   public async setupProvider(connector: ISignClient): Promise<void> {
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     this.onConnectorStateUpdate(connector);
     await this.setupEngine(connector);
   }
@@ -96,7 +100,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
         this.addChain({
           chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
@@ -104,8 +108,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
           tickerName: nativeCurrency?.name || "Ether",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
-          blockExplorer: blockExplorerUrls?.[0] || "",
+          blockExplorerUrl: blockExplorerUrls?.[0] || "",
           decimals: nativeCurrency?.decimals || 18,
+          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {
@@ -173,13 +178,13 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       }
 
       if (event.name === "chainChanged") {
-        const { chainId: connectedChainId, rpcUrl } = data;
+        const { chainId: connectedChainId, rpcUrl } = data as { chainId: number; rpcUrl: string };
         const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
 
         if (!this.checkIfChainIdAllowed(connectedHexChainId)) return;
         // Check if chainId changed and trigger event
         if (connectedHexChainId && this.state.chainId !== connectedHexChainId) {
-          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId) || {};
+          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId);
           // Handle rpcUrl update
           this.configure({
             chainConfig: { ...maybeConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl, chainNamespace: CHAIN_NAMESPACES.EIP155 },

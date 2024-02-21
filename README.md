@@ -152,3 +152,8 @@ Further checkout the [demo folder](https://github.com/Web3Auth/Web3Auth/tree/mas
 - Have a look at our [Community Portal](https://community.web3auth.io/) to see if anyone has any questions or issues you might be having. Feel free to create new topics and we'll help you out as soon as possible.
 - Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions.
 - For Priority Support, please have a look at our [Pricing Page](https://web3auth.io/pricing.html) for the plan that suits your needs.
+
+TODO:
+
+- add default adapter modules
+- whitelabel only at one place

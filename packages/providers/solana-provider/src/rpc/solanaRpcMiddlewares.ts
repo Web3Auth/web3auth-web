@@ -92,6 +92,7 @@ export interface AddSolanaChainParameter {
   };
   rpcUrls: string[];
   blockExplorerUrls?: string[];
+  iconUrls?: string[];
 }
 
 export interface IChainSwitchHandlers {

@@ -130,6 +130,10 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     this.addChainConfig(chainConfig);
   }
 
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.slopeProxyProvider?.switchChain(params);

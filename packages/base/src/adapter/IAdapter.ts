@@ -11,7 +11,7 @@ export type UserInfo = OpenloginUserInfo;
 
 export type WEB3AUTH_NETWORK_TYPE = OPENLOGIN_NETWORK_TYPE;
 export const WEB3AUTH_NETWORK = OPENLOGIN_NETWORK;
-export { OPENLOGIN_NETWORK, type OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
+export { OPENLOGIN_NETWORK, type OPENLOGIN_NETWORK_TYPE, UX_MODE, type UX_MODE_TYPE } from "@toruslabs/openlogin-utils";
 
 export const ADAPTER_CATEGORY = {
   EXTERNAL: "external",
@@ -52,7 +52,7 @@ export type UserAuthInfo = { idToken: string };
 export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
-  chainConfig?: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace">;
+  chainConfig?: CustomChainConfig;
   web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
   useCoreKitKey?: boolean;
 }
@@ -67,7 +67,7 @@ export interface IProvider extends SafeEventEmitter {
 
 export interface IBaseProvider<T> extends IProvider {
   provider: SafeEventEmitterProvider | null;
-  currentChainConfig: Partial<CustomChainConfig>;
+  currentChainConfig: CustomChainConfig;
   setupProvider(provider: T): Promise<void>;
   addChain(chainConfig: CustomChainConfig): void;
   switchChain(params: { chainId: string }): Promise<void>;
@@ -93,6 +93,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
+  enableMFA(params?: T): Promise<void>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
   switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
@@ -236,6 +237,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract connect(params?: T): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
+  abstract enableMFA(params?: T): Promise<void>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
   abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
@@ -319,15 +321,11 @@ export interface INetworkSwitchProvider {
 }
 export interface INetworkSwitch {
   addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
-  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: Partial<CustomChainConfig>; appOrigin: string }): Promise<boolean>;
+  switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 }
 
 export abstract class BaseNetworkSwitch implements INetworkSwitch {
-  abstract switchNetwork(params: {
-    currentChainConfig: CustomChainConfig;
-    newChainConfig: Partial<CustomChainConfig>;
-    appOrigin: string;
-  }): Promise<boolean>;
+  abstract switchNetwork(params: { currentChainConfig: CustomChainConfig; newChainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 
   abstract addNetwork(params: { chainConfig: CustomChainConfig; appOrigin: string }): Promise<boolean>;
 }

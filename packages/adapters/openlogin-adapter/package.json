@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "7.3.2",
+  "version": "8.0.0-alpha.19",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/openlogin-adapter",
@@ -32,17 +32,16 @@
     "src"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@solana/web3.js": "^1.x"
+    "@babel/runtime": "^7.x"
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9"
   },
   "dependencies": {
-    "@toruslabs/openlogin": "^6.2.11",
-    "@toruslabs/openlogin-utils": "^6.2.11",
-    "@web3auth/base": "^7.3.2",
-    "@web3auth/base-provider": "^7.3.2",
+    "@toruslabs/openlogin": "^7.0.4",
+    "@toruslabs/openlogin-utils": "^7.0.4",
+    "@web3auth/base": "^8.0.0-alpha.19",
+    "@web3auth/base-provider": "^8.0.0-alpha.19",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {

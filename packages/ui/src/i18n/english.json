@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Click on the QR Code to copy to clipboard",
     "external.walletconnect-subtitle": "Scan the QR code with a WalletConnect-compatible wallet",
     "footer.message": "Self-custodial login by",
-    "footer.message-new": "Self-custodial login by Web3Auth",
+    "footer.message-new": "Self-custody via",
     "footer.policy": "Privacy Policy",
     "footer.terms": "Terms of Use",
     "footer.terms-service": "Terms of Service",
@@ -44,10 +44,8 @@
     "social.sms-continue": "Continue with Mobile",
     "social.sms-invalid-number": "Invalid phone number",
     "social.sms-placeholder-text": "E.g.:",
-    "social.view-less": "View fewer options",
-    "social.view-less-new": "View fewer",
-    "social.view-more": "View more options",
-    "social.view-more-new": "View more",
+    "social.view-less": "View less",
+    "social.view-more": "View more",
     "post-loading.connected": "You are connected with your account",
     "post-loading.something-wrong": "Something went wrong!"
   }

@@ -41,7 +41,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  readonly adapterOptions: WalletConnectV2AdapterOptions;
+  adapterOptions: WalletConnectV2AdapterOptions = {};
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -59,6 +59,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   constructor(options: WalletConnectV2AdapterOptions = {}) {
     super(options);
     this.adapterOptions = { ...options };
+    this.setAdapterSettings(options);
   }
 
   get connected(): boolean {
@@ -86,7 +87,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     const wc2Settings = await getWalletConnectV2Settings(
       this.chainConfig?.chainNamespace as ChainNamespaceType,
-      [parseInt(this.chainConfig?.chainId as string, 16)],
+      [this.chainConfig?.chainId as string],
       projectId
     );
     if (!this.adapterOptions.loginSettings) {
@@ -150,6 +151,24 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
   }
 
+  // should be called only before initialization.
+  setAdapterSettings(adapterSettings: Partial<WalletConnectV2AdapterOptions>): void {
+    super.setAdapterSettings(adapterSettings);
+    const { qrcodeModal, walletConnectInitOptions } = adapterSettings?.adapterSettings || {};
+    if (!this.adapterOptions) {
+      this.adapterOptions = { adapterSettings: {}, loginSettings: {} };
+    }
+    if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
+    if (walletConnectInitOptions)
+      this.adapterOptions.adapterSettings.walletConnectInitOptions = {
+        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions || {}),
+        ...walletConnectInitOptions,
+      };
+
+    const { loginSettings } = adapterSettings;
+    if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
+  }
+
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(chainConfig, init);
     if (!isChainIdSupported(this.currentChainNamespace, parseInt(chainConfig.chainId, 16), this.adapterOptions.loginSettings)) {
@@ -189,6 +208,10 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
     this.activeSession = null;
     await super.disconnect();
+  }
+
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
   }
 
   private cleanupPendingPairings(): void {

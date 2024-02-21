@@ -12,7 +12,7 @@
     "external.walletconnect-copy": "Clique no código QR para copiar para a área de transferência",
     "external.walletconnect-subtitle": "Digitalize o código QR com uma carteira compatível com WalletConnect",
     "footer.message": "Login de autocustódia por",
-    "footer.message-new": "Login de autocustódia por Web3Auth",
+    "footer.message-new": "Autoconfiança via",
     "footer.policy": "Política de Privacidade",
     "footer.terms": "Termos de Uso",
     "footer.terms-service": "Termos de Serviço",
@@ -44,10 +44,8 @@
     "social.sms-continue": "Continuar com o celular",
     "social.sms-invalid-number": "Número de telefone inválido",
     "social.sms-placeholder-text": "Por exemplo:",
-    "social.view-less": "Ver menos opções",
-    "social.view-less-new": "Ver menos",
-    "social.view-more": "Ver mais opções",
-    "social.view-more-new": "Ver mais",
+    "social.view-less": "Ver menos",
+    "social.view-more": "Ver mais",
     "post-loading.connected": "Você está conectado com sua conta",
     "post-loading.something-wrong": "Algo deu errado!"
   }
