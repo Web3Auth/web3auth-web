@@ -7,6 +7,7 @@ import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import { PLUGIN_EVENTS } from "@web3auth/base-plugin";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -107,6 +108,26 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       });
     };
 
+    const subscribePluginEvents = (plugin: WalletServicesPlugin) => {
+      // Can subscribe to all PLUGIN_EVENTS and LOGIN_MODAL_EVENTS
+      plugin.on(PLUGIN_EVENTS.CONNECTED, (data: unknown) => {
+        console.log("Yeah!, you are successfully logged in to plugin");
+      });
+
+      plugin.on(PLUGIN_EVENTS.CONNECTING, () => {
+        console.log("connecting plugin");
+      });
+
+      plugin.on(PLUGIN_EVENTS.DISCONNECTED, () => {
+        console.log("plugin disconnected");
+        setUser(null);
+      });
+
+      plugin.on(PLUGIN_EVENTS.ERRORED, (error) => {
+        console.error("some error on plugin login", error);
+      });
+    };
+
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
@@ -195,6 +216,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             wsEmbedOpts: {},
             walletInitOptions: { whiteLabel: { showWidgetButton: true } },
           });
+          subscribePluginEvents(walletServicesPlugin);
           setWalletServicesPlugin(walletServicesPlugin);
           web3AuthInstance.addPlugin(walletServicesPlugin);
         }

@@ -35,6 +35,7 @@
     "@web3auth/openlogin-adapter": "^8.0.0"
   },
   "dependencies": {
+    "@toruslabs/openlogin-jrpc": "^7.0.0",
     "@web3auth/base": "^8.0.0",
     "@web3auth/base-plugin": "^8.0.0",
     "@web3auth/no-modal": "^8.0.0",

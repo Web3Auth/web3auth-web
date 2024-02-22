@@ -1,7 +1,8 @@
 import type { JsonRpcError } from "@metamask/rpc-errors";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES, WALLET_PLUGINS } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import log from "loglevel";
 
@@ -12,7 +13,7 @@ export type ProviderInfo = {
   userInfo?: Omit<UserInfo, "isNewUser">;
 };
 
-export class SolanaWalletConnectorPlugin implements IPlugin {
+export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPlugin {
   name = "SOLANA_WALLET_CONNECTOR_PLUGIN";
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
@@ -32,6 +33,7 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
   private walletInitOptions: TorusParams | null = null;
 
   constructor(options: { torusWalletOpts?: TorusCtorArgs; walletInitOptions: Partial<TorusParams> }) {
+    super();
     const { torusWalletOpts = {}, walletInitOptions } = options;
     // const whiteLabel = walletInitOptions?.whiteLabel;
 
@@ -80,6 +82,7 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       showTorusButton: false,
     });
     this.isInitialized = true;
+    this.emit(PLUGIN_EVENTS.READY, WALLET_PLUGINS.SOLANA);
   }
 
   async initWithProvider(provider: SafeEventEmitterProvider, userInfo: UserInfo): Promise<void> {
@@ -92,12 +95,14 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     this.userInfo = userInfo;
     await this.torusWalletInstance.init(this.walletInitOptions || {});
     this.isInitialized = true;
+    this.emit(PLUGIN_EVENTS.READY);
   }
 
   async connect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
     if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
     if (!this.isInitialized) throw SolanaWalletPluginError.notInitialized();
+    this.emit(PLUGIN_EVENTS.CONNECTING);
     // Not connected yet to openlogin
     if (!this.provider) {
       if (this.web3auth?.provider) {
@@ -132,8 +137,10 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
       });
       this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
-    } catch (error) {
+      this.emit(PLUGIN_EVENTS.CONNECTED);
+    } catch (error: unknown) {
       log.error(error);
+      this.emit(PLUGIN_EVENTS.ERRORED, { error: (error as Error).message || "Something went wrong" });
     }
   }
 
@@ -147,6 +154,7 @@ export class SolanaWalletConnectorPlugin implements IPlugin {
     if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
     if (this.torusWalletInstance.isLoggedIn) {
       await this.torusWalletInstance.logout();
+      this.emit(PLUGIN_EVENTS.DISCONNECTED);
     } else {
       throw new Error("Torus Wallet plugin is not connected");
     }
