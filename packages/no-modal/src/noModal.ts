@@ -180,6 +180,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
+      return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
     if (this.commonJRPCProvider) {
       return this.commonJRPCProvider.addChain(chainConfig);
     }
@@ -187,6 +189,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
+      return this.walletAdapters[this.connectedAdapterName].switchChain(params);
     if (this.commonJRPCProvider) {
       return this.commonJRPCProvider.switchChain(params);
     }
