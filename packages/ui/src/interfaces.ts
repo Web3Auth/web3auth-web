@@ -33,8 +33,9 @@ export interface UIConfig extends WhiteLabelData {
   loginGridCol?: 2 | 3;
 
   /**
-   * decides which button will be displayed as primary button in modal
-   * only one button will be primary and other buttons in modal will be secondary
+   * Decides which button will be the focus of the modal
+   * For `socialLogin` the social icon will be colored
+   * For other options like `emailLogin` and `externalLogin` the respective buttons will be coverted into a primary button
    *
    * @defaultValue `socialLogin`
    */
