@@ -98,7 +98,7 @@ a.t-btn:not(.t-btn-text) {
 #w3a-modal .t-btn.t-btn-secondary {
   @apply outline-none
     bg-transparent
-    text-app-gray-500
+    text-app-gray-600
     border
     border-app-gray-500
     hover:bg-app-gray-200
