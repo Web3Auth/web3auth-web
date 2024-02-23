@@ -120,7 +120,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
       plugin.on(PLUGIN_EVENTS.DISCONNECTED, () => {
         console.log("plugin disconnected");
-        setUser(null);
       });
 
       plugin.on(PLUGIN_EVENTS.ERRORED, (error) => {
