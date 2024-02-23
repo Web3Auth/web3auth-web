@@ -1,6 +1,7 @@
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
@@ -8,7 +9,7 @@ import log from "loglevel";
 
 import { WalletServicesPluginError } from "./errors";
 
-export class WalletServicesPlugin implements IPlugin {
+export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = "WALLET_SERVICES_PLUGIN";
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
@@ -28,6 +29,7 @@ export class WalletServicesPlugin implements IPlugin {
   constructor(
     options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig"> } = {}
   ) {
+    super();
     const { wsEmbedOpts, walletInitOptions } = options;
     // we fake these checks here and get them from web3auth instance
     this.wsEmbedInstance = new WsEmbed((wsEmbedOpts || {}) as CtorArgs);
@@ -74,6 +76,7 @@ export class WalletServicesPlugin implements IPlugin {
       },
     });
     this.isInitialized = true;
+    this.emit(PLUGIN_EVENTS.READY);
   }
 
   initWithProvider(): Promise<void> {
@@ -83,8 +86,11 @@ export class WalletServicesPlugin implements IPlugin {
   async connect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
     if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
-    const { connectedAdapterName } = this.web3auth;
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
+    this.emit(PLUGIN_EVENTS.CONNECTING);
+
+    const { connectedAdapterName } = this.web3auth;
+
     // Not connected yet to openlogin
     let sessionId: string | null = null;
     let sessionNamespace: string = "";
@@ -110,8 +116,10 @@ export class WalletServicesPlugin implements IPlugin {
       if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
-    } catch (error) {
+      this.emit(PLUGIN_EVENTS.CONNECTED);
+    } catch (error: unknown) {
       log.error(error);
+      this.emit(PLUGIN_EVENTS.ERRORED, { error: (error as Error).message || "Something went wrong" });
     }
   }
 
@@ -135,6 +143,7 @@ export class WalletServicesPlugin implements IPlugin {
     if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
     if (this.wsEmbedInstance.isLoggedIn) {
       await this.wsEmbedInstance.logout();
+      this.emit(PLUGIN_EVENTS.DISCONNECTED);
     } else {
       throw new Error("Wallet Services plugin is not connected");
     }
