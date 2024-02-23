@@ -131,7 +131,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             appUrl: "https://web3auth.io/",
             theme: {
               primary: "#5f27cd",
-              onPrimary: "white"
+              onPrimary: "white",
             },
             logoLight: "https://web3auth.io/images/web3auth-logo.svg",
             logoDark: "https://web3auth.io/images/web3auth-logo.svg",
@@ -193,7 +193,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         if (currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
-            walletInitOptions: { whiteLabel: { showWidgetButton: true } },
+            walletInitOptions: {
+              whiteLabel: { showWidgetButton: true },
+            },
           });
           setWalletServicesPlugin(walletServicesPlugin);
           web3AuthInstance.addPlugin(walletServicesPlugin);
@@ -289,11 +291,12 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     uiConsole("New Chain Added");
   };
   const switchChain = async () => {
+    const chainId = "0xaa36a7";
     if (!provider) {
       uiConsole("provider not initialized yet");
       return;
     }
-    await web3Auth?.switchChain({ chainId: "0xaa36a7" });
+    await web3Auth?.switchChain({ chainId });
     uiConsole("Chain Switched");
   };
 

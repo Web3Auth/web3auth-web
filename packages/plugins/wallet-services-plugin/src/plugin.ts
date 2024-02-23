@@ -234,28 +234,32 @@ export class WalletServicesPlugin implements IPlugin {
     if (!chainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
     if (chainId !== walletServicesSessionConfig.chainId && chainConfig) {
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: chainConfig.chainId,
-            chainName: chainConfig.displayName,
-            rpcUrls: [chainConfig.rpcTarget],
-            blockExplorerUrls: [chainConfig.blockExplorerUrl],
-            nativeCurrency: {
-              name: chainConfig.tickerName,
-              symbol: chainConfig.ticker,
-              decimals: chainConfig.decimals || 18,
+      try {
+        await this.wsEmbedInstance.provider?.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: chainConfig.chainId,
+              chainName: chainConfig.displayName,
+              rpcUrls: [chainConfig.rpcTarget],
+              blockExplorerUrls: [chainConfig.blockExplorerUrl],
+              nativeCurrency: {
+                name: chainConfig.tickerName,
+                symbol: chainConfig.ticker,
+                decimals: chainConfig.decimals || 18,
+              },
+              iconUrls: [chainConfig.logo],
             },
-            iconUrls: [chainConfig.logo],
-          },
-        ],
-      });
-
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
+          ],
+        });
+      } catch (error) {
+        log.error(error);
+      } finally {
+        await this.wsEmbedInstance.provider?.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: chainConfig.chainId }],
+        });
+      }
     }
   }
 }
