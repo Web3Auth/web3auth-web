@@ -2,7 +2,7 @@ import type { JsonRpcError } from "@metamask/rpc-errors";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES, WALLET_PLUGINS } from "@web3auth/base-plugin";
+import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import log from "loglevel";
 
@@ -82,7 +82,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
       showTorusButton: false,
     });
     this.isInitialized = true;
-    this.emit(PLUGIN_EVENTS.READY, WALLET_PLUGINS.SOLANA);
+    this.emit(PLUGIN_EVENTS.READY);
   }
 
   async initWithProvider(provider: SafeEventEmitterProvider, userInfo: UserInfo): Promise<void> {
