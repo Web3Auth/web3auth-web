@@ -1,5 +1,5 @@
 import { get, post } from "@toruslabs/http-helpers";
-import { LANGUAGE_TYPE } from "@toruslabs/openlogin-utils";
+import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@toruslabs/openlogin-utils";
 import { log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
@@ -86,19 +86,6 @@ export const validatePhoneNumber = async (phoneNumber: string): Promise<string |
   }
 };
 
-export const languageMap: Record<LANGUAGE_TYPE, string> = {
-  en: "english",
-  de: "german",
-  ja: "japanese",
-  ko: "korean",
-  zh: "mandarin",
-  es: "spanish",
-  fr: "french",
-  pt: "portuguese",
-  nl: "dutch",
-  tr: "turkish",
-};
-
 interface NavigatorLanguage {
   userLanguage?: string;
 }
@@ -110,5 +97,5 @@ export const getUserLanguage = (defaultLanguage: string | undefined): LANGUAGE_T
       typeof window !== "undefined" ? (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US" : "en-US";
     userLanguage = browserLanguage.split("-")[0];
   }
-  return Object.prototype.hasOwnProperty.call(languageMap, userLanguage) ? (userLanguage as LANGUAGE_TYPE) : "en";
+  return Object.prototype.hasOwnProperty.call(LANGUAGE_MAP, userLanguage) ? (userLanguage as LANGUAGE_TYPE) : LANGUAGES.en;
 };

@@ -278,14 +278,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const newChain: CustomChainConfig = {
+      rpcTarget: "https://rpc.ankr.com/polygon",
+      blockExplorerUrl: "https://polygonscan.com/",
+      chainId: "0x89",
+      displayName: "Polygon Mainnet",
+      ticker: "matic",
+      tickerName: "Matic",
+      logo: "https://images.toruswallet.io/matic.svg",
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      chainId: "0xaa36a7",
-      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-      displayName: "Sepolia Testnet",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-      logo: "https://images.toruswallet.io/eth.svg",
     };
     await web3Auth?.addChain(newChain);
     uiConsole("New Chain Added");

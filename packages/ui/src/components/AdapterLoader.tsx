@@ -42,7 +42,8 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
             <>
               <div className="w3a-modal__loader-bridge">
                 <div className={["w3a-modal__loader-app-logo", isDefaultLogo ? "w3a-modal__loader-app-logo--default" : ""].join(" ")}>
-                  <img src={appLogo} alt="" />
+                  <img src={isDefaultLogo ? DEFAULT_LOGO_LIGHT : appLogo} className="block dark:hidden" alt="" />
+                  <img src={isDefaultLogo ? DEFAULT_LOGO_DARK : appLogo} className="hidden dark:block" alt="" />
                 </div>
                 <div className="w3a-modal__connector">
                   <div className="w3a-modal__connector-beat">

@@ -171,7 +171,7 @@ export class WalletServicesPlugin implements IPlugin {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with wallet services connector plugin`);
         return;
       }
-      this.provider = web3Auth.provider;
+      this.provider = web3Auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN].provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
@@ -190,7 +190,7 @@ export class WalletServicesPlugin implements IPlugin {
     const [accounts, chainId, chainConfig] = await Promise.all([
       this.provider.request<never, string[]>({ method: "eth_accounts" }),
       this.provider.request<never, string>({ method: "eth_chainId" }),
-      this.provider.request<never, CustomChainConfig>({ method: "provider_config" }),
+      this.provider.request<never, CustomChainConfig>({ method: "eth_provider_config" }),
     ]);
     return {
       chainId: parseInt(chainId as string, 16),
