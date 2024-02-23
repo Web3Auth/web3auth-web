@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-plugin",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Base plugin for web3auth plugins",
   "keywords": [
     "web3Auth/base-plugin",

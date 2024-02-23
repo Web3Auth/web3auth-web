@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-evm-adapter",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/defaultEvmAdapter.cjs.js",
@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@web3auth/base": "^8.0.0",
-    "@web3auth/metamask-adapter": "^8.0.0",
-    "@web3auth/torus-evm-adapter": "^8.0.0",
-    "@web3auth/wallet-connect-v2-adapter": "^8.0.0"
+    "@web3auth/metamask-adapter": "^8.0.1",
+    "@web3auth/torus-evm-adapter": "^8.0.1",
+    "@web3auth/wallet-connect-v2-adapter": "^8.0.1"
   },
   "files": [
     "dist",
