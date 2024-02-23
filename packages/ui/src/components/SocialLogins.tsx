@@ -18,15 +18,16 @@ interface SocialLoginProps {
 }
 
 function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
-  if (isPrimaryBtn) {
-    return <Image width="20" imageId={`login-${method}-active`} hoverImageId={`login-${method}-active`} isButton />;
-  }
-
   const imageId =
     method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
-  const hoverImage =
+  const hoverId =
     method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
-  return <Image width="20" imageId={imageId} hoverImageId={hoverImage} isButton />;
+
+  if (isPrimaryBtn) {
+    return <Image width="20" imageId={hoverId} hoverImageId={hoverId} isButton />;
+  }
+
+  return <Image width="20" imageId={imageId} hoverImageId={hoverId} isButton />;
 }
 
 export default function SocialLogins(props: SocialLoginProps) {
