@@ -235,30 +235,36 @@ export class WalletServicesPlugin implements IPlugin {
 
     if (chainId !== walletServicesSessionConfig.chainId && chainConfig) {
       try {
-        await this.wsEmbedInstance.provider?.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: chainConfig.chainId,
-              chainName: chainConfig.displayName,
-              rpcUrls: [chainConfig.rpcTarget],
-              blockExplorerUrls: [chainConfig.blockExplorerUrl],
-              nativeCurrency: {
-                name: chainConfig.tickerName,
-                symbol: chainConfig.ticker,
-                decimals: chainConfig.decimals || 18,
+        await this.wsEmbedInstance.provider
+          ?.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: chainConfig.chainId,
+                chainName: chainConfig.displayName,
+                rpcUrls: [chainConfig.rpcTarget],
+                blockExplorerUrls: [chainConfig.blockExplorerUrl],
+                nativeCurrency: {
+                  name: chainConfig.tickerName,
+                  symbol: chainConfig.ticker,
+                  decimals: chainConfig.decimals || 18,
+                },
+                iconUrls: [chainConfig.logo],
               },
-              iconUrls: [chainConfig.logo],
-            },
-          ],
-        });
-      } catch (error) {
-        log.error(error);
-      } finally {
+            ],
+          })
+          .catch(() => {
+            // TODO: throw more specific error from the controller
+            log.error("WalletServicesPlugin: Error adding chain");
+          });
+
         await this.wsEmbedInstance.provider?.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: chainConfig.chainId }],
         });
+      } catch (error) {
+        // TODO: throw more specific error from the controller
+        log.error("WalletServicesPlugin: Error switching chain");
       }
     }
   }
