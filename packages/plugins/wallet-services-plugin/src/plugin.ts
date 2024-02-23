@@ -243,28 +243,38 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!chainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
     if (chainId !== walletServicesSessionConfig.chainId && chainConfig) {
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: chainConfig.chainId,
-            chainName: chainConfig.displayName,
-            rpcUrls: [chainConfig.rpcTarget],
-            blockExplorerUrls: [chainConfig.blockExplorerUrl],
-            nativeCurrency: {
-              name: chainConfig.tickerName,
-              symbol: chainConfig.ticker,
-              decimals: chainConfig.decimals || 18,
-            },
-            iconUrls: [chainConfig.logo],
-          },
-        ],
-      });
+      try {
+        await this.wsEmbedInstance.provider
+          ?.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: chainConfig.chainId,
+                chainName: chainConfig.displayName,
+                rpcUrls: [chainConfig.rpcTarget],
+                blockExplorerUrls: [chainConfig.blockExplorerUrl],
+                nativeCurrency: {
+                  name: chainConfig.tickerName,
+                  symbol: chainConfig.ticker,
+                  decimals: chainConfig.decimals || 18,
+                },
+                iconUrls: [chainConfig.logo],
+              },
+            ],
+          })
+          .catch(() => {
+            // TODO: throw more specific error from the controller
+            log.error("WalletServicesPlugin: Error adding chain");
+          });
 
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainConfig.chainId }],
-      });
+        await this.wsEmbedInstance.provider?.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: chainConfig.chainId }],
+        });
+      } catch (error) {
+        // TODO: throw more specific error from the controller
+        log.error("WalletServicesPlugin: Error switching chain");
+      }
     }
   }
 }
