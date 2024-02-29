@@ -23,24 +23,54 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/modal";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
+import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
 import EthRpc from "@/rpc/ethRpc.vue";
 
 import config from "../config";
-const polygonMumbaiConfig: CustomChainConfig = {
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const polygonMumbaiConfig: any = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc-mumbai.maticvigil.com",
-  blockExplorer: "https://mumbai-explorer.matic.today",
+  blockExplorerUrl: "https://mumbai-explorer.matic.today",
+  logo: "https://cryptologos.cc/logos/polygon-matic-logo.png",
   chainId: "0x13881",
   displayName: "Polygon Mumbai Testnet",
   ticker: "matic",
   tickerName: "matic",
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ethereumChainConfig: any = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc.ankr.com/eth",
+  blockExplorerUrl: "https://etherscan.io",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+  chainId: "0x1",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+};
+
+const polygonWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: polygonMumbaiConfig,
+  clientId: config.clientId["testnet"],
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonMumbaiConfig } }),
+  enableLogging: true,
+};
+
+const ethWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: ethereumChainConfig,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+  enableLogging: true,
 };
 
 export default defineComponent({
@@ -76,7 +106,7 @@ export default defineComponent({
       loading: false,
       loginButtonStatus: "",
       provider: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId[this.openloginNetwork] }),
+      web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
   components: {
@@ -115,7 +145,7 @@ export default defineComponent({
       try {
         this.loading = true;
 
-        this.web3auth = new Web3Auth({ chainConfig: polygonMumbaiConfig, clientId: config.clientId[this.openloginNetwork], authMode: "DAPP" });
+        this.web3auth = new Web3Auth(polygonWeb3AuthOptions);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
@@ -124,22 +154,18 @@ export default defineComponent({
         });
 
         this.web3auth.configureAdapter(openloginAdapter);
-        if (this.plugins["torusWallet"]) {
-          const torusPlugin = new TorusWalletConnectorPlugin({
-            torusWalletOpts: {},
-            walletInitOptions: {
-              whiteLabel: {
-                theme: { isDark: true, colors: { primary: "#00a8ff" } },
-                logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-              },
-              useWalletConnect: true,
-              enableLogging: true,
-            },
+        if (this.plugins["walletServices"]) {
+          const walletServicesPlugin = new WalletServicesPlugin({
+            wsEmbedOpts: {},
+            walletInitOptions: { whiteLabel: { showWidgetButton: true } },
           });
-          await this.web3auth.addPlugin(torusPlugin);
+          await this.web3auth.addPlugin(walletServicesPlugin);
         }
         this.subscribeAuthEvents(this.web3auth);
+        const adapters = await getDefaultExternalAdapters({ options: this.web3auth.options });
+        adapters.forEach((adapter) => {
+          this.web3auth.configureAdapter(adapter);
+        });
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         console.log("error", error);

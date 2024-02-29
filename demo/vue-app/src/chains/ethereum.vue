@@ -30,14 +30,13 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, LoginMethodConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
 import { WALLET_ADAPTERS } from "@web3auth/base";
-// import { LOGIN_MODAL_EVENTS } from "@web3auth/ui";
-import { Web3Auth } from "@web3auth/modal";
+import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
-import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import { WalletServicesConnectorPlugin } from "@web3auth/wallet-services-connector-plugin";
+import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
@@ -45,11 +44,22 @@ import Loader from "@/components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-const ethChainConfig: Partial<CustomChainConfig> & Pick<CustomChainConfig, "chainNamespace"> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ethereumChainConfig: any = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc.ankr.com/eth",
+  blockExplorerUrl: "https://etherscan.io",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
   chainId: "0x1",
   ticker: "ETH",
   tickerName: "Ethereum",
+};
+
+const ethWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: ethereumChainConfig,
+  enableLogging: true,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 export default defineComponent({
@@ -86,12 +96,7 @@ export default defineComponent({
       loginButtonStatus: "",
       connecting: false,
       provider: undefined,
-      web3auth: new Web3Auth({
-        chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
-        clientId: config.clientId[this.openloginNetwork],
-        enableLogging: true,
-        web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-      }),
+      web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
   components: {
@@ -128,13 +133,7 @@ export default defineComponent({
       try {
         this.parseConfig();
         this.loading = true;
-        this.web3auth = new Web3Auth({
-          chainConfig: ethChainConfig,
-          clientId: config.clientId[this.openloginNetwork],
-          authMode: "DAPP",
-          enableLogging: true,
-          web3AuthNetwork: this.openloginNetwork,
-        });
+        this.web3auth = new Web3Auth(ethWeb3AuthOptions);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
@@ -142,59 +141,18 @@ export default defineComponent({
             buildEnv: "testing",
           },
         });
-        const defaultadapters = getDefaultAdapters("evm");
-        Web3Auth.configureAdapter(...defaultadapters);
-
-        // by default, web3auth modal uses wallet connect v1,
-        // if you want to use wallet connect v2, configure wallet-connect-v2-adapter
-        // as shown below.
-        // NOTE: if you will configure both wc1 and wc2, precedence will be given to wc2
-        const defaultWcSettings = await getWalletConnectV2Settings(
-          ethChainConfig.chainNamespace,
-          [ethChainConfig.chainId, "0x89", "0x5"],
-          "04309ed1007e77d1f119b85205bb779d",
-        );
-        console.log("defaultWcSettings", JSON.stringify(defaultWcSettings));
-        const wc2Adapter = new WalletConnectV2Adapter({
-          adapterSettings: { ...defaultWcSettings.adapterSettings },
-          chainConfig: ethChainConfig,
-          loginSettings: defaultWcSettings.loginSettings,
+        // Only when you want to add External default adapters, which includes WalletConnect, Metamask, Torus EVM Wallet
+        const adapters = await getDefaultExternalAdapters({ options: ethWeb3AuthOptions });
+        adapters.forEach((adapter) => {
+          this.web3auth.configureAdapter(adapter);
         });
 
-        this.web3auth.configureAdapter(wc2Adapter);
-
         this.web3auth.configureAdapter(openloginAdapter);
-        if (this.plugins["torusWallet"]) {
-          const torusPlugin = new TorusWalletConnectorPlugin({
-            torusWalletOpts: {},
-            walletInitOptions: {
-              whiteLabel: {
-                theme: { isDark: true, colors: { primary: "#00a8ff" } },
-                logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-              },
-              useWalletConnect: true,
-              enableLogging: true,
-            },
-          });
-          await this.web3auth.addPlugin(torusPlugin);
-        }
 
         if (this.plugins["walletServices"]) {
-          const walletServicesPlugin = new WalletServicesConnectorPlugin({
-            wsEmbedOpts: {
-              web3AuthClientId: config.clientId[this.openloginNetwork],
-              web3AuthNetwork: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
-            },
-            walletInitOptions: {
-              whiteLabel: {
-                logoDark: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                logoLight: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                showWidgetButton: true,
-              },
-              enableLogging: true,
-              buildEnv: "development",
-            },
+          const walletServicesPlugin = new WalletServicesPlugin({
+            wsEmbedOpts: {},
+            walletInitOptions: { whiteLabel: { showWidgetButton: true } },
           });
 
           await this.web3auth.addPlugin(walletServicesPlugin);

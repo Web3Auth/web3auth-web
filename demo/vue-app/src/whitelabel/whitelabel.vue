@@ -29,12 +29,31 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/modal";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { defineComponent } from "vue";
 
 import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ethereumChainConfig: any = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc.ankr.com/eth",
+  blockExplorerUrl: "https://etherscan.io",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+  chainId: "0x1",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+};
+
+const ethWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: ethereumChainConfig,
+  enableLogging: true,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+};
 
 export default defineComponent({
   name: "WhitelabelExample",
@@ -61,7 +80,7 @@ export default defineComponent({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
+      web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
   components: {
@@ -76,6 +95,7 @@ export default defineComponent({
       try {
         this.loading = true;
         this.web3auth = new Web3Auth({
+          privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
           uiConfig: {
             logoLight: this.uiConfig.logoUrl,
             logoDark: this.uiConfig.logoUrl,
@@ -84,7 +104,7 @@ export default defineComponent({
             defaultLanguage: this.uiConfig.defaultLanguage,
           },
           web3AuthNetwork: "testnet",
-          chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 },
+          chainConfig: ethereumChainConfig,
           clientId: config.clientId["mainnet"],
         });
         this.subscribeAuthEvents(this.web3auth);
