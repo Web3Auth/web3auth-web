@@ -19,9 +19,12 @@ import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import clonedeep from "lodash.clonedeep";
+import merge from "lodash.merge";
 
 import { defaultOtherModalConfig } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
+import { fetchProjectConfig } from "./utils";
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
@@ -50,12 +53,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
     if (!this.coreOptions.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required");
-
-    this.loginModal = new LoginModal({
-      ...this.options.uiConfig,
-      adapterListener: this,
-    });
-    this.subscribeToLoginModalEvents();
   }
 
   public setModalConfig(modalConfig: AdaptersModalConfig): void {
@@ -65,6 +62,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
+
+    let whitelabel = {};
+    try {
+      const projectConfig = await fetchProjectConfig(this.options.clientId);
+      whitelabel = projectConfig.whitelabel;
+    } catch (e) {
+      throw WalletInitializationError.notReady("failed to fetch modal configurations");
+    }
+
+    this.options.uiConfig = merge(clonedeep(whitelabel), this.options.uiConfig);
+    this.loginModal = new LoginModal({
+      ...this.options.uiConfig,
+      adapterListener: this,
+    });
+    this.subscribeToLoginModalEvents();
+
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
     // TODO: get stuff from dashboard here
