@@ -7,9 +7,26 @@ import { Web3AuthProvider } from "./services/web3auth";
 import Setting from "./components/Setting";
 import Main from "./components/Main";
 
+const STORAGE_KEY = {
+  WEB3AUTH_NETWORK: "web3auth_network",
+  BLOCKCHAIN: "blockchain",
+};
+
 function App() {
-  const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>("sapphire_mainnet");
-  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>("sepolia");
+  const savedNetwork = window.localStorage.getItem(STORAGE_KEY.WEB3AUTH_NETWORK) as WEB3AUTH_NETWORK_TYPE;
+  const savedChain = window.localStorage.getItem(STORAGE_KEY.BLOCKCHAIN) as CHAIN_CONFIG_TYPE;
+  const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>(savedNetwork || "sapphire_mainnet");
+  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>(savedChain || "polygon-mumbai");
+
+  const networkChangeHandler = (network: WEB3AUTH_NETWORK_TYPE) => {
+    window.localStorage.setItem(STORAGE_KEY.BLOCKCHAIN, network);
+    setWeb3AuthNetwork(network);
+  };
+
+  const chainChangeHandler = (chain: CHAIN_CONFIG_TYPE) => {
+    window.localStorage.setItem(STORAGE_KEY.BLOCKCHAIN, chain);
+    setChain(chain);
+  };
 
   return (
     <div className={styles.container}>
@@ -20,7 +37,7 @@ function App() {
           </a>{" "}
           & ReactJS Example
         </h1>
-        <Setting setNetwork={setWeb3AuthNetwork} setChain={setChain} chain={chain} network={web3AuthNetwork} />
+        <Setting setNetwork={networkChangeHandler} setChain={chainChangeHandler} chain={chain} network={web3AuthNetwork} />
         <Main />
       </Web3AuthProvider>
       <footer className={styles.footer}>

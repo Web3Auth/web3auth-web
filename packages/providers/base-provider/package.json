@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-provider",
-  "version": "8.0.0-alpha.19",
+  "version": "8.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/baseProvider.cjs.js",
@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@metamask/rpc-errors": "^6.1.0",
-    "@toruslabs/base-controllers": "^5.5.0",
+    "@toruslabs/base-controllers": "^5.5.1",
     "@toruslabs/openlogin-jrpc": "^7.0.0",
-    "@web3auth/base": "^8.0.0-alpha.19",
+    "@web3auth/base": "^8.0.0",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {

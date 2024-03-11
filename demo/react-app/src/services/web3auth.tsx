@@ -7,6 +7,7 @@ import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import { PLUGIN_EVENTS } from "@web3auth/base-plugin";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -107,6 +108,25 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       });
     };
 
+    const subscribePluginEvents = (plugin: WalletServicesPlugin) => {
+      // Can subscribe to all PLUGIN_EVENTS and LOGIN_MODAL_EVENTS
+      plugin.on(PLUGIN_EVENTS.CONNECTED, (data: unknown) => {
+        console.log("Yeah!, you are successfully logged in to plugin");
+      });
+
+      plugin.on(PLUGIN_EVENTS.CONNECTING, () => {
+        console.log("connecting plugin");
+      });
+
+      plugin.on(PLUGIN_EVENTS.DISCONNECTED, () => {
+        console.log("plugin disconnected");
+      });
+
+      plugin.on(PLUGIN_EVENTS.ERRORED, (error) => {
+        console.error("some error on plugin login", error);
+      });
+    };
+
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
@@ -131,7 +151,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             appUrl: "https://web3auth.io/",
             theme: {
               primary: "#5f27cd",
-              onPrimary: "white"
+              onPrimary: "white",
             },
             logoLight: "https://web3auth.io/images/web3auth-logo.svg",
             logoDark: "https://web3auth.io/images/web3auth-logo.svg",
@@ -193,8 +213,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         if (currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
-            walletInitOptions: { whiteLabel: { showWidgetButton: true } },
+            walletInitOptions: {
+              whiteLabel: { showWidgetButton: true },
+            },
           });
+          subscribePluginEvents(walletServicesPlugin);
           setWalletServicesPlugin(walletServicesPlugin);
           web3AuthInstance.addPlugin(walletServicesPlugin);
         }
@@ -276,24 +299,25 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const newChain: CustomChainConfig = {
+      rpcTarget: "https://rpc.ankr.com/polygon",
+      blockExplorerUrl: "https://polygonscan.com/",
+      chainId: "0x89",
+      displayName: "Polygon Mainnet",
+      ticker: "matic",
+      tickerName: "Matic",
+      logo: "https://images.toruswallet.io/matic.svg",
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      chainId: "0xaa36a7",
-      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-      displayName: "Sepolia Testnet",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-      logo: "https://images.toruswallet.io/eth.svg",
     };
     await web3Auth?.addChain(newChain);
     uiConsole("New Chain Added");
   };
   const switchChain = async () => {
+    const chainId = "0xaa36a7";
     if (!provider) {
       uiConsole("provider not initialized yet");
       return;
     }
-    await web3Auth?.switchChain({ chainId: "0xaa36a7" });
+    await web3Auth?.switchChain({ chainId });
     uiConsole("Chain Switched");
   };
 
