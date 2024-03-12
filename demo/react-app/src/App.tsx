@@ -19,7 +19,7 @@ function App() {
   const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>(savedChain || "polygon-mumbai");
 
   const networkChangeHandler = (network: WEB3AUTH_NETWORK_TYPE) => {
-    window.localStorage.setItem(STORAGE_KEY.BLOCKCHAIN, network);
+    window.localStorage.setItem(STORAGE_KEY.WEB3AUTH_NETWORK, network);
     setWeb3AuthNetwork(network);
   };
 
