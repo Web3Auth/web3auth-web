@@ -92,7 +92,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     // TODO: get stuff from dashboard here
     // disable sms login
-    const initPromises = Object.keys(this.walletAdapters).map((adapterName) => {
+    const initPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
       // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
       // if no chainNamespace or chainId is being provided, it will connect with mainnet.
