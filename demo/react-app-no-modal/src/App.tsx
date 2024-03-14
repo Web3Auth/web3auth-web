@@ -10,7 +10,6 @@ import RPC from "./web3RPC"; // for using web3.js
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
@@ -42,8 +41,6 @@ function App() {
         });
         web3auth.configureAdapter(openloginAdapter);
 
-        const adapter = new WalletConnectV1Adapter();
-        web3auth.configureAdapter(adapter);
 
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
