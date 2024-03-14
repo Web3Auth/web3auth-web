@@ -4,8 +4,6 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
-    "@toruslabs/constants": "^13.1.0",
-    "@toruslabs/http-helpers": "^6.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "@web3auth/base": "^8.0.0",

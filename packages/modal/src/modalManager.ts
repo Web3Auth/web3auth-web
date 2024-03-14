@@ -4,6 +4,7 @@ import {
   ADAPTER_STATUS,
   BaseAdapterConfig,
   CustomChainConfig,
+  fetchProjectConfig,
   getChainConfig,
   IBaseProvider,
   IProvider,
@@ -16,7 +17,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { getOpenloginDefaultOptions, OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
@@ -24,7 +25,6 @@ import merge from "lodash.merge";
 
 import { defaultOtherModalConfig } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
-import { fetchProjectConfig } from "./utils";
 
 export interface Web3AuthOptions extends Web3AuthNoModalOptions {
   /**
@@ -63,7 +63,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
 
-    let whitelabel = {};
+    let whitelabel: WhiteLabelData = {};
     try {
       const projectConfig = await fetchProjectConfig(this.options.clientId);
       whitelabel = projectConfig.whitelabel;
