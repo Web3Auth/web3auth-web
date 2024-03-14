@@ -7,6 +7,7 @@ import {
   CHAIN_NAMESPACES,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  fetchProjectConfig,
   getChainConfig,
   IAdapter,
   IBaseProvider,
@@ -25,8 +26,10 @@ import {
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
-import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import type { OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import clonedeep from "lodash.clonedeep";
+import merge from "lodash.merge";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
@@ -113,6 +116,17 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       }
       if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
         const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+
+        let whitelabel: WhiteLabelData = {};
+        try {
+          const projectConfig = await fetchProjectConfig(this.coreOptions.clientId);
+          whitelabel = projectConfig.whitelabel;
+        } catch (e) {
+          throw WalletInitializationError.notReady("failed to fetch modal configurations");
+        }
+
+        this.coreOptions.uiConfig = merge(clonedeep(whitelabel), this.coreOptions.uiConfig);
+
         if (this.coreOptions.privateKeyProvider) {
           if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
             throw WalletInitializationError.incompatibleChainNameSpace(
