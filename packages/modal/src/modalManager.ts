@@ -253,7 +253,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async connect(): Promise<IProvider | null> {
-    // if (!this.loginModal.initialized) throw new Error("Login modal is not initialized");
+    if (!this.loginModal) throw new Error("Login modal is not initialized");
     // if already connected return provider
     if (this.connectedAdapterName && this.status === ADAPTER_STATUS.CONNECTED && this.provider) return this.provider;
     this.loginModal.open();
