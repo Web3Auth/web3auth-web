@@ -26,7 +26,9 @@
 
 <script lang="ts">
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/modal";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
 import config from "@/config";
@@ -34,6 +36,41 @@ import config from "@/config";
 import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
 import SolRpc from "../rpc/solanaRpc.vue";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ethereumChainConfig: any = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  rpcTarget: "https://rpc.ankr.com/eth",
+  blockExplorerUrl: "https://etherscan.io",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+  chainId: "0x1",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const solanaChainConfig: any = {
+  chainNamespace: CHAIN_NAMESPACES.SOLANA,
+  rpcTarget: "https://rpc.ankr.com/solana_devnet",
+  blockExplorerUrl: "https://solscan.io",
+  logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
+  chainId: "0x3",
+  ticker: "SOL",
+  tickerName: "Solana",
+};
+
+const ethWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: ethereumChainConfig,
+  enableLogging: true,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+};
+
+const solanaWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: solanaChainConfig,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
+};
 
 export default defineComponent({
   name: "BeginnerExampleMode",
@@ -44,7 +81,7 @@ export default defineComponent({
       connected: false,
       provider: undefined,
       namespace: undefined,
-      web3auth: new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] }),
+      web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
   components: {
@@ -68,11 +105,7 @@ export default defineComponent({
   methods: {
     async initSolanaAuth() {
       try {
-        this.web3auth = new Web3Auth({
-          chainConfig: { chainId: "0x3", chainNamespace: CHAIN_NAMESPACES.SOLANA },
-          clientId: config.clientId["mainnet"],
-          authMode: "DAPP",
-        });
+        this.web3auth = new Web3Auth(solanaWeb3AuthOptions);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
         console.log("web3auth", this.web3auth);
@@ -83,7 +116,7 @@ export default defineComponent({
     },
     async initEthAuth() {
       try {
-        this.web3auth = new Web3Auth({ chainConfig: { chainNamespace: CHAIN_NAMESPACES.EIP155 }, clientId: config.clientId["mainnet"] });
+        this.web3auth = new Web3Auth(ethWeb3AuthOptions);
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal();
       } catch (error) {

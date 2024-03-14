@@ -22,35 +22,35 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import {
-  ADAPTER_STATUS,
-  CHAIN_NAMESPACES,
-  CONNECTED_EVENT_DATA,
-  CustomChainConfig,
-  LoginMethodConfig,
-  SafeEventEmitterProvider,
-  WALLET_ADAPTERS,
-} from "@web3auth/base";
-import { Web3Auth } from "@web3auth/modal";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import { getDefaultExternalAdapters } from "@web3auth/default-solana-adapter";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { SlopeAdapter } from "@web3auth/slope-adapter";
-import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
-import { SolflareAdapter } from "@web3auth/solflare-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
 import Loader from "@/components/loader.vue";
 
 import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
-const solanaChainConfig: CustomChainConfig = {
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const solanaChainConfig: any = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  rpcTarget: "https://api.devnet.solana.com",
-  blockExplorer: "https://explorer.solana.com?cluster=devnet",
+  rpcTarget: "https://rpc.ankr.com/solana_devnet",
+  blockExplorerUrl: "https://solscan.io",
+  logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
   chainId: "0x3",
-  displayName: "devnet",
   ticker: "SOL",
-  tickerName: "solana",
+  tickerName: "Solana",
+};
+
+const solanaWeb3AuthOptions: Web3AuthOptions = {
+  chainConfig: solanaChainConfig,
+  enableLogging: true,
+  clientId: config.clientId["mainnet"],
+  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
 };
 
 export default defineComponent({
@@ -81,11 +81,7 @@ export default defineComponent({
       loading: false,
       loginButtonStatus: "",
       provider: undefined,
-      web3auth: new Web3Auth({
-        chainConfig: { chainNamespace: CHAIN_NAMESPACES.SOLANA },
-        clientId: config.clientId[this.openloginNetwork],
-        enableLogging: true,
-      }),
+      web3auth: new Web3Auth(solanaWeb3AuthOptions),
     };
   },
   components: {
@@ -122,12 +118,7 @@ export default defineComponent({
         this.parseConfig();
 
         this.loading = true;
-        this.web3auth = new Web3Auth({
-          chainConfig: solanaChainConfig,
-          clientId: config.clientId[this.openloginNetwork],
-          authMode: "DAPP",
-          enableLogging: true,
-        });
+        this.web3auth = new Web3Auth(solanaWeb3AuthOptions);
         const openloginAdapter = new OpenloginAdapter({
           adapterSettings: {
             network: this.openloginNetwork as OPENLOGIN_NETWORK_TYPE,
@@ -135,21 +126,12 @@ export default defineComponent({
           },
         });
         const slopeAdapter = new SlopeAdapter();
-        const solflareAdapter = new SolflareAdapter();
-        const solAdapter = new SolanaWalletAdapter({ initParams: { buildEnv: "testing" } });
-        this.web3auth.configureAdapter(solAdapter);
-        this.web3auth.configureAdapter(solflareAdapter);
         this.web3auth.configureAdapter(slopeAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
-        if (this.plugins["torusWallet"]) {
-          const torusPlugin = new SolanaWalletConnectorPlugin({
-            torusWalletOpts: {},
-            walletInitOptions: {
-              enableLogging: true,
-            },
-          });
-          await this.web3auth.addPlugin(torusPlugin);
-        }
+        const adapters = await getDefaultExternalAdapters({ options: this.web3auth.options });
+        adapters.forEach((adapter) => {
+          this.web3auth.configureAdapter(adapter);
+        });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal({
           modalConfig: {
@@ -198,8 +180,8 @@ export default defineComponent({
     },
     async connect() {
       try {
-        const provider = await this.web3auth.connect();
-        await this.setupProvider(provider);
+        await this.web3auth.connect();
+        await this.setupProvider(this.web3auth.provider);
       } catch (error) {
         console.error(error);
         this.uiConsole("error", error);
