@@ -10,11 +10,11 @@ import RPC from "./web3RPC"; // for using web3.js
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
-const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
+// const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
+const clientId = "BHHfGJWVEjpOFCOBr4fyKcAcQe-XlO93fV-lrFEjAoJI_9lUHCHNMeOiTkKXxXNuXDpeto79pjeULqmwfMo_CQI";
 
 function App() {
   const [web3auth, setWeb3auth] = useState<Web3AuthNoModal | null>(null);
@@ -26,9 +26,16 @@ function App() {
         const web3auth = new Web3AuthNoModal({
           clientId,
           chainConfig: {
+            displayName: "Ethereum Mainnet",
+            chainId: "0x1",
+            rpcTarget: `https://rpc.ankr.com/eth`,
+            blockExplorerUrl: "https://etherscan.io/",
+            ticker: "ETH",
+            tickerName: "Ethereum",
+            logo: "https://images.toruswallet.io/eth.svg",
             chainNamespace: CHAIN_NAMESPACES.EIP155,
           },
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "sapphire_devnet",
         });
 
         setWeb3auth(web3auth);
@@ -42,8 +49,6 @@ function App() {
         });
         web3auth.configureAdapter(openloginAdapter);
 
-        const adapter = new WalletConnectV1Adapter();
-        web3auth.configureAdapter(adapter);
 
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
