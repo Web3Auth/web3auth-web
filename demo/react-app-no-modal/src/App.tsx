@@ -13,8 +13,7 @@ import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
-// const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
-const clientId = "BHHfGJWVEjpOFCOBr4fyKcAcQe-XlO93fV-lrFEjAoJI_9lUHCHNMeOiTkKXxXNuXDpeto79pjeULqmwfMo_CQI";
+const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
 function App() {
   const [web3auth, setWeb3auth] = useState<Web3AuthNoModal | null>(null);
