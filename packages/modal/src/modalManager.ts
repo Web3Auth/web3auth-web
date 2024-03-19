@@ -10,6 +10,7 @@ import {
   IProvider,
   log,
   LoginMethodConfig,
+  PROJECT_CONFIG_RESPONSE,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -17,7 +18,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { getOpenloginDefaultOptions, OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
+import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
@@ -63,13 +64,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
 
-    let whitelabel: WhiteLabelData = {};
+    let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
-      const projectConfig = await fetchProjectConfig(this.options.clientId);
-      whitelabel = projectConfig.whitelabel;
+      projectConfig = await fetchProjectConfig(this.options.clientId);
     } catch (e) {
       throw WalletInitializationError.notReady("failed to fetch modal configurations");
     }
+
+    const { whitelabel, sms_otp_enabled: smsOtpEnabled } = projectConfig;
 
     this.options.uiConfig = merge(clonedeep(whitelabel), this.options.uiConfig);
     this.loginModal = new LoginModal({
@@ -78,9 +80,24 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     this.subscribeToLoginModalEvents();
 
+    if (smsOtpEnabled !== undefined) {
+      const adapterConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {
+        [WALLET_ADAPTERS.OPENLOGIN]: {
+          label: WALLET_ADAPTERS.OPENLOGIN,
+          loginMethods: {
+            sms_passwordless: {
+              name: "sms_passwordless",
+              showOnModal: smsOtpEnabled,
+            },
+          },
+        },
+      };
+      if (!params?.modalConfig) params = { modalConfig: {} };
+      params.modalConfig = merge(clonedeep(adapterConfig), params.modalConfig);
+    }
+
     await this.loginModal.initModal();
     const providedChainConfig = this.options.chainConfig;
-    // TODO: get stuff from dashboard here
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
