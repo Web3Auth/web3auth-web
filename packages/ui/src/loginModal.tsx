@@ -189,7 +189,7 @@ class LoginModal extends SafeEventEmitter {
             handleShowExternalWallets={this.handleShowExternalWallets}
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
-            appLogo={darkState.isDark ? this.uiConfig.logoLight : this.uiConfig.logoDark}
+            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
           />
         </ThemedContext.Provider>
