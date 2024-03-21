@@ -51,8 +51,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options = { ...options };
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
-    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
-    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
     if (!this.coreOptions.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required");
   }
 
@@ -74,6 +72,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const { whitelabel, sms_otp_enabled: smsOtpEnabled } = projectConfig;
 
     this.options.uiConfig = merge(clonedeep(whitelabel), this.options.uiConfig);
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "auto";
+
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
