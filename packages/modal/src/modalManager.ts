@@ -20,7 +20,7 @@ import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
-import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { getWalletConnectV2Settings, WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
@@ -69,7 +69,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       throw WalletInitializationError.notReady("failed to fetch modal configurations");
     }
 
-    const { whitelabel, sms_otp_enabled: smsOtpEnabled } = projectConfig;
+    const {
+      whitelabel,
+      sms_otp_enabled: smsOtpEnabled,
+      wallet_connect_enabled: walletConnectEnabled,
+      wallet_connect_project_id: walletConnectProjectId,
+    } = projectConfig;
 
     this.options.uiConfig = merge(clonedeep(whitelabel), this.options.uiConfig);
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
@@ -95,6 +100,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
       params.modalConfig = merge(clonedeep(adapterConfig), params.modalConfig);
+    }
+
+    if (walletConnectEnabled && walletConnectProjectId) {
+      const walletConnectAdapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2] as WalletConnectV2Adapter | undefined;
+      if (!walletConnectAdapter) {
+        const defaultWcSettings = await getWalletConnectV2Settings("eip155", ["1"], walletConnectProjectId);
+        const adapterSettings = {
+          adapterSettings: { ...defaultWcSettings.adapterSettings },
+          loginSettings: { ...defaultWcSettings.loginSettings },
+        };
+        const walletConnectV2Adapter = new WalletConnectV2Adapter(adapterSettings);
+        this.configureAdapter(walletConnectV2Adapter);
+      }
     }
 
     await this.loginModal.initModal();
@@ -196,16 +214,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (!openloginAdapter.privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
           }
-        } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-          const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
-          walletConnectAdapter.setAdapterSettings({
-            adapterSettings: {
-              walletConnectInitOptions: {
-                // Using a default wallet connect project id for web3auth modal integration
-                projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
-              },
-            },
-          });
         }
 
         return adapterName;
