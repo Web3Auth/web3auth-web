@@ -66,7 +66,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     try {
       projectConfig = await fetchProjectConfig(this.options.clientId);
     } catch (e) {
-      throw WalletInitializationError.notReady("failed to fetch modal configurations");
+      throw WalletInitializationError.notReady("failed to fetch project configurations");
     }
 
     const {
