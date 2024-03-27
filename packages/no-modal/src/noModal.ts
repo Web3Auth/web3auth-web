@@ -14,6 +14,7 @@ import {
   IProvider,
   IWeb3Auth,
   log,
+  PROJECT_CONFIG_RESPONSE,
   storageAvailable,
   UserAuthInfo,
   UserInfo,
@@ -26,8 +27,8 @@ import {
 } from "@web3auth/base";
 import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
-import type { OpenloginAdapter, WhiteLabelData } from "@web3auth/openlogin-adapter";
-import type { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
@@ -90,8 +91,14 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   public async init(): Promise<void> {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
-    // TODO: get stuff from dashboard here
-    // disable sms login
+
+    let projectConfig: PROJECT_CONFIG_RESPONSE;
+    try {
+      projectConfig = await fetchProjectConfig(this.coreOptions.clientId);
+    } catch (e) {
+      throw WalletInitializationError.notReady("failed to fetch project configurations");
+    }
+
     const initPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
       this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
       // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
@@ -117,15 +124,22 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
         const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
 
-        let whitelabel: WhiteLabelData = {};
-        try {
-          const projectConfig = await fetchProjectConfig(this.coreOptions.clientId);
-          whitelabel = projectConfig.whitelabel;
-        } catch (e) {
-          throw WalletInitializationError.notReady("failed to fetch modal configurations");
-        }
-
+        const { whitelabel } = projectConfig;
         this.coreOptions.uiConfig = merge(clonedeep(whitelabel), this.coreOptions.uiConfig);
+
+        const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
+        if (smsOtpEnabled !== undefined) {
+          openloginAdapter.setAdapterSettings({
+            loginConfig: {
+              [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+                showOnModal: smsOtpEnabled,
+                showOnDesktop: smsOtpEnabled,
+                showOnMobile: smsOtpEnabled,
+                showOnSocialBackupFactor: smsOtpEnabled,
+              } as LoginConfig[keyof LoginConfig],
+            },
+          });
+        }
 
         if (this.coreOptions.privateKeyProvider) {
           if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
@@ -141,11 +155,18 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
         }
       } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
+        const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+
+        if (walletConnectEnabled === false) {
+          throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
+        }
+        if (!walletConnectProjectId)
+          throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
+
         walletConnectAdapter.setAdapterSettings({
           adapterSettings: {
             walletConnectInitOptions: {
-              // Using a default wallet connect project id for web3auth modal integration
-              projectId: "d3c63f19f9582f8ba48e982057eb096b", // TODO: get from dashboard
+              projectId: walletConnectProjectId,
             },
           },
         });

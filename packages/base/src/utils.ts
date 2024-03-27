@@ -4,7 +4,7 @@ import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogi
 
 import { WEB3AUTH_NETWORK } from "./adapter";
 
-interface PROJECT_CONFIG_RESPONSE {
+export interface PROJECT_CONFIG_RESPONSE {
   whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;
   wallet_connect_enabled: boolean;

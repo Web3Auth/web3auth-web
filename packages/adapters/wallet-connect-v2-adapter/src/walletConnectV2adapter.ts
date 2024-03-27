@@ -155,13 +155,17 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   setAdapterSettings(adapterSettings: Partial<WalletConnectV2AdapterOptions>): void {
     super.setAdapterSettings(adapterSettings);
     const { qrcodeModal, walletConnectInitOptions } = adapterSettings?.adapterSettings || {};
-    if (!this.adapterOptions) {
-      this.adapterOptions = { adapterSettings: {}, loginSettings: {} };
-    }
+
+    this.adapterOptions = {
+      ...this.adapterOptions,
+      adapterSettings: this.adapterOptions?.adapterSettings ?? {},
+      loginSettings: this.adapterOptions?.loginSettings ?? {},
+    };
+
     if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
     if (walletConnectInitOptions)
       this.adapterOptions.adapterSettings.walletConnectInitOptions = {
-        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions || {}),
+        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions ?? {}),
         ...walletConnectInitOptions,
       };
 
