@@ -33,8 +33,7 @@ export default function Loader(props: LoaderProps) {
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <div className="w3ajs-modal-loader__spinner w3a-spinner">
-              <div className="w3a-spinner__head" />
-              <div className="w3a-spinner__mask" />
+              <div className="w3a-spinner__spinner" />
             </div>
           )}
 
