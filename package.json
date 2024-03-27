@@ -31,7 +31,7 @@
     "@toruslabs/config": "^2.0.2",
     "@toruslabs/eslint-config-typescript": "^3.2.0",
     "@toruslabs/torus-scripts": "^5.3.0",
-    "@types/chai": "^4.3.12",
+    "@types/chai": "^4.3.14",
     "@types/faker": "^5.5.9",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/mocha": "^10.0.6",
@@ -45,17 +45,17 @@
     "jsonwebtoken": "^9.0.2",
     "lerna": "^8.1.2",
     "lint-staged": "^15.2.2",
-    "mocha": "^10.3.0",
+    "mocha": "^10.4.0",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^18.1.1",
+    "@nx/nx-linux-x64-gnu": "^18.1.3",
     "@rollup/rollup-linux-x64-gnu": "^4.13.0"
   },
   "repository": {

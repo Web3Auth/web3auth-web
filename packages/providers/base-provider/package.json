@@ -19,7 +19,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@metamask/rpc-errors": "^6.1.0",
+    "@metamask/rpc-errors": "^6.2.1",
     "@toruslabs/base-controllers": "^5.5.3",
     "@toruslabs/openlogin-jrpc": "^8.0.0",
     "@web3auth/base": "^8.0.0",
