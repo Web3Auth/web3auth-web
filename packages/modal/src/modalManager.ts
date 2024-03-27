@@ -89,6 +89,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             sms_passwordless: {
               name: "sms_passwordless",
               showOnModal: smsOtpEnabled,
+              showOnDesktop: smsOtpEnabled,
+              showOnMobile: smsOtpEnabled,
             },
           },
         },
