@@ -1,5 +1,5 @@
 {
-  "name": "@web3auth/ethereum-mpc-provider",
+  "name": "@web3auth/ethereum-mpcprovider",
   "version": "8.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
