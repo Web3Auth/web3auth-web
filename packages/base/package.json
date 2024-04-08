@@ -20,10 +20,10 @@
   },
   "dependencies": {
     "@toruslabs/constants": "^13.2.0",
-    "@toruslabs/http-helpers": "^6.1.0",
-    "@toruslabs/openlogin": "^8.0.0",
-    "@toruslabs/openlogin-jrpc": "^8.0.0",
-    "@toruslabs/openlogin-utils": "^8.0.0",
+    "@toruslabs/http-helpers": "^6.1.1",
+    "@toruslabs/openlogin": "^8.1.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.0",
+    "@toruslabs/openlogin-utils": "^8.1.0",
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.1",
     "ts-custom-error": "^3.3.1"

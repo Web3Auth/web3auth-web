@@ -1,12 +1,12 @@
 import "./styles.css";
 
-import React, { CSSProperties, memo } from "react";
+import { CSSProperties, memo, ReactNode } from "react";
 
 type ButtonProps = {
   variant: "primary" | "secondary" | "tertiary";
   onClick?: () => void;
   title?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
   style?: CSSProperties;
   size?: string;
