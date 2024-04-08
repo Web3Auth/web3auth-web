@@ -3,7 +3,7 @@
   "version": "8.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/ethereumMPCProvider.cjs.js",
+  "main": "dist/ethereumMpcProvider.cjs.js",
   "module": "dist/ethereumMPCProvider.esm.js",
   "unpkg": "dist/ethereumMPCProvider.umd.min.js",
   "jsdelivr": "dist/ethereumMPCProvider.umd.min.js",
