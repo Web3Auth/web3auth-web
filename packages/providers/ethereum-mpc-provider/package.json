@@ -1,12 +1,12 @@
 {
-  "name": "@web3auth/ethereum-mpcprovider",
+  "name": "@web3auth/ethereum-mpc-provider",
   "version": "8.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/ethereumMpcprovider.cjs.js",
-  "module": "dist/ethereumMpcprovider.esm.js",
-  "unpkg": "dist/ethereumMpcprovider.umd.min.js",
-  "jsdelivr": "dist/ethereumMpcprovider.umd.min.js",
+  "main": "dist/ethereumMpcProvider.cjs.js",
+  "module": "dist/ethereumMpcProvider.esm.js",
+  "unpkg": "dist/ethereumMpcProvider.umd.min.js",
+  "jsdelivr": "dist/ethereumMpcProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
