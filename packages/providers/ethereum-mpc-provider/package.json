@@ -4,9 +4,9 @@
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumMpcProvider.cjs.js",
-  "module": "dist/ethereumMPCProvider.esm.js",
-  "unpkg": "dist/ethereumMPCProvider.umd.min.js",
-  "jsdelivr": "dist/ethereumMPCProvider.umd.min.js",
+  "module": "dist/ethereumMpcProvider.esm.js",
+  "unpkg": "dist/ethereumMpcProvider.umd.min.js",
+  "jsdelivr": "dist/ethereumMpcProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "scripts": {
