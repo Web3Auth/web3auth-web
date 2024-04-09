@@ -2,11 +2,17 @@ import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import {
+  AddEthereumChainParameter,
+  createChainSwitchMiddleware,
+  createEthMiddleware,
+  createJsonRpcClient,
+  IChainSwitchHandlers,
+  TransactionFormatter,
+} from "@web3auth/ethereum-provider";
 
-import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
-import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers } from "../../rpc/interfaces";
-import { createJsonRpcClient } from "../../rpc/jrpcClient";
-import { TransactionFormatter } from "../TransactionFormatter";
+import { createAccountMiddleware } from "../../rpc/ethRpcMiddlewares";
+import { IAccountHandlers } from "../../rpc/interfaces";
 import { getProviderHandlers } from "./signingUtils";
 
 export interface EthereumSigningProviderConfig extends BaseProviderConfig {

@@ -7,7 +7,7 @@ import { createAccountMiddleware, createChainSwitchMiddleware, createEthMiddlewa
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers } from "../../rpc/interfaces";
 import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { getProviderHandlers } from "./ethPrivatekeyUtils";
-import { TransactionFormatter } from "./TransactionFormatter";
+import { TransactionFormatter } from "./TransactionFormatter/formatter";
 
 export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {
   chainConfig: CustomChainConfig;

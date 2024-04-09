@@ -1,12 +1,12 @@
 import { Common, Hardfork } from "@ethereumjs/common";
-import { addHexPrefix, type AddressLike, stripHexPrefix } from "@ethereumjs/util";
+import { addHexPrefix, AddressLike, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import BigNumber from "bignumber.js";
 
-import { TransactionParams } from "../../rpc/interfaces";
-import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../converter";
-import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../utils";
+import { TransactionParams } from "../../../rpc/interfaces";
+import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
+import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../../utils";
 import { EIP1559APIEndpoint, GAS_ESTIMATE_TYPES, LegacyGasAPIEndpoint, TRANSACTION_ENVELOPE_TYPES, TRANSACTION_TYPES } from "./constants";
 import { EIP1159GasData, EthereumGasFeeEstimates, FallbackGasData, FeeHistoryResponse, GasData, LegacyGasData, TxType } from "./interfaces";
 import { fetchEip1159GasEstimates, fetchLegacyGasPriceEstimates } from "./utils";

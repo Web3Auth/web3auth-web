@@ -14,10 +14,14 @@ import { providerErrors } from "@metamask/rpc-errors";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth/base";
-
-import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
-import { TransactionFormatter } from "../TransactionFormatter";
-import { validateTypedMessageParams } from "../TransactionFormatter/utils";
+import {
+  IProviderHandlers,
+  MessageParams,
+  TransactionFormatter,
+  TransactionParams,
+  TypedMessageParams,
+  validateTypedMessageParams,
+} from "@web3auth/ethereum-provider";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },

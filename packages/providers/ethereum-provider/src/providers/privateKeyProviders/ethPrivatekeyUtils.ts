@@ -17,7 +17,7 @@ import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
-import { TransactionFormatter } from "./TransactionFormatter";
+import { TransactionFormatter } from "./TransactionFormatter/formatter";
 import { validateTypedMessageParams } from "./TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
