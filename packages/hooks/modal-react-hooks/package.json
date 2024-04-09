@@ -1,13 +1,14 @@
 {
   "name": "@web3auth/modal-react-hooks",
   "version": "8.0.1",
-  "description": "Wallet services for which can be used with Web3Auth or private key providers used inside Web3Auth",
+  "description": "React hooks to simplify integration with web3Auth modal SDK.",
   "keywords": [
-    "web3Auth/wallet-services-plugin",
+    "web3Auth/modal-react-hooks",
     "web3Auth",
     "blockchain",
-    "ethereum",
-    "metamask"
+    "react hooks",
+    "web3Auth hooks",
+    "web3Auth modal react hooks"
   ],
   "main": "dist/modalReactHooks.cjs.js",
   "module": "dist/modalReactHooks.esm.js",
@@ -15,7 +16,7 @@
   "jsdelivr": "dist/modalReactHooks.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/plugins/wallet-services-plugin#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/hooks/modal-react-hooks#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -31,17 +32,11 @@
     "src"
   ],
   "devDependencies": {
-    "@metamask/rpc-errors": "^6.2.1",
     "@web3auth/openlogin-adapter": "^8.0.1"
   },
   "dependencies": {
-    "@toruslabs/ethereum-controllers": "^5.5.3",
-    "@toruslabs/openlogin-jrpc": "^8.0.0",
     "@web3auth/base": "^8.0.0",
-    "@web3auth/base-plugin": "^8.0.1",
-    "@web3auth/no-modal": "^8.0.1",
-    "@web3auth/ws-embed": "^1.1.1",
-    "loglevel": "^1.9.1"
+    "@web3auth/base-plugin": "^8.0.1"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

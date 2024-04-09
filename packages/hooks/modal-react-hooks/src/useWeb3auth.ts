@@ -1,6 +1,6 @@
-import { ADAPTER_EVENTS, IProvider, WALLET_ADAPTERS } from "@web3auth/base";
-import { ModalConfig } from "@web3auth/modal";
-import { LoginParams, OpenloginAdapter, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
+import { ADAPTER_EVENTS, type IProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import { type ModalConfig } from "@web3auth/modal";
+import { type LoginParams, type OpenloginAdapter, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { useContext, useEffect, useState } from "react";
 
 import { Web3AuthContext } from "./Web3AuthProvider";
