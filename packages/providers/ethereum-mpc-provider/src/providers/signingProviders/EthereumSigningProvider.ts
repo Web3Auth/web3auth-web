@@ -51,7 +51,7 @@ export class EthereumSigningProvider extends BaseProvider<
 
   public async enable(): Promise<string[]> {
     if (!this.state.signMethods)
-      throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
+      throw providerErrors.custom({ message: "signMethods are not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.signMethods);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
