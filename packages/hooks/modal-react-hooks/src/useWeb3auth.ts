@@ -1,4 +1,4 @@
-import { ADAPTER_EVENTS, type IProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_EVENTS, CustomChainConfig, type IProvider, WALLET_ADAPTERS } from "@web3auth/base";
 import { type ModalConfig } from "@web3auth/modal";
 import { type LoginParams, type OpenloginAdapter, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { useContext, useEffect, useState } from "react";
@@ -73,6 +73,13 @@ export const useWeb3Auth = () => {
     return localProvider;
   }
 
+  async function addAndSwitchChain(chainConfig: CustomChainConfig) {
+    if (!web3auth) throw new Error(WAIT_FOR_INIT_MSG);
+    await web3auth.addChain(chainConfig);
+
+    await web3auth.switchChain({ chainId: chainConfig.chainId });
+  }
+
   return {
     web3auth,
     isConnected,
@@ -83,9 +90,10 @@ export const useWeb3Auth = () => {
     connect,
     enableMFA,
     logout,
-    addChain: web3auth?.addChain,
-    addPlugin: web3auth?.addPlugin,
-    authenticateUser: web3auth?.authenticateUser,
-    switchChain: web3auth?.switchChain,
+    addAndSwitchChain,
+    addChain: web3auth?.addChain.bind(web3auth),
+    addPlugin: web3auth?.addPlugin.bind(web3auth),
+    authenticateUser: web3auth?.authenticateUser.bind(web3auth),
+    switchChain: web3auth?.switchChain.bind(web3auth),
   };
 };
