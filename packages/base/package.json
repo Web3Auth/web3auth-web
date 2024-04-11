@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/base.cjs.js",
@@ -20,17 +20,16 @@
   },
   "dependencies": {
     "@toruslabs/constants": "^13.2.0",
-    "@toruslabs/http-helpers": "^6.1.0",
-    "@toruslabs/openlogin": "^8.0.0",
-    "@toruslabs/openlogin-jrpc": "^8.0.0",
-    "@toruslabs/openlogin-utils": "^8.0.0",
+    "@toruslabs/http-helpers": "^6.1.1",
+    "@toruslabs/openlogin": "^8.1.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@toruslabs/openlogin-utils": "^8.1.0",
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.1",
     "ts-custom-error": "^3.3.1"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x"

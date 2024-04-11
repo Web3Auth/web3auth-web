@@ -2,7 +2,7 @@ import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
 import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
 
-import { WEB3AUTH_NETWORK } from "./adapter";
+import { WEB3AUTH_NETWORK } from "./adapter/IAdapter";
 
 export interface PROJECT_CONFIG_RESPONSE {
   whitelabel?: WhiteLabelData;

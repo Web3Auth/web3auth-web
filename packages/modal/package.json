@@ -4,22 +4,22 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
+    "@web3auth/base": "^8.1.0",
+    "@web3auth/base-provider": "^8.1.0",
+    "@web3auth/no-modal": "^8.1.0",
+    "@web3auth/openlogin-adapter": "^8.1.0",
+    "@web3auth/ui": "^8.1.0",
     "lodash.clonedeep": "^4.5.0",
-    "lodash.merge": "^4.6.2",
-    "@web3auth/base": "^8.0.0",
-    "@web3auth/base-provider": "^8.0.1",
-    "@web3auth/no-modal": "^8.0.1",
-    "@web3auth/openlogin-adapter": "^8.0.1",
-    "@web3auth/ui": "^8.0.1"
+    "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@toruslabs/openlogin-utils": "^8.0.0",
-    "@web3auth/wallet-connect-v2-adapter": "^8.0.1",
-    "css-loader": "^6.10.0",
+    "@toruslabs/openlogin-utils": "^8.1.0",
+    "@web3auth/wallet-connect-v2-adapter": "^8.1.0",
+    "css-loader": "^7.1.1",
     "postcss-prefix-selector": "^1.16.0",
-    "style-loader": "^3.3.4",
+    "style-loader": "^4.0.0",
     "url-loader": "^4.1.1"
   },
   "engines": {
@@ -27,8 +27,7 @@
     "npm": ">=9.x"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "jsdelivr": "dist/modal.umd.min.js",
@@ -70,5 +69,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "8.0.1"
+  "version": "8.1.0"
 }

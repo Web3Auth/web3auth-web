@@ -6,6 +6,7 @@
       "@web3auth/*-provider": ["./packages/providers/*-provider"],
       "@web3auth/*": ["./packages/*"],
       "@web3auth/*-plugin": ["./packages/plugins/*-plugin"],
+      "@web3auth/*-hooks": ["./packages/hooks/*-hooks"],
     },
   },
 }

@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-plugin",
-  "version": "8.0.1",
+  "version": "8.1.0",
   "description": "Base plugin for web3auth plugins",
   "keywords": [
     "web3Auth/base-plugin",
@@ -28,11 +28,10 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "dependencies": {
-    "@web3auth/base": "^8.0.0"
+    "@web3auth/base": "^8.1.0"
   },
   "lint-staged": {
     "!(*d).ts": [
