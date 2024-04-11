@@ -3,6 +3,7 @@
   "include": ["src", "test"],
   "compilerOptions": {
     "strict": true,
-    "module": "esnext"
+    "module": "esnext",
+    "jsx": "react-jsx"
   }
 }
