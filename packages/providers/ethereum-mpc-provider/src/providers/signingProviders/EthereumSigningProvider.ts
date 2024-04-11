@@ -1,6 +1,6 @@
 import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
-import { CHAIN_NAMESPACES, CustomChainConfig } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
   AddEthereumChainParameter,
@@ -33,6 +33,8 @@ export class EthereumSigningProvider extends BaseProvider<
     getPublic: () => Promise<Buffer>;
   }
 > {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
+
   constructor({ config, state }: { config: EthereumSigningProviderConfig; state?: EthereumSigningProviderState }) {
     super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
   }
@@ -63,6 +65,8 @@ export class EthereumSigningProvider extends BaseProvider<
     sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
     getPublic: () => Promise<Buffer>;
   }): Promise<void> {
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
@@ -132,8 +136,8 @@ export class EthereumSigningProvider extends BaseProvider<
 
     if (parseInt(chainId, 16) !== parseInt(network, 10)) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
     if (this.state.chainId !== chainId) {
-      this._providerEngineProxy.emit("chainChanged", chainId);
-      this._providerEngineProxy.emit("connect", { chainId });
+      this.emit("chainChanged", chainId);
+      this.emit("connect", { chainId });
     }
     this.update({ chainId });
     return network;
@@ -142,15 +146,17 @@ export class EthereumSigningProvider extends BaseProvider<
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IChainSwitchHandlers = {
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = params;
+        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
         this.addChain({
-          chainNamespace: "eip155",
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
           chainId,
           ticker: nativeCurrency?.symbol || "ETH",
           tickerName: nativeCurrency?.name || "Ether",
           displayName: chainName,
           rpcTarget: rpcUrls[0],
           blockExplorerUrl: blockExplorerUrls?.[0] || "",
+          decimals: nativeCurrency?.decimals || 18,
+          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
         });
       },
       switchChain: async (params: { chainId: string }): Promise<void> => {

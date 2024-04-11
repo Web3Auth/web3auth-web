@@ -1,5 +1,5 @@
 import { Hardfork } from "@ethereumjs/common";
-import { Capability, TransactionFactory } from "@ethereumjs/tx";
+import { Capability, TransactionFactory, TransactionType } from "@ethereumjs/tx";
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import {
   type MessageTypes,
@@ -40,7 +40,7 @@ async function signTx(
   // 2021-06-23
   let hackApplied = false;
   if (
-    unsignedEthTx.type === 0 &&
+    unsignedEthTx.type === TransactionType.Legacy &&
     unsignedEthTx.common.gteHardfork(Hardfork.SpuriousDragon) &&
     !unsignedEthTx.supports(Capability.EIP155ReplayProtection)
   ) {
