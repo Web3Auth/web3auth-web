@@ -28,8 +28,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
@@ -38,7 +37,7 @@
   },
   "dependencies": {
     "@toruslabs/openlogin": "^8.1.0",
-    "@toruslabs/openlogin-jrpc": "^8.1.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.1.0",
     "@web3auth/base": "^8.0.0",
     "@web3auth/base-plugin": "^8.0.1",

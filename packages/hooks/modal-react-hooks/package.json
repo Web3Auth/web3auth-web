@@ -28,8 +28,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "devDependencies": {
     "@web3auth/openlogin-adapter": "^8.0.1"

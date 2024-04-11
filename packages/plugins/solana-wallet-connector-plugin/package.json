@@ -28,15 +28,14 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "devDependencies": {
     "@metamask/rpc-errors": "^6.2.1"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^8.1.0",
-    "@toruslabs/solana-embed": "^2.0.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@toruslabs/solana-embed": "^2.1.0",
     "@web3auth/base": "^8.0.0",
     "@web3auth/base-plugin": "^8.0.1",
     "@web3auth/no-modal": "^8.0.1",

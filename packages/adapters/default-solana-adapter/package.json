@@ -24,8 +24,7 @@
     "@web3auth/torus-solana-adapter": "^8.0.1"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x"

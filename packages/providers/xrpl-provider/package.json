@@ -21,7 +21,7 @@
   "dependencies": {
     "@metamask/rpc-errors": "^6.2.1",
     "@toruslabs/base-controllers": "^5.5.5",
-    "@toruslabs/openlogin-jrpc": "^8.1.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.0.0",
     "@web3auth/base-provider": "^8.0.1",
     "lodash": "^4.17.21",
@@ -36,8 +36,7 @@
     "xrpl": "^2.x.x"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "lint-staged": {
     "!(*d).ts": [

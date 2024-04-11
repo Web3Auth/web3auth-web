@@ -26,7 +26,7 @@
     "@metamask/rpc-errors": "^6.2.1",
     "@toruslabs/base-controllers": "^5.5.5",
     "@toruslabs/http-helpers": "^6.1.1",
-    "@toruslabs/openlogin-jrpc": "^8.1.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@walletconnect/utils": "^2.12.1",
     "@web3auth/base": "^8.0.0",
     "@web3auth/base-provider": "^8.0.1",
@@ -44,8 +44,7 @@
     "@babel/runtime": "7.x"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "lint-staged": {
     "!(*d).ts": [
