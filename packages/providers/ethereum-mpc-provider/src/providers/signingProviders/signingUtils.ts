@@ -52,13 +52,15 @@ async function signTx(
   const msgHash = unsignedEthTx.getHashedMessageToSign();
   const rawMessage = unsignedEthTx.getMessageToSign();
 
-  const { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
-  let modifiedV = v;
-  if (modifiedV <= 1) {
-    modifiedV = modifiedV + 27;
+  let { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
+
+  // mpc-core-kit workaround (revert back to 0/1)
+  if (v > 1) {
+    v = v - 27;
   }
 
-  const tx = unsignedEthTx.addSignature(BigInt(modifiedV), r, s);
+  // addSignature will handle the v value
+  const tx = unsignedEthTx.addSignature(BigInt(v), r, s);
 
   // Hack part 2
   if (hackApplied) {
