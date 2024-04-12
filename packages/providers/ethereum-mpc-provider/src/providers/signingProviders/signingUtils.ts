@@ -58,8 +58,7 @@ async function signTx(
     modifiedV = modifiedV + 27;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tx = (unsignedEthTx as any)._processSignature(BigInt(modifiedV), r, s);
+  const tx = unsignedEthTx.addSignature(BigInt(modifiedV), r, s);
 
   // Hack part 2
   if (hackApplied) {
@@ -71,7 +70,8 @@ async function signTx(
     }
   }
 
-  return tx.serialize();
+  // should we return uint8array or buffer?
+  return Buffer.from(tx.serialize());
 }
 
 async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
