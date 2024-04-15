@@ -18,7 +18,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { getOpenloginDefaultOptions, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
@@ -86,8 +86,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         [WALLET_ADAPTERS.OPENLOGIN]: {
           label: WALLET_ADAPTERS.OPENLOGIN,
           loginMethods: {
-            sms_passwordless: {
-              name: "sms_passwordless",
+            [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
               showOnModal: smsOtpEnabled,
               showOnDesktop: smsOtpEnabled,
               showOnMobile: smsOtpEnabled,
@@ -137,12 +137,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (!privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required");
           }
-          const finalOpenloginAdapterSettings = {
+          const finalOpenloginAdapterSettings: Partial<OpenLoginOptions> = {
             ...defaultOptions.adapterSettings,
             clientId,
             network: web3AuthNetwork,
             whiteLabel: this.options.uiConfig,
           };
+          if (smsOtpEnabled !== undefined) {
+            finalOpenloginAdapterSettings.loginConfig = {
+              [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+                showOnModal: smsOtpEnabled,
+                showOnDesktop: smsOtpEnabled,
+                showOnMobile: smsOtpEnabled,
+                showOnSocialBackupFactor: smsOtpEnabled,
+              } as LoginConfig[keyof LoginConfig],
+            };
+          }
           if (this.options.uiConfig.uxMode) {
             finalOpenloginAdapterSettings.uxMode = this.options.uiConfig.uxMode;
           }
@@ -190,6 +200,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               );
             }
             openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
+          }
+          if (smsOtpEnabled !== undefined) {
+            openloginAdapter.setAdapterSettings({
+              loginConfig: {
+                [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+                  showOnModal: smsOtpEnabled,
+                  showOnDesktop: smsOtpEnabled,
+                  showOnMobile: smsOtpEnabled,
+                  showOnSocialBackupFactor: smsOtpEnabled,
+                } as LoginConfig[keyof LoginConfig],
+              },
+            });
           }
           if (this.options.uiConfig?.uxMode) {
             openloginAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });

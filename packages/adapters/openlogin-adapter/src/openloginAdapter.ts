@@ -193,11 +193,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
-    this.openloginOptions = {
-      ...defaultOptions.adapterSettings,
-      ...this.openloginOptions,
-      ...adapterSettings,
-    };
+    this.openloginOptions = merge(
+      defaultOptions.adapterSettings,
+      this.openloginOptions,
+      adapterSettings
+    ) as OpenloginAdapterOptions["adapterSettings"];
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
     }
