@@ -63,14 +63,14 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       tickerName: "Polygon",
     };
   }
-  if (chainId === 80001) {
+  if (chainId === 80002) {
     return {
       logo: "https://images.toruswallet.io/polygon.svg",
       chainNamespace,
-      chainId: "0x13881",
-      rpcTarget: "https://rpc.ankr.com/polygon_mumbai",
-      displayName: "Polygon Mumbai Testnet",
-      blockExplorerUrl: "https://mumbai.polygonscan.com/",
+      chainId: "0x13882",
+      rpcTarget: "https://rpc.ankr.com/polygon_amoy",
+      displayName: "Polygon Amoy Testnet",
+      blockExplorerUrl: "https://www.oklink.com/amoy",
       ticker: "MATIC",
       tickerName: "Polygon",
       decimals: 18,

@@ -55,7 +55,7 @@
   },
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "^18.2.4",
-    "@rollup/rollup-linux-x64-gnu": "^4.14.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.14.3"
   },
   "repository": {
     "type": "git",
