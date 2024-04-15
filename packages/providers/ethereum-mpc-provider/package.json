@@ -25,7 +25,6 @@
     "@metamask/eth-sig-util": "^7.0.1",
     "@metamask/rpc-errors": "^6.2.1",
     "@toruslabs/base-controllers": "^5.5.5",
-    "@toruslabs/http-helpers": "^6.1.1",
     "@toruslabs/openlogin-jrpc": "^8.1.0",
     "@web3auth/base": "^8.1.0",
     "@web3auth/base-provider": "^8.1.0",
