@@ -4,11 +4,17 @@ import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogi
 
 import { WEB3AUTH_NETWORK } from "./adapter/IAdapter";
 
+export interface WhitelistResponse {
+  urls: string[];
+  signed_urls: Record<string, string>;
+}
+
 export interface PROJECT_CONFIG_RESPONSE {
   whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;
   wallet_connect_enabled: boolean;
   wallet_connect_project_id?: string;
+  whitelist?: WhitelistResponse;
 }
 
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
@@ -51,11 +57,13 @@ export const signerHost = (web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): string => 
   return SIGNER_MAP[web3AuthNetwork ?? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET];
 };
 
-export const fetchProjectConfig = async (clientId: string, web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): Promise<PROJECT_CONFIG_RESPONSE> => {
+export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<PROJECT_CONFIG_RESPONSE> => {
   try {
     const url = new URL(`${signerHost(web3AuthNetwork)}/api/configuration`);
     url.searchParams.append("project_id", clientId);
-    const res = await get<PROJECT_CONFIG_RESPONSE>(String(url));
+    url.searchParams.append("network", web3AuthNetwork);
+    url.searchParams.append("whitelist", "true");
+    const res = await get<PROJECT_CONFIG_RESPONSE>(url.href);
     return res;
   } catch (e) {
     throw new Error(`Failed to fetch project config: ${(e as Error).message}`);

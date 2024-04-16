@@ -94,7 +94,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
-      projectConfig = await fetchProjectConfig(this.coreOptions.clientId);
+      projectConfig = await fetchProjectConfig(this.coreOptions.clientId, this.coreOptions.web3AuthNetwork);
     } catch (e) {
       throw WalletInitializationError.notReady("failed to fetch project configurations");
     }
@@ -127,7 +127,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
         const { whitelabel } = projectConfig;
         this.coreOptions.uiConfig = merge(clonedeep(whitelabel), this.coreOptions.uiConfig);
 
-        const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
+        const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
         if (smsOtpEnabled !== undefined) {
           openloginAdapter.setAdapterSettings({
             loginConfig: {
@@ -139,6 +139,9 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
               } as LoginConfig[keyof LoginConfig],
             },
           });
+        }
+        if (whitelist) {
+          openloginAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
         }
 
         if (this.coreOptions.privateKeyProvider) {
