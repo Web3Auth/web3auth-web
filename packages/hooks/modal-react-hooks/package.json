@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-react-hooks",
-  "version": "8.2.0",
+  "version": "8.2.1",
   "description": "React hooks to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-react-hooks",
@@ -32,12 +32,12 @@
   ],
   "devDependencies": {
     "@web3auth/base-plugin": "^8.1.0",
-    "@web3auth/modal": "^8.2.0",
-    "@web3auth/openlogin-adapter": "^8.2.0"
+    "@web3auth/modal": "^8.2.1",
+    "@web3auth/openlogin-adapter": "^8.2.1"
   },
   "dependencies": {
-    "@web3auth/base": "^8.2.0",
-    "@web3auth/base-plugin": "^8.2.0"
+    "@web3auth/base": "^8.2.1",
+    "@web3auth/base-plugin": "^8.2.1"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
