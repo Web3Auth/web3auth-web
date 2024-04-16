@@ -241,16 +241,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             } as Record<string, ModalConfig>;
             this.modalConfig.adapters[WALLET_ADAPTERS.WALLET_CONNECT_V2].showOnModal = false;
           } else {
-            if (!walletConnectProjectId)
+            if (!walletConnectAdapter?.adapterOptions?.adapterSettings?.walletConnectInitOptions?.projectId && !walletConnectProjectId)
               throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
 
-            walletConnectAdapter.setAdapterSettings({
-              adapterSettings: {
-                walletConnectInitOptions: {
-                  projectId: walletConnectProjectId,
+            if (walletConnectProjectId) {
+              walletConnectAdapter.setAdapterSettings({
+                adapterSettings: {
+                  walletConnectInitOptions: {
+                    projectId: walletConnectProjectId,
+                  },
                 },
-              },
-            });
+              });
+            }
           }
         }
 
