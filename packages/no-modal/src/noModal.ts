@@ -178,7 +178,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     await Promise.all(initPromises);
-    this.status = ADAPTER_STATUS.READY;
+    if (this.status === ADAPTER_STATUS.NOT_READY) this.status = ADAPTER_STATUS.READY;
   }
 
   public getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null {
