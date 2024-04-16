@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-evm-adapter",
-  "version": "8.2.1",
+  "version": "8.2.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/defaultEvmAdapter.cjs.js",
