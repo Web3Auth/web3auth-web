@@ -1,11 +1,3 @@
-import CircleArrowLeft from "../../assets/icons/circle-arrow-left.svg";
-import Close from "../../assets/icons/close.svg";
-import Connected from "../../assets/icons/connected.svg";
-import Expand from "../../assets/icons/expand.svg";
-import ExpandLight from "../../assets/icons/expand-light.svg";
-import InfoCircle from "../../assets/icons/information-circle.svg";
-import InfoCircleLight from "../../assets/icons/information-circle-light.svg";
-
 interface IconProps {
   iconName: string;
   iconTitle?: string;
@@ -15,25 +7,25 @@ interface IconProps {
 
 const icons: Record<string, { image: string }> = {
   "arrow-left": {
-    image: CircleArrowLeft,
+    image: "https://images.web3auth.io/circle-arrow-left.svg",
   },
   close: {
-    image: Close,
+    image: "https://images.web3auth.io/close.svg",
   },
   "expand-light": {
-    image: ExpandLight,
+    image: "https://images.web3auth.io/expand-light.svg",
   },
   expand: {
-    image: Expand,
+    image: "https://images.web3auth.io/expand.svg",
   },
   connected: {
-    image: Connected,
+    image: "https://images.web3auth.io/connected.svg",
   },
   "information-circle-light": {
-    image: InfoCircleLight,
+    image: "https://images.web3auth.io/information-circle-light.svg",
   },
   "information-circle": {
-    image: InfoCircle,
+    image: "https://images.web3auth.io/information-circle.svg",
   },
 };
 
