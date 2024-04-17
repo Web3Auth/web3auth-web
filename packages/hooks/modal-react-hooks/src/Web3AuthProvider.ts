@@ -25,7 +25,7 @@ export function Web3AuthProvider(params: PropsWithChildren<Web3AuthProviderProps
     if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
     if (plugins.length) plugins.map((plugin) => web3Instance.addPlugin(plugin));
     setWeb3Auth(web3Instance);
-  }, []);
+  }, [config]);
 
   const props = { value: web3Auth };
   return createElement(Web3AuthContext.Provider, props, children);
