@@ -33,7 +33,8 @@
   "devDependencies": {
     "@web3auth/base-plugin": "^8.1.0",
     "@web3auth/modal": "^8.3.0",
-    "@web3auth/openlogin-adapter": "^8.3.0"
+    "@web3auth/openlogin-adapter": "^8.3.0",
+    "@web3auth/wallet-services-plugin": "8.3.0"
   },
   "dependencies": {
     "@web3auth/base": "^8.3.0",

@@ -1,3 +1,4 @@
+import { type SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, IProvider, IWeb3Auth, UserInfo, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 export const PLUGIN_NAMESPACES = {
@@ -32,7 +33,7 @@ export const WALLET_PLUGINS = {
   ...SOLANA_PLUGINS,
 } as const;
 
-export interface IPlugin {
+export interface IPlugin extends SafeEventEmitter {
   name: string;
   SUPPORTED_ADAPTERS: WALLET_ADAPTER_TYPE[];
   pluginNamespace: PluginNamespace;

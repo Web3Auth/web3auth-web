@@ -33,6 +33,9 @@
   "dependencies": {
     "@web3auth/base": "^8.3.0"
   },
+  "devDependencies": {
+    "@toruslabs/openlogin-jrpc": "^8.1.1"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

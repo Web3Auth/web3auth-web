@@ -281,6 +281,10 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return this;
   }
 
+  public getPlugin(name: string): IPlugin | null {
+    return this.plugins[name] || null;
+  }
+
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
