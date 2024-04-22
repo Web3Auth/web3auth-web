@@ -62,7 +62,6 @@ class LoginModal extends SafeEventEmitter {
     if (!uiConfig.mode) this.uiConfig.mode = "auto";
     if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
     if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
-    if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = LANGUAGES.en;
     if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
