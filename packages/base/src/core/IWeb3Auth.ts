@@ -3,6 +3,7 @@ import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 
 import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, OPENLOGIN_NETWORK_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
+import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
 export interface IWeb3Auth extends SafeEventEmitter {
@@ -26,6 +27,8 @@ export interface IWeb3Auth extends SafeEventEmitter {
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   enableMFA<T>(params: T): Promise<void>;
+  addPlugin(plugin: IPlugin): void;
+  getPlugin(pluginName: string): IPlugin | null;
 }
 
 export interface Web3AuthNoModalOptions {

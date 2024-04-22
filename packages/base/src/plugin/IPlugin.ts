@@ -2,7 +2,7 @@ import { type SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 
 import { IProvider, UserInfo } from "../adapter";
 import { CHAIN_NAMESPACES } from "../chain/IChainInterface";
-import { IWeb3Auth } from "../core/IWeb3Auth";
+import { type IWeb3Auth } from "../core/IWeb3Auth";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
 export const PLUGIN_NAMESPACES = {
