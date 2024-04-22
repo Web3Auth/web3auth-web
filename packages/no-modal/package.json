@@ -40,7 +40,6 @@
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.1.0",
     "@web3auth/base": "^8.3.0",
-    "@web3auth/base-plugin": "^8.3.0",
     "@web3auth/base-provider": "^8.3.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2"

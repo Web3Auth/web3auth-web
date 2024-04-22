@@ -1,5 +1,4 @@
-import type { IAdapter } from "@web3auth/base";
-import type { IPlugin } from "@web3auth/base-plugin";
+import type { IAdapter, IPlugin } from "@web3auth/base";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { createContext, createElement, PropsWithChildren, useEffect, useState } from "react";
 

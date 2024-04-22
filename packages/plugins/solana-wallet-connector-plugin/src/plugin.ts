@@ -1,8 +1,16 @@
 import type { JsonRpcError } from "@metamask/rpc-errors";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
-import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+import {
+  ADAPTER_EVENTS,
+  CustomChainConfig,
+  IPlugin,
+  PLUGIN_EVENTS,
+  PLUGIN_NAMESPACES,
+  SafeEventEmitterProvider,
+  UserInfo,
+  WALLET_ADAPTERS,
+} from "@web3auth/base";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import log from "loglevel";
 

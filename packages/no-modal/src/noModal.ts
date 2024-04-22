@@ -11,9 +11,11 @@ import {
   getChainConfig,
   IAdapter,
   IBaseProvider,
+  IPlugin,
   IProvider,
   IWeb3Auth,
   log,
+  PLUGIN_NAMESPACES,
   PROJECT_CONFIG_RESPONSE,
   storageAvailable,
   UserAuthInfo,
@@ -25,7 +27,6 @@ import {
   Web3AuthError,
   Web3AuthNoModalOptions,
 } from "@web3auth/base";
-import { IPlugin, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";

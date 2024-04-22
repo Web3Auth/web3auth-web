@@ -1,10 +1,8 @@
-import { PLUGIN_EVENTS } from "@web3auth/base-plugin";
+import { PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
 import { type WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { useContext, useEffect, useState } from "react";
 
 import { Web3AuthContext } from "./Web3AuthProvider";
-
-const WAIT_FOR_INIT_MSG = "Wait for wallet services plugin to initialize.";
 
 const WALLET_SERVICES_PLUGIN_NAME = "WALLET_SERVICES_PLUGIN";
 
@@ -33,22 +31,22 @@ export const useWalletServicesPlugin = () => {
   }, [walletServicesPlugin]);
 
   const showWalletConnectScanner = async () => {
-    if (!walletServicesPlugin) throw new Error(WAIT_FOR_INIT_MSG);
-    if (!isConnected) throw new Error("Wallet services plugin is not connected.");
+    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showWalletConnectScanner();
   };
 
   const showWalletUI = async () => {
-    if (!walletServicesPlugin) throw new Error(WAIT_FOR_INIT_MSG);
-    if (!isConnected) throw new Error("Wallet services plugin is not connected.");
+    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showWalletUi();
   };
 
   const showCheckout = async () => {
-    if (!walletServicesPlugin) throw new Error(WAIT_FOR_INIT_MSG);
-    if (!isConnected) throw new Error("Wallet services plugin is not connected.");
+    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showCheckout();
   };

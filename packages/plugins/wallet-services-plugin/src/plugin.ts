@@ -1,7 +1,15 @@
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { ADAPTER_EVENTS, ADAPTER_STATUS, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
+import {
+  ADAPTER_EVENTS,
+  ADAPTER_STATUS,
+  CustomChainConfig,
+  IPlugin,
+  PLUGIN_EVENTS,
+  PLUGIN_NAMESPACES,
+  SafeEventEmitterProvider,
+  WALLET_ADAPTERS,
+} from "@web3auth/base";
 import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
