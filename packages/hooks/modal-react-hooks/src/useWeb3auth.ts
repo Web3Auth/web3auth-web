@@ -60,6 +60,7 @@ export const useWeb3Auth = () => {
       if (!web3auth) throw WalletInitializationError.notReady();
       if (!isConnected) throw WalletLoginError.notConnectedError();
       await web3auth.enableMFA(params);
+      setIsMFAEnabled(true);
     },
     [web3auth, isConnected]
   );
