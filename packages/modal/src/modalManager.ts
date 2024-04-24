@@ -8,13 +8,13 @@ import {
   getChainConfig,
   IBaseProvider,
   IProvider,
+  IWeb3AuthCoreOptions,
   log,
   LoginMethodConfig,
   PROJECT_CONFIG_RESPONSE,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletInitializationError,
-  Web3AuthNoModalOptions,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
@@ -27,7 +27,7 @@ import merge from "lodash.merge";
 import { defaultOtherModalConfig } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
 
-export interface Web3AuthOptions extends Web3AuthNoModalOptions {
+export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
    * Config for configuring modal ui display properties
    */

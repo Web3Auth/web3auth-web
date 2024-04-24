@@ -5,12 +5,12 @@ import {
   ADAPTER_STATUS,
   CustomChainConfig,
   IPlugin,
+  IWeb3Auth,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   SafeEventEmitterProvider,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import type { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 import log from "loglevel";
@@ -28,7 +28,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: Web3AuthNoModal | null = null;
+  private web3auth: IWeb3Auth | null = null;
 
   private isInitialized = false;
 
@@ -48,7 +48,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     return this.wsEmbedInstance.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: Web3AuthNoModal): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3Auth): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
@@ -178,11 +178,11 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.wsEmbedInstance.hideTorusButton();
     });
     provider.on("connect", () => {
-      if (this.walletInitOptions?.whiteLabel.showWidgetButton) this.wsEmbedInstance.showTorusButton();
+      if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
     });
   }
 
-  private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3Auth) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with wallet services connector plugin`);

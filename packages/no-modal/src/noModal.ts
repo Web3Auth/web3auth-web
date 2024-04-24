@@ -14,6 +14,7 @@ import {
   IPlugin,
   IProvider,
   IWeb3Auth,
+  IWeb3AuthCoreOptions,
   log,
   PLUGIN_NAMESPACES,
   PROJECT_CONFIG_RESPONSE,
@@ -25,7 +26,6 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-  Web3AuthNoModalOptions,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -35,7 +35,7 @@ import merge from "lodash.merge";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
-  readonly coreOptions: Web3AuthNoModalOptions;
+  readonly coreOptions: IWeb3AuthCoreOptions;
 
   public connectedAdapterName: WALLET_ADAPTER_TYPE | null = null;
 
@@ -51,7 +51,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
   private storage: "sessionStorage" | "localStorage" = "localStorage";
 
-  constructor(options: Web3AuthNoModalOptions) {
+  constructor(options: IWeb3AuthCoreOptions) {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
