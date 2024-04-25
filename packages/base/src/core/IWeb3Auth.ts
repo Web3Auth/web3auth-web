@@ -88,3 +88,5 @@ export interface IWeb3Auth extends SafeEventEmitter {
   addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
 }
+
+export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;
