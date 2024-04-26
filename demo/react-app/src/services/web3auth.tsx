@@ -7,7 +7,7 @@ import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
-import { PLUGIN_EVENTS } from "@web3auth/base-plugin";
+import { PLUGIN_EVENTS } from "@web3auth/base";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
