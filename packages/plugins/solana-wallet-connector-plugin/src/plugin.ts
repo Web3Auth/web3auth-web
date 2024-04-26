@@ -1,9 +1,17 @@
 import type { JsonRpcError } from "@metamask/rpc-errors";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
-import { ADAPTER_EVENTS, CustomChainConfig, SafeEventEmitterProvider, UserInfo, WALLET_ADAPTERS } from "@web3auth/base";
-import { IPlugin, PLUGIN_EVENTS, PLUGIN_NAMESPACES } from "@web3auth/base-plugin";
-import type { Web3AuthNoModal } from "@web3auth/no-modal";
+import {
+  ADAPTER_EVENTS,
+  CustomChainConfig,
+  IPlugin,
+  IWeb3Auth,
+  PLUGIN_EVENTS,
+  PLUGIN_NAMESPACES,
+  SafeEventEmitterProvider,
+  UserInfo,
+  WALLET_ADAPTERS,
+} from "@web3auth/base";
 import log from "loglevel";
 
 import { SolanaWalletPluginError } from "./errors";
@@ -24,7 +32,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: Web3AuthNoModal | null = null;
+  private web3auth: IWeb3Auth | null = null;
 
   private userInfo: UserInfo | null = null;
 
@@ -49,7 +57,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: Web3AuthNoModal): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3Auth): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw SolanaWalletPluginError.web3authRequired();
     if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
@@ -176,7 +184,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     });
   }
 
-  private subscribeToWeb3AuthNoModalEvents(web3Auth: Web3AuthNoModal) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3Auth) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
       if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
         log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);

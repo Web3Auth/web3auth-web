@@ -3,32 +3,10 @@ import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 
 import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, OPENLOGIN_NETWORK_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
+import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
-export interface IWeb3Auth extends SafeEventEmitter {
-  connected: boolean;
-  connectedAdapterName: string | null;
-  status: ADAPTER_STATUS_TYPE;
-  cachedAdapter: string | null;
-  provider: IProvider | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
-  init(): Promise<void>;
-  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
-  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
-  /**
-   * Connect to a specific wallet adapter
-   * @param walletName - Key of the walletAdapter to use.
-   */
-  connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
-  logout(options?: { cleanup: boolean }): Promise<void>;
-  getUserInfo(): Promise<Partial<UserInfo>>;
-  authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
-  switchChain(params: { chainId: string }): Promise<void>;
-  enableMFA<T>(params: T): Promise<void>;
-}
-
-export interface Web3AuthNoModalOptions {
+export interface IWeb3AuthCoreOptions {
   /**
    * Client id for web3auth.
    * You can obtain your client id from the web3auth developer dashboard.
@@ -84,3 +62,31 @@ export interface Web3AuthNoModalOptions {
    */
   privateKeyProvider?: IBaseProvider<string>;
 }
+
+export interface IWeb3Auth extends SafeEventEmitter {
+  readonly coreOptions: IWeb3AuthCoreOptions;
+  connected: boolean;
+  connectedAdapterName: string | null;
+  status: ADAPTER_STATUS_TYPE;
+  cachedAdapter: string | null;
+  provider: IProvider | null;
+  walletAdapters: Record<string, IAdapter<unknown>>;
+  init(): Promise<void>;
+  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
+  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
+  /**
+   * Connect to a specific wallet adapter
+   * @param walletName - Key of the walletAdapter to use.
+   */
+  connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
+  logout(options?: { cleanup: boolean }): Promise<void>;
+  getUserInfo(): Promise<Partial<UserInfo>>;
+  authenticateUser(): Promise<UserAuthInfo>;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
+  switchChain(params: { chainId: string }): Promise<void>;
+  enableMFA<T>(params: T): Promise<void>;
+  addPlugin(plugin: IPlugin): void;
+  getPlugin(pluginName: string): IPlugin | null;
+}
+
+export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;
