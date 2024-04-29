@@ -34,7 +34,7 @@
     "@web3auth/openlogin-adapter": "^8.3.0"
   },
   "dependencies": {
-    "@toruslabs/ethereum-controllers": "^5.5.6",
+    "@toruslabs/ethereum-controllers": "^5.5.7",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.3.0",
     "@web3auth/no-modal": "^8.3.0",

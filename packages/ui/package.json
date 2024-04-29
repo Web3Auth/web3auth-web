@@ -48,16 +48,16 @@
     "@toruslabs/vue-components": "^7.8.2",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^18.2.78",
-    "@types/react-dom": "^18.2.25",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
     "css-loader": "^7.1.1",
     "live-server": "^1.2.2",
     "postcss": "^8.4.38",
     "postcss-loader": "^8.1.1",
-    "postcss-prefix-selector": "^1.16.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "postcss-prefix-selector": "^1.16.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "rollup-plugin-postcss": "^4.0.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.3",
@@ -75,8 +75,8 @@
     "i18next": "^23.11.2",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^14.1.0",
-    "react-qrcode-logo": "^2.9.0"
+    "react-i18next": "^14.1.1",
+    "react-qrcode-logo": "^2.10.0"
   },
   "lint-staged": {
     "!(*d).ts": [
