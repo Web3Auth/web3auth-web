@@ -25,7 +25,7 @@ import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
+import Loader from "../components/loader.vue";
 
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";

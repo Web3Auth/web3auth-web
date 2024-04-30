@@ -30,7 +30,7 @@ import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
+import Loader from "../components/loader.vue";
 
 import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";

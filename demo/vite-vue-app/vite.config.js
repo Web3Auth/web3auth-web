@@ -1,30 +1,44 @@
-// vite.config.js
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-//import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vitejs.dev/config/
-const path = require("path");
 export default defineConfig({
-    optimizeDeps: {
-        esbuildOptions: {
-            target: 'esnext',
-        },
-        define: {
-            global: 'globalThis'
-          },
-        supported: { 
-        bigint: true 
-        },
+  plugins: [ nodePolyfills({
+    exclude: [
+      'process',
+      'assert',
+    ],
+  }),vue()],
+  optimizeDeps: {
+    esbuildOptions: {
+        target: 'esnext',
     },
-  plugins: [vue(), 
-    //nodePolyfills({ include: ['crypto', 'stream', 'assert', 'http', 'https', 'os', 'url', 'zlib'] })
-],
+    define: {
+        global: 'globalThis'
+      },
+    supported: { 
+      bigint: true ,
+    },
+},
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      crypto: "empty-module",
+      assert: "empty-module",
+      http: "empty-module",
+      https: "empty-module",
+      os: "empty-module",
+      url: "empty-module",
+      zlib: "empty-module",
+      stream: "empty-module",
+      _stream_duplex: "empty-module",
+      _stream_passthrough: "empty-module",
+      _stream_readable: "empty-module",
+      _stream_writable: "empty-module",
+      _stream_transform: "empty-module",
     },
   },
-  target: 'es2020',
+  define: {
+    global: "globalThis",
+  },
 })
