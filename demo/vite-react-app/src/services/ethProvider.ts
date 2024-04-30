@@ -6,51 +6,35 @@ import { erc20Abi, storageSCAbi } from "../config/abi";
 const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
 
   const getTokenAddress =  () => {
-    switch(provider.currentChainConfig.chainNamespace){
-      case "eip155":
-        switch (provider.chainId) {
-          case "0x1":
-          case "0x89":
-            return "0x655F2166b0709cd575202630952D71E2bB0d61Af";  
-          case "0x13882": // amoy
-            return "0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904"
-          case "0xaa36a7": // sepolia
-            return "0x779877A7B0D9E8603169DdbD7836e478b4624789";
-          case "0x66eee": // arbitrum
-            return "0x3a12ea1bEa9b04f5541affBe1F6Dd83a72a9bbd7";
-        }
-        break;
-      case "solana":
-        return "A6rSPi9JmJgVkW6BatsA6MjFYLseizPM2Fnt92coFjf4";
-      default:
-        return ""; 
+      switch (provider.chainId) {
+        case "0x1":
+        case "0x89":
+          return "0x655F2166b0709cd575202630952D71E2bB0d61Af";  
+        case "0x13882": // amoy
+          return "0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904"
+        case "0xaa36a7": // sepolia
+          return "0x779877A7B0D9E8603169DdbD7836e478b4624789";
+        case "0x66eee": // arbitrum
+          return "0x3a12ea1bEa9b04f5541affBe1F6Dd83a72a9bbd7";
       }
   }
 
   const getStorageAddress = () => {
     // simple default storage smart contract from remix.ethereum.org
-    switch(provider.currentChainConfig.chainNamespace){
-      case "eip155":
-        switch (provider.chainId) {
-          case "0x1":
-          case "0x89":
-            return "";  
-            break;
-          case "0x13882": // amoy
-            return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-            break;
-          case "0xaa36a7": // sepolia
-            return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-            break;
-          case "0x66eee": // arbitrum
-            return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-            break;
-        }
-        break;
-      case "solana":
-        return "";
-      default:
-        return ""; 
+      switch (provider.chainId) {
+        case "0x1":
+        case "0x89":
+          return "";  
+          break;
+        case "0x13882": // amoy
+          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
+          break;
+        case "0xaa36a7": // sepolia
+          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
+          break;
+        case "0x66eee": // arbitrum
+          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
+          break;
       }
   }
 
@@ -156,7 +140,6 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
         uiConsole("txRes", txRes);  
       } else uiConsole("No Smart Contract for this blockchain.");
       
-      uiConsole("txRes", txRes);
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);
