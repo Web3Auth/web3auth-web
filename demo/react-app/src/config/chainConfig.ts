@@ -59,6 +59,7 @@ export const CHAIN_CONFIG = {
     ticker: "eth",
     tickerName: "Eth",
     chainNamespace: CHAIN_NAMESPACES.EIP155,
+    logo: "https://images.toruswallet.io/arbitrum.svg",
   } as CustomChainConfig,
 } as const;
 
