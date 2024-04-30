@@ -399,6 +399,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("walletServicesPlugin not initialized yet");
       return;
     }
+    if (web3Auth !=null && web3Auth.status !== "connected") {
+      console.log("web3Auth not initialized yet");
+      uiConsole("web3Auth not initialized yet");
+      return;
+    }
     await walletServicesPlugin.showWalletConnectScanner();
   };
 
