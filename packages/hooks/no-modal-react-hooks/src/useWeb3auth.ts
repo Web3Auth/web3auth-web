@@ -1,5 +1,12 @@
-import { ADAPTER_EVENTS, CustomChainConfig, type IPlugin, type IProvider, WalletInitializationError, WalletLoginError } from "@web3auth/base";
-import { type ModalConfig } from "@web3auth/modal";
+import {
+  ADAPTER_EVENTS,
+  CustomChainConfig,
+  type IPlugin,
+  type IProvider,
+  WALLET_ADAPTER_TYPE,
+  WalletInitializationError,
+  WalletLoginError,
+} from "@web3auth/base";
 import { type LoginParams, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { useCallback, useContext, useEffect, useState } from "react";
 
@@ -40,13 +47,10 @@ export const useWeb3Auth = () => {
     }
   }, [web3auth?.status]);
 
-  const initModal = useCallback(
-    async (params: { modalConfig?: Record<string, ModalConfig> } = {}) => {
-      if (!web3auth) throw WalletInitializationError.notReady();
-      await web3auth.initModal(params);
-    },
-    [web3auth]
-  );
+  const init = useCallback(async () => {
+    if (!web3auth) throw WalletInitializationError.notReady();
+    await web3auth.init();
+  }, [web3auth]);
 
   useEffect(() => {
     if (web3auth) {
@@ -75,11 +79,14 @@ export const useWeb3Auth = () => {
     [web3auth, isConnected]
   );
 
-  const connect = useCallback(async () => {
-    if (!web3auth) throw WalletInitializationError.notReady();
-    const localProvider = await web3auth.connect();
-    return localProvider;
-  }, [web3auth]);
+  const connectTo = useCallback(
+    async (walletName: WALLET_ADAPTER_TYPE, loginParams: LoginParams) => {
+      if (!web3auth) throw WalletInitializationError.notReady();
+      const localProvider = await web3auth.connectTo(walletName, loginParams);
+      return localProvider;
+    },
+    [web3auth]
+  );
 
   const addAndSwitchChain = useCallback(
     async (chainConfig: CustomChainConfig) => {
@@ -127,8 +134,8 @@ export const useWeb3Auth = () => {
     userInfo,
     isMFAEnabled,
     status,
-    initModal,
-    connect,
+    init,
+    connectTo,
     enableMFA,
     logout,
     addAndSwitchChain,
