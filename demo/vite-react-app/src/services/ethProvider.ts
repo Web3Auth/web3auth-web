@@ -16,6 +16,8 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
           return "0x779877A7B0D9E8603169DdbD7836e478b4624789";
         case "0x66eee": // arbitrum
           return "0x3a12ea1bEa9b04f5541affBe1F6Dd83a72a9bbd7";
+        default:
+          return "";
       }
   }
 
@@ -25,16 +27,12 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
         case "0x1":
         case "0x89":
           return "";  
-          break;
         case "0x13882": // amoy
-          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-          break;
         case "0xaa36a7": // sepolia
-          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-          break;
         case "0x66eee": // arbitrum
           return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-          break;
+        default:
+          return "";
       }
   }
 
@@ -136,7 +134,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
 
       if (storageAddress !== "") {
         const contract = new web3.eth.Contract(storageSCAbi, storageAddress);
-        const txRes = await contract.methods.store(Math.floor(Math.random() * 10));
+        const txRes = await contract.methods.retrieve().call();
         uiConsole("txRes", txRes);  
       } else uiConsole("No Smart Contract for this blockchain.");
       
