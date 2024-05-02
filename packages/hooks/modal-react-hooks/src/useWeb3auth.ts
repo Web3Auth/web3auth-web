@@ -1,4 +1,13 @@
-import { ADAPTER_EVENTS, CustomChainConfig, type IPlugin, type IProvider, WalletInitializationError, WalletLoginError } from "@web3auth/base";
+import {
+  ADAPTER_EVENTS,
+  ADAPTER_STATUS,
+  type ADAPTER_STATUS_TYPE,
+  CustomChainConfig,
+  type IPlugin,
+  type IProvider,
+  WalletInitializationError,
+  WalletLoginError,
+} from "@web3auth/base";
 import { type ModalConfig } from "@web3auth/modal";
 import { type LoginParams, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -12,7 +21,8 @@ export const useWeb3Auth = () => {
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [userInfo, setUserInfo] = useState<Partial<OpenloginUserInfo> | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [status, setStatus] = useState<ADAPTER_STATUS_TYPE | null>(null);
 
   useEffect(() => {
     const addState = async () => {
@@ -37,6 +47,8 @@ export const useWeb3Auth = () => {
   useEffect(() => {
     if (web3auth?.status) {
       setStatus(web3auth.status);
+      // we want initialized to be true in case of any status other than NOT_READY
+      setIsInitialized(web3auth.status !== ADAPTER_STATUS.NOT_READY);
     }
   }, [web3auth?.status]);
 
@@ -123,6 +135,7 @@ export const useWeb3Auth = () => {
   return {
     web3auth,
     isConnected,
+    isInitialized,
     provider,
     userInfo,
     isMFAEnabled,
