@@ -45,25 +45,35 @@ export const useWeb3Auth = () => {
   }, [web3auth, isConnected]);
 
   useEffect(() => {
-    if (web3auth?.status) {
-      setStatus(web3auth.status);
-      // we want initialized to be true in case of any status other than NOT_READY
-      setIsInitialized(web3auth.status !== ADAPTER_STATUS.NOT_READY);
+    if (status) {
+      setIsInitialized(status !== ADAPTER_EVENTS.NOT_READY);
     }
-  }, [web3auth?.status]);
+  }, [status]);
 
   const initModal = useCallback(
     async (params: { modalConfig?: Record<string, ModalConfig> } = {}) => {
       if (!web3auth) throw WalletInitializationError.notReady();
       await web3auth.initModal(params);
+      setStatus(web3auth.status);
     },
     [web3auth]
   );
 
   useEffect(() => {
     if (web3auth) {
-      web3auth.on(ADAPTER_EVENTS.CONNECTED, () => setConnected(true));
-      web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => setConnected(false));
+      // web3auth is initialized here.
+      setStatus(web3auth.status);
+      web3auth.on(ADAPTER_EVENTS.NOT_READY, () => setStatus(ADAPTER_STATUS.NOT_READY));
+      web3auth.on(ADAPTER_EVENTS.CONNECTED, () => {
+        setStatus(web3auth.status);
+        setConnected(true);
+      });
+      web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
+        setStatus(web3auth.status);
+        setConnected(false);
+      });
+      web3auth.on(ADAPTER_EVENTS.CONNECTING, () => setStatus(web3auth.status));
+      web3auth.on(ADAPTER_EVENTS.ERRORED, () => setStatus(ADAPTER_STATUS.ERRORED));
     }
   }, [web3auth]);
 
