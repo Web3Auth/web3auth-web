@@ -82,7 +82,13 @@ export const useWeb3Auth = () => {
       if (!web3auth) throw WalletInitializationError.notReady();
       if (!isConnected) throw WalletLoginError.notConnectedError();
       await web3auth.enableMFA(params);
-      setIsMFAEnabled(true);
+      // in case of redirect mode, enableMFA will not return anything
+      // and we could set isMFAEnabled to true instantly even if the user
+      // is being redirected to the enable MFA screens.
+      // so instant of updating directly to true, we will check the user info.
+      const localUserInfo = await web3auth.getUserInfo();
+      setUserInfo(localUserInfo);
+      setIsMFAEnabled(localUserInfo.isMfaEnabled || false);
     },
     [web3auth, isConnected]
   );
