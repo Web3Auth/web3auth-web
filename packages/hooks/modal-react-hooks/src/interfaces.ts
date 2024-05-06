@@ -1,9 +1,19 @@
-import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IPlugin, IProvider, UserAuthInfo } from "@web3auth/base";
-import { type ModalConfig, type Web3Auth } from "@web3auth/modal";
+import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo } from "@web3auth/base";
+import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
 import { type LoginParams, type OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import type { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 
-export interface IWeb3authContext {
+export type Web3AuthContextConfig = {
+  web3AuthOptions: Web3AuthOptions;
+  adapters?: IAdapter<unknown>[];
+  plugins?: IPlugin[];
+};
+
+export interface Web3AuthProviderProps {
+  config: Web3AuthContextConfig;
+}
+
+export interface IWeb3authInnerContext {
   web3Auth: Web3Auth | null;
   isConnected: boolean;
   provider: IProvider | null;
@@ -11,6 +21,7 @@ export interface IWeb3authContext {
   isMFAEnabled: boolean;
   isInitialized: boolean;
   status: ADAPTER_STATUS_TYPE | null;
+  walletServicesPlugin: WalletServicesPlugin | null;
   initModal(params?: { modalConfig?: Record<string, ModalConfig> }): Promise<void>;
   enableMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
@@ -30,4 +41,4 @@ export interface IWalletServicesContext {
   showWalletUI(): Promise<void>;
 }
 
-export type IContext = { core: IWeb3authContext; walletServices: IWalletServicesContext };
+export type IWeb3authContext = IWeb3authInnerContext;
