@@ -21,7 +21,7 @@ const WALLET_SERVICES_PLUGIN_NAME = "WALLET_SERVICES_PLUGIN";
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
   const { children, config } = params;
-  const [web3Auth, setweb3auth] = useState<Web3Auth | null>(null);
+  const [web3Auth, setWeb3auth] = useState<Web3Auth | null>(null);
 
   const [isConnected, setConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
@@ -42,6 +42,16 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   );
 
   useEffect(() => {
+    const resetHookState = () => {
+      setProvider(null);
+      setUserInfo(null);
+      setIsMFAEnabled(false);
+      setConnected(false);
+      setWalletServicesPlugin(null);
+      setStatus(null);
+    };
+
+    resetHookState();
     const { web3AuthOptions, adapters = [], plugins = [] } = config;
     const web3Instance = new Web3Auth(web3AuthOptions);
     if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
@@ -50,7 +60,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Instance.addPlugin(plugin);
         if (plugin.name === WALLET_SERVICES_PLUGIN_NAME) setWalletServicesPlugin(plugin as WalletServicesPlugin);
       });
-    setweb3auth(web3Instance);
+    setWeb3auth(web3Instance);
   }, [config]);
 
   useEffect(() => {
@@ -89,35 +99,38 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   );
 
   useEffect(() => {
+    const notReadyListener = () => setStatus(ADAPTER_STATUS.NOT_READY);
+    const connectedListener = () => {
+      setStatus(web3Auth.status);
+      setConnected(true);
+    };
+    const disconnectedListener = () => {
+      setStatus(web3Auth.status);
+      setConnected(false);
+    };
+    const connectingListener = () => {
+      setStatus(web3Auth.status);
+    };
+    const errorListener = () => {
+      setStatus(ADAPTER_STATUS.ERRORED);
+    };
     if (web3Auth) {
       // web3Auth is initialized here.
       setStatus(web3Auth.status);
-      web3Auth.on(ADAPTER_EVENTS.NOT_READY, () => setStatus(ADAPTER_STATUS.NOT_READY));
-      web3Auth.on(ADAPTER_EVENTS.CONNECTED, () => {
-        setStatus(web3Auth.status);
-        setConnected(true);
-      });
-      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
-        setStatus(web3Auth.status);
-        setConnected(false);
-      });
-      web3Auth.on(ADAPTER_EVENTS.CONNECTING, () => setStatus(web3Auth.status));
-      web3Auth.on(ADAPTER_EVENTS.ERRORED, () => setStatus(ADAPTER_STATUS.ERRORED));
+      web3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+      web3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+      web3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
+      web3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
     }
 
     return () => {
       if (web3Auth) {
-        web3Auth.off(ADAPTER_EVENTS.NOT_READY, () => setStatus(ADAPTER_STATUS.NOT_READY));
-        web3Auth.off(ADAPTER_EVENTS.CONNECTED, () => {
-          setStatus(web3Auth.status);
-          setConnected(true);
-        });
-        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, () => {
-          setStatus(web3Auth.status);
-          setConnected(false);
-        });
-        web3Auth.off(ADAPTER_EVENTS.CONNECTING, () => setStatus(web3Auth.status));
-        web3Auth.off(ADAPTER_EVENTS.ERRORED, () => setStatus(ADAPTER_STATUS.ERRORED));
+        web3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+        web3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
+        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+        web3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
+        web3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
       }
     };
   }, [web3Auth]);

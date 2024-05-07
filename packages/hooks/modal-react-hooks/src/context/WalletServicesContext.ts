@@ -11,23 +11,23 @@ export function WalletServicesProvider({ children }: PropsWithChildren) {
   const [walletSvcConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
+    const connectedListener = () => {
+      setIsConnected(true);
+    };
+
+    const disconnectedListener = () => {
+      setIsConnected(false);
+    };
+
     if (walletServicesPlugin) {
-      walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, () => {
-        setIsConnected(true);
-      });
-      walletServicesPlugin.on(PLUGIN_EVENTS.DISCONNECTED, () => {
-        setIsConnected(false);
-      });
+      walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
+      walletServicesPlugin.on(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
     }
 
     return () => {
       if (walletServicesPlugin) {
-        walletServicesPlugin.off(PLUGIN_EVENTS.CONNECTED, () => {
-          setIsConnected(true);
-        });
-        walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, () => {
-          setIsConnected(false);
-        });
+        walletServicesPlugin.off(PLUGIN_EVENTS.CONNECTED, connectedListener);
+        walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
       }
     };
   }, [walletServicesPlugin]);

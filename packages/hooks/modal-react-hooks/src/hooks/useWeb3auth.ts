@@ -1,4 +1,4 @@
-import { WalletInitializationError } from "@web3auth/base/dist/types";
+import { WalletInitializationError } from "@web3auth/base";
 import { useContext } from "react";
 
 import { Web3AuthInnerContext } from "../context/Web3AuthInnerContext";
