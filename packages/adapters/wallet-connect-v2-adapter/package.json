@@ -39,7 +39,10 @@
   "dependencies": {
     "@web3auth/base": "^8.4.1",
     "@web3auth/base-evm-adapter": "^8.4.1",
+    "@web3auth/base-provider": "^8.4.1",
     "@web3auth/ethereum-provider": "^8.4.1",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@metamask/rpc-errors": "^6.2.1",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {

@@ -1,10 +1,9 @@
-import { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
+import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import type { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
-
-import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
+import type { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
