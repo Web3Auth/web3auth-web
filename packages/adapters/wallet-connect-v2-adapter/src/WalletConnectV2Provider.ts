@@ -4,10 +4,14 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
+import {
+  AddEthereumChainParameter,
+  createChainSwitchMiddleware,
+  createEthMiddleware,
+  createJsonRpcClient,
+  IChainSwitchHandlers,
+} from "@web3auth/ethereum-provider";
 
-import { createChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
-import { AddEthereumChainParameter, IChainSwitchHandlers } from "../../rpc/interfaces";
-import { createJsonRpcClient } from "../../rpc/jrpcClient";
 import { getAccounts, getProviderHandlers } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {

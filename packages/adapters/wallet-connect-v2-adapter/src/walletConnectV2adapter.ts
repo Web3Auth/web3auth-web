@@ -25,12 +25,12 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
-import { WalletConnectV2Provider } from "@web3auth/ethereum-provider";
 import merge from "lodash.merge";
 
 import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
 import { isChainIdSupported } from "./utils";
+import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
 class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V2;
