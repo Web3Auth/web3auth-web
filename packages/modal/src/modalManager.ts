@@ -299,8 +299,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
 
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
-    this.status = ADAPTER_STATUS.READY;
     await Promise.all(initPromises);
+    if (this.status === ADAPTER_STATUS.NOT_READY) {
+      this.status = ADAPTER_STATUS.READY;
+      this.emit(ADAPTER_EVENTS.READY);
+    }
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
       return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
