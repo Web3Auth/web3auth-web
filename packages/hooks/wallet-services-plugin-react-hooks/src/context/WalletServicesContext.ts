@@ -1,14 +1,15 @@
-import { PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
-import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import { IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
+import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { useWeb3Auth } from "../hooks/useWeb3auth";
 import { IWalletServicesContext } from "../interfaces";
 
 export const WalletServicesContext = createContext<IWalletServicesContext>(null);
 
-export function WalletServicesProvider({ children }: PropsWithChildren) {
-  const { isConnected, walletServicesPlugin } = useWeb3Auth();
-  const [walletSvcConnected, setIsConnected] = useState<boolean>(false);
+export function WalletServicesContextProvider({ children, context }: PropsWithChildren<{ context: Context<IBaseWeb3AuthHookContext> }>) {
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
+  const web3AuthContext = useContext(context);
 
   useEffect(() => {
     const connectedListener = () => {
@@ -18,6 +19,9 @@ export function WalletServicesProvider({ children }: PropsWithChildren) {
     const disconnectedListener = () => {
       setIsConnected(false);
     };
+
+    const plugin = web3AuthContext.getPlugin("WALLET_SERVICES_PLUGIN") as WalletServicesPlugin;
+    setWalletServicesPlugin(plugin);
 
     if (walletServicesPlugin) {
       walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
@@ -30,7 +34,7 @@ export function WalletServicesProvider({ children }: PropsWithChildren) {
         walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
       }
     };
-  }, [walletServicesPlugin]);
+  }, [walletServicesPlugin, web3AuthContext]);
 
   const showWalletConnectScanner = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
@@ -56,12 +60,12 @@ export function WalletServicesProvider({ children }: PropsWithChildren) {
   const value = useMemo(() => {
     return {
       plugin: walletServicesPlugin,
-      isConnected: walletSvcConnected,
+      isConnected,
       showWalletConnectScanner,
       showCheckout,
       showWalletUI,
     };
-  }, [walletServicesPlugin, walletSvcConnected, showWalletConnectScanner, showCheckout, showWalletUI]);
+  }, [walletServicesPlugin, isConnected, showWalletConnectScanner, showCheckout, showWalletUI]);
 
   return createElement(WalletServicesContext.Provider, { value }, children);
 }

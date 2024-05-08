@@ -52,7 +52,7 @@ export class WalletServicesPluginError extends Web3AuthError {
     return WalletServicesPluginError.fromCode(5218, extraMessage);
   }
 
-  public static differentWeb3authNetwork(extraMessage = ""): IWeb3AuthError {
+  public static differentWeb3AuthNetwork(extraMessage = ""): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5219, extraMessage);
   }
 

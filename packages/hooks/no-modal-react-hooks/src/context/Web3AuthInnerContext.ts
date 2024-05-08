@@ -5,10 +5,11 @@ import {
   CustomChainConfig,
   type IPlugin,
   IProvider,
+  WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { ModalConfig, Web3Auth } from "@web3auth/modal";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -18,7 +19,7 @@ export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
   const { children, config } = params;
-  const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
+  const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
 
   const [isConnected, setConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
@@ -54,7 +55,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
 
     resetHookState();
     const { web3AuthOptions, adapters = [], plugins = [] } = config;
-    const web3Instance = new Web3Auth(web3AuthOptions);
+    const web3Instance = new Web3AuthNoModal(web3AuthOptions);
     if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
     if (plugins.length)
       plugins.forEach((plugin) => {
@@ -89,14 +90,11 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
   }, [status]);
 
-  const initModal = useCallback(
-    async (modalParams: { modalConfig?: Record<string, ModalConfig> } = {}) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      await web3Auth.initModal(modalParams);
-      setStatus(web3Auth.status);
-    },
-    [web3Auth]
-  );
+  const init = useCallback(async () => {
+    if (!web3Auth) throw WalletInitializationError.notReady();
+    await web3Auth.init();
+    setStatus(web3Auth.status);
+  }, [web3Auth]);
 
   useEffect(() => {
     const notReadyListener = () => setStatus(ADAPTER_STATUS.NOT_READY);
@@ -157,11 +155,14 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth, isConnected]
   );
 
-  const connect = useCallback(async () => {
-    if (!web3Auth) throw WalletInitializationError.notReady();
-    const localProvider = await web3Auth.connect();
-    return localProvider;
-  }, [web3Auth]);
+  const connectTo = useCallback(
+    async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
+      if (!web3Auth) throw WalletInitializationError.notReady();
+      const localProvider = await web3Auth.connectTo(walletName, loginParams);
+      return localProvider;
+    },
+    [web3Auth]
+  );
 
   const addAndSwitchChain = useCallback(
     async (chainConfig: CustomChainConfig) => {
@@ -203,8 +204,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       userInfo,
       isMFAEnabled,
       status,
-      initModal,
-      connect,
+      init,
+      getPlugin,
+      connectTo,
       enableMFA,
       logout,
       addAndSwitchChain,
@@ -212,7 +214,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       addPlugin,
       authenticateUser,
       switchChain,
-      getPlugin,
     };
   }, [
     web3Auth,
@@ -222,9 +223,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     userInfo,
     isMFAEnabled,
     status,
+    init,
+    connectTo,
     getPlugin,
-    initModal,
-    connect,
     enableMFA,
     logout,
     addAndSwitchChain,
