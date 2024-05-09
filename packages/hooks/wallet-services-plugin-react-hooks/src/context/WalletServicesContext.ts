@@ -1,5 +1,5 @@
 import { IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { type WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { IWalletServicesContext } from "../interfaces";

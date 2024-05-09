@@ -42,8 +42,7 @@
     "loglevel": "^1.9.1"
   },
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@web3auth/openlogin-adapter": "^8.x"
+    "@babel/runtime": "^7.x"
   },
   "lint-staged": {
     "!(*d).ts": [

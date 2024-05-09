@@ -30,17 +30,12 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@web3auth/wallet-services-plugin": "^8.4.1",
-    "@web3auth/openlogin-adapter": "^8.4.1"
-  },
   "dependencies": {
-    "@web3auth/base": "^8.4.1"
+    "@web3auth/base": "^8.4.1",
+    "@web3auth/wallet-services-plugin": "^8.4.1"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@web3auth/openlogin-adapter": "^8.x",
-    "@web3auth/wallet-services-plugin": "^8.x",
     "react": "^18.x"
   },
   "lint-staged": {
