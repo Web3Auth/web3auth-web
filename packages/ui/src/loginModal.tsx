@@ -59,7 +59,7 @@ class LoginModal extends SafeEventEmitter {
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
     if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
-    if (!uiConfig.mode) this.uiConfig.mode = "auto";
+    if (!uiConfig.mode) this.uiConfig.mode = "light";
     if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
     if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
     if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
