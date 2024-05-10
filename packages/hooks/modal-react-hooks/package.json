@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-react-hooks",
-  "version": "8.5.0-alpha.0",
+  "version": "8.5.0-alpha.2",
   "description": "React hooks to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-react-hooks",
