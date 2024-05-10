@@ -1,1 +1,1 @@
-export { WalletServicesContextProvider } from "./WalletServicesContext";
+export * from "./WalletServicesContext";

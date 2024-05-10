@@ -1,3 +1,4 @@
+export * from "./context";
 export * from "./hooks";
-export type { IWalletServicesContext } from "./interfaces";
-export { WalletServicesProvider } from "./WalletServicesProvider";
+export * from "./interfaces";
+export * from "./WalletServicesProvider";

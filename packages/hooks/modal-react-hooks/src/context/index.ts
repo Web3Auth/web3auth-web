@@ -1,1 +1,1 @@
-export { Web3AuthInnerProvider } from "./Web3AuthInnerContext";
+export * from "./Web3AuthInnerContext";
