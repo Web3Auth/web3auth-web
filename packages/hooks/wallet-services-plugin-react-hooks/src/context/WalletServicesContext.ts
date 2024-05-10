@@ -1,4 +1,4 @@
-import { IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
+import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
 import { type WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
@@ -20,7 +20,7 @@ export function WalletServicesContextProvider({ children, context }: PropsWithCh
       setIsConnected(false);
     };
 
-    const plugin = web3AuthContext.getPlugin("WALLET_SERVICES_PLUGIN") as WalletServicesPlugin;
+    const plugin = web3AuthContext.getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
     setWalletServicesPlugin(plugin);
 
     if (walletServicesPlugin) {
