@@ -4,6 +4,7 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   CustomChainConfig,
+  EVM_PLUGINS,
   IPlugin,
   IWeb3Auth,
   PLUGIN_EVENTS,
@@ -18,7 +19,7 @@ import log from "loglevel";
 import { WalletServicesPluginError } from "./errors";
 
 export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
-  name = "WALLET_SERVICES_PLUGIN";
+  name = EVM_PLUGINS.WALLET_SERVICES;
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
 

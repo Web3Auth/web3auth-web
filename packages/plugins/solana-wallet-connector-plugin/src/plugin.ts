@@ -9,6 +9,7 @@ import {
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   SafeEventEmitterProvider,
+  SOLANA_PLUGINS,
   UserInfo,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -22,7 +23,7 @@ export type ProviderInfo = {
 };
 
 export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPlugin {
-  name = "SOLANA_WALLET_CONNECTOR_PLUGIN";
+  name = SOLANA_PLUGINS.SOLANA;
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
 
