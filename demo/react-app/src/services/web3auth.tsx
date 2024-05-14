@@ -168,7 +168,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             mfaLevel: "optional",
           },
           adapterSettings: {
-            buildEnv: "testing",
+            buildEnv: "production",
             // uxMode: "redirect", // "redirect" | "popup"
             whiteLabel: {
               logoLight: "https://web3auth.io/images/web3auth-logo.svg",
@@ -399,7 +399,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("walletServicesPlugin not initialized yet");
       return;
     }
-    if (web3Auth !=null && web3Auth.status !== "connected") {
+    if (web3Auth != null && web3Auth.status !== "connected") {
       console.log("web3Auth not initialized yet");
       uiConsole("web3Auth not initialized yet");
       return;
