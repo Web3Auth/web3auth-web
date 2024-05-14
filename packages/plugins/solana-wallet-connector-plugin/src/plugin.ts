@@ -8,6 +8,8 @@ import {
   IWeb3Auth,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
+  PLUGIN_STATUS,
+  PLUGIN_STATUS_TYPE,
   SafeEventEmitterProvider,
   SOLANA_PLUGINS,
   UserInfo,
@@ -24,6 +26,8 @@ export type ProviderInfo = {
 
 export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPlugin {
   name = SOLANA_PLUGINS.SOLANA;
+
+  public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
 
@@ -92,6 +96,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     });
     this.isInitialized = true;
     this.emit(PLUGIN_EVENTS.READY);
+    this.status = PLUGIN_STATUS.READY;
   }
 
   async initWithProvider(provider: SafeEventEmitterProvider, userInfo: UserInfo): Promise<void> {
@@ -105,6 +110,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     await this.torusWalletInstance.init(this.walletInitOptions || {});
     this.isInitialized = true;
     this.emit(PLUGIN_EVENTS.READY);
+    this.status = PLUGIN_STATUS.READY;
   }
 
   async connect(): Promise<void> {
@@ -112,6 +118,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
     if (!this.isInitialized) throw SolanaWalletPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
+    this.status = PLUGIN_STATUS.CONNECTING;
     // Not connected yet to openlogin
     if (!this.provider) {
       if (this.web3auth?.provider) {
@@ -147,9 +154,11 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
       this.torusWalletInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.emit(PLUGIN_EVENTS.CONNECTED);
+      this.status = PLUGIN_STATUS.CONNECTED;
     } catch (error: unknown) {
       log.error(error);
       this.emit(PLUGIN_EVENTS.ERRORED, { error: (error as Error).message || "Something went wrong" });
+      this.status = PLUGIN_STATUS.ERRORED;
     }
   }
 
@@ -164,6 +173,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     if (this.torusWalletInstance.isLoggedIn) {
       await this.torusWalletInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
+      this.status = PLUGIN_STATUS.DISCONNECTED;
     } else {
       throw new Error("Torus Wallet plugin is not connected");
     }

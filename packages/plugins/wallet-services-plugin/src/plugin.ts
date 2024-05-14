@@ -9,6 +9,8 @@ import {
   IWeb3Auth,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
+  PLUGIN_STATUS,
+  PLUGIN_STATUS_TYPE,
   SafeEventEmitterProvider,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
@@ -20,6 +22,8 @@ import { WalletServicesPluginError } from "./errors";
 
 export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
+
+  public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
 
@@ -85,6 +89,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       },
     });
     this.isInitialized = true;
+    this.status = PLUGIN_STATUS.READY;
     this.emit(PLUGIN_EVENTS.READY);
   }
 
@@ -97,6 +102,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
+    this.status = PLUGIN_STATUS.CONNECTING;
 
     const { connectedAdapterName } = this.web3auth;
 
@@ -126,8 +132,10 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
       this.emit(PLUGIN_EVENTS.CONNECTED);
+      this.status = PLUGIN_STATUS.CONNECTED;
     } catch (error: unknown) {
       log.error(error);
+      this.status = PLUGIN_STATUS.ERRORED;
       this.emit(PLUGIN_EVENTS.ERRORED, { error: (error as Error).message || "Something went wrong" });
     }
   }
@@ -153,6 +161,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.wsEmbedInstance.isLoggedIn) {
       await this.wsEmbedInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
+      this.status = PLUGIN_STATUS.DISCONNECTED;
     } else {
       throw new Error("Wallet Services plugin is not connected");
     }

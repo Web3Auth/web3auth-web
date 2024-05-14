@@ -6,7 +6,7 @@ import { IWalletServicesContext } from "../interfaces";
 
 export const WalletServicesContext = createContext<IWalletServicesContext>(null);
 
-export function WalletServicesContextProvider({ children, context }: PropsWithChildren<{ context: Context<IBaseWeb3AuthHookContext> }>) {
+export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext>({ children, context }: PropsWithChildren<{ context: Context<T> }>) {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
   const web3AuthContext = useContext(context);

@@ -18,6 +18,8 @@ export const PLUGIN_STATUS = {
   ERRORED: "errored",
 } as const;
 
+export type PLUGIN_STATUS_TYPE = (typeof PLUGIN_STATUS)[keyof typeof PLUGIN_STATUS];
+
 export const PLUGIN_EVENTS = {
   ...PLUGIN_STATUS,
 } as const;
@@ -39,6 +41,7 @@ export const WALLET_PLUGINS = {
 
 export interface IPlugin extends SafeEventEmitter {
   name: string;
+  status: PLUGIN_STATUS_TYPE;
   SUPPORTED_ADAPTERS: WALLET_ADAPTER_TYPE[];
   pluginNamespace: PluginNamespace;
   initWithProvider(provider: IProvider, userInfo: UserInfo): Promise<void>;

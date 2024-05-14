@@ -3,7 +3,7 @@ import { Context, createElement, PropsWithChildren } from "react";
 
 import { WalletServicesContextProvider } from "./context/WalletServicesContext";
 
-export function WalletServicesProvider({ children, context }: PropsWithChildren<{ context: Context<IBaseWeb3AuthHookContext> }>) {
-  const wsElement = createElement(WalletServicesContextProvider, { context }, children);
+export function WalletServicesProvider<T extends IBaseWeb3AuthHookContext>({ children, context }: PropsWithChildren<{ context: Context<T> }>) {
+  const wsElement = createElement(WalletServicesContextProvider<T>, { context }, children);
   return wsElement;
 }
