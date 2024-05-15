@@ -22,7 +22,7 @@ export interface IBaseWeb3AuthHookContext {
 }
 
 export interface IBaseWalletServicesHookContext {
-  isConnected: boolean;
+  isPluginConnected: boolean;
   showWalletConnectScanner(): Promise<void>;
   showCheckout(): Promise<void>;
   showWalletUI(): Promise<void>;

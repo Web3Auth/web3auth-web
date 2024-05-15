@@ -64,7 +64,7 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
   const value = useMemo(() => {
     return {
       plugin: walletServicesPlugin,
-      isConnected: isPluginConnected,
+      isPluginConnected,
       showWalletConnectScanner,
       showCheckout,
       showWalletUI,
