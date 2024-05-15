@@ -89,6 +89,7 @@ export class EthereumSigningProvider extends BaseProvider<
     this.updateProviderEngineProxy(provider);
     await txFormatter.init();
     await this.lookupNetwork();
+    this.state.signMethods = { sign, getPublic };
   }
 
   public async updateAccount(params: {
