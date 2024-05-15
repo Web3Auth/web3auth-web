@@ -20,8 +20,12 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
       setIsConnected(false);
     };
 
-    const plugin = web3AuthContext.getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-    setWalletServicesPlugin(plugin);
+    const { getPlugin, isInitialized } = web3AuthContext;
+
+    if (isInitialized) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      setWalletServicesPlugin(plugin);
+    }
 
     if (walletServicesPlugin) {
       walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
