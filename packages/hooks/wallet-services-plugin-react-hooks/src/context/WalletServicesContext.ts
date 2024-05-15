@@ -7,17 +7,17 @@ import { IWalletServicesContext } from "../interfaces";
 export const WalletServicesContext = createContext<IWalletServicesContext>(null);
 
 export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext>({ children, context }: PropsWithChildren<{ context: Context<T> }>) {
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isPluginConnected, setIsPluginConnected] = useState<boolean>(false);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
   const web3AuthContext = useContext(context);
 
   useEffect(() => {
     const connectedListener = () => {
-      setIsConnected(true);
+      setIsPluginConnected(true);
     };
 
     const disconnectedListener = () => {
-      setIsConnected(false);
+      setIsPluginConnected(false);
     };
 
     const { getPlugin, isInitialized } = web3AuthContext;
@@ -42,34 +42,34 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
 
   const showWalletConnectScanner = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showWalletConnectScanner();
-  }, [walletServicesPlugin, isConnected]);
+  }, [walletServicesPlugin, isPluginConnected]);
 
   const showWalletUI = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showWalletUi();
-  }, [walletServicesPlugin, isConnected]);
+  }, [walletServicesPlugin, isPluginConnected]);
 
   const showCheckout = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
 
     return walletServicesPlugin.showCheckout();
-  }, [walletServicesPlugin, isConnected]);
+  }, [walletServicesPlugin, isPluginConnected]);
 
   const value = useMemo(() => {
     return {
       plugin: walletServicesPlugin,
-      isConnected,
+      isConnected: isPluginConnected,
       showWalletConnectScanner,
       showCheckout,
       showWalletUI,
     };
-  }, [walletServicesPlugin, isConnected, showWalletConnectScanner, showCheckout, showWalletUI]);
+  }, [walletServicesPlugin, isPluginConnected, showWalletConnectScanner, showCheckout, showWalletUI]);
 
   return createElement(WalletServicesContext.Provider, { value }, children);
 }
