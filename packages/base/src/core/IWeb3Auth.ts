@@ -63,15 +63,25 @@ export interface IWeb3AuthCoreOptions {
   privateKeyProvider?: IBaseProvider<string>;
 }
 
-export interface IWeb3Auth extends SafeEventEmitter {
+export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connected: boolean;
   connectedAdapterName: string | null;
   status: ADAPTER_STATUS_TYPE;
-  cachedAdapter: string | null;
   provider: IProvider | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
   init(): Promise<void>;
+  logout(options?: { cleanup: boolean }): Promise<void>;
+  getUserInfo(): Promise<Partial<UserInfo>>;
+  authenticateUser(): Promise<UserAuthInfo>;
+  addChain(chainConfig: CustomChainConfig): Promise<void>;
+  switchChain(params: { chainId: string }): Promise<void>;
+  addPlugin(plugin: IPlugin): void;
+  getPlugin(pluginName: string): IPlugin | null;
+}
+
+export interface IWeb3Auth extends IWeb3AuthCore {
+  connected: boolean;
+  cachedAdapter: string | null;
+  walletAdapters: Record<string, IAdapter<unknown>>;
   getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
   configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
   /**
@@ -79,14 +89,7 @@ export interface IWeb3Auth extends SafeEventEmitter {
    * @param walletName - Key of the walletAdapter to use.
    */
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
-  logout(options?: { cleanup: boolean }): Promise<void>;
-  getUserInfo(): Promise<Partial<UserInfo>>;
-  authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
-  switchChain(params: { chainId: string }): Promise<void>;
   enableMFA<T>(params: T): Promise<void>;
-  addPlugin(plugin: IPlugin): void;
-  getPlugin(pluginName: string): IPlugin | null;
 }
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;
