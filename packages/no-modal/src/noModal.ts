@@ -127,6 +127,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
 
         const { whitelabel } = projectConfig;
         this.coreOptions.uiConfig = merge(clonedeep(whitelabel), this.coreOptions.uiConfig);
+        if (!this.coreOptions.uiConfig.mode) this.coreOptions.uiConfig.mode = "light";
 
         const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
         if (smsOtpEnabled !== undefined) {
