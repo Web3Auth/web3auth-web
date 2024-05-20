@@ -54,7 +54,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     return this.wsEmbedInstance.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel: WhiteLabelData): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
@@ -64,8 +64,10 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
-    const { logoDark, logoLight } = whiteLabel || {};
-    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
+    if (whiteLabel && Object.keys(whiteLabel).length > 0) {
+      const { logoDark, logoLight } = whiteLabel || {};
+      if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
+    }
 
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
