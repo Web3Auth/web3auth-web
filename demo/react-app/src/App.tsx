@@ -16,7 +16,7 @@ function App() {
   const savedNetwork = window.localStorage.getItem(STORAGE_KEY.WEB3AUTH_NETWORK) as WEB3AUTH_NETWORK_TYPE;
   const savedChain = window.localStorage.getItem(STORAGE_KEY.BLOCKCHAIN) as CHAIN_CONFIG_TYPE;
   const [web3AuthNetwork, setWeb3AuthNetwork] = useState<WEB3AUTH_NETWORK_TYPE>(savedNetwork || "sapphire_mainnet");
-  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>(savedChain || "polygon-mumbai");
+  const [chain, setChain] = useState<CHAIN_CONFIG_TYPE>(savedChain || "polygon-amoy");
 
   const networkChangeHandler = (network: WEB3AUTH_NETWORK_TYPE) => {
     window.localStorage.setItem(STORAGE_KEY.WEB3AUTH_NETWORK, network);
