@@ -95,12 +95,12 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     try {
       const web3 = new Web3(provider as any);
       const accounts = await web3.eth.getAccounts();
-      const gasestimate = await web3.eth.estimateGas({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0.001", "ether") });
+      const gasestimate = await web3.eth.estimateGas({ from: accounts[0], to: accounts[0], value: web3.utils.toWei("0", "ether") });
       // console.log("gasestimate", gasestimate);
       const txRes = await web3.eth.sendTransaction({
         from: accounts[0],
         to: accounts[0],
-        value: web3.utils.toWei("0.001", "ether"),
+        value: web3.utils.toWei("0", "ether"),
         gas: gasestimate,
       });
       uiConsole("txRes", txRes);
@@ -116,7 +116,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const accounts = await web3.eth.getAccounts();
       const contract = new web3.eth.Contract(erc20Abi, getTokenAddress());
       const txRes = await contract.methods
-        .transfer("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", web3.utils.toWei("0.002", "ether"))
+        .transfer("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", web3.utils.toWei("0", "ether"))
         .send({ from: accounts[0] });
       uiConsole("txRes", txRes);
     } catch (error) {
