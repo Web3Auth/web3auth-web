@@ -31,10 +31,10 @@
   ],
   "devDependencies": {
     "@metamask/rpc-errors": "^6.2.1",
-    "@web3auth/openlogin-adapter": "^8.5.0"
+    "@toruslabs/openlogin-utils": "^8.1.2",
+    "@toruslabs/ethereum-controllers": "^5.6.1"
   },
   "dependencies": {
-    "@toruslabs/ethereum-controllers": "^5.6.1",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.5.0",
     "@web3auth/no-modal": "^8.5.0",

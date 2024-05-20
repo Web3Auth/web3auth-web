@@ -299,14 +299,15 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-
       Object.values(this.plugins).map(async (plugin) => {
         try {
           if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
             return;
           }
-          await plugin.initWithWeb3Auth(this);
-          await plugin.connect();
+          const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
+          const { options, sessionId, sessionNamespace } = openloginInstance || {};
+          await plugin.initWithWeb3Auth(this, options.whiteLabel);
+          await plugin.connect({ sessionId, sessionNamespace });
         } catch (error: unknown) {
           // swallow error if connector adapter doesn't supports this plugin.
           if ((error as Web3AuthError).code === 5211) {

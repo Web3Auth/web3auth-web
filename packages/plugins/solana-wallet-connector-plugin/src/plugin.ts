@@ -1,15 +1,17 @@
 import type { JsonRpcError } from "@metamask/rpc-errors";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_EVENTS,
   CustomChainConfig,
   IPlugin,
-  IWeb3Auth,
+  IWeb3AuthCore,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
+  PluginConnectParams,
   SafeEventEmitterProvider,
   SOLANA_PLUGINS,
   UserInfo,
@@ -29,7 +31,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.SOLANA;
 
@@ -37,7 +39,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: IWeb3Auth | null = null;
+  private web3auth: IWeb3AuthCore | null = null;
 
   private userInfo: UserInfo | null = null;
 
@@ -48,24 +50,18 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   constructor(options: { torusWalletOpts?: TorusCtorArgs; walletInitOptions: Partial<TorusParams> }) {
     super();
     const { torusWalletOpts = {}, walletInitOptions } = options;
-    // const whiteLabel = walletInitOptions?.whiteLabel;
-
-    // if (!whiteLabel) throw new Error("whiteLabel is required");
-    // const { logoDark, logoLight } = whiteLabel;
-    // if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
-
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
-    this.walletInitOptions = walletInitOptions;
+    this.walletInitOptions = walletInitOptions || {};
   }
 
   get proxyProvider(): SafeEventEmitterProvider | null {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: IWeb3Auth): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw SolanaWalletPluginError.web3authRequired();
-    if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
+    if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw SolanaWalletPluginError.unsupportedAdapter();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw SolanaWalletPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
@@ -73,6 +69,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
     }
     this.web3auth = web3auth;
+    const { logoDark, logoLight } = whiteLabel || {};
+    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
     this.subscribeToWeb3AuthNoModalEvents(web3auth);
 
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
@@ -84,6 +82,16 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
     await this.torusWalletInstance.init({
       ...(this.walletInitOptions || {}),
+      whiteLabel: {
+        ...whiteLabel,
+        logoDark: whiteLabel?.logoDark,
+        logoLight: whiteLabel?.logoLight,
+        ...(this.walletInitOptions.whiteLabel || {}),
+        theme: {
+          isDark: whiteLabel.mode === "dark",
+          colors: {},
+        },
+      },
       network: {
         ...connectedChainConfig,
         blockExplorerUrl: connectedChainConfig.blockExplorerUrl,
@@ -99,23 +107,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     this.status = PLUGIN_STATUS.READY;
   }
 
-  async initWithProvider(provider: SafeEventEmitterProvider, userInfo: UserInfo): Promise<void> {
-    if (this.isInitialized) return;
-
-    if (!userInfo) throw SolanaWalletPluginError.userInfoRequired();
-    if (!provider) throw SolanaWalletPluginError.providerRequired();
-
-    this.provider = provider;
-    this.userInfo = userInfo;
-    await this.torusWalletInstance.init(this.walletInitOptions || {});
-    this.isInitialized = true;
-    this.emit(PLUGIN_EVENTS.READY);
-    this.status = PLUGIN_STATUS.READY;
-  }
-
-  async connect(): Promise<void> {
+  async connect(_: PluginConnectParams): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
-    if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
     if (!this.isInitialized) throw SolanaWalletPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
@@ -195,12 +188,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     });
   }
 
-  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3Auth) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
-      if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
-        log.warn(`${web3Auth.connectedAdapterName} is not compatible with torus wallet connector plugin`);
-        return;
-      }
       this.provider = web3Auth.provider;
       this.userInfo = (await web3Auth.getUserInfo()) as Omit<UserInfo, "isNewUser">;
       if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
@@ -247,17 +236,9 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   private async setSelectedAddress(address: string): Promise<void> {
     if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw SolanaWalletPluginError.web3AuthNotConnected();
-    const [sessionConfig, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
+    const [, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
     if (address !== torusWalletSessionConfig.accounts?.[0]) {
-      await this.torusWalletInstance.loginWithPrivateKey({
-        privateKey: sessionConfig.privateKey,
-        userInfo: {
-          ...this.userInfo,
-          email: this.userInfo?.email as string,
-          name: this.userInfo?.name as string,
-          profileImage: this.userInfo?.profileImage as string,
-        },
-      });
+      throw SolanaWalletPluginError.invalidSession();
     }
   }
 

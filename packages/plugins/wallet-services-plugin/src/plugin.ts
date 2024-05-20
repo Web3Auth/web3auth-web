@@ -1,20 +1,21 @@
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
-  IWeb3Auth,
+  IWeb3AuthCore,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
+  PluginConnectParams,
   SafeEventEmitterProvider,
   WALLET_ADAPTERS,
 } from "@web3auth/base";
-import type { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 import log from "loglevel";
 
@@ -25,7 +26,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
@@ -33,7 +34,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   private provider: SafeEventEmitterProvider | null = null;
 
-  private web3auth: IWeb3Auth | null = null;
+  private web3auth: IWeb3AuthCore | null = null;
 
   private isInitialized = false;
 
@@ -53,19 +54,22 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     return this.wsEmbedInstance.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: IWeb3Auth): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
-    if (web3auth.provider && web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
+    if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
-    // get whitelabel from openlogin adapter
-    const { options } = (this.web3auth.walletAdapters[this.web3auth.connectedAdapterName] as OpenloginAdapter).openloginInstance || {};
-    const { logoDark, logoLight } = options.whiteLabel || {};
+    const mergedWhitelabelSettings = {
+      ...whiteLabel,
+      ...(this.walletInitOptions.whiteLabel || {}),
+    };
+
+    const { logoDark, logoLight } = mergedWhitelabelSettings || {};
     if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
 
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
@@ -81,12 +85,8 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     await this.wsEmbedInstance.init({
       ...this.walletInitOptions,
       chainConfig: connectedChainConfig as EthereumProviderConfig,
-      buildEnv: options?.buildEnv,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
-      whiteLabel: {
-        ...options.whiteLabel,
-        ...(this.walletInitOptions.whiteLabel || {}),
-      },
+      whiteLabel: mergedWhitelabelSettings,
     });
     this.isInitialized = true;
     this.status = PLUGIN_STATUS.READY;
@@ -97,25 +97,21 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     throw new Error("Method not implemented.");
   }
 
-  async connect(): Promise<void> {
+  async connect({ sessionId, sessionNamespace }: PluginConnectParams): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
-    if (this.web3auth && this.web3auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    const { connectedAdapterName } = this.web3auth;
+    if (!this.provider) {
+      if (this.web3auth?.provider) {
+        this.provider = this.web3auth.provider;
+      }
+    }
 
-    // Not connected yet to openlogin
-    let sessionId: string | null = null;
-    let sessionNamespace: string = "";
-    if (this.web3auth?.provider) {
-      const { openloginInstance } = this.web3auth.walletAdapters[connectedAdapterName] as OpenloginAdapter;
-      sessionId = openloginInstance.sessionId;
-      sessionNamespace = (this.web3auth.walletAdapters[connectedAdapterName] as OpenloginAdapter).openloginInstance.sessionNamespace;
-    } else if (this.web3auth) {
+    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) {
       throw WalletServicesPluginError.web3AuthNotConnected();
-    } else {
+    } else if (!this.web3auth.provider) {
       throw WalletServicesPluginError.providerRequired();
     }
 
@@ -157,7 +153,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
-    if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
     if (this.wsEmbedInstance.isLoggedIn) {
       await this.wsEmbedInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
@@ -192,13 +187,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     });
   }
 
-  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3Auth) {
+  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
-      if (web3Auth.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) {
-        log.warn(`${web3Auth.connectedAdapterName} is not compatible with wallet services connector plugin`);
-        return;
-      }
-      this.provider = web3Auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN].provider;
+      this.provider = web3Auth.provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
@@ -239,15 +230,10 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private async setSelectedAddress(address: string): Promise<void> {
-    if (!this.web3auth.connected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) throw WalletServicesPluginError.web3AuthNotConnected();
     const walletServicesSessionConfig = await this.walletServicesSessionConfig();
     if (address !== walletServicesSessionConfig.accounts?.[0]) {
-      const { sessionId, sessionNamespace } = (this.web3auth.walletAdapters[this.web3auth.connectedAdapterName] as OpenloginAdapter)
-        .openloginInstance;
-      await this.wsEmbedInstance.loginWithSessionId({
-        sessionId,
-        sessionNamespace,
-      });
+      throw WalletServicesPluginError.invalidSession();
     }
   }
 

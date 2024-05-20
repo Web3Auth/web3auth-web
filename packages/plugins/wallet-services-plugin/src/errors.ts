@@ -10,6 +10,8 @@ export class WalletServicesPluginError extends Web3AuthError {
     5216: "Plugin is already initialized",
     5218: "Unsupported chain namespace.",
     5219: "Plugin network different than web3auth instance network.",
+    5221: "Web3Auth is not initialized",
+    5222: "Invalid session inside wallet services. Please report this issue.",
   };
 
   public constructor(code: number, message?: string) {
@@ -58,5 +60,13 @@ export class WalletServicesPluginError extends Web3AuthError {
 
   public static invalidParams(extraMessage = ""): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5220, extraMessage);
+  }
+
+  public static web3authNotInitialized(extraMessage = ""): IWeb3AuthError {
+    return WalletServicesPluginError.fromCode(5221, extraMessage);
+  }
+
+  public static invalidSession(extraMessage = ""): IWeb3AuthError {
+    return WalletServicesPluginError.fromCode(5222, extraMessage);
   }
 }

@@ -1,6 +1,7 @@
 export const MULTI_CHAIN_ADAPTERS = {
   OPENLOGIN: "openlogin",
   WALLET_CONNECT_V2: "wallet-connect-v2",
+  SFA: "sfa",
 };
 
 export const SOLANA_ADAPTERS = {
@@ -30,6 +31,7 @@ export type MULTI_CHAIN_ADAPTER_TYPE = (typeof MULTI_CHAIN_ADAPTERS)[keyof typeo
 export const ADAPTER_NAMES = {
   [MULTI_CHAIN_ADAPTERS.OPENLOGIN]: "OpenLogin",
   [MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V2]: "Wallet Connect v2",
+  [MULTI_CHAIN_ADAPTERS.SFA]: "SFA",
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
   [SOLANA_ADAPTERS.PHANTOM]: "Phantom",
   [SOLANA_ADAPTERS.SOLFLARE]: "Solflare",

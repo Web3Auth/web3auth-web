@@ -10,6 +10,7 @@ export class SolanaWalletPluginError extends Web3AuthError {
     5215: "UserInfo is required.",
     5216: "Plugin is already initialized",
     5217: "Torus wallet instance is not set.",
+    5222: "Invalid session inside wallet services. Please report this issue.",
   };
 
   public constructor(code: number, message?: string) {
@@ -62,5 +63,9 @@ export class SolanaWalletPluginError extends Web3AuthError {
 
   public static invalidParams(extraMessage = ""): IWeb3AuthError {
     return SolanaWalletPluginError.fromCode(5220, extraMessage);
+  }
+
+  public static invalidSession(extraMessage = ""): IWeb3AuthError {
+    return SolanaWalletPluginError.fromCode(5222, extraMessage);
   }
 }
