@@ -64,10 +64,13 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
-    if (whiteLabel && Object.keys(whiteLabel).length > 0) {
-      const { logoDark, logoLight } = whiteLabel || {};
-      if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
-    }
+    const mergedWhitelabelSettings = {
+      ...whiteLabel,
+      ...(this.walletInitOptions.whiteLabel || {}),
+    };
+
+    const { logoDark, logoLight } = mergedWhitelabelSettings || {};
+    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
 
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
@@ -83,10 +86,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       ...this.walletInitOptions,
       chainConfig: connectedChainConfig as EthereumProviderConfig,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
-      whiteLabel: {
-        ...whiteLabel,
-        ...(this.walletInitOptions.whiteLabel || {}),
-      },
+      whiteLabel: mergedWhitelabelSettings,
     });
     this.isInitialized = true;
     this.status = PLUGIN_STATUS.READY;
