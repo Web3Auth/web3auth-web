@@ -8,7 +8,7 @@
     "@web3auth/base-provider": "^8.6.0-alpha.0",
     "@web3auth/no-modal": "^8.6.0-alpha.0",
     "@web3auth/openlogin-adapter": "^8.6.0-alpha.0",
-    "@web3auth/ui": "^8.6.0-alpha.0",
+    "@web3auth/ui": "^8.6.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2"
   },
@@ -69,5 +69,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "8.6.0-alpha.0"
+  "version": "8.6.0"
 }
