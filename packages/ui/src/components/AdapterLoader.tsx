@@ -2,7 +2,7 @@ import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, MODAL_STATUS, ModalStatusType } from "../interfaces";
+import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
 import Footer from "./Footer";
 import Icon from "./Icon";
@@ -23,7 +23,6 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
   const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
   const [t] = useTranslation(undefined, { i18n });
-  const isDefaultLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo);
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
@@ -41,9 +40,9 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
-                <div className={["w3a-modal__loader-app-logo", isDefaultLogo ? "w3a-modal__loader-app-logo--default" : ""].join(" ")}>
-                  <img src={isDefaultLogo ? DEFAULT_LOGO_LIGHT : appLogo} className="block dark:hidden" alt="" />
-                  <img src={isDefaultLogo ? DEFAULT_LOGO_DARK : appLogo} className="hidden dark:block" alt="" />
+                <div className="w3a-modal__loader-app-logo">
+                  <img src={appLogo} className="block dark:hidden" alt="" />
+                  <img src={appLogo} className="hidden dark:block" alt="" />
                 </div>
                 <div className="w3a-modal__connector">
                   <div className="w3a-modal__connector-beat">
