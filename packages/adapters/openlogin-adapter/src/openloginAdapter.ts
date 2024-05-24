@@ -206,18 +206,6 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     }
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    this.privateKeyProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
-  }
-
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
-    super.checkSwitchChainRequirements(params, init);
-    await this.privateKeyProvider?.switchChain(params);
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
-  }
-
   private _getFinalPrivKey() {
     if (!this.openloginInstance) return "";
     let finalPrivKey = this.openloginInstance.privKey;

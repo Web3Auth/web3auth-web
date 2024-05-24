@@ -143,7 +143,11 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
+  private async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(chainConfig, init);
     await this.metamaskProvider?.request({
       method: "wallet_addEthereumChain",
@@ -165,17 +169,13 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
     this.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  private async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.metamaskProvider?.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
-  }
-
-  public async enableMFA(): Promise<void> {
-    throw new Error("Method Not implemented");
   }
 }
 

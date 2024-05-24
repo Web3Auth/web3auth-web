@@ -166,27 +166,6 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
     return userInfo;
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    // await this.solanaProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
-  }
-
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
-    super.checkSwitchChainRequirements(params, init);
-    const chainConfig = this.getChainConfig(params.chainId) as CustomChainConfig;
-    await this.torusInstance?.setProvider({
-      rpcTarget: chainConfig.rpcTarget,
-      chainId: chainConfig.chainId,
-      displayName: chainConfig.displayName,
-      blockExplorerUrl: chainConfig.blockExplorerUrl,
-      ticker: chainConfig.ticker,
-      tickerName: chainConfig.tickerName,
-      logo: chainConfig.logo || "https://images.web3auth.io/login-torus-solana.svg",
-    });
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
-  }
-
   public async enableMFA(): Promise<void> {
     throw new Error("Method Not implemented");
   }

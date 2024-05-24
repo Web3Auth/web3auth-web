@@ -88,15 +88,24 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: IProvider | null;
   adapterData?: unknown;
   connnected: boolean;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
-  switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
+  addChainConfig(chainConfig: CustomChainConfig): void;
+  getChainConfig(chainId: string): CustomChainConfig | null;
+  checkAddChainRequirements(chainConfig: CustomChainConfig, init?: boolean): void;
+  checkSwitchChainRequirements(
+    {
+      chainId,
+    }: {
+      chainId: string;
+    },
+    init?: boolean
+  ): void;
 }
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
@@ -221,7 +230,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
   }
 
-  protected addChainConfig(chainConfig: CustomChainConfig): void {
+  addChainConfig(chainConfig: CustomChainConfig): void {
     const currentConfig = this.knownChainConfigs[chainConfig.chainId];
     this.knownChainConfigs[chainConfig.chainId] = {
       ...(currentConfig || {}),
@@ -229,7 +238,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
     };
   }
 
-  protected getChainConfig(chainId: string): CustomChainConfig | null {
+  getChainConfig(chainId: string): CustomChainConfig | null {
     return this.knownChainConfigs[chainId] || null;
   }
 
@@ -239,8 +248,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapte
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
-  abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
-  abstract switchChain(params: { chainId: string }): Promise<void>;
 }
 
 export interface BaseAdapterConfig {

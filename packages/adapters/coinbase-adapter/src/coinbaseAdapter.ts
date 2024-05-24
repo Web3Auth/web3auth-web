@@ -131,7 +131,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+  public async enableMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
+  private async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(chainConfig, init);
     await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
@@ -153,17 +157,13 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     super.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  private async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.coinbaseProvider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: params.chainId }],
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
-  }
-
-  public async enableMFA(): Promise<void> {
-    throw new Error("Method Not implemented");
   }
 }
 

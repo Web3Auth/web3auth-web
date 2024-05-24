@@ -10,7 +10,6 @@ import {
   fetchProjectConfig,
   getChainConfig,
   IAdapter,
-  IBaseProvider,
   IPlugin,
   IProvider,
   IWeb3Auth,
@@ -25,6 +24,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  WalletOperationsError,
   Web3AuthError,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
@@ -32,6 +32,9 @@ import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlog
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
+
+import { CHAIN_METHODS } from "./constants";
+import { createAddChainParams } from "./utils";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
@@ -223,8 +226,20 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
-      return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
+    if (chainConfig.chainNamespace !== this.coreOptions.chainConfig.chainNamespace) throw WalletOperationsError.chainNamespaceNotAllowed();
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      const method = CHAIN_METHODS[this.coreOptions.chainConfig.chainNamespace].addChain;
+      if (method) {
+        const adapter = this.walletAdapters[this.connectedAdapterName];
+        if (!adapter) throw WalletInitializationError.notFound(`Adapter not found`);
+        adapter.checkAddChainRequirements(chainConfig);
+        adapter.addChainConfig(chainConfig);
+        return this.provider.request<unknown, void>({
+          method,
+          params: [createAddChainParams(chainConfig)],
+        });
+      }
+    }
     if (this.commonJRPCProvider) {
       return this.commonJRPCProvider.addChain(chainConfig);
     }
@@ -232,8 +247,21 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
-      return this.walletAdapters[this.connectedAdapterName].switchChain(params);
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      const method = CHAIN_METHODS[this.coreOptions.chainConfig.chainNamespace].switchChain;
+      if (method) {
+        const adapter = this.walletAdapters[this.connectedAdapterName];
+        if (!adapter) throw WalletInitializationError.notFound(`Adapter not found`);
+        adapter.checkSwitchChainRequirements(params);
+        adapter.setAdapterSettings({
+          chainConfig: adapter.getChainConfig(params.chainId),
+        });
+        return this.provider.request<[{ chainId: string }], void>({
+          method,
+          params: [params],
+        });
+      }
+    }
     if (this.commonJRPCProvider) {
       return this.commonJRPCProvider.switchChain(params);
     }
@@ -248,7 +276,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     const provider = await this.walletAdapters[walletName].connect(loginParams);
-    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
+    this.commonJRPCProvider.updateProviderEngineProxy(provider);
     return this.provider;
   }
 
@@ -294,7 +322,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = this.walletAdapters[data.adapter];
-      this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
+      this.commonJRPCProvider.updateProviderEngineProxy(provider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);

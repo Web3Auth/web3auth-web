@@ -1,7 +1,7 @@
 import { providerErrors } from "@metamask/rpc-errors";
 import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
-import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
+import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 import { createJsonRpcClient } from "./jrpcClient";
@@ -45,10 +45,15 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     await this.setupProvider();
   }
 
-  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
+  public updateProviderEngineProxy(provider: IBaseProvider<unknown> | SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
+      if ((provider as IBaseProvider<unknown>).provider) {
+        provider.on("chainChanged", (e) => this.emit("chainChanged", e));
+        provider.on("connect", (e) => this.emit("connect", e));
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
+      (this._providerEngineProxy as any).setTarget((provider as IBaseProvider<unknown>).provider || provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
