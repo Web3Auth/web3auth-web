@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "8.6.0-alpha.0",
+  "version": "8.6.1",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -68,11 +68,11 @@
     "@toruslabs/openlogin": "^8.1.2",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.1.2",
-    "@web3auth/base": "^8.6.0-alpha.0",
+    "@web3auth/base": "^8.6.1",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
-    "i18next": "^23.11.4",
+    "i18next": "^23.11.5",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "react-i18next": "^14.1.1",
