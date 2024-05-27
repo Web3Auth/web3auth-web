@@ -81,7 +81,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const web3 = new Web3(provider);
       const message = "Some string";
       const hash = web3.utils.sha3(message) as string;
-      const fromAddress = (await web3.eth.getAccounts())[0];
+      const fromAddress = (await web3.eth.getAccounts())[1];
       const sig = await web3.eth.personal.sign(hash, fromAddress, "");
       uiConsole("personal sign", sig);
       uiConsole("Eth sign message => true", sig);
@@ -149,8 +149,8 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       const accounts = await web3.eth.getAccounts();
       // only supported with social logins (openlogin adapter)
       const txRes = await web3.eth.signTransaction({
-        from: accounts[0],
-        to: accounts[0],
+        from: accounts[1],
+        to: accounts[1],
         value: web3.utils.toWei("0.001", "ether"),
       });
       uiConsole("txRes", txRes);

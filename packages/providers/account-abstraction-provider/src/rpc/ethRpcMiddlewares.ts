@@ -7,9 +7,23 @@ import {
   SafeEventEmitterProvider,
 } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig } from "@web3auth/base";
-import { ENTRYPOINT_ADDRESS_V06, providerToSmartAccountSigner } from "permissionless";
-import { signerToBiconomySmartAccount } from "permissionless/accounts";
-import { Chain, Client, createPublicClient, EIP1193Provider, Hex, http } from "viem";
+import { TransactionParams } from "@web3auth/ethereum-provider";
+import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V06, providerToSmartAccountSigner } from "permissionless";
+import { BiconomySmartAccount, signerToBiconomySmartAccount } from "permissionless/accounts";
+import { createPimlicoBundlerClient } from "permissionless/clients/pimlico";
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types";
+import { Chain, Client, createPublicClient, EIP1193Provider, Hex, http, Transport } from "viem";
+
+const apiKey = "3027848b-7365-4081-b66e-1c7cb69b5b78";
+const bundlerUrl = `https://api.pimlico.io/v2/sepolia/rpc?apikey=${apiKey}`;
+
+function getBundlerClient() {
+  // Set Bundler
+  return createPimlicoBundlerClient({
+    transport: http(bundlerUrl),
+    entryPoint: ENTRYPOINT_ADDRESS_V06,
+  });
+}
 
 async function getSmartAccount(params: { eoaAddress: string; rpcTarget: string; chainId: string; ethProvider: SafeEventEmitterProvider }) {
   const publicClient = createPublicClient({
@@ -26,44 +40,67 @@ async function getSmartAccount(params: { eoaAddress: string; rpcTarget: string; 
   });
 }
 
+async function getSmartAccountClient(params: { smartAccount: BiconomySmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE, Transport, Chain>; chainId: string }) {
+  const bundlerClient = getBundlerClient();
+  const smartAccountClient = createSmartAccountClient({
+    account: params.smartAccount,
+    chain: params.chainId as unknown as Chain,
+    bundlerTransport: http(bundlerUrl),
+    middleware: {
+      gasPrice: async () => {
+        return (await bundlerClient.getUserOperationGasPrice()).fast;
+      },
+      // sponsorUserOperation: paymasterClient.sponsorUserOperation,
+    },
+  });
+  return smartAccountClient;
+}
+
 // #region account middlewares
 export function createAaMiddleware(params: {
   ethProvider: SafeEventEmitterProvider;
   chainConfig: CustomChainConfig;
 }): JRPCMiddleware<unknown, unknown> {
   async function getAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    const ethRes = (await params.ethProvider.request(req)) as string[];
+    const [eoaAddress] = (await params.ethProvider.request(req)) as string[];
 
     const smartAccount = await getSmartAccount({
-      eoaAddress: ethRes[0],
+      eoaAddress,
       rpcTarget: params.chainConfig.rpcTarget,
       chainId: params.chainConfig.chainId,
       ethProvider: params.ethProvider,
     });
-    // eslint-disable-next-line no-console
-    console.log("check: aaGetAccounts", smartAccount.address);
-    res.result = [smartAccount.address];
+    res.result = [smartAccount.address, eoaAddress];
   }
 
-  async function sendTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function sendTransaction(req: JRPCRequest<TransactionParams>, res: JRPCResponse<unknown>): Promise<void> {
     // eslint-disable-next-line no-debugger
     debugger;
-    // eslint-disable-next-line no-console
-    console.log("check: aaSendTransaction", req);
-    res.result = "ok";
-  }
-  async function signTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    // eslint-disable-next-line no-debugger
-    debugger;
-    // eslint-disable-next-line no-console
-    console.log("check: aaSignTransaction", req);
-    res.result = "ok";
+    const [eoaAddress] = (await params.ethProvider.request({ method: "eth_accounts" })) as string[];
+
+    const smartAccount = await getSmartAccount({
+      eoaAddress,
+      rpcTarget: params.chainConfig.rpcTarget,
+      chainId: params.chainConfig.chainId,
+      ethProvider: params.ethProvider,
+    });
+    const smartAccountClient = await getSmartAccountClient({ smartAccount, chainId: params.chainConfig.chainId });
+    const txParams = req.params[0];
+    const txData = {
+      to: (txParams.to || "") as Hex,
+      value: txParams.value ? txParams.value : BigInt(0),
+      data: (txParams.data || "0x") as Hex,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const txHash = await smartAccountClient.sendTransaction(txData as any);
+
+    res.result = txHash;
   }
 
   return createScaffoldMiddleware({
     eth_accounts: createAsyncMiddleware(getAccounts),
-    eth_sendTransaction: createAsyncMiddleware(sendTransaction),
-    eth_signTransaction: createAsyncMiddleware(signTransaction),
+    eth_sendTransaction: createAsyncMiddleware(sendTransaction) as JRPCMiddleware<unknown, unknown>,
   });
 }
 
