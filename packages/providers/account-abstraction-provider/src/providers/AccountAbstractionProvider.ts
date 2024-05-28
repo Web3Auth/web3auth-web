@@ -32,7 +32,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       chainConfig: this.config.chainConfig,
     });
     const { provider: ethProvider } = ethereumPrivateKeyProvider;
-    const aaMiddleware = createAaMiddleware({ ethProvider, chainConfig: this.config.chainConfig });
+    const aaMiddleware = await createAaMiddleware({ ethProvider, chainConfig: this.config.chainConfig });
     engine.push(aaMiddleware);
     engine.push(providerAsMiddleware(ethProvider));
     const provider = providerFromEngine(engine);

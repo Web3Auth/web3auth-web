@@ -178,24 +178,29 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               mode: "dark", // whether to enable dark, light or auto mode. defaultValue: auto [ system theme]
             },
             mfaSettings: {
-              deviceShareFactor: {
+              passkeysFactor: {
                 enable: true,
                 priority: 1,
                 mandatory: true,
               },
-              backUpShareFactor: {
+              deviceShareFactor: {
                 enable: true,
                 priority: 2,
-                mandatory: false,
+                mandatory: true,
               },
-              socialBackupFactor: {
+              backUpShareFactor: {
                 enable: true,
                 priority: 3,
                 mandatory: false,
               },
-              passwordFactor: {
+              socialBackupFactor: {
                 enable: true,
                 priority: 4,
+                mandatory: false,
+              },
+              passwordFactor: {
+                enable: true,
+                priority: 5,
                 mandatory: false,
               },
             },
@@ -216,6 +221,12 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             wsEmbedOpts: {},
             walletInitOptions: {
               whiteLabel: { showWidgetButton: true },
+              walletUrls: {
+                production: {
+                  url: "http://localhost:4050",
+                  logLevel: "debug",
+                },
+              },
             },
           });
           subscribePluginEvents(walletServicesPlugin);

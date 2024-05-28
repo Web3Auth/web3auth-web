@@ -51,7 +51,7 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     try {
       const web3 = new Web3(provider);
       const accounts = await web3.eth.getAccounts();
-      const balance = await web3.eth.getBalance(accounts[0]);
+      const balance = await web3.eth.getBalance(accounts[1]);
       uiConsole("Eth balance", balance);
     } catch (error) {
       console.error("Error", error);
