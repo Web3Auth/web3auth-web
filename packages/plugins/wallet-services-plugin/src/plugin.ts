@@ -190,7 +190,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
     web3Auth.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
-      this.provider = data.provider;
+      this.provider = data.provider || web3Auth.provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
