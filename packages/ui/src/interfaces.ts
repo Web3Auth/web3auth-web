@@ -75,6 +75,7 @@ export interface ModalState {
   externalWalletsInitialized: boolean;
   hasExternalWallets: boolean;
   externalWalletsVisibility: boolean;
+  passkeyRegisterVisibility: boolean;
   modalVisibility: boolean;
   modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
