@@ -315,7 +315,11 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     this.subscribeEvents();
     this.cleanupPendingPairings();
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, {
+      adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2,
+      reconnected: this.rehydrated,
+      provider: this.provider,
+    } as CONNECTED_EVENT_DATA);
   }
 
   private subscribeEvents(): void {

@@ -170,7 +170,11 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
     if (!this.phantomProvider) throw WalletLoginError.connectionError("No phantom provider");
     await this.phantomProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.PHANTOM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, {
+      adapter: WALLET_ADAPTERS.PHANTOM,
+      reconnected: this.rehydrated,
+      provider: this.provider,
+    } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 

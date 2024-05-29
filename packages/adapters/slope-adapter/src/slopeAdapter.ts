@@ -144,7 +144,11 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
     if (!this.slopeProxyProvider) throw WalletLoginError.connectionError("No Slope provider found");
     await this.slopeProxyProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.SLOPE, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, {
+      adapter: WALLET_ADAPTERS.SLOPE,
+      reconnected: this.rehydrated,
+      provider: this.provider,
+    } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 

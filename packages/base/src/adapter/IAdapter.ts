@@ -42,11 +42,6 @@ export const ADAPTER_EVENTS = {
 } as const;
 export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
 
-export type CONNECTED_EVENT_DATA = {
-  adapter: string;
-  reconnected: boolean;
-};
-
 export type UserAuthInfo = { idToken: string };
 
 export interface BaseAdapterSettings {
@@ -98,6 +93,12 @@ export interface IAdapter<T> extends SafeEventEmitter {
   switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
 }
+
+export type CONNECTED_EVENT_DATA = {
+  adapter: string;
+  provider: IProvider;
+  reconnected: boolean;
+};
 
 export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
   public adapterData?: unknown = {};
