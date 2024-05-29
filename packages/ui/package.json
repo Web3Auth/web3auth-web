@@ -37,7 +37,7 @@
     "react-dom": "^18.x"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-react": "^7.24.6",
     "@mertasan/tailwindcss-variables": "^2.7.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-url": "^8.0.2",
@@ -48,10 +48,10 @@
     "@toruslabs/vue-components": "^7.8.2",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
-    "css-loader": "^7.1.1",
+    "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
     "postcss": "^8.4.38",
     "postcss-loader": "^8.1.1",
@@ -75,7 +75,7 @@
     "i18next": "^23.11.5",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^14.1.1",
+    "react-i18next": "^14.1.2",
     "react-qrcode-logo": "^2.10.0"
   },
   "lint-staged": {

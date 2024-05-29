@@ -19,7 +19,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^5.6.3",
+    "@toruslabs/base-controllers": "^5.7.0",
     "@web3auth/base": "^8.6.1"
   },
   "files": [

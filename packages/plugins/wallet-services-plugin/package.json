@@ -31,7 +31,7 @@
   ],
   "devDependencies": {
     "@metamask/rpc-errors": "^6.2.1",
-    "@toruslabs/ethereum-controllers": "^5.6.4",
+    "@toruslabs/ethereum-controllers": "^5.7.0",
     "@toruslabs/openlogin-utils": "^8.1.2"
   },
   "dependencies": {
