@@ -4,6 +4,7 @@ import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
@@ -188,8 +189,8 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
-    web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
-      this.provider = web3Auth.provider;
+    web3Auth.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      this.provider = data.provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });

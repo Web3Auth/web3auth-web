@@ -158,7 +158,11 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
     if (!this.solflareProvider) throw WalletLoginError.connectionError("No solflare provider");
     await this.solflareProvider.setupProvider(injectedProvider);
     this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.SOLFLARE, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+    this.emit(ADAPTER_EVENTS.CONNECTED, {
+      adapter: WALLET_ADAPTERS.SOLFLARE,
+      reconnected: this.rehydrated,
+      provider: this.provider,
+    } as CONNECTED_EVENT_DATA);
     return this.provider;
   }
 

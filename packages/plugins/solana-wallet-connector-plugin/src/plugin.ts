@@ -4,6 +4,7 @@ import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
   ADAPTER_EVENTS,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   IPlugin,
   IWeb3AuthCore,
@@ -189,8 +190,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   }
 
   private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
-    web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
-      this.provider = web3Auth.provider;
+    web3Auth.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+      this.provider = data.provider;
       this.userInfo = (await web3Auth.getUserInfo()) as Omit<UserInfo, "isNewUser">;
       if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);

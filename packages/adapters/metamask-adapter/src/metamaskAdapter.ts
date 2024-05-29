@@ -113,7 +113,11 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
         this.provider?.removeListener("disconnect", disconnectHandler);
       };
       this.provider.on("disconnect", disconnectHandler);
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.METAMASK, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, {
+        adapter: WALLET_ADAPTERS.METAMASK,
+        reconnected: this.rehydrated,
+        provider: this.provider,
+      } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {
       // ready again to be connected
