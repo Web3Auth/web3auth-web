@@ -19,8 +19,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
           <Icon iconName="arrow-left" />
           <div className="w3a-group__title">{t("modal.external.back")}</div>
         </button>
-        <div className="text-center mt-4">
-          <img className="mx-auto mb-8" src="https://develop-auth.web3auth.io/assets/device_desktop-D51M4Pzr.svg" alt="Register Passkey" />
+        <div className="text-center mt-2">
+          <img className="mx-auto mb-b" src="https://images.web3auth.io/passkey-register.svg" alt="Register Passkey" />
           <div className="font-bold mb-2 text-app-gray-900 dark:text-app-white">{t("modal.passkey.register-title")}</div>
           <div className="text-sm mb-8 text-app-gray-400 dark:text-app-gray-500">
             <div>{t("modal.passkey.register-desc")}</div>
