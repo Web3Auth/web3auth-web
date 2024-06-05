@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@toruslabs/base-controllers": "file:../../../controllers/packages/base-controllers",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",
     "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
