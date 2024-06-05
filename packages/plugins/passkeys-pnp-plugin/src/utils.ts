@@ -2,7 +2,7 @@ import { base64URLStringToBuffer } from "@simplewebauthn/browser";
 import { type RegistrationResponseJSON } from "@simplewebauthn/types";
 import { encrypt } from "@toruslabs/eccrypto";
 import { encParamsBufToHex, keccak256 } from "@toruslabs/metadata-helpers";
-import { base64url, BUILD_ENV_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import { base64url, BUILD_ENV_TYPE, OpenloginUserInfo, safeatob } from "@toruslabs/openlogin-utils";
 import { decode } from "cbor-x/decode";
 import { ec as EC } from "elliptic";
 
@@ -152,3 +152,11 @@ export const getUserName = (userInfo: Partial<OpenloginUserInfo>) => {
   if (typeOfLogin && typeOfLogin !== "jwt") return `${typeOfLogin}|${email || name || verifierId}`;
   return email || name || verifierId;
 };
+
+export function decodeToken<T>(token: string): { header: { alg: string; typ: string; kid?: string }; payload: T } {
+  const [header, payload] = token.split(".");
+  return {
+    header: JSON.parse(safeatob(header)),
+    payload: JSON.parse(safeatob(payload)) as T,
+  };
+}

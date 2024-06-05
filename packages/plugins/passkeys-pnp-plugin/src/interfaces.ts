@@ -1,4 +1,4 @@
-import { type BUILD_ENV_TYPE } from "@toruslabs/openlogin-utils";
+import { type BUILD_ENV_TYPE, OpenloginSessionData } from "@toruslabs/openlogin-utils";
 import type { Auth0UserInfo, TorusSubVerifierInfo } from "@web3auth/single-factor-auth";
 
 export interface PasskeyServiceEndpoints {
@@ -76,3 +76,19 @@ export interface IPasskeysPluginOptions {
    */
   rpName?: string;
 }
+export interface ExternalAuthTokenPayload {
+  iat: number;
+  aud: string;
+  nonce: string;
+  iss: string;
+  wallets: Array<{ public_key: string; type: string; curve: string }>;
+  email?: string;
+  name?: string;
+  profileImage?: string;
+  verifier?: string;
+  verifierId?: string;
+  aggregateVerifier?: string;
+  typeOfLogin?: string;
+}
+
+export type EncryptedMetadata = { state: OpenloginSessionData; jwtTokenPayload: { wallets: ExternalAuthTokenPayload["wallets"] } };

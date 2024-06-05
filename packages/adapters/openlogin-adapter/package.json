@@ -37,11 +37,14 @@
     "@types/lodash.merge": "^4.6.9"
   },
   "dependencies": {
+    "@toruslabs/base-controllers": "../../../../controllers/packages/base-controllers",
+    "@toruslabs/eccrypto": "^4.0.0",
     "@toruslabs/openlogin": "^8.1.2",
     "@toruslabs/openlogin-session-manager": "^3.1.1",
     "@toruslabs/openlogin-utils": "^8.1.2",
     "@web3auth/base": "^8.6.1",
     "@web3auth/base-provider": "^8.6.1",
+    "bs58": "^5.0.0",
     "lodash.merge": "^4.6.2"
   },
   "lint-staged": {

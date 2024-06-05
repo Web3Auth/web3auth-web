@@ -33,6 +33,8 @@ import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
+import { PASSKEYS_PLUGIN } from "./constants";
+
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
@@ -180,6 +182,11 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     await Promise.all(initPromises);
+
+    if (this.plugins[PASSKEYS_PLUGIN]) {
+      await this.plugins[PASSKEYS_PLUGIN].initWithWeb3Auth(this);
+    }
+
     if (this.status === ADAPTER_STATUS.NOT_READY) {
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.READY);
@@ -299,7 +306,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      Object.values(this.plugins).map(async (plugin) => {
+      const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
+      Object.values(localPlugins).map(async (plugin) => {
         try {
           if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
             return;
@@ -331,8 +339,9 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       }
 
       log.debug("disconnected", this.status, this.connectedAdapterName);
+      const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
       await Promise.all(
-        Object.values(this.plugins).map((plugin) => {
+        Object.values(localPlugins).map((plugin: IPlugin) => {
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if adapter doesn't supports this plugin.
             if (error.code === 5211) {

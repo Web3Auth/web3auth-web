@@ -8,6 +8,7 @@ import { createContext, FunctionComponent, ReactNode, useCallback, useContext, u
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
 import { PLUGIN_EVENTS } from "@web3auth/base";
+import { PasskeysPlugin } from "@web3auth/passkeys-pnp-plugin";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -74,6 +75,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
+  const [passkeysPlugin, setPasskeysPlugin] = useState<PasskeysPlugin | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -176,28 +178,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
               mode: "dark", // whether to enable dark, light or auto mode. defaultValue: auto [ system theme]
             },
-            mfaSettings: {
-              deviceShareFactor: {
-                enable: true,
-                priority: 1,
-                mandatory: true,
-              },
-              backUpShareFactor: {
-                enable: true,
-                priority: 2,
-                mandatory: false,
-              },
-              socialBackupFactor: {
-                enable: true,
-                priority: 3,
-                mandatory: false,
-              },
-              passwordFactor: {
-                enable: true,
-                priority: 4,
-                mandatory: false,
-              },
-            },
             loginConfig: {
               google: {
                 verifier: "w3a-google-demo",
@@ -208,6 +188,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           },
         });
         web3AuthInstance.configureAdapter(openloginAdapter);
+
+        const localPasskeysPlugin = new PasskeysPlugin({ buildEnv: 'testing' });
+        web3AuthInstance.addPlugin(localPasskeysPlugin);
+        setPasskeysPlugin(localPasskeysPlugin);
 
         // Wallet Services Plugin
         if (currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
@@ -407,6 +391,38 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await walletServicesPlugin.showWalletConnectScanner();
   };
 
+  const registerWithPasskey = async () => { 
+    if (!passkeysPlugin) {
+      console.log("passkeysPlugin not initialized yet");
+      uiConsole("passkeysPlugin not initialized yet");
+      return;
+    }
+    const userInfo = await web3Auth?.getUserInfo();
+     
+    const res = await passkeysPlugin.registerPasskey({ 
+      username: `${userInfo?.typeOfLogin}|${userInfo?.email || userInfo?.name} - ${new Date().toLocaleDateString("en-GB")}`
+    });
+    if (res) uiConsole("Passkey registered successfully");
+  }
+
+  const loginWithPasskey = async () => { 
+    if (!passkeysPlugin) {
+      console.log("passkeysPlugin not initialized yet");
+      uiConsole("passkeysPlugin not initialized yet");
+      return;
+    }
+    await passkeysPlugin.loginWithPasskey();
+  }
+
+  const listAllPasskeys = async () => {
+    if (!passkeysPlugin) {
+      uiConsole("passkeysPlugin not initialized yet");
+      return;
+    }
+    const res = await passkeysPlugin?.listAllPasskeys();
+    uiConsole(res);
+  };
+
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -435,6 +451,9 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     randomContractInteraction,
     showWalletConnectScanner,
     enableMFA,
+    registerWithPasskey,
+    loginWithPasskey,
+    listAllPasskeys,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

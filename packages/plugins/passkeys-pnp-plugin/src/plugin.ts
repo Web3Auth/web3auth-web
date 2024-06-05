@@ -1,7 +1,7 @@
 import { NodeDetailManager } from "@toruslabs/fetch-node-details";
 import { decryptData } from "@toruslabs/metadata-helpers";
 import { SafeEventEmitter, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
-import { BUILD_ENV, OpenloginSessionData, OpenloginUserInfo, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { BUILD_ENV, OpenloginUserInfo, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import Torus, { TorusPublicKey } from "@toruslabs/torus.js";
 import {
   ADAPTER_EVENTS,
@@ -21,15 +21,15 @@ import {
 import { type OpenloginAdapter } from "@web3auth/openlogin-adapter";
 
 import { PASSKEYS_VERIFIER_MAP } from "./constants";
-import { IPasskeysPluginOptions, LoginParams, RegisterPasskeyParams } from "./interfaces";
+import { EncryptedMetadata, ExternalAuthTokenPayload, IPasskeysPluginOptions, LoginParams, RegisterPasskeyParams } from "./interfaces";
 import PasskeyService from "./passkeysSvc";
-import { encryptData, getPasskeyVerifierId, getSiteName, getTopLevelDomain, getUserName } from "./utils";
+import { decodeToken, encryptData, getPasskeyVerifierId, getSiteName, getTopLevelDomain, getUserName } from "./utils";
 export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
   name = "PASSKEYS_PLUGIN";
 
   status: PLUGIN_STATUS_TYPE;
 
-  SUPPORTED_ADAPTERS: string[] = [WALLET_ADAPTERS.SFA];
+  SUPPORTED_ADAPTERS: string[] = [WALLET_ADAPTERS.OPENLOGIN];
 
   pluginNamespace: PluginNamespace = PLUGIN_NAMESPACES.MULTICHAIN;
 
@@ -197,13 +197,14 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
       const passkey = await this.getPasskeyPostboxKey(loginParams);
 
       // decrypt the data.
-      const data = await decryptData<OpenloginSessionData>(passkey, metadata);
+      const data = await decryptData<EncryptedMetadata>(passkey, metadata);
       if (!data) throw new Error("Unable to decrypt metadata.");
 
       const adapter = this.web3auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN];
       await (adapter as OpenloginAdapter)._rehydrateWithPasskey({
-        sessionData: data,
+        sessionData: data.state,
         passkeyToken: loginResult.data.idToken,
+        jwtTokenPayload: data.jwtTokenPayload,
       });
       return (this.web3auth as IWeb3Auth).provider;
     } catch (error: unknown) {
@@ -221,9 +222,26 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
 
   private async getEncryptedMetadata(passkeyPubKey: TorusPublicKey) {
     const adapter = this.web3auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] as OpenloginAdapter;
-
+    const idToken = adapter.openloginInstance?.state?.userInfo?.idToken || "";
+    let jwtTokenPayload: Partial<ExternalAuthTokenPayload> = {};
+    if (idToken) {
+      jwtTokenPayload = decodeToken<ExternalAuthTokenPayload>(idToken).payload;
+    }
+    const metadata: EncryptedMetadata = {
+      state: {
+        ...adapter.openloginInstance.state,
+        signatures: [],
+        userInfo: {
+          ...adapter.openloginInstance.state.userInfo,
+          idToken: "",
+        },
+      },
+      jwtTokenPayload: {
+        wallets: jwtTokenPayload?.wallets || [],
+      },
+    };
     // encrypting the metadata.
-    return encryptData({ x: passkeyPubKey.finalKeyData.X, y: passkeyPubKey.finalKeyData.Y }, adapter.openloginInstance.state);
+    return encryptData({ x: passkeyPubKey.finalKeyData.X, y: passkeyPubKey.finalKeyData.Y }, metadata);
   }
 
   private async getPasskeyPublicKey(params: { verifier: string; verifierId: string }) {
