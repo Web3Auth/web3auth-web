@@ -300,7 +300,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   protected subscribeToAdapterEvents(walletAdapter: IAdapter<unknown>): void {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { provider } = this.walletAdapters[data.adapter];
+      const { provider } = data;
       this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;

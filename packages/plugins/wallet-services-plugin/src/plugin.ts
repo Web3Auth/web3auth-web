@@ -4,6 +4,7 @@ import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
@@ -74,7 +75,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
-    this.subscribeToWeb3AuthNoModalEvents(web3auth);
+    this.subscribeToWeb3AuthEvents(web3auth);
     const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
     if (!connectedChainConfig.blockExplorerUrl) throw WalletServicesPluginError.invalidParams("blockExplorerUrl is required in chainConfig");
     if (!connectedChainConfig.displayName) throw WalletServicesPluginError.invalidParams("displayName is required in chainConfig");
@@ -187,9 +188,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     });
   }
 
-  private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
-    web3Auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
-      this.provider = web3Auth.provider;
+  private subscribeToWeb3AuthEvents(web3Auth: IWeb3AuthCore) {
+    web3Auth.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      this.provider = data.provider || web3Auth.provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
