@@ -28,6 +28,11 @@
   transform-origin: center center;
 }
 
+#w3a-modal .w3a-modal__inner.w3a-modal__inner--passkey {
+  @apply min-h-0;
+
+}
+
 #w3a-modal .w3a-modal__inner.w3a-modal__inner--active {
   @apply opacity-100;
   transform: scale(1);

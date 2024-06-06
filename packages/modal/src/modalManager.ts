@@ -19,7 +19,15 @@ import {
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
-import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import {
+  getAdapterSocialLogins,
+  getUserLanguage,
+  LOGIN_MODAL_EVENTS,
+  LoginModal,
+  OPENLOGIN_PROVIDERS,
+  RegisterPasskeyModal,
+  UIConfig,
+} from "@web3auth/ui";
 import { type WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
@@ -320,6 +328,16 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // if no in app wallet is available then initialize external wallets in modal
       await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
     }
+  }
+
+  // TODO: use register modal properly
+  public async connect2(): Promise<IProvider | null> {
+    const registerPasskeyModal = new RegisterPasskeyModal({
+      ...this.options.uiConfig,
+      adapterListener: this,
+    });
+    registerPasskeyModal.initModal();
+    return null;
   }
 
   public async connect(): Promise<IProvider | null> {
