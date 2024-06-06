@@ -25,16 +25,35 @@ function createWrapper(parentZIndex = "20"): HTMLElement {
 }
 
 class RegisterPasskeyModal extends SafeEventEmitter {
-  isDark = true;
-
   private uiConfig: UIConfig;
+
+  private stateEmitter: SafeEventEmitter;
 
   constructor(uiConfig: UIConfig) {
     super();
     this.uiConfig = uiConfig;
     if (!uiConfig.mode) this.uiConfig.mode = "light";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+    this.stateEmitter = new SafeEventEmitter();
   }
+
+  get isDark(): boolean {
+    return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+
+  // TODO: implement close modal through this.stateEmitter
+  // eslint-disable-next-line class-methods-use-this
+  closeModal = () => {
+    // eslint-disable-next-line no-console
+    console.log("close modal");
+  };
+
+  // TODO: implement registerPasskey through this.stateEmitter
+  // eslint-disable-next-line class-methods-use-this
+  registerPasskey = () => {
+    // eslint-disable-next-line no-console
+    console.log("registerPasskey");
+  };
 
   initModal = (): void => {
     const darkState = { isDark: this.isDark };
@@ -49,7 +68,7 @@ class RegisterPasskeyModal extends SafeEventEmitter {
 
     root.render(
       <ThemedContext.Provider value={darkState}>
-        <RegisterPasskey />
+        <RegisterPasskey stateListener={this.stateEmitter} closeModal={this.closeModal} registerPasskey={this.registerPasskey} />
       </ThemedContext.Provider>
     );
   };
