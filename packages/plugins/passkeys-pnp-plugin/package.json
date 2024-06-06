@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/passkeys-pnp-plugin",
-  "version": "8.6.1",
+  "version": "8.6.2",
   "description": "Passkeys PnP plugin for fast login",
   "author": "Torus Labs",
   "homepage": "https://github.com/web3auth/passkeys-pnp-plugin#readme",
@@ -53,23 +53,7 @@
     "@web3auth/base": "../../base",
     "@web3auth/no-modal": "../../no-modal",
     "@web3auth/openlogin-adapter": "../../adapters/openlogin-adapter",
-    "@babel/register": "^7.24.6",
-    "@babel/runtime": "^7.24.6",
-    "@toruslabs/config": "^2.0.2",
-    "@toruslabs/eslint-config-typescript": "^3.2.0",
-    "@toruslabs/torus-scripts": "^5.3.1",
-    "@types/assert": "^1.5.10",
-    "@types/elliptic": "^6.4.18",
-    "@types/node": "^20",
-    "cross-env": "^7.0.3",
-    "dotenv": "^16.4.5",
-    "eslint": "^9.4.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.5",
-    "nyc": "^15.1.0",
-    "prettier": "^3.3.1",
-    "rimraf": "^5.0.7",
-    "typescript": "^5.4.5"
+    "@types/elliptic": "^6.4.18"
   },
   "bugs": {
     "url": "https://github.com/Web3Auth/web3auth-web/issues"

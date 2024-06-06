@@ -13,8 +13,6 @@ import Button from "./Button";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
-import RegisterPasskey from "./RegisterPasskey";
-// import Loader from "./Loader";
 import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 
@@ -25,6 +23,7 @@ interface ModalProps {
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
+  handlePasskeyLogin: () => void;
   closeModal: () => void;
 }
 
@@ -59,7 +58,16 @@ export default function Modal(props: ModalProps) {
   });
   const [t] = useTranslation(undefined, { i18n });
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const {
+    stateListener,
+    appLogo,
+    appName,
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleShowExternalWallets,
+    handlePasskeyLogin,
+    closeModal,
+  } = props;
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -168,14 +176,7 @@ export default function Modal(props: ModalProps) {
         <button
           type="button"
           className="ml-1 text-sm text-app-primary-600 hover:text-app-primary-800 dark:text-app-primary-500 dark:hover:text-app-primary-400 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400"
-          onClick={() => {
-            setModalState((prevState) => {
-              return {
-                ...prevState,
-                passkeyRegisterVisibility: true,
-              };
-            });
-          }}
+          onClick={handlePasskeyLogin}
         >
           {t("modal.passkey.use")}
         </button>
@@ -250,7 +251,7 @@ export default function Modal(props: ModalProps) {
                   {passkeyButton}
                 </>
               ) : (
-                (modalState.externalWalletsVisibility && (
+                modalState.externalWalletsVisibility && (
                   <ExternalWallets
                     modalStatus={modalState.status}
                     showBackButton={areSocialLoginsVisible}
@@ -264,16 +265,7 @@ export default function Modal(props: ModalProps) {
                       })
                     }
                   />
-                )) ||
-                (modalState.passkeyRegisterVisibility && (
-                  <RegisterPasskey
-                    hideExternalWallets={() =>
-                      setModalState((prevState) => {
-                        return { ...prevState, passkeyRegisterVisibility: false };
-                      })
-                    }
-                  />
-                ))
+                )
               )}
             </div>
           )}

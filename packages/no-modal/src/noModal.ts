@@ -29,6 +29,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { type PasskeysPlugin } from "@web3auth/passkeys-pnp-plugin";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
@@ -257,6 +258,22 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     const provider = await this.walletAdapters[walletName].connect(loginParams);
     this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
     return this.provider;
+  }
+
+  async registerWithPasskey(params?: { authenticatorAttachment?: AuthenticatorAttachment; username?: string }): Promise<boolean> {
+    const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
+    if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
+
+    const provider = await plugin.registerPasskey(params);
+    return provider;
+  }
+
+  async loginWithPasskeys(params?: { authenticatorId?: string }): Promise<IProvider | null> {
+    const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
+    if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
+
+    const provider = await plugin.loginWithPasskey(params);
+    return provider;
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {

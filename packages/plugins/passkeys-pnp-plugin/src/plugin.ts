@@ -1,12 +1,13 @@
 import { NodeDetailManager } from "@toruslabs/fetch-node-details";
 import { decryptData } from "@toruslabs/metadata-helpers";
-import { SafeEventEmitter, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
+import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { BUILD_ENV, OpenloginUserInfo, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import Torus, { TorusPublicKey } from "@toruslabs/torus.js";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   type IPlugin,
+  IProvider,
   IWeb3Auth,
   type IWeb3AuthCore,
   log,
@@ -164,7 +165,7 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     }
   }
 
-  public async loginWithPasskey({ authenticatorId }: { authenticatorId?: string } = {}): Promise<SafeEventEmitterProvider | null> {
+  public async loginWithPasskey({ authenticatorId }: { authenticatorId?: string } = {}): Promise<IProvider | null> {
     if (!this.initialized) throw new Error("Sdk not initialized, please call init first.");
     if (!this.passkeysSvc) throw new Error("Passkey service not initialized");
 

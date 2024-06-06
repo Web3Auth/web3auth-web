@@ -188,6 +188,7 @@ class LoginModal extends SafeEventEmitter {
             handleShowExternalWallets={this.handleShowExternalWallets}
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
+            handlePasskeyLogin={this.handlePasskeyLogin}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
           />
@@ -268,6 +269,10 @@ class LoginModal extends SafeEventEmitter {
       loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
     });
   };
+
+  private handlePasskeyLogin() {
+    this.emit(LOGIN_MODAL_EVENTS.PASSKEY_LOGIN);
+  }
 
   private setState = (newState: Partial<ModalState>) => {
     this.stateEmitter.emit("STATE_UPDATED", newState);

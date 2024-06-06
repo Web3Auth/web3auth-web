@@ -20,7 +20,7 @@ import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
 import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
-import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { type WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
@@ -59,7 +59,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.modalConfig = modalConfig;
   }
 
-  public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
+  // TODO: types here are confusing as its just a string, we should fix this ideally.
+  public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE | "passkeys", ModalConfig> }): Promise<void> {
     super.checkInitRequirements();
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
@@ -430,6 +431,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           log.debug("this stops wc adapter from trying to reconnect once proposal expires");
           adapter.status = ADAPTER_STATUS.READY;
         }
+      }
+    });
+
+    this.loginModal.on(LOGIN_MODAL_EVENTS.PASSKEY_REGISTER, async () => {
+      try {
+        await this.registerWithPasskey();
+      } catch (err) {
+        log.error("Error while registering with passkeys", err);
+      }
+    });
+
+    this.loginModal.on(LOGIN_MODAL_EVENTS.PASSKEY_LOGIN, async () => {
+      try {
+        await this.loginWithPasskeys();
+      } catch (err) {
+        log.error("Error while login with passkeys", err);
       }
     });
   }
