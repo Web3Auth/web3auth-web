@@ -16,7 +16,9 @@ import {
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
+  PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
+  PLUGIN_STATUS,
   PROJECT_CONFIG_RESPONSE,
   storageAvailable,
   UserAuthInfo,
@@ -394,6 +396,18 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       if (storageAvailable(this.storage)) {
         this.clearCache();
       }
+    });
+  }
+
+  protected subscribeToPluginEvents(plugin: IPlugin): void {
+    plugin.on(PLUGIN_EVENTS.CONNECTING, (data: unknown) => {
+      this.status = PLUGIN_STATUS.CONNECTING;
+      this.emit(PLUGIN_EVENTS.CONNECTING, data);
+    });
+
+    plugin.on(PLUGIN_EVENTS.ERRORED, (data: unknown) => {
+      this.status = PLUGIN_STATUS.ERRORED;
+      this.emit(PLUGIN_EVENTS.ERRORED, data);
     });
   }
 

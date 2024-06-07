@@ -9,12 +9,12 @@ import { LOGIN_MODAL_EVENTS, PASSKEY_MODAL_EVENTS, UIConfig } from "./interfaces
 import { getUserLanguage } from "./utils";
 
 function createWrapper(parentZIndex = "20"): HTMLElement {
-  const existingWrapper = document.getElementById("w3a-parent-container");
+  const existingWrapper = document.getElementById("w3a-passkey-container");
   if (existingWrapper) existingWrapper.remove();
 
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
-  parent.setAttribute("id", "w3a-parent-container");
+  parent.setAttribute("id", "w3a-passkey-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
   const wrapper = document.createElement("section");
@@ -50,7 +50,7 @@ class RegisterPasskeyModal extends SafeEventEmitter {
   };
 
   registerPasskey = () => {
-    this.stateEmitter.emit(LOGIN_MODAL_EVENTS.PASSKEY_REGISTER, {});
+    this.emit(LOGIN_MODAL_EVENTS.PASSKEY_REGISTER, {});
   };
 
   initModal = (): void => {

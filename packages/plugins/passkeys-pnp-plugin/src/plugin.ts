@@ -25,7 +25,7 @@ import { type RegisterPasskeyModal } from "@web3auth/ui";
 import { PASSKEYS_VERIFIER_MAP } from "./constants";
 import { EncryptedMetadata, ExternalAuthTokenPayload, IPasskeysPluginOptions, LoginParams, RegisterPasskeyParams } from "./interfaces";
 import PasskeyService from "./passkeysSvc";
-import { decodeToken, encryptData, getPasskeyVerifierId, getSiteName, getTopLevelDomain, getUserName } from "./utils";
+import { decodeToken, encryptData, getPasskeyVerifierId, getSiteName, getTopLevelDomain, getUserName, shouldSupportPasskey } from "./utils";
 export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
   name = "PASSKEYS_PLUGIN";
 
@@ -129,6 +129,8 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     if (!this.passkeysSvc) throw new Error("Passkey service not initialized");
     if (!this.web3auth.connected) throw new Error("Web3Auth not connected");
 
+    this.checkIfPasskeysSupported();
+
     if (this.options.registerFlowModal) {
       this.options.registerFlowModal.openModal();
       return;
@@ -141,9 +143,11 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     if (!this.initialized) throw new Error("Sdk not initialized, please call init first.");
     if (!this.passkeysSvc) throw new Error("Passkey service not initialized");
 
-    const loginResult = await this.passkeysSvc.loginUser(authenticatorId);
+    this.checkIfPasskeysSupported();
 
+    this.emit(PLUGIN_EVENTS.CONNECTING, { adapter: "passkey" });
     try {
+      const loginResult = await this.passkeysSvc.loginUser(authenticatorId);
       const {
         response: { signature, clientDataJSON, authenticatorData },
         id,
@@ -182,6 +186,7 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
       return (this.web3auth as IWeb3Auth).provider;
     } catch (error: unknown) {
       log.error("error login with passkey", error);
+      this.emit(PLUGIN_EVENTS.ERRORED, error);
       throw error;
     }
   }
@@ -315,5 +320,12 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
         log.error("error registering passkey", error);
       }
     });
+  }
+
+  private checkIfPasskeysSupported() {
+    const result = shouldSupportPasskey();
+    if (!result.isOsSupported) throw new Error("Passkeys not supported on this OS.");
+    if (!result.isBrowserSupported) throw new Error("Passkeys not supported on this browser.");
+    return true;
   }
 }

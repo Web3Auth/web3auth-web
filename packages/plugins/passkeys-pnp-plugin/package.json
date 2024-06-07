@@ -45,6 +45,7 @@
     "@toruslabs/openlogin-utils": "^8.1.2",
     "@toruslabs/torus.js": "^12.3.6",
     "base64url": "^3.0.1",
+    "bowser": "^2.11.0",
     "cbor-x": "^1.5.9",
     "elliptic": "^6.5.5",
     "loglevel": "^1.9.1"

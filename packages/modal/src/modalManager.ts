@@ -335,6 +335,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     if (params.modalConfig?.[PASSKEYS_PLUGIN]?.showOnModal) {
       await passkeysPlugin?.initWithWeb3Auth(this);
+      this.subscribeToPluginEvents(passkeysPlugin);
       this.loginModal.setPasskeyPluginVisibility(true);
     }
 

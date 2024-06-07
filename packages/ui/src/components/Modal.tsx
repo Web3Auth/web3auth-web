@@ -137,6 +137,13 @@ export default function Modal(props: ModalProps) {
     handleSocialLoginClick(params);
   };
 
+  const preHandlePasskeyClick = () => {
+    setModalState((prevState) => {
+      return { ...prevState, detailedLoaderAdapter: "passkey", detailedLoaderAdapterName: "passkey" };
+    });
+    handlePasskeyLogin();
+  };
+
   const isEmailPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
 
@@ -176,7 +183,7 @@ export default function Modal(props: ModalProps) {
         <button
           type="button"
           className="ml-1 text-sm text-app-primary-600 hover:text-app-primary-800 dark:text-app-primary-500 dark:hover:text-app-primary-400 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400"
-          onClick={handlePasskeyLogin}
+          onClick={preHandlePasskeyClick}
         >
           {t("modal.passkey.use")}
         </button>

@@ -298,6 +298,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await web3Auth?.addChain(newChain);
     uiConsole("New Chain Added");
   };
+
   const switchChain = async () => {
     const chainId = "0xaa36a7";
     if (!provider) {
