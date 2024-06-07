@@ -20,6 +20,7 @@ import {
   WALLET_ADAPTERS,
 } from "@web3auth/base";
 import { type OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { type RegisterPasskeyModal } from "@web3auth/ui";
 
 import { PASSKEYS_VERIFIER_MAP } from "./constants";
 import { EncryptedMetadata, ExternalAuthTokenPayload, IPasskeysPluginOptions, LoginParams, RegisterPasskeyParams } from "./interfaces";
@@ -79,6 +80,10 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     throw new Error("Method not implemented.");
   }
 
+  public setPluginOptions(options: IPasskeysPluginOptions = {}) {
+    this.options = { ...this.options, ...options };
+  }
+
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData) {
     if (this.initialized) return;
     if (!web3auth) throw new Error("Web3Auth pnp instance is required");
@@ -113,56 +118,23 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     }
 
     this.subscribeToPnpEvents(this.web3auth);
-
+    if (this.options.registerFlowModal) this.subscribeToRegisterModalEvents(this.options.registerFlowModal);
     this.initialized = true;
     this.status = PLUGIN_STATUS.READY;
     this.emit(PLUGIN_EVENTS.READY);
   }
 
-  public async registerPasskey({ authenticatorAttachment, username }: RegisterPasskeyParams = {}) {
+  public async registerPasskey(params: RegisterPasskeyParams = {}): Promise<boolean | void> {
     if (!this.initialized) throw new Error("Sdk not initialized, please call init first.");
     if (!this.passkeysSvc) throw new Error("Passkey service not initialized");
     if (!this.web3auth.connected) throw new Error("Web3Auth not connected");
 
-    if (!username) {
-      username = getUserName(this.userInfo);
+    if (this.options.registerFlowModal) {
+      this.options.registerFlowModal.openModal();
+      return;
     }
-    try {
-      const { verifier, verifierId, aggregateVerifier } = this.userInfo;
-      const result = await this.passkeysSvc.initiateRegistration({
-        oAuthVerifier: aggregateVerifier || verifier,
-        oAuthVerifierId: verifierId,
-        authenticatorAttachment,
-        signatures: this.sessionSignatures,
-        username,
-        passkeyToken: this.authToken,
-      });
 
-      if (!result) throw new Error("passkey registration failed.");
-
-      const passkeyVerifierId = await getPasskeyVerifierId(result);
-
-      // get the passkey public address.
-      const passkeyPublicKey = await this.getPasskeyPublicKey({ verifier: this.verifier, verifierId: passkeyVerifierId });
-
-      if (!passkeyPublicKey) throw new Error("Unable to get passkey public key, please try again.");
-
-      const encryptedMetadata = await this.getEncryptedMetadata(passkeyPublicKey);
-
-      const verificationResult = await this.passkeysSvc.registerPasskey({
-        verificationResponse: result,
-        signatures: this.sessionSignatures,
-        passkeyToken: this.authToken,
-        data: encryptedMetadata,
-      });
-
-      if (!verificationResult) throw new Error("passkey registration failed.");
-
-      return true;
-    } catch (error: unknown) {
-      log.error("error registering user", error);
-      throw error;
-    }
+    return this.initiatePasskeyRegistration(params);
   }
 
   public async loginWithPasskey({ authenticatorId }: { authenticatorId?: string } = {}): Promise<IProvider | null> {
@@ -257,6 +229,48 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
     return publicAddress;
   }
 
+  private async initiatePasskeyRegistration({ authenticatorAttachment, username }: RegisterPasskeyParams) {
+    if (!username) {
+      username = getUserName(this.userInfo);
+    }
+    try {
+      const { verifier, verifierId, aggregateVerifier } = this.userInfo;
+      const result = await this.passkeysSvc.initiateRegistration({
+        oAuthVerifier: aggregateVerifier || verifier,
+        oAuthVerifierId: verifierId,
+        authenticatorAttachment,
+        signatures: this.sessionSignatures,
+        username,
+        passkeyToken: this.authToken,
+      });
+
+      if (!result) throw new Error("passkey registration failed.");
+
+      const passkeyVerifierId = await getPasskeyVerifierId(result);
+
+      // get the passkey public address.
+      const passkeyPublicKey = await this.getPasskeyPublicKey({ verifier: this.verifier, verifierId: passkeyVerifierId });
+
+      if (!passkeyPublicKey) throw new Error("Unable to get passkey public key, please try again.");
+
+      const encryptedMetadata = await this.getEncryptedMetadata(passkeyPublicKey);
+
+      const verificationResult = await this.passkeysSvc.registerPasskey({
+        verificationResponse: result,
+        signatures: this.sessionSignatures,
+        passkeyToken: this.authToken,
+        data: encryptedMetadata,
+      });
+
+      if (!verificationResult) throw new Error("passkey registration failed.");
+
+      return true;
+    } catch (error: unknown) {
+      log.error("error registering user", error);
+      throw error;
+    }
+  }
+
   private async getPasskeyPostboxKey(loginParams: LoginParams): Promise<string> {
     if (!this.initialized) throw new Error("Sdk not initialized, please call init first.");
 
@@ -288,6 +302,17 @@ export class PasskeysPlugin extends SafeEventEmitter implements IPlugin {
         const openloginAdapter = this.web3auth.walletAdapters[WALLET_ADAPTERS.OPENLOGIN] as OpenloginAdapter;
         this.sessionSignatures = openloginAdapter?.openloginInstance?.state?.signatures;
         this.authToken = openloginAdapter._passkeyToken;
+      }
+    });
+  }
+
+  private subscribeToRegisterModalEvents(registerModal: RegisterPasskeyModal) {
+    registerModal.on("PASSKEY_REGISTER", async (params: RegisterPasskeyParams) => {
+      try {
+        await this.initiatePasskeyRegistration(params);
+        registerModal.closeModal();
+      } catch (error: unknown) {
+        log.error("error registering passkey", error);
       }
     });
   }

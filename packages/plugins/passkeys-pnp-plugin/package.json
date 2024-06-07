@@ -53,6 +53,7 @@
     "@web3auth/base": "../../base",
     "@web3auth/no-modal": "../../no-modal",
     "@web3auth/openlogin-adapter": "../../adapters/openlogin-adapter",
+    "@web3auth/ui": "../../ui",
     "@types/elliptic": "^6.4.18"
   },
   "bugs": {

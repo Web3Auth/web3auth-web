@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 
 import RegisterPasskey from "./components/RegisterPasskey";
 import { ThemedContext } from "./context/ThemeContext";
-import { UIConfig } from "./interfaces";
+import { LOGIN_MODAL_EVENTS, PASSKEY_MODAL_EVENTS, UIConfig } from "./interfaces";
 import { getUserLanguage } from "./utils";
 
 function createWrapper(parentZIndex = "20"): HTMLElement {
@@ -41,18 +41,16 @@ class RegisterPasskeyModal extends SafeEventEmitter {
     return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
-  // TODO: implement close modal through this.stateEmitter
-  // eslint-disable-next-line class-methods-use-this
-  closeModal = () => {
-    // eslint-disable-next-line no-console
-    console.log("close modal");
+  openModal = (): void => {
+    this.stateEmitter.emit(PASSKEY_MODAL_EVENTS.PASSKEY_MODAL_VISIBILITY, true);
   };
 
-  // TODO: implement registerPasskey through this.stateEmitter
-  // eslint-disable-next-line class-methods-use-this
+  closeModal = () => {
+    this.stateEmitter.emit(PASSKEY_MODAL_EVENTS.PASSKEY_MODAL_VISIBILITY, false);
+  };
+
   registerPasskey = () => {
-    // eslint-disable-next-line no-console
-    console.log("registerPasskey");
+    this.stateEmitter.emit(LOGIN_MODAL_EVENTS.PASSKEY_REGISTER, {});
   };
 
   initModal = (): void => {

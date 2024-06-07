@@ -1,6 +1,6 @@
 import { type BUILD_ENV_TYPE, OpenloginSessionData } from "@toruslabs/openlogin-utils";
 import type { Auth0UserInfo, TorusSubVerifierInfo } from "@web3auth/single-factor-auth";
-
+import { type RegisterPasskeyModal } from "@web3auth/ui";
 export interface PasskeyServiceEndpoints {
   register: {
     options: string;
@@ -75,6 +75,12 @@ export interface IPasskeysPluginOptions {
    * @defaultValue window.title || window.location.hostname
    */
   rpName?: string;
+
+  /**
+   * register flow modal to show before registering a passkey.
+   */
+  // TODO: comeback to this later.
+  registerFlowModal?: RegisterPasskeyModal;
 }
 export interface ExternalAuthTokenPayload {
   iat: number;

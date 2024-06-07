@@ -36,7 +36,6 @@ export default function Modal(props: ModalProps) {
 
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
-    passkeyRegisterVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
     hasExternalWallets: false,
     externalWalletsInitialized: false,
@@ -55,6 +54,7 @@ export default function Modal(props: ModalProps) {
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
     wcAdapters: [],
+    hasPasskeyEnabled: false,
   });
   const [t] = useTranslation(undefined, { i18n });
 
@@ -226,8 +226,7 @@ export default function Modal(props: ModalProps) {
           ) : (
             <div className="w3a-modal__content w3ajs-content">
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
-              !modalState.externalWalletsVisibility &&
-              !modalState.passkeyRegisterVisibility ? (
+              !modalState.externalWalletsVisibility ? (
                 <>
                   {areSocialLoginsVisible ? (
                     <SocialLogins
@@ -248,7 +247,7 @@ export default function Modal(props: ModalProps) {
 
                   {/* button to show external wallets */}
                   {modalState.hasExternalWallets && externalWalletButton}
-                  {passkeyButton}
+                  {modalState.hasPasskeyEnabled && passkeyButton}
                 </>
               ) : (
                 modalState.externalWalletsVisibility && (

@@ -2,6 +2,7 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PASSKEY_MODAL_EVENTS } from "../interfaces";
 import i18n from "../localeImport";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -20,11 +21,8 @@ export default function RegisterPasskey(props: ModalProps) {
   const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
-    stateListener.on("REGISTER_PASSKEY_MODAL_OPEN", () => {
-      setModalVisibility(true);
-    });
-    stateListener.on("REGISTER_PASSKEY_MODAL_CLOSE", () => {
-      setModalVisibility(true);
+    stateListener.on(PASSKEY_MODAL_EVENTS.PASSKEY_MODAL_VISIBILITY, (visible: boolean) => {
+      setModalVisibility(visible);
     });
   }, [stateListener]);
 

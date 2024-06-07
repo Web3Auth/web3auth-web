@@ -8,6 +8,7 @@ import { createContext, FunctionComponent, ReactNode, useCallback, useContext, u
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
 import { PLUGIN_EVENTS } from "@web3auth/base";
+import { PasskeysPlugin } from "@web3auth/passkeys-pnp-plugin";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -30,6 +31,7 @@ export interface IWeb3AuthContext {
   randomContractInteraction: () => Promise<void>;
   showWalletConnectScanner: () => Promise<void>;
   enableMFA: () => Promise<void>;
+  registerPasskey: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -53,6 +55,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   randomContractInteraction: async () => {},
   showWalletConnectScanner: async () => {},
   enableMFA: async () => {},
+  registerPasskey: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -74,6 +77,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
+  const [passkeysPlugin, setPasskeysPlguin] = useState<PasskeysPlugin | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -176,28 +180,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
               mode: "dark", // whether to enable dark, light or auto mode. defaultValue: auto [ system theme]
             },
-            mfaSettings: {
-              deviceShareFactor: {
-                enable: true,
-                priority: 1,
-                mandatory: true,
-              },
-              backUpShareFactor: {
-                enable: true,
-                priority: 2,
-                mandatory: false,
-              },
-              socialBackupFactor: {
-                enable: true,
-                priority: 3,
-                mandatory: false,
-              },
-              passwordFactor: {
-                enable: true,
-                priority: 4,
-                mandatory: false,
-              },
-            },
             loginConfig: {
               google: {
                 verifier: "w3a-google-demo",
@@ -224,6 +206,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
+        
+        const passkeysPluginInstance = new PasskeysPlugin({ });
+        web3AuthInstance.addPlugin(passkeysPluginInstance);
+        setPasskeysPlguin(passkeysPluginInstance);
+
         await web3AuthInstance.initModal({
           modalConfig: {
             [WALLET_ADAPTERS.OPENLOGIN]: {
@@ -407,6 +394,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await walletServicesPlugin.showWalletConnectScanner();
   };
 
+  const registerPasskey = async () => { 
+    if (!passkeysPlugin) {
+      console.log("passkeysPlugin not initialized yet");
+      uiConsole("passkeysPlugin not initialized yet");
+      return;
+    }
+    await web3Auth?.registerWithPasskey();
+  }
+
   const uiConsole = (...args: unknown[]): void => {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -435,6 +431,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     randomContractInteraction,
     showWalletConnectScanner,
     enableMFA,
+    registerPasskey,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

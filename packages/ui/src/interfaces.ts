@@ -57,6 +57,10 @@ export const LOGIN_MODAL_EVENTS = {
   PASSKEY_REGISTER: "PASSKEY_REGISTER",
 };
 
+export const PASSKEY_MODAL_EVENTS = {
+  PASSKEY_MODAL_VISIBILITY: "PASSKEY_MODAL_VISIBILITY",
+};
+
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
@@ -77,7 +81,6 @@ export interface ModalState {
   externalWalletsInitialized: boolean;
   hasExternalWallets: boolean;
   externalWalletsVisibility: boolean;
-  passkeyRegisterVisibility: boolean;
   modalVisibility: boolean;
   modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
@@ -88,6 +91,7 @@ export interface ModalState {
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
   wcAdapters: IWalletConnectExtensionAdapter[];
+  hasPasskeyEnabled: boolean;
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };

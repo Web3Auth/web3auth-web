@@ -91,7 +91,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
 
-  registerWithPasskey(params?: { authenticatorAttachment: AuthenticatorAttachment; username: string }): Promise<boolean>;
+  registerWithPasskey(params?: { authenticatorAttachment: AuthenticatorAttachment; username: string }): Promise<boolean | void>;
   loginWithPasskeys(params?: { authenticatorId: string }): Promise<IProvider>;
 }
 
