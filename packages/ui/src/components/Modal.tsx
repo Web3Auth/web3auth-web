@@ -178,7 +178,7 @@ export default function Modal(props: ModalProps) {
 
   const passkeyButton = (
     <div className="w3a-group text-center">
-      <Button variant="tertiary" type="button" className="w-full w3ajs-passkey-toggle__button" onClick={preHandlePasskeyClick}>
+      <Button variant="tertiary" type="button" className="w-full" onClick={preHandlePasskeyClick}>
         {t("modal.passkey.use")}
       </Button>
     </div>

@@ -51,7 +51,7 @@
     "social.view-less-socials": "表示を減らす socials",
     "social.view-more-socials": "もっと見る socials",
     "passkey.haveExisting": "既存の passkey をお持ちですか?",
-    "passkey.use": "passkeyを使用してください",
+    "passkey.use": "Passkey を持っています",
     "passkey.or": "または",
     "passkey.register-title": "Passkey を登録する",
     "passkey.register-desc": "passkeys を使用すると、顔、指紋、またはセキュリティ キーを使用して本人確認を行うことができます。",

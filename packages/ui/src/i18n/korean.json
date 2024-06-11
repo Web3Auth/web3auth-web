@@ -51,7 +51,7 @@
     "social.view-less-socials": "간략히 보기 socials",
     "social.view-more-socials": "더보기 socials",
     "passkey.haveExisting": "기존 passkey가 있습니까?",
-    "passkey.use": "passkey를 사용하세요",
+    "passkey.use": "나에게는 passkey이(가) 있습니다.",
     "passkey.or": "또는",
     "passkey.register-title": "Passkey 등록",
     "passkey.register-desc": "passkeys를 사용하면 얼굴, 지문 또는 보안 키를 통해 본인임을 확인할 수 있습니다.",
