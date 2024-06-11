@@ -476,7 +476,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     this.loginModal.on(LOGIN_MODAL_EVENTS.PASSKEY_LOGIN, async () => {
       try {
-        await this.loginWithPasskeys();
+        await this.loginWithPasskey();
       } catch (err) {
         log.error("Error while login with passkeys", err);
       }

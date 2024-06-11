@@ -262,7 +262,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return this.provider;
   }
 
-  async registerWithPasskey(params?: { authenticatorAttachment?: AuthenticatorAttachment; username?: string }): Promise<boolean | void> {
+  async registerPasskey(params?: { authenticatorAttachment?: AuthenticatorAttachment; username?: string }): Promise<boolean | void> {
     const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
     if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
 
@@ -270,7 +270,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return result;
   }
 
-  async loginWithPasskeys(params?: { authenticatorId?: string }): Promise<IProvider | null> {
+  async loginWithPasskey(params?: { authenticatorId?: string }): Promise<IProvider | null> {
     const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
     if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
 
