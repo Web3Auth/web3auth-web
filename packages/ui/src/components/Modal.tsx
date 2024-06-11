@@ -178,16 +178,9 @@ export default function Modal(props: ModalProps) {
 
   const passkeyButton = (
     <div className="w3a-group text-center">
-      <div className="inline-block text-sm text-app-gray-400 dark:text-app-gray-500">
-        {t("modal.passkey.haveExisting")}
-        <button
-          type="button"
-          className="ml-1 text-sm text-app-primary-600 hover:text-app-primary-800 dark:text-app-primary-500 dark:hover:text-app-primary-400 focus-visible:outline-1 dark:focus-visible:outline-1 focus-visible:outline dark:focus-visible:outline focus-visible:outline-app-gray-50 dark:focus-visible:outline-app-gray-400"
-          onClick={preHandlePasskeyClick}
-        >
-          {t("modal.passkey.use")}
-        </button>
-      </div>
+      <Button variant="tertiary" type="button" className="w-full w3ajs-passkey-toggle__button" onClick={preHandlePasskeyClick}>
+        {t("modal.passkey.use")}
+      </Button>
     </div>
   );
 

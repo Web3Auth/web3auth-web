@@ -401,7 +401,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("passkeysPlugin not initialized yet");
       return;
     }
-    await web3Auth?.registerWithPasskey();
+    await web3Auth?.registerPasskey();
   }
 
   const uiConsole = (...args: unknown[]): void => {
