@@ -1,7 +1,7 @@
 import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
-import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
+import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
@@ -160,22 +160,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       return this.connector.session.get(this.connector.session.keys[lastKeyIndex])?.topic;
     }
     return undefined;
-  }
-
-  private checkIfChainIdAllowed(chainId: string) {
-    if (!this.connector || !this.connectedTopic()) return false;
-    const sessionData = this.connector.session.get(this.connectedTopic());
-    const allChains = getChainsFromNamespaces(sessionData.namespaces);
-
-    let chainAllowed = false;
-    for (const chain of allChains) {
-      const parsedId = parseChainId(chain);
-      if (Number.parseInt(parsedId.reference, 10) === Number.parseInt(chainId, 10)) {
-        chainAllowed = true;
-        break;
-      }
-    }
-    return chainAllowed;
   }
 
   private checkIfAccountAllowed(address: string) {
