@@ -54,13 +54,14 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
 
     resetHookState();
     const { web3AuthOptions, adapters = [], plugins = [] } = config;
-    const web3Instance = new Web3Auth(web3AuthOptions);
-    if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
-    if (plugins.length)
+    const web3AuthInstance = new Web3Auth(web3AuthOptions);
+    if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
+    if (plugins.length) {
       plugins.forEach((plugin) => {
-        web3Instance.addPlugin(plugin);
+        web3AuthInstance.addPlugin(plugin);
       });
-    setWeb3Auth(web3Instance);
+    }
+    setWeb3Auth(web3AuthInstance);
   }, [config]);
 
   useEffect(() => {
