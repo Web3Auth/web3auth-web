@@ -22,6 +22,10 @@ import log from "loglevel";
 
 import { WalletServicesPluginError } from "./errors";
 
+type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
+  confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
+};
+
 export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
 
@@ -39,11 +43,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   private isInitialized = false;
 
-  private walletInitOptions: WsEmbedParams | null = null;
+  private walletInitOptions: WsPluginEmbedParams | null = null;
 
-  constructor(
-    options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig"> } = {}
-  ) {
+  constructor(options: { wsEmbedOpts?: Partial<CtorArgs>; walletInitOptions?: WsPluginEmbedParams } = {}) {
     super();
     const { wsEmbedOpts, walletInitOptions } = options;
     // we fake these checks here and get them from web3auth instance
@@ -83,12 +85,14 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!connectedChainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
     if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
-    await this.wsEmbedInstance.init({
+    const finalInitOptions = {
       ...this.walletInitOptions,
       chainConfig: connectedChainConfig as EthereumProviderConfig,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
       whiteLabel: mergedWhitelabelSettings,
-    });
+    };
+
+    await this.wsEmbedInstance.init(finalInitOptions);
     this.isInitialized = true;
     this.status = PLUGIN_STATUS.READY;
     this.emit(PLUGIN_EVENTS.READY);
