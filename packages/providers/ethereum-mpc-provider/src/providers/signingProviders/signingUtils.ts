@@ -52,7 +52,9 @@ async function signTx(
   const msgHash = unsignedEthTx.getHashedMessageToSign();
   const rawMessage = unsignedEthTx.getMessageToSign();
 
-  let { v, r, s } = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
+  const vrs = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
+  let { v } = vrs;
+  const { r, s } = vrs;
 
   // mpc-core-kit workaround (revert back to 0/1)
   if (v > 1) {
