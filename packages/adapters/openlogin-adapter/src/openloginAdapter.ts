@@ -277,7 +277,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
       await this.privateKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: WALLET_ADAPTERS.OPENLOGIN, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, {
+        adapter: WALLET_ADAPTERS.OPENLOGIN,
+        reconnected: this.rehydrated,
+        provider: this.provider,
+      } as CONNECTED_EVENT_DATA);
     }
   }
 }

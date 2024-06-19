@@ -445,16 +445,8 @@
   @apply flex p-2;
 }
 
-#w3a-modal .w3a-modal__loader-app-logo--default {
-  @apply bg-app-primary-600 dark:bg-app-gray-50 w-[72px] h-[72px] rounded-full items-center justify-center;
-}
-
 #w3a-modal .w3a-modal__loader-app-logo img {
   @apply max-h-[72px] max-w-[72px] w-[72px] h-auto;
-}
-
-#w3a-modal .w3a-modal__loader-app-logo--default img {
-  @apply max-h-[45px] max-w-[45px] w-[45px];
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
