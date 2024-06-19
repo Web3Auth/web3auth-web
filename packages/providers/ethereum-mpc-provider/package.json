@@ -34,8 +34,7 @@
     "@babel/runtime": "7.x"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "lint-staged": {
     "!(*d).ts": [
