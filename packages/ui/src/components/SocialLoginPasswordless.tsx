@@ -95,8 +95,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
           name="passwordless-input"
           required
           placeholder={`${t("modal.social.sms-placeholder-text")} ${placeholder}`}
-          onFocus={(e) => (e.target.placeholder = "")}
-          onBlur={(e) => (e.target.placeholder = `${t("modal.social.sms-placeholder-text")} ${placeholder}`)}
+          onFocus={(e) => {
+            e.target.placeholder = "";
+          }}
+          onBlur={(e) => {
+            e.target.placeholder = `${t("modal.social.sms-placeholder-text")} ${placeholder}`;
+          }}
           onChange={(e) => handleInputChange(e)}
         />
 
