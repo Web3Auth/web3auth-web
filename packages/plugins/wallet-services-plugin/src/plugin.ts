@@ -23,6 +23,17 @@ import log from "loglevel";
 import { WalletServicesPluginError } from "./errors";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
+  /**
+   * Determines how to show confirmation screens
+   * @defaultValue default
+   *
+   * default & auto-approve
+   * - use auto-approve as default
+   * - if wallet connect request use modal
+   *
+   * modal
+   * - use modal always
+   */
   confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
 };
 
