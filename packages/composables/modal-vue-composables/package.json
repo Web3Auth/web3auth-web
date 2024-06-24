@@ -1,0 +1,64 @@
+{
+  "name": "@web3auth/modal-vue-composables",
+  "version": "8.6.2",
+  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
+  "keywords": [
+    "web3Auth/modal-vue-composables",
+    "web3Auth",
+    "blockchain",
+    "vue composables",
+    "web3Auth composables",
+    "web3Auth modal vue composables"
+  ],
+  "main": "dist/modalVueComposables.cjs.js",
+  "module": "dist/modalVueComposables.esm.js",
+  "unpkg": "dist/modalVueComposables.umd.min.js",
+  "jsdelivr": "dist/modalVueComposables.umd.min.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Torus Labs",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
+  "license": "ISC",
+  "scripts": {
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@web3auth/base": "^8.6.2",
+    "@web3auth/modal": "^8.6.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6"
+  },
+  "peerDependencies": {
+    "@babel/runtime": "^7.x",
+    "vue": "^3.4.x"
+  },
+  "lint-staged": {
+    "!(*d).ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
+  }
+}
