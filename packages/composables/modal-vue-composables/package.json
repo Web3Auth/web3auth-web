@@ -41,12 +41,6 @@
     "@babel/runtime": "^7.x",
     "vue": "^3.4.x"
   },
-  "lint-staged": {
-    "!(*d).ts": [
-      "eslint --cache --fix",
-      "prettier --write"
-    ]
-  },
   "publishConfig": {
     "access": "public"
   },
