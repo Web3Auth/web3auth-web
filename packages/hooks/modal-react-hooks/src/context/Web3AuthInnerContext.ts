@@ -43,46 +43,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth]
   );
 
-  useEffect(() => {
-    const resetHookState = () => {
-      setProvider(null);
-      setUserInfo(null);
-      setIsMFAEnabled(false);
-      setIsConnected(false);
-      setStatus(null);
-    };
-
-    resetHookState();
-    const { web3AuthOptions, adapters = [], plugins = [] } = config;
-    const web3Instance = new Web3Auth(web3AuthOptions);
-    if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
-    if (plugins.length)
-      plugins.forEach((plugin) => {
-        web3Instance.addPlugin(plugin);
-      });
-    setWeb3Auth(web3Instance);
-  }, [config]);
-
-  useEffect(() => {
-    const addState = async () => {
-      setProvider(web3Auth.provider);
-      const userState = await web3Auth.getUserInfo();
-      setUserInfo(userState);
-      setIsMFAEnabled(userState?.isMfaEnabled || false);
-    };
-
-    const resetState = () => {
-      setProvider(null);
-      setUserInfo(null);
-      setIsMFAEnabled(false);
-    };
-
-    if (web3Auth) {
-      if (isConnected) addState();
-      else resetState();
-    }
-  }, [web3Auth, isConnected]);
-
   const initModal = useCallback(
     async (modalParams: { modalConfig?: Record<string, ModalConfig> } = {}) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
@@ -90,50 +50,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     },
     [web3Auth]
   );
-
-  useEffect(() => {
-    const notReadyListener = () => setStatus(web3Auth.status);
-    const readyListener = () => {
-      setStatus(web3Auth.status);
-      setIsInitialized(true);
-    };
-    const connectedListener = () => {
-      setStatus(web3Auth.status);
-      setIsInitialized(true);
-      setIsConnected(true);
-    };
-    const disconnectedListener = () => {
-      setStatus(web3Auth.status);
-      setIsConnected(false);
-    };
-    const connectingListener = () => {
-      setStatus(web3Auth.status);
-    };
-    const errorListener = () => {
-      setStatus(ADAPTER_STATUS.ERRORED);
-    };
-    if (web3Auth) {
-      // web3Auth is initialized here.
-      setStatus(web3Auth.status);
-      web3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-      web3Auth.on(ADAPTER_EVENTS.READY, readyListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
-      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
-      web3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
-    }
-
-    return () => {
-      if (web3Auth) {
-        web3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-        web3Auth.off(ADAPTER_EVENTS.READY, readyListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
-        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
-        web3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
-      }
-    };
-  }, [web3Auth]);
 
   const enableMFA = useCallback(
     async (loginParams: Partial<LoginParams>) => {
@@ -193,6 +109,91 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     },
     [web3Auth]
   );
+
+  useEffect(() => {
+    const resetHookState = () => {
+      setProvider(null);
+      setUserInfo(null);
+      setIsMFAEnabled(false);
+      setIsConnected(false);
+      setStatus(null);
+    };
+
+    resetHookState();
+    const { web3AuthOptions, adapters = [], plugins = [] } = config;
+    const web3AuthInstance = new Web3Auth(web3AuthOptions);
+    if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
+    if (plugins.length) {
+      plugins.forEach((plugin) => {
+        web3AuthInstance.addPlugin(plugin);
+      });
+    }
+    setWeb3Auth(web3AuthInstance);
+  }, [config]);
+
+  useEffect(() => {
+    const addState = async () => {
+      setProvider(web3Auth.provider);
+      const userState = await web3Auth.getUserInfo();
+      setUserInfo(userState);
+      setIsMFAEnabled(userState?.isMfaEnabled || false);
+    };
+
+    const resetState = () => {
+      setProvider(null);
+      setUserInfo(null);
+      setIsMFAEnabled(false);
+    };
+
+    if (web3Auth) {
+      if (isConnected) addState();
+      else resetState();
+    }
+  }, [web3Auth, isConnected]);
+
+  useEffect(() => {
+    const notReadyListener = () => setStatus(web3Auth.status);
+    const readyListener = () => {
+      setStatus(web3Auth.status);
+      setIsInitialized(true);
+    };
+    const connectedListener = () => {
+      setStatus(web3Auth.status);
+      setIsInitialized(true);
+      setIsConnected(true);
+    };
+    const disconnectedListener = () => {
+      setStatus(web3Auth.status);
+      setIsConnected(false);
+    };
+    const connectingListener = () => {
+      setStatus(web3Auth.status);
+    };
+    const errorListener = () => {
+      setStatus(ADAPTER_STATUS.ERRORED);
+    };
+    if (web3Auth) {
+      // web3Auth is initialized here.
+      setStatus(web3Auth.status);
+      web3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+      web3Auth.on(ADAPTER_EVENTS.READY, readyListener);
+      web3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+      web3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
+      web3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
+    }
+
+    return () => {
+      if (web3Auth) {
+        web3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+        web3Auth.off(ADAPTER_EVENTS.READY, readyListener);
+        web3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
+        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+        web3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
+        web3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
+      }
+    };
+  }, [web3Auth]);
 
   const value = useMemo(() => {
     return {
