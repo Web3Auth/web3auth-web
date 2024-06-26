@@ -21,7 +21,7 @@
   "dependencies": {
     "@toruslabs/constants": "^13.4.0",
     "@toruslabs/http-helpers": "^6.1.1",
-    "@toruslabs/openlogin": "^8.1.2",
+    "@toruslabs/openlogin": "^8.2.1",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.2.1",
     "jwt-decode": "^4.0.0",
