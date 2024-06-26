@@ -32,7 +32,7 @@
   "devDependencies": {
     "@metamask/rpc-errors": "^6.2.1",
     "@toruslabs/ethereum-controllers": "^5.7.0",
-    "@toruslabs/openlogin-utils": "^8.1.2"
+    "@toruslabs/openlogin-utils": "^8.2.1"
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^8.1.1",

@@ -91,6 +91,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.openloginOptions = {
       ...this.openloginOptions,
       replaceUrlOnRedirect: isRedirectResult,
+      useCoreKitKey: this.useCoreKitKey,
     };
     this.openloginInstance = new OpenLogin({
       ...this.openloginOptions,
