@@ -30,15 +30,15 @@
     "dist"
   ],
   "devDependencies": {
-    "@metamask/rpc-errors": "^6.2.1",
-    "@toruslabs/ethereum-controllers": "^5.7.0",
-    "@toruslabs/openlogin-utils": "^8.1.2"
+    "@metamask/rpc-errors": "^6.3.0",
+    "@toruslabs/ethereum-controllers": "^5.9.1",
+    "@toruslabs/openlogin-utils": "^8.2.1"
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.6.2",
+    "@web3auth/ws-embed": "^2.0.15",
     "@web3auth/no-modal": "^8.6.3-alpha.0",
-    "@web3auth/ws-embed": "^2.0.3",
     "loglevel": "^1.9.1"
   },
   "peerDependencies": {

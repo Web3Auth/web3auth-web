@@ -37,7 +37,7 @@
     "@walletconnect/utils": "^2.x"
   },
   "dependencies": {
-    "@metamask/rpc-errors": "^6.2.1",
+    "@metamask/rpc-errors": "^6.3.0",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.6.2",
     "@web3auth/base-evm-adapter": "^8.6.2",
@@ -47,9 +47,9 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9",
-    "@walletconnect/sign-client": "^2.13.0",
-    "@walletconnect/types": "^2.13.0",
-    "@walletconnect/utils": "^2.13.0"
+    "@walletconnect/sign-client": "^2.13.3",
+    "@walletconnect/types": "^2.13.3",
+    "@walletconnect/utils": "^2.13.3"
   },
   "lint-staged": {
     "!(*d).ts": [
