@@ -34,7 +34,7 @@
     "@web3auth/wallet-services-connector-plugin": "file:../../packages/plugins/wallet-services-connector-plugin",
     "lodash.merge": "^4.6.2",
     "ts-custom-error": "^3.3.1",
-    "vue": "^3.3.13",
+    "vue": "^3.4.27",
     "web3": "^4.3.0"
   },
   "devDependencies": {
