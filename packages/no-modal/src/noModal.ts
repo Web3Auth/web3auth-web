@@ -16,7 +16,9 @@ import {
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
+  PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
+  PLUGIN_STATUS,
   PROJECT_CONFIG_RESPONSE,
   storageAvailable,
   UserAuthInfo,
@@ -29,9 +31,12 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { type PasskeysPlugin } from "@web3auth/passkeys-pnp-plugin";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
+
+import { PASSKEYS_PLUGIN } from "./constants";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
@@ -180,6 +185,11 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
     });
     await Promise.all(initPromises);
+
+    if (this.plugins[PASSKEYS_PLUGIN]) {
+      await this.plugins[PASSKEYS_PLUGIN].initWithWeb3Auth(this);
+    }
+
     if (this.status === ADAPTER_STATUS.NOT_READY) {
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.READY);
@@ -252,6 +262,22 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     return this.provider;
   }
 
+  async registerPasskey(params?: { authenticatorAttachment?: AuthenticatorAttachment; username?: string }): Promise<boolean | void> {
+    const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
+    if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
+
+    const result = await plugin.registerPasskey(params);
+    return result;
+  }
+
+  async loginWithPasskey(params?: { authenticatorId?: string }): Promise<IProvider | null> {
+    const plugin = this.getPlugin(PASSKEYS_PLUGIN) as PasskeysPlugin;
+    if (!plugin) throw WalletInitializationError.notFound("Please add passkeys plugin before connecting");
+
+    const provider = await plugin.loginWithPasskey(params);
+    return provider;
+  }
+
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.walletAdapters[this.connectedAdapterName].disconnect(options);
@@ -299,7 +325,8 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      Object.values(this.plugins).map(async (plugin) => {
+      const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
+      Object.values(localPlugins).map(async (plugin) => {
         try {
           if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
             return;
@@ -331,8 +358,9 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       }
 
       log.debug("disconnected", this.status, this.connectedAdapterName);
+      const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
       await Promise.all(
-        Object.values(this.plugins).map((plugin) => {
+        Object.values(localPlugins).map((plugin: IPlugin) => {
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if adapter doesn't supports this plugin.
             if (error.code === 5211) {
@@ -368,6 +396,18 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       if (storageAvailable(this.storage)) {
         this.clearCache();
       }
+    });
+  }
+
+  protected subscribeToPluginEvents(plugin: IPlugin): void {
+    plugin.on(PLUGIN_EVENTS.CONNECTING, (data: unknown) => {
+      this.status = PLUGIN_STATUS.CONNECTING;
+      this.emit(PLUGIN_EVENTS.CONNECTING, data);
+    });
+
+    plugin.on(PLUGIN_EVENTS.ERRORED, (data: unknown) => {
+      this.status = PLUGIN_STATUS.ERRORED;
+      this.emit(PLUGIN_EVENTS.ERRORED, data);
     });
   }
 
