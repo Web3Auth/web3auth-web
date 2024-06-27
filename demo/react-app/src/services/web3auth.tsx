@@ -168,6 +168,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           enableLogging: true,
         });
         const openloginAdapter = new OpenloginAdapter({
+          useCoreKitKey: true,
           loginSettings: {
             mfaLevel: "optional",
           },
@@ -196,6 +197,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
             walletInitOptions: {
+              // @ts-ignore
+              buildEnv: "development",
               whiteLabel: { showWidgetButton: true },
             },
           });

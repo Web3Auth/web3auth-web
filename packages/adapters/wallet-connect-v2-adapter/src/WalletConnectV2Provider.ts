@@ -1,7 +1,7 @@
 import { providerErrors } from "@metamask/rpc-errors";
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
-import { getAccountsFromNamespaces, getChainsFromNamespaces, parseAccountId, parseChainId } from "@walletconnect/utils";
+import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
@@ -12,7 +12,7 @@ import {
   IChainSwitchHandlers,
 } from "@web3auth/ethereum-provider";
 
-import { getAccounts, getProviderHandlers } from "./walletConnectV2Utils";
+import { addChain, getAccounts, getProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
   chainConfig: CustomChainConfig;
@@ -63,12 +63,38 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     const currentChainConfig = this.getChainConfig(chainId);
+
+    const { chainId: currentChainId } = this.config.chainConfig;
+    const currentNumChainId = parseInt(currentChainId, 16);
+
+    await switchChain({ connector: this.connector, chainId: currentNumChainId, newChainId: chainId });
+
     this.configure({ chainConfig: currentChainConfig });
     await this.setupEngine(this.connector);
     this.lookupNetwork(this.connector);
   }
 
   async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    const { chainId: currentChainId } = this.config.chainConfig;
+    const numChainId = parseInt(currentChainId, 16);
+
+    await addChain({
+      connector: this.connector,
+      chainId: numChainId,
+      chainConfig: {
+        chainId: chainConfig.chainId,
+        chainName: chainConfig.displayName,
+        nativeCurrency: {
+          name: chainConfig.tickerName,
+          symbol: chainConfig.ticker.toLocaleUpperCase(),
+          decimals: (chainConfig.decimals || 18) as AddEthereumChainParameter["nativeCurrency"]["decimals"],
+        },
+        rpcUrls: [chainConfig.rpcTarget],
+        blockExplorerUrls: [chainConfig.blockExplorerUrl],
+        iconUrls: [chainConfig.logo],
+      },
+    });
+
     super.addChain(chainConfig);
   }
 
@@ -136,22 +162,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     return undefined;
   }
 
-  private checkIfChainIdAllowed(chainId: string) {
-    if (!this.connector || !this.connectedTopic()) return false;
-    const sessionData = this.connector.session.get(this.connectedTopic());
-    const allChains = getChainsFromNamespaces(sessionData.namespaces);
-
-    let chainAllowed = false;
-    for (const chain of allChains) {
-      const parsedId = parseChainId(chain);
-      if (Number.parseInt(parsedId.reference, 10) === Number.parseInt(chainId, 10)) {
-        chainAllowed = true;
-        break;
-      }
-    }
-    return chainAllowed;
-  }
-
   private checkIfAccountAllowed(address: string) {
     if (!this.connector || !this.connectedTopic()) return false;
     const sessionData = this.connector.session.get(this.connectedTopic());
@@ -182,16 +192,16 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       }
 
       if (event.name === "chainChanged") {
-        const { chainId: connectedChainId, rpcUrl } = data as { chainId: number; rpcUrl: string };
+        if (!data) return;
+        const connectedChainId = data as number;
         const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
 
-        if (!this.checkIfChainIdAllowed(connectedHexChainId)) return;
         // Check if chainId changed and trigger event
         if (connectedHexChainId && this.state.chainId !== connectedHexChainId) {
           const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId);
           // Handle rpcUrl update
           this.configure({
-            chainConfig: { ...maybeConfig, chainId: connectedHexChainId, rpcTarget: rpcUrl, chainNamespace: CHAIN_NAMESPACES.EIP155 },
+            chainConfig: { ...maybeConfig, chainId: connectedHexChainId, chainNamespace: CHAIN_NAMESPACES.EIP155 },
           });
           await this.setupEngine(connector);
         }

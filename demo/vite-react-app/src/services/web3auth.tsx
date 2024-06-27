@@ -1,14 +1,15 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, WALLET_ADAPTERS, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import { getWalletProvider, IWalletProvider } from "./walletProvider";
 import { PLUGIN_EVENTS } from "@web3auth/base";
 import { PasskeysPlugin } from "@web3auth/passkeys-pnp-plugin";
+import walletServiceProvider from "./walletServiceProvider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -74,6 +75,7 @@ interface IWeb3AuthProps {
 export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<IWalletProvider | null>(null);
+  const [waasProvider, setWaasProvider] = useState<IWalletProvider | null>(null);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
   const [passkeysPlugin, setPasskeysPlugin] = useState<PasskeysPlugin | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
@@ -114,6 +116,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       // Can subscribe to all PLUGIN_EVENTS and LOGIN_MODAL_EVENTS
       plugin.on(PLUGIN_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in to plugin");
+        const provider = walletServiceProvider(plugin.wsEmbedInstance.provider, uiConsole);
+        setWaasProvider(provider);
       });
 
       plugin.on(PLUGIN_EVENTS.CONNECTING, () => {
@@ -165,6 +169,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           },
           enableLogging: true,
         });
+
         const openloginAdapter = new OpenloginAdapter({
           loginSettings: {
             mfaLevel: "optional",
@@ -199,6 +204,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             wsEmbedOpts: {},
             walletInitOptions: {
               whiteLabel: { showWidgetButton: true },
+              confirmationStrategy: "modal",
+              walletUrls: {
+                production: {
+                  url: "http://localhost:4050",
+                  logLevel: "debug",
+                },
+              },
             },
           });
           subscribePluginEvents(walletServicesPlugin);
@@ -208,27 +220,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
-        await web3AuthInstance.initModal({
-          modalConfig: {
-            [WALLET_ADAPTERS.OPENLOGIN]: {
-              label: "openlogin",
-              loginMethods: {
-                google: {
-                  name: "google",
-                  showOnModal: true,
-                  mainOption: true,
-                },
-                // Disable apple login
-                apple: {
-                  name: "apple",
-                  showOnModal: false,
-                },
-              },
-              // setting it to false will hide all social login methods from modal.
-              showOnModal: true,
-            },
-          },
-        });
+        await web3AuthInstance.initModal();
       } catch (error) {
         console.error(error);
       } finally {
@@ -338,7 +330,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    await provider.signMessage();
+    // await provider.signMessage();
+    await waasProvider?.signMessage();
   };
 
   const signTransaction = async () => {

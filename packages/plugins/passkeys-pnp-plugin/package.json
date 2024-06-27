@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/passkeys-pnp-plugin",
-  "version": "8.6.2",
+  "version": "8.7.0",
   "description": "Passkeys PnP plugin for fast login",
   "author": "Torus Labs",
   "homepage": "https://github.com/web3auth/passkeys-pnp-plugin#readme",
@@ -30,9 +30,7 @@
     "prepare": "husky"
   },
   "peerDependencies": {
-    "@babel/runtime": "7.x",
-    "@web3auth/base": "^8.x",
-    "@web3auth/single-factor-auth": "^8.x"
+    "@babel/runtime": "7.x"
   },
   "dependencies": {
     "@simplewebauthn/browser": "^10.0.0",
@@ -44,6 +42,7 @@
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.1.2",
     "@toruslabs/torus.js": "^12.3.6",
+    "@web3auth/base": "^8.7.0",
     "base64url": "^3.0.1",
     "bowser": "^2.11.0",
     "cbor-x": "^1.5.9",
@@ -51,10 +50,8 @@
     "loglevel": "^1.9.1"
   },
   "devDependencies": {
-    "@web3auth/base": "../../base",
-    "@web3auth/no-modal": "../../no-modal",
-    "@web3auth/openlogin-adapter": "../../adapters/openlogin-adapter",
-    "@web3auth/ui": "../../ui",
+    "@web3auth/openlogin-adapter": "^8.7.0",
+    "@web3auth/ui": "^8.7.0",
     "@types/elliptic": "^6.4.18"
   },
   "bugs": {

@@ -98,8 +98,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
               name="passwordless-input"
               required
               placeholder={placeholder}
-              onFocus={(e) => (e.target.placeholder = "")}
-              onBlur={(e) => (e.target.placeholder = placeholder)}
+              onFocus={(e) => {
+                e.target.placeholder = "";
+              }}
+              onBlur={(e) => {
+                e.target.placeholder = placeholder;
+              }}
               onChange={(e) => handleInputChange(e)}
             />
           </div>

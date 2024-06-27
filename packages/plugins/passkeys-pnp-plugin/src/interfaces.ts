@@ -1,5 +1,4 @@
 import { type BUILD_ENV_TYPE, OpenloginSessionData } from "@toruslabs/openlogin-utils";
-import type { Auth0UserInfo, TorusSubVerifierInfo } from "@web3auth/single-factor-auth";
 import { type RegisterPasskeyModal } from "@web3auth/ui";
 export interface PasskeyServiceEndpoints {
   register: {
@@ -13,6 +12,11 @@ export interface PasskeyServiceEndpoints {
   crud: {
     list: string;
   };
+}
+
+export interface TorusSubVerifierInfo {
+  verifier: string;
+  idToken: string;
 }
 
 export interface PasskeyExtraVerifierParams extends Record<string, string> {
@@ -32,7 +36,6 @@ export interface LoginParams {
   subVerifierInfoArray?: TorusSubVerifierInfo[];
   // offset in seconds
   serverTimeOffset?: number;
-  fallbackUserInfo?: Partial<Auth0UserInfo>;
   extraVerifierParams: PasskeyExtraVerifierParams;
 }
 
@@ -79,7 +82,6 @@ export interface IPasskeysPluginOptions {
   /**
    * register flow modal to show before registering a passkey.
    */
-  // TODO: comeback to this later.
   registerFlowModal?: RegisterPasskeyModal;
 }
 export interface ExternalAuthTokenPayload {
