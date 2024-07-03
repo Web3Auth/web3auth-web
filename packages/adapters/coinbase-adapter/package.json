@@ -32,14 +32,14 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@coinbase/wallet-sdk": "^3.x"
+    "@coinbase/wallet-sdk": "^4.x"
   },
   "dependencies": {
     "@web3auth/base": "^8.7.0",
     "@web3auth/base-evm-adapter": "^8.7.0"
   },
   "devDependencies": {
-    "@coinbase/wallet-sdk": "^3.7.2"
+    "@coinbase/wallet-sdk": "^4.0.4"
   },
   "lint-staged": {
     "!(*d).ts": [
