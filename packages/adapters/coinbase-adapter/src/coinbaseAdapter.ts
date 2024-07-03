@@ -69,8 +69,8 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     await super.init(options);
     super.checkInitializationRequirements();
     this.coinbaseInstance = new CoinbaseWalletSDK(this.coinbaseOptions);
-    const { chainId, rpcTarget } = this.chainConfig;
-    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider(rpcTarget, Number.parseInt(chainId, 16));
+    const { id: chainId, rpcUrls } = this.chainConfig;
+    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider((rpcUrls?.default?.http || [])[0], chainId);
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {
@@ -91,9 +91,9 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     try {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const { chainId } = this.coinbaseProvider;
-      if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
+      if (chainId !== this.chainConfig.id.toString(16)) {
         await this.addChain(this.chainConfig as CustomChainConfig);
-        await this.switchChain(this.chainConfig as CustomChainConfig, true);
+        await this.switchChain({ chainId: this.chainConfig.id }, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -141,14 +141,14 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: chainConfig.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorerUrl],
+          chainId: chainConfig.id,
+          chainName: chainConfig.name,
+          rpcUrls: [chainConfig.rpcUrls.default.http[0]],
+          blockExplorerUrls: [chainConfig.blockExplorers?.default?.url],
           nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
+            name: chainConfig.nativeCurrency.name,
+            symbol: chainConfig.nativeCurrency.symbol,
+            decimals: chainConfig.nativeCurrency.symbol || 18,
           },
           iconUrls: [chainConfig.logo],
         },
@@ -157,11 +157,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     super.addChainConfig(chainConfig);
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  public async switchChain(params: { chainId: number }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.coinbaseProvider.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: params.chainId }],
+      params: [{ chainId: params.chainId.toString(16) }],
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
   }
