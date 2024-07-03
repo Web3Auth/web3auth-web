@@ -144,7 +144,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
       this.emit(ADAPTER_STATUS.ERRORED, error);
-      throw error instanceof Web3AuthError ? error : WalletLoginError.connectionError("Failed to login with torus wallet");
+      throw error instanceof Web3AuthError ? error : WalletLoginError.connectionError("Failed to login with torus wallet", error);
     }
   }
 
