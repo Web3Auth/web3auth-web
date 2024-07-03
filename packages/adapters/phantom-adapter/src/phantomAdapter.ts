@@ -109,7 +109,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
           });
         } catch (error: unknown) {
           if (error instanceof Web3AuthError) throw error;
-          throw WalletLoginError.connectionError((error as Error)?.message);
+          throw WalletLoginError.connectionError((error as Error)?.message, error);
         } finally {
           this._wallet._handleDisconnect = handleDisconnect;
         }

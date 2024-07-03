@@ -91,7 +91,7 @@ export class SlopeAdapter extends BaseSolanaAdapter<void> {
         await this.connectWithProvider(this._wallet);
       } catch (error: unknown) {
         if (error instanceof Web3AuthError) throw error;
-        throw WalletLoginError.connectionError((error as Error)?.message);
+        throw WalletLoginError.connectionError((error as Error)?.message, error);
       }
 
       return this.provider;

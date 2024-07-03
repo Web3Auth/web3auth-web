@@ -1,6 +1,6 @@
 import { get, post } from "@toruslabs/http-helpers";
 import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@toruslabs/openlogin-utils";
-import { log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { log, LoginMethodConfig, WALLET_ADAPTERS, WalletInitializationError } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
 
@@ -18,7 +18,7 @@ export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: 
     });
     log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);
   } else {
-    throw new Error(`${adapterName} is not a valid adapter`);
+    throw WalletInitializationError.invalidParams(`${adapterName} is not a valid adapter`);
   }
   return finalLoginMethodsConfig;
 };

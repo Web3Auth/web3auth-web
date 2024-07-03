@@ -16,11 +16,10 @@ import {
   PluginConnectParams,
   SafeEventEmitterProvider,
   WALLET_ADAPTERS,
+  WalletServicesPluginError,
 } from "@web3auth/base";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 import log from "loglevel";
-
-import { WalletServicesPluginError } from "./errors";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
@@ -84,7 +83,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     };
 
     const { logoDark, logoLight } = mergedWhitelabelSettings || {};
-    if (!logoDark || !logoLight) throw new Error("logoDark and logoLight are required in whiteLabel config");
+    if (!logoDark || !logoLight) throw WalletServicesPluginError.invalidParams("logoDark and logoLight are required in whiteLabel config");
 
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
@@ -174,7 +173,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
       this.status = PLUGIN_STATUS.DISCONNECTED;
     } else {
-      throw new Error("Wallet Services plugin is not connected");
+      throw WalletServicesPluginError.invalidSession("Wallet Services plugin is not connected");
     }
   }
 

@@ -146,7 +146,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       const finalError =
         error instanceof Web3AuthError
           ? error
-          : WalletLoginError.connectionError(`Failed to login with wallet connect: ${(error as Error)?.message || ""}`);
+          : WalletLoginError.connectionError(`Failed to login with wallet connect: ${(error as Error)?.message || ""}`, error);
       throw finalError;
     }
   }
