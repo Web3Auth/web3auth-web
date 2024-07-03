@@ -98,7 +98,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       projectConfig = await fetchProjectConfig(this.coreOptions.clientId, this.coreOptions.web3AuthNetwork);
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
-      throw WalletInitializationError.notReady("failed to fetch project configurations");
+      throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
     const initPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
@@ -277,9 +277,9 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
   }
 
   public addPlugin(plugin: IPlugin): IWeb3Auth {
-    if (this.plugins[plugin.name]) throw new Error(`Plugin ${plugin.name} already exist`);
+    if (this.plugins[plugin.name]) throw WalletInitializationError.duplicateAdapterError(`Plugin ${plugin.name} already exist`);
     if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
-      throw new Error(
+      throw WalletInitializationError.incompatibleChainNameSpace(
         `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.coreOptions.chainConfig.chainNamespace}`
       );
 

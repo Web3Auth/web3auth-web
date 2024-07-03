@@ -96,7 +96,7 @@ export class SolflareAdapter extends BaseSolanaAdapter<void> {
           await wallet.connect();
         } catch (error: unknown) {
           if (error instanceof Web3AuthError) throw error;
-          throw WalletLoginError.connectionError((error as Error)?.message);
+          throw WalletLoginError.connectionError((error as Error)?.message, error);
         }
       }
       await this.connectWithProvider(wallet as SolflareWallet);
