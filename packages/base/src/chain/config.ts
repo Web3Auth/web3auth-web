@@ -165,6 +165,34 @@ export const polygonAmoy: CustomChainConfig = {
   testnet: true,
 };
 
+export const bsc: CustomChainConfig = {
+  id: 56,
+  name: "BNB Smart Chain",
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  logo: "https://images.toruswallet.io/bnb.png",
+  nativeCurrency: {
+    decimals: 18,
+    name: "BNB",
+    symbol: "BNB",
+  },
+  rpcUrls: {
+    default: { http: ["https://rpc.ankr.com/bsc"] },
+  },
+  blockExplorers: {
+    default: {
+      name: "BscScan",
+      url: "https://bscscan.com",
+      apiUrl: "https://api.bscscan.com/api",
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 15921452,
+    },
+  },
+};
+
 export const bscTestnet: CustomChainConfig = {
   id: 97,
   name: "Binance Smart Chain Testnet",
@@ -192,34 +220,6 @@ export const bscTestnet: CustomChainConfig = {
     },
   },
   testnet: true,
-};
-
-export const bsc: CustomChainConfig = {
-  id: 56,
-  name: "BNB Smart Chain",
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  logo: "https://images.toruswallet.io/bnb.png",
-  nativeCurrency: {
-    decimals: 18,
-    name: "BNB",
-    symbol: "BNB",
-  },
-  rpcUrls: {
-    default: { http: ["https://rpc.ankr.com/bsc"] },
-  },
-  blockExplorers: {
-    default: {
-      name: "BscScan",
-      url: "https://bscscan.com",
-      apiUrl: "https://api.bscscan.com/api",
-    },
-  },
-  contracts: {
-    multicall3: {
-      address: "0xca11bde05977b3631167028862be2a173976ca11",
-      blockCreated: 15921452,
-    },
-  },
 };
 
 export const cronos: CustomChainConfig = {
