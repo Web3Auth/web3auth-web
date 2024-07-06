@@ -185,7 +185,7 @@ export default defineComponent({
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.uiConsole("connected to wallet", data);
+        this.uiConsole("connected to wallet", data.adapter);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
