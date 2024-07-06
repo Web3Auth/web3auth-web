@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, LoginMethodConfig, SafeEventEmitterProvider, solana, WALLET_ADAPTERS } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-solana-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
@@ -35,22 +35,11 @@ import Loader from "@/components/loader.vue";
 import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const solanaChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  rpcTarget: "https://rpc.ankr.com/solana_devnet",
-  blockExplorerUrl: "https://solscan.io",
-  logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-  chainId: "0x3",
-  ticker: "SOL",
-  tickerName: "Solana",
-};
-
 const solanaWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: solanaChainConfig,
+  chainConfig: solana,
   enableLogging: true,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
+  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solana } }),
 };
 
 export default defineComponent({

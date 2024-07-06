@@ -6,7 +6,7 @@ const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
   const connectionConfig = await solanaWallet.request<never, CustomChainConfig>({ method: "solana_provider_config" });
-  const conn = new Connection(connectionConfig.rpcTarget);
+  const conn = new Connection(connectionConfig.rpcUrls.default.http[0]);
   return conn;
 };
 

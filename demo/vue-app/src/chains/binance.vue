@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, bscTestnet, CONNECTED_EVENT_DATA, LoginMethodConfig, mainnet } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -30,40 +30,17 @@ import Loader from "@/components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const binanceChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
-  blockExplorerUrl: "https://testnet.bscscan.com",
-  logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
-  chainId: "0x61",
-  displayName: "Binance SmartChain Testnet",
-  ticker: "BNB",
-  tickerName: "BNB",
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc.ankr.com/eth",
-  blockExplorerUrl: "https://etherscan.io",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-  chainId: "0x1",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-};
-
 const binanceWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: binanceChainConfig,
+  chainConfig: bscTestnet,
   clientId: config.clientId["testnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: binanceChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: bscTestnet } }),
   enableLogging: true,
 };
 
 const ethWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: ethereumChainConfig,
+  chainConfig: mainnet,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: mainnet } }),
   enableLogging: true,
 };
 

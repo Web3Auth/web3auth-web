@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, mainnet, solana } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
@@ -37,39 +37,17 @@ import Loader from "../components/loader.vue";
 import EthRpc from "../rpc/ethRpc.vue";
 import SolRpc from "../rpc/solanaRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc.ankr.com/eth",
-  blockExplorerUrl: "https://etherscan.io",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-  chainId: "0x1",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const solanaChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  rpcTarget: "https://rpc.ankr.com/solana_devnet",
-  blockExplorerUrl: "https://solscan.io",
-  logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-  chainId: "0x3",
-  ticker: "SOL",
-  tickerName: "Solana",
-};
-
 const ethWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: ethereumChainConfig,
+  chainConfig: mainnet,
   enableLogging: true,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: mainnet } }),
 };
 
 const solanaWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: solanaChainConfig,
+  chainConfig: solana,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
+  privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solana } }),
 };
 
 export default defineComponent({

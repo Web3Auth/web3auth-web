@@ -20,9 +20,11 @@
   },
   "dependencies": {
     "@web3auth/base": "^8.7.0",
+    "@web3auth/base-evm-adapter": "^8.7.0",
     "@web3auth/metamask-adapter": "^8.7.0",
     "@web3auth/torus-evm-adapter": "^8.7.0",
-    "@web3auth/wallet-connect-v2-adapter": "^8.7.0"
+    "@web3auth/wallet-connect-v2-adapter": "^8.7.0",
+    "mipd": "^0.0.7"
   },
   "files": [
     "dist"

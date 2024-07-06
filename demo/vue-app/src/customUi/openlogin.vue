@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, mainnet, sepolia, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
@@ -37,42 +37,18 @@ import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc.ankr.com/eth",
-  blockExplorerUrl: "https://etherscan.io",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-  chainId: "0x1",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sepoliaChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0xaa36a7", // hex for 11155111
-  displayName: "Ethereum Sepolia",
-  tickerName: "Ethereum",
-  ticker: "ETH",
-  decimals: 18,
-  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-  blockExplorerUrl: "https://sepolia.etherscan.io",
-  logo: "https://images.toruswallet.io/eth.svg",
-};
-
 const ethWeb3AuthOptions: Web3AuthNoModalOptions = {
-  chainConfig: ethereumChainConfig,
+  chainConfig: sepolia,
   enableLogging: true,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: sepolia } }),
 };
 
 const sepoliaWeb3AuthOptions: Web3AuthNoModalOptions = {
-  chainConfig: sepoliaChainConfig,
+  chainConfig: mainnet,
   enableLogging: true,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: sepoliaChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: mainnet } }),
 };
 
 export default defineComponent({

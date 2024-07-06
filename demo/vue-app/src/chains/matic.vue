@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, LoginMethodConfig, mainnet, polygonAmoy } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -36,40 +36,17 @@ import EthRpc from "@/rpc/ethRpc.vue";
 
 import config from "../config";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const polygonMumbaiConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc-mumbai.maticvigil.com",
-  blockExplorerUrl: "https://mumbai-explorer.matic.today",
-  logo: "https://cryptologos.cc/logos/polygon-matic-logo.png",
-  chainId: "0x13881",
-  displayName: "Polygon Mumbai Testnet",
-  ticker: "matic",
-  tickerName: "matic",
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc.ankr.com/eth",
-  blockExplorerUrl: "https://etherscan.io",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-  chainId: "0x1",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-};
-
 const polygonWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: polygonMumbaiConfig,
+  chainConfig: polygonAmoy,
   clientId: config.clientId["testnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonMumbaiConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonAmoy } }),
   enableLogging: true,
 };
 
 const ethWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: ethereumChainConfig,
+  chainConfig: mainnet,
   clientId: config.clientId["mainnet"],
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: mainnet } }),
   enableLogging: true,
 };
 

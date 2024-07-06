@@ -1,4 +1,7 @@
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IWeb3AuthCoreOptions } from "@web3auth/base";
+import { createStore as createMipd } from "mipd";
+
+import { InjectedEvmAdapter } from "./injectedAdapter";
 
 export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
   const { options } = params;
@@ -29,5 +32,20 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     },
   });
 
-  return [torusWalletAdapter, metamaskAdapter, wcv2Adapter];
+  // multiple injected provider discovery
+  const mipd = createMipd();
+  const injectedProviders = mipd.getProviders().map(
+    (providerDetail) =>
+      new InjectedEvmAdapter({
+        chainConfig: finalChainConfig,
+        clientId,
+        sessionTime,
+        web3AuthNetwork,
+        useCoreKitKey,
+        name: providerDetail.info.name,
+        provider: providerDetail.provider,
+      })
+  );
+
+  return [...injectedProviders, torusWalletAdapter, metamaskAdapter, wcv2Adapter];
 };
