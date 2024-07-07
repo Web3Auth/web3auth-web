@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, LoginMethodConfig, mainnet, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, LoginMethodConfig, mainnet } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -46,7 +46,7 @@ import EthRpc from "../rpc/ethRpc.vue";
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: mainnet,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId["sapphire_mainnet"],
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: mainnet } }),
 };
 
@@ -62,7 +62,7 @@ export default defineComponent({
     },
     openloginNetwork: {
       type: String,
-      default: "testnet",
+      default: "sapphire_mainnet",
     },
   },
   watch: {
@@ -148,34 +148,7 @@ export default defineComponent({
 
         this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal({
-          modalConfig: {
-            [WALLET_ADAPTERS.METAMASK]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Metamask",
-            },
-            [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Wallet Connect",
-            },
-            [WALLET_ADAPTERS.TORUS_EVM]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Torus",
-            },
-            [WALLET_ADAPTERS.OPENLOGIN]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "OpenLogin",
-            },
-          },
-        });
+        await this.web3auth.initModal();
       } catch (error) {
         console.log("error", error);
         this.uiConsole("error", error);

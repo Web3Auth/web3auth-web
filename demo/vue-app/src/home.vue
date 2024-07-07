@@ -46,17 +46,13 @@
           <div class="flex-vertical-center ui-mode">
             <span class="form-label">Openlogin Network</span>
             <span class="form-control radio-group">
-              <label for="mainnet" class="radio-button">
-                <input type="radio" id="mainnet" value="mainnet" v-model="form.openloginNetwork" />
-                Mainnet
+              <label for="sapphire-mainnet" class="radio-button">
+                <input type="radio" id="sapphire-mainnet" value="sapphire_mainnet" v-model="form.openloginNetwork" />
+                Sapphire Mainnet
               </label>
-              <label for="testnet" class="radio-button">
-                <input type="radio" id="testnet" value="testnet" v-model="form.openloginNetwork" />
-                Testnet
-              </label>
-              <label for="cyan" class="radio-button">
-                <input type="radio" id="cyan" value="cyan" v-model="form.openloginNetwork" />
-                Cyan
+              <label for="sapphire-devnet" class="radio-button">
+                <input type="radio" id="sapphire-devnet" value="sapphire_devnet" v-model="form.openloginNetwork" />
+                Sapphire Devnet
               </label>
             </span>
           </div>
