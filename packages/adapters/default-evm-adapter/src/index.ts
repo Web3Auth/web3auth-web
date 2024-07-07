@@ -12,14 +12,11 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     ...(chainConfig || {}),
   };
 
-  const [{ TorusWalletAdapter }, { MetamaskAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
+  const [{ TorusWalletAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
     import("@web3auth/torus-evm-adapter"),
-    import("@web3auth/metamask-adapter"),
     import("@web3auth/wallet-connect-v2-adapter"),
   ]);
   const torusWalletAdapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
-
-  const metamaskAdapter = new MetamaskAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
 
   const wcv2Adapter = new WalletConnectV2Adapter({
     chainConfig: finalChainConfig,
@@ -34,18 +31,23 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
 
   // multiple injected provider discovery
   const mipd = createMipd();
-  const injectedProviders = mipd.getProviders().map(
-    (providerDetail) =>
-      new InjectedEvmAdapter({
-        chainConfig: finalChainConfig,
-        clientId,
-        sessionTime,
-        web3AuthNetwork,
-        useCoreKitKey,
-        name: providerDetail.info.name,
-        provider: providerDetail.provider,
-      })
-  );
+  const injectedProviders = mipd.getProviders().map((providerDetail) => {
+    let walletName = providerDetail.info.name.toLowerCase();
+    if (walletName.toLowerCase().endsWith("wallet")) {
+      walletName = walletName.substring(0, walletName.lastIndexOf(" "));
+    }
+    walletName = walletName.replace(/\s/g, "-");
 
-  return [...injectedProviders, torusWalletAdapter, metamaskAdapter, wcv2Adapter];
+    return new InjectedEvmAdapter({
+      chainConfig: finalChainConfig,
+      clientId,
+      sessionTime,
+      web3AuthNetwork,
+      useCoreKitKey,
+      name: walletName,
+      provider: providerDetail.provider,
+    });
+  });
+
+  return [...injectedProviders, torusWalletAdapter, wcv2Adapter];
 };
