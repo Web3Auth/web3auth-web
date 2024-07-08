@@ -3,16 +3,16 @@ import "../css/web3auth.css";
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { applyWhiteLabelTheme, LANGUAGES } from "@toruslabs/openlogin-utils";
 import {
-  ADAPTER_EVENTS,
-  BaseAdapterConfig,
+  BaseConnectorConfig,
   CONNECTED_EVENT_DATA,
-  IAdapterDataEvent,
-  IWalletConnectExtensionAdapter,
+  CONNECTOR_EVENTS,
+  IConnectorDataEvent,
+  IWalletConnectExtensionConnector,
   log,
   LoginMethodConfig,
-  WALLET_ADAPTER_TYPE,
-  WALLET_ADAPTERS,
-  WalletConnectV2Data,
+  WALLET_CONNECTOR_TYPE,
+  WALLET_CONNECTORS,
+  WalletConnectData,
   Web3AuthError,
 } from "@web3auth/base";
 import { createRoot } from "react-dom/client";
@@ -68,7 +68,7 @@ class LoginModal extends SafeEventEmitter {
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
     this.stateEmitter = new SafeEventEmitter();
-    this.subscribeCoreEvents(this.uiConfig.adapterListener);
+    this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
 
   get isDark(): boolean {
@@ -202,23 +202,23 @@ class LoginModal extends SafeEventEmitter {
   };
 
   addSocialLogins = (
-    adapter: WALLET_ADAPTER_TYPE,
+    connector: WALLET_CONNECTOR_TYPE,
     loginMethods: LoginMethodConfig,
     loginMethodsOrder: string[],
-    uiConfig: Omit<UIConfig, "adapterListener">
+    uiConfig: Omit<UIConfig, "connectorListener">
   ): void => {
     this.setState({
       socialLoginsConfig: {
-        adapter,
+        connector,
         loginMethods,
         loginMethodsOrder,
         uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
+    log.info("addSocialLogins", connector, loginMethods, loginMethodsOrder, uiConfig);
   };
 
-  addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {
+  addWalletLogins = (externalWalletsConfig: Record<string, BaseConnectorConfig>, options: { showExternalWalletsOnly: boolean }): void => {
     this.setState({
       externalWalletsConfig,
       externalWalletsInitialized: true,
@@ -254,17 +254,17 @@ class LoginModal extends SafeEventEmitter {
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
-    const { adapter } = params;
+    const { connector } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
-      adapter,
+      connector,
     });
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
-    const { adapter, loginParams } = params;
+    const { connector, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
-      adapter,
+      connector,
       loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
     });
   };
@@ -273,34 +273,32 @@ class LoginModal extends SafeEventEmitter {
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
-  private updateWalletConnect = (walletConnectUri: string, wcAdapters: IWalletConnectExtensionAdapter[]): void => {
+  private updateWalletConnect = (walletConnectUri: string, wcConnectors: IWalletConnectExtensionConnector[]): void => {
     if (!walletConnectUri) return;
     this.setState({
       walletConnectUri,
-      wcAdapters,
+      wcConnectors,
     });
   };
 
-  private handleAdapterData = (adapterData: IAdapterDataEvent) => {
-    if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-      const walletConnectData = adapterData.data as WalletConnectV2Data;
-      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+  private handleConnectorData = (data: IConnectorDataEvent) => {
+    if (data.connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+      const walletConnectData = data.data as WalletConnectData;
+      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionConnector);
     }
   };
 
   private subscribeCoreEvents = (listener: SafeEventEmitter) => {
-    listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
-      log.info("connecting with adapter", data);
+    listener.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
+      log.info("connecting with data", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
-      if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-        // const provider = data?.loginProvider || "";
-
+      if (data?.connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
         this.setState({ status: MODAL_STATUS.CONNECTING });
       }
     });
-    listener.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
-      log.debug("connected with adapter", data);
+    listener.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+      log.debug("connected with connector", data);
       // only show success if not being reconnected again.
       if (!data.reconnected) {
         this.setState({
@@ -314,7 +312,7 @@ class LoginModal extends SafeEventEmitter {
         });
       }
     });
-    listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
+    listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
       if (error.code === 5000) {
         if (this.uiConfig.displayErrorsOnModal)
@@ -334,12 +332,12 @@ class LoginModal extends SafeEventEmitter {
         });
       }
     });
-    listener.on(ADAPTER_EVENTS.DISCONNECTED, () => {
+    listener.on(CONNECTOR_EVENTS.DISCONNECTED, () => {
       this.setState({ status: MODAL_STATUS.INITIALIZED, externalWalletsVisibility: false });
       // this.toggleMessage("");
     });
-    listener.on(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, (adapterData: IAdapterDataEvent) => {
-      this.handleAdapterData(adapterData);
+    listener.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (data: IConnectorDataEvent) => {
+      this.handleConnectorData(data);
     });
   };
 }

@@ -1,4 +1,4 @@
-import { ADAPTER_STATUS, log } from "@web3auth/base";
+import { CONNECTOR_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,8 +11,8 @@ import Image from "./Image";
 interface DetailedLoaderProps {
   message?: string;
   appLogo?: string;
-  adapter: string;
-  adapterName: string;
+  connector: string;
+  connectorName: string;
   modalStatus: ModalStatusType;
   onClose: () => void;
 }
@@ -20,12 +20,12 @@ interface DetailedLoaderProps {
 const closeIcon = <Icon iconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
-  const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
-  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
+  const { connector, appLogo, message, modalStatus, connectorName, onClose } = props;
+  const providerIcon = connector === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${connector}`} />;
   const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
-    log.debug("adapter loader re-rendering");
+    log.debug("connector loader re-rendering");
     if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
@@ -56,25 +56,25 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
                 <div className="w3a-modal__loader-social-logo">{providerIcon}</div>
               </div>
               <div>
-                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter: adapterName })}</div>
-                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter: adapterName })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message1", { adapter: connectorName })}</div>
+                <div className="w3a-modal__loader-bridge-message">{t("modal.adapter-loader.message2", { adapter: connectorName })}</div>
               </div>
             </>
           )}
-          {modalStatus === ADAPTER_STATUS.CONNECTED && (
+          {modalStatus === CONNECTOR_STATUS.CONNECTED && (
             <div className="flex flex-col items-center">
               <Icon iconName="connected" />
               <div className="w3ajs-modal-loader__message w3a-spinner-message mt-4">{message}</div>
             </div>
           )}
-          {modalStatus === ADAPTER_STATUS.ERRORED && (
+          {modalStatus === CONNECTOR_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
 
         <Footer />
       </div>
-      {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
+      {(modalStatus === CONNECTOR_STATUS.CONNECTED || modalStatus === CONNECTOR_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
           {closeIcon}
         </button>

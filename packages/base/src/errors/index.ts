@@ -48,7 +48,7 @@ export class WalletInitializationError extends Web3AuthError {
     5004: "Wallet window is blocked",
     5005: "Wallet window has been closed by the user",
     5006: "Incompatible chain namespace provided",
-    5007: "Adapter has already been included",
+    5007: "Connector has already been included",
     5008: "Invalid provider Config",
     5009: "Provider is not ready yet",
     5010: "Failed to connect with rpc url",
@@ -93,7 +93,7 @@ export class WalletInitializationError extends Web3AuthError {
     return WalletInitializationError.fromCode(5006, extraMessage);
   }
 
-  public static duplicateAdapterError(extraMessage = ""): IWeb3AuthError {
+  public static duplicateConnectorError(extraMessage = ""): IWeb3AuthError {
     return WalletInitializationError.fromCode(5007, extraMessage);
   }
 

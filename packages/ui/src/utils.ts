@@ -1,15 +1,15 @@
 import { get, post } from "@toruslabs/http-helpers";
 import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@toruslabs/openlogin-utils";
-import { log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { log, LoginMethodConfig, WALLET_CONNECTORS } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
+import { SOCIAL_PROVIDERS, SOCIAL_PROVIDERS_NAMES } from "./config";
 
-export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: LoginMethodConfig = {}): LoginMethodConfig => {
+export const getConnectorSocialLogins = (connectorName: string, loginMethodsConfig: LoginMethodConfig = {}): LoginMethodConfig => {
   const finalLoginMethodsConfig: LoginMethodConfig = {};
-  if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-    OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
+  if (connectorName === WALLET_CONNECTORS.SOCIAL) {
+    SOCIAL_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {
-        name: OPENLOGIN_PROVIDERS_NAMES[loginMethod],
+        name: SOCIAL_PROVIDERS_NAMES[loginMethod],
         showOnMobile: true,
         showOnModal: true,
         showOnDesktop: true,
@@ -18,7 +18,7 @@ export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: 
     });
     log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);
   } else {
-    throw new Error(`${adapterName} is not a valid adapter`);
+    throw new Error(`${connectorName} is not a valid connector`);
   }
   return finalLoginMethodsConfig;
 };

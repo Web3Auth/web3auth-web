@@ -12,11 +12,11 @@ interface SocialLoginPasswordlessProps {
   isPrimaryBtn: boolean;
   isEmailVisible: boolean;
   isSmsVisible: boolean;
-  adapter: string;
-  handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  connector: string;
+  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
+  const { handleSocialLoginClick, connector, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
   const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
@@ -30,13 +30,16 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
     const value = fieldValue;
     const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
     if (isEmailValid) {
-      return handleSocialLoginClick({ adapter, loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" } });
+      return handleSocialLoginClick({
+        connector,
+        loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+      });
     }
     const number = value.startsWith("+") ? value : `${countryCode}${value}`;
     const result = await validatePhoneNumber(number);
     if (result) {
       return handleSocialLoginClick({
-        adapter,
+        connector,
         loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
       });
     }

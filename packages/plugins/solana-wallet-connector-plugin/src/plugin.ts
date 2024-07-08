@@ -3,8 +3,8 @@ import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
-  ADAPTER_EVENTS,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_EVENTS,
   CustomChainConfig,
   IPlugin,
   IWeb3AuthCore,
@@ -16,7 +16,7 @@ import {
   SafeEventEmitterProvider,
   SOLANA_PLUGINS,
   UserInfo,
-  WALLET_ADAPTERS,
+  WALLET_CONNECTORS,
 } from "@web3auth/base";
 import log from "loglevel";
 
@@ -32,7 +32,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_CONNECTORS = [WALLET_CONNECTORS.SOCIAL, WALLET_CONNECTORS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.SOLANA;
 
@@ -62,7 +62,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw SolanaWalletPluginError.web3authRequired();
-    if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw SolanaWalletPluginError.unsupportedAdapter();
+    if (web3auth.provider && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw SolanaWalletPluginError.unsupportedAdapter();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw SolanaWalletPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
@@ -166,7 +166,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
-    if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw SolanaWalletPluginError.unsupportedAdapter();
+    if (this.web3auth?.connectedConnectorName !== WALLET_CONNECTORS.SOCIAL) throw SolanaWalletPluginError.unsupportedAdapter();
     if (this.torusWalletInstance.isLoggedIn) {
       await this.torusWalletInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
@@ -193,14 +193,14 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   }
 
   private subscribeToWeb3AuthNoModalEvents(web3Auth: IWeb3AuthCore) {
-    web3Auth.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+    web3Auth.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       this.provider = data.provider;
       this.userInfo = (await web3Auth.getUserInfo()) as Omit<UserInfo, "isNewUser">;
       if (!this.provider) throw SolanaWalletPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
 
-    web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, async () => {
+    web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
       this.provider = null;
       this.userInfo = null;
       if (this.torusWalletInstance.isLoggedIn) {

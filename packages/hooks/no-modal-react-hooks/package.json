@@ -31,7 +31,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@web3auth/openlogin-adapter": "^8.7.0"
+    "@web3auth/social-connector": "^8.7.0"
   },
   "dependencies": {
     "@web3auth/base": "^8.7.0",

@@ -1,6 +1,6 @@
 import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
-import { ADAPTER_NAMES, log } from "@web3auth/base";
+import { CONNECTOR_NAMES, log } from "@web3auth/base";
 import cloneDeep from "lodash.clonedeep";
 import deepmerge from "lodash.merge";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -46,14 +46,14 @@ export default function Modal(props: ModalProps) {
     socialLoginsConfig: {
       loginMethods: {},
       loginMethodsOrder: [],
-      adapter: "",
+      connector: "",
       uiConfig: {},
     },
     externalWalletsConfig: {},
-    detailedLoaderAdapter: "",
-    detailedLoaderAdapterName: "",
+    detailedLoaderConnector: "",
+    detailedLoaderConnectorName: "",
     showExternalWalletsOnly: false,
-    wcAdapters: [],
+    wcConnectors: [],
   });
   const [t] = useTranslation(undefined, { i18n });
 
@@ -110,9 +110,9 @@ export default function Modal(props: ModalProps) {
 
   const preHandleExternalWalletClick = useCallback(
     (params: ExternalWalletEventType) => {
-      const { adapter } = params;
+      const { connector } = params;
       setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
+        return { ...prevState, detailedLoaderAdapter: connector, detailedLoaderAdapterName: CONNECTOR_NAMES[connector] };
       });
       handleExternalWalletClick(params);
     },
@@ -186,8 +186,8 @@ export default function Modal(props: ModalProps) {
                 appLogo={appLogo}
                 modalStatus={modalState.status}
                 message={t(modalState.postLoadingMessage)}
-                adapter={modalState.detailedLoaderAdapter}
-                adapterName={modalState.detailedLoaderAdapterName}
+                connector={modalState.detailedLoaderConnector}
+                connectorName={modalState.detailedLoaderConnectorName}
               />
               {/* ) : ( */}
               {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
@@ -209,7 +209,7 @@ export default function Modal(props: ModalProps) {
                     <SocialLoginPasswordless
                       isEmailVisible={isEmailPasswordlessLoginVisible}
                       isSmsVisible={isSmsPasswordlessLoginVisible}
-                      adapter={modalState.socialLoginsConfig?.adapter}
+                      connector={modalState.socialLoginsConfig?.connector}
                       handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                       isPrimaryBtn={isEmailPrimary}
                     />
@@ -224,7 +224,7 @@ export default function Modal(props: ModalProps) {
                   showBackButton={areSocialLoginsVisible}
                   handleExternalWalletClick={preHandleExternalWalletClick}
                   walletConnectUri={modalState.walletConnectUri}
-                  wcAdapters={modalState.wcAdapters}
+                  wcConnectors={modalState.wcConnectors}
                   config={modalState.externalWalletsConfig}
                   hideExternalWallets={() =>
                     setModalState((prevState) => {

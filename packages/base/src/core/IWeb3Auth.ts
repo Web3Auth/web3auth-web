@@ -1,10 +1,10 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 
-import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, OPENLOGIN_NETWORK_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
-import { CustomChainConfig } from "../chain/IChainInterface";
+import { CustomChainConfig } from "../chain/interface";
+import { CONNECTOR_STATUS_TYPE, IBaseProvider, IConnector, IProvider, UserAuthInfo, UserInfo, WEB3AUTH_NETWORK_TYPE } from "../connector/interface";
 import { type IPlugin } from "../plugin";
-import { WALLET_ADAPTER_TYPE } from "../wallet";
+import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -44,7 +44,7 @@ export interface IWeb3AuthCoreOptions {
    * Web3Auth Network to use for the session & the issued idToken
    * @defaultValue mainnet
    */
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
 
   /**
    * Uses core-kit key with web3auth provider
@@ -65,8 +65,8 @@ export interface IWeb3AuthCoreOptions {
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connectedAdapterName: string | null;
-  status: ADAPTER_STATUS_TYPE;
+  connectedConnectorName: string | null;
+  status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
@@ -80,15 +80,15 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
-  cachedAdapter: string | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
-  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
-  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
+  cachedConnector: string | null;
+  walletConnectors: Record<string, IConnector<unknown>>;
+  getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
+  configureConnector(connector: IConnector<unknown>): IWeb3Auth;
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.
    */
-  connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
+  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
 }
 

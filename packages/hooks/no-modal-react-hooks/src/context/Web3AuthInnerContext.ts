@@ -1,16 +1,17 @@
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
-  ADAPTER_STATUS_TYPE,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
   CustomChainConfig,
   type IPlugin,
   IProvider,
-  WALLET_ADAPTER_TYPE,
+  UserInfo,
+  WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
+import type { LoginParams } from "@web3auth/social-connector";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
@@ -23,10 +24,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
 
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
-  const [userInfo, setUserInfo] = useState<Partial<OpenloginUserInfo> | null>(null);
+  const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [status, setStatus] = useState<ADAPTER_STATUS_TYPE | null>(null);
+  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
 
   const addPlugin = useCallback(
     (plugin: IPlugin) => {
@@ -54,9 +55,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
 
     resetHookState();
-    const { web3AuthOptions, adapters = [], plugins = [] } = config;
+    const { web3AuthOptions, connectors = [], plugins = [] } = config;
     const web3Instance = new Web3AuthNoModal(web3AuthOptions);
-    if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
+    if (connectors.length) connectors.map((connector) => web3Instance.configureConnector(connector));
     if (plugins.length)
       plugins.forEach((plugin) => {
         web3Instance.addPlugin(plugin);
@@ -90,7 +91,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [web3Auth]);
 
   useEffect(() => {
-    const notReadyListener = () => setStatus(ADAPTER_STATUS.NOT_READY);
+    const notReadyListener = () => setStatus(CONNECTOR_STATUS.NOT_READY);
     const readyListener = () => {
       setStatus(web3Auth.status);
       setIsInitialized(true);
@@ -108,27 +109,27 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
     };
     const errorListener = () => {
-      setStatus(ADAPTER_STATUS.ERRORED);
+      setStatus(CONNECTOR_STATUS.ERRORED);
     };
     if (web3Auth) {
       // web3Auth is initialized here.
       setStatus(web3Auth.status);
-      web3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-      web3Auth.on(ADAPTER_EVENTS.READY, readyListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
-      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
-      web3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
+      web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+      web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+      web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
     }
 
     return () => {
       if (web3Auth) {
-        web3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-        web3Auth.off(ADAPTER_EVENTS.READY, readyListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
-        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
-        web3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
+        web3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+        web3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
+        web3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+        web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+        web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+        web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
       }
     };
   }, [web3Auth]);
@@ -156,7 +157,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   );
 
   const connectTo = useCallback(
-    async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
+    async <T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
       const localProvider = await web3Auth.connectTo(walletName, loginParams);
       return localProvider;

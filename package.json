@@ -5,10 +5,9 @@
     "packages/base",
     "packages/modal",
     "packages/no-modal",
-    "packages/adapter-factory",
     "packages/ui",
     "packages/providers/*",
-    "packages/adapters/*",
+    "packages/connectors/*",
     "packages/plugins/*",
     "packages/hooks/*"
   ],

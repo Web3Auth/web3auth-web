@@ -1,4 +1,6 @@
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
+import { CHAIN_NAMESPACES } from "./constants";
+import { ChainNamespaceType, CustomChainConfig } from "./interface";
+
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;

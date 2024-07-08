@@ -14,7 +14,7 @@ import Image from "./Image";
 
 interface SocialLoginProps {
   socialLoginsConfig: SocialLoginsConfig;
-  handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
 }
 
 function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
@@ -37,7 +37,7 @@ export default function SocialLogins(props: SocialLoginProps) {
     socialLoginsConfig = {
       loginMethods: {},
       loginMethodsOrder: [],
-      adapter: "",
+      connector: "",
       uiConfig: {},
     },
     handleSocialLoginClick,
@@ -97,7 +97,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                   variant="secondary"
                   onClick={() =>
                     handleSocialLoginClick({
-                      adapter: socialLoginsConfig.adapter,
+                      connector: socialLoginsConfig.connector,
                       loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
@@ -116,7 +116,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                 variant="secondary"
                 onClick={() =>
                   handleSocialLoginClick({
-                    adapter: socialLoginsConfig.adapter,
+                    connector: socialLoginsConfig.connector,
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }

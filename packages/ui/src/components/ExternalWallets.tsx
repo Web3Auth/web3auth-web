@@ -1,4 +1,4 @@
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, log, WALLET_ADAPTERS } from "@web3auth/base";
+import { BaseConnectorConfig, IWalletConnectExtensionConnector, log, WALLET_CONNECTORS } from "@web3auth/base";
 import bowser from "bowser";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,12 +21,12 @@ declare global {
 
 interface ExternalWalletsProps {
   hideExternalWallets: () => void;
-  handleExternalWalletClick: (params: { adapter: string }) => void;
-  config: Record<string, BaseAdapterConfig>;
+  handleExternalWalletClick: (params: { connector: string }) => void;
+  config: Record<string, BaseConnectorConfig>;
   walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
-  wcAdapters: IWalletConnectExtensionAdapter[];
+  wcConnectors: IWalletConnectExtensionConnector[];
 }
 
 type ExternalButton = {
@@ -61,7 +61,7 @@ function formatIOSMobile(params: { uri: string; universalLink?: string; deepLink
 }
 
 function formatMobileRegistryEntry(
-  entry: IWalletConnectExtensionAdapter,
+  entry: IWalletConnectExtensionConnector,
   walletConnectUri: string,
   os: os,
   platform: "mobile" | "desktop" = "mobile"
@@ -78,20 +78,20 @@ function formatMobileRegistryEntry(
 }
 
 function formatMobileRegistry(
-  registry: IWalletConnectExtensionAdapter[],
+  registry: IWalletConnectExtensionConnector[],
   walletConnectUri: string,
   os: os,
   platform: "mobile" | "desktop" = "mobile"
 ): IMobileRegistryEntry[] {
-  return Object.values<IWalletConnectExtensionAdapter>(registry)
+  return Object.values<IWalletConnectExtensionConnector>(registry)
     .filter((entry) => !!entry[platform].universal || !!entry[platform].native)
     .map((entry) => formatMobileRegistryEntry(entry, walletConnectUri, os, platform));
 }
 
 export default function ExternalWallet(props: ExternalWalletsProps) {
-  const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcAdapters } = props;
+  const { hideExternalWallets, handleExternalWalletClick, config = {}, walletConnectUri, showBackButton, modalStatus, wcConnectors } = props;
   const [isLoaded, setIsLoaded] = useState(true);
-  const [adapterVisibilityMap, setAdapterVisibilityMap] = useState<Record<string, boolean>>({});
+  const [connectorVisibilityMap, setConnectorVisibilityMap] = useState<Record<string, boolean>>({});
   const [externalButtons, setExternalButtons] = useState<ExternalButton[]>([]);
 
   const deviceType = useMemo<platform>(() => {
@@ -108,40 +108,40 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
   useEffect(() => {
     log.debug("loaded external wallets", config, walletConnectUri, deviceType);
-    const walletConnectAdapterName = WALLET_ADAPTERS.WALLET_CONNECT_V2;
-    const wcAvailable = (config[walletConnectAdapterName]?.showOnModal || false) !== false;
+    const walletConnectConnectorName = WALLET_CONNECTORS.WALLET_CONNECT_V2;
+    const wcAvailable = (config[walletConnectConnectorName]?.showOnModal || false) !== false;
     if (wcAvailable && !walletConnectUri) {
       setIsLoaded(false);
-      handleExternalWalletClick({ adapter: walletConnectAdapterName });
+      handleExternalWalletClick({ connector: walletConnectConnectorName });
     } else if (Object.keys(config).length > 0) {
       setIsLoaded(true);
     }
 
     const canShowMap: Record<string, boolean> = {};
-    Object.keys(config).forEach((adapter) => {
-      const adapterConfig = config[adapter];
-      if (!adapterConfig.showOnModal) {
-        canShowMap[adapter] = false;
+    Object.keys(config).forEach((connector) => {
+      const connectorConfig = config[connector];
+      if (!connectorConfig.showOnModal) {
+        canShowMap[connector] = false;
         return;
       }
-      if (deviceType === "desktop" && adapterConfig.showOnDesktop) {
-        canShowMap[adapter] = true;
+      if (deviceType === "desktop" && connectorConfig.showOnDesktop) {
+        canShowMap[connector] = true;
         return;
       }
-      if ((deviceType === "mobile" || deviceType === "tablet") && adapterConfig.showOnMobile) {
-        canShowMap[adapter] = true;
+      if ((deviceType === "mobile" || deviceType === "tablet") && connectorConfig.showOnMobile) {
+        canShowMap[connector] = true;
         return;
       }
-      canShowMap[adapter] = false;
+      canShowMap[connector] = false;
     });
-    setAdapterVisibilityMap(canShowMap);
+    setConnectorVisibilityMap(canShowMap);
   }, [config, handleExternalWalletClick, walletConnectUri, deviceType]);
 
   useEffect(() => {
     const buttons: ExternalButton[] = [];
     // add wallet connect links
     if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile) {
-      let mobileLinks = formatMobileRegistry(wcAdapters, walletConnectUri, deviceDetails.os, deviceDetails.platform as "mobile" | "desktop");
+      let mobileLinks = formatMobileRegistry(wcConnectors, walletConnectUri, deviceDetails.os, deviceDetails.platform as "mobile" | "desktop");
       if (deviceDetails.os === bowser.OS_MAP.iOS) {
         if (window.ethereum?.isMetaMask) {
           // if metamask, use the metamask adapter directly
@@ -167,19 +167,19 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       }
     }
 
-    const adapterBtns = Object.keys(config)
-      .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && adapterVisibilityMap[adapter])
-      .map((adapter) => ({
-        name: adapter,
+    const connectorBtns = Object.keys(config)
+      .filter((connector) => ![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) && connectorVisibilityMap[connector])
+      .map((connector) => ({
+        name: connector,
         isLink: false,
         block: false,
       }));
 
-    if (adapterBtns.length === 1 && deviceDetails.os !== bowser.OS_MAP.iOS) adapterBtns[0].block = true;
+    if (connectorBtns.length === 1 && deviceDetails.os !== bowser.OS_MAP.iOS) connectorBtns[0].block = true;
 
-    buttons.push(...adapterBtns);
+    buttons.push(...connectorBtns);
     setExternalButtons(buttons);
-  }, [wcAdapters, config, deviceDetails.os, deviceDetails.platform, walletConnectUri, adapterVisibilityMap]);
+  }, [wcConnectors, config, deviceDetails.os, deviceDetails.platform, walletConnectUri, connectorVisibilityMap]);
 
   return (
     <div className="w3ajs-external-wallet w3a-group">
@@ -192,9 +192,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         )}
         {!isLoaded && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {/* <!-- Other Wallet --> */}
-        {Object.keys(config).map((adapter) => {
-          if (walletConnectUri && deviceDetails.platform === bowser.PLATFORMS_MAP.desktop && [WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter)) {
-            return <WalletConnect key={adapter} walletConnectUri={walletConnectUri} />;
+        {Object.keys(config).map((connector) => {
+          if (
+            walletConnectUri &&
+            deviceDetails.platform === bowser.PLATFORMS_MAP.desktop &&
+            [WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector)
+          ) {
+            return <WalletConnect key={connector} walletConnectUri={walletConnectUri} />;
           }
           return null;
         })}
@@ -223,7 +227,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                     <Button
                       variant="tertiary"
                       type="button"
-                      onClick={() => handleExternalWalletClick({ adapter: button.name })}
+                      onClick={() => handleExternalWalletClick({ connector: button.name })}
                       className="w-full"
                       title={config[button.name]?.label || button.name}
                     >

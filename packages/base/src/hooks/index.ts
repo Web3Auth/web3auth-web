@@ -1,7 +1,7 @@
 import { LoginParams, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
 
-import { ADAPTER_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
-import { CustomChainConfig } from "../chain/IChainInterface";
+import { CustomChainConfig } from "../chain/interface";
+import { CONNECTOR_STATUS_TYPE, IProvider, UserAuthInfo } from "../connector";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
@@ -10,7 +10,7 @@ export interface IBaseWeb3AuthHookContext {
   userInfo: Partial<OpenloginUserInfo> | null;
   isMFAEnabled: boolean;
   isInitialized: boolean;
-  status: ADAPTER_STATUS_TYPE | null;
+  status: CONNECTOR_STATUS_TYPE | null;
   enableMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
   addAndSwitchChain(chainConfig: CustomChainConfig): Promise<void>;

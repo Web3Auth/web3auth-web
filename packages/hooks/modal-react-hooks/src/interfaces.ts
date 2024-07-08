@@ -1,9 +1,9 @@
-import type { IAdapter, IBaseWeb3AuthHookContext, IPlugin, IProvider } from "@web3auth/base";
+import type { IBaseWeb3AuthHookContext, IConnector, IPlugin, IProvider } from "@web3auth/base";
 import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
-  adapters?: IAdapter<unknown>[];
+  connectors?: IConnector<unknown>[];
   plugins?: IPlugin[];
 };
 

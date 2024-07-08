@@ -1,9 +1,9 @@
 import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
@@ -14,7 +14,7 @@ import {
   PLUGIN_STATUS_TYPE,
   PluginConnectParams,
   SafeEventEmitterProvider,
-  WALLET_ADAPTERS,
+  WALLET_CONNECTORS,
 } from "@web3auth/base";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 import log from "loglevel";
@@ -41,7 +41,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_CONNECTORS = [WALLET_CONNECTORS.SOCIAL, WALLET_CONNECTORS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
@@ -70,7 +70,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
-    if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
+    if (web3auth.provider && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
     // Not connected yet to openlogin
     if (web3auth.provider) {
@@ -126,7 +126,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async connect({ sessionId, sessionNamespace }: PluginConnectParams): Promise<void> {
-    // if web3auth is being used and connected to unsupported adapter throw error
+    // if web3auth is being used and connected to unsupported connector throw error
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
@@ -137,7 +137,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       }
     }
 
-    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) {
+    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) {
       throw WalletServicesPluginError.web3AuthNotConnected();
     } else if (!this.web3auth.provider) {
       throw WalletServicesPluginError.providerRequired();
@@ -180,7 +180,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async disconnect(): Promise<void> {
-    // if web3auth is being used and connected to unsupported adapter throw error
+    // if web3auth is being used and connected to unsupported connector throw error
     if (this.wsEmbedInstance.isLoggedIn) {
       await this.wsEmbedInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
@@ -194,7 +194,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: string[] = []) => {
       if ((accounts as string[]).length === 0) {
         this.wsEmbedInstance.hideTorusButton();
-        if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
+        if (this.web3auth?.status === CONNECTOR_STATUS.CONNECTED) this.web3auth?.logout();
       }
     });
   }
@@ -216,13 +216,13 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToWeb3AuthEvents(web3Auth: IWeb3AuthCore) {
-    web3Auth.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    web3Auth.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       this.provider = data.provider || web3Auth.provider;
       if (!this.provider) throw WalletServicesPluginError.web3AuthNotConnected();
       this.subscribeToProviderEvents(this.provider);
     });
 
-    web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, async () => {
+    web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
       this.provider = null;
       if (this.wsEmbedInstance.isLoggedIn) {
         await this.wsEmbedInstance.logout();
@@ -258,7 +258,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private async setSelectedAddress(address: string): Promise<void> {
-    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) throw WalletServicesPluginError.web3AuthNotConnected();
     const walletServicesSessionConfig = await this.walletServicesSessionConfig();
     if (address !== walletServicesSessionConfig.accounts?.[0]) {
       throw WalletServicesPluginError.invalidSession();

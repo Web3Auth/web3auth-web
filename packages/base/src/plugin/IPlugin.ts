@@ -1,9 +1,9 @@
 import { type SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { WhiteLabelData } from "@toruslabs/openlogin-utils";
 
-import { CHAIN_NAMESPACES } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES } from "../chain/constants";
 import { type IWeb3AuthCore } from "../core/IWeb3Auth";
-import { WALLET_ADAPTER_TYPE } from "../wallet";
+import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export const PLUGIN_NAMESPACES = {
   ...CHAIN_NAMESPACES,
@@ -47,7 +47,7 @@ export interface PluginConnectParams {
 export interface IPlugin extends SafeEventEmitter {
   name: string;
   status: PLUGIN_STATUS_TYPE;
-  SUPPORTED_ADAPTERS: WALLET_ADAPTER_TYPE[];
+  SUPPORTED_CONNECTORS: WALLET_CONNECTOR_TYPE[];
   pluginNamespace: PluginNamespace;
   initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void>;
   connect(params: PluginConnectParams): Promise<void>;

@@ -1,42 +1,42 @@
-export const MULTI_CHAIN_ADAPTERS = {
-  OPENLOGIN: "openlogin",
+export const MULTI_CHAIN_CONNECTORS = {
+  SOCIAL: "social",
   WALLET_CONNECT_V2: "wallet-connect-v2",
   SFA: "sfa",
 };
 
-export const SOLANA_ADAPTERS = {
+export const SOLANA_CONNECTORS = {
   TORUS_SOLANA: "torus-solana",
   PHANTOM: "phantom",
   SOLFLARE: "solflare",
   SLOPE: "slope",
-  ...MULTI_CHAIN_ADAPTERS,
+  ...MULTI_CHAIN_CONNECTORS,
 };
 
-export const EVM_ADAPTERS = {
+export const EVM_CONNECTORS = {
   TORUS_EVM: "torus-evm",
   METAMASK: "metamask",
   COINBASE: "coinbase",
-  ...MULTI_CHAIN_ADAPTERS,
+  ...MULTI_CHAIN_CONNECTORS,
 };
 
-export const WALLET_ADAPTERS = {
-  ...EVM_ADAPTERS,
-  ...SOLANA_ADAPTERS,
+export const WALLET_CONNECTORS = {
+  ...EVM_CONNECTORS,
+  ...SOLANA_CONNECTORS,
 };
-export type WALLET_ADAPTER_TYPE = (typeof WALLET_ADAPTERS)[keyof typeof WALLET_ADAPTERS];
-export type SOLANA_ADAPTER_TYPE = (typeof SOLANA_ADAPTERS)[keyof typeof SOLANA_ADAPTERS];
-export type EVM_ADAPTER_TYPE = (typeof EVM_ADAPTERS)[keyof typeof EVM_ADAPTERS];
-export type MULTI_CHAIN_ADAPTER_TYPE = (typeof MULTI_CHAIN_ADAPTERS)[keyof typeof MULTI_CHAIN_ADAPTERS];
+export type WALLET_CONNECTOR_TYPE = (typeof WALLET_CONNECTORS)[keyof typeof WALLET_CONNECTORS];
+export type SOLANA_CONNECTOR_TYPE = (typeof SOLANA_CONNECTORS)[keyof typeof SOLANA_CONNECTORS];
+export type EVM_CONNECTOR_TYPE = (typeof EVM_CONNECTORS)[keyof typeof EVM_CONNECTORS];
+export type MULTI_CHAIN_CONNECTOR_TYPE = (typeof MULTI_CHAIN_CONNECTORS)[keyof typeof MULTI_CHAIN_CONNECTORS];
 
-export const ADAPTER_NAMES = {
-  [MULTI_CHAIN_ADAPTERS.OPENLOGIN]: "OpenLogin",
-  [MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V2]: "Wallet Connect v2",
-  [MULTI_CHAIN_ADAPTERS.SFA]: "SFA",
-  [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
-  [SOLANA_ADAPTERS.PHANTOM]: "Phantom",
-  [SOLANA_ADAPTERS.SOLFLARE]: "Solflare",
-  [SOLANA_ADAPTERS.SLOPE]: "Slope",
-  [EVM_ADAPTERS.TORUS_EVM]: "Torus",
-  [EVM_ADAPTERS.METAMASK]: "Metamask",
-  [EVM_ADAPTERS.COINBASE]: "Coinbase",
+export const CONNECTOR_NAMES = {
+  [MULTI_CHAIN_CONNECTORS.SOCIAL]: "Social",
+  [MULTI_CHAIN_CONNECTORS.WALLET_CONNECT_V2]: "Wallet Connect v2",
+  [MULTI_CHAIN_CONNECTORS.SFA]: "SFA",
+  [SOLANA_CONNECTORS.TORUS_SOLANA]: "Torus",
+  [SOLANA_CONNECTORS.PHANTOM]: "Phantom",
+  [SOLANA_CONNECTORS.SOLFLARE]: "Solflare",
+  [SOLANA_CONNECTORS.SLOPE]: "Slope",
+  [EVM_CONNECTORS.TORUS_EVM]: "Torus",
+  [EVM_CONNECTORS.METAMASK]: "Metamask",
+  [EVM_CONNECTORS.COINBASE]: "Coinbase",
 };

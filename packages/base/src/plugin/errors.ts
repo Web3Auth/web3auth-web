@@ -3,7 +3,7 @@ import { ErrorCodes, IWeb3AuthError, Web3AuthError } from "../errors";
 export class WalletServicesPluginError extends Web3AuthError {
   protected static messages: ErrorCodes = {
     5210: "Wallet Services Plugin is not initialized",
-    5211: "Web3Auth is connected to unsupported adapter. Wallet services connector plugin requires web3auth connected to openlogin adapter.",
+    5211: "Web3Auth is connected to unsupported connector. Wallet services connector plugin requires web3auth connected to social connector.",
     5212: "Provider is required..",
     5213: "Web3Auth instance is required while initialization.",
     5214: "Web3Auth is not connected.",
