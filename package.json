@@ -10,7 +10,8 @@
     "packages/providers/*",
     "packages/adapters/*",
     "packages/plugins/*",
-    "packages/hooks/*"
+    "packages/hooks/*",
+    "packages/composables/*"
   ],
   "description": "Monorepo for web3 auth packages",
   "scripts": {
