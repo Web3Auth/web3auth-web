@@ -58,7 +58,7 @@ const ethereumChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId["sapphire_mainnet"],
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
@@ -74,7 +74,7 @@ export default defineComponent({
     },
     openloginNetwork: {
       type: String,
-      default: "testnet",
+      default: "sapphire_mainnet",
     },
   },
   watch: {
@@ -197,7 +197,7 @@ export default defineComponent({
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.uiConsole("connected to wallet", data);
+        this.uiConsole("connected to wallet", data.adapter);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
