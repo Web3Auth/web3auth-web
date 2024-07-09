@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/passkeys-pnp-plugin",
-  "version": "8.7.0",
+  "version": "8.8.0",
   "description": "Passkeys PnP plugin for fast login",
   "author": "Torus Labs",
   "homepage": "https://github.com/web3auth/passkeys-pnp-plugin#readme",
