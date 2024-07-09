@@ -48,3 +48,9 @@ export interface FeeHistoryResponse {
   oldestBlock: string;
   reward: string[][];
 }
+
+export enum SignTypedDataVersion {
+  V1 = "V1",
+  V3 = "V3",
+  V4 = "V4",
+}
