@@ -45,10 +45,11 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace);
+      const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
 
       const signedMessage = await this.provider.request<[string, string], string>({
         method: "personal_sign",
-        params: [challenge, accounts[0]],
+        params: [hexChallenge, accounts[0]],
       });
 
       const idToken = await verifySignedChallenge(
