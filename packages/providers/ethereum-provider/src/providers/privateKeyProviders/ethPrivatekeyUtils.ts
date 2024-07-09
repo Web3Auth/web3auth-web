@@ -84,7 +84,7 @@ export function getProviderHandlers({
         ...msgParams,
         version: SignTypedDataVersion.V1,
       };
-      validateTypedMessageParams(params, finalChainId);
+      await validateTypedMessageParams(params, finalChainId);
       const { signTypedData } = await import("@metamask/eth-sig-util");
       const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V1 });
@@ -101,7 +101,7 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const { signTypedData } = await import("@metamask/eth-sig-util");
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V3 });
@@ -118,7 +118,7 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const { signTypedData } = await import("@metamask/eth-sig-util");
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V4 });

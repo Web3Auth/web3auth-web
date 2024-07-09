@@ -204,7 +204,7 @@ export function getProviderHandlers({
         ...msgParams,
         version: SignTypedDataVersion.V1,
       };
-      validateTypedMessageParams(params, finalChainId);
+      await validateTypedMessageParams(params, finalChainId);
       const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V1);
       return sig;
@@ -219,7 +219,7 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V3);
       return sig;
@@ -234,7 +234,7 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
