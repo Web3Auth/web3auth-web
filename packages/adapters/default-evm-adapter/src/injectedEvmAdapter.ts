@@ -52,7 +52,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, this.name);
     try {
-      log.debug("initializing metamask adapter");
+      log.debug(`initializing ${this.name} injected adapter`);
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect();
@@ -87,7 +87,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       if (error instanceof Web3AuthError) throw error;
-      throw WalletLoginError.connectionError("Failed to login with metamask wallet");
+      throw WalletLoginError.connectionError(`Failed to login with ${this.name} injected wallet`);
     }
   }
 
