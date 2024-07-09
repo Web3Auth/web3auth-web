@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@toruslabs/openlogin-utils": "^8.2.1",
+    "@web3auth/openlogin-adapter": "^8.6.2",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
