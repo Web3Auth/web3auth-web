@@ -70,7 +70,7 @@ export default defineComponent({
     },
     async switchChain() {
       try {
-        await this.web3auth.switchChain({ chainId: "0x89" });
+        await this.web3auth.switchChain({ chainId: 137 });
         this.uiConsole("switchedChain");
       } catch (error) {
         console.log("error while switching chain", error);
@@ -79,7 +79,8 @@ export default defineComponent({
     },
     async addChain() {
       try {
-        await this.web3auth.addChain(getEvmChainConfig(137));
+        const chain = getEvmChainConfig(137);
+        await this.web3auth.addChain(chain);
         this.uiConsole("added chain");
       } catch (error) {
         console.log("error while adding chain", error);

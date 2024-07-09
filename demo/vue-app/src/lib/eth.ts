@@ -33,8 +33,8 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     // });
 
     const message = "Some string";
-    const hash = web3.utils.sha3(message) as string;
-    const sig = await web3.eth.personal.sign(hash, fromAddress, "");
+    const msg = `0x${Buffer.from(message, "utf8").toString("hex")}`;
+    const sig = await web3.eth.personal.sign(msg, fromAddress, "");
     uiConsole("personal sign", sig);
     // const originalMessage = {
     //   types: {
