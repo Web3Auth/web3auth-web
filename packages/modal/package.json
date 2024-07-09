@@ -6,7 +6,7 @@
   "dependencies": {
     "@web3auth/base": "^8.8.0",
     "@web3auth/base-provider": "^8.8.0",
-    "@web3auth/no-modal": "^8.8.0",
+    "@web3auth/no-modal": "^8.9.1",
     "@web3auth/openlogin-adapter": "^8.8.0",
     "@web3auth/ui": "^8.8.0",
     "lodash.clonedeep": "^4.5.0",
@@ -69,5 +69,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "8.8.0"
+  "version": "8.9.1"
 }
