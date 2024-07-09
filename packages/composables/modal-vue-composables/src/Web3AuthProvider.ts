@@ -140,37 +140,47 @@ export default defineComponent({
 
     watch(
       web3Auth,
-      () => {
-        if (web3Auth.value) {
-          const notReadyListener = () => (status.value = web3Auth.value!.status);
-          const readyListener = () => {
-            status.value = web3Auth.value!.status;
-            isInitialized.value = true;
-          };
-          const connectedListener = () => {
-            status.value = web3Auth.value!.status;
-            isInitialized.value = true;
-            isConnected.value = true;
-          };
-          const disconnectedListener = () => {
-            status.value = web3Auth.value!.status;
-            isConnected.value = false;
-          };
-          const connectingListener = () => {
-            status.value = web3Auth.value!.status;
-          };
-          const errorListener = () => {
-            status.value = ADAPTER_EVENTS.ERRORED;
-          };
+      (newWeb3Auth, prevWeb3Auth) => {
+        const notReadyListener = () => (status.value = web3Auth.value!.status);
+        const readyListener = () => {
+          status.value = web3Auth.value!.status;
+          isInitialized.value = true;
+        };
+        const connectedListener = () => {
+          status.value = web3Auth.value!.status;
+          isInitialized.value = true;
+          isConnected.value = true;
+        };
+        const disconnectedListener = () => {
+          status.value = web3Auth.value!.status;
+          isConnected.value = false;
+        };
+        const connectingListener = () => {
+          status.value = web3Auth.value!.status;
+        };
+        const errorListener = () => {
+          status.value = ADAPTER_EVENTS.ERRORED;
+        };
 
-          status.value = web3Auth.value.status;
+        // unregister previous listeners
+        if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
+          prevWeb3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+          prevWeb3Auth.off(ADAPTER_EVENTS.READY, readyListener);
+          prevWeb3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
+          prevWeb3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+          prevWeb3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
+          prevWeb3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
+        }
+
+        if (newWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
+          status.value = newWeb3Auth.status;
           // web3Auth is initialized here.
-          web3Auth.value.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-          web3Auth.value.on(ADAPTER_EVENTS.READY, readyListener);
-          web3Auth.value.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
-          web3Auth.value.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-          web3Auth.value.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
-          web3Auth.value.on(ADAPTER_EVENTS.ERRORED, errorListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.READY, readyListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
+          newWeb3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
         }
       },
       { immediate: true }
