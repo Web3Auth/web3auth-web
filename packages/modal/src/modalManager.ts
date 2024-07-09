@@ -66,7 +66,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     try {
       projectConfig = await fetchProjectConfig(this.options.clientId, this.options.web3AuthNetwork);
     } catch (e) {
-      throw WalletInitializationError.notReady("failed to fetch project configurations");
+      log.error("Failed to fetch project configurations", e);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
     const { whitelabel } = projectConfig;
@@ -322,7 +323,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async connect(): Promise<IProvider | null> {
-    if (!this.loginModal) throw new Error("Login modal is not initialized");
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return provider
     if (this.connectedAdapterName && this.status === ADAPTER_STATUS.CONNECTED && this.provider) return this.provider;
     this.loginModal.open();

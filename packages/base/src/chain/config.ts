@@ -1,3 +1,4 @@
+import { WalletInitializationError } from "../errors";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
@@ -7,7 +8,7 @@ const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   } else if (chainNamespace === CHAIN_NAMESPACES.XRPL) {
     return 1;
   }
-  throw new Error(`Chain namespace ${chainNamespace} is not supported`);
+  throw WalletInitializationError.invalidParams(`Chain namespace ${chainNamespace} is not supported`);
 };
 
 export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => {

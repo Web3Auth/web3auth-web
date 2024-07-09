@@ -91,6 +91,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     this.openloginOptions = {
       ...this.openloginOptions,
       replaceUrlOnRedirect: isRedirectResult,
+      useCoreKitKey: this.useCoreKitKey,
     };
     this.openloginInstance = new OpenLogin({
       ...this.openloginOptions,
@@ -138,7 +139,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       } else if (error instanceof Web3AuthError) {
         throw error;
       }
-      throw WalletLoginError.connectionError("Failed to login with openlogin");
+      throw WalletLoginError.connectionError("Failed to login with openlogin", error);
     }
   }
 
@@ -152,7 +153,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       if (error instanceof Web3AuthError) {
         throw error;
       }
-      throw WalletLoginError.connectionError((error as Error).message || "Failed to enable MFA with openlogin");
+      throw WalletLoginError.connectionError("Failed to enable MFA with openlogin", error);
     }
   }
 

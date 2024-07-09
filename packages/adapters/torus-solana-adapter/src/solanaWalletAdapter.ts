@@ -139,7 +139,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       if (error instanceof Web3AuthError) throw error;
-      throw WalletLoginError.connectionError("Failed to login with torus solana wallet");
+      throw WalletLoginError.connectionError("Failed to login with torus solana wallet", error);
     }
   }
 

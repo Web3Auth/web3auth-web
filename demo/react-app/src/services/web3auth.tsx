@@ -165,6 +165,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           enableLogging: true,
         });
         const openloginAdapter = new OpenloginAdapter({
+          useCoreKitKey: true,
           loginSettings: {
             mfaLevel: "optional",
           },
@@ -176,33 +177,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               logoDark: "https://web3auth.io/images/web3auth-logo.svg",
               defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
               mode: "dark", // whether to enable dark, light or auto mode. defaultValue: auto [ system theme]
-            },
-            mfaSettings: {
-              passkeysFactor: {
-                enable: true,
-                priority: 1,
-                mandatory: true,
-              },
-              deviceShareFactor: {
-                enable: true,
-                priority: 2,
-                mandatory: true,
-              },
-              backUpShareFactor: {
-                enable: true,
-                priority: 3,
-                mandatory: false,
-              },
-              socialBackupFactor: {
-                enable: true,
-                priority: 4,
-                mandatory: false,
-              },
-              passwordFactor: {
-                enable: true,
-                priority: 5,
-                mandatory: false,
-              },
             },
             loginConfig: {
               google: {
@@ -220,6 +194,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
             walletInitOptions: {
+              // @ts-ignore
+              buildEnv: "development",
               whiteLabel: { showWidgetButton: true },
               walletUrls: {
                 production: {

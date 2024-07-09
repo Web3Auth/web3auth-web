@@ -4,6 +4,7 @@ import { CustomError } from "ts-custom-error";
 export interface IWeb3AuthError extends CustomError {
   code: number;
   message: string;
+  cause?: unknown;
   toString(): string;
 }
 
@@ -11,17 +12,39 @@ export type ErrorCodes = {
   [key: number]: string;
 };
 
+function serializeError(args: unknown[]): [Error, unknown[]] {
+  // Find first Error or create an "unknown" Error to keep stack trace.
+  const index = args.findIndex((arg) => arg instanceof Error);
+  const msgIndex = args.findIndex((arg) => typeof arg === "string");
+  const apiErrorIdx = args.findIndex((arg) => arg && typeof arg === "object" && "status" in arg && "type" in arg);
+  let err: Error;
+  if (apiErrorIdx !== -1) {
+    const apiError = args[apiErrorIdx] as Response;
+    err = new Error(`${apiError.status} ${apiError.type.toString()} ${apiError.statusText}`);
+  } else if (index !== -1) {
+    err = args.splice(index, 1)[0] as Error;
+  } else if (msgIndex !== -1) {
+    err = new Error(args.splice(msgIndex, 1)[0] as string);
+  } else {
+    err = new Error("Unknown error");
+  }
+  return [err, args];
+}
+
 export abstract class Web3AuthError extends CustomError implements IWeb3AuthError {
   code: number;
 
   message: string;
 
-  public constructor(code: number, message?: string) {
+  cause?: unknown;
+
+  public constructor(code: number, message?: string, cause?: unknown) {
     // takes care of stack and proto
     super(message);
 
     this.code = code;
     this.message = message || "";
+    this.cause = cause;
     // Set name explicitly as minification can mangle class names
     Object.defineProperty(this, "name", { value: "Web3AuthError" });
   }
@@ -31,6 +54,7 @@ export abstract class Web3AuthError extends CustomError implements IWeb3AuthErro
       name: this.name,
       code: this.code,
       message: this.message,
+      cause: serializeError([this.cause]),
     };
   }
 
@@ -56,65 +80,65 @@ export class WalletInitializationError extends Web3AuthError {
     5013: "Invalid network provided",
   };
 
-  public constructor(code: number, message?: string) {
+  public constructor(code: number, message?: string, cause?: unknown) {
     // takes care of stack and proto
-    super(code, message);
+    super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
     Object.defineProperty(this, "name", { value: "WalletInitializationError" });
   }
 
-  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletInitializationError(code, `${WalletInitializationError.messages[code]}, ${extraMessage}`);
+  public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return new WalletInitializationError(code, `${WalletInitializationError.messages[code]}, ${extraMessage}`, cause);
   }
 
   // Custom methods
-  public static notFound(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5001, extraMessage);
+  public static notFound(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5001, extraMessage, cause);
   }
 
-  public static notInstalled(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5002, extraMessage);
+  public static notInstalled(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5002, extraMessage, cause);
   }
 
-  public static notReady(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5003, extraMessage);
+  public static notReady(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5003, extraMessage, cause);
   }
 
-  public static windowBlocked(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5004, extraMessage);
+  public static windowBlocked(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5004, extraMessage, cause);
   }
 
-  public static windowClosed(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5005, extraMessage);
+  public static windowClosed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5005, extraMessage, cause);
   }
 
-  public static incompatibleChainNameSpace(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5006, extraMessage);
+  public static incompatibleChainNameSpace(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5006, extraMessage, cause);
   }
 
-  public static duplicateAdapterError(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5007, extraMessage);
+  public static duplicateAdapterError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5007, extraMessage, cause);
   }
 
-  public static invalidProviderConfigError(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5008, extraMessage);
+  public static invalidProviderConfigError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5008, extraMessage, cause);
   }
 
-  public static providerNotReadyError(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5009, extraMessage);
+  public static providerNotReadyError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5009, extraMessage, cause);
   }
 
-  public static rpcConnectionError(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5010, extraMessage);
+  public static rpcConnectionError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5010, extraMessage, cause);
   }
 
-  public static invalidParams(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5011, extraMessage);
+  public static invalidParams(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5011, extraMessage, cause);
   }
 
-  public static invalidNetwork(extraMessage = ""): IWeb3AuthError {
-    return WalletInitializationError.fromCode(5013, extraMessage);
+  public static invalidNetwork(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletInitializationError.fromCode(5013, extraMessage, cause);
   }
 }
 
@@ -136,52 +160,52 @@ export class WalletLoginError extends Web3AuthError {
     5119: "User not logged in.",
   };
 
-  public constructor(code: number, message?: string) {
+  public constructor(code: number, message?: string, cause?: unknown) {
     // takes care of stack and proto
-    super(code, message);
+    super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
     Object.defineProperty(this, "name", { value: "WalletLoginError" });
   }
 
-  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletLoginError(code, `${WalletLoginError.messages[code]}. ${extraMessage}`);
+  public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return new WalletLoginError(code, `${WalletLoginError.messages[code]}. ${extraMessage}`, cause);
   }
 
-  public static connectionError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5111, extraMessage);
+  public static connectionError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5111, extraMessage, cause);
   }
 
-  public static disconnectionError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5112, extraMessage);
+  public static disconnectionError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5112, extraMessage, cause);
   }
 
-  public static notConnectedError(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5113, extraMessage);
+  public static notConnectedError(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5113, extraMessage, cause);
   }
 
-  public static popupClosed(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5114, extraMessage);
+  public static popupClosed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5114, extraMessage, cause);
   }
 
-  public static mfaEnabled(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5115, extraMessage);
+  public static mfaEnabled(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5115, extraMessage, cause);
   }
 
-  public static chainConfigNotAdded(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5116, extraMessage);
+  public static chainConfigNotAdded(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5116, extraMessage, cause);
   }
 
-  public static unsupportedOperation(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5117, extraMessage);
+  public static unsupportedOperation(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5117, extraMessage, cause);
   }
 
-  public static coreKitKeyNotFound(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5118, extraMessage);
+  public static coreKitKeyNotFound(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5118, extraMessage, cause);
   }
 
-  public static userNotLoggedIn(extraMessage = ""): IWeb3AuthError {
-    return WalletLoginError.fromCode(5119, extraMessage);
+  public static userNotLoggedIn(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5119, extraMessage, cause);
   }
 }
 
@@ -192,29 +216,29 @@ export class WalletOperationsError extends Web3AuthError {
     5202: "This operation is not allowed",
   };
 
-  public constructor(code: number, message?: string) {
+  public constructor(code: number, message?: string, cause?: unknown) {
     // takes care of stack and proto
-    super(code, message);
+    super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
     Object.defineProperty(this, "name", { value: "WalletOperationsError" });
   }
 
-  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`);
+  public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`, cause);
   }
 
   // Custom methods
-  public static chainIDNotAllowed(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5201, extraMessage);
+  public static chainIDNotAllowed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5201, extraMessage, cause);
   }
 
-  public static operationNotAllowed(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5202, extraMessage);
+  public static operationNotAllowed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5202, extraMessage, cause);
   }
 
-  public static chainNamespaceNotAllowed(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5203, extraMessage);
+  public static chainNamespaceNotAllowed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5203, extraMessage, cause);
   }
 }
 
@@ -226,28 +250,28 @@ export class WalletProviderError extends Web3AuthError {
     5303: "'args.params' must be an object or array if provided.",
   };
 
-  public constructor(code: number, message?: string) {
+  public constructor(code: number, message?: string, cause?: unknown) {
     // takes care of stack and proto
-    super(code, message);
+    super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
     Object.defineProperty(this, "name", { value: "WalletProviderError" });
   }
 
-  public static fromCode(code: number, extraMessage = ""): IWeb3AuthError {
-    return new WalletOperationsError(code, `${WalletProviderError.messages[code]}, ${extraMessage}`);
+  public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return new WalletOperationsError(code, `${WalletProviderError.messages[code]}, ${extraMessage}`, cause);
   }
 
   // Custom methods
-  public static invalidRequestArgs(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5301, extraMessage);
+  public static invalidRequestArgs(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5301, extraMessage, cause);
   }
 
-  public static invalidRequestMethod(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5302, extraMessage);
+  public static invalidRequestMethod(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5302, extraMessage, cause);
   }
 
-  public static invalidRequestParams(extraMessage = ""): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5303, extraMessage);
+  public static invalidRequestParams(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5303, extraMessage, cause);
   }
 }

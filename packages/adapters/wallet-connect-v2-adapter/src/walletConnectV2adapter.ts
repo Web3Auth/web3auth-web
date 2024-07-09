@@ -21,7 +21,6 @@ import {
   WalletConnectV2Data,
   WalletInitializationError,
   WalletLoginError,
-  WalletOperationsError,
   Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
@@ -29,7 +28,6 @@ import merge from "lodash.merge";
 
 import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
-import { isChainIdSupported } from "./utils";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
 class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
@@ -90,16 +88,18 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       [this.chainConfig?.chainId as string],
       projectId
     );
-    if (!this.adapterOptions.loginSettings) {
+    if (!this.adapterOptions.loginSettings || Object.keys(this.adapterOptions.loginSettings).length === 0) {
       this.adapterOptions.loginSettings = wc2Settings.loginSettings;
     }
 
     this.adapterOptions.adapterSettings = merge(wc2Settings.adapterSettings, this.adapterOptions.adapterSettings);
 
     const { adapterSettings } = this.adapterOptions;
-
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
-    this.wcProvider = new WalletConnectV2Provider({ config: { chainConfig: this.chainConfig as CustomChainConfig }, connector: this.connector });
+    this.wcProvider = new WalletConnectV2Provider({
+      config: { chainConfig: this.chainConfig as CustomChainConfig },
+      connector: this.connector,
+    });
 
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
     this.status = ADAPTER_STATUS.READY;
@@ -146,7 +146,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       const finalError =
         error instanceof Web3AuthError
           ? error
-          : WalletLoginError.connectionError(`Failed to login with wallet connect: ${(error as Error)?.message || ""}`);
+          : WalletLoginError.connectionError(`Failed to login with wallet connect: ${(error as Error)?.message || ""}`, error);
       throw finalError;
     }
   }
@@ -175,18 +175,12 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
     super.checkAddChainRequirements(chainConfig, init);
-    if (!isChainIdSupported(this.currentChainNamespace, parseInt(chainConfig.chainId, 16), this.adapterOptions.loginSettings)) {
-      throw WalletOperationsError.chainIDNotAllowed(`Unsupported chainID: ${chainConfig.chainId}`);
-    }
     await this.wcProvider?.addChain(chainConfig);
     this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    if (!isChainIdSupported(this.currentChainNamespace, parseInt(params.chainId, 16), this.adapterOptions.loginSettings)) {
-      throw WalletOperationsError.chainIDNotAllowed(`Unsupported chainID: ${params.chainId}`);
-    }
     await this.wcProvider?.switchChain({ chainId: params.chainId });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
@@ -243,7 +237,9 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   private async createNewSession(opts: { forceNewSession: boolean } = { forceNewSession: false }): Promise<void> {
     try {
       if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
-      if (!this.adapterOptions.loginSettings) throw WalletInitializationError.notReady("login settings are not set yet");
+
+      if (!this.adapterOptions.loginSettings || Object.keys(this.adapterOptions.loginSettings).length === 0)
+        throw WalletInitializationError.notReady("login settings are not set yet");
 
       this.status = ADAPTER_STATUS.CONNECTING;
       this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
@@ -253,6 +249,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
       log.debug("creating new session for web3auth wallet connect");
       const { uri, approval } = await this.connector.connect(this.adapterOptions.loginSettings);
+
       const qrcodeModal = this.adapterOptions?.adapterSettings?.qrcodeModal;
       // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {
