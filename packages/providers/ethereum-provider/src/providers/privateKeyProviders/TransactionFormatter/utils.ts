@@ -1,22 +1,14 @@
 import { isValidAddress } from "@ethereumjs/util";
-import {
-  MessageTypeProperty,
-  SignTypedDataVersion,
-  TYPED_MESSAGE_SCHEMA,
-  TypedDataV1Field,
-  TypedMessage,
-  typedSignatureHash,
-} from "@metamask/eth-sig-util";
+import type { MessageTypeProperty, TypedDataV1Field, TypedMessage } from "@metamask/eth-sig-util";
 import { rpcErrors } from "@metamask/rpc-errors";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
-import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
-import { EIP1159GasData, EthereumGasFeeEstimates, LegacyGasData } from "./interfaces";
+import { EIP1159GasData, EthereumGasFeeEstimates, LegacyGasData, SignTypedDataVersion } from "./interfaces";
 
 export function normalizeGWEIDecimalNumbers(n: string | BigNumber): string {
   const numberAsWEIHex = decGWEIToHexWEI(n);
@@ -70,7 +62,7 @@ export async function fetchLegacyGasPriceEstimates(url: string): Promise<LegacyG
   };
 }
 
-export const validateTypedMessageParams = (parameters: TypedMessageParams<unknown>, activeChainId: number) => {
+export const validateTypedMessageParams = async (parameters: TypedMessageParams<unknown>, activeChainId: number) => {
   try {
     assert.ok(parameters && typeof parameters === "object", "Params must be an object.");
     assert.ok("data" in parameters, 'Params must include a "data" field.');
@@ -81,6 +73,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
     );
     let data: unknown = null;
     let chainId = null;
+    const { typedSignatureHash, TYPED_MESSAGE_SCHEMA } = await import("@metamask/eth-sig-util");
     switch ((parameters as TypedMessageParams<unknown>).version) {
       case SignTypedDataVersion.V1:
         if (typeof parameters.data === "string") {
@@ -111,6 +104,7 @@ export const validateTypedMessageParams = (parameters: TypedMessageParams<unknow
         }>;
 
         assert.ok(typedData.primaryType in typedData.types, `Primary type of "${typedData.primaryType}" has no type definition.`);
+        const jsonschema = await import("jsonschema");
         const validation = jsonschema.validate(typedData, TYPED_MESSAGE_SCHEMA.properties);
         assert.strictEqual(validation.errors.length, 0, "Signing data must conform to EIP-712 schema. See https://git.io/fNtcx.");
         chainId = typedData.domain?.chainId;

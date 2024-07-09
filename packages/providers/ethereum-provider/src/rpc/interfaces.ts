@@ -52,8 +52,6 @@ export interface TypedMessageParams<T> {
 export interface WalletMiddlewareOptions {
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  processDecryptMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => string;
-  processEncryptionPublicKey?: (address: string, req: JRPCRequest<unknown>) => Promise<string>;
   processEthSignMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
   processPersonalMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
