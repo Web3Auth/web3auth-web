@@ -121,7 +121,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: chainConfig.id,
+          chainId: `0x${chainConfig.id.toString(16)}`,
           chainName: chainConfig.name,
           rpcUrls: [chainConfig.rpcUrls.default.http[0]],
           blockExplorerUrls: [chainConfig.blockExplorers?.default?.url],
@@ -137,7 +137,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.injectedProvider?.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: params.chainId }],
+      params: [{ chainId: `0x${params.chainId.toString(16)}` }],
     });
     this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }

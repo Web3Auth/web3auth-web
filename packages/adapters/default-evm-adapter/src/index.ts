@@ -32,9 +32,10 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
   // multiple injected provider discovery
   const mipd = createMipd();
   const injectedProviders = mipd.getProviders().map((providerDetail) => {
+    // remove "wallet" from the wallet name e.g. Coinbase Wallet => coinbase
     let walletName = providerDetail.info.name.toLowerCase();
     if (walletName.toLowerCase().endsWith("wallet")) {
-      walletName = walletName.substring(0, walletName.lastIndexOf(" "));
+      walletName = walletName.slice(0, -6).trim();
     }
     walletName = walletName.replace(/\s/g, "-");
 
