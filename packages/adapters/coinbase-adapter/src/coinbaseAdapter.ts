@@ -1,4 +1,4 @@
-import CoinbaseWalletSDK, { CoinbaseWalletProvider } from "@coinbase/wallet-sdk";
+import CoinbaseWalletSDK, { ProviderInterface } from "@coinbase/wallet-sdk";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -40,7 +40,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   public coinbaseInstance: CoinbaseWalletSDK | null = null;
 
-  private coinbaseProvider: CoinbaseWalletProvider | null = null;
+  private coinbaseProvider: ProviderInterface | null = null;
 
   private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
 
@@ -68,9 +68,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
-    this.coinbaseInstance = new CoinbaseWalletSDK(this.coinbaseOptions);
-    const { chainId, rpcTarget } = this.chainConfig;
-    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider(rpcTarget, Number.parseInt(chainId, 16));
+    this.coinbaseInstance = new CoinbaseWalletSDK({
+      ...this.coinbaseOptions,
+      appChainIds: [Number.parseInt(this.chainConfig.chainId, 16)],
+    });
+    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: "all" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {
@@ -90,7 +92,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
-      const { chainId } = this.coinbaseProvider;
+      const { chainId } = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as { chainId: string };
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
         await this.addChain(this.chainConfig as CustomChainConfig);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);
@@ -113,7 +115,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       this.rehydrated = false;
       this.emit(ADAPTER_EVENTS.ERRORED, error);
       if (error instanceof Web3AuthError) throw error;
-      throw WalletLoginError.connectionError("Failed to login with coinbase wallet");
+      throw WalletLoginError.connectionError("Failed to login with coinbase wallet", error);
     }
   }
 

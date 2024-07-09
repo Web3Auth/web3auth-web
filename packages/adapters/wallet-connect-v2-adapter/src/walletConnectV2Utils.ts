@@ -3,7 +3,8 @@ import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import type { JRPCRequest } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
-import type { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
+import { WalletLoginError } from "@web3auth/base";
+import type { AddEthereumChainParameter, IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
@@ -43,7 +44,7 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
       ),
     ];
   }
-  throw new Error("Failed to get accounts");
+  throw WalletLoginError.connectionError("Failed to get accounts");
 }
 
 export function getProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IProviderHandlers {
@@ -67,7 +68,7 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
       return methodRes;
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, string[]>(connector, chainId, "personal_sign", [msgParams.from, msgParams.data]);
+      const methodRes = await sendJrpcRequest<string, string[]>(connector, chainId, "personal_sign", [msgParams.data, msgParams.from]);
       return methodRes;
     },
     processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
@@ -89,4 +90,28 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
       throw rpcErrors.methodNotSupported();
     },
   };
+}
+
+export async function switchChain({
+  connector,
+  chainId,
+  newChainId,
+}: {
+  connector: ISignClient;
+  chainId: number;
+  newChainId: string;
+}): Promise<void> {
+  await sendJrpcRequest<string, { chainId: string }[]>(connector, chainId, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
+}
+
+export async function addChain({
+  connector,
+  chainId,
+  chainConfig,
+}: {
+  connector: ISignClient;
+  chainId: number;
+  chainConfig: AddEthereumChainParameter;
+}): Promise<void> {
+  await sendJrpcRequest<string, AddEthereumChainParameter[]>(connector, chainId, "wallet_addEthereumChain", [chainConfig]);
 }

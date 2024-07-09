@@ -73,9 +73,14 @@ export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[]
 
 export enum DEFAULT_EIP155_METHODS {
   ETH_SEND_TRANSACTION = "eth_sendTransaction",
+  ETH_SIGN_TRANSACTION = "eth_signTransaction",
   ETH_SIGN = "eth_sign",
   PERSONAL_SIGN = "personal_sign",
   ETH_SIGN_TYPED_DATA = "eth_signTypedData",
+  ETH_SIGN_TYPED_DATA_V3 = "eth_signTypedData_v3",
+  ETH_SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4",
+  ADD_ETHEREUM_CHAIN = "wallet_addEthereumChain",
+  SWITCH_ETHEREUM_CHAIN = "wallet_switchEthereumChain",
 }
 
 export enum DEFAULT_EIP_155_EVENTS {

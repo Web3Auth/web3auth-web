@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "8.6.2",
+  "version": "8.8.0",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -37,19 +37,19 @@
     "@walletconnect/utils": "^2.x"
   },
   "dependencies": {
-    "@metamask/rpc-errors": "^6.2.1",
+    "@metamask/rpc-errors": "^6.3.0",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
-    "@web3auth/base": "^8.6.2",
-    "@web3auth/base-evm-adapter": "^8.6.2",
-    "@web3auth/base-provider": "^8.6.2",
-    "@web3auth/ethereum-provider": "^8.6.2",
+    "@web3auth/base": "^8.8.0",
+    "@web3auth/base-evm-adapter": "^8.8.0",
+    "@web3auth/base-provider": "^8.8.0",
+    "@web3auth/ethereum-provider": "^8.8.0",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9",
-    "@walletconnect/sign-client": "^2.13.0",
-    "@walletconnect/types": "^2.13.0",
-    "@walletconnect/utils": "^2.13.0"
+    "@walletconnect/sign-client": "^2.13.3",
+    "@walletconnect/types": "^2.13.3",
+    "@walletconnect/utils": "^2.13.3"
   },
   "lint-staged": {
     "!(*d).ts": [
