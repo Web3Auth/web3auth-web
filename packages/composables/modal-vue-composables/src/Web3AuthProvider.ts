@@ -49,6 +49,7 @@ export default defineComponent({
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.enableMFA(loginParams);
+      triggerRef(web3Auth);
       const localUserInfo = await web3Auth.value.getUserInfo();
       userInfo.value = localUserInfo;
       isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
