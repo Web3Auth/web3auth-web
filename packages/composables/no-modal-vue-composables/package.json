@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal-vue-composables",
-  "version": "8.9.1",
+  "version": "8.10.0",
   "description": "Vue composables to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
     "web3Auth/no-modal-vue-composables",
@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@web3auth/base": "^8.8.0",
-    "@web3auth/no-modal": "^8.9.1"
+    "@web3auth/no-modal": "^8.10.0"
   },
   "devDependencies": {
     "@toruslabs/openlogin-utils": "^8.2.1",
