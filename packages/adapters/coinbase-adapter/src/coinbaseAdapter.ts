@@ -1,4 +1,4 @@
-import CoinbaseWalletSDK, { ProviderInterface } from "@coinbase/wallet-sdk";
+import CoinbaseWalletSDK, { AppMetadata, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -21,7 +21,7 @@ import {
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
-export type CoinbaseWalletSDKOptions = ConstructorParameters<typeof CoinbaseWalletSDK>[0];
+export type CoinbaseWalletSDKOptions = Partial<AppMetadata & Preference>;
 
 export interface CoinbaseAdapterOptions extends BaseAdapterSettings {
   adapterSettings?: CoinbaseWalletSDKOptions;
@@ -72,7 +72,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       ...this.coinbaseOptions,
       appChainIds: [Number.parseInt(this.chainConfig.chainId, 16)],
     });
-    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: "all" });
+    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "all" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {
@@ -92,7 +92,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
-      const { chainId } = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as { chainId: string };
+      const chainId = await this.coinbaseProvider.request<string>({ method: "eth_chainId" });
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
         await this.addChain(this.chainConfig as CustomChainConfig);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);

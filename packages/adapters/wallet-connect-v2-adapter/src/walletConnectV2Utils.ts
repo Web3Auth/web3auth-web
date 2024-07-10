@@ -83,12 +83,6 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
       const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v4", [msgParams.from, msgParams.data]);
       return methodRes;
     },
-    processEncryptionPublicKey: async (_: string): Promise<string> => {
-      throw rpcErrors.methodNotSupported();
-    },
-    processDecryptMessage: (_: MessageParams<string>): string => {
-      throw rpcErrors.methodNotSupported();
-    },
   };
 }
 

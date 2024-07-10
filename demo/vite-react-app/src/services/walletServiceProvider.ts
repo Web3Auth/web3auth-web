@@ -78,9 +78,8 @@ const walletServiceProvider = (provider: TorusInPageProvider, uiConsole: (...arg
     try {
       const web3 = new Web3(provider);
       const message = "Some string";
-      const hash = web3.utils.sha3(message) as string;
       const fromAddress = (await web3.eth.getAccounts())[0];
-      const sig = await web3.eth.personal.sign(hash, fromAddress, "");
+      const sig = await web3.eth.personal.sign(message, fromAddress, "");
       uiConsole("personal sign", sig);
       uiConsole("Eth sign message => true", sig);
     } catch (error) {

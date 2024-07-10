@@ -12,8 +12,6 @@ function resemblesAddress(str: string): boolean {
 export function createWalletMiddleware({
   getAccounts,
   getPrivateKey,
-  processDecryptMessage,
-  processEncryptionPublicKey,
   processEthSignMessage,
   processPersonalMessage,
   processTransaction,
@@ -214,33 +212,6 @@ export function createWalletMiddleware({
     res.result = await processPersonalMessage(msgParams, req);
   }
 
-  async function encryptionPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processEncryptionPublicKey) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const address: string = await validateAndNormalizeKeyholder((req.params as string)[0], req);
-
-    res.result = await processEncryptionPublicKey(address, req);
-  }
-
-  async function decryptMessage(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processDecryptMessage) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const ciphertext: string = (req.params as string)[0];
-    const address: string = await validateAndNormalizeKeyholder((req.params as string)[1], req);
-    const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams<string> = {
-      ...extraParams,
-      from: address,
-      data: ciphertext,
-    };
-
-    res.result = processDecryptMessage(msgParams, req);
-  }
-
   async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!getPrivateKey) {
       throw rpcErrors.methodNotSupported();
@@ -263,7 +234,5 @@ export function createWalletMiddleware({
     eth_signTypedData_v3: createAsyncMiddleware(signTypedDataV3),
     eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
     personal_sign: createAsyncMiddleware(personalSign),
-    eth_getEncryptionPublicKey: createAsyncMiddleware(encryptionPublicKey),
-    eth_decrypt: createAsyncMiddleware(decryptMessage),
   });
 }
