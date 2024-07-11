@@ -75,3 +75,5 @@ export interface ITorusWalletProvider extends InjectedProvider {
   signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
   signMessage(data: Uint8Array): Promise<Uint8Array>;
 }
+
+export interface IWalletStandardProviderHandler extends IBaseWalletProvider {}

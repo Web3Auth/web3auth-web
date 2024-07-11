@@ -363,7 +363,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
               return undefined;
             })
-            .catch((error) => log.error(error, "error while initializing adapter"));
+            .catch((error) => log.error(error, `error while initializing ${adapterName} adapter`));
         } else if (adapter.status === ADAPTER_STATUS.READY) {
           adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });

@@ -19,9 +19,17 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
+    "@solana/wallet-standard-features": "^1.2.0",
+    "@solana/web3.js": "^1.95.0",
+    "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.8.0",
-    "@web3auth/phantom-adapter": "^8.8.0",
-    "@web3auth/torus-solana-adapter": "^8.8.0"
+    "@wallet-standard/app": "^1.0.1",
+    "@wallet-standard/base": "^1.0.1",
+    "@wallet-standard/features": "^1.0.3",
+    "@web3auth/base-solana-adapter": "^8.8.0",
+    "@web3auth/solana-provider": "^8.8.0",
+    "@web3auth/torus-solana-adapter": "^8.8.0",
+    "bn.js": "^5.2.1"
   },
   "files": [
     "dist"
