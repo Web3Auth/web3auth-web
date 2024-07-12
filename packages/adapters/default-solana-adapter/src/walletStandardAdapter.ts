@@ -48,7 +48,10 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   ) {
     super(options);
     this.name = options.name;
-    this.wallet = options.wallet as WalletStandard;
+    // in VueJS, for some wallets e.g. Gate, Solflare, when connecting it throws error "attempted to get private field on non-instance"
+    // it seems that Vue create a Proxy object for the wallet object which causes the issue
+    // ref: https://stackoverflow.com/questions/64917686/vue-array-converted-to-proxy-object
+    this.wallet = (["gate", "solflare"].includes(this.name) ? Object.freeze(options.wallet) : options.wallet) as WalletStandard;
   }
 
   get provider(): IProvider {
@@ -122,7 +125,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     await super.disconnectSession();
     try {
-      await this.wallet.features[StandardDisconnect].disconnect();
+      await this.wallet.features[StandardDisconnect]?.disconnect();
       if (options.cleanup) {
         this.status = ADAPTER_STATUS.NOT_READY;
         this.injectedProvider = null;

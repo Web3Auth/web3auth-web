@@ -1,6 +1,6 @@
 import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction } from "@solana/wallet-standard-features";
 import { getWallets } from "@wallet-standard/app";
-import { StandardConnect, StandardDisconnect } from "@wallet-standard/features";
+import { StandardConnect } from "@wallet-standard/features";
 import {
   BaseAdapter,
   CHAIN_NAMESPACES,
@@ -32,8 +32,8 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     const { name, chains, features } = wallet;
     const isSolana = chains.some((chain) => chain.startsWith("solana"));
     if (!isSolana) return;
-    const hasRequiredFeatures = [StandardConnect, StandardDisconnect, SolanaSignMessage, SolanaSignTransaction, SolanaSignAndSendTransaction].every(
-      (feature) => Object.keys(features).includes(feature)
+    const hasRequiredFeatures = [StandardConnect, SolanaSignMessage, SolanaSignTransaction, SolanaSignAndSendTransaction].every((feature) =>
+      Object.keys(features).includes(feature)
     );
     if (!hasRequiredFeatures) return;
 
