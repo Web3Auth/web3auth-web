@@ -310,6 +310,17 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       );
 
     this.plugins[plugin.name] = plugin;
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName && plugin.name !== PASSKEYS_PLUGIN) {
+      // web3auth is already connected. can initialize plugins
+      this.connectToPlugins({ adapter: this.connectedAdapterName });
+    }
+
+    if (plugin.name === PASSKEYS_PLUGIN && (this.status === ADAPTER_STATUS.READY || this.status === ADAPTER_STATUS.CONNECTED)) {
+      // this does return a Promise but we don't need to wait here.
+      // as its mostly a sync function.
+      this.plugins[PASSKEYS_PLUGIN].initWithWeb3Auth(this);
+    }
+
     return this;
   }
 
@@ -326,25 +337,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
-      Object.values(localPlugins).map(async (plugin) => {
-        try {
-          if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
-            return;
-          }
-          const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
-          const { options, sessionId, sessionNamespace } = openloginInstance || {};
-          await plugin.initWithWeb3Auth(this, options.whiteLabel);
-          await plugin.connect({ sessionId, sessionNamespace });
-        } catch (error: unknown) {
-          // swallow error if connector adapter doesn't supports this plugin.
-          if ((error as Web3AuthError).code === 5211) {
-            return;
-          }
-          log.error(error);
-        }
-      });
-
+      this.connectToPlugins(data);
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
@@ -422,5 +415,27 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     if (!storageAvailable(this.storage)) return;
     window[this.storage].setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
+  }
+
+  private connectToPlugins(data: { adapter: WALLET_ADAPTER_TYPE }) {
+    const localPlugins = Object.values(this.plugins).filter((plugin) => plugin.name !== PASSKEYS_PLUGIN);
+    Object.values(localPlugins).map(async (plugin) => {
+      try {
+        if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+          return;
+        }
+        if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
+        const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
+        const { options, sessionId, sessionNamespace } = openloginInstance || {};
+        await plugin.initWithWeb3Auth(this, options.whiteLabel);
+        await plugin.connect({ sessionId, sessionNamespace });
+      } catch (error: unknown) {
+        // swallow error if connector adapter doesn't supports this plugin.
+        if ((error as Web3AuthError).code === 5211) {
+          return;
+        }
+        log.error(error);
+      }
+    });
   }
 }

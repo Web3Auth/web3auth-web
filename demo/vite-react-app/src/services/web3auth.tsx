@@ -205,12 +205,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             walletInitOptions: {
               whiteLabel: { showWidgetButton: true },
               confirmationStrategy: "modal",
-              walletUrls: {
-                production: {
-                  url: "http://localhost:4050",
-                  logLevel: "debug",
-                },
-              },
             },
           });
           subscribePluginEvents(walletServicesPlugin);

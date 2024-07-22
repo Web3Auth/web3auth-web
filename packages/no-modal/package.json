@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "8.8.0",
+  "version": "8.10.2",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -46,8 +46,8 @@
   },
   "devDependencies": {
     "@web3auth/openlogin-adapter": "^8.8.0",
-    "@web3auth/passkeys-pnp-plugin": "^8.8.0",
-    "@web3auth/wallet-connect-v2-adapter": "^8.8.0"
+    "@web3auth/passkeys-pnp-plugin": "^8.10.2",
+    "@web3auth/wallet-connect-v2-adapter": "^8.10.2"
   },
   "peerDependenciesMeta": {
     "@web3auth/openlogin-adapter": {

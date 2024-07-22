@@ -1,22 +1,22 @@
 {
-  "name": "@web3auth/modal-vue-composables",
+  "name": "@web3auth/no-modal-vue-composables",
   "version": "8.10.2",
-  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
+  "description": "Vue composables to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
-    "web3Auth/modal-vue-composables",
+    "web3Auth/no-modal-vue-composables",
     "web3Auth",
     "blockchain",
     "vue composables",
     "web3Auth composables",
-    "web3Auth modal vue composables"
+    "web3Auth no-modal vue composables"
   ],
-  "main": "dist/modalVueComposables.cjs.js",
-  "module": "dist/modalVueComposables.esm.js",
-  "unpkg": "dist/modalVueComposables.umd.min.js",
-  "jsdelivr": "dist/modalVueComposables.umd.min.js",
+  "main": "dist/noModalVueComposables.cjs.js",
+  "module": "dist/noModalVueComposables.esm.js",
+  "unpkg": "dist/noModalVueComposables.umd.min.js",
+  "jsdelivr": "dist/noModalVueComposables.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/no-modal-vue-composables#readme",
   "license": "ISC",
   "scripts": {
     "dev": "torus-scripts start",
@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@web3auth/base": "^8.8.0",
-    "@web3auth/modal": "^8.10.2"
+    "@web3auth/no-modal": "^8.10.2"
   },
   "devDependencies": {
     "@toruslabs/openlogin-utils": "^8.2.1",

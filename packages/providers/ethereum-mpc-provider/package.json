@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-mpc-provider",
-  "version": "8.8.0",
+  "version": "8.10.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumMpcProvider.cjs.js",
@@ -28,7 +28,7 @@
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.8.0",
     "@web3auth/base-provider": "^8.8.0",
-    "@web3auth/ethereum-provider": "^8.8.0"
+    "@web3auth/ethereum-provider": "^8.10.2"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

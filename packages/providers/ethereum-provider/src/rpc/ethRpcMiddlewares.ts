@@ -22,8 +22,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     processTypedMessageV3,
     processTypedMessageV4,
     processPersonalMessage,
-    processEncryptionPublicKey,
-    processDecryptMessage,
   } = providerHandlers;
   const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
@@ -39,8 +37,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processTypedMessageV3,
       processTypedMessageV4,
       processPersonalMessage,
-      processEncryptionPublicKey,
-      processDecryptMessage,
     }) as JRPCMiddleware<unknown, unknown>,
   ]);
   return ethMiddleware;
