@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ChainContainer :plugins="plugins" :openloginNetwork="openloginNetwork" :adapterConfig="adapterConfig" :chain="chain"></ChainContainer>
+    <ChainContainer :plugins="plugins" :openlogin-network="openloginNetwork" :adapter-config="adapterConfig" :chain="chain"></ChainContainer>
     <div id="console" style="white-space: pre-line">
       <code style="white-space: pre-line"></code>
     </div>
@@ -14,6 +14,9 @@ import ChainContainer from "../chains/chainContainer.vue";
 
 export default defineComponent({
   name: "ConfigurableExample",
+  components: {
+    ChainContainer,
+  },
   props: {
     chain: {
       type: String,
@@ -21,9 +24,11 @@ export default defineComponent({
     },
     plugins: {
       type: Object,
+      default: () => ({}),
     },
     adapterConfig: {
       type: Object,
+      default: () => ({}),
     },
     openloginNetwork: {
       type: String,
@@ -32,9 +37,6 @@ export default defineComponent({
   },
   data() {
     return {};
-  },
-  components: {
-    ChainContainer,
   },
 });
 </script>

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { CustomChainConfig, IProvider } from "@web3auth/base";
+import { CustomChainConfig, IProvider, log } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
+
 const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
@@ -26,8 +27,9 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
     uiConsole("accounts", acc);
     return acc;
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
+    return [];
   }
 };
 export const getBalance = async (provider: IProvider, uiConsole: any): Promise<void> => {
@@ -37,9 +39,8 @@ export const getBalance = async (provider: IProvider, uiConsole: any): Promise<v
     const accounts = await solanaWallet.requestAccounts();
     const balance = await conn.getBalance(new PublicKey(accounts[0]));
     uiConsole("balance", balance);
-    return;
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
   }
 };
@@ -66,7 +67,7 @@ export const signAndSendTransaction = async (provider: IProvider, uiConsole: any
     const signature = await solWeb3.signAndSendTransaction(transaction);
     uiConsole("signature", signature);
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
   }
 };
@@ -96,8 +97,9 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     uiConsole("signature", signedTx);
     return { signature: signedTx };
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
+    return undefined;
   }
 };
 
@@ -105,10 +107,10 @@ export const signMessage = async (provider: IProvider, uiConsole: any) => {
   try {
     const solWeb3 = new SolanaWallet(provider);
     const msg = Buffer.from("Test Signing Message ", "utf8");
-    const res = await solWeb3.signMessage(msg);
+    const res = await solWeb3.signMessage(new Uint8Array(msg));
     uiConsole(res);
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
   }
 };
@@ -118,18 +120,18 @@ export const signAllTransactions = async (provider: IProvider, uiConsole: any) =
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const publicKeys = await solWeb3.requestAccounts();
-    const blockhash = (await conn.getRecentBlockhash("finalized")).blockhash;
-    console.log("blockhash", blockhash);
+    const { blockhash } = await conn.getRecentBlockhash("finalized");
+    log.log("blockhash", blockhash);
 
     const signedTx = await solWeb3.signAllTransactions([
       getNewTx(publicKeys, blockhash),
       getNewTx(publicKeys, blockhash),
       getNewTx(publicKeys, blockhash),
     ]);
-    console.log("signedTx", signedTx);
+    log.log("signedTx", signedTx);
     uiConsole("signature", signedTx);
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
   }
 };

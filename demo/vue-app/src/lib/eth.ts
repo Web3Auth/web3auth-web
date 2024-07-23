@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IProvider } from "@web3auth/base";
+import { IProvider, log } from "@web3auth/base";
 import Web3 from "web3";
 
 export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
-    console.log("pubKey", accounts);
+    log.log("pubKey", accounts);
     const txRes = await web3.eth.sendTransaction({
       from: accounts[0],
       to: accounts[0],
@@ -14,7 +14,7 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
     });
     uiConsole("txRes", txRes);
   } catch (error) {
-    console.log("error", error);
+    log.log("error", error);
     uiConsole("error", error);
   }
 };
@@ -26,7 +26,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     // hex message
     // const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
     const fromAddress = (await web3.eth.getAccounts())[0];
-    console.log("fromAddress", fromAddress);
+    log.log("fromAddress", fromAddress);
     // const signedMessage = await provider.request({
     //   method: "eth_sign",
     //   params: [fromAddress, message],
@@ -109,7 +109,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     // });
     // uiConsole("signedMessage orog", signedMessage);
   } catch (error) {
-    console.log("error", error);
+    log.error("error", error);
     uiConsole("error", error);
   }
 };
@@ -121,8 +121,9 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
     uiConsole("accounts", accounts);
     return accounts;
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
+    return [];
   }
 };
 export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
@@ -132,8 +133,9 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
     uiConsole(chainId.toString());
     return chainId.toString();
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
+    return undefined;
   }
 };
 export const getBalance = async (provider: IProvider, uiConsole: any) => {
@@ -143,7 +145,7 @@ export const getBalance = async (provider: IProvider, uiConsole: any) => {
     const balance = await web3.eth.getBalance(accounts[0]);
     uiConsole("balance", balance);
   } catch (error) {
-    console.error("Error", error);
+    log.error("Error", error);
     uiConsole("error", error);
   }
 };
@@ -161,7 +163,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     });
     uiConsole("txRes", txRes);
   } catch (error) {
-    console.log("error", error);
+    log.log("error", error);
     uiConsole("error", error);
   }
 };

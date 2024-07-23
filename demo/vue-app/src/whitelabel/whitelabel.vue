@@ -7,16 +7,16 @@
         fontSize: '12px',
       }"
     >
-      <Loader :isLoading="loading" />
+      <Loader :is-loading="loading" />
     </section>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button v-if="!provider" type="button" class="rpcBtn" style="cursor: pointer" @click="connect">Connect</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
       <EthRpc v-if="provider && web3auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { defineComponent } from "vue";
@@ -51,12 +51,16 @@ const ethereumChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 export default defineComponent({
   name: "WhitelabelExample",
+  components: {
+    EthRpc,
+    Loader,
+  },
   props: {
     uiConfig: {
       type: Object,
@@ -64,13 +68,6 @@ export default defineComponent({
         theme: "light",
         logoUrl: "https://images.web3auth.io/example-hello.svg",
       }),
-    },
-  },
-  watch: {
-    uiConfig: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initWhitelabledModal();
     },
   },
   data() {
@@ -83,9 +80,11 @@ export default defineComponent({
       web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
-  components: {
-    EthRpc,
-    Loader,
+  watch: {
+    async uiConfig() {
+      // watch it
+      await this.initWhitelabledModal();
+    },
   },
   async mounted() {
     await this.initWhitelabledModal();
@@ -105,12 +104,12 @@ export default defineComponent({
           },
           web3AuthNetwork: "testnet",
           chainConfig: ethereumChainConfig,
-          clientId: config.clientId["mainnet"],
+          clientId: config.clientId.mainnet,
         });
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
       } catch (error) {
-        console.log("error", error);
+        log.log("error", error);
         this.console("error sss", error);
       } finally {
         this.loading = false;
@@ -133,7 +132,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.log("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });
@@ -142,7 +141,7 @@ export default defineComponent({
       try {
         this.provider = await this.web3auth.connect();
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.console("error", error);
       }
     },

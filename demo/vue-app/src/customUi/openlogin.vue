@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h2>Login With Web3Auth</h2>
-    <Loader :isLoading="loading"></Loader>
+    <Loader :is-loading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
@@ -12,10 +12,10 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" name="google" @click="connect" style="cursor: pointer">Login With Google</button>
-      <button class="rpcBtn" v-if="!provider" name="facebook" @click="connect" style="cursor: pointer">Login With facebook</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button v-if="!provider" type="button" class="rpcBtn" name="google" style="cursor: pointer" @click="connect">Login With Google</button>
+      <button v-if="!provider" type="button" class="rpcBtn" name="facebook" style="cursor: pointer" @click="connect">Login With facebook</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
       <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
@@ -64,19 +64,23 @@ const sepoliaChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthNoModalOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 const sepoliaWeb3AuthOptions: Web3AuthNoModalOptions = {
   chainConfig: sepoliaChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: sepoliaChainConfig } }),
 };
 
 export default defineComponent({
   name: "BeginnerExampleMode",
+  components: {
+    Loader,
+    EthRpc,
+  },
   data() {
     return {
       loading: false,
@@ -86,10 +90,6 @@ export default defineComponent({
       namespace: undefined,
       web3auth: new Web3AuthNoModal(ethWeb3AuthOptions),
     };
-  },
-  components: {
-    Loader,
-    EthRpc,
   },
   async mounted() {
     await this.initWeb3Auth();
@@ -108,7 +108,7 @@ export default defineComponent({
         this.web3auth.configureAdapter(openloginAdapter);
         await this.web3auth.init();
       } catch (error) {
-        console.log("error", error);
+        log.log("error", error);
         this.console("error", error);
       }
     },
@@ -129,7 +129,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.log("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });
@@ -141,7 +141,7 @@ export default defineComponent({
           login_hint: "",
         } as OpenloginLoginParams);
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.console("error", error);
       }
     },
