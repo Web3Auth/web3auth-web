@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.87.6",
-    "@toruslabs/openlogin": "^6.1.0",
+    "@toruslabs/openlogin": "^8.0.0",
     "@toruslabs/openlogin-ed25519": "^6.0.0",
     "@walletconnect/modal": "^2.6.2",
     "@web3auth/base": "file:../../packages/base",
