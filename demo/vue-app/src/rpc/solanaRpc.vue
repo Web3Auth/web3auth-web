@@ -4,12 +4,12 @@
       fontSize: '12px',
     }"
   >
-    <button class="rpcBtn" @click="onSignAndSendTransaction" style="cursor: pointer">Sign and send txn</button>
-    <button class="rpcBtn" @click="onSignTransaction" style="cursor: pointer">Sign txn</button>
-    <button class="rpcBtn" @click="onSignMessage" style="cursor: pointer">Sign Message</button>
-    <button class="rpcBtn" @click="onSignAllTransactions" style="cursor: pointer">Sign Multiple Transactions</button>
-    <button class="rpcBtn" @click="onGetAccounts" style="cursor: pointer">Get Account</button>
-    <button class="rpcBtn" @click="onGetBalance" style="cursor: pointer">Get Balance</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onSignAndSendTransaction">Sign and send txn</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onSignTransaction">Sign txn</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onSignMessage">Sign Message</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onSignAllTransactions">Sign Multiple Transactions</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onGetAccounts">Get Account</button>
+    <button class="rpcBtn" type="button" style="cursor: pointer" @click="onGetBalance">Get Balance</button>
   </section>
 </template>
 
@@ -41,7 +41,7 @@ export default defineComponent({
       await getAccounts(this.provider, this.uiConsole);
     },
     async onGetBalance() {
-      return await getBalance(this.provider, this.uiConsole);
+      return getBalance(this.provider, this.uiConsole);
     },
   },
 });

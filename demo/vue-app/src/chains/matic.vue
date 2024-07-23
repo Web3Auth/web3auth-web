@@ -1,17 +1,17 @@
 <template>
   <div id="app">
     <h2>Login with Web3Auth and Polygon</h2>
-    <Loader :isLoading="loading"></Loader>
+    <Loader :is-loading="loading"></Loader>
 
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <EthRpc :connectedAdapter="web3auth.connectedAdapterName" v-if="provider" :provider="provider" :uiConsole="uiConsole"></EthRpc>
+      <button v-if="!provider" type="button" class="rpcBtn" style="cursor: pointer" @click="connect">Connect</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
+      <EthRpc v-if="provider" :connected-adapter="web3auth.connectedAdapterName" :provider="provider" :ui-console="uiConsole"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, LoginMethodConfig } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -31,10 +31,9 @@ import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
-import EthRpc from "@/rpc/ethRpc.vue";
-
+import Loader from "../components/loader.vue";
 import config from "../config";
+import EthRpc from "../rpc/ethRpc.vue";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const polygonMumbaiConfig: any = {
@@ -61,20 +60,24 @@ const ethereumChainConfig: any = {
 
 const polygonWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: polygonMumbaiConfig,
-  clientId: config.clientId["testnet"],
+  clientId: config.clientId.testnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonMumbaiConfig } }),
   enableLogging: true,
 };
 
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
   enableLogging: true,
 };
 
 export default defineComponent({
   name: "PolygonChain",
+  components: {
+    Loader,
+    EthRpc,
+  },
   props: {
     plugins: {
       type: Object,
@@ -82,22 +85,11 @@ export default defineComponent({
     },
     adapterConfig: {
       type: Object,
+      default: () => ({}),
     },
     openloginNetwork: {
       type: String,
       default: "testnet",
-    },
-  },
-  watch: {
-    adapterConfig: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initPolygonWeb3Auth();
-    },
-    openloginNetwork: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initPolygonWeb3Auth();
     },
   },
   data() {
@@ -109,12 +101,17 @@ export default defineComponent({
       web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
-  components: {
-    Loader,
-    EthRpc,
+  watch: {
+    async adapterConfig() {
+      // watch it
+      await this.initPolygonWeb3Auth();
+    },
+    async openloginNetwork() {
+      // watch it
+      await this.initPolygonWeb3Auth();
+    },
   },
   async mounted() {
-    console.log("polygon");
     await this.initPolygonWeb3Auth();
   },
   methods: {
@@ -140,7 +137,6 @@ export default defineComponent({
       });
     },
     async initPolygonWeb3Auth() {
-      console.log("polygon");
       this.parseConfig();
       try {
         this.loading = true;
@@ -154,7 +150,7 @@ export default defineComponent({
         });
 
         this.web3auth.configureAdapter(openloginAdapter);
-        if (this.plugins["walletServices"]) {
+        if (this.plugins.walletServices) {
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
             walletInitOptions: { whiteLabel: { showWidgetButton: true } },
@@ -168,7 +164,7 @@ export default defineComponent({
         });
         await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
-        console.log("error", error);
+        log.error("error", error);
         this.uiConsole("error", error);
       } finally {
         this.loading = false;
@@ -190,7 +186,7 @@ export default defineComponent({
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.error("error", error);
         this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
@@ -200,7 +196,7 @@ export default defineComponent({
         const provider = await this.web3auth.connect();
         this.provider = provider;
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.uiConsole("error", error);
       }
     },

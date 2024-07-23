@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <h2>Login with Web3Auth and {{ web3auth.options.chainConfig.chainNamespace }}</h2>
-    <Loader :isLoading="loading"></Loader>
-    <button v-if="!provider" @click="switchChain" style="cursor: pointer">
+    <Loader :is-loading="loading"></Loader>
+    <button v-if="!provider" type="button" style="cursor: pointer" @click="switchChain">
       Switch To {{ web3auth.options.chainConfig.chainNamespace === "solana" ? "Ethereum" : "solana" }}
     </button>
     <section
@@ -10,10 +10,10 @@
         fontSize: '12px',
       }"
     >
-      <button v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button v-if="!provider" type="button" style="cursor: pointer" @click="connect">Connect</button>
+      <button v-if="provider" type="button" style="cursor: pointer" @click="logout">Logout</button>
 
-      <button v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
+      <button v-if="provider" type="button" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
       <SolRpc v-if="provider && web3auth.options.chainConfig.chainNamespace === 'solana'" :provider="provider" :console="console"></SolRpc>
       <EthRpc v-if="provider && web3auth.options.chainConfig.chainNamespace === 'eip155'" :provider="provider" :console="console"></EthRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
@@ -25,15 +25,14 @@
 </template>
 
 <script lang="ts">
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
-import config from "@/config";
-
 import Loader from "../components/loader.vue";
+import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 import SolRpc from "../rpc/solanaRpc.vue";
 
@@ -62,18 +61,23 @@ const solanaChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 const solanaWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: solanaChainConfig,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
 };
 
 export default defineComponent({
   name: "BeginnerExampleMode",
+  components: {
+    Loader,
+    EthRpc,
+    SolRpc,
+  },
   data() {
     return {
       loading: false,
@@ -83,11 +87,6 @@ export default defineComponent({
       namespace: undefined,
       web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
-  },
-  components: {
-    Loader,
-    EthRpc,
-    SolRpc,
   },
   async mounted() {
     try {
@@ -108,9 +107,9 @@ export default defineComponent({
         this.web3auth = new Web3Auth(solanaWeb3AuthOptions);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
-        console.log("web3auth", this.web3auth);
+        log.info("web3auth", this.web3auth);
       } catch (error) {
-        console.log("error", error);
+        log.info("error", error);
         this.console("error", error);
       }
     },
@@ -120,7 +119,7 @@ export default defineComponent({
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal();
       } catch (error) {
-        console.log("error", error);
+        log.info("error", error);
         this.console("error sss", error);
       }
     },
@@ -155,7 +154,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.info("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });
@@ -164,7 +163,7 @@ export default defineComponent({
       try {
         this.provider = await this.web3auth.connect();
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.console("error", error);
       }
     },
