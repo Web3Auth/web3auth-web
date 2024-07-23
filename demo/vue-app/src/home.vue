@@ -323,7 +323,7 @@ const initialFormConfig = {
   ...configFromURL(),
 };
 
-log.log(initialFormConfig);
+log.info(initialFormConfig);
 
 export default defineComponent({
   name: "HomeComponent",
@@ -397,7 +397,7 @@ export default defineComponent({
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
-      log.log("config saved", this.config);
+      log.info("config saved", this.config);
       // // temp hack to hide fb, todo: fix later
       // this.config.uiMode.default.login.push({
       //   id: "facebook",
@@ -406,7 +406,7 @@ export default defineComponent({
       // });
     },
     onChainSelect(e) {
-      log.log("e", e.target.value);
+      log.info("e", e.target.value);
       this.form.uiMode.default.adapter =
         e.target.value === "solana" ? defaultAdapters(CHAIN_NAMESPACES.SOLANA) : defaultAdapters(CHAIN_NAMESPACES.EIP155);
     },

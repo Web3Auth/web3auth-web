@@ -108,7 +108,7 @@ export default defineComponent({
         this.web3auth.configureAdapter(openloginAdapter);
         await this.web3auth.init();
       } catch (error) {
-        log.log("error", error);
+        log.info("error", error);
         this.console("error", error);
       }
     },
@@ -129,7 +129,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        log.log("error", error);
+        log.info("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });

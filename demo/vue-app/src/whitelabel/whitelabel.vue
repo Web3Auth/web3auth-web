@@ -109,7 +109,7 @@ export default defineComponent({
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
       } catch (error) {
-        log.log("error", error);
+        log.info("error", error);
         this.console("error sss", error);
       } finally {
         this.loading = false;
@@ -132,7 +132,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        log.log("error", error);
+        log.info("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });

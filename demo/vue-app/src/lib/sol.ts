@@ -121,14 +121,14 @@ export const signAllTransactions = async (provider: IProvider, uiConsole: any) =
     const solWeb3 = new SolanaWallet(provider);
     const publicKeys = await solWeb3.requestAccounts();
     const { blockhash } = await conn.getRecentBlockhash("finalized");
-    log.log("blockhash", blockhash);
+    log.info("blockhash", blockhash);
 
     const signedTx = await solWeb3.signAllTransactions([
       getNewTx(publicKeys, blockhash),
       getNewTx(publicKeys, blockhash),
       getNewTx(publicKeys, blockhash),
     ]);
-    log.log("signedTx", signedTx);
+    log.info("signedTx", signedTx);
     uiConsole("signature", signedTx);
   } catch (error) {
     log.error("Error", error);

@@ -6,7 +6,7 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
-    log.log("pubKey", accounts);
+    log.info("pubKey", accounts);
     const txRes = await web3.eth.sendTransaction({
       from: accounts[0],
       to: accounts[0],
@@ -14,7 +14,7 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
     });
     uiConsole("txRes", txRes);
   } catch (error) {
-    log.log("error", error);
+    log.info("error", error);
     uiConsole("error", error);
   }
 };
@@ -26,7 +26,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     // hex message
     // const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
     const fromAddress = (await web3.eth.getAccounts())[0];
-    log.log("fromAddress", fromAddress);
+    log.info("fromAddress", fromAddress);
     // const signedMessage = await provider.request({
     //   method: "eth_sign",
     //   params: [fromAddress, message],
@@ -163,7 +163,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     });
     uiConsole("txRes", txRes);
   } catch (error) {
-    log.log("error", error);
+    log.info("error", error);
     uiConsole("error", error);
   }
 };

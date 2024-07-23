@@ -107,9 +107,9 @@ export default defineComponent({
         this.web3auth = new Web3Auth(solanaWeb3AuthOptions);
         this.subscribeAuthEvents(this.web3auth);
         await this.web3auth.initModal();
-        log.log("web3auth", this.web3auth);
+        log.info("web3auth", this.web3auth);
       } catch (error) {
-        log.log("error", error);
+        log.info("error", error);
         this.console("error", error);
       }
     },
@@ -119,7 +119,7 @@ export default defineComponent({
         this.subscribeAuthEvents(this.web3auth);
         await (this.web3auth as Web3Auth).initModal();
       } catch (error) {
-        log.log("error", error);
+        log.info("error", error);
         this.console("error sss", error);
       }
     },
@@ -154,7 +154,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        log.log("error", error);
+        log.info("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });

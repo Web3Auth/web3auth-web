@@ -155,7 +155,7 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        log.log("error", error);
+        log.info("error", error);
         this.uiConsole("error", error);
       } finally {
         this.loading = false;
@@ -180,7 +180,7 @@ export default defineComponent({
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        log.log("error", error);
+        log.info("error", error);
         this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
