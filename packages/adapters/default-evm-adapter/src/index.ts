@@ -32,6 +32,8 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
 
   // EIP-6963: multiple injected provider discovery
   const mipd = createMipd();
+  // We assume that all extensions have emitted by here.
+  // TODO: Ideally, we must use reactive listening. We will do that with v9
   const injectedProviders = mipd.getProviders().map((providerDetail) => {
     // remove "wallet" from the wallet name e.g. Coinbase Wallet => coinbase
     let walletName = providerDetail.info.name.toLowerCase();
