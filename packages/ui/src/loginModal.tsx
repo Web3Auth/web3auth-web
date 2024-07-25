@@ -314,6 +314,7 @@ class LoginModal extends SafeEventEmitter {
         });
       }
     });
+    // TODO: send adapter name in error
     listener.on(ADAPTER_EVENTS.ERRORED, (error: Web3AuthError) => {
       log.error("error", error, error.message);
       if (error.code === 5000) {
