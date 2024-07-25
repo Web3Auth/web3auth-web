@@ -40,10 +40,14 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
   }
 
   get provider(): IProvider | null {
-    if (this.status !== ADAPTER_STATUS.NOT_READY) {
+    if (this.status !== ADAPTER_STATUS.NOT_READY && this.injectedProvider) {
       return this.injectedProvider;
     }
     return null;
+  }
+
+  set provider(_: IProvider | null) {
+    throw new Error("Not implemented");
   }
 
   async init(options: AdapterInitOptions = {}): Promise<void> {
