@@ -156,7 +156,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   }
 
   async initiateTopup(provider: PAYMENT_PROVIDER_TYPE, params: PaymentParams): Promise<void> {
-    if (!this.torusWalletInstance.isLoggedIn) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!this.torusWalletInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     await this.torusWalletInstance.initiateTopup(provider, params);
   }
 
@@ -235,7 +235,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   }
 
   private async setSelectedAddress(address: string): Promise<void> {
-    if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!this.torusWalletInstance.isLoggedIn || !this.userInfo) throw WalletServicesPluginError.walletPluginNotConnected();
     const [, torusWalletSessionConfig] = await Promise.all([this.sessionConfig(), this.torusWalletSessionConfig()]);
     if (address !== torusWalletSessionConfig.accounts?.[0]) {
       throw WalletServicesPluginError.invalidSession();

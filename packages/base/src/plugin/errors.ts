@@ -12,6 +12,7 @@ export class WalletServicesPluginError extends Web3AuthError {
     5219: "Plugin network different than web3auth instance network.",
     5221: "Web3Auth is not initialized",
     5222: "Invalid session inside wallet services. Please report this issue.",
+    5223: "Wallet plugin is not connected Yet. Please wait for plugin to connect and listen via `connected` event on the plugin",
   };
 
   public constructor(code: number, message?: string, cause?: unknown) {
@@ -68,5 +69,9 @@ export class WalletServicesPluginError extends Web3AuthError {
 
   public static invalidSession(extraMessage = "", cause?: unknown): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5222, extraMessage, cause);
+  }
+
+  public static walletPluginNotConnected(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletServicesPluginError.fromCode(5223, extraMessage, cause);
   }
 }
