@@ -31,7 +31,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@metamask/rpc-errors": "^6.3.0"
+    "@metamask/rpc-errors": "6.2.1"
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^8.1.1",

@@ -204,7 +204,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               const providerIcon = button.isLink ? (
                 <img src={button.logo} height="auto" width="auto" alt={`login-${button.name}`} />
               ) : (
-                <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} isButton />
+                <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} height="32" width="32" isButton />
               );
 
               const isBlock = externalButtons.length === 1 || button.block;

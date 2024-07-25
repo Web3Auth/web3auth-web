@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, LoginMethodConfig, WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, log, LoginMethodConfig } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -42,8 +42,7 @@ import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
+const ethereumChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc.ankr.com/eth",
   blockExplorerUrl: "https://etherscan.io",
@@ -56,7 +55,7 @@ const ethereumChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId.mainnet,
+  clientId: config.clientId.sapphire_mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
@@ -77,7 +76,7 @@ export default defineComponent({
     },
     openloginNetwork: {
       type: String,
-      default: "testnet",
+      default: "sapphire_mainnet",
     },
   },
   data() {
@@ -157,34 +156,7 @@ export default defineComponent({
 
         this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal({
-          modalConfig: {
-            [WALLET_ADAPTERS.METAMASK]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Metamask",
-            },
-            [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Wallet Connect",
-            },
-            [WALLET_ADAPTERS.TORUS_EVM]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Torus",
-            },
-            [WALLET_ADAPTERS.OPENLOGIN]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "OpenLogin",
-            },
-          },
-        });
+        await this.web3auth.initModal();
       } catch (error) {
         log.info("error", error);
         this.uiConsole("error", error);
@@ -194,7 +166,7 @@ export default defineComponent({
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.uiConsole("connected to wallet", data);
+        this.uiConsole("connected to wallet", data.adapter);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });

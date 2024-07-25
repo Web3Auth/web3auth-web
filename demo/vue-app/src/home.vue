@@ -46,6 +46,14 @@
           <div class="flex-vertical-center ui-mode">
             <span class="form-label">Openlogin Network</span>
             <span class="form-control radio-group">
+              <label for="sapphire_mainnet" class="radio-button">
+                <input type="radio" id="sapphire_mainnet" value="sapphire_mainnet" v-model="form.openloginNetwork" />
+                Sapphire Mainnet
+              </label>
+              <label for="sapphire_devnet" class="radio-button">
+                <input type="radio" id="sapphire_devnet" value="sapphire_devnet" v-model="form.openloginNetwork" />
+                Sapphire Devnet
+              </label>
               <label for="mainnet" class="radio-button">
                 <input id="mainnet" v-model="form.openloginNetwork" type="radio" value="mainnet" />
                 Mainnet
@@ -276,7 +284,7 @@ const defaultFormConfig = {
   chain: "ethereum",
   authMode: "hosted",
   selectedUiMode: "default",
-  openloginNetwork: "testnet",
+  openloginNetwork: "sapphire_mainnet",
   plugins: {
     torusWallet: false,
     walletServices: true,
