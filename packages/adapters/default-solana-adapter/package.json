@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-solana-adapter",
-  "version": "8.8.0",
+  "version": "8.11.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/defaultSolanaAdapter.cjs.js",
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@web3auth/base": "^8.8.0",
-    "@web3auth/phantom-adapter": "^8.8.0",
-    "@web3auth/torus-solana-adapter": "^8.8.0"
+    "@web3auth/phantom-adapter": "^8.11.0",
+    "@web3auth/torus-solana-adapter": "^8.11.0"
   },
   "files": [
     "dist"
