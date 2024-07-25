@@ -64,7 +64,7 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^6.1.1",
+    "@toruslabs/http-helpers": "^7.0.0",
     "@toruslabs/openlogin": "^8.2.1",
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@toruslabs/openlogin-utils": "^8.2.1",
