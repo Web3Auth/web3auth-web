@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "8.10.1",
+  "version": "8.10.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/ethereumProvider.cjs.js",
