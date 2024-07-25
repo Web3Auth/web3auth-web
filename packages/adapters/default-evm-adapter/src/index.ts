@@ -1,4 +1,12 @@
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IWeb3AuthCoreOptions, WalletInitializationError } from "@web3auth/base";
+import {
+  CHAIN_NAMESPACES,
+  CustomChainConfig,
+  getChainConfig,
+  IAdapter,
+  IWeb3AuthCoreOptions,
+  normalizeWalletName,
+  WalletInitializationError,
+} from "@web3auth/base";
 import { createStore as createMipd } from "mipd";
 
 import { InjectedEvmAdapter } from "./injectedEvmAdapter";
@@ -35,15 +43,8 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
   // We assume that all extensions have emitted by here.
   // TODO: Ideally, we must use reactive listening. We will do that with v9
   const injectedProviders = mipd.getProviders().map((providerDetail) => {
-    // remove "wallet" from the wallet name e.g. Coinbase Wallet => coinbase
-    let walletName = providerDetail.info.name.toLowerCase();
-    if (walletName.toLowerCase().endsWith("wallet")) {
-      walletName = walletName.slice(0, -6).trim();
-    }
-    walletName = walletName.replace(/\s/g, "-");
-
     return new InjectedEvmAdapter({
-      name: walletName,
+      name: normalizeWalletName(providerDetail.info.name),
       provider: providerDetail.provider,
       chainConfig: finalChainConfig,
       clientId,

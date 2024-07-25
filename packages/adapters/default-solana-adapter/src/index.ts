@@ -8,10 +8,10 @@ import {
   getChainConfig,
   IAdapter,
   IWeb3AuthCoreOptions,
+  normalizeWalletName,
   WalletInitializationError,
 } from "@web3auth/base";
 
-import { getWalletKey } from "./utils";
 import { WalletStandardAdapter } from "./walletStandardAdapter";
 
 export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
@@ -40,7 +40,7 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
 
     standardWalletAdapters.push(
       new WalletStandardAdapter({
-        name: getWalletKey(name),
+        name: normalizeWalletName(name),
         wallet,
         chainConfig: finalChainConfig,
         clientId,
