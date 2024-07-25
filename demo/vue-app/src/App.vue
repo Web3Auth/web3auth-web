@@ -17,17 +17,17 @@ import { defineComponent } from "vue";
 import Home from "./home.vue";
 
 export default defineComponent({
-  name: "app",
+  name: "App",
+  components: {
+    Home,
+    // DefaultModal,
+  },
   data() {
     return {
       exampleMode: "default",
       chain: null,
       authType: null,
     };
-  },
-  components: {
-    Home,
-    // DefaultModal,
   },
 
   methods: {},

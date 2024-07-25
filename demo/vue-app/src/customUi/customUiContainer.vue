@@ -11,6 +11,10 @@ import Openlogin from "./openlogin.vue";
 
 export default defineComponent({
   name: "CustomUiContainer",
+  components: {
+    Openlogin,
+    // WalletConnect,
+  },
   props: {
     authType: {
       type: String,
@@ -19,10 +23,6 @@ export default defineComponent({
   },
   data() {
     return {};
-  },
-  components: {
-    Openlogin,
-    // WalletConnect,
   },
   methods: {},
 });

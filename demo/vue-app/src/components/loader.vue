@@ -1,5 +1,5 @@
 <template>
-  <div id="w3a-example-modal" class="w3a-example-modal" v-if="isLoading">
+  <div v-if="isLoading" id="w3a-example-modal" class="w3a-example-modal">
     <div class="w3ajs-modal-loader w3a-example-modal__loader">
       <div class="w3a-example-modal__loader-content">
         <div class="w3a-example-modal__loader-info">
@@ -12,7 +12,7 @@
           <div class="w3ajs-modal-loader__message w3a-spinner-message" style="display: none"></div>
         </div>
         <div class="w3a-spinner-power">
-          <img src="https://images.web3auth.io/web3auth.svg" />
+          <img src="https://images.web3auth.io/web3auth.svg" alt="logo" />
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="sidebar">
       <a href="https://github.com/Web3Auth/Web3Auth/tree/master/demo/vue-app" target="blank">
-        <img src="./assets/github-logo.png" width="30px" />
+        <img src="./assets/github-logo.png" alt="github-logo" width="30px" />
       </a>
       <h2>Demo Settings</h2>
 
@@ -12,11 +12,11 @@
         <span class="form-label">Auth Mode</span>
         <span class="form-control radio-group">
           <label for="hosted" class="radio-button">
-            <input type="radio" id="hosted" value="hosted" v-model="form.authMode" />
+            <input id="hosted" v-model="form.authMode" type="radio" value="hosted" />
             Hosted
           </label>
           <label for="ownAuth" class="radio-button">
-            <input type="radio" id="ownAuth" value="ownAuth" v-model="form.authMode" />
+            <input id="ownAuth" v-model="form.authMode" type="radio" value="ownAuth" />
             Use Your Own Auth
           </label>
         </span>
@@ -27,13 +27,13 @@
         <span class="form-label">Plugins</span>
         <span class="form-control radio-group">
           <label for="torusWallet" class="radio-button">
-            <input type="checkbox" id="torusWallet" value="torus wallet plugin" v-model="form.plugins.torusWallet" />
+            <input id="torusWallet" v-model="form.plugins.torusWallet" type="checkbox" value="torus wallet plugin" />
             Torus Wallet UI Plugin
           </label>
         </span>
         <span class="form-control radio-group">
           <label for="walletServices" class="radio-button">
-            <input type="checkbox" id="walletServices" value="wallet services plugin" v-model="form.plugins.walletServices" />
+            <input id="walletServices" v-model="form.plugins.walletServices" type="checkbox" value="wallet services plugin" />
             Wallet Services Plugin
           </label>
         </span>
@@ -41,7 +41,7 @@
 
       <hr />
 
-      <div class="hosted" v-if="config.authMode === 'hosted'">
+      <div v-if="config.authMode === 'hosted'" class="hosted">
         <div class="ui-mode">
           <div class="flex-vertical-center ui-mode">
             <span class="form-label">Openlogin Network</span>
@@ -55,15 +55,15 @@
                 Sapphire Devnet
               </label>
               <label for="mainnet" class="radio-button">
-                <input type="radio" id="mainnet" value="mainnet" v-model="form.openloginNetwork" />
+                <input id="mainnet" v-model="form.openloginNetwork" type="radio" value="mainnet" />
                 Mainnet
               </label>
               <label for="testnet" class="radio-button">
-                <input type="radio" id="testnet" value="testnet" v-model="form.openloginNetwork" />
+                <input id="testnet" v-model="form.openloginNetwork" type="radio" value="testnet" />
                 Testnet
               </label>
               <label for="cyan" class="radio-button">
-                <input type="radio" id="cyan" value="cyan" v-model="form.openloginNetwork" />
+                <input id="cyan" v-model="form.openloginNetwork" type="radio" value="cyan" />
                 Cyan
               </label>
             </span>
@@ -77,19 +77,19 @@
           <span class="form-label">Select Chain</span>
           <span class="form-control radio-group">
             <label for="ethereum" class="radio-button">
-              <input type="radio" id="ethereum" value="ethereum" v-model="form.chain" />
+              <input id="ethereum" v-model="form.chain" type="radio" value="ethereum" />
               Ethereum
             </label>
             <label for="solana" class="radio-button">
-              <input type="radio" id="solana" value="solana" v-model="form.chain" />
+              <input id="solana" v-model="form.chain" type="radio" value="solana" />
               Solana
             </label>
             <label for="binance" class="radio-button">
-              <input type="radio" id="binance" value="binance" v-model="form.chain" />
+              <input id="binance" v-model="form.chain" type="radio" value="binance" />
               Binance
             </label>
             <label for="polygon" class="radio-button">
-              <input type="radio" id="polygon" value="polygon" v-model="form.chain" />
+              <input id="polygon" v-model="form.chain" type="radio" value="polygon" />
               Polygon
             </label>
           </span>
@@ -100,7 +100,7 @@
             <span class="form-label">UI</span>
             <span class="form-control radio-group">
               <label for="default" class="radio-button">
-                <input type="radio" id="default" value="default" v-model="form.selectedUiMode" />
+                <input id="default" v-model="form.selectedUiMode" type="radio" value="default" />
                 Default
               </label>
               <!-- <label for="customUi" class="radio-button">
@@ -108,7 +108,7 @@
               CustomUI
             </label> -->
               <label for="whitelabel" class="radio-button">
-                <input type="radio" id="whitelabel" value="whitelabel" v-model="form.selectedUiMode" />
+                <input id="whitelabel" v-model="form.selectedUiMode" type="radio" value="whitelabel" />
                 WhiteLabel
               </label>
             </span>
@@ -116,13 +116,13 @@
           <hr />
 
           <!-- UI MODE DEFAULT -->
-          <div v-if="form.selectedUiMode == 'default'">
+          <div v-if="form.selectedUiMode === 'default'">
             <div class="flex-vertical-center">
               <span class="form-label">Social Logins</span>
               <div class="form-control">
                 <li v-for="loginType in form.uiMode.default.login" :key="loginType.id" class="list-style-none">
                   <label :for="loginType.id">
-                    <input type="checkbox" v-model="loginType.checked" v-bind:id="loginType.id" />
+                    <input :id="loginType.id" v-model="loginType.checked" type="checkbox" />
                     <span>{{ loginType.name }}</span>
                   </label>
                 </li>
@@ -134,7 +134,7 @@
               <div class="form-control">
                 <li v-for="walletType in form.uiMode.default.adapter" :key="walletType.id" class="list-style-none">
                   <label :for="walletType.id">
-                    <input type="checkbox" v-model="walletType.checked" v-bind:id="walletType.id" />
+                    <input :id="walletType.id" v-model="walletType.checked" type="checkbox" />
                     <span>{{ walletType.name }}</span>
                   </label>
                 </li>
@@ -143,11 +143,11 @@
           </div>
 
           <!-- UI MODE YOUR OWN MODAL -->
-          <div v-if="form.selectedUiMode == 'customUi'">
+          <div v-if="form.selectedUiMode === 'customUi'">
             <div class="flex-vertical-center">
               <span class="form-label">Type</span>
               <span class="form-control">
-                <input type="radio" id="openlogin" name="openlogin" value="openlogin" v-model="form.uiMode.customUi.type" />
+                <input id="openlogin" v-model="form.uiMode.customUi.type" type="radio" name="openlogin" value="openlogin" />
                 <label for="openlogin">OpenLogin</label>
                 <br />
               </span>
@@ -156,29 +156,29 @@
           </div>
 
           <!-- UI MODE WHITELABEL -->
-          <div v-if="form.selectedUiMode == 'whitelabel'">
+          <div v-if="form.selectedUiMode === 'whitelabel'">
             <div class="flex-vertical-center">
               <span class="form-label">Logo URL</span>
               <span class="form-control">
-                <input type="text" class="text" v-model="form.uiMode.whitelabel.logoUrl" />
+                <input v-model="form.uiMode.whitelabel.logoUrl" type="text" class="text" aria-label="logo" />
               </span>
             </div>
             <div class="flex-vertical-center">
               <span class="form-label">Theme</span>
               <span class="form-control">
-                <input type="radio" id="light" name="light" value="light" v-model="form.uiMode.whitelabel.theme" />
+                <input id="light" v-model="form.uiMode.whitelabel.theme" type="radio" name="light" value="light" />
                 <label for="light">Light</label>
-                <input type="radio" id="dark" name="dark" value="dark" v-model="form.uiMode.whitelabel.theme" />
+                <input id="dark" v-model="form.uiMode.whitelabel.theme" type="radio" name="dark" value="dark" />
                 <label for="dark">Dark</label>
-                <input type="radio" id="auto" name="auto" value="auto" v-model="form.uiMode.whitelabel.theme" />
+                <input id="auto" v-model="form.uiMode.whitelabel.theme" type="radio" name="auto" value="auto" />
                 <label for="auto">Auto</label>
               </span>
             </div>
             <div class="flex-vertical-center">
-              <span class="form-label">Default Language</span>
+              <label for="defaultLanguage" class="form-label">Default Language</label>
               <span class="form-control">
-                <select v-model="form.uiMode.whitelabel.defaultLanguage">
-                  <option v-for="language in languages" :value="language.value" :key="language.value">
+                <select id="defaultLanguage" v-model="form.uiMode.whitelabel.defaultLanguage">
+                  <option v-for="language in languages" :key="language.value" :value="language.value">
                     {{ language.display }}
                   </option>
                 </select>
@@ -187,10 +187,10 @@
             <div class="order-container">
               <div class="form-label">
                 <div>Login Methods Order</div>
-                <a @click="setDefaultLoginMethodsOrder">Set to default</a>
+                <a @click="setDefaultLoginMethodsOrder" @keydown="setDefaultLoginMethodsOrder">Set to default</a>
               </div>
               <div>
-                <textarea rows="5" class="order-list" v-model="tempLoginMethodsOrder" />
+                <textarea v-model="tempLoginMethodsOrder" aria-label="login-order" rows="5" class="order-list" />
               </div>
               <div></div>
             </div>
@@ -198,33 +198,33 @@
         </div>
       </div>
 
-      <div class="ownAuth" v-else-if="config.authMode === 'ownAuth'">
+      <div v-else-if="config.authMode === 'ownAuth'" class="ownAuth">
         <!-- <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer> -->
       </div>
 
       <div class="btn-group">
-        <button class="btn submit-btn" @click="saveConfig">Submit</button>
+        <button type="button" class="btn submit-btn" @click="saveConfig">Submit</button>
       </div>
     </div>
     <div class="content">
       <section>
         <!-- hosted auth -->
         <ConfigurableExample
-          :plugins="form.plugins"
-          :openloginNetwork="config.openloginNetwork"
-          :adapterConfig="config.uiMode.default"
-          :chain="config.chain"
           v-if="config.selectedUiMode === 'default' && config.authMode === 'hosted'"
+          :plugins="form.plugins"
+          :openlogin-network="config.openloginNetwork"
+          :adapter-config="config.uiMode.default"
+          :chain="config.chain"
         />
 
         <WhitelabelExample
-          :uiConfig="config.uiMode.whitelabel"
-          :chain="config.chain"
           v-else-if="config.selectedUiMode === 'whitelabel' && config.authMode === 'hosted'"
+          :ui-config="config.uiMode.whitelabel"
+          :chain="config.chain"
         />
 
         <!-- Custom auth -->
-        <CustomUiContainer :authType="config.uiMode.customUi.type" v-if="config.authMode === 'ownAuth'"></CustomUiContainer>
+        <CustomUiContainer v-if="config.authMode === 'ownAuth'" :auth-type="config.uiMode.customUi.type"></CustomUiContainer>
       </section>
     </div>
   </div>
@@ -232,7 +232,7 @@
 
 <script lang="ts">
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
-import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
 import { cloneDeep } from "lodash";
 import merge from "lodash.merge";
@@ -331,15 +331,15 @@ const initialFormConfig = {
   ...configFromURL(),
 };
 
-console.log(initialFormConfig);
+log.info(initialFormConfig);
 
 export default defineComponent({
+  name: "HomeComponent",
   components: {
     CustomUiContainer,
     ConfigurableExample,
     WhitelabelExample,
   },
-  name: "HomeComponent",
   data() {
     return {
       // storing config collected from user input.
@@ -388,24 +388,24 @@ export default defineComponent({
     };
   },
   watch: {
-    "form.authMode"(val) {
+    "form.authMode": function (val) {
       const formValURLSearchParamMap = { ownAuth: "custom", hosted: "default" };
       this.updateURL("auth", formValURLSearchParamMap[val]);
     },
-    "form.chain"(val) {
+    "form.chain": function (val) {
       this.updateURL("chain", val);
     },
-    "form.selectedUiMode"(val) {
+    "form.selectedUiMode": function (val) {
       const formValURLSearchParamMap = { whitelabel: "yes", default: "no" };
       this.updateURL("whitelabel", formValURLSearchParamMap[val]);
     },
   },
   methods: {
-    saveConfig: function () {
+    saveConfig() {
       this.form.uiMode.whitelabel.loginMethodsOrder = this.tempLoginMethodsOrder.split(",") as typeof DEFAULT_LOGIN_PROVIDERS;
       sessionStorage.setItem("web3AuthExampleConfig", JSON.stringify(this.form || {}));
       this.config = merge({}, this.form);
-      console.log("config saved", this.config);
+      log.info("config saved", this.config);
       // // temp hack to hide fb, todo: fix later
       // this.config.uiMode.default.login.push({
       //   id: "facebook",
@@ -413,12 +413,12 @@ export default defineComponent({
       //   checked: false,
       // });
     },
-    onChainSelect: function (e) {
-      console.log("e", e.target.value);
+    onChainSelect(e) {
+      log.info("e", e.target.value);
       this.form.uiMode.default.adapter =
         e.target.value === "solana" ? defaultAdapters(CHAIN_NAMESPACES.SOLANA) : defaultAdapters(CHAIN_NAMESPACES.EIP155);
     },
-    setDefaultLoginMethodsOrder: function () {
+    setDefaultLoginMethodsOrder() {
       this.tempLoginMethodsOrder = DEFAULT_LOGIN_PROVIDERS.join(",");
     },
     updateURL(searchParamKey, searchParamValue) {
