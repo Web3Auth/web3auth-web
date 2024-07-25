@@ -42,21 +42,21 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
 
   const showWalletConnectScanner = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
     return walletServicesPlugin.showWalletConnectScanner();
   }, [walletServicesPlugin, isPluginConnected]);
 
   const showWalletUI = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
     return walletServicesPlugin.showWalletUi();
   }, [walletServicesPlugin, isPluginConnected]);
 
   const showCheckout = useCallback(async () => {
     if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
     return walletServicesPlugin.showCheckout();
   }, [walletServicesPlugin, isPluginConnected]);
