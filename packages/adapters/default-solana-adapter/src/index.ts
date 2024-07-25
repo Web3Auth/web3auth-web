@@ -11,6 +11,7 @@ import {
   WalletInitializationError,
 } from "@web3auth/base";
 
+import { getWalletKey } from "./utils";
 import { WalletStandardAdapter } from "./walletStandardAdapter";
 
 export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
@@ -37,16 +38,9 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     );
     if (!hasRequiredFeatures) return;
 
-    // determine wallet name
-    let walletName = name.toLowerCase();
-    if (walletName.endsWith("wallet")) {
-      walletName = walletName.substring(0, walletName.lastIndexOf(" "));
-    }
-    walletName = walletName.replace(/\s/g, "-");
-
     standardWalletAdapters.push(
       new WalletStandardAdapter({
-        name: walletName,
+        name: getWalletKey(name),
         wallet,
         chainConfig: finalChainConfig,
         clientId,

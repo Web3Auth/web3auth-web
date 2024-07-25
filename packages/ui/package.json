@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "8.8.0",
+  "version": "8.11.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -53,14 +53,14 @@
     "autoprefixer": "^10.4.19",
     "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
-    "postcss": "^8.4.39",
+    "postcss": "^8.4.40",
     "postcss-loader": "^8.1.1",
     "postcss-prefix-selector": "^1.16.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rollup-plugin-postcss": "^4.0.2",
     "style-loader": "^4.0.0",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^3.4.6",
     "url-loader": "^4.1.1"
   },
   "dependencies": {
@@ -72,10 +72,10 @@
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
-    "i18next": "^23.11.5",
+    "i18next": "^23.12.2",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "react-i18next": "^14.1.2",
+    "react-i18next": "^15.0.0",
     "react-qrcode-logo": "^3.0.0"
   },
   "lint-staged": {

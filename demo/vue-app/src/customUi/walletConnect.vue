@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h2>Login With Web3Auth</h2>
-    <Loader :isLoading="loading"></Loader>
+    <Loader :is-loading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
@@ -12,8 +12,10 @@
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" name="walletConnect" @click="connect" style="cursor: pointer">Login With Wallet Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
+      <button v-if="!provider" type="button" class="rpcBtn" name="walletConnect" style="cursor: pointer" @click="connect">
+        Login With Wallet Connect
+      </button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
       <EthRpc v-if="provider" :provider="provider" :console="console"></EthRpc>
 
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
@@ -27,7 +29,7 @@
 
 <script lang="ts">
 import { WalletConnectModal } from "@walletconnect/modal";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
@@ -64,19 +66,23 @@ const sepoliaChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthNoModalOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 const sepoliaWeb3AuthOptions: Web3AuthNoModalOptions = {
   chainConfig: sepoliaChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: sepoliaChainConfig } }),
 };
 
 export default defineComponent({
   name: "BeginnerExampleMode",
+  components: {
+    Loader,
+    EthRpc,
+  },
   data() {
     return {
       loading: false,
@@ -86,10 +92,6 @@ export default defineComponent({
       namespace: undefined,
       web3auth: new Web3AuthNoModal(ethWeb3AuthOptions),
     };
-  },
-  components: {
-    Loader,
-    EthRpc,
   },
   async mounted() {
     await this.initWeb3Auth();
@@ -105,7 +107,7 @@ export default defineComponent({
         this.web3auth.configureAdapter(adapter);
         await this.web3auth.init();
       } catch (error) {
-        console.log("error", error);
+        log.info("error", error);
         this.console("error", error);
       }
     },
@@ -126,7 +128,7 @@ export default defineComponent({
         this.connected = false;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.info("error", error);
         this.console("errored", error);
         this.loginButtonStatus = "";
       });
@@ -135,7 +137,7 @@ export default defineComponent({
       try {
         await this.web3auth.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V2);
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.console("error", error);
       }
     },
