@@ -47,9 +47,9 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9",
-    "@walletconnect/sign-client": "^2.13.3",
-    "@walletconnect/types": "^2.13.3",
-    "@walletconnect/utils": "^2.13.3"
+    "@walletconnect/sign-client": "^2.14.0",
+    "@walletconnect/types": "^2.14.0",
+    "@walletconnect/utils": "^2.14.0"
   },
   "lint-staged": {
     "!(*d).ts": [
