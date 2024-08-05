@@ -200,99 +200,99 @@ const formConfig = {
   },
   ["buttons"]: {
     btnGetAccounts: {
-      label: t('app.button.btnGetAccounts'),
-      ariaLabel: t('app.button.btnGetAccounts'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.btnGetAccounts'),
+      ariaLabel: t('app.buttons.btnGetAccounts'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnnGetBalance"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSendEth"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSignEthMessage"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnGetConnectedChainId"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnAddChain"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSwitchChain"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[[w-full !h-auto group py-3 rounded-full flex items-center justify-center]]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSignAndSendTransaction"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSignTransaction"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSignMessage"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
       pill: true,
     },
     ["btnSignAllTransactions"]: {
-      label: t('app.button.xxx'),
-      ariaLabel: t('app.button.xxx'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center]',
+      label: t('app.buttons.xxx'),
+      ariaLabel: t('app.buttons.xxx'),
+      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
       size: 'md',
@@ -438,7 +438,7 @@ watch(formData.value, async () => {
   web3Auth.value?.clearCache()
   web3Auth.value = new Web3Auth(options.value);
 
-  for(const adapter of formData.value.adapters) {
+  for (const adapter of formData.value.adapters) {
     const externalAdapter = getExternalAdapterByName(adapter);
     if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
   }
@@ -651,43 +651,61 @@ const onSignAllTransactions = async () => {
             <div class="mb-4">
               <p class="btn-label">User info</p>
             </div>
-            <div class="mb-4">
-              <Button :v-bind="formConfig['buttons']['btnGetAccounts']" @click="onGetAccounts" />
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnGetAccounts']" @click="onGetAccounts">
+                {{ t("app.buttons.btnGetAccounts") }}
+              </Button>
             </div>
-            <div class="mb-4">
+            <div class="mb-2">
 
-              <div>
-            dsds  
-            </div><Button :v-bind="formConfig['buttons']['btnnGetBalance']" @click="onGetBalance" />
-
-
-              <Button :v-bind="formConfig['buttons']['btnSendEth']" @click="onSendEth" />
-              <Button :v-bind="formConfig['buttons']['btnSignEthMessage']" @click="onSignEthMessage" />
-              <Button :v-bind="formConfig['buttons']['btnGetConnectedChainId']" @click="getConnectedChainId" />
-              <Button :v-bind="formConfig['buttons']['btnAddChain']" @click="onAddChain" />
-              <Button :v-bind="formConfig['buttons']['btnSwitchChain']" @click="onSwitchChain" />
-
-              <Button :v-bind="formConfig['buttons']['btnSignAndSendTransaction']" @click="onSignAndSendTransaction" />
-              <Button :v-bind="formConfig['buttons']['btnSignTransaction']" @click="onSignTransaction" />
-              <Button :v-bind="formConfig['buttons']['btnSignMessage']" @click="onSignMessage" />
-              <Button :v-bind="formConfig['buttons']['btnSignAllTransactions']" @click="onSignAllTransactions" />
-
+              <Button :v-bind="formConfig['buttons']['btnnGetBalance']" @click="onGetBalance">
+                {{ t("app.buttons.btnGetBalance") }}
+              </Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSendEth']" @click="onSendEth">{{
+                t("app.buttons.btnSendEth") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSignEthMessage']" @click="onSignEthMessage">{{
+                t("app.buttons.btnSignEthMessage") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnGetConnectedChainId']" @click="getConnectedChainId">{{
+                t("app.buttons.btnGetConnectedChainId") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnAddChain']" @click="onAddChain">{{
+                t("app.buttons.btnAddChain") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSwitchChain']" @click="onSwitchChain">{{
+                t("app.buttons.btnSwitchChain") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSignAndSendTransaction']" @click="onSignAndSendTransaction">{{
+                t("app.buttons.btnSignAndSendTransaction") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSignTransaction']" @click="onSignTransaction">{{
+                t("app.buttons.btnSignTransaction") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSignMessage']" @click="onSignMessage">{{
+                t("app.buttons.btnSignMessage") }}</Button>
+            </div>
+            <div class="mb-2">
+              <Button :v-bind="formConfig['buttons']['btnSignAllTransactions']" @click="onSignAllTransactions">{{
+                t("app.buttons.btnSignAllTransactions") }}</Button>
             </div>
           </Card>
           <Card id="console" class="px-4 py-4 col-span-4 overflow-y-auto">
             <pre
-              class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"
-            ></pre>
+              class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen">
+      </pre>
             <div class="absolute top-2 right-8">
-              <Button
-                :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
-                type="button"
-                block
-                size="md"
-                pill
-                @click="clearConsole"
-                data-testid="btnClearConsole"
-              >
+              <Button :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']" type="button"
+                block size="md" pill @click="clearConsole" data-testid="btnClearConsole">
                 Clear console
               </Button>
             </div>

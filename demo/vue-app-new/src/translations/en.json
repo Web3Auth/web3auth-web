@@ -24,7 +24,17 @@
     "isConnected": "Is connected ::::: {isConnected}",
     "isInitialized": "Is initialized ::::: {isInitialized}",
     "buttons": {
-      "btnGetAccounts": "Get Accounts"
+      "btnGetAccounts": "Get Accounts",
+      "btnGetBalance": "Get Balance",
+      "btnSendEth": "Send ETH",
+      "btnSignEthMessage": "Sign ETH Message",
+      "btnGetConnectedChainId": "Get Connected Chain ID",
+      "btnAddChain": "Add Chain",
+      "btnSwitchChain": "Switch Chain",
+      "btnSignAndSendTransaction": "Sign and Send Transaction",
+      "btnSignTransaction": "Sign Transaction",
+      "btnSignMessage": "Sign Message",
+      "btnSignAllTransactions": "Sign All Transactions"
     }
   }
 }
