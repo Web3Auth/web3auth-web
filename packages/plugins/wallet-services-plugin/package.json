@@ -30,7 +30,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@metamask/rpc-errors": "6.2.1",
+    "@metamask/rpc-errors": "6.3.1",
     "@toruslabs/ethereum-controllers": "^5.9.2",
     "@toruslabs/openlogin-utils": "^8.2.1"
   },
