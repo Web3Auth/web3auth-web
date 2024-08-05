@@ -38,7 +38,7 @@
     "@toruslabs/openlogin-jrpc": "^8.1.1",
     "@web3auth/base": "^8.12.0",
     "@web3auth/no-modal": "^8.12.0",
-    "@web3auth/ws-embed": "^2.0.15",
+    "@web3auth/ws-embed": "^2.0.20",
     "loglevel": "^1.9.1"
   },
   "peerDependencies": {
