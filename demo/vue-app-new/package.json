@@ -10,11 +10,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@toruslabs/openlogin-utils": "file:../../packages/openlogin-utils/",
+    "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
     "@toruslabs/vue-components": "^7.8.3",
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/base": "^8.8.0",
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
+    "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
+    "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "vue": "^3.4.31",
     "vue-i18n": "^9.13.1"
   },
