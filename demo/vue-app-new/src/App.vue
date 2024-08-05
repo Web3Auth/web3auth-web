@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import Web3AuthProvider, { Web3AuthContextConfig, } from '@web3auth/modal-vue-composables'
-import Main from './Main.vue';
+import Main from './MainView.vue';
 import { chainOptions } from './config';
 import { EthereumPrivateKeyProvider, } from "@web3auth/ethereum-provider";
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from '@web3auth/base';

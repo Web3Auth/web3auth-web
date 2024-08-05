@@ -10,20 +10,23 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
     "@toruslabs/vue-components": "^7.8.3",
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/base": "^8.8.0",
+    "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
-    "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
+    "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
+    "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
+    "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
+    "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
     "vue": "^3.4.31",
-    "vue-i18n": "^9.13.1"
+    "vue-i18n": "^9.13.1",
+    "web3": "^4.11.1"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^3.3.1",
     "@vitejs/plugin-vue": "^5.0.5",
-    "typescript-eslint": "^7.18.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.54.0",
     "globals": "^15.8.0",
@@ -31,6 +34,7 @@
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.7",
     "typescript": "^5.2.2",
+    "typescript-eslint": "^7.18.0",
     "vite": "^5.3.4",
     "vue-tsc": "^2.0.24"
   }

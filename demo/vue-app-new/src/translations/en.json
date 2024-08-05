@@ -10,6 +10,21 @@
     "selectLoginProvider": "Select a login provider",
     "selectAdapters": "Select an external wallet",
     "greeting": "Let's configure Web3Auth!",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "selectChainNamespace": "Select a chain namespace",
+    "appName": "App Name",
+    "appUrl": "App URL",
+    "defaultLanguage": "Default Language",
+    "logoLight": "Light Logo",
+    "logoDark": "Dark Logo",
+    "useLogoLoader": "Use Logo Loader",
+    "primaryColor": "Primary Color",
+    "onPrimaryColor": "On Primary Color",
+    "w3aStatus": "Web3Auth status ::::: {status}",
+    "isConnected": "Is connected ::::: {isConnected}",
+    "isInitialized": "Is initialized ::::: {isInitialized}",
+    "buttons": {
+      "btnGetAccounts": "Get Accounts"
+    }
   }
 }

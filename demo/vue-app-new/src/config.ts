@@ -1,6 +1,5 @@
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
-import { WhiteLabelData, LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
-
+import { WhiteLabelData, LOGIN_PROVIDER, LANGUAGES, LANGUAGE_TYPE } from "@toruslabs/openlogin-utils";
 export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
@@ -79,3 +78,16 @@ export const initWhiteLabel: WhiteLabelData = {
 export const loginProviderOptions = Object.values(LOGIN_PROVIDER)
   .filter((x) => x !== "jwt" && x !== "webauthn")
   .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
+
+export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
+  { name: "English", value: LANGUAGES.en },
+  { name: "German", value: LANGUAGES.de },
+  { name: "Japanese", value: LANGUAGES.ja },
+  { name: "Korean", value: LANGUAGES.ko },
+  { name: "Mandarin", value: LANGUAGES.zh },
+  { name: "Spanish", value: LANGUAGES.es },
+  { name: "French", value: LANGUAGES.fr },
+  { name: "Portuguese", value: LANGUAGES.pt },
+  { name: "Dutch", value: LANGUAGES.nl },
+  { name: "Turkish", value: LANGUAGES.tr },
+];
