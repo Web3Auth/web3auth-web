@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/solana-provider",
-  "version": "8.12.0",
+  "version": "8.12.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/solanaProvider.cjs.js",
