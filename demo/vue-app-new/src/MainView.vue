@@ -209,8 +209,6 @@ const formConfig = {
       pill: true,
     },
     ["btnnGetBalance"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -218,8 +216,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSendEth"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -227,8 +223,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSignEthMessage"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -236,8 +230,6 @@ const formConfig = {
       pill: true,
     },
     ["btnGetConnectedChainId"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -245,8 +237,6 @@ const formConfig = {
       pill: true,
     },
     ["btnAddChain"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -254,8 +244,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSwitchChain"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]]',
       type: 'button',
       block: true,
@@ -263,8 +251,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSignAndSendTransaction"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -272,8 +258,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSignTransaction"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -281,8 +265,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSignMessage"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
@@ -290,8 +272,6 @@ const formConfig = {
       pill: true,
     },
     ["btnSignAllTransactions"]: {
-      label: t('app.buttons.xxx'),
-      ariaLabel: t('app.buttons.xxx'),
       class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
       type: 'button',
       block: true,
