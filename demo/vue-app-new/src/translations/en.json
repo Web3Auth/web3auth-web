@@ -1,0 +1,40 @@
+{
+  "app": {
+    "title": "Web3Auth Web Vue Demo",
+    "description": "This is a demo of Web3Auth in a Vue.js app.",
+    "logout": "Logout",
+    "selectAuthMode": "Select an authentication method",
+    "selectPlugin": "Select a plugin",
+    "selectNetwork": "Select a network",
+    "selectChain": "Select a chain",
+    "selectLoginProvider": "Select a login provider",
+    "selectAdapters": "Select an external wallet",
+    "greeting": "Let's configure Web3Auth!",
+    "whiteLabel": "White Label",
+    "selectChainNamespace": "Select a chain namespace",
+    "appName": "App Name",
+    "appUrl": "App URL",
+    "defaultLanguage": "Default Language",
+    "logoLight": "Light Logo",
+    "logoDark": "Dark Logo",
+    "useLogoLoader": "Use Logo Loader",
+    "primaryColor": "Primary Color",
+    "onPrimaryColor": "On Primary Color",
+    "w3aStatus": "Web3Auth status ::::: {status}",
+    "isConnected": "Is connected ::::: {isConnected}",
+    "isInitialized": "Is initialized ::::: {isInitialized}",
+    "buttons": {
+      "btnGetAccounts": "Get Accounts",
+      "btnGetBalance": "Get Balance",
+      "btnSendEth": "Send ETH",
+      "btnSignEthMessage": "Sign ETH Message",
+      "btnGetConnectedChainId": "Get Connected Chain ID",
+      "btnAddChain": "Add Chain",
+      "btnSwitchChain": "Switch Chain",
+      "btnSignAndSendTransaction": "Sign and Send Transaction",
+      "btnSignTransaction": "Sign Transaction",
+      "btnSignMessage": "Sign Message",
+      "btnSignAllTransactions": "Sign All Transactions"
+    }
+  }
+}

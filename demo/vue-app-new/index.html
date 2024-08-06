@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script type="module">
+      import { Buffer } from "buffer";
+      import process from "process";
+      // window.global ||= window;
+      window.Buffer = Buffer;
+      window.process = process;
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web3Auth demo</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>
+        We're sorry but this app doesn't work properly without JavaScript enabled. Please enable it to continue.
+      </strong>
+    </noscript>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
