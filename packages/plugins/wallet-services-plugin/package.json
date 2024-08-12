@@ -30,7 +30,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^5.10.0",
+    "@toruslabs/ethereum-controllers": "^5.10.1",
     "@toruslabs/openlogin-utils": "^8.2.1"
   },
   "dependencies": {
