@@ -1,6 +1,5 @@
-import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 import bs58 from "bs58";
 

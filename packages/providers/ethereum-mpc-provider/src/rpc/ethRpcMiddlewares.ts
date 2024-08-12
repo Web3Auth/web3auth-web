@@ -1,5 +1,4 @@
-import { rpcErrors } from "@metamask/rpc-errors";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@toruslabs/openlogin-jrpc";
 
 import { IAccountHandlers } from "./interfaces";
 

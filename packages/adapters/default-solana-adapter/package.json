@@ -21,7 +21,7 @@
   "dependencies": {
     "@solana/wallet-standard-features": "^1.2.0",
     "@solana/web3.js": "^1.95.2",
-    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@toruslabs/openlogin-jrpc": "^8.3.0",
     "@wallet-standard/app": "^1.0.1",
     "@wallet-standard/base": "^1.0.1",
     "@wallet-standard/features": "^1.0.3",

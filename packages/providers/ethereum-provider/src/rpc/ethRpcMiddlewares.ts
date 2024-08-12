@@ -1,4 +1,3 @@
-import { rpcErrors } from "@metamask/rpc-errors";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,
@@ -6,6 +5,7 @@ import {
   JRPCRequest,
   JRPCResponse,
   mergeMiddleware,
+  rpcErrors,
 } from "@toruslabs/openlogin-jrpc";
 
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";

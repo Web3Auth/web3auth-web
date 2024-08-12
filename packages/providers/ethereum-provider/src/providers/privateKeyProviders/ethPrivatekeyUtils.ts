@@ -1,8 +1,7 @@
 import { privateToAddress } from "@ethereumjs/util";
 import { type MessageTypes, personalSign, signTypedData, type TypedDataV1, type TypedMessage } from "@metamask/eth-sig-util";
-import { providerErrors } from "@metamask/rpc-errors";
 import { signMessage } from "@toruslabs/base-controllers";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";

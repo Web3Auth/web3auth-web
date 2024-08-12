@@ -30,11 +30,8 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@metamask/rpc-errors": "6.2.1"
-  },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@toruslabs/openlogin-jrpc": "^8.3.0",
     "@toruslabs/solana-embed": "^2.1.0",
     "@web3auth/base": "^8.12.0",
     "@web3auth/no-modal": "^8.12.0",
