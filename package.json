@@ -32,7 +32,7 @@
     "@babel/register": "^7.24.6",
     "@toruslabs/config": "^2.1.1",
     "@toruslabs/eslint-config-typescript": "^3.3.3",
-    "@toruslabs/torus-scripts": "^5.3.1",
+    "@toruslabs/torus-scripts": "^6.1.1",
     "@types/chai": "^4.3.17",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20",
