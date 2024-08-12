@@ -7,9 +7,8 @@ import {
   type TypedMessage,
   typedSignatureHash,
 } from "@metamask/eth-sig-util";
-import { providerErrors } from "@metamask/rpc-errors";
 import { concatSig } from "@toruslabs/base-controllers";
-import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth/base";
 import {
   IProviderHandlers,
