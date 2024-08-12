@@ -1,5 +1,5 @@
 import { isValidAddress } from "@ethereumjs/util";
-import type { MessageTypeProperty, TypedDataV1Field, TypedMessage } from "@metamask/eth-sig-util";
+import { type MessageTypeProperty, TYPED_MESSAGE_SCHEMA, type TypedDataV1Field, type TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { rpcErrors } from "@metamask/rpc-errors";
 import { get } from "@toruslabs/http-helpers";
 import { isHexStrict } from "@web3auth/base";
@@ -73,7 +73,7 @@ export const validateTypedMessageParams = async (parameters: TypedMessageParams<
     );
     let data: unknown = null;
     let chainId = null;
-    const { typedSignatureHash, TYPED_MESSAGE_SCHEMA } = await import("@metamask/eth-sig-util");
+
     switch ((parameters as TypedMessageParams<unknown>).version) {
       case SignTypedDataVersion.V1:
         if (typeof parameters.data === "string") {
