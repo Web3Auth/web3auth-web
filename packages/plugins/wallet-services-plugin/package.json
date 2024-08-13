@@ -30,14 +30,14 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^5.10.0",
+    "@toruslabs/ethereum-controllers": "^5.10.1",
     "@toruslabs/openlogin-utils": "^8.2.1"
   },
   "dependencies": {
     "@toruslabs/openlogin-jrpc": "^8.3.0",
     "@web3auth/base": "^8.12.0",
     "@web3auth/no-modal": "^8.12.0",
-    "@web3auth/ws-embed": "^2.0.20",
+    "@web3auth/ws-embed": "^2.0.21",
     "loglevel": "^1.9.1"
   },
   "peerDependencies": {
