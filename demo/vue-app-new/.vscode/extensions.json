@@ -1,3 +1,5 @@
 {
-  "recommendations": ["Vue.volar"]
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  }
 }

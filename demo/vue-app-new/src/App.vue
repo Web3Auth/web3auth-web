@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import Web3AuthProvider, { Web3AuthContextConfig, } from '@web3auth/modal-vue-composables'
-import Main from './MainView.vue';
-import { chainOptions } from './config';
-import { EthereumPrivateKeyProvider, } from "@web3auth/ethereum-provider";
-import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from '@web3auth/base';
+import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
+import Web3AuthProvider, { Web3AuthContextConfig } from "@web3auth/modal-vue-composables";
+import { computed } from "vue";
+
+import { chainOptions } from "./config";
+import Main from "./MainView.vue";
 
 const w3AOptions = computed((): Web3AuthContextConfig => {
   const ethereumPrivateKeyProvider = new EthereumPrivateKeyProvider({
@@ -23,12 +24,11 @@ const w3AOptions = computed((): Web3AuthContextConfig => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     // uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
-  }
+  };
   return {
-    web3AuthOptions: options
-  }
-})
-
+    web3AuthOptions: options,
+  };
+});
 </script>
 
 <template>

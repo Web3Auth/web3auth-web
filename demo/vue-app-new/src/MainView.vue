@@ -1,34 +1,54 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useI18n } from "vue-i18n";
-const { t } = useI18n({ useScope: "global" });
-import { Button, Card, Select, Toggle, TextField, ExpansionPanel } from '@toruslabs/vue-components';
+import { LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { Button, Card, ExpansionPanel, Select, TextField, Toggle } from "@toruslabs/vue-components";
 import {
-  WhiteLabelData,
-  LOGIN_PROVIDER_TYPE,
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  IBaseProvider,
+  IProvider,
   storageAvailable,
-} from "@toruslabs/openlogin-utils";
-import { Web3AuthOptions, Web3Auth } from "@web3auth/modal";
-import { CHAIN_NAMESPACES, ChainNamespaceType, IBaseProvider, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, WALLET_ADAPTERS, IProvider } from "@web3auth/base";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
-import { chainNamespaceOptions, chainOptions, clientIds, initWhiteLabel, networkOptions, loginProviderOptions, languageOptions } from './config';
-import { useWeb3Auth } from '@web3auth/modal-vue-composables';
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+  WALLET_ADAPTERS,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+} from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { PhantomAdapter } from "@web3auth/phantom-adapter";
+import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { computed, ref, watch, InputHTMLAttributes } from "vue";
+import { useI18n } from "vue-i18n";
 
-const { web3Auth, isConnected, connect, isInitialized, initModal, logout, status, provider, isMFAEnabled, userInfo, enableMFA: w3EnableMFA, switchChain, addAndSwitchChain, } = useWeb3Auth()
-import { sendEth, signTransaction, signEthMessage, getAccounts, getChainId, getBalance } from './lib/eth';
-import { signAndSendTransaction, signMessage, signAllTransactions } from './lib/sol';
+import { chainNamespaceOptions, chainOptions, clientIds, initWhiteLabel, languageOptions, loginProviderOptions, networkOptions } from "./config";
+import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "./lib/eth";
+import { signAllTransactions, signAndSendTransaction, signMessage } from "./lib/sol";
+
+const { t } = useI18n({ useScope: "global" });
+
+const {
+  web3Auth,
+  isConnected,
+  connect,
+  isInitialized,
+  initModal,
+  logout,
+  status,
+  provider,
+  userInfo,
+  enableMFA: w3EnableMFA,
+  switchChain,
+  addAndSwitchChain,
+} = useWeb3Auth();
 
 const plugins = [
   { name: "wallet-services-plugin", value: "wallet-services-plugin" },
-  { name: "solana-wallet-connector-plugin", value: "solana-wallet-connector-plugin" }
-]
+  { name: "solana-wallet-connector-plugin", value: "solana-wallet-connector-plugin" },
+];
 
 const adapters = [
   { name: "coinbase-adapter", value: "coinbase" },
@@ -38,8 +58,7 @@ const adapters = [
   { name: "torus-evm-adapter", value: "torus-evm" },
   { name: "torus-solana-adapter", value: "torus-solana" },
   { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-]
-
+];
 
 type FormData = {
   // authMode: string;
@@ -53,7 +72,6 @@ type FormData = {
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
   plugins: string[];
-
 };
 
 const formData = ref<FormData>({
@@ -68,7 +86,6 @@ const formData = ref<FormData>({
   loginProviders: [],
   adapters: [],
   plugins: [],
-
 });
 
 const formConfig = {
@@ -83,209 +100,207 @@ const formConfig = {
   //   ],
   //   class: 'max-w-xs w-80'
   // },
-  ["network"]: {
-    label: t('app.selectNetwork'),
-    ariaLabel: t('app.selectNetwork'),
-    placeholder: t('app.selectNetwork'),
+  network: {
+    label: t("app.selectNetwork"),
+    ariaLabel: t("app.selectNetwork"),
+    placeholder: t("app.selectNetwork"),
     options: networkOptions,
-    class: 'max-w-xs w-80'
+    class: "max-w-xs w-80",
   },
-  ["chainNamespace"]: {
-    label: t('app.selectChainNamespace'),
-    ariaLabel: t('app.selectChainNamespace'),
-    placeholder: t('app.selectChainNamespace'),
+  chainNamespace: {
+    label: t("app.selectChainNamespace"),
+    ariaLabel: t("app.selectChainNamespace"),
+    placeholder: t("app.selectChainNamespace"),
     options: chainNamespaceOptions,
-    class: 'max-w-xs w-80'
+    class: "max-w-xs w-80",
   },
-  ["chain"]: {
-    label: t('app.selectChain'),
-    ariaLabel: t('app.selectChain'),
-    placeholder: t('app.selectChain'),
-    class: 'max-w-xs w-80'
+  chain: {
+    label: t("app.selectChain"),
+    ariaLabel: t("app.selectChain"),
+    placeholder: t("app.selectChain"),
+    class: "max-w-xs w-80",
   },
-  ["whiteLabel"]: {
+  whiteLabel: {
     enable: {
       showLabel: true,
-      size: 'small' as "small" | "large" | "medium",
-      labelEnabled: t('app.whiteLabel'),
-      labelDisabled: t('app.whiteLabel'),
-      class: 'max-w-xs w-80',
+      size: "small" as "small" | "large" | "medium",
+      labelEnabled: t("app.whiteLabel"),
+      labelDisabled: t("app.whiteLabel"),
+      class: "max-w-xs w-80",
     },
     panel: {
       borderRadiusTop: false,
       borderRadiusBottom: false,
       flushedPanel: false,
       showArrowIcon: false,
-      class: 'col-span-1 sm:col-span-2 max-w-xs w-80 sm:w-max sm:max-w-max'
+      class: "col-span-1 sm:col-span-2 max-w-xs w-80 sm:w-max sm:max-w-max",
     },
     appName: {
-      label: t('app.appName'),
-      ariaLabel: t('app.appName'),
-      placeholder: t('app.appName'),
-      class: 'max-w-xs col-span-1'
+      label: t("app.appName"),
+      ariaLabel: t("app.appName"),
+      placeholder: t("app.appName"),
+      class: "max-w-xs col-span-1",
     },
     appUrl: {
-      label: t('app.appUrl'),
-      ariaLabel: t('app.appUrl'),
-      placeholder: t('app.appUrl'),
-      class: 'max-w-xs col-span-1'
+      label: t("app.appUrl"),
+      ariaLabel: t("app.appUrl"),
+      placeholder: t("app.appUrl"),
+      class: "max-w-xs col-span-1",
     },
     defaultLanguage: {
-      label: t('app.defaultLanguage'),
-      ariaLabel: t('app.defaultLanguage'),
-      placeholder: t('app.defaultLanguage'),
+      label: t("app.defaultLanguage"),
+      ariaLabel: t("app.defaultLanguage"),
+      placeholder: t("app.defaultLanguage"),
       options: languageOptions,
-      class: 'max-w-xs'
+      class: "max-w-xs",
     },
     logoLight: {
-      label: t('app.logoLight'),
-      ariaLabel: t('app.logoLight'),
-      placeholder: t('app.logoLight'),
-      class: 'max-w-xs'
+      label: t("app.logoLight"),
+      ariaLabel: t("app.logoLight"),
+      placeholder: t("app.logoLight"),
+      class: "max-w-xs",
     },
     logoDark: {
-      label: t('app.logoDark'),
-      ariaLabel: t('app.logoDark'),
-      placeholder: t('app.logoDark'),
-      class: 'max-w-xs'
+      label: t("app.logoDark"),
+      ariaLabel: t("app.logoDark"),
+      placeholder: t("app.logoDark"),
+      class: "max-w-xs",
     },
     useLogoLoader: {
       showLabel: true,
-      size: 'small' as "small" | "large" | "medium",
-      labelEnabled: t('app.useLogoLoader'),
-      labelDisabled: t('app.useLogoLoader'),
-      class: 'max-w-xs',
+      size: "small" as "small" | "large" | "medium",
+      labelEnabled: t("app.useLogoLoader"),
+      labelDisabled: t("app.useLogoLoader"),
+      class: "max-w-xs",
     },
 
     primaryColor: {
-      label: t('app.primaryColor'),
-      ariaLabel: t('app.primaryColor'),
-      placeholder: t('app.primaryColor'),
-      class: 'max-w-xs'
+      label: t("app.primaryColor"),
+      ariaLabel: t("app.primaryColor"),
+      placeholder: t("app.primaryColor"),
+      class: "max-w-xs",
     },
     onPrimaryColor: {
-      label: t('app.onPrimaryColor'),
-      ariaLabel: t('app.onPrimaryColor'),
-      placeholder: t('app.onPrimaryColor'),
-      class: 'max-w-xs'
+      label: t("app.onPrimaryColor"),
+      ariaLabel: t("app.onPrimaryColor"),
+      placeholder: t("app.onPrimaryColor"),
+      class: "max-w-xs",
     },
-
   },
-  ["loginProviders"]: {
-    label: t('app.selectLoginProvider'),
-    ariaLabel: t('app.selectLoginProvider'),
-    placeholder: t('app.selectLoginProvider'),
+  loginProviders: {
+    label: t("app.selectLoginProvider"),
+    ariaLabel: t("app.selectLoginProvider"),
+    placeholder: t("app.selectLoginProvider"),
     options: loginProviderOptions,
     multiple: true,
     showCheckBox: true,
-    class: 'max-w-xs w-80'
+    class: "max-w-xs w-80",
   },
-  ["adapters"]: {
-    label: t('app.selectAdapters'),
-    ariaLabel: t('app.selectAdapters'),
-    placeholder: t('app.selectAdapters'),
+  adapters: {
+    label: t("app.selectAdapters"),
+    ariaLabel: t("app.selectAdapters"),
+    placeholder: t("app.selectAdapters"),
     options: adapters,
     multiple: true,
     showCheckBox: true,
-    class: 'max-w-xs w-80'
+    class: "max-w-xs w-80",
   },
-  ["plugins"]: {
-    label: t('app.selectPlugin'),
-    ariaLabel: t('app.selectPlugin'),
-    placeholder: t('app.selectPlugin'),
+  plugins: {
+    label: t("app.selectPlugin"),
+    ariaLabel: t("app.selectPlugin"),
+    placeholder: t("app.selectPlugin"),
     options: plugins,
-    class: 'max-w-xs w-80',
+    class: "max-w-xs w-80",
     multiple: true,
-    showCheckBox: true
+    showCheckBox: true,
   },
-  ["buttons"]: {
+  buttons: {
     btnGetAccounts: {
-      label: t('app.buttons.btnGetAccounts'),
-      ariaLabel: t('app.buttons.btnGetAccounts'),
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+      label: t("app.buttons.btnGetAccounts"),
+      ariaLabel: t("app.buttons.btnGetAccounts"),
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnnGetBalance"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnnGetBalance: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSendEth"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSendEth: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSignEthMessage"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSignEthMessage: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnGetConnectedChainId"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnGetConnectedChainId: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnAddChain"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnAddChain: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSwitchChain"]: {
-      class: '[[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]]',
-      type: 'button',
+    btnSwitchChain: {
+      class: "[[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSignAndSendTransaction"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSignAndSendTransaction: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSignTransaction"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSignTransaction: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSignMessage"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSignMessage: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
-    ["btnSignAllTransactions"]: {
-      class: '[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]',
-      type: 'button',
+    btnSignAllTransactions: {
+      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
+      type: "button",
       block: true,
-      size: 'md',
+      size: "md",
       pill: true,
     },
   },
-}
+};
 
-const chainIdOptions = ref<{ name: string, value: string }[]>([])
+const chainIdOptions = ref<{ name: string; value: string }[]>([]);
 
 // Populate the private key provider based on the chain selected
-const privateKeyProvider = computed((): IBaseProvider<string> => {
-
+const privateKeyProvider = computed((): IBaseProvider<string> | null => {
   const chainConfig = chainOptions[formData.value.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.value.chain);
   if (!chainConfig) return null;
 
@@ -293,13 +308,13 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
     case CHAIN_NAMESPACES.EIP155:
       return new EthereumPrivateKeyProvider({
         config: {
-          chainConfig
+          chainConfig,
         },
       });
     case CHAIN_NAMESPACES.SOLANA:
       return new SolanaPrivateKeyProvider({
         config: {
-          chainConfig
+          chainConfig,
         },
       });
     default:
@@ -309,7 +324,9 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
 
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
-  const { whiteLabel: { config: whiteLabel, enable: enabledWhiteLabel } } = formData.value;
+  const {
+    whiteLabel: { config: whiteLabel, enable: enabledWhiteLabel },
+  } = formData.value;
   return {
     clientId: clientIds[formData.value.network],
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
@@ -322,22 +339,21 @@ const options = computed((): Web3AuthOptions => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     // enableLogging: true,
-  }
-})
+  };
+});
 
 const modalParams = computed(() => {
-
   const excludedProviders = loginProviderOptions.filter((x) => !formData.value.loginProviders.includes(x.value)).map((x) => x.value);
 
   const modalConfig = {
     [WALLET_ADAPTERS.OPENLOGIN]: {
       label: "openlogin",
-      loginMethods: Object.fromEntries(excludedProviders.map((x) => ([x, { name: `${x} login`, showOnModal: false }]))),
-    }
-  }
+      loginMethods: Object.fromEntries(excludedProviders.map((x) => [x, { name: `${x} login`, showOnModal: false }])),
+    },
+  };
   console.log("modalConfig", modalConfig);
   return { modalConfig };
-})
+});
 
 const getExternalAdapterByName = (name: string) => {
   switch (name) {
@@ -395,27 +411,32 @@ const getExternalAdapterByName = (name: string) => {
           ticker: "sol",
           tickerName: "solana",
         },
-      })
+      });
     default:
       return null;
   }
-}
+};
 
-// Init the web3Auth object 
+// Init the web3Auth object
 const init = async () => {
-  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({ name: `${x.chainId} ${x.tickerName}`, value: x.chainId }))
-  if (storageAvailable("sessionStorage") && sessionStorage.getItem("state"))
-    formData.value = JSON.parse(sessionStorage.getItem("state") as string);
+  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({
+    name: `${x.chainId} ${x.tickerName}`,
+    value: x.chainId,
+  }));
+  if (storageAvailable("sessionStorage") && sessionStorage.getItem("state")) formData.value = JSON.parse(sessionStorage.getItem("state") as string);
   if (!isInitialized) await initModal(modalParams.value);
-}
-init()
+};
+init();
 
 // Every time the form data changes, reinitialize the web3Auth object
 watch(formData.value, async () => {
-  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({ name: `${x.chainId} ${x.tickerName}`, value: x.chainId }))
-  if (!chainIdOptions.value.find(option => option.value == formData.value.chain)) formData.value.chain = chainIdOptions.value[0]?.value
+  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({
+    name: `${x.chainId} ${x.tickerName}`,
+    value: x.chainId,
+  }));
+  if (!chainIdOptions.value.find((option) => option.value == formData.value.chain)) formData.value.chain = chainIdOptions.value[0]?.value;
   if (storageAvailable("sessionStorage")) sessionStorage.setItem("state", JSON.stringify(formData.value));
-  web3Auth.value?.clearCache()
+  web3Auth.value?.clearCache();
   web3Auth.value = new Web3Auth(options.value);
 
   for (const adapter of formData.value.adapters) {
@@ -428,11 +449,11 @@ watch(formData.value, async () => {
 
 watch(status, () => {
   console.log("status :::::::::::::::::::::::::::", status.value);
-})
+});
 
 const enableMFA = async () => {
   await w3EnableMFA();
-}
+};
 
 const getUserInfo = async () => {
   printToConsole("User Info", userInfo);
@@ -470,25 +491,26 @@ const clearConsole = () => {
 
 const onSendEth = async () => {
   await sendEth(provider.value as IProvider, printToConsole);
-}
+};
 
 const onSignEthMessage = async () => {
   await signEthMessage(provider.value as IProvider, printToConsole);
-}
+};
 
 const onGetAccounts = async () => {
   await getAccounts(provider.value as IProvider, printToConsole);
-}
+};
 
 const getConnectedChainId = async () => {
   await getChainId(provider.value as IProvider, printToConsole);
-}
+};
 
 const onGetBalance = async () => {
   await getBalance(provider.value as IProvider, printToConsole);
-}
+};
 
 const onSwitchChain = async () => {
+  console.log("switching chain");
   try {
     await switchChain({ chainId: "0x89" });
     printToConsole("switchedChain");
@@ -496,7 +518,7 @@ const onSwitchChain = async () => {
     console.error("error while switching chain", error);
     printToConsole("switchedChain error", error);
   }
-}
+};
 
 const onAddChain = async () => {
   try {
@@ -514,25 +536,23 @@ const onAddChain = async () => {
     console.error("error while adding chain", error);
     printToConsole("add chain error", error);
   }
-}
+};
 
 const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
-}
+};
 
 const onSignTransaction = async () => {
   await signTransaction(provider.value as IProvider, printToConsole);
-}
+};
 
 const onSignMessage = async () => {
   await signMessage(provider.value as IProvider, printToConsole);
-}
+};
 
 const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
-}
-
-
+};
 </script>
 
 <template>
@@ -542,13 +562,14 @@ const onSignAllTransactions = async () => {
         <img :src="`/web3auth.svg`" class="h-8" alt="W3A Logo" />
       </a>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <Button v-if="isConnected" @click="() => logout()"
-          v-bind="{ block: true, size: 'xs', pill: true, variant: 'secondary' }">{{ $t("app.logout") }}</Button>
+        <Button v-if="isConnected" v-bind="{ block: true, size: 'xs', pill: true, variant: 'secondary' }" @click="() => logout()">
+          {{ $t("app.logout") }}
+        </Button>
       </div>
       <div id="navbar-sticky" class="items-center justify-between w-full md:flex md:w-auto md:order-1">
         <div v-if="isConnected" class="max-sm:w-full">
           <h1 class="leading-tight text-3xl font-extrabold">{{ $t("app.title") }}</h1>
-          <p class="leading-tight text-1xl">{{ $t("app.description") }} </p>
+          <p class="leading-tight text-1xl">{{ $t("app.description") }}</p>
         </div>
       </div>
     </div>
@@ -559,70 +580,82 @@ const onSignAllTransactions = async () => {
         <div class="col-span-8 sm:col-span-6 lg:col-span-4 mx-auto">
           <div class="text-3xl font-bold leading-tight mb-5 text-center">{{ $t("app.greeting") }}</div>
 
-          <Card class="h-auto px-8 py-8 ">
+          <Card class="h-auto px-8 py-8">
             <div class="leading-tight text-2xl font-extrabold">{{ $t("app.w3aStatus", { status }) }}</div>
             <div class="text-app-gray-500 mt-2">{{ $t("app.isConnected", { isConnected }) }}</div>
             <div class="text-app-gray-500 mt-2">{{ $t("app.isInitialized", { isInitialized }) }}</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
-
               <!-- <Select v-model="formData.authMode" v-bind="formConfig['authMode']" /> -->
-              <Select v-model="formData.network" v-bind="formConfig['network']" />
-              <Select v-model="formData.chainNamespace" v-bind="formConfig['chainNamespace']" />
-              <Select v-model="formData.chain" v-bind="formConfig['chain']" :options="chainIdOptions" />
-              <Select v-model="formData.loginProviders" v-bind="formConfig['loginProviders']" />
+              <Select v-model="formData.network" v-bind="formConfig.network" />
+              <Select v-model="formData.chainNamespace" v-bind="formConfig.chainNamespace" />
+              <Select v-model="formData.chain" v-bind="formConfig.chain" :options="chainIdOptions" />
+              <Select v-model="formData.loginProviders" v-bind="formConfig.loginProviders" />
               <!-- <Select v-model="formData.plugins" v-bind="formConfig['plugins']" /> -->
-              <Select v-model="formData.adapters" v-bind="formConfig['adapters']" />
-              <ExpansionPanel v-bind="formConfig['whiteLabel'].panel" v-bind:expand="formData.whiteLabel.enable">
+              <Select v-model="formData.adapters" v-bind="formConfig.adapters" />
+              <ExpansionPanel v-bind="formConfig.whiteLabel.panel" :expand="formData.whiteLabel.enable">
                 <template #panelTitle>
-                  <Toggle v-model="formData.whiteLabel.enable" v-bind="formConfig['whiteLabel'].enable" />
+                  <Toggle v-model="formData.whiteLabel.enable" v-bind="formConfig.whiteLabel.enable" />
                 </template>
                 <template #panelBody>
-                  <div class=" grid grid-cols-1 sm:grid-cols-2">
-                    <TextField v-model="formData.whiteLabel.config.appName" v-bind="formConfig['whiteLabel'].appName" />
-                    <TextField v-model="formData.whiteLabel.config.appUrl" v-bind="formConfig['whiteLabel'].appUrl" />
-                    <Select v-model="formData.whiteLabel.config.defaultLanguage"
-                      v-bind="formConfig['whiteLabel'].defaultLanguage" />
-                    <TextField v-model="formData.whiteLabel.config.logoLight"
-                      v-bind="formConfig['whiteLabel'].logoLight" />
-                    <TextField v-model="formData.whiteLabel.config.logoDark"
-                      v-bind="formConfig['whiteLabel'].logoDark" />
-                    <Toggle id="useLogoLoader" v-bind="formConfig['whiteLabel'].useLogoLoader" />
-                    <TextField :model-value="formData.whiteLabel.config.theme?.primary"
-                      v-bind="formConfig['whiteLabel'].primaryColor">
+                  <div class="grid grid-cols-1 sm:grid-cols-2">
+                    <TextField v-model="formData.whiteLabel.config.appName" v-bind="formConfig.whiteLabel.appName" />
+                    <TextField v-model="formData.whiteLabel.config.appUrl" v-bind="formConfig.whiteLabel.appUrl" />
+                    <Select v-model="formData.whiteLabel.config.defaultLanguage" v-bind="formConfig.whiteLabel.defaultLanguage" />
+                    <TextField v-model="formData.whiteLabel.config.logoLight" v-bind="formConfig.whiteLabel.logoLight" />
+                    <TextField v-model="formData.whiteLabel.config.logoDark" v-bind="formConfig.whiteLabel.logoDark" />
+                    <Toggle id="useLogoLoader" v-bind="formConfig.whiteLabel.useLogoLoader" />
+                    <TextField :model-value="formData.whiteLabel.config.theme?.primary" v-bind="formConfig.whiteLabel.primaryColor">
                       <template #endIconSlot>
-                        <input id="primary-color-picker" class="color-picker" type="color"
-                          :value="formData.whiteLabel.config.theme?.primary" @input="(e) => {
-                            const color = (e.target as InputHTMLAttributes).value;
-                            formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, primary: color };
-                          }
-                            " />
+                        <input
+                          id="primary-color-picker"
+                          class="color-picker"
+                          type="color"
+                          :value="formData.whiteLabel.config.theme?.primary"
+                          @input="
+                            (e) => {
+                              const color = (e.target as InputHTMLAttributes).value;
+                              formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, primary: color };
+                            }
+                          "
+                        />
                       </template>
                     </TextField>
-                    <TextField :model-value="formData.whiteLabel.config.theme?.onPrimary"
-                      v-bind="formConfig['whiteLabel'].onPrimaryColor">
+                    <TextField :model-value="formData.whiteLabel.config.theme?.onPrimary" v-bind="formConfig.whiteLabel.onPrimaryColor">
                       <template #endIconSlot>
-                        <input id="primary-color-picker" class="color-picker" type="color"
-                          :value="formData.whiteLabel.config.theme?.onPrimary" @input="(e) => {
-                            const color = (e.target as InputHTMLAttributes).value;
-                            formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, onPrimary: color };
-                          }
-                            " />
+                        <input
+                          id="primary-color-picker"
+                          class="color-picker"
+                          type="color"
+                          :value="formData.whiteLabel.config.theme?.onPrimary"
+                          @input="
+                            (e) => {
+                              const color = (e.target as InputHTMLAttributes).value;
+                              formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, onPrimary: color };
+                            }
+                          "
+                        />
                       </template>
                     </TextField>
                   </div>
-
                 </template>
               </ExpansionPanel>
             </div>
             <div class="flex justify-center mt-5">
-              <Button :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
-                data-testid="loginButton" type="button" block size="md" pill @click="connect" :disabled="isConnected">
+              <Button
+                :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
+                data-testid="loginButton"
+                type="button"
+                block
+                size="md"
+                pill
+                :disabled="isConnected"
+                @click="connect"
+              >
                 Connect
               </Button>
             </div>
           </Card>
         </div>
-
       </div>
       <div v-else class="grid gap-0">
         <div class="grid grid-cols-8 gap-0">
@@ -632,60 +665,65 @@ const onSignAllTransactions = async () => {
               <p class="btn-label">User info</p>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnGetAccounts']" @click="onGetAccounts">
+              <Button :v-bind="formConfig.buttons.btnGetAccounts" @click="onGetAccounts">
                 {{ t("app.buttons.btnGetAccounts") }}
               </Button>
             </div>
             <div class="mb-2">
-
-              <Button :v-bind="formConfig['buttons']['btnnGetBalance']" @click="onGetBalance">
+              <Button :v-bind="formConfig.buttons.btnnGetBalance" @click="onGetBalance">
                 {{ t("app.buttons.btnGetBalance") }}
               </Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSendEth']" @click="onSendEth">{{
-                t("app.buttons.btnSendEth") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSendEth" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSignEthMessage']" @click="onSignEthMessage">{{
-                t("app.buttons.btnSignEthMessage") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSignEthMessage" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnGetConnectedChainId']" @click="getConnectedChainId">{{
-                t("app.buttons.btnGetConnectedChainId") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnGetConnectedChainId" @click="getConnectedChainId">
+                {{ t("app.buttons.btnGetConnectedChainId") }}
+              </Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnAddChain']" @click="onAddChain">{{
-                t("app.buttons.btnAddChain") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnAddChain" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSwitchChain']" @click="onSwitchChain">{{
-                t("app.buttons.btnSwitchChain") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSwitchChain" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSignAndSendTransaction']" @click="onSignAndSendTransaction">{{
-                t("app.buttons.btnSignAndSendTransaction") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSignAndSendTransaction" @click="onSignAndSendTransaction">
+                {{ t("app.buttons.btnSignAndSendTransaction") }}
+              </Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSignTransaction']" @click="onSignTransaction">{{
-                t("app.buttons.btnSignTransaction") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSignTransaction" @click="onSignTransaction">
+                {{ t("app.buttons.btnSignTransaction") }}
+              </Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSignMessage']" @click="onSignMessage">{{
-                t("app.buttons.btnSignMessage") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSignMessage" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig['buttons']['btnSignAllTransactions']" @click="onSignAllTransactions">{{
-                t("app.buttons.btnSignAllTransactions") }}</Button>
+              <Button :v-bind="formConfig.buttons.btnSignAllTransactions" @click="onSignAllTransactions">
+                {{ t("app.buttons.btnSignAllTransactions") }}
+              </Button>
             </div>
           </Card>
           <Card id="console" class="px-4 py-4 col-span-4 overflow-y-auto">
             <pre
-              class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen">
-      </pre>
+              class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"
+            ></pre>
             <div class="absolute top-2 right-8">
-              <Button :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']" type="button"
-                block size="md" pill @click="clearConsole" data-testid="btnClearConsole">
+              <Button
+                :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
+                type="button"
+                block
+                size="md"
+                pill
+                data-testid="btnClearConsole"
+                @click="clearConsole"
+              >
                 Clear console
               </Button>
             </div>

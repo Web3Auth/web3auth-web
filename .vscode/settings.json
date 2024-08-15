@@ -11,7 +11,10 @@
     {
       "directory": "demo/*",
       "changeProcessCWD": true
+    },
+    {
+      "directory": "demo/vue-app-new/",
+      "changeProcessCWD": true
     }
   ],
-  "cSpell.words": ["JRPC", "openlogin", "Solana"]
 }
