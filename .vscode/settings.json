@@ -11,10 +11,6 @@
     {
       "directory": "demo/*",
       "changeProcessCWD": true
-    },
-    {
-      "directory": "demo/vue-app-new/",
-      "changeProcessCWD": true
     }
   ],
 }
