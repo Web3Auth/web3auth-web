@@ -9,6 +9,15 @@ export const chainOptions: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.EIP155]: [
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://rpc.ankr.com/eth",
+      blockExplorerUrl: "https://etherscan.io",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+      chainId: "0x1",
+      ticker: "ETH",
+      tickerName: "Ethereum",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
       rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
       blockExplorerUrl: "https://testnet.bscscan.com",
       logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
@@ -16,15 +25,6 @@ export const chainOptions: Record<ChainNamespaceType, CustomChainConfig[]> = {
       displayName: "Binance SmartChain Testnet",
       ticker: "BNB",
       tickerName: "BNB",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc.ankr.com/eth",
-      blockExplorerUrl: "https://etherscan.io",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-      chainId: "0x1",
-      ticker: "ETH",
-      tickerName: "Ethereum",
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,

@@ -34,18 +34,13 @@ import {
   loginProviderOptions,
   networkOptions,
 } from "./config";
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "./lib/eth";
-import { signAllTransactions, signAndSendTransaction, signMessage } from "./lib/sol";
+import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "./services/ethHandlers";
+import { signAllTransactions, signAndSendTransaction, signMessage } from "./services/solHandlers";
 
 const { t } = useI18n({ useScope: "global" });
 const { log } = console;
 const { web3Auth, isConnected, connect, isInitialized, initModal, logout, status, provider, userInfo, enableMFA, switchChain, addAndSwitchChain } =
   useWeb3Auth();
-
-const plugins = [
-  { name: "wallet-services-plugin", value: "wallet-services-plugin" },
-  { name: "solana-wallet-connector-plugin", value: "solana-wallet-connector-plugin" },
-];
 
 const adapters = [
   { name: "coinbase-adapter", value: "coinbase" },
@@ -198,15 +193,7 @@ const getExternalAdapterByName = (name: string) => {
   }
 };
 
-// Init the web3Auth object
-const init = async () => {
-  if (storageAvailable("sessionStorage") && sessionStorage.getItem("state")) formData.value = JSON.parse(sessionStorage.getItem("state") as string);
-  if (!isInitialized) await initModal(modalParams.value);
-};
-init();
-
-// Every time the form data changes, reinitialize the web3Auth object
-watch(formData.value, async () => {
+const initWallet = async () => {
   if (!chainIdOptions.value.find((option) => option.value === formData.value.chain)) formData.value.chain = chainIdOptions.value[0]?.value;
   if (storageAvailable("sessionStorage")) sessionStorage.setItem("state", JSON.stringify(formData.value));
   web3Auth.value?.clearCache();
@@ -218,6 +205,17 @@ watch(formData.value, async () => {
   }
 
   await initModal(modalParams.value);
+};
+
+// Init the web3Auth object
+const init = async () => {
+  initWallet();
+};
+init();
+
+// Every time the form data changes, reinitialize the web3Auth object
+watch(formData.value, async () => {
+  initWallet();
 });
 
 watch(status, () => {
@@ -358,6 +356,9 @@ const isDisabled = (name: string): boolean => {
 
     case "solanaWalletServicePlugin":
       return formData.value.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
+
+    case "btnConnect":
+      return !isInitialized.value;
 
     default: {
       return false;
@@ -584,7 +585,7 @@ const onManageMFA = async () => {
               block
               size="md"
               pill
-              :disabled="isConnected"
+              :disabled="isDisabled('btnConnect')"
               @click="connect"
             >
               Connect
@@ -605,12 +606,12 @@ const onManageMFA = async () => {
           <Card class="px-4 py-4 gird col-span-2">
             <div class="mb-2">
               <Button block size="xs" pill variant="secondary" data-testid="btnClearConsole" @click="clearConsole">
-                {{ $t("app.btnClearConsole") }}
+                {{ $t("app.buttons.btnClearConsole") }}
               </Button>
             </div>
             <div class="mb-2">
               <Button block size="xs" pill @click="onGetUserInfo">
-                {{ $t("app.btnGetUserInfo") }}
+                {{ $t("app.buttons.btnGetUserInfo") }}
               </Button>
             </div>
             <Card class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">

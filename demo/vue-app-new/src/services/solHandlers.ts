@@ -11,7 +11,7 @@ const getConnection = async (provider: IProvider): Promise<Connection> => {
   return conn;
 };
 
-function getNewTx(publicKeys, blockhash) {
+function getNewTx(publicKeys: any, blockhash: any) {
   const inst = SystemProgram.transfer({
     fromPubkey: new PublicKey(publicKeys[0]),
     toPubkey: new PublicKey(publicKeys[0]),
