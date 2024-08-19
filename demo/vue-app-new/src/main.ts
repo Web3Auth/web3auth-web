@@ -1,8 +1,12 @@
+import "./style.css";
+
 import { createApp } from "vue";
 import { createI18n } from "vue-i18n";
 
-import vi from "./translations/vi.json";
+import App from "./App.vue";
+import createIcons from "./plugins/iconPlugin";
 import en from "./translations/en.json";
+import vi from "./translations/vi.json";
 
 const i18n = createI18n({
   locale: "en",
@@ -10,11 +14,6 @@ const i18n = createI18n({
   fallbackLocale: "en",
   messages: { vi, en },
 });
-
-import "./style.css";
-
-import App from "./App.vue";
-import createIcons from "./plugins/iconPlugin";
 
 const app = createApp(App);
 

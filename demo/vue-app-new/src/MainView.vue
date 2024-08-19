@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
-import { Button, Card, ExpansionPanel, Select, TextField, Toggle } from "@toruslabs/vue-components";
+import { Button, Card, Checkbox, Select, TextField, Toggle } from "@toruslabs/vue-components";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -21,29 +21,26 @@ import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { computed, ref, watch, InputHTMLAttributes } from "vue";
+import { computed, InputHTMLAttributes, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { chainNamespaceOptions, chainOptions, clientIds, initWhiteLabel, languageOptions, loginProviderOptions, networkOptions } from "./config";
+import {
+  chainNamespaceOptions,
+  chainOptions,
+  clientIds,
+  FormData,
+  initWhiteLabel,
+  languageOptions,
+  loginProviderOptions,
+  networkOptions,
+} from "./config";
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "./lib/eth";
 import { signAllTransactions, signAndSendTransaction, signMessage } from "./lib/sol";
 
 const { t } = useI18n({ useScope: "global" });
-
-const {
-  web3Auth,
-  isConnected,
-  connect,
-  isInitialized,
-  initModal,
-  logout,
-  status,
-  provider,
-  userInfo,
-  enableMFA: w3EnableMFA,
-  switchChain,
-  addAndSwitchChain,
-} = useWeb3Auth();
+const { log } = console;
+const { web3Auth, isConnected, connect, isInitialized, initModal, logout, status, provider, userInfo, enableMFA, switchChain, addAndSwitchChain } =
+  useWeb3Auth();
 
 const plugins = [
   { name: "wallet-services-plugin", value: "wallet-services-plugin" },
@@ -60,20 +57,6 @@ const adapters = [
   { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
 ];
 
-type FormData = {
-  // authMode: string;
-  network: WEB3AUTH_NETWORK_TYPE;
-  chainNamespace: ChainNamespaceType;
-  chain: string;
-  whiteLabel: {
-    enable: boolean;
-    config: WhiteLabelData;
-  };
-  loginProviders: LOGIN_PROVIDER_TYPE[];
-  adapters: string[];
-  plugins: string[];
-};
-
 const formData = ref<FormData>({
   // authMode: "",
   network: WEB3AUTH_NETWORK.TESTNET,
@@ -85,219 +68,17 @@ const formData = ref<FormData>({
   },
   loginProviders: [],
   adapters: [],
-  plugins: [],
+  walletServicePlugin: false,
+  solanaWalletServicePlugin: false,
 });
 
-const formConfig = {
-  // ["authMode"]: {
-  //   ["data-testid"]: "authMode",
-  //   label: t('app.selectAuthMode'),
-  //   ariaLabel: t('app.selectAuthMode'),
-  //   placeholder: t('app.selectAuthMode'),
-  //   options: [
-  //     { name: "hosted", value: "hosted" },
-  //     { name: "ownAuth", value: "ownAuth" }
-  //   ],
-  //   class: 'max-w-xs w-80'
-  // },
-  network: {
-    label: t("app.selectNetwork"),
-    ariaLabel: t("app.selectNetwork"),
-    placeholder: t("app.selectNetwork"),
-    options: networkOptions,
-    class: "max-w-xs w-80",
-  },
-  chainNamespace: {
-    label: t("app.selectChainNamespace"),
-    ariaLabel: t("app.selectChainNamespace"),
-    placeholder: t("app.selectChainNamespace"),
-    options: chainNamespaceOptions,
-    class: "max-w-xs w-80",
-  },
-  chain: {
-    label: t("app.selectChain"),
-    ariaLabel: t("app.selectChain"),
-    placeholder: t("app.selectChain"),
-    class: "max-w-xs w-80",
-  },
-  whiteLabel: {
-    enable: {
-      showLabel: true,
-      size: "small" as "small" | "large" | "medium",
-      labelEnabled: t("app.whiteLabel"),
-      labelDisabled: t("app.whiteLabel"),
-      class: "max-w-xs w-80",
-    },
-    panel: {
-      borderRadiusTop: false,
-      borderRadiusBottom: false,
-      flushedPanel: false,
-      showArrowIcon: false,
-      class: "col-span-1 sm:col-span-2 max-w-xs w-80 sm:w-max sm:max-w-max",
-    },
-    appName: {
-      label: t("app.appName"),
-      ariaLabel: t("app.appName"),
-      placeholder: t("app.appName"),
-      class: "max-w-xs col-span-1",
-    },
-    appUrl: {
-      label: t("app.appUrl"),
-      ariaLabel: t("app.appUrl"),
-      placeholder: t("app.appUrl"),
-      class: "max-w-xs col-span-1",
-    },
-    defaultLanguage: {
-      label: t("app.defaultLanguage"),
-      ariaLabel: t("app.defaultLanguage"),
-      placeholder: t("app.defaultLanguage"),
-      options: languageOptions,
-      class: "max-w-xs",
-    },
-    logoLight: {
-      label: t("app.logoLight"),
-      ariaLabel: t("app.logoLight"),
-      placeholder: t("app.logoLight"),
-      class: "max-w-xs",
-    },
-    logoDark: {
-      label: t("app.logoDark"),
-      ariaLabel: t("app.logoDark"),
-      placeholder: t("app.logoDark"),
-      class: "max-w-xs",
-    },
-    useLogoLoader: {
-      showLabel: true,
-      size: "small" as "small" | "large" | "medium",
-      labelEnabled: t("app.useLogoLoader"),
-      labelDisabled: t("app.useLogoLoader"),
-      class: "max-w-xs",
-    },
-
-    primaryColor: {
-      label: t("app.primaryColor"),
-      ariaLabel: t("app.primaryColor"),
-      placeholder: t("app.primaryColor"),
-      class: "max-w-xs",
-    },
-    onPrimaryColor: {
-      label: t("app.onPrimaryColor"),
-      ariaLabel: t("app.onPrimaryColor"),
-      placeholder: t("app.onPrimaryColor"),
-      class: "max-w-xs",
-    },
-  },
-  loginProviders: {
-    label: t("app.selectLoginProvider"),
-    ariaLabel: t("app.selectLoginProvider"),
-    placeholder: t("app.selectLoginProvider"),
-    options: loginProviderOptions,
-    multiple: true,
-    showCheckBox: true,
-    class: "max-w-xs w-80",
-  },
-  adapters: {
-    label: t("app.selectAdapters"),
-    ariaLabel: t("app.selectAdapters"),
-    placeholder: t("app.selectAdapters"),
-    options: adapters,
-    multiple: true,
-    showCheckBox: true,
-    class: "max-w-xs w-80",
-  },
-  plugins: {
-    label: t("app.selectPlugin"),
-    ariaLabel: t("app.selectPlugin"),
-    placeholder: t("app.selectPlugin"),
-    options: plugins,
-    class: "max-w-xs w-80",
-    multiple: true,
-    showCheckBox: true,
-  },
-  buttons: {
-    btnGetAccounts: {
-      label: t("app.buttons.btnGetAccounts"),
-      ariaLabel: t("app.buttons.btnGetAccounts"),
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnnGetBalance: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSendEth: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSignEthMessage: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnGetConnectedChainId: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnAddChain: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSwitchChain: {
-      class: "[[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSignAndSendTransaction: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSignTransaction: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSignMessage: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-    btnSignAllTransactions: {
-      class: "[w-full !h-auto group py-3 rounded-full flex items-center justify-center mb-4]",
-      type: "button",
-      block: true,
-      size: "md",
-      pill: true,
-    },
-  },
-};
-
-const chainIdOptions = ref<{ name: string; value: string }[]>([]);
+const chainIdOptions = computed(() => {
+  const chainConfig = chainOptions[formData.value.chainNamespace as ChainNamespaceType];
+  return chainConfig.map((x) => ({
+    name: `${x.chainId} ${x.tickerName}`,
+    value: x.chainId,
+  }));
+});
 
 // Populate the private key provider based on the chain selected
 const privateKeyProvider = computed((): IBaseProvider<string> | null => {
@@ -351,7 +132,7 @@ const modalParams = computed(() => {
       loginMethods: Object.fromEntries(excludedProviders.map((x) => [x, { name: `${x} login`, showOnModal: false }])),
     },
   };
-  console.log("modalConfig", modalConfig);
+  log("modalConfig", modalConfig);
   return { modalConfig };
 });
 
@@ -419,10 +200,6 @@ const getExternalAdapterByName = (name: string) => {
 
 // Init the web3Auth object
 const init = async () => {
-  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({
-    name: `${x.chainId} ${x.tickerName}`,
-    value: x.chainId,
-  }));
   if (storageAvailable("sessionStorage") && sessionStorage.getItem("state")) formData.value = JSON.parse(sessionStorage.getItem("state") as string);
   if (!isInitialized) await initModal(modalParams.value);
 };
@@ -430,17 +207,13 @@ init();
 
 // Every time the form data changes, reinitialize the web3Auth object
 watch(formData.value, async () => {
-  chainIdOptions.value = chainOptions[formData.value.chainNamespace as ChainNamespaceType].map((x) => ({
-    name: `${x.chainId} ${x.tickerName}`,
-    value: x.chainId,
-  }));
-  if (!chainIdOptions.value.find((option) => option.value == formData.value.chain)) formData.value.chain = chainIdOptions.value[0]?.value;
+  if (!chainIdOptions.value.find((option) => option.value === formData.value.chain)) formData.value.chain = chainIdOptions.value[0]?.value;
   if (storageAvailable("sessionStorage")) sessionStorage.setItem("state", JSON.stringify(formData.value));
   web3Auth.value?.clearCache();
   web3Auth.value = new Web3Auth(options.value);
 
-  for (const adapter of formData.value.adapters) {
-    const externalAdapter = getExternalAdapterByName(adapter);
+  for (let i = 0; i <= formData.value.adapters.length; i += 1) {
+    const externalAdapter = getExternalAdapterByName(formData.value.adapters[i]);
     if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
   }
 
@@ -448,17 +221,12 @@ watch(formData.value, async () => {
 });
 
 watch(status, () => {
-  console.log("status :::::::::::::::::::::::::::", status.value);
+  log("status :::::::::::::::::::::::::::", status.value);
 });
 
-const enableMFA = async () => {
-  await w3EnableMFA();
-};
-
-const getUserInfo = async () => {
-  printToConsole("User Info", userInfo);
-};
-
+// const enableMFA = async () => {
+//   await w3EnableMFA();
+// };
 const printToConsole = (...args: unknown[]) => {
   const el = document.querySelector("#console>pre");
   const h1 = document.querySelector("#console>h1");
@@ -472,6 +240,10 @@ const printToConsole = (...args: unknown[]) => {
   if (consoleBtn) {
     consoleBtn.style.display = "block";
   }
+};
+
+const onGetUserInfo = async () => {
+  printToConsole("User Info", userInfo);
 };
 
 const clearConsole = () => {
@@ -510,12 +282,11 @@ const onGetBalance = async () => {
 };
 
 const onSwitchChain = async () => {
-  console.log("switching chain");
+  log("switching chain");
   try {
     await switchChain({ chainId: "0x89" });
     printToConsole("switchedChain");
   } catch (error) {
-    console.error("error while switching chain", error);
     printToConsole("switchedChain error", error);
   }
 };
@@ -533,7 +304,6 @@ const onAddChain = async () => {
     });
     printToConsole("added chain");
   } catch (error) {
-    console.error("error while adding chain", error);
     printToConsole("add chain error", error);
   }
 };
@@ -553,6 +323,56 @@ const onSignMessage = async () => {
 const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
 };
+const isDisplay = (name: string): boolean => {
+  switch (name) {
+    case "btnLogout":
+      return isConnected.value;
+
+    case "form":
+      return !isConnected.value;
+
+    case "appHeading":
+      return isConnected.value;
+
+    case "whiteLabelSettings":
+      return formData.value.whiteLabel.enable;
+
+    case "ethServices":
+      return formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155;
+
+    case "solServices":
+      return formData.value.chainNamespace === CHAIN_NAMESPACES.SOLANA;
+
+    default: {
+      return false;
+    }
+  }
+};
+const isDisabled = (name: string): boolean => {
+  switch (name) {
+    case "whiteLabelSettings":
+      return !formData.value.whiteLabel.enable;
+
+    case "walletServicePlugin":
+      return formData.value.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+
+    case "solanaWalletServicePlugin":
+      return formData.value.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
+
+    default: {
+      return false;
+    }
+  }
+};
+const onLogout = async () => {
+  await logout();
+};
+const onEnableMFA = async () => {
+  await enableMFA();
+};
+const onManageMFA = async () => {
+  // await web3Auth.value?.
+};
 </script>
 
 <template>
@@ -562,12 +382,15 @@ const onSignAllTransactions = async () => {
         <img :src="`/web3auth.svg`" class="h-8" alt="W3A Logo" />
       </a>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <Button v-if="isConnected" v-bind="{ block: true, size: 'xs', pill: true, variant: 'secondary' }" @click="() => logout()">
-          {{ $t("app.logout") }}
+        <Button v-if="isDisplay('btnLogout')" block size="xs" pill variant="secondary" @click="onLogout">
+          {{ $t("app.btnLogout") }}
+        </Button>
+        <Button v-else block size="xs" pill variant="secondary" @click="() => {}">
+          {{ $t("app.documentation") }}
         </Button>
       </div>
       <div id="navbar-sticky" class="items-center justify-between w-full md:flex md:w-auto md:order-1">
-        <div v-if="isConnected" class="max-sm:w-full">
+        <div v-if="isDisplay('appHeading')" class="max-sm:w-full">
           <h1 class="leading-tight text-3xl font-extrabold">{{ $t("app.title") }}</h1>
           <p class="leading-tight text-1xl">{{ $t("app.description") }}</p>
         </div>
@@ -576,157 +399,263 @@ const onSignAllTransactions = async () => {
   </nav>
   <main class="flex-1 p-1">
     <div class="relative">
-      <div v-if="!isConnected" class="grid gap-0">
-        <div class="col-span-8 sm:col-span-6 lg:col-span-4 mx-auto">
-          <div class="text-3xl font-bold leading-tight mb-5 text-center">{{ $t("app.greeting") }}</div>
-
-          <Card class="h-auto px-8 py-8">
-            <div class="leading-tight text-2xl font-extrabold">{{ $t("app.w3aStatus", { status }) }}</div>
-            <div class="text-app-gray-500 mt-2">{{ $t("app.isConnected", { isConnected }) }}</div>
-            <div class="text-app-gray-500 mt-2">{{ $t("app.isInitialized", { isInitialized }) }}</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
-              <!-- <Select v-model="formData.authMode" v-bind="formConfig['authMode']" /> -->
-              <Select v-model="formData.network" v-bind="formConfig.network" />
-              <Select v-model="formData.chainNamespace" v-bind="formConfig.chainNamespace" />
-              <Select v-model="formData.chain" v-bind="formConfig.chain" :options="chainIdOptions" />
-              <Select v-model="formData.loginProviders" v-bind="formConfig.loginProviders" />
-              <!-- <Select v-model="formData.plugins" v-bind="formConfig['plugins']" /> -->
-              <Select v-model="formData.adapters" v-bind="formConfig.adapters" />
-              <ExpansionPanel v-bind="formConfig.whiteLabel.panel" :expand="formData.whiteLabel.enable">
-                <template #panelTitle>
-                  <Toggle v-model="formData.whiteLabel.enable" v-bind="formConfig.whiteLabel.enable" />
-                </template>
-                <template #panelBody>
-                  <div class="grid grid-cols-1 sm:grid-cols-2">
-                    <TextField v-model="formData.whiteLabel.config.appName" v-bind="formConfig.whiteLabel.appName" />
-                    <TextField v-model="formData.whiteLabel.config.appUrl" v-bind="formConfig.whiteLabel.appUrl" />
-                    <Select v-model="formData.whiteLabel.config.defaultLanguage" v-bind="formConfig.whiteLabel.defaultLanguage" />
-                    <TextField v-model="formData.whiteLabel.config.logoLight" v-bind="formConfig.whiteLabel.logoLight" />
-                    <TextField v-model="formData.whiteLabel.config.logoDark" v-bind="formConfig.whiteLabel.logoDark" />
-                    <Toggle id="useLogoLoader" v-bind="formConfig.whiteLabel.useLogoLoader" />
-                    <TextField :model-value="formData.whiteLabel.config.theme?.primary" v-bind="formConfig.whiteLabel.primaryColor">
-                      <template #endIconSlot>
-                        <input
-                          id="primary-color-picker"
-                          class="color-picker"
-                          type="color"
-                          :value="formData.whiteLabel.config.theme?.primary"
-                          @input="
-                            (e) => {
-                              const color = (e.target as InputHTMLAttributes).value;
-                              formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, primary: color };
-                            }
-                          "
-                        />
-                      </template>
-                    </TextField>
-                    <TextField :model-value="formData.whiteLabel.config.theme?.onPrimary" v-bind="formConfig.whiteLabel.onPrimaryColor">
-                      <template #endIconSlot>
-                        <input
-                          id="primary-color-picker"
-                          class="color-picker"
-                          type="color"
-                          :value="formData.whiteLabel.config.theme?.onPrimary"
-                          @input="
-                            (e) => {
-                              const color = (e.target as InputHTMLAttributes).value;
-                              formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, onPrimary: color };
-                            }
-                          "
-                        />
-                      </template>
-                    </TextField>
-                  </div>
-                </template>
-              </ExpansionPanel>
-            </div>
-            <div class="flex justify-center mt-5">
-              <Button
-                :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
-                data-testid="loginButton"
-                type="button"
-                block
-                size="md"
-                pill
-                :disabled="isConnected"
-                @click="connect"
+      <div v-if="isDisplay('form')" class="grid grid-cols-8 gap-0">
+        <div class="col-span-0 sm:col-span-1 lg:col-span-2"></div>
+        <Card class="h-auto px-8 py-8 col-span-8 sm:col-span-6 lg:col-span-4">
+          <div class="text-3xl font-bold leading-tight text-center">{{ $t("app.greeting") }}</div>
+          <div class="leading-tight font-extrabold">{{ $t("app.w3aStatus", { status }) }}</div>
+          <div class="leading-tight font-extrabold mb-4">{{ $t("app.isInitialized", { isInitialized }) }}</div>
+          <div class="grid grid-cols-1 gap-2">
+            <Select
+              v-model="formData.network"
+              data-testid="selectNetwork"
+              :label="$t('app.network')"
+              :aria-label="$t('app.network')"
+              :placeholder="$t('app.network')"
+              :options="networkOptions"
+            />
+            <Select
+              v-model="formData.chainNamespace"
+              data-testid="selectChainNamespace"
+              :label="$t('app.chainNamespace')"
+              :aria-label="$t('app.chainNamespace')"
+              :placeholder="$t('app.chainNamespace')"
+              :options="chainNamespaceOptions"
+            />
+            <Select
+              v-model="formData.chain"
+              data-testid="selectChain"
+              :label="$t('app.chain')"
+              :aria-label="$t('app.chain')"
+              :placeholder="$t('app.chain')"
+              :options="chainIdOptions"
+            />
+            <Select
+              v-model="formData.loginProviders"
+              data-testid="selectLoginProviders"
+              :label="$t('app.loginProviders')"
+              :aria-label="$t('app.loginProviders')"
+              :placeholder="$t('app.loginProviders')"
+              :options="loginProviderOptions"
+              multiple
+              :show-check-box="true"
+            />
+            <Select
+              v-model="formData.adapters"
+              data-testid="selectAdapters"
+              :label="$t('app.adapters')"
+              :aria-label="$t('app.adapters')"
+              :placeholder="$t('app.adapters')"
+              :options="adapters"
+              multiple
+              :show-check-box="true"
+            />
+            <Card class="h-auto px-4 py-4" :shadow="false">
+              <Toggle
+                v-model="formData.whiteLabel.enable"
+                data-testid="whitelabel"
+                :show-label="true"
+                :size="'small'"
+                :label-disabled="$t('app.whiteLabel.title')"
+                :label-enabled="$t('app.whiteLabel.title')"
+                class="mb-2"
+              />
+              <Select
+                v-if="isDisplay('whiteLabelSettings')"
+                v-model="formData.whiteLabel.config.defaultLanguage"
+                :label="$t('app.whiteLabel.defaultLanguage')"
+                :aria-label="$t('app.whiteLabel.defaultLanguage')"
+                :placeholder="$t('app.whiteLabel.defaultLanguage')"
+                :options="languageOptions"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                v-model="formData.whiteLabel.config.appName"
+                :label="$t('app.whiteLabel.appName')"
+                :aria-label="$t('app.whiteLabel.appName')"
+                :placeholder="$t('app.whiteLabel.appName')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                v-model="formData.whiteLabel.config.appUrl"
+                :label="$t('app.whiteLabel.appUrl')"
+                :aria-label="$t('app.whiteLabel.appUrl')"
+                :placeholder="$t('app.whiteLabel.appUrl')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                v-model="formData.whiteLabel.config.logoLight"
+                :label="$t('app.whiteLabel.logoLight')"
+                :aria-label="$t('app.whiteLabel.logoLight')"
+                :placeholder="$t('app.whiteLabel.logoLight')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                v-model="formData.whiteLabel.config.logoDark"
+                :label="$t('app.whiteLabel.logoDark')"
+                :aria-label="$t('app.whiteLabel.logoDark')"
+                :placeholder="$t('app.whiteLabel.logoDark')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <Toggle
+                v-if="isDisplay('whiteLabelSettings')"
+                id="useLogoLoader"
+                v-model="formData.whiteLabel.config.useLogoLoader"
+                :show-label="true"
+                :size="'small'"
+                :label-disabled="$t('app.useLogoLoader')"
+                :label-enabled="$t('app.useLogoLoader')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              />
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                :model-value="formData.whiteLabel.config.theme?.primary"
+                :label="$t('app.whiteLabel.primaryColor')"
+                :aria-label="$t('app.whiteLabel.primaryColor')"
+                :placeholder="$t('app.whiteLabel.primaryColor')"
+                :disabled="isDisabled('whiteLabelSettings')"
               >
-                Connect
-              </Button>
-            </div>
-          </Card>
-        </div>
+                <template #endIconSlot>
+                  <input
+                    id="primary-color-picker"
+                    class="color-picker"
+                    type="color"
+                    :value="formData.whiteLabel.config.theme?.primary"
+                    @input="
+                      (e) => {
+                        const color = (e.target as InputHTMLAttributes).value;
+                        formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, primary: color };
+                      }
+                    "
+                  />
+                </template>
+              </TextField>
+              <TextField
+                v-if="isDisplay('whiteLabelSettings')"
+                :model-value="formData.whiteLabel.config.theme?.onPrimary"
+                :label="$t('app.whiteLabel.onPrimaryColor')"
+                :aria-label="$t('app.whiteLabel.onPrimaryColor')"
+                :placeholder="$t('app.whiteLabel.onPrimaryColor')"
+                :disabled="isDisabled('whiteLabelSettings')"
+              >
+                <template #endIconSlot>
+                  <input
+                    id="primary-color-picker"
+                    class="color-picker"
+                    type="color"
+                    :value="formData.whiteLabel.config.theme?.onPrimary"
+                    @input="
+                      (e) => {
+                        const color = (e.target as InputHTMLAttributes).value;
+                        formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, onPrimary: color };
+                      }
+                    "
+                  />
+                </template>
+              </TextField>
+            </Card>
+            <div class="text-xl font-bold leading-tight text-left">Plugins</div>
+            <Card class="h-auto px-4 py-4" :shadow="false">
+              <Checkbox
+                v-model="formData.walletServicePlugin"
+                :disabled="isDisabled('walletServicePlugin')"
+                label-placement="right"
+                label="Wallet Service"
+              />
+            </Card>
+            <Card class="h-auto px-4 py-4" :shadow="false">
+              <Checkbox
+                v-model="formData.solanaWalletServicePlugin"
+                :disabled="isDisabled('solanaWalletServicePlugin')"
+                label-placement="right"
+                label="Solana Wallet Service"
+              />
+            </Card>
+          </div>
+          <div class="flex justify-center mt-5">
+            <Button
+              :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
+              data-testid="loginButton"
+              type="button"
+              block
+              size="md"
+              pill
+              :disabled="isConnected"
+              @click="connect"
+            >
+              Connect
+            </Button>
+          </div>
+          <div class="text-base text-app-gray-900 dark:text-app-gray-200 font-medium mt-4 mb-5 px-0">
+            Reach out to us at
+            <a class="text-app-primary-600 dark:text-app-primary-500 underline" href="mailto:hello@tor.us">hello@tor.us</a>
+            or
+            <a class="text-app-primary-600 dark:text-app-primary-500 underline" href="https://t.me/torusdev">telegram group</a>
+            .
+          </div>
+        </Card>
       </div>
       <div v-else class="grid gap-0">
         <div class="grid grid-cols-8 gap-0">
           <div class="col-span-1"></div>
           <Card class="px-4 py-4 gird col-span-2">
-            <div class="mb-4">
-              <p class="btn-label">User info</p>
+            <div class="mb-2">
+              <Button block size="xs" pill variant="secondary" data-testid="btnClearConsole" @click="clearConsole">
+                {{ $t("app.btnClearConsole") }}
+              </Button>
             </div>
             <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnGetAccounts" @click="onGetAccounts">
+              <Button block size="xs" pill @click="onGetUserInfo">
+                {{ $t("app.btnGetUserInfo") }}
+              </Button>
+            </div>
+            <Card class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
+              <div class="text-xl font-bold leading-tight text-left mb-2">MFA settings</div>
+              <Button v-if="isDisplay('btnEnableMFA')" block size="xs" pill class="mb-2" @click="onEnableMFA">
+                {{ $t("app.btnEnableMFA") }}
+              </Button>
+              <Button v-if="isDisplay('btnManageMFA')" block size="xs" pill class="mb-2" @click="onManageMFA">
+                {{ $t("app.btnManageMFA") }}
+              </Button>
+            </Card>
+            <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
+              <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+              <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
                 {{ t("app.buttons.btnGetAccounts") }}
               </Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnnGetBalance" @click="onGetBalance">
+              <Button block size="xs" pill class="mb-2" @click="onGetBalance">
                 {{ t("app.buttons.btnGetBalance") }}
               </Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSendEth" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSignEthMessage" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnGetConnectedChainId" @click="getConnectedChainId">
+              <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+              <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
+              <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
                 {{ t("app.buttons.btnGetConnectedChainId") }}
               </Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnAddChain" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSwitchChain" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSignAndSendTransaction" @click="onSignAndSendTransaction">
+            </Card>
+            <Card v-if="isDisplay('solServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
+              <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+              <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
+              <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+              <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
                 {{ t("app.buttons.btnSignAndSendTransaction") }}
               </Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSignTransaction" @click="onSignTransaction">
+              <Button block size="xs" pill class="mb-2" @click="onSignTransaction">
                 {{ t("app.buttons.btnSignTransaction") }}
               </Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSignMessage" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
-            </div>
-            <div class="mb-2">
-              <Button :v-bind="formConfig.buttons.btnSignAllTransactions" @click="onSignAllTransactions">
+              <Button block size="xs" pill class="mb-2" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
+              <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
                 {{ t("app.buttons.btnSignAllTransactions") }}
               </Button>
-            </div>
+            </Card>
           </Card>
           <Card id="console" class="px-4 py-4 col-span-4 overflow-y-auto">
             <pre
               class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"
             ></pre>
-            <div class="absolute top-2 right-8">
-              <Button
-                :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
-                type="button"
-                block
-                size="md"
-                pill
-                data-testid="btnClearConsole"
-                @click="clearConsole"
-              >
-                Clear console
-              </Button>
-            </div>
           </Card>
         </div>
       </div>
