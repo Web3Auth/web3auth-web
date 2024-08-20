@@ -7,10 +7,11 @@
     "network": "Network",
     "chain": "Chain",
     "loginProviders": "Login provider",
-    "adapters": "External wallet",
+    "adapters": "Adapters",
     "greeting": "Let's configure Web3Auth!",
+    "enableWalletServicePlugin": "Enable Wallet Service Plugin",
     "whiteLabel": {
-      "title": "Configure White Label settings",
+      "title": "Enable White Label",
       "appName": "App Name",
       "appUrl": "App URL",
       "defaultLanguage": "Default Language",
@@ -19,6 +20,20 @@
       "useLogoLoader": "Use Logo Loader",
       "primaryColor": "Primary Color",
       "onPrimaryColor": "On Primary Color"
+    },
+    "loginMethod": {
+      "name": "Name",
+      "description": "Description",
+      "logoHover": "Logo Hover",
+      "logoLight": "Logo Light",
+      "logoDark": "Logo Dark",
+      "mainOption": "Main Option",
+      "showOnModal": "on Modal?",
+      "showOnDesktop": "on Desktop?",
+      "showOnMobile": "on Mobile?"
+    },
+    "adapter": {
+      "sessionTime": "Session Time"
     },
     "chainNamespace": "Chain namespace",
 
@@ -38,7 +53,10 @@
       "btnSignAndSendTransaction": "Sign and Send Transaction",
       "btnSignTransaction": "Sign Transaction",
       "btnSignMessage": "Sign Message",
-      "btnSignAllTransactions": "Sign All Transactions"
+      "btnSignAllTransactions": "Sign All Transactions",
+      "btnShowWalletUI": "Show Wallet UI",
+      "btnShowCheckout": "Show Checkout",
+      "btnShowWalletConnectScanner": "Show WalletConnect Scanner"
     }
   }
 }

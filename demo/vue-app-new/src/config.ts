@@ -1,11 +1,11 @@
-import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 
 export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
-export const chainOptions: Record<ChainNamespaceType, CustomChainConfig[]> = {
+export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.EIP155]: [
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -93,6 +93,24 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Turkish", value: LANGUAGES.tr },
 ];
 
+export const defaultLoginMethod = loginProviderOptions.reduce(
+  (acc, curr) => ({
+    ...acc,
+    [curr.value]: {
+      name: `${curr.name} login`,
+      description: "",
+      logoHover: "",
+      logoLight: "",
+      logoDark: "",
+      mainOption: false,
+      showOnModal: false,
+      showOnDesktop: false,
+      showOnMobile: false,
+    },
+  }),
+  {},
+);
+
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
@@ -104,6 +122,6 @@ export type FormData = {
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
-  walletServicePlugin: boolean;
-  solanaWalletServicePlugin: boolean;
+  enableWalletServicePlugin: boolean;
+  loginMethods: typeof defaultLoginMethod;
 };

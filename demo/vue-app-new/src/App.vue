@@ -5,13 +5,13 @@ import { type Web3AuthOptions } from "@web3auth/modal";
 import Web3AuthProvider, { Web3AuthContextConfig } from "@web3auth/modal-vue-composables";
 import { computed } from "vue";
 
-import { chainOptions } from "./config";
+import { chainConfigs } from "./config";
 import Main from "./MainView.vue";
 
 const w3AOptions = computed((): Web3AuthContextConfig => {
   const ethereumPrivateKeyProvider = new EthereumPrivateKeyProvider({
     config: {
-      chainConfig: chainOptions[CHAIN_NAMESPACES.EIP155][0],
+      chainConfig: chainConfigs[CHAIN_NAMESPACES.EIP155][0],
     },
   });
   const options: Web3AuthOptions = {

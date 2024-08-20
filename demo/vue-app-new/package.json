@@ -34,7 +34,7 @@
     "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/wallet-connect-v2-adapter": "file:../../packages/adapters/wallet-connect-v2-adapter",
-    "@web3auth/wallet-services-plugin": "^8.10.2",
+    "@web3auth/wallet-services-plugin": "file:../../packages/plugins/wallet-services-plugin",
     "vue": "^3.4.31",
     "vue-i18n": "^9.13.1",
     "web3": "^4.11.1"
