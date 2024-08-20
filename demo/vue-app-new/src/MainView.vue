@@ -1,16 +1,6 @@
 <script setup lang="ts">
-import { Button, Card, Checkbox, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import {
-  CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  IBaseProvider,
-  IProvider,
-  storageAvailable,
-  WALLET_ADAPTER_TYPE,
-  WALLET_ADAPTERS,
-  WEB3AUTH_NETWORK,
-  WEB3AUTH_NETWORK_TYPE,
-} from "@web3auth/base";
+import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
+import { CHAIN_NAMESPACES, ChainNamespaceType, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
@@ -63,6 +53,8 @@ const formData = ref<FormData>({
 const walletServicesPlugin = new WalletServicesPlugin({
   walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: "logo", logoLight: "logo" } },
 });
+
+const solanaWalletConnectorPlugin = new SolanaWalletConnectorPlugin({});
 
 const walletPlugin = computed(() => {
   if (formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155) {
