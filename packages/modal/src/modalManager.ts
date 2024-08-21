@@ -96,10 +96,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           label: WALLET_ADAPTERS.OPENLOGIN,
           loginMethods: {
             [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
-              showOnModal: smsOtpEnabled,
-              showOnDesktop: smsOtpEnabled,
-              showOnMobile: smsOtpEnabled,
+              name:
+                params?.modalConfig[WALLET_ADAPTERS.OPENLOGIN].loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS].name || LOGIN_PROVIDER.SMS_PASSWORDLESS,
+              showOnModal:
+                params?.modalConfig[WALLET_ADAPTERS.OPENLOGIN].loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnModal === false
+                  ? false
+                  : smsOtpEnabled,
+              showOnDesktop:
+                params?.modalConfig[WALLET_ADAPTERS.OPENLOGIN].loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnDesktop === false
+                  ? false
+                  : smsOtpEnabled,
+              showOnMobile:
+                params?.modalConfig[WALLET_ADAPTERS.OPENLOGIN].loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnMobile === false
+                  ? false
+                  : smsOtpEnabled,
             },
           },
         },
