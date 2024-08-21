@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "8.12.3",
+  "version": "8.12.4",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -39,14 +39,14 @@
     "@toruslabs/openlogin": "^8.2.1",
     "@toruslabs/openlogin-jrpc": "^8.3.0",
     "@toruslabs/openlogin-utils": "^8.2.1",
-    "@web3auth/base": "^8.12.2",
-    "@web3auth/base-provider": "^8.12.2",
+    "@web3auth/base": "^8.12.4",
+    "@web3auth/base-provider": "^8.12.4",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
-    "@web3auth/openlogin-adapter": "^8.12.2",
-    "@web3auth/wallet-connect-v2-adapter": "^8.12.3"
+    "@web3auth/openlogin-adapter": "^8.12.4",
+    "@web3auth/wallet-connect-v2-adapter": "^8.12.4"
   },
   "peerDependenciesMeta": {
     "@web3auth/openlogin-adapter": {
