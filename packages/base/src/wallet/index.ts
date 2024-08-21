@@ -8,7 +8,6 @@ export const SOLANA_ADAPTERS = {
   TORUS_SOLANA: "torus-solana",
   PHANTOM: "phantom",
   SOLFLARE: "solflare",
-  SLOPE: "slope",
   ...MULTI_CHAIN_ADAPTERS,
 };
 
@@ -35,7 +34,6 @@ export const ADAPTER_NAMES = {
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
   [SOLANA_ADAPTERS.PHANTOM]: "Phantom",
   [SOLANA_ADAPTERS.SOLFLARE]: "Solflare",
-  [SOLANA_ADAPTERS.SLOPE]: "Slope",
   [EVM_ADAPTERS.TORUS_EVM]: "Torus",
   [EVM_ADAPTERS.METAMASK]: "Metamask",
   [EVM_ADAPTERS.COINBASE]: "Coinbase",
