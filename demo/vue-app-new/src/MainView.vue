@@ -171,7 +171,7 @@ const getExternalAdapterByName = (name: string) => {
 };
 
 const isWalletPluginEnabled = () => {
-  return formData.value.chainNamespace == CHAIN_NAMESPACES.EIP155 && formData.value.walletPlugin.enable;
+  return formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.value.walletPlugin.enable;
 };
 
 const initW3A = async () => {
