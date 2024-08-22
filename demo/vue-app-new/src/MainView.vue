@@ -9,7 +9,6 @@ import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
-import { SolanaWalletConnectorPlugin } from "@web3auth/solana-wallet-connector-plugin";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
@@ -46,7 +45,6 @@ const formData = ref<FormData>({
   },
   loginProviders: [],
   adapters: [],
-  enableWalletServicePlugin: false,
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,
@@ -172,6 +170,10 @@ const getExternalAdapterByName = (name: string) => {
   }
 };
 
+const isWalletPluginEnabled = () => {
+  return formData.value.chainNamespace == CHAIN_NAMESPACES.EIP155 && formData.value.walletPlugin.enable;
+};
+
 const initW3A = async () => {
   if (!chainOptions.value.find((option) => option.value === formData.value.chain)) formData.value.chain = chainOptions.value[0]?.value;
   if (storageAvailable("sessionStorage")) sessionStorage.setItem("state", JSON.stringify(formData.value));
@@ -181,7 +183,7 @@ const initW3A = async () => {
     const externalAdapter = getExternalAdapterByName(formData.value.adapters[i]);
     if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
   }
-  if (formData.value.walletPlugin.enable) await addPlugin(walletPlugin.value);
+  if (isWalletPluginEnabled()) await addPlugin(walletPlugin.value);
 
   await initModal(modalParams.value);
 };
@@ -315,7 +317,7 @@ const isDisplay = (name: string): boolean => {
       return formData.value.chainNamespace === CHAIN_NAMESPACES.SOLANA;
 
     case "walletServices":
-      return formData.value.walletPlugin.enable;
+      return isWalletPluginEnabled();
 
     default: {
       return false;
@@ -613,6 +615,7 @@ const showWalletConnectScanner = async () => {
           <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
             <Toggle
               v-model="formData.walletPlugin.enable"
+              :disabled="isDisabled('walletServicePlugin')"
               :show-label="true"
               :size="'small'"
               :label-disabled="$t('app.walletPlugin.title')"
@@ -620,12 +623,16 @@ const showWalletConnectScanner = async () => {
               class="mb-2"
             />
             <TextField
+              v-model="formData.walletPlugin.logoLight"
               :label="$t('app.walletPlugin.logoLight')"
+              :disabled="isDisabled('walletServicePlugin')"
               :aria-label="$t('app.walletPlugin.logoLight')"
               :placeholder="$t('app.walletPlugin.logoLight')"
               class="sm:col-span-2"
             />
             <TextField
+              v-model="formData.walletPlugin.logoDark"
+              :disabled="isDisabled('walletServicePlugin')"
               :label="$t('app.walletPlugin.logoDark')"
               :aria-label="$t('app.walletPlugin.logoDark')"
               :placeholder="$t('app.walletPlugin.logoDark')"
