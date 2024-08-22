@@ -1,8 +1,14 @@
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
-import type { MessageTypes, TypedDataV1, TypedDataV1Field, TypedMessage } from "@metamask/eth-sig-util";
-import { providerErrors } from "@metamask/rpc-errors";
+import {
+  type MessageTypes,
+  TypedDataUtils,
+  type TypedDataV1,
+  type TypedDataV1Field,
+  type TypedMessage,
+  typedSignatureHash,
+} from "@metamask/eth-sig-util";
 import { concatSig } from "@toruslabs/base-controllers";
-import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth/base";
 import {
   IProviderHandlers,
@@ -121,7 +127,6 @@ async function signTypedData(
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
-  const { TypedDataUtils, typedSignatureHash } = await import("@metamask/eth-sig-util");
   const messageHash =
     version === SignTypedDataVersion.V1
       ? Buffer.from(stripHexPrefix(typedSignatureHash(data as TypedDataV1Field[])), "hex")

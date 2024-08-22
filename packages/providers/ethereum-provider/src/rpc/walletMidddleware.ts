@@ -1,6 +1,5 @@
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { rpcErrors } from "@metamask/rpc-errors";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@toruslabs/openlogin-jrpc";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
 

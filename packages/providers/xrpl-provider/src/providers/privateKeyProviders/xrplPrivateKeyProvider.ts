@@ -1,5 +1,4 @@
-import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
-import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import type { PingResponse } from "xrpl";

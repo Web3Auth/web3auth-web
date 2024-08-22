@@ -34,7 +34,6 @@ import {
 import { getDefaultExternalAdapters } from "@web3auth/default-solana-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
@@ -132,8 +131,6 @@ export default defineComponent({
             clientId: config.clientId[this.openloginNetwork],
           },
         });
-        const slopeAdapter = new SlopeAdapter();
-        this.web3auth.configureAdapter(slopeAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
         const adapters = await getDefaultExternalAdapters({ options: this.web3auth.options });
         adapters.forEach((adapter) => {
