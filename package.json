@@ -30,20 +30,20 @@
   },
   "devDependencies": {
     "@babel/register": "^7.24.6",
-    "@toruslabs/config": "^2.1.0",
-    "@toruslabs/eslint-config-typescript": "^3.3.1",
+    "@toruslabs/config": "^2.1.1",
+    "@toruslabs/eslint-config-typescript": "^3.3.3",
     "@toruslabs/torus-scripts": "^5.3.1",
-    "@types/chai": "^4.3.16",
+    "@types/chai": "^4.3.17",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20",
     "chai": "^5.1.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
-    "husky": "^9.1.1",
-    "lerna": "^8.1.7",
-    "lint-staged": "^15.2.7",
-    "mocha": "^10.7.0",
+    "husky": "^9.1.4",
+    "lerna": "^8.1.8",
+    "lint-staged": "^15.2.8",
+    "mocha": "^10.7.3",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
@@ -53,8 +53,8 @@
     "typescript": "^5.5.4"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^19.5.3",
-    "@rollup/rollup-linux-x64-gnu": "^4.19.0"
+    "@nx/nx-linux-x64-gnu": "^19.5.7",
+    "@rollup/rollup-linux-x64-gnu": "^4.20.0"
   },
   "repository": {
     "type": "git",

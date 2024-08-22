@@ -25,7 +25,6 @@
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/openlogin-adapter": "file:../../packages/adapters/openlogin-adapter",
     "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
-    "@web3auth/slope-adapter": "file:../../packages/adapters/slope-adapter",
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",
     "@web3auth/solana-wallet-connector-plugin": "file:../../packages/plugins/solana-wallet-connector-plugin",
     "@web3auth/solflare-adapter": "file:../../packages/adapters/solflare-adapter",

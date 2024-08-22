@@ -1,5 +1,4 @@
-import { rpcErrors } from "@metamask/rpc-errors";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
 
 import { ITorusWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";

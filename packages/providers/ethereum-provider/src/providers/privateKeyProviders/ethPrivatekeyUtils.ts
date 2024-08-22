@@ -1,8 +1,7 @@
 import { privateToAddress } from "@ethereumjs/util";
-import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { providerErrors } from "@metamask/rpc-errors";
+import { type MessageTypes, personalSign, signTypedData, type TypedDataV1, type TypedMessage } from "@metamask/eth-sig-util";
 import { signMessage } from "@toruslabs/base-controllers";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
@@ -65,7 +64,6 @@ export function getProviderHandlers({
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
-      const { personalSign } = await import("@metamask/eth-sig-util");
       const sig = personalSign({ privateKey: privKeyBuffer, data: msgParams.data });
       return sig;
     },
@@ -85,7 +83,6 @@ export function getProviderHandlers({
         version: SignTypedDataVersion.V1,
       };
       await validateTypedMessageParams(params, finalChainId);
-      const { signTypedData } = await import("@metamask/eth-sig-util");
       const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V1 });
       return sig;
@@ -103,7 +100,6 @@ export function getProviderHandlers({
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
       await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-      const { signTypedData } = await import("@metamask/eth-sig-util");
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V3 });
       return sig;
     },
@@ -120,7 +116,6 @@ export function getProviderHandlers({
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
       await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-      const { signTypedData } = await import("@metamask/eth-sig-util");
       const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V4 });
       return sig;
     },

@@ -1,6 +1,5 @@
-import { rpcErrors } from "@metamask/rpc-errors";
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, SendCallBack } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@toruslabs/openlogin-jrpc";
 import {
   CustomChainConfig,
   IBaseProvider,

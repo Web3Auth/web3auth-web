@@ -1,10 +1,11 @@
 import { isValidAddress } from "@ethereumjs/util";
-import type { MessageTypeProperty, TypedDataV1Field, TypedMessage } from "@metamask/eth-sig-util";
-import { rpcErrors } from "@metamask/rpc-errors";
+import { type MessageTypeProperty, TYPED_MESSAGE_SCHEMA, type TypedDataV1Field, type TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
+import { rpcErrors } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";
+import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
@@ -73,7 +74,7 @@ export const validateTypedMessageParams = async (parameters: TypedMessageParams<
     );
     let data: unknown = null;
     let chainId = null;
-    const { typedSignatureHash, TYPED_MESSAGE_SCHEMA } = await import("@metamask/eth-sig-util");
+
     switch ((parameters as TypedMessageParams<unknown>).version) {
       case SignTypedDataVersion.V1:
         if (typeof parameters.data === "string") {
@@ -104,7 +105,6 @@ export const validateTypedMessageParams = async (parameters: TypedMessageParams<
         }>;
 
         assert.ok(typedData.primaryType in typedData.types, `Primary type of "${typedData.primaryType}" has no type definition.`);
-        const jsonschema = await import("jsonschema");
         const validation = jsonschema.validate(typedData, TYPED_MESSAGE_SCHEMA.properties);
         assert.strictEqual(validation.errors.length, 0, "Signing data must conform to EIP-712 schema. See https://git.io/fNtcx.");
         chainId = typedData.domain?.chainId;

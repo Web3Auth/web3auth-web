@@ -1,5 +1,4 @@
-import type { JsonRpcError } from "@metamask/rpc-errors";
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { type JsonRpcError, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
 import {
@@ -53,6 +52,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
     this.walletInitOptions = walletInitOptions || {};
   }
+
+  SUPPORTED_CONNECTORS: string[];
 
   get proxyProvider(): SafeEventEmitterProvider | null {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;

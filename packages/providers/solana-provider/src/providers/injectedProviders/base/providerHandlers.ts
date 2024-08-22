@@ -1,5 +1,4 @@
-import { rpcErrors } from "@metamask/rpc-errors";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import bs58 from "bs58";
 
 import { IBaseWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
