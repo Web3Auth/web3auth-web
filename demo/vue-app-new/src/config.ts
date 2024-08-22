@@ -122,6 +122,10 @@ export type FormData = {
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
-  enableWalletServicePlugin: boolean;
   loginMethods: typeof defaultLoginMethod;
+  walletPlugin: {
+    enable: boolean;
+    logoDark: string;
+    logoLight: string;
+  };
 };

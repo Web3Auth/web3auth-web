@@ -10,6 +10,11 @@
     "adapters": "Adapters",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
+    "walletPlugin": {
+      "title": "Wallet Service Plugin",
+      "logoLight": "Logo Light",
+      "logoDark": "Logo Dark"
+    },
     "whiteLabel": {
       "title": "Enable White Label",
       "appName": "App Name",

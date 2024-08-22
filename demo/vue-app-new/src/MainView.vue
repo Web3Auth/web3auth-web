@@ -48,19 +48,19 @@ const formData = ref<FormData>({
   adapters: [],
   enableWalletServicePlugin: false,
   loginMethods: defaultLoginMethod,
+  walletPlugin: {
+    enable: false,
+    logoLight: "",
+    logoDark: "",
+  },
 });
-
-const walletServicesPlugin = new WalletServicesPlugin({
-  walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: "logo", logoLight: "logo" } },
-});
-
-const solanaWalletConnectorPlugin = new SolanaWalletConnectorPlugin({});
 
 const walletPlugin = computed(() => {
-  if (formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-    return walletServicesPlugin;
-  }
-  return solanaWalletConnectorPlugin;
+  const { logoDark, logoLight } = formData.value.walletPlugin;
+  const walletServicesPlugin = new WalletServicesPlugin({
+    walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
+  });
+  return walletServicesPlugin;
 });
 
 const chainOptions = computed(() =>
@@ -128,11 +128,26 @@ const options = computed((): Web3AuthOptions => {
   };
 });
 
+const loginMethodsConfig = computed(() => {
+  if (formData.value.loginProviders.length === 0) return undefined;
+
+  if (
+    !Object.values(formData.value.loginMethods)
+      .map((x) => x.showOnModal)
+      .includes(true)
+  ) {
+    return undefined;
+  }
+
+  const loginMethods = JSON.parse(JSON.stringify(formData.value.loginMethods));
+  return loginMethods;
+});
+
 const modalParams = computed(() => {
   const modalConfig = {
     [WALLET_ADAPTERS.OPENLOGIN]: {
       label: "openlogin",
-      loginMethods: JSON.parse(JSON.stringify(formData.value.loginMethods)),
+      loginMethods: loginMethodsConfig.value,
     },
   };
   return { modalConfig };
@@ -166,7 +181,7 @@ const initW3A = async () => {
     const externalAdapter = getExternalAdapterByName(formData.value.adapters[i]);
     if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
   }
-  if (formData.value.enableWalletServicePlugin) await addPlugin(walletPlugin.value);
+  if (formData.value.walletPlugin.enable) await addPlugin(walletPlugin.value);
 
   await initModal(modalParams.value);
 };
@@ -186,9 +201,6 @@ watch(status, () => {
   log("status :::::::::::::::::::::::::::", status.value);
 });
 
-// const enableMFA = async () => {
-//   await w3EnableMFA();
-// };
 const printToConsole = (...args: unknown[]) => {
   const el = document.querySelector("#console>pre");
   const h1 = document.querySelector("#console>h1");
@@ -303,7 +315,7 @@ const isDisplay = (name: string): boolean => {
       return formData.value.chainNamespace === CHAIN_NAMESPACES.SOLANA;
 
     case "walletServices":
-      return formData.value.enableWalletServicePlugin;
+      return formData.value.walletPlugin.enable;
 
     default: {
       return false;
@@ -317,9 +329,6 @@ const isDisabled = (name: string): boolean => {
 
     case "walletServicePlugin":
       return formData.value.chainNamespace !== CHAIN_NAMESPACES.EIP155;
-
-    case "solanaWalletServicePlugin":
-      return formData.value.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
 
     case "btnConnect":
       return !isInitialized.value;
@@ -387,7 +396,7 @@ const showWalletConnectScanner = async () => {
             <Tab variant="button" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
             <Tab variant="button" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
             <Tab variant="button" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
-            <Tab variant="button" :active="isActiveTab(3)" @click="onTabChange(3)">Adapters</Tab>
+            <Tab variant="button" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
           </Tabs>
           <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
             <Select
@@ -414,13 +423,15 @@ const showWalletConnectScanner = async () => {
               :placeholder="$t('app.chain')"
               :options="chainOptions"
             />
-            <Toggle
-              v-model="formData.enableWalletServicePlugin"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.enableWalletServicePlugin')"
-              :label-enabled="$t('app.enableWalletServicePlugin')"
-              class="mb-2"
+            <Select
+              v-model="formData.adapters"
+              data-testid="selectAdapters"
+              :label="$t('app.adapters')"
+              :aria-label="$t('app.adapters')"
+              :placeholder="$t('app.adapters')"
+              :options="adapterOptions"
+              multiple
+              :show-check-box="true"
             />
           </Card>
           <Card v-if="isActiveTab(1)" class="grid grid-cols-1 sm:grid-cols-2 gap-2 py-4 px-4" :shadow="false">
@@ -600,28 +611,26 @@ const showWalletConnectScanner = async () => {
             </Card>
           </Card>
           <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
-            <Select
-              v-model="formData.adapters"
-              data-testid="selectAdapters"
-              :label="$t('app.adapters')"
-              :aria-label="$t('app.adapters')"
-              :placeholder="$t('app.adapters')"
-              :options="adapterOptions"
-              multiple
-              :show-check-box="true"
+            <Toggle
+              v-model="formData.walletPlugin.enable"
+              :show-label="true"
+              :size="'small'"
+              :label-disabled="$t('app.walletPlugin.title')"
+              :label-enabled="$t('app.walletPlugin.title')"
+              class="mb-2"
             />
-            <Card v-for="a in formData.adapters" :key="a" :shadow="false" class="px-4 py-4 grid grid-cols-1 sm:grid-cols-2">
-              <div class="font-bold leading-tight text-left sm:col-span-2">{{ a }}</div>
-              <template v-if="['coinbase', 'metamask', 'slope', 'solfare'].includes(a)">
-                <TextField
-                  type="number"
-                  :label="$t('app.adapter.sessionTime')"
-                  :aria-label="$t('app.adapter.sessionTime')"
-                  :placeholder="$t('app.adapter.sessionTime')"
-                  class="sm:col-span-2"
-                />
-              </template>
-            </Card>
+            <TextField
+              :label="$t('app.walletPlugin.logoLight')"
+              :aria-label="$t('app.walletPlugin.logoLight')"
+              :placeholder="$t('app.walletPlugin.logoLight')"
+              class="sm:col-span-2"
+            />
+            <TextField
+              :label="$t('app.walletPlugin.logoDark')"
+              :aria-label="$t('app.walletPlugin.logoDark')"
+              :placeholder="$t('app.walletPlugin.logoDark')"
+              class="sm:col-span-2"
+            />
           </Card>
           <div class="flex justify-center mt-5">
             <Button
