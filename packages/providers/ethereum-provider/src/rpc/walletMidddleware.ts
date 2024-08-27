@@ -1,5 +1,5 @@
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
 

@@ -3,6 +3,7 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   BaseAdapterConfig,
+  cloneDeep,
   CustomChainConfig,
   fetchProjectConfig,
   getChainConfig,
@@ -18,7 +19,7 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
+import { AuthOptions, getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import {
   capitalizeFirstLetter,
   getAdapterSocialLogins,
@@ -29,8 +30,7 @@ import {
   UIConfig,
 } from "@web3auth/ui";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import clonedeep from "lodash.clonedeep";
-import merge from "lodash.merge";
+import deepmerge from "deepmerge";
 
 import { defaultOtherModalConfig } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
@@ -79,7 +79,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     const { whitelabel } = projectConfig;
-    this.options.uiConfig = merge(clonedeep(whitelabel), this.options.uiConfig);
+    this.options.uiConfig = deepmerge(cloneDeep(whitelabel), this.options.uiConfig);
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
@@ -105,7 +105,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      params.modalConfig = merge(clonedeep(params.modalConfig), adapterConfig);
+      params.modalConfig = deepmerge(cloneDeep(params.modalConfig), adapterConfig);
     }
 
     await this.loginModal.initModal();
@@ -146,7 +146,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (!privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required");
           }
-          const finalOpenloginAdapterSettings: Partial<OpenLoginOptions> = {
+          const finalOpenloginAdapterSettings: Partial<AuthOptions> = {
             ...defaultOptions.adapterSettings,
             clientId,
             network: web3AuthNetwork,

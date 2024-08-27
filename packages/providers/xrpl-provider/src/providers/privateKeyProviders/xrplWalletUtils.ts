@@ -1,4 +1,4 @@
-import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 import { CustomChainConfig } from "@web3auth/base";
 import { generateSeed, sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";

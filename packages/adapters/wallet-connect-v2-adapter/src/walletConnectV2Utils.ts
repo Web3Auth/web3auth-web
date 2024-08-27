@@ -1,7 +1,7 @@
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { type JRPCRequest, providerErrors, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
+import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { WalletLoginError } from "@web3auth/base";
 import type { AddEthereumChainParameter, IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 

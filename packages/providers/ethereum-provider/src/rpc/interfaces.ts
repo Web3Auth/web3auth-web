@@ -1,6 +1,6 @@
 import type { AccessListEIP2930TxData, FeeMarketEIP1559TxData, TxData } from "@ethereumjs/tx";
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import type { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import type { JRPCRequest } from "@web3auth/auth";
 
 export interface IAccountHandlers {
   updatePrivatekey: (params: { privateKey: string }) => Promise<void>;

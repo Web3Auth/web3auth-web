@@ -1,5 +1,4 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { UX_MODE_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 
 // capture whitelabel only once
@@ -53,7 +52,7 @@ export const LOGIN_MODAL_EVENTS = {
   LOGIN: "LOGIN",
   DISCONNECT: "DISCONNECT",
   MODAL_VISIBILITY: "MODAL_VISIBILITY",
-};
+} as const;
 
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];

@@ -6,7 +6,7 @@ import {
   JRPCResponse,
   mergeMiddleware,
   rpcErrors,
-} from "@toruslabs/openlogin-jrpc";
+} from "@web3auth/auth";
 
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";

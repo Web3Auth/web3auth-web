@@ -1,7 +1,7 @@
-import { privateToAddress } from "@ethereumjs/util";
+import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
 import { type MessageTypes, personalSign, signTypedData, type TypedDataV1, type TypedMessage } from "@metamask/eth-sig-util";
 import { signMessage } from "@toruslabs/base-controllers";
-import { JRPCRequest, providerErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
@@ -39,7 +39,7 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
-      if (txParams.input && !txParams.data) txParams.data = txParams.input;
+      if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
       const signedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<[string], string>({
         method: "eth_sendRawTransaction",
@@ -54,7 +54,7 @@ export function getProviderHandlers({
           message: "Provider is not initialized",
           code: 4902,
         });
-      if (txParams.input && !txParams.data) txParams.data = txParams.input;
+      if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
       const signedTx = await signTx(txParams, privKey, txFormatter);
       return `0x${signedTx.toString("hex")}`;
     },

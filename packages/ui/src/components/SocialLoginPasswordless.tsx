@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 

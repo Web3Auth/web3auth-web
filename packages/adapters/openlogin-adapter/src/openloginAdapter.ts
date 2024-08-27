@@ -1,5 +1,4 @@
-import OpenLogin from "@toruslabs/openlogin";
-import { LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin-utils";
+import { Auth, AuthOptions, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -23,10 +22,10 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import merge from "lodash.merge";
+import deepmerge from "deepmerge";
 
 import { getOpenloginDefaultOptions } from "./config";
-import type { LoginSettings, OpenloginAdapterOptions, PrivateKeyProvider } from "./interface";
+import type { AuthAdapterOptions, LoginSettings, PrivateKeyProvider } from "./interface";
 
 export type OpenloginLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -40,7 +39,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
-  public openloginInstance: OpenLogin | null = null;
+  public openloginInstance: Auth | null = null;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -48,11 +47,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public privateKeyProvider: PrivateKeyProvider | null = null;
 
-  private openloginOptions: OpenloginAdapterOptions["adapterSettings"];
+  private openloginOptions: AuthAdapterOptions["adapterSettings"];
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  constructor(params: OpenloginAdapterOptions = {}) {
+  constructor(params: AuthAdapterOptions = {}) {
     super(params);
     this.setAdapterSettings({
       ...params.adapterSettings,
@@ -93,10 +92,10 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       replaceUrlOnRedirect: isRedirectResult,
       useCoreKitKey: this.useCoreKitKey,
     };
-    this.openloginInstance = new OpenLogin({
+    this.openloginInstance = new Auth({
       ...this.openloginOptions,
       clientId: this.clientId,
-      network: this.openloginOptions.network || this.web3AuthNetwork || OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
+      network: this.openloginOptions.network || this.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     });
     log.debug("initializing openlogin adapter init");
 
@@ -118,7 +117,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       }
     } catch (error) {
       log.error("Failed to connect with cached openlogin provider", error);
-      this.emit("ERRORED", error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -133,7 +132,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       log.error("Failed to connect with openlogin provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       if ((error as Error)?.message.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
       } else if (error instanceof Web3AuthError) {
@@ -190,15 +189,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
+  setAdapterSettings(adapterSettings: Partial<AuthOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
-    this.openloginOptions = merge(
+    this.openloginOptions = deepmerge(
       defaultOptions.adapterSettings,
-      this.openloginOptions,
-      adapterSettings
-    ) as OpenloginAdapterOptions["adapterSettings"];
+      deepmerge(this.openloginOptions, adapterSettings)
+    ) as AuthAdapterOptions["adapterSettings"];
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
     }
@@ -265,9 +263,12 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
       await this.openloginInstance.login(
-        merge(this.loginSettings, params, {
-          extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-        })
+        deepmerge(
+          this.loginSettings,
+          deepmerge(params, {
+            extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
+          })
+        )
       );
     }
     let finalPrivKey = this._getFinalPrivKey();

@@ -1,7 +1,6 @@
-import "../css/web3auth.css";
+import "./css/web3auth.css";
 
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { applyWhiteLabelTheme, LANGUAGES } from "@toruslabs/openlogin-utils";
+import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -48,7 +47,7 @@ function createWrapper(parentZIndex: string): HTMLElement {
   return wrapper;
 }
 
-class LoginModal extends SafeEventEmitter {
+export class LoginModal extends SafeEventEmitter {
   private uiConfig: UIConfig;
 
   private stateEmitter: SafeEventEmitter;
@@ -344,5 +343,3 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 }
-
-export default LoginModal;

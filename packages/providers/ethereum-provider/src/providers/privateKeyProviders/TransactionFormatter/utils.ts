@@ -1,7 +1,7 @@
 import { isValidAddress } from "@ethereumjs/util";
 import { type MessageTypeProperty, TYPED_MESSAGE_SCHEMA, type TypedDataV1Field, type TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
-import { rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { rpcErrors } from "@web3auth/auth";
 import { isHexStrict } from "@web3auth/base";
 import assert from "assert";
 import { BigNumber } from "bignumber.js";

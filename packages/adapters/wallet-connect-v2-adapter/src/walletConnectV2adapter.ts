@@ -24,7 +24,7 @@ import {
   Web3AuthError,
 } from "@web3auth/base";
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
-import merge from "lodash.merge";
+import deepmerge from "deepmerge";
 
 import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
@@ -92,7 +92,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       this.adapterOptions.loginSettings = wc2Settings.loginSettings;
     }
 
-    this.adapterOptions.adapterSettings = merge(wc2Settings.adapterSettings, this.adapterOptions.adapterSettings);
+    this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings, this.adapterOptions.adapterSettings);
 
     const { adapterSettings } = this.adapterOptions;
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
@@ -113,7 +113,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
           await this.onConnectHandler();
         } catch (error) {
           log.error("wallet auto connect", error);
-          this.emit(ADAPTER_EVENTS.ERRORED, error);
+          this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
         }
       } else {
         this.status = ADAPTER_STATUS.NOT_READY;
@@ -141,7 +141,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = true;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
 
       const finalError =
         error instanceof Web3AuthError
@@ -291,7 +291,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
         }
       }
       log.error("error while creating new wallet connect session", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       throw error;
     }
   }

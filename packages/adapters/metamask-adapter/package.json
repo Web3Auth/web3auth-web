@@ -10,8 +10,9 @@
     "ethereum",
     "metamask"
   ],
-  "main": "dist/metamaskAdapter.cjs.js",
-  "module": "dist/metamaskAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/metamaskAdapter.umd.min.js",
   "jsdelivr": "dist/metamaskAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",

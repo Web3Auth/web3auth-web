@@ -1,4 +1,4 @@
-import { JRPCEngine, providerErrors, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, isHexStrict, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
@@ -82,7 +82,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   private async handleInjectedProviderUpdate(injectedProvider: ITorusWalletProvider): Promise<void> {
     injectedProvider.on("accountsChanged", async (accounts: string[]) => {
-      this.emit("accountsChanged", accounts);
+      this.emit("accountsChanged", { accounts });
     });
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;

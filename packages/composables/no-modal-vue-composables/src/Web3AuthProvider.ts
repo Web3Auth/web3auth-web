@@ -9,7 +9,7 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
+import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
@@ -25,7 +25,7 @@ export default defineComponent({
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
     const isConnected = ref(false);
     const provider = ref<IProvider | null>(null);
-    const userInfo = ref<Partial<OpenloginUserInfo> | null>(null);
+    const userInfo = ref<Partial<AuthUserInfo> | null>(null);
     const isMFAEnabled = ref(false);
     const isInitialized = ref(false);
     const status = ref<ADAPTER_STATUS_TYPE | null>(null);

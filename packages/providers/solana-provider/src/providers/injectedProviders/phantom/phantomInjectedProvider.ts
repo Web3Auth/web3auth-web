@@ -1,4 +1,4 @@
-import { JRPCMiddleware } from "@toruslabs/openlogin-jrpc";
+import { JRPCMiddleware } from "@web3auth/auth";
 
 import { IPhantomWalletProvider } from "../../../interface";
 import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";

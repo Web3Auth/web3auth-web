@@ -1,10 +1,11 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import { SafeEventEmitter, SafeEventEmitterProvider } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   CHAIN_NAMESPACES,
+  cloneDeep,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   fetchProjectConfig,
@@ -31,11 +32,12 @@ import {
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import clonedeep from "lodash.clonedeep";
-import merge from "lodash.merge";
+import deepmerge from "deepmerge";
+
+import { Web3AuthNoModalEvents } from "./interfaces";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
-export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
+export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
   public connectedAdapterName: WALLET_ADAPTER_TYPE | null = null;
@@ -128,7 +130,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
         const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
 
         const { whitelabel } = projectConfig;
-        this.coreOptions.uiConfig = merge(clonedeep(whitelabel), this.coreOptions.uiConfig);
+        this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel), this.coreOptions.uiConfig);
         if (!this.coreOptions.uiConfig.mode) this.coreOptions.uiConfig.mode = "light";
 
         const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
@@ -250,7 +252,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     const provider = await this.walletAdapters[walletName].connect(loginParams);
-    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
+    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider));
     return this.provider;
   }
 
@@ -300,16 +302,16 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
-      this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || provider);
+      this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider));
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
       this.connectToPlugins(data);
-      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { ...data });
     });
 
-    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async (data) => {
+    walletAdapter.on(ADAPTER_EVENTS.DISCONNECTED, async () => {
       // get back to ready state for rehydrating.
       this.status = ADAPTER_STATUS.READY;
       if (storageAvailable(this.storage)) {
@@ -333,7 +335,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
         })
       );
       this.connectedAdapterName = null;
-      this.emit(ADAPTER_EVENTS.DISCONNECTED, data);
+      this.emit(ADAPTER_EVENTS.DISCONNECTED);
     });
     walletAdapter.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       this.status = ADAPTER_STATUS.CONNECTING;

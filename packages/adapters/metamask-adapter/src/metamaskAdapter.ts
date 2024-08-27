@@ -69,7 +69,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
         await this.connect();
       }
     } catch (error) {
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -123,7 +123,7 @@ class MetamaskAdapter extends BaseEvmAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with metamask wallet", error);
     }

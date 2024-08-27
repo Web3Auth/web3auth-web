@@ -1,5 +1,5 @@
 import { isHexString } from "@ethereumjs/util";
-import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
@@ -107,7 +107,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
     if (currentPubKey !== updatePubKey) {
       await this.setupProvider(params.signMethods);
-      this._providerEngineProxy.emit("accountsChanged", {
+      this.emit("accountsChanged", {
         accounts: await this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" }),
       });
     }

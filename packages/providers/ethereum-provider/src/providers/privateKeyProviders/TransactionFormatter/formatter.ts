@@ -1,6 +1,6 @@
 import { type Common } from "@ethereumjs/common";
-import { addHexPrefix, AddressLike, stripHexPrefix } from "@ethereumjs/util";
-import { Block } from "@toruslabs/openlogin-jrpc";
+import { addHexPrefix, AddressLike, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
+import { Block } from "@web3auth/auth";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import BigNumber from "bignumber.js";
 
@@ -73,7 +73,7 @@ export class TransactionFormatter {
             clonedTxParams.gasLimit = defaultGasLimit;
           }
         } else {
-          clonedTxParams.gasLimit = clonedTxParams.gas;
+          clonedTxParams.gasLimit = addHexPrefix(clonedTxParams.gas);
         }
       }
       return clonedTxParams;
@@ -86,7 +86,7 @@ export class TransactionFormatter {
           clonedTxParams.gasLimit = defaultGasLimit;
         }
       } else {
-        clonedTxParams.gasLimit = clonedTxParams.gas;
+        clonedTxParams.gasLimit = addHexPrefix(clonedTxParams.gas);
       }
     }
 
@@ -106,26 +106,26 @@ export class TransactionFormatter {
           typeof defaultMaxPriorityFeePerGas === "string" ? stripHexPrefix(defaultMaxPriorityFeePerGas) : defaultMaxPriorityFeePerGas,
           typeof clonedTxParams.gasPrice === "string" ? stripHexPrefix(clonedTxParams.gasPrice) : clonedTxParams.gasPrice
         )
-          ? defaultMaxPriorityFeePerGas
-          : clonedTxParams.gasPrice;
+          ? addHexPrefix(defaultMaxPriorityFeePerGas)
+          : addHexPrefix(clonedTxParams.gasPrice);
       } else {
         if (defaultMaxFeePerGas && !clonedTxParams.maxFeePerGas) {
           // If the dapp has not set the gasPrice or the maxFeePerGas, then we set maxFeePerGas
           // with the one returned by the gasFeeController, if that is available.
-          clonedTxParams.maxFeePerGas = defaultMaxFeePerGas;
+          clonedTxParams.maxFeePerGas = addHexPrefix(defaultMaxFeePerGas);
         }
 
         if (defaultMaxPriorityFeePerGas && !clonedTxParams.maxPriorityFeePerGas) {
           // If the dapp has not set the gasPrice or the maxPriorityFeePerGas, then we set maxPriorityFeePerGas
           // with the one returned by the gasFeeController, if that is available.
-          clonedTxParams.maxPriorityFeePerGas = defaultMaxPriorityFeePerGas;
+          clonedTxParams.maxPriorityFeePerGas = addHexPrefix(defaultMaxPriorityFeePerGas);
         }
 
         if (defaultGasPrice && !clonedTxParams.maxFeePerGas) {
           // If the dapp has not set the gasPrice or the maxFeePerGas, and no maxFeePerGas is available
           // then we set maxFeePerGas to the defaultGasPrice, assuming it is
           // available.
-          clonedTxParams.maxFeePerGas = defaultGasPrice;
+          clonedTxParams.maxFeePerGas = addHexPrefix(defaultGasPrice);
         }
 
         if (clonedTxParams.maxFeePerGas && !clonedTxParams.maxPriorityFeePerGas) {
@@ -157,7 +157,7 @@ export class TransactionFormatter {
     }
 
     clonedTxParams.type = this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY;
-    clonedTxParams.chainId = this.chainConfig.chainId;
+    clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }
 
@@ -308,7 +308,7 @@ export class TransactionFormatter {
     return { gasPrice: addHexPrefix(decGWEIToHexWEI(gasPrice)) };
   }
 
-  private async estimateTxGas(txMeta: TransactionParams): Promise<string> {
+  private async estimateTxGas(txMeta: TransactionParams): Promise<PrefixedHexString> {
     const txParams = { ...txMeta };
 
     // `eth_estimateGas` can fail if the user has insufficient balance for the
@@ -319,7 +319,7 @@ export class TransactionFormatter {
     delete txParams.gasPrice;
     delete txParams.maxFeePerGas;
     delete txParams.maxPriorityFeePerGas;
-    const gas = (await this.providerProxy.request<[TransactionParams], string>({ method: "eth_estimateGas", params: [txParams] })) as string;
+    const gas = await this.providerProxy.request<[TransactionParams], PrefixedHexString>({ method: "eth_estimateGas", params: [txParams] });
     return gas;
   }
 
@@ -344,7 +344,7 @@ export class TransactionFormatter {
     return { blockGasLimit: block.gasLimit as string, estimatedGasHex };
   }
 
-  private addGasBuffer(initialGasLimitHex: string, blockGasLimitHex: string, multiplier = 1.5): string {
+  private addGasBuffer(initialGasLimitHex: string, blockGasLimitHex: string, multiplier = 1.5): PrefixedHexString {
     const initialGasLimitBn = hexToBn(initialGasLimitHex);
     const blockGasLimitBn = hexToBn(blockGasLimitHex);
     const upperGasLimitBn = blockGasLimitBn.muln(0.9);
@@ -371,7 +371,7 @@ export class TransactionFormatter {
       txCategory = TRANSACTION_TYPES.DEPLOY_CONTRACT;
     } else {
       try {
-        code = (await this.providerProxy.request<[AddressLike, string], string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
+        code = (await this.providerProxy.request<[AddressLike | "", string], string>({ method: "eth_getCode", params: [to, "latest"] })) as string;
       } catch (error) {
         log.warn(error);
       }
@@ -383,11 +383,11 @@ export class TransactionFormatter {
     return { transactionCategory: txCategory, code };
   }
 
-  private async getDefaultGasLimit(txParams: TransactionParams & { gas?: string }): Promise<string> {
+  private async getDefaultGasLimit(txParams: TransactionParams & { gas?: string }): Promise<PrefixedHexString> {
     const { transactionCategory } = await this.determineTransactionCategory({ ...txParams });
 
     if (txParams.gas) {
-      return txParams.gas;
+      return addHexPrefix(txParams.gas);
     }
 
     if (txParams.to && transactionCategory === TRANSACTION_TYPES.SENT_ETHER) {

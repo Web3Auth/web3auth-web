@@ -1,4 +1,4 @@
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
 import { IAccountHandlers } from "./interfaces";
 

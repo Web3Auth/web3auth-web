@@ -73,7 +73,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
       }
     } catch (error) {
       log.error("Failed to connect with cached phantom provider", error);
-      this.emit("ERRORED", error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -125,7 +125,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       throw error;
     }
   }
@@ -141,7 +141,7 @@ export class PhantomAdapter extends BaseSolanaAdapter<void> {
       }
       await super.disconnect();
     } catch (error: unknown) {
-      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
+      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message) as Web3AuthError);
     }
   }
 
