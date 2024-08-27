@@ -1,5 +1,5 @@
 import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE, Web3AuthNoModalEvents } from "@web3auth/base";
 
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
@@ -39,7 +39,7 @@ export interface UIConfig extends WhiteLabelData {
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
-  adapterListener: SafeEventEmitter;
+  adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 
   /**
    * UX Mode for the openlogin adapter
@@ -93,3 +93,8 @@ export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.sv
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
 
 export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
+
+export type StateEmitterEvents = {
+  STATE_UPDATED: (state: Partial<ModalState>) => void;
+  MOUNTED: () => void;
+};

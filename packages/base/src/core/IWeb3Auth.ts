@@ -1,6 +1,16 @@
 import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 
-import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, UserAuthInfo, UserInfo, WEB3AUTH_NETWORK_TYPE } from "../adapter/IAdapter";
+import {
+  ADAPTER_EVENTS,
+  ADAPTER_STATUS_TYPE,
+  AdapterEvents,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  UserAuthInfo,
+  UserInfo,
+  WEB3AUTH_NETWORK_TYPE,
+} from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
@@ -90,5 +100,10 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
 }
+
+export type Web3AuthNoModalEvents = AdapterEvents & {
+  [ADAPTER_EVENTS.READY]: () => void;
+  MODAL_VISIBILITY: (visibility: boolean) => void;
+};
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

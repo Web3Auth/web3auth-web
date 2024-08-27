@@ -4,7 +4,7 @@ import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
+import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
 import Button from "./Button";
@@ -16,7 +16,7 @@ import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 
 interface ModalProps {
-  stateListener: SafeEventEmitter;
+  stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;

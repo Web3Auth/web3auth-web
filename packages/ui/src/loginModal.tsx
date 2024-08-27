@@ -13,6 +13,7 @@ import {
   WALLET_ADAPTERS,
   WalletConnectV2Data,
   Web3AuthError,
+  Web3AuthNoModalEvents,
 } from "@web3auth/base";
 import { createRoot } from "react-dom/client";
 
@@ -26,6 +27,7 @@ import {
   MODAL_STATUS,
   ModalState,
   SocialLoginEventType,
+  StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
 import i18n from "./localeImport";
@@ -50,7 +52,7 @@ function createWrapper(parentZIndex: string): HTMLElement {
 export class LoginModal extends SafeEventEmitter {
   private uiConfig: UIConfig;
 
-  private stateEmitter: SafeEventEmitter;
+  private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
   constructor(uiConfig: UIConfig) {
     super();
@@ -66,7 +68,7 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
-    this.stateEmitter = new SafeEventEmitter();
+    this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.subscribeCoreEvents(this.uiConfig.adapterListener);
   }
 
@@ -287,7 +289,7 @@ export class LoginModal extends SafeEventEmitter {
     }
   };
 
-  private subscribeCoreEvents = (listener: SafeEventEmitter) => {
+  private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
     listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
