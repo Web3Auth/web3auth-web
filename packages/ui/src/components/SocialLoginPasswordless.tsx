@@ -28,17 +28,24 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const value = fieldValue;
-    const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
-    if (isEmailValid) {
-      return handleSocialLoginClick({ adapter, loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" } });
+    if (isEmailVisible) {
+      const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
+      if (isEmailValid) {
+        return handleSocialLoginClick({
+          adapter,
+          loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+        });
+      }
     }
-    const number = value.startsWith("+") ? value : `${countryCode}${value}`;
-    const result = await validatePhoneNumber(number);
-    if (result) {
-      return handleSocialLoginClick({
-        adapter,
-        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
-      });
+    if (isSmsVisible) {
+      const number = value.startsWith("+") ? value : `${countryCode}${value}`;
+      const result = await validatePhoneNumber(number);
+      if (result) {
+        return handleSocialLoginClick({
+          adapter,
+          loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+        });
+      }
     }
 
     setIsValidInput(false);
