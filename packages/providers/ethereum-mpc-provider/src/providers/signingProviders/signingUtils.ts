@@ -1,24 +1,18 @@
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
-import {
-  type MessageTypes,
-  TypedDataUtils,
-  type TypedDataV1,
-  type TypedDataV1Field,
-  type TypedMessage,
-  typedSignatureHash,
-} from "@metamask/eth-sig-util";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
-import { isHexStrict, log } from "@web3auth/base";
+import { log } from "@web3auth/base";
 import {
   IProviderHandlers,
   MessageParams,
+  SignTypedDataMessageV4,
   SignTypedDataVersion,
   TransactionFormatter,
   TransactionParams,
   TypedMessageParams,
-  validateTypedMessageParams,
+  validateTypedSignMessageDataV4,
 } from "@web3auth/ethereum-provider";
+import { TypedDataEncoder } from "ethers";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
@@ -120,18 +114,16 @@ function validateVersion(version: string, allowedVersions: string[]) {
 
 async function signTypedData(
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
-  data: unknown,
+  data: TypedMessageParams,
   version: SignTypedDataVersion
 ) {
   validateVersion(version, undefined); // Note: this is intentional;
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
-  const messageHash =
-    version === SignTypedDataVersion.V1
-      ? Buffer.from(stripHexPrefix(typedSignatureHash(data as TypedDataV1Field[])), "hex")
-      : TypedDataUtils.eip712Hash(data as TypedMessage<MessageTypes>, version);
-  const { v, r, s } = await sign(Buffer.from(messageHash.buffer));
+  const message: SignTypedDataMessageV4 = typeof data === "string" ? JSON.parse(data) : data;
+
+  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message)));
 
   let modifiedV = v;
   if (modifiedV <= 1) {
@@ -195,41 +187,7 @@ export function getProviderHandlers({
       const sig = personalSign(sign, msgParams.data);
       return sig;
     },
-    processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessage", msgParams);
-      const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy)
-        throw providerErrors.custom({
-          message: "Provider is not initialized",
-          code: 4902,
-        });
-      const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      const params = {
-        ...msgParams,
-        version: SignTypedDataVersion.V1,
-      };
-      await validateTypedMessageParams(params, finalChainId);
-      const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
-      const sig = signTypedData(sign, data, SignTypedDataVersion.V1);
-      return sig;
-    },
-    processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessageV3", msgParams);
-      const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy)
-        throw providerErrors.custom({
-          message: "Provider is not initialized",
-          code: 4902,
-        });
-      const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      await validateTypedMessageParams(msgParams, finalChainId);
-      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-      const sig = signTypedData(sign, data, SignTypedDataVersion.V3);
-      return sig;
-    },
-    processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+    processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
       log.debug("processTypedMessageV4", msgParams);
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
@@ -238,8 +196,7 @@ export function getProviderHandlers({
           code: 4902,
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      await validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedSignMessageDataV4(msgParams, chainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
