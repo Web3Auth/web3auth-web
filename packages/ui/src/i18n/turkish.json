@@ -4,6 +4,8 @@
     "adapter-loader.message1": "{{adapter}} doğrula",
     "adapter-loader.message2": "devam edecek hesap",
     "errors-invalid-number-email": "Geçersiz E-posta veya Telefon Numarası",
+    "errors-invalid-number": "Geçersiz Telefon Numarası",
+    "errors-invalid-email": "Geçersiz E-posta",
     "errors-required": "Zorunlu",
     "external.back": "Geri",
     "external.connect": "Cüzdan ile Bağlan",

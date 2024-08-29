@@ -4,6 +4,8 @@
     "adapter-loader.message1": "Bestätigen Sie Ihr {{adapter}}",
     "adapter-loader.message2": "Konto fortzusetzen",
     "errors-invalid-number-email": "Ungültige E-Mail-Adresse oder Telefonnummer",
+    "errors-invalid-number": "Ungültige Telefonnummer",
+    "errors-invalid-email": "Ungültige E-Mail",
     "errors-required": "Erforderlich",
     "external.back": "Zurück",
     "external.connect": "Mit Wallet verbinden",

@@ -4,6 +4,8 @@
     "adapter-loader.message1": "Verifique su {{adapter}}",
     "adapter-loader.message2": "cuenta para continuar",
     "errors-invalid-number-email": "Correo electrónico o número de teléfono inválido",
+    "errors-invalid-number": "Número de teléfono no válido",
+    "errors-invalid-email": "Correo electrónico no válido",
     "errors-required": "Campo obligatorio",
     "external.back": "Atrás",
     "external.connect": "Conectar con la billetera",

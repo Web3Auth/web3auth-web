@@ -4,6 +4,8 @@
     "adapter-loader.message1": "Vérifiez votre {{adapter}}",
     "adapter-loader.message2": "compte pour continuer",
     "errors-invalid-number-email": "Adresse e-mail ou numéro de téléphone invalide",
+    "errors-invalid-number": "Numéro de téléphone invalide",
+    "errors-invalid-email": "E-mail invalide",
     "errors-required": "Champ obligatoire",
     "external.back": "Retour",
     "external.connect": "Se connecter avec un portefeuille",
