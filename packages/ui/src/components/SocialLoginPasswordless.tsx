@@ -79,6 +79,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
     return "+(00)123456";
   }, [isEmailVisible, isSmsVisible]);
 
+  const invalidInputErrorMessage = useMemo(() => {
+    if (isEmailVisible && isSmsVisible) return "modal.errors-invalid-number-email";
+    if (isEmailVisible) return "modal.errors-invalid-email";
+    return "modal.errors-invalid-number";
+  }, [isEmailVisible, isSmsVisible]);
+
   return (
     <div className="w3ajs-passwordless w3a-group w3a-group--passwordless">
       <div className="w3a-group__title">
@@ -111,7 +117,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
           onChange={(e) => handleInputChange(e)}
         />
 
-        {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
+        {isValidInput === false && <div className="w3a-sms-field--error">{t(invalidInputErrorMessage)}</div>}
 
         <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w-full" type="submit">
           {t("modal.social.passwordless-cta")}
