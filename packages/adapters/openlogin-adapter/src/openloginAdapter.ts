@@ -193,10 +193,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     super.setAdapterSettings(adapterSettings);
     const defaultOptions = getOpenloginDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
-    this.openloginOptions = deepmerge(
+    this.openloginOptions = deepmerge.all([
       defaultOptions.adapterSettings,
-      deepmerge(this.openloginOptions, adapterSettings)
-    ) as AuthAdapterOptions["adapterSettings"];
+      this.openloginOptions,
+      adapterSettings,
+    ]) as AuthAdapterOptions["adapterSettings"];
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
     }
@@ -263,12 +264,13 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
       await this.openloginInstance.login(
-        deepmerge(
+        deepmerge.all([
           this.loginSettings,
-          deepmerge(params, {
+          params,
+          {
             extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-          })
-        )
+          },
+        ]) as OpenloginLoginParams
       );
     }
     let finalPrivKey = this._getFinalPrivKey();
