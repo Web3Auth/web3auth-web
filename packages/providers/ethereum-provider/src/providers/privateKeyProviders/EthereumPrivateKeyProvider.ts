@@ -68,9 +68,8 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     const existingKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" }),
-      });
+      const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
+      this.emit("accountsChanged", accounts);
     }
   }
 

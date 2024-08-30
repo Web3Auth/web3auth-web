@@ -172,8 +172,8 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
   }
 
   private subscribeToProviderEvents(provider: IProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

@@ -1,5 +1,5 @@
 export type ProviderEvents = {
-  accountsChanged: (data: { accounts: string[] }) => void;
+  accountsChanged: (accounts: string[]) => void;
   chainChanged: (chainId: string) => void;
   disconnect: () => void;
   connect: (data: { chainId: string }) => void;

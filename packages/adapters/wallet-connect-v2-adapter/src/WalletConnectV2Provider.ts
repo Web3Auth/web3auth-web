@@ -187,7 +187,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         this.update({
           accounts: data,
         });
-        this.emit("accountsChanged", data);
+        this.emit("accountsChanged", data as string[]);
       }
 
       if (event.name === "chainChanged") {

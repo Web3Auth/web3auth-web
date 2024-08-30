@@ -187,8 +187,8 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToProviderEvents(provider: IProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] } = { accounts: [] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

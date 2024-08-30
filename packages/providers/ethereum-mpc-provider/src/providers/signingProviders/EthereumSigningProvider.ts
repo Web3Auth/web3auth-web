@@ -107,9 +107,8 @@ export class EthereumSigningProvider extends BaseProvider<
     const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
     if (currentPubKey !== updatePubKey) {
       await this.setupProvider(params.signMethods);
-      this.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<unknown, string[]>({ method: "eth_accounts" }),
-      });
+      const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
+      this.emit("accountsChanged", accounts);
     }
   }
 

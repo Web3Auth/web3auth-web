@@ -70,9 +70,8 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
     const existingKey = await this._providerEngineProxy.request<never, string>({ method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<never, string[]>({ method: "requestAccounts" }),
-      });
+      const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "requestAccounts" });
+      this.emit("accountsChanged", accounts);
     }
   }
 
