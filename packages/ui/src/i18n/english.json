@@ -4,6 +4,8 @@
     "adapter-loader.message1": "Verify your {{adapter}}",
     "adapter-loader.message2": "account to continue",
     "errors-invalid-number-email": "Invalid Email or Phone Number",
+    "errors-invalid-number": "Invalid Phone Number",
+    "errors-invalid-email": "Invalid Email",
     "errors-required": "Required",
     "external.back": "Back",
     "external.connect": "Connect with Wallet",

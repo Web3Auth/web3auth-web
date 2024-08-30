@@ -4,6 +4,8 @@
     "adapter-loader.message1": "在您的{{adapter}}上验证",
     "adapter-loader.message2": "帐号继续",
     "errors-invalid-number-email": "无效的电子邮件或电话号码",
+    "errors-invalid-number": "电话号码无效",
+    "errors-invalid-email": "无效的电子邮件",
     "errors-required": "必填",
     "external.back": "返回",
     "external.connect": "使用钱包连接",

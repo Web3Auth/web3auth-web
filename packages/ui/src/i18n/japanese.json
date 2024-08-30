@@ -4,6 +4,8 @@
     "adapter-loader.message1": "{{adapter}} を確認する",
     "adapter-loader.message2": "続行するアカウント",
     "errors-invalid-number-email": "無効なメールアドレスまたは電話番号",
+    "errors-invalid-number": "無効な電話番号",
+    "errors-invalid-email": "無効な電子メール",
     "errors-required": "必須",
     "external.back": "戻る",
     "external.connect": "ウォレットと接続",

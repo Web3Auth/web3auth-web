@@ -4,6 +4,8 @@
     "adapter-loader.message1": "{{adapter}} 확인",
     "adapter-loader.message2": "계속할 계정",
     "errors-invalid-number-email": "잘못된 이메일 또는 전화번호",
+    "errors-invalid-number": "잘못된 전화번호",
+    "errors-invalid-email": "잘못된 이메일",
     "errors-required": "필수",
     "external.back": "뒤로",
     "external.connect": "지갑에 연결",

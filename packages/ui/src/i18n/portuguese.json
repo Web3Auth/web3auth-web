@@ -4,6 +4,8 @@
     "adapter-loader.message1": "Verifique o(a) seu/sua {{adapter}}",
     "adapter-loader.message2": "conta para continuar",
     "errors-invalid-number-email": "Email ou número de telefone inválido",
+    "errors-invalid-number": "Número de telefone inválido",
+    "errors-invalid-email": "E-mail inválido",
     "errors-required": "Obrigatório",
     "external.back": "Voltar",
     "external.connect": "Conectar com carteira",
