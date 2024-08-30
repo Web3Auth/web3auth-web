@@ -219,7 +219,7 @@ export default function Modal(props: ModalProps) {
               ) : (
                 <ExternalWallets
                   modalStatus={modalState.status}
-                  showBackButton={areSocialLoginsVisible}
+                  showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
                   handleExternalWalletClick={preHandleExternalWalletClick}
                   walletConnectUri={modalState.walletConnectUri}
                   wcAdapters={modalState.wcAdapters}

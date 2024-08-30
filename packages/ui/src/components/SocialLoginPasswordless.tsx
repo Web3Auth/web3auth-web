@@ -28,17 +28,24 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const value = fieldValue;
-    const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
-    if (isEmailValid) {
-      return handleSocialLoginClick({ adapter, loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" } });
+    if (isEmailVisible) {
+      const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
+      if (isEmailValid) {
+        return handleSocialLoginClick({
+          adapter,
+          loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+        });
+      }
     }
-    const number = value.startsWith("+") ? value : `${countryCode}${value}`;
-    const result = await validatePhoneNumber(number);
-    if (result) {
-      return handleSocialLoginClick({
-        adapter,
-        loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
-      });
+    if (isSmsVisible) {
+      const number = value.startsWith("+") ? value : `${countryCode}${value}`;
+      const result = await validatePhoneNumber(number);
+      if (result) {
+        return handleSocialLoginClick({
+          adapter,
+          loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+        });
+      }
     }
 
     setIsValidInput(false);
@@ -72,6 +79,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
     return "+(00)123456";
   }, [isEmailVisible, isSmsVisible]);
 
+  const invalidInputErrorMessage = useMemo(() => {
+    if (isEmailVisible && isSmsVisible) return "modal.errors-invalid-number-email";
+    if (isEmailVisible) return "modal.errors-invalid-email";
+    return "modal.errors-invalid-number";
+  }, [isEmailVisible, isSmsVisible]);
+
   return (
     <div className="w3ajs-passwordless w3a-group w3a-group--passwordless">
       <div className="w3a-group__title">
@@ -81,7 +94,11 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
             <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
             <div className="absolute z-20 flex-col items-center hidden mb-5 top-4 group-hover:flex">
               <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
-              <div className="relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg">
+              <div
+                className={`relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg ${
+                  isSmsVisible && !isEmailVisible ? "left-20" : "left-8"
+                }`}
+              >
                 <div className="mb-1 text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.popup.phone-header")}</div>
                 <div className="text-xs text-app-gray-400">{t("modal.popup.phone-body")}</div>
               </div>
@@ -104,7 +121,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
           onChange={(e) => handleInputChange(e)}
         />
 
-        {isValidInput === false && <div className="w3a-sms-field--error">{t("modal.errors-invalid-number-email")}</div>}
+        {isValidInput === false && <div className="w3a-sms-field--error">{t(invalidInputErrorMessage)}</div>}
 
         <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w-full" type="submit">
           {t("modal.social.passwordless-cta")}
