@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-vue-composables",
-  "version": "8.12.7",
+  "version": "8.13.0",
   "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-vue-composables",
