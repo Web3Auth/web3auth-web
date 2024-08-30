@@ -10,8 +10,9 @@
     "ethereum",
     "coinbase"
   ],
-  "main": "dist/coinbaseAdapter.cjs.js",
-  "module": "dist/coinbaseAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/coinbaseAdapter.umd.min.js",
   "jsdelivr": "dist/coinbaseAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",

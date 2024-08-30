@@ -1,5 +1,5 @@
 import { get, post } from "@toruslabs/http-helpers";
-import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@toruslabs/openlogin-utils";
+import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@web3auth/auth";
 import { log, LoginMethodConfig, WALLET_ADAPTERS, WalletInitializationError } from "@web3auth/base";
 
 import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";

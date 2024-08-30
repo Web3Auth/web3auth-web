@@ -1,5 +1,5 @@
 import { Connection } from "@solana/web3.js";
-import { JRPCRequest, providerErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { IBaseWalletProvider, SolflareWallet, TransactionOrVersionedTransaction } from "../../../interface";

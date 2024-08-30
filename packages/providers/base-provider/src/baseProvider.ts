@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/auth";
 import {
   CustomChainConfig,
   IBaseProvider,
@@ -9,6 +9,8 @@ import {
   WalletInitializationError,
   WalletProviderError,
 } from "@web3auth/base";
+
+import { BaseProviderEvents } from "./interfaces";
 
 export interface BaseProviderState extends BaseState {
   chainId: string;
@@ -21,7 +23,7 @@ export interface BaseProviderConfig extends BaseConfig {
 }
 
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
-  extends BaseController<C, S>
+  extends BaseController<C, S, BaseProviderEvents<S>>
   implements IBaseProvider<P>
 {
   // should be Assigned in setupProvider

@@ -1,4 +1,4 @@
-import { BaseRedirectParams, LoginParams, OpenLoginOptions } from "@toruslabs/openlogin-utils";
+import { AuthOptions, BaseRedirectParams, LoginParams } from "@web3auth/auth";
 import { BaseAdapterSettings, IBaseProvider } from "@web3auth/base";
 
 export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
@@ -7,11 +7,11 @@ type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick
 
 export type PrivateKeyProvider = IBaseProvider<string>;
 
-export interface OpenloginAdapterOptions extends BaseAdapterSettings {
-  adapterSettings?: MakeOptional<OpenLoginOptions, "clientId" | "network">;
+export interface AuthAdapterOptions extends BaseAdapterSettings {
+  adapterSettings?: MakeOptional<AuthOptions, "clientId" | "network">;
   loginSettings?: LoginSettings;
   privateKeyProvider?: PrivateKeyProvider;
 }
 
-export * from "@toruslabs/openlogin-utils";
-export { type LoginConfig } from "@toruslabs/openlogin-utils";
+export * from "@web3auth/auth";
+export { type LoginConfig } from "@web3auth/auth";

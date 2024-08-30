@@ -1,6 +1,6 @@
 import { Keypair, VersionedTransaction } from "@solana/web3.js";
-import { JRPCRequest, providerErrors, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import nacl from "@toruslabs/tweetnacl-js";
+import { JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/base";
 import bs58 from "bs58";
 

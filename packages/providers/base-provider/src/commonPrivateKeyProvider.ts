@@ -7,7 +7,7 @@ import {
   JRPCRequest,
   JRPCResponse,
   providerFromEngine,
-} from "@toruslabs/openlogin-jrpc";
+} from "@web3auth/auth";
 import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";

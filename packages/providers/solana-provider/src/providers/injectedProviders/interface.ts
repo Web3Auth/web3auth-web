@@ -1,4 +1,4 @@
-import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import type { SafeEventEmitter } from "@web3auth/auth";
 import { RequestArguments } from "@web3auth/base";
 
 export interface InjectedProvider extends SafeEventEmitter {

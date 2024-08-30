@@ -1,4 +1,4 @@
-import type { LoginParams, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type {
   ADAPTER_STATUS_TYPE,
   CustomChainConfig,
@@ -25,7 +25,7 @@ export interface Web3AuthProviderProps {
 interface IBaseWeb3AuthComposableContext {
   isConnected: Ref<boolean>;
   provider: Ref<IProvider | null>;
-  userInfo: Ref<Partial<OpenloginUserInfo> | null>;
+  userInfo: Ref<Partial<AuthUserInfo> | null>;
   isMFAEnabled: Ref<boolean>;
   isInitialized: Ref<boolean>;
   status: Ref<ADAPTER_STATUS_TYPE | null>;

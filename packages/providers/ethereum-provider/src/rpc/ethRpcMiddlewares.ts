@@ -6,7 +6,7 @@ import {
   JRPCResponse,
   mergeMiddleware,
   rpcErrors,
-} from "@toruslabs/openlogin-jrpc";
+} from "@web3auth/auth";
 
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
@@ -18,8 +18,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     processTransaction,
     processSignTransaction,
     processEthSignMessage,
-    processTypedMessage,
-    processTypedMessageV3,
     processTypedMessageV4,
     processPersonalMessage,
   } = providerHandlers;
@@ -33,8 +31,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processTransaction,
       processEthSignMessage,
       processSignTransaction,
-      processTypedMessage,
-      processTypedMessageV3,
       processTypedMessageV4,
       processPersonalMessage,
     }) as JRPCMiddleware<unknown, unknown>,

@@ -1,7 +1,6 @@
-import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { type JRPCRequest, providerErrors, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
+import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { WalletLoginError } from "@web3auth/base";
 import type { AddEthereumChainParameter, IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 
@@ -70,15 +69,7 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
       const methodRes = await sendJrpcRequest<string, string[]>(connector, chainId, "personal_sign", [msgParams.data, msgParams.from]);
       return methodRes;
     },
-    processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData", [msgParams.data, msgParams.from]);
-      return methodRes;
-    },
-    processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v3", [msgParams.from, msgParams.data]);
-      return methodRes;
-    },
-    processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
+    processTypedMessageV4: async (msgParams: TypedMessageParams): Promise<string> => {
       const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v4", [msgParams.from, msgParams.data]);
       return methodRes;
     },

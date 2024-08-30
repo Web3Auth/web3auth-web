@@ -3,8 +3,9 @@
   "version": "8.12.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/baseSolanaAdapter.cjs.js",
-  "module": "dist/baseSolanaAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/baseSolanaAdapter.umd.min.js",
   "jsdelivr": "dist/baseSolanaAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -19,7 +20,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^5.10.0",
+    "@toruslabs/base-controllers": "^6.0.2",
     "@web3auth/base": "^8.12.4",
     "bs58": "^5.0.0"
   },

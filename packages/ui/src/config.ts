@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE } from "@toruslabs/openlogin-utils";
+import { LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
 
 export function capitalizeFirstLetter(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);

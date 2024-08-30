@@ -1,5 +1,5 @@
 import { isHexString } from "@ethereumjs/util";
-import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
@@ -68,9 +68,8 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     const existingKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
       await this.setupProvider(params.privateKey);
-      this.emit("accountsChanged", {
-        accounts: await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" }),
-      });
+      const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
+      this.emit("accountsChanged", accounts);
     }
   }
 
