@@ -96,7 +96,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
               <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
               <div
                 className={`relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg ${
-                  isSmsVisible && !isEmailVisible ? "left-20" : "left-6"
+                  isSmsVisible && !isEmailVisible ? "left-20" : "left-8"
                 }`}
               >
                 <div className="mb-1 text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.popup.phone-header")}</div>
