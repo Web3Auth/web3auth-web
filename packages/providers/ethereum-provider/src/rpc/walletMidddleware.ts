@@ -1,4 +1,3 @@
-import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
@@ -15,8 +14,6 @@ export function createWalletMiddleware({
   processPersonalMessage,
   processTransaction,
   processSignTransaction,
-  processTypedMessage,
-  processTypedMessageV3,
   processTypedMessageV4,
 }: WalletMiddlewareOptions): JRPCMiddleware<string, unknown> {
   if (!getAccounts) {
@@ -115,56 +112,12 @@ export function createWalletMiddleware({
     res.result = await processEthSignMessage(msgParams, req);
   }
 
-  async function signTypedData(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processTypedMessage) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const message: TypedDataV1 = (req.params as TypedDataV1[])[0];
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[1], req);
-    const version = "V1";
-    const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams<TypedDataV1> = {
-      ...extraParams,
-      from: address,
-      data: message,
-    };
-
-    res.result = await processTypedMessage(msgParams, req, version);
-  }
-
-  async function signTypedDataV3(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processTypedMessageV3) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
-    const version = "V3";
-    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
-      data: message,
-      from: address,
-      version,
-    };
-
-    res.result = await processTypedMessageV3(msgParams, req, version);
-  }
-
   async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTypedMessageV4) {
       throw rpcErrors.methodNotSupported();
     }
 
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
-    const version = "V4";
-    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
-      data: message,
-      from: address,
-      version,
-    };
-
-    res.result = await processTypedMessageV4(msgParams, req, version);
+    res.result = await processTypedMessageV4((req.params as [TypedMessageParams])[0], req);
   }
 
   async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
@@ -229,8 +182,6 @@ export function createWalletMiddleware({
     eth_signTransaction: createAsyncMiddleware(signTransaction),
     // message signatures
     eth_sign: createAsyncMiddleware(ethSign),
-    eth_signTypedData: createAsyncMiddleware(signTypedData),
-    eth_signTypedData_v3: createAsyncMiddleware(signTypedDataV3),
     eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
     personal_sign: createAsyncMiddleware(personalSign),
   });

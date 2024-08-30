@@ -1,13 +1,12 @@
 import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
-import { type MessageTypes, personalSign, signTypedData, type TypedDataV1, type TypedMessage } from "@metamask/eth-sig-util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
-import { isHexStrict, log, SafeEventEmitterProvider } from "@web3auth/base";
+import { log, SafeEventEmitterProvider } from "@web3auth/base";
+import { SigningKey, TypedDataEncoder } from "ethers";
 
-import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
-import { SignTypedDataVersion } from "./TransactionFormatter";
+import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
-import { validateTypedMessageParams } from "./TransactionFormatter/utils";
+import { validateTypedSignMessageDataV4 } from "./TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
@@ -64,46 +63,11 @@ export function getProviderHandlers({
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
-      const sig = personalSign({ privateKey: privKeyBuffer, data: msgParams.data });
-      return sig;
+      const ethersKey = new SigningKey(privKeyBuffer);
+      const signature = ethersKey.sign(Buffer.from(msgParams.data));
+      return signature.serialized;
     },
-    processTypedMessage: async (msgParams: MessageParams<TypedDataV1>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessage", msgParams);
-      const privKeyBuffer = Buffer.from(privKey, "hex");
-      const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy)
-        throw providerErrors.custom({
-          message: "Provider is not initialized",
-          code: 4902,
-        });
-      const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      const params = {
-        ...msgParams,
-        version: SignTypedDataVersion.V1,
-      };
-      await validateTypedMessageParams(params, finalChainId);
-      const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
-      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V1 });
-      return sig;
-    },
-    processTypedMessageV3: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
-      log.debug("processTypedMessageV3", msgParams);
-      const privKeyBuffer = Buffer.from(privKey, "hex");
-      const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy)
-        throw providerErrors.custom({
-          message: "Provider is not initialized",
-          code: 4902,
-        });
-      const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      await validateTypedMessageParams(msgParams, finalChainId);
-      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V3 });
-      return sig;
-    },
-    processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, _: JRPCRequest<unknown>): Promise<string> => {
+    processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
       log.debug("processTypedMessageV4", msgParams);
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const providerEngineProxy = getProviderEngineProxy();
@@ -113,11 +77,11 @@ export function getProviderHandlers({
           code: 4902,
         });
       const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
-      const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      await validateTypedMessageParams(msgParams, finalChainId);
-      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-      const sig = signTypedData({ privateKey: privKeyBuffer, data, version: SignTypedDataVersion.V4 });
-      return sig;
+      await validateTypedSignMessageDataV4(msgParams, chainId);
+      const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      const ethersPrivateKey = new SigningKey(privKeyBuffer);
+      const signature = ethersPrivateKey.sign(TypedDataEncoder.hash(data.domain, data.types, data.message)).serialized;
+      return signature;
     },
   };
 }
