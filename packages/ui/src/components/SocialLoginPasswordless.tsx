@@ -94,7 +94,11 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
             <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
             <div className="absolute z-20 flex-col items-center hidden mb-5 top-4 group-hover:flex">
               <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
-              <div className="relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg">
+              <div
+                className={`relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg ${
+                  isSmsVisible && !isEmailVisible ? "left-20" : "left-6"
+                }`}
+              >
                 <div className="mb-1 text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.popup.phone-header")}</div>
                 <div className="text-xs text-app-gray-400">{t("modal.popup.phone-body")}</div>
               </div>
