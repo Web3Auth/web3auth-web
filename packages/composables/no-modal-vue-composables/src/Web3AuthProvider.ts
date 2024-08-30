@@ -23,12 +23,18 @@ export default defineComponent({
   },
   setup(props) {
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
-    const isConnected = ref(false);
     const provider = ref<IProvider | null>(null);
     const userInfo = ref<Partial<OpenloginUserInfo> | null>(null);
     const isMFAEnabled = ref(false);
-    const isInitialized = ref(false);
     const status = ref<ADAPTER_STATUS_TYPE | null>(null);
+
+    const isInitializing = ref(false);
+    const initError = ref<Error | null>(null);
+    const isInitialized = ref(false);
+
+    const isConnecting = ref(false);
+    const connectError = ref<Error | null>(null);
+    const isConnected = ref(false);
 
     const addPlugin = (plugin: IPlugin) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
@@ -42,8 +48,17 @@ export default defineComponent({
 
     const init = async () => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
-      await web3Auth.value.init();
-      triggerRef(web3Auth);
+      try {
+        initError.value = null;
+        isInitializing.value = true;
+        await web3Auth.value.init();
+        triggerRef(web3Auth);
+      } catch (error) {
+        initError.value = error as Error;
+        throw error;
+      } finally {
+        isInitializing.value = false;
+      }
     };
 
     const enableMFA = async (loginParams?: Partial<LoginParams>) => {
@@ -65,9 +80,18 @@ export default defineComponent({
 
     const connectTo = async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
-      const localProvider = await web3Auth.value.connectTo(walletName, loginParams);
-      triggerRef(web3Auth);
-      return localProvider;
+      try {
+        connectError.value = null;
+        isConnecting.value = true;
+        const localProvider = await web3Auth.value.connectTo(walletName, loginParams);
+        triggerRef(web3Auth);
+        return localProvider;
+      } catch (error) {
+        connectError.value = error as Error;
+        throw error;
+      } finally {
+        isConnecting.value = false;
+      }
     };
 
     const addAndSwitchChain = async (chainConfig: CustomChainConfig) => {
@@ -205,6 +229,10 @@ export default defineComponent({
       addPlugin,
       authenticateUser,
       switchChain,
+      isInitializing,
+      isConnecting,
+      initError,
+      connectError,
     });
   },
   render() {
