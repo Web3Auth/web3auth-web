@@ -23,10 +23,14 @@ export interface Web3AuthProviderProps {
 }
 
 interface IBaseWeb3AuthComposableContext {
+  isConnecting: Ref<boolean>;
+  connectError: Ref<Error | null>;
   isConnected: Ref<boolean>;
   provider: Ref<IProvider | null>;
   userInfo: Ref<Partial<OpenloginUserInfo> | null>;
   isMFAEnabled: Ref<boolean>;
+  isInitializing: Ref<boolean>;
+  initError: Ref<Error | null>;
   isInitialized: Ref<boolean>;
   status: Ref<ADAPTER_STATUS_TYPE | null>;
   enableMFA(params?: LoginParams): Promise<void>;
