@@ -132,7 +132,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel), this.coreOptions.uiConfig);
         if (!this.coreOptions.uiConfig.mode) this.coreOptions.uiConfig.mode = "light";
 
-        const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
+        const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
         if (smsOtpEnabled !== undefined) {
           openloginAdapter.setAdapterSettings({
             loginConfig: {
@@ -147,6 +147,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
         if (whitelist) {
           openloginAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
+        }
+
+        if (typeof keyExportEnabled === "boolean") {
+          this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
+          // dont know if this is required or not.
+          this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
         }
 
         if (this.coreOptions.privateKeyProvider) {

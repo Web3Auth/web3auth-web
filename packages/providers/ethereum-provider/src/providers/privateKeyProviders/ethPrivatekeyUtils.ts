@@ -22,15 +22,25 @@ async function signTx(txParams: TransactionParams & { gas?: string }, privKey: s
 export function getProviderHandlers({
   txFormatter,
   privKey,
+  keyExportEnabled,
   getProviderEngineProxy,
 }: {
   txFormatter: TransactionFormatter;
   privKey: string;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
+  keyExportEnabled: boolean;
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${Buffer.from(privateToAddress(Buffer.from(privKey, "hex"))).toString("hex")}`],
-    getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
+    getPrivateKey: async (_: JRPCRequest<unknown>) => {
+      if (!keyExportEnabled)
+        throw providerErrors.custom({
+          message: "Private key export is disabled",
+          code: 4902,
+        });
+
+      return privKey;
+    },
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)

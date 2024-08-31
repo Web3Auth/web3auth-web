@@ -47,7 +47,11 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   public async setupProvider(privKey: string): Promise<void> {
     const { chainNamespace } = this.config.chainConfig;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
-    const providerHandlers = await getProviderHandlers({ privKey, getProviderEngineProxy: this.getProviderEngineProxy.bind(this) });
+    const providerHandlers = await getProviderHandlers({
+      privKey,
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      keyExportEnabled: this.config.keyExportEnabled,
+    });
 
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
 
