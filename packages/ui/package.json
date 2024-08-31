@@ -10,7 +10,6 @@
     "ethereum",
     "solana"
   ],
-  "sideEffects": false,
   "main": "dist/lib.cjs/packages/ui/src/index.js",
   "module": "dist/lib.esm/packages/ui/src/index.js",
   "unpkg": "dist/ui.umd.min.js",

@@ -195,8 +195,8 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
     log.info("setting adapter settings", adapterSettings);
     this.openloginOptions = deepmerge.all([
       defaultOptions.adapterSettings,
-      this.openloginOptions,
-      adapterSettings,
+      this.openloginOptions || {},
+      adapterSettings || {},
     ]) as AuthAdapterOptions["adapterSettings"];
     if (adapterSettings.web3AuthNetwork) {
       this.openloginOptions.network = adapterSettings.web3AuthNetwork;
