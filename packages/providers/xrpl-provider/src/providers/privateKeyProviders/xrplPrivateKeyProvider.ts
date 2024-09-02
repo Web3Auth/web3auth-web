@@ -50,6 +50,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const providerHandlers = await getProviderHandlers({
       privKey,
       chainConfig: this.config.chainConfig,
+      keyExportEnabled: this.config.keyExportEnabled,
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
     const engine = new JRPCEngine();

@@ -47,6 +47,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       txFormatter,
       privKey,
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      keyExportEnabled: this.config.keyExportEnabled,
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();

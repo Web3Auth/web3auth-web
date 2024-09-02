@@ -2,7 +2,7 @@ import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
-import { SigningKey, TypedDataEncoder } from "ethers";
+import { hashMessage, SigningKey, TypedDataEncoder } from "ethers";
 
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
@@ -22,15 +22,25 @@ async function signTx(txParams: TransactionParams & { gas?: string }, privKey: s
 export function getProviderHandlers({
   txFormatter,
   privKey,
+  keyExportEnabled,
   getProviderEngineProxy,
 }: {
   txFormatter: TransactionFormatter;
   privKey: string;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
+  keyExportEnabled: boolean;
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${Buffer.from(privateToAddress(Buffer.from(privKey, "hex"))).toString("hex")}`],
-    getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
+    getPrivateKey: async (_: JRPCRequest<unknown>) => {
+      if (!keyExportEnabled)
+        throw providerErrors.custom({
+          message: "Private key export is disabled",
+          code: 4902,
+        });
+
+      return privKey;
+    },
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
@@ -64,7 +74,7 @@ export function getProviderHandlers({
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const ethersKey = new SigningKey(privKeyBuffer);
-      const signature = ethersKey.sign(Buffer.from(msgParams.data));
+      const signature = ethersKey.sign(hashMessage(msgParams.data));
       return signature.serialized;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
