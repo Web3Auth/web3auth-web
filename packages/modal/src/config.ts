@@ -80,7 +80,7 @@ export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const defaultOtherModalConfig = (): AdaptersModalConfig => ({
+export const defaultOtherModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.OTHER,
   adapters: {
     [EVM_ADAPTERS.OPENLOGIN]: {
@@ -90,4 +90,4 @@ export const defaultOtherModalConfig = (): AdaptersModalConfig => ({
       showOnDesktop: true,
     },
   },
-});
+};

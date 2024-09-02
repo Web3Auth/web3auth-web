@@ -52,7 +52,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   readonly options: Web3AuthOptions;
 
-  private modalConfig: AdaptersModalConfig = defaultOtherModalConfig();
+  private modalConfig: AdaptersModalConfig = clonedeep(defaultOtherModalConfig);
 
   constructor(options: Web3AuthOptions) {
     super(options);
