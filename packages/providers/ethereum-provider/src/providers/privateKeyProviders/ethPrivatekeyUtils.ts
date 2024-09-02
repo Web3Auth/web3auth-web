@@ -2,7 +2,7 @@ import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
-import { SigningKey, TypedDataEncoder } from "ethers";
+import { hashMessage, SigningKey, TypedDataEncoder } from "ethers";
 
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
@@ -74,7 +74,7 @@ export function getProviderHandlers({
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const ethersKey = new SigningKey(privKeyBuffer);
-      const signature = ethersKey.sign(Buffer.from(msgParams.data));
+      const signature = ethersKey.sign(hashMessage(msgParams.data));
       return signature.serialized;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
