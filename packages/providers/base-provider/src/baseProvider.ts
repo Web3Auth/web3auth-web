@@ -30,14 +30,16 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   // should be Assigned in setupProvider
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
 
-  private defaultKeyExportEnabled = true;
+  // set to true when the keyExportEnabled flag is set by code.
+  // This is to prevent the flag from being overridden by the dashboard config.
+  private keyExportFlagSetByCode = false;
 
   constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     if (!config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chainConfig");
     if (!config.chainConfig.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chainConfig");
-    if (typeof config.keyExportEnabled === "boolean") this.defaultKeyExportEnabled = false;
+    if (typeof config.keyExportEnabled === "boolean") this.keyExportFlagSetByCode = true;
     this.defaultState = {
       chainId: "loading",
     } as S;
@@ -130,7 +132,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   public setKeyExportFlag(flag: boolean): void {
-    if (this.defaultKeyExportEnabled) {
+    if (!this.keyExportFlagSetByCode) {
       this.configure({
         keyExportEnabled: flag,
       } as Partial<C>);
