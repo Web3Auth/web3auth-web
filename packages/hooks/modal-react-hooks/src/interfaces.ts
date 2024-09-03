@@ -9,11 +9,11 @@ export type Web3AuthContextConfig = {
 
 export interface Web3AuthProviderProps {
   config: Web3AuthContextConfig;
+  modalConfig?: Record<string, ModalConfig>;
 }
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
   web3Auth: Web3Auth | null;
-  initModal(params?: { modalConfig?: Record<string, ModalConfig> }): Promise<void>;
   connect(): Promise<IProvider>;
 }
 
