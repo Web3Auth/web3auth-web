@@ -46,21 +46,6 @@ export default defineComponent({
       return web3Auth.value.getPlugin(name);
     };
 
-    const init = async () => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      try {
-        initError.value = null;
-        isInitializing.value = true;
-        await web3Auth.value.init();
-        triggerRef(web3Auth);
-      } catch (error) {
-        initError.value = error as Error;
-        throw error;
-      } finally {
-        isInitializing.value = false;
-      }
-    };
-
     const enableMFA = async (loginParams?: Partial<LoginParams>) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
@@ -143,6 +128,22 @@ export default defineComponent({
       { immediate: true }
     );
 
+    watch([web3Auth], async () => {
+      if (web3Auth) {
+        try {
+          initError.value = null;
+          isInitializing.value = true;
+          await web3Auth.value.init();
+          triggerRef(web3Auth);
+        } catch (error) {
+          initError.value = error as Error;
+          throw error;
+        } finally {
+          isInitializing.value = false;
+        }
+      }
+    });
+
     watch([web3Auth, isConnected], () => {
       if (web3Auth.value) {
         const addState = async (web3AuthInstance: Web3AuthNoModal) => {
@@ -220,7 +221,6 @@ export default defineComponent({
       isMFAEnabled,
       status,
       getPlugin,
-      init,
       connectTo,
       enableMFA,
       logout,
