@@ -13,7 +13,6 @@ export interface Web3AuthProviderProps {
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
   web3Auth: Web3AuthNoModal | null;
-  init(): Promise<void>;
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
 }
 
