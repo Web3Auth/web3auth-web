@@ -19,6 +19,7 @@ export default defineComponent({
   name: "Web3AuthProvider",
   props: {
     config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
+    modalConfig: { type: Object as PropType<Record<string, ModalConfig>>, required: false },
   },
   setup(props) {
     const web3Auth = shallowRef<Web3Auth | null>(null);
@@ -43,21 +44,6 @@ export default defineComponent({
     const getPlugin = (name: string) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       return web3Auth.value.getPlugin(name);
-    };
-
-    const initModal = async (modalParams: { modalConfig?: Record<string, ModalConfig> } = {}) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      try {
-        initError.value = null;
-        isInitializing.value = true;
-        await web3Auth.value.initModal(modalParams);
-        triggerRef(web3Auth);
-      } catch (error) {
-        initError.value = error as Error;
-        throw error;
-      } finally {
-        isInitializing.value = false;
-      }
     };
 
     const enableMFA = async (loginParams?: Partial<LoginParams>) => {
@@ -142,6 +128,26 @@ export default defineComponent({
       { immediate: true }
     );
 
+    watch([web3Auth], async () => {
+      if (web3Auth) {
+        try {
+          initError.value = null;
+          isInitializing.value = true;
+          if (props.modalConfig) {
+            await web3Auth.value.initModal({ modalConfig: props.modalConfig });
+          } else {
+            await web3Auth.value.initModal();
+          }
+          triggerRef(web3Auth);
+        } catch (error) {
+          initError.value = error as Error;
+          throw error;
+        } finally {
+          isInitializing.value = false;
+        }
+      }
+    });
+
     watch([web3Auth, isConnected], () => {
       if (web3Auth.value) {
         const addState = async (web3AuthInstance: Web3Auth) => {
@@ -219,7 +225,6 @@ export default defineComponent({
       isMFAEnabled,
       status,
       getPlugin,
-      initModal,
       connect,
       enableMFA,
       logout,

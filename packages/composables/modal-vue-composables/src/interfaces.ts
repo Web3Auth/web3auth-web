@@ -1,6 +1,6 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo } from "@web3auth/base";
-import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
+import { type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
 import { Ref, ShallowRef } from "vue";
 
 export type Web3AuthContextConfig = {
@@ -36,6 +36,5 @@ interface IBaseWeb3AuthComposableContext {
 
 export interface IWeb3AuthContext extends IBaseWeb3AuthComposableContext {
   web3Auth: ShallowRef<Web3Auth | null>;
-  initModal(params?: { modalConfig?: Record<string, ModalConfig> }): Promise<void>;
   connect(): Promise<IProvider | null>;
 }
