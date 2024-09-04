@@ -4,6 +4,7 @@ import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/aut
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
+  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   IAdapterDataEvent,
   IWalletConnectExtensionAdapter,
@@ -12,6 +13,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletConnectV2Data,
+  WalletRegistry,
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
@@ -24,6 +26,7 @@ import {
   DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
   LOGIN_MODAL_EVENTS,
+  LoginModalProps,
   MODAL_STATUS,
   ModalState,
   SocialLoginEventType,
@@ -54,7 +57,11 @@ export class LoginModal extends SafeEventEmitter {
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  constructor(uiConfig: UIConfig) {
+  private chainNamespace: ChainNamespaceType;
+
+  private walletRegistry: WalletRegistry;
+
+  constructor(uiConfig: LoginModalProps) {
     super();
     this.uiConfig = uiConfig;
 
@@ -69,6 +76,8 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
+    this.chainNamespace = uiConfig.chainNamespace;
+    this.walletRegistry = uiConfig.walletRegistry;
     this.subscribeCoreEvents(this.uiConfig.adapterListener);
   }
 
@@ -191,6 +200,8 @@ export class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
+            chainNamespace={this.chainNamespace}
+            walletRegistry={this.walletRegistry}
           />
         </ThemedContext.Provider>
       );

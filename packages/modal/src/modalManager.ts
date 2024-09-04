@@ -6,6 +6,7 @@ import {
   cloneDeep,
   CustomChainConfig,
   fetchProjectConfig,
+  fetchWalletRegistry,
   getChainConfig,
   IBaseProvider,
   IProvider,
@@ -16,6 +17,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletInitializationError,
+  WalletRegistry,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
@@ -83,9 +85,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
+    let walletRegistry: WalletRegistry;
+    try {
+      walletRegistry = await fetchWalletRegistry("https://assets.web3auth.io/v1/wallet-registry.json");
+    } catch (e) {
+      log.error("Failed to fetch wallet registry", e);
+    }
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
+      chainNamespace: this.options.chainConfig.chainNamespace,
+      walletRegistry,
     });
     this.subscribeToLoginModalEvents();
 

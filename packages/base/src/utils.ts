@@ -18,6 +18,28 @@ export interface PROJECT_CONFIG_RESPONSE {
   whitelist?: WhitelistResponse;
 }
 
+export interface WalletRegistryItem {
+  name: string;
+  chains: string[];
+  walletConnect?: {
+    sdks: string[];
+  };
+  app?: {
+    android?: string;
+    ios?: string;
+    chrome?: string;
+    firefox?: string;
+    edge?: string;
+  };
+  mobile?: {
+    native?: string;
+    universal?: string;
+    inAppBrowser?: string;
+  };
+}
+
+export type WalletRegistry = Record<string, WalletRegistryItem>;
+
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
   let storageExists = false;
   let storageLength = 0;
@@ -64,6 +86,11 @@ export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: WEB3
   url.searchParams.append("network", web3AuthNetwork);
   url.searchParams.append("whitelist", "true");
   const res = await get<PROJECT_CONFIG_RESPONSE>(url.href);
+  return res;
+};
+
+export const fetchWalletRegistry = async (url?: string): Promise<WalletRegistry> => {
+  const res = await get<WalletRegistry>(url || "https://assets.web3auth.io/v1/wallet-registry.json");
   return res;
 };
 
