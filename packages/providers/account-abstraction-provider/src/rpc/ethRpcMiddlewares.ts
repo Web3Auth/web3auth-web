@@ -9,12 +9,14 @@ import {
 import { CustomChainConfig } from "@web3auth/base";
 import { TransactionParams } from "@web3auth/ethereum-provider";
 import { Hex } from "viem";
+import { SmartAccount } from "viem/account-abstraction";
 
 import BiconomyAdapter from "../providers/adapters/BiconomyAdapter";
 
 export async function createAaMiddleware(params: {
   ethProvider: SafeEventEmitterProvider;
   chainConfig: CustomChainConfig;
+  smartAccount: SmartAccount;
 }): Promise<JRPCMiddleware<unknown, unknown>> {
   const [eoaAddress] = (await params.ethProvider.request({ method: "eth_accounts" })) as string[];
 
