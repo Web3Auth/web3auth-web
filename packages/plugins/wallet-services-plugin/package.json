@@ -9,8 +9,9 @@
     "ethereum",
     "metamask"
   ],
-  "main": "dist/walletServicesPlugin.cjs.js",
-  "module": "dist/walletServicesPlugin.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/walletServicesPlugin.umd.min.js",
   "jsdelivr": "dist/walletServicesPlugin.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -30,11 +31,10 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^5.10.1",
-    "@toruslabs/openlogin-utils": "^8.2.1"
+    "@toruslabs/ethereum-controllers": "^6.0.2"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^8.3.0",
+    "@web3auth/auth": "^9.1.3",
     "@web3auth/base": "^8.12.4",
     "@web3auth/no-modal": "^8.12.4",
     "@web3auth/ws-embed": "^2.0.23",

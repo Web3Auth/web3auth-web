@@ -95,7 +95,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       }
     } catch (error) {
       log.error("Failed to connect with cached torus solana provider", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -137,7 +137,7 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with torus solana wallet", error);
     }

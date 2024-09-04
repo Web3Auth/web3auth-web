@@ -1,17 +1,26 @@
-import { JRPCRequest, JRPCResponse, Maybe, RequestArguments, SafeEventEmitter, SendCallBack } from "@toruslabs/openlogin-jrpc";
-import { OPENLOGIN_NETWORK, OPENLOGIN_NETWORK_TYPE, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import {
+  type AuthUserInfo,
+  JRPCRequest,
+  JRPCResponse,
+  Maybe,
+  RequestArguments,
+  SafeEventEmitter,
+  SendCallBack,
+  UX_MODE,
+  type UX_MODE_TYPE,
+  WEB3AUTH_NETWORK,
+  type WEB3AUTH_NETWORK_TYPE,
+} from "@web3auth/auth";
 
 import { getChainConfig } from "../chain/config";
 import { AdapterNamespaceType, CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { WalletInitializationError, WalletLoginError, WalletOperationsError } from "../errors";
-import { SafeEventEmitterProvider } from "../provider/IProvider";
+import { WalletInitializationError, WalletLoginError, WalletOperationsError, Web3AuthError } from "../errors";
+import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_ADAPTERS } from "../wallet";
 
-export type UserInfo = OpenloginUserInfo;
+export type UserInfo = AuthUserInfo;
 
-export type WEB3AUTH_NETWORK_TYPE = OPENLOGIN_NETWORK_TYPE;
-export const WEB3AUTH_NETWORK = OPENLOGIN_NETWORK;
-export { OPENLOGIN_NETWORK, type OPENLOGIN_NETWORK_TYPE, UX_MODE, type UX_MODE_TYPE } from "@toruslabs/openlogin-utils";
+export { UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE };
 
 export const ADAPTER_CATEGORY = {
   EXTERNAL: "external",
@@ -48,11 +57,11 @@ export interface BaseAdapterSettings {
   clientId?: string;
   sessionTime?: number;
   chainConfig?: CustomChainConfig;
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
   useCoreKitKey?: boolean;
 }
 
-export interface IProvider extends SafeEventEmitter {
+export interface IProvider extends SafeEventEmitter<ProviderEvents> {
   get chainId(): string;
   request<S, R>(args: RequestArguments<S>): Promise<Maybe<R>>;
   sendAsync<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;
@@ -67,6 +76,7 @@ export interface IBaseProvider<T> extends IProvider {
   addChain(chainConfig: CustomChainConfig): void;
   switchChain(params: { chainId: string }): Promise<void>;
   updateProviderEngineProxy(provider: SafeEventEmitterProvider): void;
+  setKeyExportFlag(flag: boolean): void;
 }
 
 export interface IAdapter<T> extends SafeEventEmitter {
@@ -76,7 +86,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
   sessionTime: number;
-  web3AuthNetwork: OPENLOGIN_NETWORK_TYPE;
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   useCoreKitKey: boolean | undefined;
   clientId: string;
   status: ADAPTER_STATUS_TYPE;
@@ -100,14 +110,30 @@ export type CONNECTED_EVENT_DATA = {
   reconnected: boolean;
 };
 
-export abstract class BaseAdapter<T> extends SafeEventEmitter implements IAdapter<T> {
+export interface IAdapterDataEvent {
+  adapterName: string;
+  data: unknown;
+}
+
+export type AdapterEvents = {
+  [ADAPTER_EVENTS.NOT_READY]: () => void;
+  [ADAPTER_EVENTS.READY]: (adapter: string) => void;
+  [ADAPTER_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
+  [ADAPTER_EVENTS.DISCONNECTED]: () => void;
+  [ADAPTER_EVENTS.CONNECTING]: (data: { adapter: string }) => void;
+  [ADAPTER_EVENTS.ERRORED]: (error: Web3AuthError) => void;
+  [ADAPTER_EVENTS.ADAPTER_DATA_UPDATED]: (data: IAdapterDataEvent) => void;
+  [ADAPTER_EVENTS.CACHE_CLEAR]: () => void;
+};
+
+export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> implements IAdapter<T> {
   public adapterData?: unknown = {};
 
   public sessionTime = 86400;
 
   public clientId: string;
 
-  public web3AuthNetwork: OPENLOGIN_NETWORK_TYPE = OPENLOGIN_NETWORK.MAINNET;
+  public web3AuthNetwork: WEB3AUTH_NETWORK_TYPE = WEB3AUTH_NETWORK.MAINNET;
 
   public useCoreKitKey: boolean = undefined;
 
@@ -311,7 +337,3 @@ export type WalletConnectV2Data = {
   uri: string;
   extensionAdapters: IWalletConnectExtensionAdapter[];
 };
-export interface IAdapterDataEvent {
-  adapterName: string;
-  data: unknown;
-}

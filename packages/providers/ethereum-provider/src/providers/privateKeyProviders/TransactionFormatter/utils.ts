@@ -1,15 +1,10 @@
 import { isValidAddress } from "@ethereumjs/util";
-import { type MessageTypeProperty, TYPED_MESSAGE_SCHEMA, type TypedDataV1Field, type TypedMessage, typedSignatureHash } from "@metamask/eth-sig-util";
 import { get } from "@toruslabs/http-helpers";
-import { rpcErrors } from "@toruslabs/openlogin-jrpc";
-import { isHexStrict } from "@web3auth/base";
-import assert from "assert";
 import { BigNumber } from "bignumber.js";
-import jsonschema from "jsonschema";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
-import { EIP1159GasData, EthereumGasFeeEstimates, LegacyGasData, SignTypedDataVersion } from "./interfaces";
+import { EIP1159GasData, EthereumGasFeeEstimates, LegacyGasData } from "./interfaces";
 
 export function normalizeGWEIDecimalNumbers(n: string | BigNumber): string {
   const numberAsWEIHex = decGWEIToHexWEI(n);
@@ -63,66 +58,47 @@ export async function fetchLegacyGasPriceEstimates(url: string): Promise<LegacyG
   };
 }
 
-export const validateTypedMessageParams = async (parameters: TypedMessageParams<unknown>, activeChainId: number) => {
-  try {
-    assert.ok(parameters && typeof parameters === "object", "Params must be an object.");
-    assert.ok("data" in parameters, 'Params must include a "data" field.');
-    assert.ok("from" in parameters, 'Params must include a "from" field.');
-    assert.ok(
-      typeof parameters.from === "string" && isValidAddress(parameters.from),
-      '"from" field must be a valid, lowercase, hexadecimal Ethereum address string.'
-    );
-    let data: unknown = null;
-    let chainId = null;
-
-    switch ((parameters as TypedMessageParams<unknown>).version) {
-      case SignTypedDataVersion.V1:
-        if (typeof parameters.data === "string") {
-          assert.doesNotThrow(() => {
-            data = JSON.parse(parameters.data as string);
-          }, '"data" must be a valid JSON string.');
-        } else {
-          // for backward compatiblity we validate for both string and object type.
-          data = parameters.data;
-        }
-        assert.ok(Array.isArray(data as unknown), "params.data must be an array.");
-        assert.doesNotThrow(() => {
-          typedSignatureHash(data as TypedDataV1Field[]);
-        }, "Signing data must be valid EIP-712 typed data.");
-        break;
-      case SignTypedDataVersion.V3:
-      case SignTypedDataVersion.V4: {
-        if (typeof parameters.data === "string") {
-          assert.doesNotThrow(() => {
-            data = JSON.parse(parameters.data as string);
-          }, '"data" must be a valid JSON string.');
-        } else {
-          // for backward compatiblity we validate for both string and object type.
-          data = parameters.data;
-        }
-        const typedData = data as TypedMessage<{
-          EIP712Domain: MessageTypeProperty[];
-        }>;
-
-        assert.ok(typedData.primaryType in typedData.types, `Primary type of "${typedData.primaryType}" has no type definition.`);
-        const validation = jsonschema.validate(typedData, TYPED_MESSAGE_SCHEMA.properties);
-        assert.strictEqual(validation.errors.length, 0, "Signing data must conform to EIP-712 schema. See https://git.io/fNtcx.");
-        chainId = typedData.domain?.chainId;
-        if (chainId) {
-          assert.ok(!Number.isNaN(activeChainId), `Cannot sign messages for chainId "${chainId}", because Web3Auth is switching networks.`);
-          if (typeof chainId === "string") {
-            chainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-          }
-          assert.strictEqual(chainId, activeChainId, `Provided chainId "${chainId}" must match the active chainId "${activeChainId}"`);
-        }
-        break;
-      }
-      default:
-        assert.fail(`Unknown typed data version "${(parameters as TypedMessageParams<unknown>).version}"`);
-    }
-  } catch (error) {
-    throw rpcErrors.invalidInput({
-      message: (error as Error)?.message,
-    });
+export function validateAddress(address: string, propertyName: string) {
+  if (!address || typeof address !== "string" || !isValidAddress(address)) {
+    throw new Error(`Invalid "${propertyName}" address: ${address} must be a valid string.`);
   }
-};
+}
+
+export async function validateTypedSignMessageDataV4(messageData: TypedMessageParams, currentChainId: string) {
+  validateAddress(messageData.from, "from");
+
+  if (!messageData.data || Array.isArray(messageData.data) || (typeof messageData.data !== "object" && typeof messageData.data !== "string")) {
+    throw new Error(`Invalid message "data": Must be a valid string or object.`);
+  }
+
+  let data;
+  if (typeof messageData.data === "object") {
+    data = messageData.data;
+  } else {
+    try {
+      data = JSON.parse(messageData.data);
+    } catch (e) {
+      throw new Error("Data must be passed as a valid JSON string.");
+    }
+  }
+
+  if (!currentChainId) {
+    throw new Error("Current chainId cannot be null or undefined.");
+  }
+
+  let { chainId } = data.domain;
+  if (chainId) {
+    if (typeof chainId === "string") {
+      chainId = parseInt(chainId, chainId.startsWith("0x") ? 16 : 10);
+    }
+
+    const activeChainId = parseInt(currentChainId, 16);
+    if (Number.isNaN(activeChainId)) {
+      throw new Error(`Cannot sign messages for chainId "${chainId}", because MetaMask is switching networks.`);
+    }
+
+    if (chainId !== activeChainId) {
+      throw new Error(`Provided chainId "${chainId}" must match the active chainId "${activeChainId}"`);
+    }
+  }
+}

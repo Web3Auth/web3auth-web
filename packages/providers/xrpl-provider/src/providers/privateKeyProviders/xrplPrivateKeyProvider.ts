@@ -1,4 +1,4 @@
-import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import type { PingResponse } from "xrpl";
@@ -50,6 +50,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const providerHandlers = await getProviderHandlers({
       privKey,
       chainConfig: this.config.chainConfig,
+      keyExportEnabled: this.config.keyExportEnabled,
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
     const engine = new JRPCEngine();

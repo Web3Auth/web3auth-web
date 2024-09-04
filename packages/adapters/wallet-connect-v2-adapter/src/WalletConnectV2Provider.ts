@@ -1,6 +1,6 @@
-import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
+import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
@@ -187,7 +187,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         this.update({
           accounts: data,
         });
-        this.emit("accountsChanged", data);
+        this.emit("accountsChanged", data as string[]);
       }
 
       if (event.name === "chainChanged") {

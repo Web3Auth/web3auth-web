@@ -18,6 +18,7 @@ import {
   log,
   UserInfo,
   WalletLoginError,
+  Web3AuthError,
 } from "@web3auth/base";
 import { BaseSolanaAdapter } from "@web3auth/base-solana-adapter";
 import { WalletStandardProvider } from "@web3auth/solana-provider";
@@ -87,7 +88,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       }
     } catch (error) {
       log.error("Failed to connect with cached solana injected provider", error);
-      this.emit("ERRORED", error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -117,7 +118,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       throw error;
     }
   }
@@ -134,7 +135,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       }
       await super.disconnect();
     } catch (error: unknown) {
-      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message));
+      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message) as Web3AuthError);
     }
   }
 

@@ -1,6 +1,5 @@
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -8,6 +7,7 @@ import {
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
+  IProvider,
   IWeb3AuthCore,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
@@ -47,7 +47,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public wsEmbedInstance: WsEmbed;
 
-  private provider: SafeEventEmitterProvider | null = null;
+  private provider: IProvider | null = null;
 
   private web3auth: IWeb3AuthCore | null = null;
 
@@ -186,9 +186,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     });
   }
 
-  private subscribeToProviderEvents(provider: SafeEventEmitterProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] } = { accounts: [] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+  private subscribeToProviderEvents(provider: IProvider) {
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

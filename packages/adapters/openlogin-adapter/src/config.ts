@@ -1,11 +1,11 @@
-import { OPENLOGIN_NETWORK, UX_MODE } from "@toruslabs/openlogin-utils";
+import { UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 
-import { OpenloginAdapterOptions } from "./interface";
+import { AuthAdapterOptions } from "./interface";
 
-export const getOpenloginDefaultOptions = (): OpenloginAdapterOptions => {
+export const getOpenloginDefaultOptions = (): AuthAdapterOptions => {
   return {
     adapterSettings: {
-      network: OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
+      network: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: "",
       uxMode: UX_MODE.POPUP,
     },

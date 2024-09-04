@@ -1,6 +1,7 @@
+import { cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
-import type { OPENLOGIN_NETWORK_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import type { WEB3AUTH_NETWORK_TYPE, WhiteLabelData } from "@web3auth/auth";
 
 import { WEB3AUTH_NETWORK } from "./adapter/IAdapter";
 
@@ -15,6 +16,7 @@ export interface PROJECT_CONFIG_RESPONSE {
   wallet_connect_enabled: boolean;
   wallet_connect_project_id?: string;
   whitelist?: WhitelistResponse;
+  key_export_enabled?: boolean;
 }
 
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
@@ -53,11 +55,11 @@ export const isHexStrict = (hex: string): boolean => {
   return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
 };
 
-export const signerHost = (web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE): string => {
+export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
   return SIGNER_MAP[web3AuthNetwork ?? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET];
 };
 
-export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: OPENLOGIN_NETWORK_TYPE): Promise<PROJECT_CONFIG_RESPONSE> => {
+export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: WEB3AUTH_NETWORK_TYPE): Promise<PROJECT_CONFIG_RESPONSE> => {
   const url = new URL(`${signerHost(web3AuthNetwork)}/api/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
@@ -86,3 +88,5 @@ export const normalizeWalletName = (name: string) => {
 
   return normalizedName;
 };
+
+export { cloneDeep };

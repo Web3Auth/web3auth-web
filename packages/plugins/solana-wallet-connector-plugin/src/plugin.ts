@@ -1,11 +1,11 @@
-import { type JsonRpcError, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
 import TorusEmbed, { NetworkInterface, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams } from "@toruslabs/solana-embed";
+import { type JsonRpcError, SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   IPlugin,
+  IProvider,
   IWeb3AuthCore,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
@@ -36,7 +36,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   public torusWalletInstance: TorusEmbed;
 
-  private provider: SafeEventEmitterProvider | null = null;
+  private provider: IProvider | null = null;
 
   private web3auth: IWeb3AuthCore | null = null;
 
@@ -52,8 +52,6 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     this.torusWalletInstance = new TorusEmbed(torusWalletOpts);
     this.walletInitOptions = walletInitOptions || {};
   }
-
-  SUPPORTED_CONNECTORS: string[];
 
   get proxyProvider(): SafeEventEmitterProvider | null {
     return this.torusWalletInstance.isLoggedIn ? (this.torusWalletInstance.provider as unknown as SafeEventEmitterProvider) : null;
@@ -173,9 +171,9 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     }
   }
 
-  private subscribeToProviderEvents(provider: SafeEventEmitterProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+  private subscribeToProviderEvents(provider: IProvider) {
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

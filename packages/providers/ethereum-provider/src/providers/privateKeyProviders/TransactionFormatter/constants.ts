@@ -1,6 +1,8 @@
+import { PrefixedHexString } from "@ethereumjs/util";
+
 export const LegacyGasAPIEndpoint = "https://gas-api.metaswap.codefi.network/networks/<chain_id>/gasPrices";
 export const EIP1559APIEndpoint = "https://gas-api.metaswap.codefi.network/networks/<chain_id>/suggestedGasFees";
-export const TRANSACTION_ENVELOPE_TYPES = {
+export const TRANSACTION_ENVELOPE_TYPES: Record<string, PrefixedHexString> = {
   LEGACY: "0x0",
   ACCESS_LIST: "0x1",
   FEE_MARKET: "0x2",

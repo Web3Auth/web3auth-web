@@ -1,4 +1,4 @@
-import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 import bs58 from "bs58";
 
 import { IBaseWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";

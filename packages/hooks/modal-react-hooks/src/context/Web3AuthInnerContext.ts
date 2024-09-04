@@ -9,7 +9,7 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { ModalConfig, Web3Auth } from "@web3auth/modal";
-import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
+import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
@@ -26,7 +26,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [connectError, setConnectError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
-  const [userInfo, setUserInfo] = useState<Partial<OpenloginUserInfo> | null>(null);
+  const [userInfo, setUserInfo] = useState<Partial<AuthUserInfo> | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<ADAPTER_STATUS_TYPE | null>(null);

@@ -11,8 +11,9 @@
     "solana",
     "phantom"
   ],
-  "main": "dist/phantomAdapter.cjs.js",
-  "module": "dist/phantomAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/phantomAdapter.umd.min.js",
   "jsdelivr": "dist/phantomAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",

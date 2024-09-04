@@ -10,8 +10,9 @@
     "web3Auth hooks",
     "web3Auth no-modal react hooks"
   ],
-  "main": "dist/noModalReactHooks.cjs.js",
-  "module": "dist/noModalReactHooks.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/noModalReactHooks.umd.min.js",
   "jsdelivr": "dist/noModalReactHooks.umd.min.js",
   "types": "dist/types/index.d.ts",

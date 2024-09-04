@@ -7,9 +7,9 @@ import {
   type SolanaSignTransactionFeature,
 } from "@solana/wallet-standard-features";
 import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { IdentifierString, type WalletWithFeatures } from "@wallet-standard/base";
 import { type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
+import { SafeEventEmitter } from "@web3auth/auth";
 import { WalletLoginError } from "@web3auth/base";
 import { IWalletStandardProviderHandler, TransactionOrVersionedTransaction } from "@web3auth/solana-provider";
 import BN from "bn.js";
