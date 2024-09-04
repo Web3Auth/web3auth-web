@@ -1,4 +1,4 @@
-import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
+import { addHexPrefix, isHexString, privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
@@ -74,7 +74,12 @@ export function getProviderHandlers({
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const ethersKey = new SigningKey(privKeyBuffer);
-      const signature = ethersKey.sign(hashMessage(msgParams.data));
+      const { data } = msgParams;
+      // we need to check if the data is hex or not
+      // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
+      // https://docs.metamask.io/wallet/how-to/sign-data/#use-personal_sign
+      const message = isHexString(data) ? Buffer.from(stripHexPrefix(data), "hex") : Buffer.from(data);
+      const signature = ethersKey.sign(hashMessage(message));
       return signature.serialized;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
