@@ -57,6 +57,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     return [Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2)];
   }, [config]);
 
+  const [isWalletDiscoverySupported] = useMemo(() => {
+    return [walletConnectSupported && walletConnectUri && walletRegistry];
+  }, [walletConnectSupported, walletConnectUri, walletRegistry]);
+
   const deviceDetails = useMemo<{ platform: platform; os: os; browser: browser }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
     return {
@@ -79,49 +83,63 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   }, [config, handleExternalWalletClick, walletConnectUri, deviceDetails]);
 
   useEffect(() => {
-    const buttons: ExternalButton[] = Object.keys(walletRegistry)
-      .map((wallet): ExternalButton => {
-        const walletRegistryItem = walletRegistry[wallet];
-        let href = "";
-        if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile && walletConnectUri) {
-          const universalLink = walletRegistryItem?.mobile?.universal;
-          const deepLink = walletRegistryItem?.mobile?.native;
-          href = universalLink || deepLink ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri;
-        }
-        return {
-          name: wallet,
-          displayName: walletRegistryItem.name,
-          href,
-          hasInjectedWallet: Object.keys(config).some((adapter) => adapter === wallet),
-          hasWalletConnect:
-            Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
-            walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
-          hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
-          walletRegistryItem,
-        };
-      })
-      .filter((button) => {
-        if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return false;
-        const walletRegistryItem = walletRegistry[button.name];
-        const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-        if (!chainNamespaces.has(chainNamespace)) return false;
-        return true;
+    // if wallet connect is supported and walletRegistry is available
+    if (isWalletDiscoverySupported) {
+      const buttons: ExternalButton[] = Object.keys(walletRegistry)
+        .map((wallet): ExternalButton => {
+          const walletRegistryItem = walletRegistry[wallet];
+          let href = "";
+          if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile && walletConnectUri) {
+            const universalLink = walletRegistryItem?.mobile?.universal;
+            const deepLink = walletRegistryItem?.mobile?.native;
+            href = universalLink || deepLink ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri;
+          }
+          return {
+            name: wallet,
+            displayName: walletRegistryItem.name,
+            href,
+            hasInjectedWallet: Object.keys(config).some((adapter) => adapter === wallet),
+            hasWalletConnect:
+              Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
+              walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+            hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
+            walletRegistryItem,
+          };
+        })
+        .filter((button) => {
+          if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return false;
+          const walletRegistryItem = walletRegistry[button.name];
+          const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+          if (!chainNamespaces.has(chainNamespace)) return false;
+          return true;
+        });
+      setTotalExternalWallets(buttons.length);
+      // prioritize wallet that has injected wallet
+      buttons.sort((a, b) => {
+        if (a.hasInjectedWallet && !b.hasInjectedWallet) return -1;
+        if (!a.hasInjectedWallet && b.hasInjectedWallet) return 1;
+        return 0;
       });
-    setTotalExternalWallets(buttons.length);
-    // prioritize wallet that has injected wallet
-    buttons.sort((a, b) => {
-      if (a.hasInjectedWallet && !b.hasInjectedWallet) return -1;
-      if (!a.hasInjectedWallet && b.hasInjectedWallet) return 1;
-      return 0;
-    });
-    const filteredButtons = buttons
-      .filter((button) => {
-        if (!walletSearch) return true;
-        return button.displayName.toLowerCase().includes(walletSearch.toLowerCase());
-      })
-      .slice(0, 15); // show at most 15 wallets
-    setExternalButtons(filteredButtons);
-  }, [config, deviceDetails, walletConnectUri, walletRegistry, walletSearch, chainNamespace]);
+      const filteredButtons = buttons
+        .filter((button) => {
+          if (!walletSearch) return true;
+          return button.displayName.toLowerCase().includes(walletSearch.toLowerCase());
+        })
+        .slice(0, 15); // show at most 15 wallets
+      setExternalButtons(filteredButtons);
+    } else {
+      const buttons: ExternalButton[] = Object.keys(config)
+        .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter))
+        .map((adapter) => ({
+          name: adapter,
+          displayName: config[adapter].label || adapter,
+          hasInjectedWallet: true,
+          hasWalletConnect: false,
+          hasInstallLinks: false,
+        }));
+      setExternalButtons(buttons);
+    }
+  }, [config, deviceDetails, walletConnectUri, isWalletDiscoverySupported, walletRegistry, walletSearch, chainNamespace]);
 
   const handleWalletClick = (button: ExternalButton) => {
     if (deviceDetails.platform === "desktop") {
@@ -132,6 +150,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         // else, show wallet detail
         setSelectedButton(button);
       }
+    } else if (!button.href && button.hasInjectedWallet) {
+      // on mobile, if href is not available, connect to injected wallet
+      handleExternalWalletClick({ adapter: button.name });
     }
   };
 
@@ -139,9 +160,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
         {/* Loader */}
-        {deviceDetails.platform !== "desktop" && walletConnectSupported && !walletConnectUri && (
-          <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />
-        )}
+        {walletConnectSupported && !walletConnectUri && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {modalStatus === MODAL_STATUS.INITIALIZED &&
           // All wallets
           (!selectedButton ? (
@@ -155,30 +174,32 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               />
 
               {/* Search */}
-              <div className="pt-4 mb-4">
-                <input
-                  className="w-full w3a-text-field"
-                  name="passwordless-input"
-                  required
-                  value={walletSearch}
-                  placeholder={t("modal.external.search-wallet", { count: totalExternalWallets })}
-                  onFocus={(e) => {
-                    e.target.placeholder = "";
-                  }}
-                  onBlur={(e) => {
-                    e.target.placeholder = t("modal.external.search-wallet", { count: totalExternalWallets });
-                  }}
-                  onChange={(e) => handleWalletSearch(e)}
-                />
-              </div>
+              {isWalletDiscoverySupported && (
+                <div className="pt-4">
+                  <input
+                    className="w-full w3a-text-field"
+                    name="passwordless-input"
+                    required
+                    value={walletSearch}
+                    placeholder={t("modal.external.search-wallet", { count: totalExternalWallets })}
+                    onFocus={(e) => {
+                      e.target.placeholder = "";
+                    }}
+                    onBlur={(e) => {
+                      e.target.placeholder = t("modal.external.search-wallet", { count: totalExternalWallets });
+                    }}
+                    onChange={(e) => handleWalletSearch(e)}
+                  />
+                </div>
+              )}
 
               {/* Wallet List */}
               {externalButtons.length === 0 && (
-                <div className="w-full text-center text-app-gray-400 dark:text-app-gray-500 py-6 flex justify-center items-center">
+                <div className="w-full text-center text-app-gray-400 dark:text-app-gray-500 py-6 mt-4 flex justify-center items-center">
                   {t("modal.external.no-wallets-found")}
                 </div>
               )}
-              <ul className="w3a-adapter-list w3ajs-wallet-adapters">
+              <ul className="w3a-adapter-list w3ajs-wallet-adapters mt-4">
                 {externalButtons.map((button) => {
                   const providerIcon = (
                     <Image
@@ -205,7 +226,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                           <div className="flex items-center">
                             {providerIcon} {label}
                           </div>
-                          {button.hasInjectedWallet && (
+                          {isWalletDiscoverySupported && button.hasInjectedWallet && (
                             <span className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium bg-app-primary-100 text-app-primary-800">
                               {t("modal.external.installed")}
                             </span>
