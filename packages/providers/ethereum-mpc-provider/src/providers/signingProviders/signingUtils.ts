@@ -1,4 +1,4 @@
-import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
+import { intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
 import { log } from "@web3auth/base";
@@ -12,7 +12,7 @@ import {
   TypedMessageParams,
   validateTypedSignMessageDataV4,
 } from "@web3auth/ethereum-provider";
-import { TypedDataEncoder } from "ethers";
+import { hashMessage, TypedDataEncoder } from "ethers";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
@@ -84,18 +84,17 @@ async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{
   return rawMsgSig;
 }
 
-function legacyToBuffer(value: unknown) {
-  return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBytes(value);
-}
-
 async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
-  const message = legacyToBuffer(data);
-  const msgHash = hashPersonalMessage(message);
+  // we need to check if the data is hex or not
+  // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
+  // https://docs.metamask.io/wallet/how-to/sign-data/#use-personal_sign
+  const message = isHexString(data) ? Buffer.from(stripHexPrefix(data), "hex") : Buffer.from(data);
+  const msgHash = hashMessage(message);
   const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${message.length}`, "utf-8");
-  const sig = await sign(Buffer.from(msgHash), Buffer.concat([prefix, message]));
+  const sig = await sign(Buffer.from(msgHash.slice(2)), Buffer.concat([prefix, message]));
   let modifiedV = sig.v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
@@ -123,7 +122,7 @@ async function signTypedData(
   }
   const message: SignTypedDataMessageV4 = typeof data === "string" ? JSON.parse(data) : data;
 
-  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message)));
+  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message).slice(2), "hex"));
 
   let modifiedV = v;
   if (modifiedV <= 1) {
