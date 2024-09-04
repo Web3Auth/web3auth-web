@@ -1,5 +1,4 @@
-import { providerErrors } from "@metamask/rpc-errors";
-import { JRPCEngine, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
