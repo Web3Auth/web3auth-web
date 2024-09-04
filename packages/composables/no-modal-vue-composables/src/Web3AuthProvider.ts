@@ -137,7 +137,6 @@ export default defineComponent({
           triggerRef(web3Auth);
         } catch (error) {
           initError.value = error as Error;
-          throw error;
         } finally {
           isInitializing.value = false;
         }

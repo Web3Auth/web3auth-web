@@ -76,7 +76,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         await web3Auth.init();
       } catch (error) {
         setInitError(error as Error);
-        throw error;
       } finally {
         setIsInitializing(false);
       }

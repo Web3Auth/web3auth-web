@@ -148,7 +148,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         }
       } catch (error) {
         setInitError(error as Error);
-        throw error;
       } finally {
         setIsInitializing(false);
       }
