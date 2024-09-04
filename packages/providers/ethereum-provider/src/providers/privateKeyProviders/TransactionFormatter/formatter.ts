@@ -1,4 +1,4 @@
-import { Common, Hardfork } from "@ethereumjs/common";
+import { type Common } from "@ethereumjs/common";
 import { addHexPrefix, AddressLike, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
@@ -37,6 +37,7 @@ export class TransactionFormatter {
   async getCommonConfiguration(): Promise<Common> {
     if (!this.chainConfig) throw new Error("Chain config not initialized");
     const { displayName: name, chainId } = this.chainConfig;
+    const { Hardfork, Common } = await import("@ethereumjs/common");
     const hardfork = this.isEIP1559Compatible ? Hardfork.Paris : Hardfork.Berlin;
     const customChainParams = {
       name,

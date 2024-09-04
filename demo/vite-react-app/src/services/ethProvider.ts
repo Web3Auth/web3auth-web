@@ -4,37 +4,36 @@ import { IWalletProvider } from "./walletProvider";
 import { erc20Abi, storageSCAbi } from "../config/abi";
 
 const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => void): IWalletProvider => {
-
-  const getTokenAddress =  () => {
-      switch (provider.chainId) {
-        case "0x1":
-        case "0x89":
-          return "0x655F2166b0709cd575202630952D71E2bB0d61Af";  
-        case "0x13882": // amoy
-          return "0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904"
-        case "0xaa36a7": // sepolia
-          return "0x779877A7B0D9E8603169DdbD7836e478b4624789";
-        case "0x66eee": // arbitrum
-          return "0x3a12ea1bEa9b04f5541affBe1F6Dd83a72a9bbd7";
-        default:
-          return "";
-      }
-  }
+  const getTokenAddress = () => {
+    switch (provider.chainId) {
+      case "0x1":
+      case "0x89":
+        return "0x655F2166b0709cd575202630952D71E2bB0d61Af";
+      case "0x13882": // amoy
+        return "0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904";
+      case "0xaa36a7": // sepolia
+        return "0x779877A7B0D9E8603169DdbD7836e478b4624789";
+      case "0x66eee": // arbitrum
+        return "0x3a12ea1bEa9b04f5541affBe1F6Dd83a72a9bbd7";
+      default:
+        return "";
+    }
+  };
 
   const getStorageAddress = () => {
     // simple default storage smart contract from remix.ethereum.org
-      switch (provider.chainId) {
-        case "0x1":
-        case "0x89":
-          return "";  
-        case "0x13882": // amoy
-        case "0xaa36a7": // sepolia
-        case "0x66eee": // arbitrum
-          return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
-        default:
-          return "";
-      }
-  }
+    switch (provider.chainId) {
+      case "0x1":
+      case "0x89":
+        return "";
+      case "0x13882": // amoy
+      case "0xaa36a7": // sepolia
+      case "0x66eee": // arbitrum
+        return "0xAD2709105e2b755b29DA45859d4E42A69cfADa12";
+      default:
+        return "";
+    }
+  };
 
   const getAccounts = async () => {
     try {
@@ -69,7 +68,6 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
         const balance = await contract.methods.balanceOf(accounts[0]).call();
         uiConsole("Token balance", balance);
       } else uiConsole("No Token Address for this blockchain");
-      
     } catch (error) {
       console.error("Error", error);
       uiConsole("error", error);
@@ -80,9 +78,8 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
     try {
       const web3 = new Web3(provider);
       const message = "Some string";
-      const hash = web3.utils.sha3(message) as string;
       const fromAddress = (await web3.eth.getAccounts())[0];
-      const sig = await web3.eth.personal.sign(hash, fromAddress, "");
+      const sig = await web3.eth.personal.sign(message, fromAddress, "");
       uiConsole("personal sign", sig);
       uiConsole("Eth sign message => true", sig);
     } catch (error) {
@@ -135,9 +132,8 @@ const ethProvider = (provider: IProvider, uiConsole: (...args: unknown[]) => voi
       if (storageAddress !== "") {
         const contract = new web3.eth.Contract(storageSCAbi, storageAddress);
         const txRes = await contract.methods.retrieve().call();
-        uiConsole("txRes", txRes);  
+        uiConsole("txRes", txRes);
       } else uiConsole("No Smart Contract for this blockchain.");
-      
     } catch (error) {
       console.log("error", error);
       uiConsole("error", error);

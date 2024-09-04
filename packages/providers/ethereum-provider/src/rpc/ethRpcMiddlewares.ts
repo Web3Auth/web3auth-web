@@ -1,4 +1,3 @@
-import { rpcErrors } from "@metamask/rpc-errors";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,
@@ -6,6 +5,7 @@ import {
   JRPCRequest,
   JRPCResponse,
   mergeMiddleware,
+  rpcErrors,
 } from "@toruslabs/openlogin-jrpc";
 
 import { AddEthereumChainParameter, IAccountHandlers, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";
@@ -22,8 +22,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     processTypedMessageV3,
     processTypedMessageV4,
     processPersonalMessage,
-    processEncryptionPublicKey,
-    processDecryptMessage,
   } = providerHandlers;
   const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
@@ -39,8 +37,6 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
       processTypedMessageV3,
       processTypedMessageV4,
       processPersonalMessage,
-      processEncryptionPublicKey,
-      processDecryptMessage,
     }) as JRPCMiddleware<unknown, unknown>,
   ]);
   return ethMiddleware;

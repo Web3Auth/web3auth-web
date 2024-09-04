@@ -198,44 +198,49 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
           }
           return null;
         })}
-        {modalStatus === MODAL_STATUS.INITIALIZED && (
-          <ul className="w3a-adapter-list w3ajs-wallet-adapters">
-            {externalButtons.map((button) => {
-              const providerIcon = button.isLink ? (
-                <img src={button.logo} height="auto" width="auto" alt={`login-${button.name}`} />
-              ) : (
-                <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} isButton />
-              );
+        {modalStatus === MODAL_STATUS.INITIALIZED &&
+          (externalButtons.length > 0 ? (
+            <ul className="w3a-adapter-list w3ajs-wallet-adapters">
+              {externalButtons.map((button) => {
+                const providerIcon = button.isLink ? (
+                  <img src={button.logo} height="auto" width="auto" alt={`login-${button.name}`} />
+                ) : (
+                  <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} height="32" width="32" isButton />
+                );
 
-              const isBlock = externalButtons.length === 1 || button.block;
+                const isBlock = externalButtons.length === 1 || button.block;
 
-              const label = isBlock ? <p className="ml-2 text-left">{config[button.name]?.label || button.name}</p> : "";
-              return (
-                <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : "col-span-2"].join(" ")} key={button.name}>
-                  {button.isLink ? (
-                    <a key={button.name} href={button.href} rel="noopener noreferrer" target="_blank">
-                      <Button type="button" variant="tertiary" className="w-full">
+                const label = isBlock ? <p className="ml-2 text-left">{config[button.name]?.label || button.name}</p> : "";
+                return (
+                  <li className={[`w3a-adapter-item`, isBlock ? "w3a-adapter-item--full" : "col-span-2"].join(" ")} key={button.name}>
+                    {button.isLink ? (
+                      <a key={button.name} href={button.href} rel="noopener noreferrer" target="_blank">
+                        <Button type="button" variant="tertiary" className="w-full">
+                          {providerIcon}
+                          {label}
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button
+                        variant="tertiary"
+                        type="button"
+                        onClick={() => handleExternalWalletClick({ adapter: button.name })}
+                        className="w-full"
+                        title={config[button.name]?.label || button.name}
+                      >
                         {providerIcon}
                         {label}
                       </Button>
-                    </a>
-                  ) : (
-                    <Button
-                      variant="tertiary"
-                      type="button"
-                      onClick={() => handleExternalWalletClick({ adapter: button.name })}
-                      className="w-full"
-                      title={config[button.name]?.label || button.name}
-                    >
-                      {providerIcon}
-                      {label}
-                    </Button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="mt-4 text-center text-sm font-normal text-app-gray-500 dark:text-app-gray-400">
+              {t("modal.external.no-wallets-found")}
+            </div>
+          ))}
       </div>
     </div>
   );

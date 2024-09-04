@@ -1,6 +1,5 @@
 import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
-import type { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { type JRPCRequest, providerErrors, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { WalletLoginError } from "@web3auth/base";
@@ -82,12 +81,6 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
     processTypedMessageV4: async (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>): Promise<string> => {
       const methodRes = await sendJrpcRequest<string, unknown[]>(connector, chainId, "eth_signTypedData_v4", [msgParams.from, msgParams.data]);
       return methodRes;
-    },
-    processEncryptionPublicKey: async (_: string): Promise<string> => {
-      throw rpcErrors.methodNotSupported();
-    },
-    processDecryptMessage: (_: MessageParams<string>): string => {
-      throw rpcErrors.methodNotSupported();
     },
   };
 }

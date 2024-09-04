@@ -1,22 +1,22 @@
 <template>
   <div id="app">
     <h2>Login with Web3Auth and Ethereum</h2>
-    <Loader :isLoading="loading"></Loader>
+    <Loader :is-loading="loading"></Loader>
 
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
+      <button v-if="!provider" type="button" class="rpcBtn" style="cursor: pointer" @click="connect">Connect</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="authenticateUser">Get Auth Id token</button>
       <EthRpc
-        :connectedAdapter="web3auth.connectedAdapterName"
         v-if="provider"
+        :connected-adapter="web3auth.connectedAdapterName"
         :provider="provider"
-        :uiConsole="uiConsole"
+        :ui-console="uiConsole"
         :web3auth="web3auth"
       ></EthRpc>
 
@@ -30,8 +30,7 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig } from "@web3auth/base";
-import { WALLET_ADAPTERS } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, CustomChainConfig, log, LoginMethodConfig } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
@@ -39,13 +38,11 @@ import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
-
+import Loader from "../components/loader.vue";
 import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ethereumChainConfig: any = {
+const ethereumChainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   rpcTarget: "https://rpc.ankr.com/eth",
   blockExplorerUrl: "https://etherscan.io",
@@ -58,12 +55,16 @@ const ethereumChainConfig: any = {
 const ethWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: ethereumChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.sapphire_mainnet,
   privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: ethereumChainConfig } }),
 };
 
 export default defineComponent({
   name: "EthereumChain",
+  components: {
+    EthRpc,
+    Loader,
+  },
   props: {
     plugins: {
       type: Object,
@@ -71,22 +72,11 @@ export default defineComponent({
     },
     adapterConfig: {
       type: Object,
+      default: () => ({}),
     },
     openloginNetwork: {
       type: String,
-      default: "testnet",
-    },
-  },
-  watch: {
-    adapterConfig: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
-    },
-    openloginNetwork: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initEthAuth();
+      default: "sapphire_mainnet",
     },
   },
   data() {
@@ -99,9 +89,15 @@ export default defineComponent({
       web3auth: new Web3Auth(ethWeb3AuthOptions),
     };
   },
-  components: {
-    EthRpc,
-    Loader,
+  watch: {
+    async adapterConfig() {
+      // watch it
+      await this.initEthAuth();
+    },
+    async openloginNetwork() {
+      // watch it
+      await this.initEthAuth();
+    },
   },
 
   async mounted() {
@@ -149,7 +145,7 @@ export default defineComponent({
 
         this.web3auth.configureAdapter(openloginAdapter);
 
-        if (this.plugins["walletServices"]) {
+        if (this.plugins.walletServices) {
           const walletServicesPlugin = new WalletServicesPlugin({
             wsEmbedOpts: {},
             walletInitOptions: { whiteLabel: { showWidgetButton: true } },
@@ -160,36 +156,9 @@ export default defineComponent({
 
         this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal({
-          modalConfig: {
-            [WALLET_ADAPTERS.METAMASK]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Metamask",
-            },
-            [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Wallet Connect",
-            },
-            [WALLET_ADAPTERS.TORUS_EVM]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "Torus",
-            },
-            [WALLET_ADAPTERS.OPENLOGIN]: {
-              showOnDesktop: true,
-              showOnModal: true,
-              showOnMobile: true,
-              label: "OpenLogin",
-            },
-          },
-        });
+        await this.web3auth.initModal();
       } catch (error) {
-        console.log("error", error);
+        log.info("error", error);
         this.uiConsole("error", error);
       } finally {
         this.loading = false;
@@ -197,7 +166,7 @@ export default defineComponent({
     },
     subscribeAuthEvents(web3auth: Web3Auth) {
       web3auth.on(ADAPTER_STATUS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        this.uiConsole("connected to wallet", data);
+        this.uiConsole("connected to wallet", data.adapter);
         this.provider = web3auth.provider;
         this.loginButtonStatus = "Logged in";
       });
@@ -212,7 +181,7 @@ export default defineComponent({
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.info("error", error);
         this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
@@ -225,7 +194,7 @@ export default defineComponent({
         const web3authProvider = await this.web3auth.connect();
         this.provider = web3authProvider;
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.uiConsole("error", error);
       }
     },

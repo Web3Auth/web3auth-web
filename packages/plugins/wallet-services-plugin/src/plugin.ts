@@ -152,17 +152,17 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async showWalletConnectScanner(): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     await this.wsEmbedInstance.showWalletConnectScanner();
   }
 
   async showCheckout(): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     await this.wsEmbedInstance.showCheckout();
   }
 
   async showWalletUi(): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.web3AuthNotConnected();
+    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     await this.wsEmbedInstance.showWalletUi();
   }
 

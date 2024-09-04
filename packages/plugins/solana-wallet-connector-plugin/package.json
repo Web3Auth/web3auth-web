@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/solana-wallet-connector-plugin",
-  "version": "8.8.0",
+  "version": "8.12.4",
   "description": "Torus Solana wallet connector for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
     "web3Auth/solana-wallet-connector-plugin",
@@ -30,14 +30,11 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@metamask/rpc-errors": "^6.3.0"
-  },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^8.1.1",
+    "@toruslabs/openlogin-jrpc": "^8.3.0",
     "@toruslabs/solana-embed": "^2.1.0",
-    "@web3auth/base": "^8.8.0",
-    "@web3auth/no-modal": "^8.8.0",
+    "@web3auth/base": "^8.12.4",
+    "@web3auth/no-modal": "^8.12.4",
     "loglevel": "^1.9.1"
   },
   "peerDependencies": {

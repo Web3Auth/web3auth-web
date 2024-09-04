@@ -17,6 +17,7 @@ import {
   IWeb3AuthCoreOptions,
   log,
   PLUGIN_NAMESPACES,
+  PLUGIN_STATUS,
   PROJECT_CONFIG_RESPONSE,
   storageAvailable,
   UserAuthInfo,
@@ -178,7 +179,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
         });
       }
 
-      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e));
+      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e, adapterName));
     });
     await Promise.all(initPromises);
     if (this.status === ADAPTER_STATUS.NOT_READY) {
@@ -284,6 +285,10 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       );
 
     this.plugins[plugin.name] = plugin;
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      // web3auth is already connected. can initialize plugins
+      this.connectToPlugins({ adapter: this.connectedAdapterName });
+    }
     return this;
   }
 
@@ -300,24 +305,7 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
-      Object.values(this.plugins).map(async (plugin) => {
-        try {
-          if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
-            return;
-          }
-          const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
-          const { options, sessionId, sessionNamespace } = openloginInstance || {};
-          await plugin.initWithWeb3Auth(this, options.whiteLabel);
-          await plugin.connect({ sessionId, sessionNamespace });
-        } catch (error: unknown) {
-          // swallow error if connector adapter doesn't supports this plugin.
-          if ((error as Web3AuthError).code === 5211) {
-            return;
-          }
-          log.error(error);
-        }
-      });
-
+      this.connectToPlugins(data);
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data } as CONNECTED_EVENT_DATA);
     });
 
@@ -382,5 +370,26 @@ export class Web3AuthNoModal extends SafeEventEmitter implements IWeb3Auth {
     if (!storageAvailable(this.storage)) return;
     window[this.storage].setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
+  }
+
+  private connectToPlugins(data: { adapter: WALLET_ADAPTER_TYPE }) {
+    Object.values(this.plugins).map(async (plugin) => {
+      try {
+        if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+          return;
+        }
+        if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
+        const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
+        const { options, sessionId, sessionNamespace } = openloginInstance || {};
+        await plugin.initWithWeb3Auth(this, options.whiteLabel);
+        await plugin.connect({ sessionId, sessionNamespace });
+      } catch (error: unknown) {
+        // swallow error if connector adapter doesn't supports this plugin.
+        if ((error as Web3AuthError).code === 5211) {
+          return;
+        }
+        log.error(error);
+      }
+    });
   }
 }

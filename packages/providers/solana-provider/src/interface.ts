@@ -44,34 +44,11 @@ export type SolflareWallet = Solflare & {
   signAndSendTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }>;
 };
 
-export interface ISlopeProvider extends SafeEventEmitter {
-  connect(): Promise<{
-    msg: string;
-    data: {
-      publicKey?: string;
-    };
-  }>;
-  disconnect(): Promise<{ msg: string }>;
-  signTransaction(message: string): Promise<{
-    msg: string;
-    data: {
-      publicKey?: string;
-      signature?: string;
-    };
-  }>;
-  signAllTransactions(messages: string[]): Promise<{
-    msg: string;
-    data: {
-      publicKey?: string;
-      signatures?: string[];
-    };
-  }>;
-  signMessage(message: Uint8Array): Promise<{ data: { signature: string } }>;
-}
-
 export interface ITorusWalletProvider extends InjectedProvider {
   sendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string>;
   signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
   signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
   signMessage(data: Uint8Array): Promise<Uint8Array>;
 }
+
+export interface IWalletStandardProviderHandler extends IBaseWalletProvider {}

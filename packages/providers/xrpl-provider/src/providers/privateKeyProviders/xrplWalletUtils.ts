@@ -1,8 +1,6 @@
-import { rpcErrors } from "@metamask/rpc-errors";
-import { JRPCRequest } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import { CustomChainConfig } from "@web3auth/base";
 import { generateSeed, sign } from "ripple-keypairs";
-// import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
 import ECDSA from "xrpl/dist/npm/ECDSA";
 

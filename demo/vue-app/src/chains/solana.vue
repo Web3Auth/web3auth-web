@@ -1,17 +1,17 @@
 <template>
   <div id="app">
     <h2>Login with Web3Auth and Solana</h2>
-    <Loader :isLoading="loading"></Loader>
+    <Loader :is-loading="loading"></Loader>
     <section
       :style="{
         fontSize: '12px',
       }"
     >
-      <button class="rpcBtn" v-if="!provider" @click="connect" style="cursor: pointer">Connect</button>
-      <button class="rpcBtn" v-if="provider" @click="logout" style="cursor: pointer">Logout</button>
-      <button class="rpcBtn" v-if="provider" @click="getUserInfo" style="cursor: pointer">Get User Info</button>
-      <button class="rpcBtn" v-if="provider" @click="authenticateUser" style="cursor: pointer">Get Auth Id token</button>
-      <SolanaRpc v-if="provider" :provider="provider" :uiConsole="uiConsole"></SolanaRpc>
+      <button v-if="!provider" type="button" class="rpcBtn" style="cursor: pointer" @click="connect">Connect</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="logout">Logout</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="getUserInfo">Get User Info</button>
+      <button v-if="provider" type="button" class="rpcBtn" style="cursor: pointer" @click="authenticateUser">Get Auth Id token</button>
+      <SolanaRpc v-if="provider" :provider="provider" :ui-console="uiConsole"></SolanaRpc>
       <!-- <button @click="showError" style="cursor: pointer">Show Error</button> -->
     </section>
     <div id="console" style="white-space: pre-line">
@@ -22,16 +22,22 @@
 
 <script lang="ts">
 import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, LoginMethodConfig, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import {
+  ADAPTER_STATUS,
+  CHAIN_NAMESPACES,
+  CONNECTED_EVENT_DATA,
+  log,
+  LoginMethodConfig,
+  SafeEventEmitterProvider,
+  WALLET_ADAPTERS,
+} from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-solana-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { SlopeAdapter } from "@web3auth/slope-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { defineComponent } from "vue";
 
-import Loader from "@/components/loader.vue";
-
+import Loader from "../components/loader.vue";
 import config from "../config";
 import SolanaRpc from "../rpc/solanaRpc.vue";
 
@@ -49,12 +55,16 @@ const solanaChainConfig: any = {
 const solanaWeb3AuthOptions: Web3AuthOptions = {
   chainConfig: solanaChainConfig,
   enableLogging: true,
-  clientId: config.clientId["mainnet"],
+  clientId: config.clientId.mainnet,
   privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig: solanaChainConfig } }),
 };
 
 export default defineComponent({
   name: "SolanaChain",
+  components: {
+    SolanaRpc,
+    Loader,
+  },
   props: {
     plugins: {
       type: Object,
@@ -62,17 +72,11 @@ export default defineComponent({
     },
     adapterConfig: {
       type: Object,
+      default: () => ({}),
     },
     openloginNetwork: {
       type: String,
       default: "testnet",
-    },
-  },
-  watch: {
-    adapterConfig: async function (newVal, oldVal) {
-      // watch it
-      console.log("Prop changed: ", newVal, " | was: ", oldVal);
-      await this.initSolanaAuth();
     },
   },
   data() {
@@ -84,9 +88,11 @@ export default defineComponent({
       web3auth: new Web3Auth(solanaWeb3AuthOptions),
     };
   },
-  components: {
-    SolanaRpc,
-    Loader,
+  watch: {
+    async adapterConfig() {
+      // watch it
+      await this.initSolanaAuth();
+    },
   },
   async mounted() {
     await this.initSolanaAuth();
@@ -125,8 +131,6 @@ export default defineComponent({
             clientId: config.clientId[this.openloginNetwork],
           },
         });
-        const slopeAdapter = new SlopeAdapter();
-        this.web3auth.configureAdapter(slopeAdapter);
         this.web3auth.configureAdapter(openloginAdapter);
         const adapters = await getDefaultExternalAdapters({ options: this.web3auth.options });
         adapters.forEach((adapter) => {
@@ -148,7 +152,7 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        console.log("error", error);
+        log.info("error", error);
         this.uiConsole("error", error);
       } finally {
         this.loading = false;
@@ -173,7 +177,7 @@ export default defineComponent({
         this.provider = undefined;
       });
       web3auth.on(ADAPTER_STATUS.ERRORED, (error) => {
-        console.log("error", error);
+        log.info("error", error);
         this.uiConsole("errored", error);
         this.loginButtonStatus = "";
       });
@@ -183,7 +187,7 @@ export default defineComponent({
         await this.web3auth.connect();
         await this.setupProvider(this.web3auth.provider);
       } catch (error) {
-        console.error(error);
+        log.error(error);
         this.uiConsole("error", error);
       }
     },

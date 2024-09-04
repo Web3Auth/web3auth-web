@@ -1,5 +1,5 @@
-import { providerErrors, rpcErrors } from "@metamask/rpc-errors";
-import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { isHexString } from "@ethereumjs/util";
+import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@toruslabs/openlogin-jrpc";
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
@@ -94,7 +94,9 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
       params: [],
     });
 
-    if (parseInt(chainId, 16) !== parseInt(network, 10)) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
+    const finalNetwork = isHexString(network) ? parseInt(network, 16) : parseInt(network, 10);
+
+    if (parseInt(chainId, 16) !== finalNetwork) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
     if (this.state.chainId !== chainId) {
       this.emit("chainChanged", chainId);
       this.emit("connect", { chainId });

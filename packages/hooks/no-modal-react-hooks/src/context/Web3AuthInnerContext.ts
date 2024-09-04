@@ -21,6 +21,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const { children, config } = params;
   const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
 
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [isInitializing, setIsInitializing] = useState<boolean>(false);
+  const [initError, setInitError] = useState<Error | null>(null);
+  const [connectError, setConnectError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [userInfo, setUserInfo] = useState<Partial<OpenloginUserInfo> | null>(null);
@@ -84,9 +88,21 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
   }, [web3Auth, isConnected]);
 
+  // TODO: Init ourselves in v9
+  // TODO: don't throw error in init, connect in v9
+
   const init = useCallback(async () => {
     if (!web3Auth) throw WalletInitializationError.notReady();
-    await web3Auth.init();
+    try {
+      setInitError(null);
+      setIsInitializing(true);
+      await web3Auth.init();
+    } catch (error) {
+      setInitError(error as Error);
+      throw error;
+    } finally {
+      setIsInitializing(false);
+    }
   }, [web3Auth]);
 
   useEffect(() => {
@@ -158,8 +174,17 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const connectTo = useCallback(
     async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
-      const localProvider = await web3Auth.connectTo(walletName, loginParams);
-      return localProvider;
+      try {
+        setConnectError(null);
+        setIsConnecting(true);
+        const localProvider = await web3Auth.connectTo(walletName, loginParams);
+        return localProvider;
+      } catch (error) {
+        setConnectError(error as Error);
+        throw error;
+      } finally {
+        setIsConnecting(false);
+      }
     },
     [web3Auth]
   );
@@ -213,6 +238,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       addPlugin,
       authenticateUser,
       switchChain,
+      isInitializing,
+      isConnecting,
+      initError,
+      connectError,
     };
   }, [
     web3Auth,
@@ -232,6 +261,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     addPlugin,
     authenticateUser,
     switchChain,
+    isConnecting,
+    isInitializing,
+    initError,
+    connectError,
   ]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);

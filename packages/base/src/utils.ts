@@ -65,3 +65,24 @@ export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: OPEN
   const res = await get<PROJECT_CONFIG_RESPONSE>(url.href);
   return res;
 };
+
+// Normalize wallet name to a standard format, used for external wallets that are auto-detected by MIPD (EIP-6963 and Wallet Standard)
+export const normalizeWalletName = (name: string) => {
+  let normalizedName = name.toLowerCase();
+  // remove decriptive part after | e.g. "Crypto.com | Defi Wallet" => "Crypto.com"
+  normalizedName = normalizedName.split("|")[0];
+
+  // replace -  with space e.g. "Trust - Wallet" => "Trust Wallet"
+  normalizedName = normalizedName.replace(/-/g, " ");
+
+  // replace multiple spaces with single space
+  normalizedName = normalizedName.replace(/\s+/g, " ");
+
+  // remove trailing "wallet" e.g. "Trust Wallet" => "Trust", "GateWallet" => "Gate"
+  normalizedName = normalizedName.replace(/wallet$/i, "").trim();
+
+  // replace space with -
+  normalizedName = normalizedName.replace(/\s/g, "-");
+
+  return normalizedName;
+};

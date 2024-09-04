@@ -12,7 +12,7 @@ export type ErrorCodes = {
   [key: number]: string;
 };
 
-function serializeError(args: unknown[]): [Error, unknown[]] {
+export function serializeError(args: unknown[]): [Error, unknown[]] {
   // Find first Error or create an "unknown" Error to keep stack trace.
   const index = args.findIndex((arg) => arg instanceof Error);
   const msgIndex = args.findIndex((arg) => typeof arg === "string");

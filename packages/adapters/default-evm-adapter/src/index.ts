@@ -1,4 +1,15 @@
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IWeb3AuthCoreOptions, WalletInitializationError } from "@web3auth/base";
+import {
+  CHAIN_NAMESPACES,
+  CustomChainConfig,
+  getChainConfig,
+  IAdapter,
+  IWeb3AuthCoreOptions,
+  normalizeWalletName,
+  WalletInitializationError,
+} from "@web3auth/base";
+import { createStore as createMipd } from "mipd";
+
+import { InjectedEvmAdapter } from "./injectedEvmAdapter";
 
 export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
   const { options } = params;
@@ -10,14 +21,11 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     ...(chainConfig || {}),
   };
 
-  const [{ TorusWalletAdapter }, { MetamaskAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
+  const [{ TorusWalletAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
     import("@web3auth/torus-evm-adapter"),
-    import("@web3auth/metamask-adapter"),
     import("@web3auth/wallet-connect-v2-adapter"),
   ]);
   const torusWalletAdapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
-
-  const metamaskAdapter = new MetamaskAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
 
   const wcv2Adapter = new WalletConnectV2Adapter({
     chainConfig: finalChainConfig,
@@ -30,5 +38,21 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     },
   });
 
-  return [torusWalletAdapter, metamaskAdapter, wcv2Adapter];
+  // EIP-6963: multiple injected provider discovery
+  const mipd = createMipd();
+  // We assume that all extensions have emitted by here.
+  // TODO: Ideally, we must use reactive listening. We will do that with v9
+  const injectedProviders = mipd.getProviders().map((providerDetail) => {
+    return new InjectedEvmAdapter({
+      name: normalizeWalletName(providerDetail.info.name),
+      provider: providerDetail.provider,
+      chainConfig: finalChainConfig,
+      clientId,
+      sessionTime,
+      web3AuthNetwork,
+      useCoreKitKey,
+    });
+  });
+
+  return [...injectedProviders, torusWalletAdapter, wcv2Adapter];
 };

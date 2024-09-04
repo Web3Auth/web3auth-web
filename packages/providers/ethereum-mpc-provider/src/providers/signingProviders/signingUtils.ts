@@ -1,22 +1,19 @@
-import { Hardfork } from "@ethereumjs/common";
-import { Capability, TransactionFactory, TransactionType } from "@ethereumjs/tx";
 import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import {
   type MessageTypes,
-  SignTypedDataVersion,
   TypedDataUtils,
   type TypedDataV1,
   type TypedDataV1Field,
   type TypedMessage,
   typedSignatureHash,
 } from "@metamask/eth-sig-util";
-import { providerErrors } from "@metamask/rpc-errors";
 import { concatSig } from "@toruslabs/base-controllers";
-import { JRPCRequest, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@toruslabs/openlogin-jrpc";
 import { isHexStrict, log } from "@web3auth/base";
 import {
   IProviderHandlers,
   MessageParams,
+  SignTypedDataVersion,
   TransactionFormatter,
   TransactionParams,
   TypedMessageParams,
@@ -28,6 +25,10 @@ async function signTx(
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
 ): Promise<Buffer> {
+  const [{ Hardfork }, { Capability, TransactionFactory, TransactionType }] = await Promise.all([
+    import("@ethereumjs/common"),
+    import("@ethereumjs/tx"),
+  ]);
   const finalTxParams = await txFormatter.formatTransaction(txParams);
   const common = await txFormatter.getCommonConfiguration();
   const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
@@ -208,7 +209,7 @@ export function getProviderHandlers({
         ...msgParams,
         version: SignTypedDataVersion.V1,
       };
-      validateTypedMessageParams(params, finalChainId);
+      await validateTypedMessageParams(params, finalChainId);
       const data = typeof params.data === "string" ? JSON.parse(params.data) : params.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V1);
       return sig;
@@ -223,7 +224,7 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V3);
       return sig;
@@ -238,24 +239,10 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
       const finalChainId = Number.parseInt(chainId, isHexStrict(chainId) ? 16 : 10);
-      validateTypedMessageParams(msgParams, finalChainId);
+      await validateTypedMessageParams(msgParams, finalChainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
-    },
-    processEncryptionPublicKey: async (address: string, _: JRPCRequest<unknown>): Promise<string> => {
-      log.info("processEncryptionPublicKey", address);
-      throw providerErrors.custom({
-        message: "Provider cannot encryption public key",
-        code: 4902,
-      });
-    },
-    processDecryptMessage: (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): string => {
-      log.info("processDecryptMessage", msgParams);
-      throw providerErrors.custom({
-        message: "Provider cannot decrypt",
-        code: 4902,
-      });
     },
   };
 }

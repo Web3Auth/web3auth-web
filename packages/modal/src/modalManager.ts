@@ -19,7 +19,15 @@ import {
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter, OpenLoginOptions } from "@web3auth/openlogin-adapter";
-import { getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, OPENLOGIN_PROVIDERS, UIConfig } from "@web3auth/ui";
+import {
+  capitalizeFirstLetter,
+  getAdapterSocialLogins,
+  getUserLanguage,
+  LOGIN_MODAL_EVENTS,
+  LoginModal,
+  OPENLOGIN_PROVIDERS,
+  UIConfig,
+} from "@web3auth/ui";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import clonedeep from "lodash.clonedeep";
 import merge from "lodash.merge";
@@ -108,7 +116,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
       // start with the default config of adapter.
       let adapterConfig = this.modalConfig.adapters?.[adapterName] || {
-        label: adapterName,
+        label: adapterName.split("-").map(capitalizeFirstLetter).join(" "),
         showOnModal: true,
         showOnMobile: true,
         showOnDesktop: true,
@@ -295,7 +303,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.initializeInAppWallet(adapterName);
         }
       } catch (error) {
-        log.error(error, "error while initializing adapter");
+        log.error(error, "error while initializing adapter ", adapterName);
       }
     });
 
@@ -363,7 +371,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
               return undefined;
             })
-            .catch((error) => log.error(error, "error while initializing adapter"));
+            .catch((error) => log.error(error, "error while initializing adapter", adapterName));
         } else if (adapter.status === ADAPTER_STATUS.READY) {
           adaptersConfig[adapterName] = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
