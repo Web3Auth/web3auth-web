@@ -4,6 +4,7 @@ import {
   type CustomChainConfig,
   type IPlugin,
   type IProvider,
+  WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
@@ -19,7 +20,7 @@ export default defineComponent({
   name: "Web3AuthProvider",
   props: {
     config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
-    modalConfig: { type: Object as PropType<Record<string, ModalConfig>>, required: false },
+    modalConfig: { type: Object as PropType<Record<WALLET_ADAPTER_TYPE, ModalConfig>>, required: false },
   },
   setup(props) {
     const web3Auth = shallowRef<Web3Auth | null>(null);
