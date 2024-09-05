@@ -72,7 +72,6 @@ export default defineComponent({
         return localProvider;
       } catch (error) {
         connectError.value = error as Error;
-        throw error;
       } finally {
         isConnecting.value = false;
       }
