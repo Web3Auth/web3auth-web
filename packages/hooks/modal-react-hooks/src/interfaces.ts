@@ -3,13 +3,13 @@ import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
+  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
   adapters?: IAdapter<unknown>[];
   plugins?: IPlugin[];
 };
 
 export interface Web3AuthProviderProps {
   config: Web3AuthContextConfig;
-  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
 }
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {

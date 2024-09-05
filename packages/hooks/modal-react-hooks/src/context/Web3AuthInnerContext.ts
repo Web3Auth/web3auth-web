@@ -17,7 +17,7 @@ import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
-  const { children, config, modalConfig } = params;
+  const { children, config } = params;
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
@@ -141,6 +141,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       try {
         setInitError(null);
         setIsInitializing(true);
+        const { modalConfig } = config;
         if (modalConfig) {
           await web3Auth.initModal({ modalConfig });
         } else {
@@ -154,7 +155,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
 
     if (web3Auth) init();
-  }, [web3Auth, modalConfig]);
+  }, [web3Auth, config]);
 
   useEffect(() => {
     const addState = async () => {

@@ -4,11 +4,10 @@ import {
   type CustomChainConfig,
   type IPlugin,
   type IProvider,
-  WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { type ModalConfig, Web3Auth } from "@web3auth/modal";
+import { Web3Auth } from "@web3auth/modal";
 import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
 
@@ -20,7 +19,6 @@ export default defineComponent({
   name: "Web3AuthProvider",
   props: {
     config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
-    modalConfig: { type: Object as PropType<Record<WALLET_ADAPTER_TYPE, ModalConfig>>, required: false },
   },
   setup(props) {
     const web3Auth = shallowRef<Web3Auth | null>(null);
@@ -134,8 +132,9 @@ export default defineComponent({
         try {
           initError.value = null;
           isInitializing.value = true;
-          if (props.modalConfig) {
-            await web3Auth.value.initModal({ modalConfig: props.modalConfig });
+          const { modalConfig } = props.config;
+          if (modalConfig) {
+            await web3Auth.value.initModal({ modalConfig });
           } else {
             await web3Auth.value.initModal();
           }

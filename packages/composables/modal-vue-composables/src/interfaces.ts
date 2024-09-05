@@ -1,10 +1,11 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
-import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo } from "@web3auth/base";
-import { type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
+import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
 import { Ref, ShallowRef } from "vue";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
+  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
   adapters?: IAdapter<unknown>[];
   plugins?: IPlugin[];
 };
