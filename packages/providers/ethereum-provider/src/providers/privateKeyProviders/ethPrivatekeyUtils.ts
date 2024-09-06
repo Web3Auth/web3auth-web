@@ -10,13 +10,11 @@ import { validateTypedSignMessageDataV4 } from "./TransactionFormatter/utils";
 
 async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
-  const common = await txFormatter.getCommonConfiguration();
-  const { TransactionFactory } = await import("@ethereumjs/tx");
-  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
-    common,
-  });
-  const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
-  return Buffer.from(signedTx);
+  const { Transaction } = await import("ethers");
+  const ethTx = Transaction.from(finalTxParams);
+  const signKey = new SigningKey(addHexPrefix(privKey));
+  ethTx.signature = signKey.sign(ethTx.unsignedHash);
+  return Buffer.from(ethTx.serialized);
 }
 
 export function getProviderHandlers({

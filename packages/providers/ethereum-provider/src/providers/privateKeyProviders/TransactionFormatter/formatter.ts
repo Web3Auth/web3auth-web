@@ -1,8 +1,8 @@
-import { type Common } from "@ethereumjs/common";
-import { addHexPrefix, AddressLike, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
+import { addHexPrefix, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@web3auth/auth";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
 import BigNumber from "bignumber.js";
+import { AddressLike } from "ethers";
 
 import { TransactionParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
@@ -32,20 +32,6 @@ export class TransactionFormatter {
   async init(): Promise<void> {
     this.chainConfig = (await this.providerProxy.request<never, CustomChainConfig>({ method: "eth_provider_config" })) as CustomChainConfig;
     this.isEIP1559Compatible = await this.getEIP1559Compatibility();
-  }
-
-  async getCommonConfiguration(): Promise<Common> {
-    if (!this.chainConfig) throw new Error("Chain config not initialized");
-    const { displayName: name, chainId } = this.chainConfig;
-    const { Hardfork, Common } = await import("@ethereumjs/common");
-    const hardfork = this.isEIP1559Compatible ? Hardfork.Paris : Hardfork.Berlin;
-    const customChainParams = {
-      name,
-      chainId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
-      networkId: chainId === "loading" ? 0 : Number.parseInt(chainId, 16),
-      defaultHardfork: hardfork,
-    };
-    return Common.custom(customChainParams);
   }
 
   async formatTransaction(txParams: TransactionParams & { gas?: string }): Promise<TransactionParams & { gas?: string }> {
@@ -104,10 +90,10 @@ export class TransactionFormatter {
 
         clonedTxParams.maxPriorityFeePerGas = bnLessThan(
           typeof defaultMaxPriorityFeePerGas === "string" ? stripHexPrefix(defaultMaxPriorityFeePerGas) : defaultMaxPriorityFeePerGas,
-          typeof clonedTxParams.gasPrice === "string" ? stripHexPrefix(clonedTxParams.gasPrice) : clonedTxParams.gasPrice
+          typeof clonedTxParams.gasPrice === "string" ? stripHexPrefix(clonedTxParams.gasPrice) : clonedTxParams.gasPrice.toString()
         )
           ? addHexPrefix(defaultMaxPriorityFeePerGas)
-          : addHexPrefix(clonedTxParams.gasPrice);
+          : addHexPrefix(clonedTxParams.gasPrice.toString());
       } else {
         if (defaultMaxFeePerGas && !clonedTxParams.maxFeePerGas) {
           // If the dapp has not set the gasPrice or the maxFeePerGas, then we set maxFeePerGas
@@ -156,7 +142,7 @@ export class TransactionFormatter {
       clonedTxParams.gasPrice = defaultGasPrice as never;
     }
 
-    clonedTxParams.type = this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY;
+    clonedTxParams.type = Number(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY);
     clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }

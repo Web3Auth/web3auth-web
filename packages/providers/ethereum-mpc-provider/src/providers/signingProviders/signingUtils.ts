@@ -19,35 +19,11 @@ async function signTx(
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
 ): Promise<Buffer> {
-  const [{ Hardfork }, { Capability, TransactionFactory, TransactionType }] = await Promise.all([
-    import("@ethereumjs/common"),
-    import("@ethereumjs/tx"),
-  ]);
+  const { Transaction } = await import("ethers");
   const finalTxParams = await txFormatter.formatTransaction(txParams);
-  const common = await txFormatter.getCommonConfiguration();
-  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
-    common,
-  });
+  const ethTx = Transaction.from(finalTxParams);
 
-  // Hack for the constellation that we have got a legacy tx after spuriousDragon with a non-EIP155 conforming signature
-  // and want to recreate a signature (where EIP155 should be applied)
-  // Leaving this hack lets the legacy.spec.ts -> sign(), verifySignature() test fail
-  // 2021-06-23
-  let hackApplied = false;
-  if (
-    unsignedEthTx.type === TransactionType.Legacy &&
-    unsignedEthTx.common.gteHardfork(Hardfork.SpuriousDragon) &&
-    !unsignedEthTx.supports(Capability.EIP155ReplayProtection)
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (unsignedEthTx as any).activeCapabilities.push(Capability.EIP155ReplayProtection);
-    hackApplied = true;
-  }
-
-  const msgHash = unsignedEthTx.getHashedMessageToSign();
-  const rawMessage = unsignedEthTx.getMessageToSign();
-
-  const vrs = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
+  const vrs = await sign(Buffer.from(ethTx.unsignedHash));
   let { v } = vrs;
   const { r, s } = vrs;
 
@@ -57,20 +33,13 @@ async function signTx(
   }
 
   // addSignature will handle the v value
-  const tx = unsignedEthTx.addSignature(BigInt(v), r, s);
-
-  // Hack part 2
-  if (hackApplied) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const index = (unsignedEthTx as any).activeCapabilities.indexOf(Capability.EIP155ReplayProtection);
-    if (index > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (unsignedEthTx as any).activeCapabilities.splice(index, 1);
-    }
-  }
+  const tx = ethTx;
+  tx.signature.v = BigInt(v);
+  tx.signature.r = r;
+  tx.signature.s = s;
 
   // should we return uint8array or buffer?
-  return Buffer.from(tx.serialize());
+  return Buffer.from(tx.serialized);
 }
 
 async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {

@@ -1,6 +1,5 @@
-import type { AccessListEIP2930TxData, FeeMarketEIP1559TxData, TxData } from "@ethereumjs/tx";
 import type { JRPCRequest } from "@web3auth/auth";
-import type { TypedDataDomain, TypedDataField } from "ethers";
+import type { TransactionLike, TypedDataDomain, TypedDataField } from "ethers";
 export interface IAccountHandlers {
   updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
 }
@@ -23,19 +22,7 @@ export interface IChainSwitchHandlers {
   switchChain: (params: { chainId: string }) => Promise<void>;
 }
 
-export interface ExtendedAccessListEIP2930TxData extends AccessListEIP2930TxData {
-  from: string;
-}
-
-export interface ExtendedFeeMarketEIP1559Transaction extends FeeMarketEIP1559TxData {
-  from: string;
-}
-
-export interface ExtendedTxData extends TxData {
-  from: string;
-}
-
-export type TransactionParams = ExtendedFeeMarketEIP1559Transaction & ExtendedAccessListEIP2930TxData & ExtendedTxData & { input?: string };
+export type TransactionParams<A = string> = TransactionLike<A> & { input?: string };
 
 export interface MessageParams<T> {
   from: string;
