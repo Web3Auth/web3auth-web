@@ -1,5 +1,6 @@
+import Bowser from "bowser";
 import copyToClipboard from "copy-to-clipboard";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
@@ -13,6 +14,11 @@ interface WalletConnectProps {
 
 function WalletConnect(props: WalletConnectProps) {
   const { walletConnectUri, logoImage } = props;
+
+  const isDesktop = useMemo<boolean>(() => {
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    return browser.getPlatformType() === "desktop";
+  }, []);
 
   const [t] = useTranslation(undefined, { i18n });
 
@@ -30,7 +36,7 @@ function WalletConnect(props: WalletConnectProps) {
             onKeyDown={() => copyToClipboard(walletConnectUri)}
           >
             <QRCode
-              size={300}
+              size={isDesktop ? 300 : 260}
               eyeRadius={5}
               qrStyle="dots"
               removeQrCodeBehindLogo

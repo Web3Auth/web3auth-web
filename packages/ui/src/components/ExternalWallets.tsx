@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 
 import { ExternalButton, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
-import Button from "./Button";
+import ExternalWalletButton from "./ExternalWallet/ExternalWalletButton";
 import ExternalWalletDetail from "./ExternalWallet/ExternalWalletDetail";
 import ExternalWalletHeader from "./ExternalWallet/ExternalWalletHeader";
-import Image from "./Image";
 import Loader from "./Loader";
 
 interface ExternalWalletsProps {
@@ -52,14 +51,11 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [t] = useTranslation(undefined, { i18n });
 
-  const [walletConnectSupported] = useMemo(() => {
-    if (!config) return [true];
-    return [Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2)];
-  }, [config]);
-
-  const [isWalletDiscoverySupported] = useMemo(() => {
-    return [walletConnectSupported && walletConnectUri && walletRegistry];
-  }, [walletConnectSupported, walletConnectUri, walletRegistry]);
+  const [isWalletDiscoveryReady, isWalletDiscoveryNotReady] = useMemo(() => {
+    const walletConnectSupported = Object.keys(config || {}).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2);
+    const walletDiscoverySupported = walletRegistry && Object.keys(walletRegistry).length > 0 && walletConnectSupported;
+    return [walletDiscoverySupported && walletConnectUri, walletDiscoverySupported && !walletConnectUri];
+  }, [config, walletConnectUri, walletRegistry]);
 
   const deviceDetails = useMemo<{ platform: platform; os: os; browser: browser }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
@@ -83,8 +79,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   }, [config, handleExternalWalletClick, walletConnectUri, deviceDetails]);
 
   useEffect(() => {
-    // if wallet connect is supported and walletRegistry is available
-    if (isWalletDiscoverySupported) {
+    if (isWalletDiscoveryReady) {
       const buttons: ExternalButton[] = Object.keys(walletRegistry)
         .map((wallet): ExternalButton => {
           const walletRegistryItem = walletRegistry[wallet];
@@ -98,7 +93,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             name: wallet,
             displayName: walletRegistryItem.name,
             href,
-            hasInjectedWallet: Object.keys(config).some((adapter) => adapter === wallet),
+            hasInjectedWallet: Object.keys(config).some((adapter) => adapter === wallet && config[adapter].isInjected),
             hasWalletConnect:
               Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
               walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
@@ -133,13 +128,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         .map((adapter) => ({
           name: adapter,
           displayName: config[adapter].label || adapter,
-          hasInjectedWallet: true,
+          hasInjectedWallet: config[adapter].isInjected,
           hasWalletConnect: false,
           hasInstallLinks: false,
         }));
       setExternalButtons(buttons);
     }
-  }, [config, deviceDetails, walletConnectUri, isWalletDiscoverySupported, walletRegistry, walletSearch, chainNamespace]);
+  }, [config, deviceDetails, walletConnectUri, isWalletDiscoveryReady, walletRegistry, walletSearch, chainNamespace]);
 
   const handleWalletClick = (button: ExternalButton) => {
     if (deviceDetails.platform === "desktop") {
@@ -160,7 +155,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-container w3ajs-external-container">
         {/* Loader */}
-        {walletConnectSupported && !walletConnectUri && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
+        {isWalletDiscoveryNotReady && <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />}
         {modalStatus === MODAL_STATUS.INITIALIZED &&
           // All wallets
           (!selectedButton ? (
@@ -174,7 +169,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               />
 
               {/* Search */}
-              {isWalletDiscoverySupported && (
+              {isWalletDiscoveryReady && (
                 <div className="pt-4">
                   <input
                     className="w-full w3a-text-field"
@@ -201,48 +196,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               )}
               <ul className="w3a-adapter-list w3ajs-wallet-adapters mt-4">
                 {externalButtons.map((button) => {
-                  const providerIcon = (
-                    <Image
-                      imageId={`login-${button.name}`}
-                      hoverImageId={`login-${button.name}`}
-                      fallbackImageId="wallet"
-                      height="30"
-                      width="30"
-                      isButton
-                    />
-                  );
-                  const label = <p className="ml-2 text-left">{config[button.name]?.label || button.displayName}</p>;
-
                   return (
                     <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name}>
                       {deviceDetails.platform === "desktop" ? (
-                        <Button
-                          variant="tertiary"
-                          type="button"
-                          onClick={() => handleWalletClick(button)}
-                          className="w-full rounded-xl size-xl flex !justify-between items-center !bg-app-gray-100 hover:!bg-app-gray-200 !px-2"
-                          title={config[button.name]?.label || button.name}
-                        >
-                          <div className="flex items-center">
-                            {providerIcon} {label}
-                          </div>
-                          {isWalletDiscoverySupported && button.hasInjectedWallet && (
-                            <span className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium bg-app-primary-100 text-app-primary-800">
-                              {t("modal.external.installed")}
-                            </span>
-                          )}
-                        </Button>
+                        <ExternalWalletButton button={button} adapterConfig={config[button.name]} handleWalletClick={handleWalletClick} />
                       ) : (
                         <a href={button.href} target="_blank" className="w-full" rel="noreferrer noopener">
-                          <Button
-                            variant="tertiary"
-                            type="button"
-                            onClick={() => handleWalletClick(button)}
-                            className="w-full rounded-xl size-xl flex !justify-start items-center !bg-app-gray-100 hover:!bg-app-gray-200 !px-2"
-                            title={config[button.name]?.label || button.name}
-                          >
-                            {providerIcon} {label}
-                          </Button>
+                          <ExternalWalletButton button={button} adapterConfig={config[button.name]} handleWalletClick={handleWalletClick} />
                         </a>
                       )}
                     </li>

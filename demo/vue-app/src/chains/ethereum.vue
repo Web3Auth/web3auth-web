@@ -140,6 +140,7 @@ export default defineComponent({
         // Only when you want to add External default adapters, which includes WalletConnect, Metamask, Torus EVM Wallet
         const adapters = await getDefaultExternalAdapters({ options: ethWeb3AuthOptions });
         adapters.forEach((adapter) => {
+          // if (adapter.name === "wallet-connect-v2") return;
           this.web3auth.configureAdapter(adapter);
         });
 
