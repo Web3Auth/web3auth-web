@@ -57,6 +57,10 @@ const getOsName = (os: string) => {
   }
 };
 
+const getBrowserName = (browser: string) => {
+  return browser.charAt(0).toUpperCase() + browser.slice(1);
+};
+
 export default function ExternalWalletInstall(props: ExternalWalletInstallProps) {
   const { connectButton, goBack, closeModal } = props;
   const [t] = useTranslation(undefined, { i18n });
@@ -82,7 +86,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
             <a href={appUrl} rel="noopener noreferrer" target="_blank">
               <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2">
                 <Image imageId={os} hoverImageId={os} height="30" width="30" isButton />
-                <span>Install {getOsName(os)} app</span>
+                <span>{t("modal.external.install-mobile-app", { os: getOsName(os) })}</span>
               </Button>
             </a>
           </li>
@@ -102,9 +106,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2">
             <Image imageId={deviceDetails.browser} hoverImageId={deviceDetails.browser} height="30" width="30" isButton />
-            <span>
-              Install <span className="capitalize">{deviceDetails.browser}</span> extension
-            </span>
+            <span>{t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}</span>
           </Button>
         </a>
       </li>
