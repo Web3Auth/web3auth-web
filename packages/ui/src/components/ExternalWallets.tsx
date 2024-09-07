@@ -46,6 +46,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     walletRegistry = {},
   } = props;
   const [externalButtons, setExternalButtons] = useState<ExternalButton[]>([]);
+  const [adapterVisibilityMap, setAdapterVisibilityMap] = useState<Record<string, boolean>>({});
   const [totalExternalWallets, setTotalExternalWallets] = useState<number>(0);
   const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
@@ -76,11 +77,31 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     if (wcAvailable && !walletConnectUri) {
       handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
     }
+
+    const canShowMap: Record<string, boolean> = {};
+    Object.keys(config).forEach((adapter) => {
+      const adapterConfig = config[adapter];
+      if (!adapterConfig.showOnModal) {
+        canShowMap[adapter] = false;
+        return;
+      }
+      if (deviceDetails.platform === "desktop" && adapterConfig.showOnDesktop) {
+        canShowMap[adapter] = true;
+        return;
+      }
+      if ((deviceDetails.platform === "mobile" || deviceDetails.platform === "tablet") && adapterConfig.showOnMobile) {
+        canShowMap[adapter] = true;
+        return;
+      }
+      canShowMap[adapter] = false;
+    });
+    setAdapterVisibilityMap(canShowMap);
   }, [config, handleExternalWalletClick, walletConnectUri, deviceDetails]);
 
   useEffect(() => {
     if (isWalletDiscoveryReady) {
       const buttons: ExternalButton[] = Object.keys(walletRegistry)
+        .filter((wallet) => adapterVisibilityMap[wallet] !== false)
         .map((wallet): ExternalButton => {
           const walletRegistryItem = walletRegistry[wallet];
           let href = "";
@@ -125,6 +146,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     } else {
       const buttons: ExternalButton[] = Object.keys(config)
         .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter))
+        .filter((adapter) => adapterVisibilityMap[adapter])
         .map((adapter) => ({
           name: adapter,
           displayName: config[adapter].label || adapter,
@@ -134,7 +156,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         }));
       setExternalButtons(buttons);
     }
-  }, [config, deviceDetails, walletConnectUri, isWalletDiscoveryReady, walletRegistry, walletSearch, chainNamespace]);
+  }, [config, deviceDetails, walletConnectUri, adapterVisibilityMap, isWalletDiscoveryReady, walletRegistry, walletSearch, chainNamespace]);
 
   const handleWalletClick = (button: ExternalButton) => {
     if (deviceDetails.platform === "desktop") {

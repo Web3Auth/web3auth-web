@@ -157,7 +157,7 @@ export default defineComponent({
 
         this.subscribeAuthEvents(this.web3auth);
 
-        await this.web3auth.initModal();
+        await this.web3auth.initModal({ modalConfig: this.modalConfig });
       } catch (error) {
         log.info("error", error);
         this.uiConsole("error", error);
