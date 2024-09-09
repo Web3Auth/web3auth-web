@@ -1,5 +1,5 @@
 import { createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCEngine, providerErrors, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";

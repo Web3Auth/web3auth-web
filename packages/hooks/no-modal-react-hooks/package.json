@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal-react-hooks",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.0",
   "description": "React hooks to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
     "web3Auth/no-modal-react-hooks",
@@ -10,8 +10,9 @@
     "web3Auth hooks",
     "web3Auth no-modal react hooks"
   ],
-  "main": "dist/noModalReactHooks.cjs.js",
-  "module": "dist/noModalReactHooks.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/noModalReactHooks.umd.min.js",
   "jsdelivr": "dist/noModalReactHooks.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -31,11 +32,11 @@
     "dist"
   ],
   "devDependencies": {
-    "@web3auth/openlogin-adapter": "^8.12.4"
+    "@web3auth/auth-adapter": "^9.0.0-alpha.0"
   },
   "dependencies": {
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/no-modal": "^8.12.4"
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/no-modal": "^9.0.0-alpha.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

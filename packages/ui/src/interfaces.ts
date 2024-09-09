@@ -1,6 +1,13 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { UX_MODE_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
+import {
+  BaseAdapterConfig,
+  ChainNamespaceType,
+  LoginMethodConfig,
+  WALLET_ADAPTER_TYPE,
+  WalletRegistry,
+  WalletRegistryItem,
+  Web3AuthNoModalEvents,
+} from "@web3auth/base";
 
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
@@ -40,12 +47,17 @@ export interface UIConfig extends WhiteLabelData {
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
-  adapterListener: SafeEventEmitter;
+  adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 
   /**
-   * UX Mode for the openlogin adapter
+   * UX Mode for the auth adapter
    */
   uxMode?: UX_MODE_TYPE;
+}
+
+export interface LoginModalProps extends UIConfig {
+  chainNamespace: ChainNamespaceType;
+  walletRegistry: WalletRegistry;
 }
 
 export const LOGIN_MODAL_EVENTS = {
@@ -53,7 +65,7 @@ export const LOGIN_MODAL_EVENTS = {
   LOGIN: "LOGIN",
   DISCONNECT: "DISCONNECT",
   MODAL_VISIBILITY: "MODAL_VISIBILITY",
-};
+} as const;
 
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
@@ -84,7 +96,6 @@ export interface ModalState {
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
-  wcAdapters: IWalletConnectExtensionAdapter[];
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
@@ -94,3 +105,18 @@ export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.sv
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
 
 export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
+
+export type StateEmitterEvents = {
+  STATE_UPDATED: (state: Partial<ModalState>) => void;
+  MOUNTED: () => void;
+};
+
+export type ExternalButton = {
+  name: string;
+  displayName?: string;
+  href?: string;
+  hasInjectedWallet: boolean;
+  hasWalletConnect: boolean;
+  hasInstallLinks: boolean;
+  walletRegistryItem?: WalletRegistryItem;
+};

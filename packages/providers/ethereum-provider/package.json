@@ -1,10 +1,11 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/ethereumProvider.cjs.js",
-  "module": "dist/ethereumProvider.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/ethereumProvider.umd.min.js",
   "jsdelivr": "dist/ethereumProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -19,24 +20,22 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^4.3.0",
-    "@ethereumjs/tx": "^5.3.0",
-    "@ethereumjs/util": "^9.0.3",
-    "@metamask/eth-sig-util": "7.0.2",
-    "@toruslabs/base-controllers": "^5.10.0",
-    "@toruslabs/http-helpers": "^6.1.1",
-    "@toruslabs/openlogin-jrpc": "^8.3.0",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
+    "@ethereumjs/util": "^9.1.0",
+    "@toruslabs/base-controllers": "^6.1.0",
+    "@toruslabs/http-helpers": "^7.0.0",
+    "@web3auth/auth": "^9.3.2",
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/base-provider": "^9.0.0-alpha.0",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
+    "ethers": "^6.13.2",
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.5",
     "@types/json-rpc-random-id": "^1.0.3",
-    "@walletconnect/types": "^2.14.0"
+    "@walletconnect/types": "^2.16.0"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

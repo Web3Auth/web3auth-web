@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal-vue-composables",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.0",
   "description": "Vue composables to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
     "web3Auth/no-modal-vue-composables",
@@ -10,8 +10,9 @@
     "web3Auth composables",
     "web3Auth no-modal vue composables"
   ],
-  "main": "dist/noModalVueComposables.cjs.js",
-  "module": "dist/noModalVueComposables.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/noModalVueComposables.umd.min.js",
   "jsdelivr": "dist/noModalVueComposables.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -28,12 +29,12 @@
     "dist"
   ],
   "dependencies": {
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/no-modal": "^8.12.4"
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/no-modal": "^9.0.0-alpha.0"
   },
   "devDependencies": {
-    "@toruslabs/openlogin-utils": "^8.2.1",
-    "@web3auth/openlogin-adapter": "^8.12.4"
+    "@web3auth/auth": "^9.3.2",
+    "@web3auth/auth-adapter": "^9.0.0-alpha.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

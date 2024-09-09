@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-services-plugin-react-hooks",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.0",
   "description": "React hooks to simplify integration with web3Auth wallet-services-plugin SDK.",
   "keywords": [
     "web3Auth/wallet-services-plugin-react-hooks",
@@ -10,8 +10,9 @@
     "web3Auth hooks",
     "web3Auth wallet-services-plugin react hooks"
   ],
-  "main": "dist/walletServicesPluginReactHooks.cjs.js",
-  "module": "dist/walletServicesPluginReactHooks.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/walletServicesPluginReactHooks.umd.min.js",
   "jsdelivr": "dist/walletServicesPluginReactHooks.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -31,8 +32,8 @@
     "dist"
   ],
   "dependencies": {
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/wallet-services-plugin": "^8.12.4"
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/wallet-services-plugin": "^9.0.0-alpha.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

@@ -1,4 +1,4 @@
-import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
 
 import { TransactionOrVersionedTransaction } from "../interface";
 

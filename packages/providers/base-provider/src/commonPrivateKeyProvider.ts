@@ -7,7 +7,7 @@ import {
   JRPCRequest,
   JRPCResponse,
   providerFromEngine,
-} from "@toruslabs/openlogin-jrpc";
+} from "@web3auth/auth";
 import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@web3auth/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
@@ -78,6 +78,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
   private getPrivKeyMiddleware(privKey: string): JRPCMiddleware<unknown, unknown> {
     const middleware = {
       getPrivatekey: async (): Promise<string> => {
+        if (!this.config.keyExportEnabled) throw new Error("Exporting private key is disabled. Please enable it in the provider config");
         return privKey;
       },
     };
@@ -86,7 +87,11 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
 
   private createPrivKeyMiddleware({ getPrivatekey }: { getPrivatekey: () => Promise<string> }): JRPCMiddleware<unknown, unknown> {
     async function getPrivatekeyHandler(_: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
-      res.result = await getPrivatekey();
+      try {
+        res.result = await getPrivatekey();
+      } catch (error: unknown) {
+        res.error = error instanceof Error ? (error as Error).message : error;
+      }
     }
 
     return createScaffoldMiddleware({

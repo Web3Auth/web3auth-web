@@ -1,23 +1,23 @@
 {
-  "name": "@web3auth/phantom-adapter",
-  "version": "8.12.4",
-  "description": "phantom wallet adapter for web3auth",
+  "name": "@web3auth/auth-adapter",
+  "version": "9.0.0-alpha.0",
+  "description": "Auth adapter for Web3auth",
   "keywords": [
-    "web3Auth/phantom-wallet-adapter",
+    "web3Auth/auth-adapter",
     "web3Auth",
     "multichainWallet",
     "blockchain",
     "ethereum",
-    "solana",
-    "phantom"
+    "solana"
   ],
-  "main": "dist/phantomAdapter.cjs.js",
-  "module": "dist/phantomAdapter.esm.js",
-  "unpkg": "dist/phantomAdapter.umd.min.js",
-  "jsdelivr": "dist/phantomAdapter.umd.min.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
+  "unpkg": "dist/auth.umd.min.js",
+  "jsdelivr": "dist/auth.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/blob/master/packages/adapters/phantom-adapter/README.md",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/adapters/auth-adapter#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../../.mocharc.json test/**.ts",
@@ -32,15 +32,13 @@
     "dist"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@solana/web3.js": "^1.x"
+    "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
-    "@web3auth/base-solana-adapter": "^8.12.4",
-    "@web3auth/solana-provider": "^8.12.4",
-    "bn.js": "^5.2.1"
+    "@web3auth/auth": "^9.3.2",
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/base-provider": "^9.0.0-alpha.0",
+    "deepmerge": "^4.3.1"
   },
   "lint-staged": {
     "!(*d).ts": [

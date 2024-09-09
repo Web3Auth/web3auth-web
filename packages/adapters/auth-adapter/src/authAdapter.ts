@@ -1,5 +1,4 @@
-import OpenLogin from "@toruslabs/openlogin";
-import { LoginParams, OPENLOGIN_NETWORK, OpenLoginOptions, SUPPORTED_KEY_CURVES, UX_MODE } from "@toruslabs/openlogin-utils";
+import { Auth, AuthOptions, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -23,24 +22,24 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import merge from "lodash.merge";
+import deepmerge from "deepmerge";
 
-import { getOpenloginDefaultOptions } from "./config";
-import type { LoginSettings, OpenloginAdapterOptions, PrivateKeyProvider } from "./interface";
+import { getAuthDefaultOptions } from "./config";
+import type { AuthAdapterOptions, LoginSettings, PrivateKeyProvider } from "./interface";
 
-export type OpenloginLoginParams = LoginParams & {
+export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
   login_hint?: string;
 };
 
-export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
-  readonly name: string = WALLET_ADAPTERS.OPENLOGIN;
+export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
+  readonly name: string = WALLET_ADAPTERS.AUTH;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
 
-  public openloginInstance: OpenLogin | null = null;
+  public authInstance: Auth | null = null;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -48,11 +47,11 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   public privateKeyProvider: PrivateKeyProvider | null = null;
 
-  private openloginOptions: OpenloginAdapterOptions["adapterSettings"];
+  private authOptions: AuthAdapterOptions["adapterSettings"];
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  constructor(params: OpenloginAdapterOptions = {}) {
+  constructor(params: AuthAdapterOptions = {}) {
     super(params);
     this.setAdapterSettings({
       ...params.adapterSettings,
@@ -84,31 +83,31 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
-    if (!this.clientId) throw WalletInitializationError.invalidParams("clientId is required before openlogin's initialization");
-    if (!this.openloginOptions) throw WalletInitializationError.invalidParams("openloginOptions is required before openlogin's initialization");
-    const isRedirectResult = this.openloginOptions.uxMode === UX_MODE.REDIRECT;
+    if (!this.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
+    if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
+    const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.openloginOptions = {
-      ...this.openloginOptions,
+    this.authOptions = {
+      ...this.authOptions,
       replaceUrlOnRedirect: isRedirectResult,
       useCoreKitKey: this.useCoreKitKey,
     };
-    this.openloginInstance = new OpenLogin({
-      ...this.openloginOptions,
+    this.authInstance = new Auth({
+      ...this.authOptions,
       clientId: this.clientId,
-      network: this.openloginOptions.network || this.web3AuthNetwork || OPENLOGIN_NETWORK.SAPPHIRE_MAINNET,
+      network: this.authOptions.network || this.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     });
-    log.debug("initializing openlogin adapter init");
+    log.debug("initializing auth adapter init");
 
-    await this.openloginInstance.init();
+    await this.authInstance.init();
 
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
 
     this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.OPENLOGIN);
+    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.AUTH);
 
     try {
-      log.debug("initializing openlogin adapter");
+      log.debug("initializing auth adapter");
 
       const finalPrivKey = this._getFinalPrivKey();
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
@@ -117,53 +116,53 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
         await this.connect();
       }
     } catch (error) {
-      log.error("Failed to connect with cached openlogin provider", error);
-      this.emit("ERRORED", error);
+      log.error("Failed to connect with cached auth provider", error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
-  async connect(params: OpenloginLoginParams = { loginProvider: "" }): Promise<IProvider | null> {
+  async connect(params: AuthLoginParams = { loginProvider: "" }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.OPENLOGIN });
+    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.AUTH });
     try {
       await this.connectWithProvider(params);
       return this.provider;
     } catch (error: unknown) {
-      log.error("Failed to connect with openlogin provider", error);
+      log.error("Failed to connect with auth provider", error);
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       if ((error as Error)?.message.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
       } else if (error instanceof Web3AuthError) {
         throw error;
       }
-      throw WalletLoginError.connectionError("Failed to login with openlogin", error);
+      throw WalletLoginError.connectionError("Failed to login with auth", error);
     }
   }
 
-  public async enableMFA(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
+  public async enableMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
-      await this.openloginInstance.enableMFA(params);
+      await this.authInstance.enableMFA(params);
     } catch (error: unknown) {
-      log.error("Failed to enable MFA with openlogin provider", error);
+      log.error("Failed to enable MFA with auth provider", error);
       if (error instanceof Web3AuthError) {
         throw error;
       }
-      throw WalletLoginError.connectionError("Failed to enable MFA with openlogin", error);
+      throw WalletLoginError.connectionError("Failed to enable MFA with auth", error);
     }
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-    await this.openloginInstance.logout();
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    await this.authInstance.logout();
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
-      this.openloginInstance = null;
+      this.authInstance = null;
       this.privateKeyProvider = null;
     } else {
       // ready to be connected again
@@ -184,23 +183,23 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
-    const userInfo = this.openloginInstance.getUserInfo();
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    const userInfo = this.authInstance.getUserInfo();
     return userInfo;
   }
 
   // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<OpenLoginOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
+  setAdapterSettings(adapterSettings: Partial<AuthOptions & BaseAdapterSettings> & { privateKeyProvider?: PrivateKeyProvider }): void {
     super.setAdapterSettings(adapterSettings);
-    const defaultOptions = getOpenloginDefaultOptions();
+    const defaultOptions = getAuthDefaultOptions();
     log.info("setting adapter settings", adapterSettings);
-    this.openloginOptions = merge(
+    this.authOptions = deepmerge.all([
       defaultOptions.adapterSettings,
-      this.openloginOptions,
-      adapterSettings
-    ) as OpenloginAdapterOptions["adapterSettings"];
+      this.authOptions || {},
+      adapterSettings || {},
+    ]) as AuthAdapterOptions["adapterSettings"];
     if (adapterSettings.web3AuthNetwork) {
-      this.openloginOptions.network = adapterSettings.web3AuthNetwork;
+      this.authOptions.network = adapterSettings.web3AuthNetwork;
     }
     if (adapterSettings.privateKeyProvider) {
       this.privateKeyProvider = adapterSettings.privateKeyProvider;
@@ -220,40 +219,40 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
   }
 
   private _getFinalPrivKey() {
-    if (!this.openloginInstance) return "";
-    let finalPrivKey = this.openloginInstance.privKey;
+    if (!this.authInstance) return "";
+    let finalPrivKey = this.authInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
     if (this.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
-      if (this.openloginInstance.privKey && !this.openloginInstance.coreKitKey) {
+      if (this.authInstance.privKey && !this.authInstance.coreKitKey) {
         throw WalletLoginError.coreKitKeyNotFound();
       }
-      finalPrivKey = this.openloginInstance.coreKitKey;
+      finalPrivKey = this.authInstance.coreKitKey;
     }
     return finalPrivKey;
   }
 
   private _getFinalEd25519PrivKey() {
-    if (!this.openloginInstance) return "";
-    let finalPrivKey = this.openloginInstance.ed25519PrivKey;
+    if (!this.authInstance) return "";
+    let finalPrivKey = this.authInstance.ed25519PrivKey;
     // coreKitKey is available only for custom verifiers by default
     if (this.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
-      if (this.openloginInstance.ed25519PrivKey && !this.openloginInstance.coreKitEd25519Key) {
+      if (this.authInstance.ed25519PrivKey && !this.authInstance.coreKitEd25519Key) {
         throw WalletLoginError.coreKitKeyNotFound();
       }
-      finalPrivKey = this.openloginInstance.coreKitEd25519Key;
+      finalPrivKey = this.authInstance.coreKitEd25519Key;
     }
     return finalPrivKey;
   }
 
-  private async connectWithProvider(params: OpenloginLoginParams = { loginProvider: "" }): Promise<void> {
+  private async connectWithProvider(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
     if (!this.privateKeyProvider) throw WalletInitializationError.invalidParams("PrivateKey Provider is required before initialization");
-    if (!this.openloginInstance) throw WalletInitializationError.notReady("openloginInstance is not ready");
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
 
     const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
@@ -264,10 +263,14 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       }
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
-      await this.openloginInstance.login(
-        merge(this.loginSettings, params, {
-          extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-        })
+      await this.authInstance.login(
+        deepmerge.all([
+          this.loginSettings,
+          params,
+          {
+            extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
+          },
+        ]) as AuthLoginParams
       );
     }
     let finalPrivKey = this._getFinalPrivKey();
@@ -279,7 +282,7 @@ export class OpenloginAdapter extends BaseAdapter<OpenloginLoginParams> {
       await this.privateKeyProvider.setupProvider(finalPrivKey);
       this.status = ADAPTER_STATUS.CONNECTED;
       this.emit(ADAPTER_EVENTS.CONNECTED, {
-        adapter: WALLET_ADAPTERS.OPENLOGIN,
+        adapter: WALLET_ADAPTERS.AUTH,
         reconnected: this.rehydrated,
         provider: this.provider,
       } as CONNECTED_EVENT_DATA);

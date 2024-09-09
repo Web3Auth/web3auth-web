@@ -11,7 +11,7 @@ import { createStore as createMipd } from "mipd";
 
 import { InjectedEvmAdapter } from "./injectedEvmAdapter";
 
-export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
+export const getInjectedAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
   const { options } = params;
   const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
@@ -20,24 +20,6 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
     ...(chainConfig || {}),
   };
-
-  const [{ TorusWalletAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
-    import("@web3auth/torus-evm-adapter"),
-    import("@web3auth/wallet-connect-v2-adapter"),
-  ]);
-  const torusWalletAdapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
-
-  const wcv2Adapter = new WalletConnectV2Adapter({
-    chainConfig: finalChainConfig,
-    clientId,
-    sessionTime,
-    web3AuthNetwork,
-    useCoreKitKey,
-    adapterSettings: {
-      walletConnectInitOptions: {},
-    },
-  });
-
   // EIP-6963: multiple injected provider discovery
   const mipd = createMipd();
   // We assume that all extensions have emitted by here.
@@ -54,5 +36,32 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     });
   });
 
-  return [...injectedProviders, torusWalletAdapter, wcv2Adapter];
+  return injectedProviders;
+};
+
+export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
+  const { options } = params;
+  const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
+  if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
+    throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
+  const finalChainConfig = {
+    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
+    ...(chainConfig || {}),
+  };
+
+  const [{ WalletConnectV2Adapter }] = await Promise.all([import("@web3auth/wallet-connect-v2-adapter")]);
+
+  const wcv2Adapter = new WalletConnectV2Adapter({
+    chainConfig: finalChainConfig,
+    clientId,
+    sessionTime,
+    web3AuthNetwork,
+    useCoreKitKey,
+    adapterSettings: {
+      walletConnectInitOptions: {},
+    },
+  });
+  const injectedProviders = await getInjectedAdapters({ options });
+
+  return [...injectedProviders, wcv2Adapter];
 };

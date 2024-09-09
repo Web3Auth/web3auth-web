@@ -9,21 +9,21 @@
       <button class="show-modal" onclick="showModal()">Show Modal</button>
     </div>
     <script src="../dist/ui.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@toruslabs/openlogin-jrpc"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/auth"></script>
     <script>
       let modal = null;
       let testEventEmitter = null;
       function showModal() {
         console.log("open");
         modal.open();
-        // testEventEmitter.emit("connecting", { adapter: "openlogin" })
+        // testEventEmitter.emit("connecting", { adapter: "auth" })
         // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
         // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
         // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
       }
       (async function init() {
         try {
-          testEventEmitter = new OpenloginJrpc.SafeEventEmitter();
+          testEventEmitter = new Auth.SafeEventEmitter();
           modal = new Ui({
             adapterListener: testEventEmitter,
             theme: "dark",
@@ -32,7 +32,7 @@
           await modal.initModal();
           console.log("modal init");
           modal.addSocialLogins(
-            "openlogin",
+            "auth",
             {
               google: {
                 name: "google",
@@ -58,11 +58,8 @@
           modal.initExternalWalletContainer();
           modal.addWalletLogins(
             {
-              metamask: {
-                label: "metamask",
-              },
-              "wallet-connect-v1": {
-                label: "wallet-connect-v1",
+              "wallet-connect-v2": {
+                label: "wallet-connect-v2",
               },
             },
             { showExternalWalletsOnly: false }

@@ -1,6 +1,5 @@
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -8,6 +7,7 @@ import {
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
+  IProvider,
   IWeb3AuthCore,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
@@ -41,13 +41,13 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
   public wsEmbedInstance: WsEmbed;
 
-  private provider: SafeEventEmitterProvider | null = null;
+  private provider: IProvider | null = null;
 
   private web3auth: IWeb3AuthCore | null = null;
 
@@ -72,7 +72,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
-    // Not connected yet to openlogin
+    // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
@@ -178,7 +178,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToWalletEvents() {
-    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: string[] = []) => {
+    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
       if ((accounts as string[]).length === 0) {
         this.wsEmbedInstance.hideTorusButton();
         if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
@@ -186,9 +186,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     });
   }
 
-  private subscribeToProviderEvents(provider: SafeEventEmitterProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] } = { accounts: [] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+  private subscribeToProviderEvents(provider: IProvider) {
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

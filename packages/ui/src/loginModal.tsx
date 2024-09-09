@@ -1,19 +1,20 @@
-import "../css/web3auth.css";
+import "./css/web3auth.css";
 
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { applyWhiteLabelTheme, LANGUAGES } from "@toruslabs/openlogin-utils";
+import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
+  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   IAdapterDataEvent,
-  IWalletConnectExtensionAdapter,
   log,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
   WalletConnectV2Data,
+  WalletRegistry,
   Web3AuthError,
+  Web3AuthNoModalEvents,
 } from "@web3auth/base";
 import { createRoot } from "react-dom/client";
 
@@ -24,9 +25,11 @@ import {
   DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
   LOGIN_MODAL_EVENTS,
+  LoginModalProps,
   MODAL_STATUS,
   ModalState,
   SocialLoginEventType,
+  StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
 import i18n from "./localeImport";
@@ -48,12 +51,16 @@ function createWrapper(parentZIndex: string): HTMLElement {
   return wrapper;
 }
 
-class LoginModal extends SafeEventEmitter {
+export class LoginModal extends SafeEventEmitter {
   private uiConfig: UIConfig;
 
-  private stateEmitter: SafeEventEmitter;
+  private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  constructor(uiConfig: UIConfig) {
+  private chainNamespace: ChainNamespaceType;
+
+  private walletRegistry: WalletRegistry;
+
+  constructor(uiConfig: LoginModalProps) {
     super();
     this.uiConfig = uiConfig;
 
@@ -67,7 +74,9 @@ class LoginModal extends SafeEventEmitter {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
-    this.stateEmitter = new SafeEventEmitter();
+    this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
+    this.chainNamespace = uiConfig.chainNamespace;
+    this.walletRegistry = uiConfig.walletRegistry;
     this.subscribeCoreEvents(this.uiConfig.adapterListener);
   }
 
@@ -190,6 +199,8 @@ class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
+            chainNamespace={this.chainNamespace}
+            walletRegistry={this.walletRegistry}
           />
         </ThemedContext.Provider>
       );
@@ -273,22 +284,21 @@ class LoginModal extends SafeEventEmitter {
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
-  private updateWalletConnect = (walletConnectUri: string, wcAdapters: IWalletConnectExtensionAdapter[]): void => {
+  private updateWalletConnect = (walletConnectUri: string): void => {
     if (!walletConnectUri) return;
     this.setState({
       walletConnectUri,
-      wcAdapters,
     });
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
       const walletConnectData = adapterData.data as WalletConnectV2Data;
-      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+      this.updateWalletConnect(walletConnectData.uri);
     }
   };
 
-  private subscribeCoreEvents = (listener: SafeEventEmitter) => {
+  private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
     listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
@@ -344,5 +354,3 @@ class LoginModal extends SafeEventEmitter {
     });
   };
 }
-
-export default LoginModal;

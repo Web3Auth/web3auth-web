@@ -1,4 +1,4 @@
-import { LoginParams, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 
 import { ADAPTER_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
@@ -7,7 +7,7 @@ import { IPlugin } from "../plugin";
 export interface IBaseWeb3AuthHookContext {
   isConnected: boolean;
   provider: IProvider | null;
-  userInfo: Partial<OpenloginUserInfo> | null;
+  userInfo: Partial<AuthUserInfo> | null;
   isMFAEnabled: boolean;
   isInitialized: boolean;
   status: ADAPTER_STATUS_TYPE | null;

@@ -1,4 +1,4 @@
-import type { LoginParams, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type {
   ADAPTER_STATUS_TYPE,
   CustomChainConfig,
@@ -23,10 +23,14 @@ export interface Web3AuthProviderProps {
 }
 
 interface IBaseWeb3AuthComposableContext {
+  isConnecting: Ref<boolean>;
+  connectError: Ref<Error | null>;
   isConnected: Ref<boolean>;
   provider: Ref<IProvider | null>;
-  userInfo: Ref<Partial<OpenloginUserInfo> | null>;
+  userInfo: Ref<Partial<AuthUserInfo> | null>;
   isMFAEnabled: Ref<boolean>;
+  isInitializing: Ref<boolean>;
+  initError: Ref<Error | null>;
   isInitialized: Ref<boolean>;
   status: Ref<ADAPTER_STATUS_TYPE | null>;
   enableMFA(params?: LoginParams): Promise<void>;
@@ -41,6 +45,5 @@ interface IBaseWeb3AuthComposableContext {
 
 export interface IWeb3AuthContext extends IBaseWeb3AuthComposableContext {
   web3Auth: ShallowRef<Web3AuthNoModal | null>;
-  init(): Promise<void>;
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
 }
