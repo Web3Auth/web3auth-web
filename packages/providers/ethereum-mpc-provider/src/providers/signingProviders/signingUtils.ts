@@ -1,4 +1,4 @@
-import { intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
+import { intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
 import { log } from "@web3auth/base";
@@ -18,7 +18,7 @@ async function signTx(
   txParams: TransactionParams & { gas?: string },
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
-): Promise<Buffer> {
+): Promise<PrefixedHexString> {
   const { Transaction } = await import("ethers");
   const finalTxParams = await txFormatter.formatTransaction(txParams);
   const ethTx = Transaction.from(finalTxParams);
@@ -38,8 +38,7 @@ async function signTx(
   tx.signature.r = r;
   tx.signature.s = s;
 
-  // should we return uint8array or buffer?
-  return Buffer.from(tx.serialized);
+  return tx.serialized as PrefixedHexString;
 }
 
 async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
@@ -133,7 +132,7 @@ export function getProviderHandlers({
       const serializedTxn = await signTx(txParams, sign, txFormatter);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
-        params: ["0x".concat(serializedTxn.toString("hex"))],
+        params: [serializedTxn],
       });
       return txHash;
     },
@@ -145,7 +144,7 @@ export function getProviderHandlers({
           code: 4902,
         });
       const serializedTxn = await signTx(txParams, sign, txFormatter);
-      return Buffer.from(serializedTxn).toString("hex");
+      return serializedTxn;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const rawMessageSig = signMessage(sign, msgParams.data);
