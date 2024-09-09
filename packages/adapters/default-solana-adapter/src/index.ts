@@ -14,7 +14,7 @@ import {
 
 import { WalletStandardAdapter } from "./walletStandardAdapter";
 
-export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
+export const getInjectedAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
   const { options } = params;
   const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
@@ -49,4 +49,8 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     );
   });
   return standardWalletAdapters;
+};
+
+export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
+  return getInjectedAdapters(params);
 };
