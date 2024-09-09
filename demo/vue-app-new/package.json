@@ -3,9 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "dev": "vite",
     "serve": "vite preview",
-    "build": "vue-tsc -b && vite build",
+    "build": "npm run type-check && vite build",
     "lint": "eslint ."
   },
   "dependencies": {

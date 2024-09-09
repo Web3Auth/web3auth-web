@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { AuthAdapter } from "@web3auth/auth-adapter";
 import { CHAIN_NAMESPACES, ChainNamespaceType, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
@@ -70,15 +69,11 @@ const adapterOptions = computed(() =>
   formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        { name: "metamask-adapter", value: "metamask" },
-        { name: "openlogin-adapter", value: "openlogin" },
+        { name: "auth-adapter", value: "auth" },
         { name: "torus-evm-adapter", value: "torus-evm" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
       ]
-    : [
-        { name: "phantom-adapter", value: "phantom" },
-        { name: "torus-solana-adapter", value: "torus-solana" },
-      ]
+    : [{ name: "torus-solana-adapter", value: "torus-solana" }]
 );
 
 // Populate the private key provider based on the chain selected
@@ -153,8 +148,8 @@ const getExternalAdapterByName = (name: string) => {
   switch (name) {
     case "coinbase":
       return new CoinbaseAdapter();
-    case "auth":
-      return new AuthAdapter();
+    // case "auth":
+    //   return new AuthAdapter();
     case "torus-evm":
       return new TorusWalletAdapter();
     case "torus-solana":
@@ -186,6 +181,7 @@ const initW3A = async () => {
 const init = async () => {
   initW3A();
 };
+
 init();
 
 // Every time the form data changes, reinitialize the web3Auth object
