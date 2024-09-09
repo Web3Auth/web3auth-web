@@ -4,7 +4,7 @@ module.exports = {
   root: true,
   extends: ["@toruslabs/vue"],
   parser: "vue-eslint-parser",
-  ignorePatterns: ["*.config.js", ".eslintrc.js"],
+  ignorePatterns: ["*.config.js", ".eslintrc.js", "*.config.mts"],
   parserOptions: {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
