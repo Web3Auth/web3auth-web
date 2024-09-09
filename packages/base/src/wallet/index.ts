@@ -1,5 +1,5 @@
 export const MULTI_CHAIN_ADAPTERS = {
-  OPENLOGIN: "openlogin",
+  AUTH: "auth",
   WALLET_CONNECT_V2: "wallet-connect-v2",
   SFA: "sfa",
 };
@@ -28,7 +28,7 @@ export type EVM_ADAPTER_TYPE = (typeof EVM_ADAPTERS)[keyof typeof EVM_ADAPTERS];
 export type MULTI_CHAIN_ADAPTER_TYPE = (typeof MULTI_CHAIN_ADAPTERS)[keyof typeof MULTI_CHAIN_ADAPTERS];
 
 export const ADAPTER_NAMES = {
-  [MULTI_CHAIN_ADAPTERS.OPENLOGIN]: "OpenLogin",
+  [MULTI_CHAIN_ADAPTERS.AUTH]: "Auth",
   [MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V2]: "Wallet Connect v2",
   [MULTI_CHAIN_ADAPTERS.SFA]: "SFA",
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",

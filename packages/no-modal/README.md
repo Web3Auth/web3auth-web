@@ -62,7 +62,7 @@ await web3auth.init();
 Once you're done initialising, just create a button that triggers login for your preferred social channel for the user on their request. You can further use the returned provider for making RPC calls to the blockchain.
 
 ```js
-const web3authProvider = await web3auth.connectTo("openlogin", {
+const web3authProvider = await web3auth.connectTo("auth", {
   loginProvider: "google",
 });
 ```

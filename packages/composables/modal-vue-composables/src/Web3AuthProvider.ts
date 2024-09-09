@@ -1,3 +1,4 @@
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth-adapter";
 import {
   ADAPTER_EVENTS,
   type ADAPTER_STATUS_TYPE,
@@ -8,7 +9,6 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";

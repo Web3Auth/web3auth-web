@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@web3auth/auth": "^9.3.2",
-    "@web3auth/openlogin-adapter": "^9.0.0-alpha.0"
+    "@web3auth/auth-adapter": "^9.0.0-alpha.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
