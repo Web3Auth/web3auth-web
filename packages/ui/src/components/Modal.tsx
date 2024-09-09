@@ -237,7 +237,7 @@ export default function Modal(props: ModalProps) {
                 <div className="w3a-modal__content w3ajs-content">
                   <ExternalWallets
                     modalStatus={modalState.status}
-                    showBackButton={areSocialLoginsVisible}
+                    showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
                     handleExternalWalletClick={preHandleExternalWalletClick}
                     chainNamespace={chainNamespace}
                     walletConnectUri={modalState.walletConnectUri}
