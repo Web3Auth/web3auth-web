@@ -1,36 +1,51 @@
-import { addHexPrefix, privateToAddress } from "@ethereumjs/util";
+import { addHexPrefix, isHexString, PrefixedHexString, privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
-import { SigningKey, TypedDataEncoder } from "ethers";
+import { hashMessage, SigningKey, TypedDataEncoder } from "ethers";
 
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
 import { validateTypedSignMessageDataV4 } from "./TransactionFormatter/utils";
 
-async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
+async function signTx(
+  txParams: TransactionParams & { gas?: string },
+  privKey: string,
+  txFormatter: TransactionFormatter
+): Promise<PrefixedHexString> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
-  const common = await txFormatter.getCommonConfiguration();
-  const { TransactionFactory } = await import("@ethereumjs/tx");
-  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
-    common,
+  const { Transaction } = await import("ethers");
+  const ethTx = Transaction.from({
+    ...finalTxParams,
+    from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
   });
-  const signedTx = unsignedEthTx.sign(Buffer.from(privKey, "hex")).serialize();
-  return Buffer.from(signedTx);
+  const signKey = new SigningKey(addHexPrefix(privKey));
+  ethTx.signature = signKey.sign(ethTx.unsignedHash);
+  return ethTx.serialized as PrefixedHexString;
 }
 
 export function getProviderHandlers({
   txFormatter,
   privKey,
+  keyExportEnabled,
   getProviderEngineProxy,
 }: {
   txFormatter: TransactionFormatter;
   privKey: string;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
+  keyExportEnabled: boolean;
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${Buffer.from(privateToAddress(Buffer.from(privKey, "hex"))).toString("hex")}`],
-    getPrivateKey: async (_: JRPCRequest<unknown>) => privKey,
+    getPrivateKey: async (_: JRPCRequest<unknown>) => {
+      if (!keyExportEnabled)
+        throw providerErrors.custom({
+          message: "Private key export is disabled",
+          code: 4902,
+        });
+
+      return privKey;
+    },
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
       if (!providerEngineProxy)
@@ -39,10 +54,10 @@ export function getProviderHandlers({
           code: 4902,
         });
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const signedTx = await signTx(txParams, privKey, txFormatter);
+      const serializedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<[string], string>({
         method: "eth_sendRawTransaction",
-        params: ["0x".concat(signedTx.toString("hex"))],
+        params: [serializedTx],
       });
       return txHash;
     },
@@ -54,8 +69,8 @@ export function getProviderHandlers({
           code: 4902,
         });
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const signedTx = await signTx(txParams, privKey, txFormatter);
-      return `0x${signedTx.toString("hex")}`;
+      const serializedTx = await signTx(txParams, privKey, txFormatter);
+      return serializedTx;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const rawMessageSig = signMessage(privKey, msgParams.data);
@@ -64,7 +79,12 @@ export function getProviderHandlers({
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const privKeyBuffer = Buffer.from(privKey, "hex");
       const ethersKey = new SigningKey(privKeyBuffer);
-      const signature = ethersKey.sign(Buffer.from(msgParams.data));
+      const { data } = msgParams;
+      // we need to check if the data is hex or not
+      // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
+      // https://docs.metamask.io/wallet/how-to/sign-data/#use-personal_sign
+      const message = isHexString(data) ? Buffer.from(stripHexPrefix(data), "hex") : Buffer.from(data);
+      const signature = ethersKey.sign(hashMessage(message));
       return signature.serialized;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {

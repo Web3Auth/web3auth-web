@@ -1,4 +1,4 @@
-import { hashPersonalMessage, intToBytes, isHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
+import { intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
 import { log } from "@web3auth/base";
@@ -12,42 +12,21 @@ import {
   TypedMessageParams,
   validateTypedSignMessageDataV4,
 } from "@web3auth/ethereum-provider";
-import { TypedDataEncoder } from "ethers";
+import { hashMessage, TypedDataEncoder } from "ethers";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
-): Promise<Buffer> {
-  const [{ Hardfork }, { Capability, TransactionFactory, TransactionType }] = await Promise.all([
-    import("@ethereumjs/common"),
-    import("@ethereumjs/tx"),
-  ]);
+): Promise<PrefixedHexString> {
+  const { Transaction } = await import("ethers");
   const finalTxParams = await txFormatter.formatTransaction(txParams);
-  const common = await txFormatter.getCommonConfiguration();
-  const unsignedEthTx = TransactionFactory.fromTxData(finalTxParams, {
-    common,
+  const ethTx = Transaction.from({
+    ...finalTxParams,
+    from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
   });
 
-  // Hack for the constellation that we have got a legacy tx after spuriousDragon with a non-EIP155 conforming signature
-  // and want to recreate a signature (where EIP155 should be applied)
-  // Leaving this hack lets the legacy.spec.ts -> sign(), verifySignature() test fail
-  // 2021-06-23
-  let hackApplied = false;
-  if (
-    unsignedEthTx.type === TransactionType.Legacy &&
-    unsignedEthTx.common.gteHardfork(Hardfork.SpuriousDragon) &&
-    !unsignedEthTx.supports(Capability.EIP155ReplayProtection)
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (unsignedEthTx as any).activeCapabilities.push(Capability.EIP155ReplayProtection);
-    hackApplied = true;
-  }
-
-  const msgHash = unsignedEthTx.getHashedMessageToSign();
-  const rawMessage = unsignedEthTx.getMessageToSign();
-
-  const vrs = await sign(Buffer.from(msgHash), Buffer.from(rawMessage as Uint8Array));
+  const vrs = await sign(Buffer.from(ethTx.unsignedHash));
   let { v } = vrs;
   const { r, s } = vrs;
 
@@ -57,20 +36,12 @@ async function signTx(
   }
 
   // addSignature will handle the v value
-  const tx = unsignedEthTx.addSignature(BigInt(v), r, s);
+  const tx = ethTx;
+  tx.signature.v = BigInt(v);
+  tx.signature.r = r;
+  tx.signature.s = s;
 
-  // Hack part 2
-  if (hackApplied) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const index = (unsignedEthTx as any).activeCapabilities.indexOf(Capability.EIP155ReplayProtection);
-    if (index > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (unsignedEthTx as any).activeCapabilities.splice(index, 1);
-    }
-  }
-
-  // should we return uint8array or buffer?
-  return Buffer.from(tx.serialize());
+  return tx.serialized as PrefixedHexString;
 }
 
 async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
@@ -84,18 +55,17 @@ async function signMessage(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{
   return rawMsgSig;
 }
 
-function legacyToBuffer(value: unknown) {
-  return typeof value === "string" && !isHexString(value) ? Buffer.from(value) : toBytes(value);
-}
-
 async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>, data: string) {
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
-  const message = legacyToBuffer(data);
-  const msgHash = hashPersonalMessage(message);
+  // we need to check if the data is hex or not
+  // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
+  // https://docs.metamask.io/wallet/how-to/sign-data/#use-personal_sign
+  const message = isHexString(data) ? Buffer.from(stripHexPrefix(data), "hex") : Buffer.from(data);
+  const msgHash = hashMessage(message);
   const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${message.length}`, "utf-8");
-  const sig = await sign(Buffer.from(msgHash), Buffer.concat([prefix, message]));
+  const sig = await sign(Buffer.from(msgHash.slice(2)), Buffer.concat([prefix, message]));
   let modifiedV = sig.v;
   if (modifiedV <= 1) {
     modifiedV = modifiedV + 27;
@@ -123,7 +93,7 @@ async function signTypedData(
   }
   const message: SignTypedDataMessageV4 = typeof data === "string" ? JSON.parse(data) : data;
 
-  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message)));
+  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message).slice(2), "hex"));
 
   let modifiedV = v;
   if (modifiedV <= 1) {
@@ -165,7 +135,7 @@ export function getProviderHandlers({
       const serializedTxn = await signTx(txParams, sign, txFormatter);
       const txHash = await providerEngineProxy.request<string[], string>({
         method: "eth_sendRawTransaction",
-        params: ["0x".concat(serializedTxn.toString("hex"))],
+        params: [serializedTxn],
       });
       return txHash;
     },
@@ -177,7 +147,7 @@ export function getProviderHandlers({
           code: 4902,
         });
       const serializedTxn = await signTx(txParams, sign, txFormatter);
-      return Buffer.from(serializedTxn).toString("hex");
+      return serializedTxn;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const rawMessageSig = signMessage(sign, msgParams.data);

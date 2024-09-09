@@ -16,6 +16,7 @@ export interface PROJECT_CONFIG_RESPONSE {
   wallet_connect_enabled: boolean;
   wallet_connect_project_id?: string;
   whitelist?: WhitelistResponse;
+  key_export_enabled?: boolean;
 }
 
 export interface WalletRegistryItem {

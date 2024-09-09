@@ -9,9 +9,11 @@ import { IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
 
 export async function getProviderHandlers({
   privKey,
+  keyExportEnabled,
   getProviderEngineProxy,
 }: {
   privKey: string;
+  keyExportEnabled: boolean;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
 }): Promise<IProviderHandlers> {
   const keyPairGenerator = (): Keypair => {
@@ -25,7 +27,12 @@ export async function getProviderHandlers({
     },
     getAccounts: async () => [keyPair.publicKey.toBase58()],
 
-    getPrivateKey: async () => privKey,
+    getPrivateKey: async () => {
+      if (!keyExportEnabled) {
+        throw providerErrors.custom({ message: "Private key export is disabled", code: 4902 });
+      }
+      return privKey;
+    },
     getSecretKey: async () => bs58.encode(keyPair.secretKey),
 
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {

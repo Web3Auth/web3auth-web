@@ -54,7 +54,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   readonly options: Web3AuthOptions;
 
-  private modalConfig: AdaptersModalConfig = defaultOtherModalConfig;
+  private modalConfig: AdaptersModalConfig = cloneDeep(defaultOtherModalConfig);
 
   constructor(options: Web3AuthOptions) {
     super(options);
@@ -99,7 +99,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     this.subscribeToLoginModalEvents();
 
-    const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
+    const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       const adapterConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {
         [WALLET_ADAPTERS.OPENLOGIN]: {
@@ -318,6 +318,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
 
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
+    if (typeof keyExportEnabled === "boolean") {
+      this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
+      // dont know if we need to do this.
+      this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
+    }
+
     await Promise.all(initPromises);
     if (this.status === ADAPTER_STATUS.NOT_READY) {
       this.status = ADAPTER_STATUS.READY;

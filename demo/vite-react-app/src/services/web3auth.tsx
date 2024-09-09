@@ -293,8 +293,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    // await provider.signMessage();
-    await waasProvider?.signMessage();
+    await provider.signMessage();
+    // await waasProvider?.signMessage();
   };
 
   const signTransaction = async () => {

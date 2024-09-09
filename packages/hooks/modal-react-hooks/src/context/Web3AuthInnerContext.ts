@@ -8,7 +8,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { ModalConfig, Web3Auth } from "@web3auth/modal";
+import { Web3Auth } from "@web3auth/modal";
 import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -43,23 +43,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     (name: string) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
       return web3Auth.getPlugin(name);
-    },
-    [web3Auth]
-  );
-
-  const initModal = useCallback(
-    async (modalParams: { modalConfig?: Record<string, ModalConfig> } = {}) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      try {
-        setInitError(null);
-        setIsInitializing(true);
-        await web3Auth.initModal(modalParams);
-      } catch (error) {
-        setInitError(error as Error);
-        throw error;
-      } finally {
-        setIsInitializing(false);
-      }
     },
     [web3Auth]
   );
@@ -154,6 +137,27 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [config]);
 
   useEffect(() => {
+    async function init() {
+      try {
+        setInitError(null);
+        setIsInitializing(true);
+        const { modalConfig } = config;
+        if (modalConfig) {
+          await web3Auth.initModal({ modalConfig });
+        } else {
+          await web3Auth.initModal();
+        }
+      } catch (error) {
+        setInitError(error as Error);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+
+    if (web3Auth) init();
+  }, [web3Auth, config]);
+
+  useEffect(() => {
     const addState = async () => {
       setProvider(web3Auth.provider);
       const userState = await web3Auth.getUserInfo();
@@ -226,7 +230,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       userInfo,
       isMFAEnabled,
       status,
-      initModal,
       connect,
       enableMFA,
       logout,
@@ -250,7 +253,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     isMFAEnabled,
     status,
     getPlugin,
-    initModal,
     connect,
     enableMFA,
     logout,

@@ -69,6 +69,22 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [config]);
 
   useEffect(() => {
+    async function init() {
+      try {
+        setInitError(null);
+        setIsInitializing(true);
+        await web3Auth.init();
+      } catch (error) {
+        setInitError(error as Error);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+
+    if (web3Auth) init();
+  }, [web3Auth]);
+
+  useEffect(() => {
     const addState = async () => {
       setProvider(web3Auth.provider);
       const userState = await web3Auth.getUserInfo();
@@ -88,22 +104,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
   }, [web3Auth, isConnected]);
 
-  // TODO: Init ourselves in v9
   // TODO: don't throw error in init, connect in v9
-
-  const init = useCallback(async () => {
-    if (!web3Auth) throw WalletInitializationError.notReady();
-    try {
-      setInitError(null);
-      setIsInitializing(true);
-      await web3Auth.init();
-    } catch (error) {
-      setInitError(error as Error);
-      throw error;
-    } finally {
-      setIsInitializing(false);
-    }
-  }, [web3Auth]);
 
   useEffect(() => {
     const notReadyListener = () => setStatus(ADAPTER_STATUS.NOT_READY);
@@ -228,7 +229,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       userInfo,
       isMFAEnabled,
       status,
-      init,
       getPlugin,
       connectTo,
       enableMFA,
@@ -251,7 +251,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     userInfo,
     isMFAEnabled,
     status,
-    init,
     connectTo,
     getPlugin,
     enableMFA,
