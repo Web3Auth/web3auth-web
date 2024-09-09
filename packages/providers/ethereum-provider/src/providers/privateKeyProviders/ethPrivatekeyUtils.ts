@@ -1,4 +1,4 @@
-import { addHexPrefix, isHexString, privateToAddress, stripHexPrefix } from "@ethereumjs/util";
+import { addHexPrefix, isHexString, PrefixedHexString, privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
@@ -8,13 +8,20 @@ import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionPa
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
 import { validateTypedSignMessageDataV4 } from "./TransactionFormatter/utils";
 
-async function signTx(txParams: TransactionParams & { gas?: string }, privKey: string, txFormatter: TransactionFormatter): Promise<Buffer> {
+async function signTx(
+  txParams: TransactionParams & { gas?: string },
+  privKey: string,
+  txFormatter: TransactionFormatter
+): Promise<PrefixedHexString> {
   const finalTxParams = await txFormatter.formatTransaction(txParams);
   const { Transaction } = await import("ethers");
-  const ethTx = Transaction.from(finalTxParams);
+  const ethTx = Transaction.from({
+    ...finalTxParams,
+    from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
+  });
   const signKey = new SigningKey(addHexPrefix(privKey));
   ethTx.signature = signKey.sign(ethTx.unsignedHash);
-  return Buffer.from(ethTx.serialized);
+  return ethTx.serialized as PrefixedHexString;
 }
 
 export function getProviderHandlers({
@@ -47,10 +54,10 @@ export function getProviderHandlers({
           code: 4902,
         });
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const signedTx = await signTx(txParams, privKey, txFormatter);
+      const serializedTx = await signTx(txParams, privKey, txFormatter);
       const txHash = await providerEngineProxy.request<[string], string>({
         method: "eth_sendRawTransaction",
-        params: ["0x".concat(signedTx.toString("hex"))],
+        params: [serializedTx],
       });
       return txHash;
     },
@@ -62,8 +69,8 @@ export function getProviderHandlers({
           code: 4902,
         });
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const signedTx = await signTx(txParams, privKey, txFormatter);
-      return `0x${signedTx.toString("hex")}`;
+      const serializedTx = await signTx(txParams, privKey, txFormatter);
+      return serializedTx;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const rawMessageSig = signMessage(privKey, msgParams.data);
