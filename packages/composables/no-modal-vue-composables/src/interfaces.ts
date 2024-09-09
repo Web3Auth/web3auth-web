@@ -45,6 +45,5 @@ interface IBaseWeb3AuthComposableContext {
 
 export interface IWeb3AuthContext extends IBaseWeb3AuthComposableContext {
   web3Auth: ShallowRef<Web3AuthNoModal | null>;
-  init(): Promise<void>;
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
 }

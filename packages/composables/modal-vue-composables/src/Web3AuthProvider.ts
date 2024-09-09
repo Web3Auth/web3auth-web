@@ -7,7 +7,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
 } from "@web3auth/base";
-import { type ModalConfig, Web3Auth } from "@web3auth/modal";
+import { Web3Auth } from "@web3auth/modal";
 import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
 
@@ -45,21 +45,6 @@ export default defineComponent({
       return web3Auth.value.getPlugin(name);
     };
 
-    const initModal = async (modalParams: { modalConfig?: Record<string, ModalConfig> } = {}) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      try {
-        initError.value = null;
-        isInitializing.value = true;
-        await web3Auth.value.initModal(modalParams);
-        triggerRef(web3Auth);
-      } catch (error) {
-        initError.value = error as Error;
-        throw error;
-      } finally {
-        isInitializing.value = false;
-      }
-    };
-
     const enableMFA = async (loginParams?: Partial<LoginParams>) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
@@ -87,7 +72,6 @@ export default defineComponent({
         return localProvider;
       } catch (error) {
         connectError.value = error as Error;
-        throw error;
       } finally {
         isConnecting.value = false;
       }
@@ -141,6 +125,26 @@ export default defineComponent({
       },
       { immediate: true }
     );
+
+    watch([web3Auth], async () => {
+      if (web3Auth) {
+        try {
+          initError.value = null;
+          isInitializing.value = true;
+          const { modalConfig } = props.config;
+          if (modalConfig) {
+            await web3Auth.value.initModal({ modalConfig });
+          } else {
+            await web3Auth.value.initModal();
+          }
+          triggerRef(web3Auth);
+        } catch (error) {
+          initError.value = error as Error;
+        } finally {
+          isInitializing.value = false;
+        }
+      }
+    });
 
     watch([web3Auth, isConnected], () => {
       if (web3Auth.value) {
@@ -219,7 +223,6 @@ export default defineComponent({
       isMFAEnabled,
       status,
       getPlugin,
-      initModal,
       connect,
       enableMFA,
       logout,
