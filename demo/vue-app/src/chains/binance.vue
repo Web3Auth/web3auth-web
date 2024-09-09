@@ -16,12 +16,12 @@
 </template>
 
 <script lang="ts">
-import { OPENLOGIN_NETWORK_TYPE } from "@toruslabs/openlogin-utils";
+import { WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
+import { AuthAdapter } from "@web3auth/auth-adapter";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, LoginMethodConfig } from "@web3auth/base";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent } from "vue";
 

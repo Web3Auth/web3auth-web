@@ -47,11 +47,11 @@
             <span class="form-label">Openlogin Network</span>
             <span class="form-control radio-group">
               <label for="sapphire_mainnet" class="radio-button">
-                <input type="radio" id="sapphire_mainnet" value="sapphire_mainnet" v-model="form.openloginNetwork" />
+                <input id="sapphire_mainnet" v-model="form.openloginNetwork" type="radio" value="sapphire_mainnet" />
                 Sapphire Mainnet
               </label>
               <label for="sapphire_devnet" class="radio-button">
-                <input type="radio" id="sapphire_devnet" value="sapphire_devnet" v-model="form.openloginNetwork" />
+                <input id="sapphire_devnet" v-model="form.openloginNetwork" type="radio" value="sapphire_devnet" />
                 Sapphire Devnet
               </label>
               <label for="mainnet" class="radio-button">
@@ -234,7 +234,7 @@
 import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/base";
 import { defaultEvmDappModalConfig, defaultSolanaDappModalConfig } from "@web3auth/modal";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 import { defineComponent } from "vue";
 

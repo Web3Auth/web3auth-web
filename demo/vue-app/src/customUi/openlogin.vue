@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
+import { AuthAdapter, AuthLoginParams } from "@web3auth/auth-adapter";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, CONNECTED_EVENT_DATA, log, WALLET_ADAPTERS, Web3AuthNoModalOptions } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { OpenloginAdapter, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import { defineComponent } from "vue";
 
 import Loader from "../components/loader.vue";
@@ -99,7 +99,7 @@ export default defineComponent({
       try {
         this.web3auth = new Web3AuthNoModal(sepoliaWeb3AuthOptions);
         this.subscribeAuthEvents(this.web3auth);
-        const openloginAdapter = new OpenloginAdapter({
+        const openloginAdapter = new AuthAdapter({
           adapterSettings: {
             uxMode: "redirect",
           },
@@ -136,10 +136,10 @@ export default defineComponent({
     },
     async connect(e) {
       try {
-        this.provider = await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+        this.provider = await this.web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
           loginProvider: e.target.name,
           login_hint: "",
-        } as OpenloginLoginParams);
+        } as AuthLoginParams);
       } catch (error) {
         log.error(error);
         this.console("error", error);
