@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
+import { AuthAdapter } from "@web3auth/auth-adapter";
 import { CHAIN_NAMESPACES, ChainNamespaceType, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
@@ -31,7 +29,7 @@ import { signAllTransactions, signAndSendTransaction, signMessage } from "./serv
 
 const { t } = useI18n({ useScope: "global" });
 const { log } = console;
-const { web3Auth, isConnected, connect, isInitialized, initModal, logout, status, provider, userInfo, switchChain, addAndSwitchChain, addPlugin } =
+const { web3Auth, isConnected, connect, isInitialized, logout, status, provider, userInfo, switchChain, addAndSwitchChain, addPlugin } =
   useWeb3Auth();
 
 const formData = ref<FormData>({
@@ -143,8 +141,8 @@ const loginMethodsConfig = computed(() => {
 
 const modalParams = computed(() => {
   const modalConfig = {
-    [WALLET_ADAPTERS.OPENLOGIN]: {
-      label: "openlogin",
+    [WALLET_ADAPTERS.AUTH]: {
+      label: "auth",
       loginMethods: loginMethodsConfig.value,
     },
   };
@@ -155,12 +153,8 @@ const getExternalAdapterByName = (name: string) => {
   switch (name) {
     case "coinbase":
       return new CoinbaseAdapter();
-    case "metamask":
-      return new MetamaskAdapter();
-    case "openlogin":
-      return new OpenloginAdapter();
-    case "phantom":
-      return new PhantomAdapter();
+    case "auth":
+      return new AuthAdapter();
     case "torus-evm":
       return new TorusWalletAdapter();
     case "torus-solana":
@@ -171,7 +165,7 @@ const getExternalAdapterByName = (name: string) => {
 };
 
 const isWalletPluginEnabled = () => {
-  return formData.value.chainNamespace == CHAIN_NAMESPACES.EIP155 && formData.value.walletPlugin.enable;
+  return formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.value.walletPlugin.enable;
 };
 
 const initW3A = async () => {
@@ -183,9 +177,9 @@ const initW3A = async () => {
     const externalAdapter = getExternalAdapterByName(formData.value.adapters[i]);
     if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
   }
-  if (isWalletPluginEnabled()) await addPlugin(walletPlugin.value);
+  if (isWalletPluginEnabled()) addPlugin(walletPlugin.value);
 
-  await initModal(modalParams.value);
+  web3Auth.value.initModal(modalParams.value);
 };
 
 // Init the web3Auth object
@@ -390,7 +384,7 @@ const showWalletConnectScanner = async () => {
         <Card class="h-auto px-8 py-8 col-span-8 sm:col-span-6 lg:col-span-4">
           <div class="text-3xl font-bold leading-tight text-center">{{ $t("app.greeting") }}</div>
           <div class="leading-tight font-extrabold text-center mb-12">
-            <Tag v-bind="{ minWidth: 'inherit' }">{{ status.toUpperCase() }}</Tag>
+            <Tag v-bind="{ minWidth: 'inherit' }">{{ status }}</Tag>
             &nbsp;
             <Tag v-bind="{ minWidth: 'inherit' }">{{ isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET" }}</Tag>
           </div>

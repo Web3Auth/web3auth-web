@@ -1,6 +1,8 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 
+import { FormConfigSettings } from "./interfaces";
+
 export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
@@ -93,7 +95,7 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Turkish", value: LANGUAGES.tr },
 ];
 
-export const defaultLoginMethod = loginProviderOptions.reduce(
+export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
   (acc, curr) => ({
     ...acc,
     [curr.value]: {
@@ -108,7 +110,7 @@ export const defaultLoginMethod = loginProviderOptions.reduce(
       showOnMobile: false,
     },
   }),
-  {},
+  {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>,
 );
 
 export type FormData = {
@@ -122,7 +124,7 @@ export type FormData = {
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
-  loginMethods: typeof defaultLoginMethod;
+  loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
     logoDark: string;
