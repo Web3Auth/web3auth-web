@@ -6,14 +6,11 @@ export const MULTI_CHAIN_ADAPTERS = {
 
 export const SOLANA_ADAPTERS = {
   TORUS_SOLANA: "torus-solana",
-  PHANTOM: "phantom",
-  SOLFLARE: "solflare",
   ...MULTI_CHAIN_ADAPTERS,
 };
 
 export const EVM_ADAPTERS = {
   TORUS_EVM: "torus-evm",
-  METAMASK: "metamask",
   COINBASE: "coinbase",
   ...MULTI_CHAIN_ADAPTERS,
 };
@@ -32,9 +29,6 @@ export const ADAPTER_NAMES = {
   [MULTI_CHAIN_ADAPTERS.WALLET_CONNECT_V2]: "Wallet Connect v2",
   [MULTI_CHAIN_ADAPTERS.SFA]: "SFA",
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
-  [SOLANA_ADAPTERS.PHANTOM]: "Phantom",
-  [SOLANA_ADAPTERS.SOLFLARE]: "Solflare",
   [EVM_ADAPTERS.TORUS_EVM]: "Torus",
-  [EVM_ADAPTERS.METAMASK]: "Metamask",
   [EVM_ADAPTERS.COINBASE]: "Coinbase",
 };

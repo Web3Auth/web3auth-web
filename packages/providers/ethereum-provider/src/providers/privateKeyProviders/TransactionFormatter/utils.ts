@@ -94,7 +94,7 @@ export async function validateTypedSignMessageDataV4(messageData: TypedMessagePa
 
     const activeChainId = parseInt(currentChainId, 16);
     if (Number.isNaN(activeChainId)) {
-      throw new Error(`Cannot sign messages for chainId "${chainId}", because MetaMask is switching networks.`);
+      throw new Error(`Cannot sign messages for chainId "${chainId}", because Web3Auth is switching networks.`);
     }
 
     if (chainId !== activeChainId) {

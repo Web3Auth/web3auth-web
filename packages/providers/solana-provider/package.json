@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@solana/web3.js": "^1.95.3",
-    "@solflare-wallet/sdk": "^1.4.2",
     "@types/bn.js": "^5.1.5",
     "@types/bs58": "^4.0.4",
     "@types/json-rpc-random-id": "^1.0.3"

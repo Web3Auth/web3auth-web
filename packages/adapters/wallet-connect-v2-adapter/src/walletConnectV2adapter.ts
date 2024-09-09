@@ -26,7 +26,7 @@ import {
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 import deepmerge from "deepmerge";
 
-import { getWalletConnectV2Settings, WALLET_CONNECT_EXTENSION_ADAPTERS } from "./config";
+import { getWalletConnectV2Settings } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
@@ -45,7 +45,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
   public adapterData: WalletConnectV2Data = {
     uri: "",
-    extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS,
   };
 
   public connector: Client | null = null;
@@ -263,7 +262,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
             log.error("unable to open qr code modal");
           }
         } else {
-          this.updateAdapterData({ uri, extensionAdapters: WALLET_CONNECT_EXTENSION_ADAPTERS } as WalletConnectV2Data);
+          this.updateAdapterData({ uri } as WalletConnectV2Data);
         }
       }
 

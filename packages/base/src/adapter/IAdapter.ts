@@ -321,21 +321,6 @@ export type LoginMethodConfig = Record<
   }
 >;
 
-export interface IWalletConnectExtensionAdapter {
-  name: string;
-  chains: ChainNamespaceType[];
-  logo: string;
-  mobile: {
-    native: string;
-    universal: string;
-  };
-  desktop: {
-    native: string;
-    universal: string;
-  };
-}
-
 export type WalletConnectV2Data = {
   uri: string;
-  extensionAdapters: IWalletConnectExtensionAdapter[];
 };

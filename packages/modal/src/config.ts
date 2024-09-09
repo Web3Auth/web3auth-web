@@ -17,12 +17,6 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [SOLANA_ADAPTERS.PHANTOM]: {
-      label: "Phantom",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
   },
 };
 
@@ -31,12 +25,6 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   adapters: {
     [EVM_ADAPTERS.TORUS_EVM]: {
       label: "Torus Wallet",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
-    [EVM_ADAPTERS.METAMASK]: {
-      label: "MetaMask",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,

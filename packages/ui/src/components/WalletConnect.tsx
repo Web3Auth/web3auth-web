@@ -22,7 +22,6 @@ function WalletConnect(props: WalletConnectProps) {
 
   const [t] = useTranslation(undefined, { i18n });
 
-  // TODO: show only wcAdapters of current chain
   return (
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
       <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">

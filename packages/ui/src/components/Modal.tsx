@@ -29,8 +29,6 @@ interface ModalProps {
 
 log.enableAll();
 
-// const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
-
 export default function Modal(props: ModalProps) {
   const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
 
@@ -53,7 +51,6 @@ export default function Modal(props: ModalProps) {
     detailedLoaderAdapter: "",
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
-    wcAdapters: [],
   });
   const [t] = useTranslation(undefined, { i18n });
 

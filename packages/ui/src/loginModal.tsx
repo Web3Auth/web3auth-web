@@ -7,7 +7,6 @@ import {
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   IAdapterDataEvent,
-  IWalletConnectExtensionAdapter,
   log,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
@@ -285,18 +284,17 @@ export class LoginModal extends SafeEventEmitter {
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
-  private updateWalletConnect = (walletConnectUri: string, wcAdapters: IWalletConnectExtensionAdapter[]): void => {
+  private updateWalletConnect = (walletConnectUri: string): void => {
     if (!walletConnectUri) return;
     this.setState({
       walletConnectUri,
-      wcAdapters,
     });
   };
 
   private handleAdapterData = (adapterData: IAdapterDataEvent) => {
     if (adapterData.adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
       const walletConnectData = adapterData.data as WalletConnectV2Data;
-      this.updateWalletConnect(walletConnectData.uri, walletConnectData.extensionAdapters);
+      this.updateWalletConnect(walletConnectData.uri);
     }
   };
 

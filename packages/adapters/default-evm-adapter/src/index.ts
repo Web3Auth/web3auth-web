@@ -21,11 +21,7 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     ...(chainConfig || {}),
   };
 
-  const [{ TorusWalletAdapter }, { WalletConnectV2Adapter }] = await Promise.all([
-    import("@web3auth/torus-evm-adapter"),
-    import("@web3auth/wallet-connect-v2-adapter"),
-  ]);
-  const torusWalletAdapter = new TorusWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
+  const [{ WalletConnectV2Adapter }] = await Promise.all([import("@web3auth/wallet-connect-v2-adapter")]);
 
   const wcv2Adapter = new WalletConnectV2Adapter({
     chainConfig: finalChainConfig,
@@ -54,5 +50,5 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     });
   });
 
-  return [...injectedProviders, torusWalletAdapter, wcv2Adapter];
+  return [...injectedProviders, wcv2Adapter];
 };

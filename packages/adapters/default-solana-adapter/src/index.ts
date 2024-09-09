@@ -23,8 +23,6 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
     ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
     ...(chainConfig || {}),
   };
-  const [{ SolanaWalletAdapter }] = await Promise.all([import("@web3auth/torus-solana-adapter")]);
-  const solanaWalletAdapter = new SolanaWalletAdapter({ chainConfig: finalChainConfig, clientId, sessionTime, web3AuthNetwork, useCoreKitKey });
 
   // get installed wallets that support standard wallet
   const standardWalletAdapters = [] as BaseAdapter<void>[];
@@ -50,5 +48,5 @@ export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCor
       })
     );
   });
-  return [solanaWalletAdapter, ...standardWalletAdapters];
+  return standardWalletAdapters;
 };
