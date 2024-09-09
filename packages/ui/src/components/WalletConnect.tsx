@@ -1,5 +1,6 @@
+import Bowser from "bowser";
 import copyToClipboard from "copy-to-clipboard";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
@@ -8,10 +9,16 @@ import i18n from "../localeImport";
 
 interface WalletConnectProps {
   walletConnectUri: string;
+  logoImage?: string;
 }
 
 function WalletConnect(props: WalletConnectProps) {
-  const { walletConnectUri } = props;
+  const { walletConnectUri, logoImage } = props;
+
+  const isDesktop = useMemo<boolean>(() => {
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    return browser.getPlatformType() === "desktop";
+  }, []);
 
   const [t] = useTranslation(undefined, { i18n });
 
@@ -28,7 +35,14 @@ function WalletConnect(props: WalletConnectProps) {
             onClick={() => copyToClipboard(walletConnectUri)}
             onKeyDown={() => copyToClipboard(walletConnectUri)}
           >
-            <QRCode size={200} eyeRadius={5} qrStyle="dots" removeQrCodeBehindLogo logoImage={WALLET_CONNECT_LOGO} value={walletConnectUri} />
+            <QRCode
+              size={isDesktop ? 300 : 260}
+              eyeRadius={5}
+              qrStyle="dots"
+              removeQrCodeBehindLogo
+              logoImage={logoImage || WALLET_CONNECT_LOGO}
+              value={walletConnectUri}
+            />
           </div>
           <div>{t("modal.external.walletconnect-copy")}</div>
         </div>

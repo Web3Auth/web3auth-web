@@ -93,6 +93,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: IProvider | null;
   adapterData?: unknown;
   connnected: boolean;
+  isInjected?: boolean;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
@@ -272,6 +273,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
 export interface BaseAdapterConfig {
   label: string;
+  isInjected?: boolean;
   showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;

@@ -110,11 +110,12 @@
 
 /* Adapter List */
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-6 overflow-y-hidden gap-x-2 gap-y-4;
+  @apply grid grid-cols-6 overflow-y-auto gap-x-2 gap-y-2;
   padding: 1px;
-  max-height: 500px;
+  max-height: 380px;
   transition: max-height 0.35s;
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
+  scrollbar-width: none;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
@@ -164,7 +165,7 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply inline-flex items-center p-0 mb-2 border-0 cursor-pointer bg-none text-app-gray-500 dark:text-app-gray-400 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
+  @apply inline-flex items-center p-0 border-0 cursor-pointer bg-none text-app-gray-500 dark:text-app-gray-400 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
@@ -184,7 +185,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-  @apply bg-app-white rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4 px-3;
+  @apply bg-app-white rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4;
 }
 
 #w3a-modal .w3a-wallet-connect__container-desktop,
@@ -198,10 +199,6 @@
 
 #w3a-modal .w3a-wallet-connect__container-ios {
   @apply flex gap-x-5 gap-y-[30px] p-0 pb-7 box-border flex-wrap;
-}
-
-#w3a-modal .w3a-wallet-connect-qr {
-  @apply m-4;
 }
 
 #w3a-modal .w3a-wallet-connect-qr>canvas,

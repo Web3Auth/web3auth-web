@@ -91,3 +91,5 @@ export const defaultOtherModalConfig: AdaptersModalConfig = {
     },
   },
 };
+
+export const walletRegistryUrl = "https://assets.web3auth.io/v1/wallet-registry.json";
