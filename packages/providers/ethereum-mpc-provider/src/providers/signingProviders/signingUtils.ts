@@ -21,7 +21,10 @@ async function signTx(
 ): Promise<PrefixedHexString> {
   const { Transaction } = await import("ethers");
   const finalTxParams = await txFormatter.formatTransaction(txParams);
-  const ethTx = Transaction.from(finalTxParams);
+  const ethTx = Transaction.from({
+    ...finalTxParams,
+    from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
+  });
 
   const vrs = await sign(Buffer.from(ethTx.unsignedHash));
   let { v } = vrs;

@@ -142,7 +142,7 @@ export class TransactionFormatter {
       clonedTxParams.gasPrice = defaultGasPrice as never;
     }
 
-    clonedTxParams.type = Number(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY);
+    clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
     clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }
