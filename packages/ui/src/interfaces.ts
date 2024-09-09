@@ -2,7 +2,6 @@ import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/a
 import {
   BaseAdapterConfig,
   ChainNamespaceType,
-  IWalletConnectExtensionAdapter,
   LoginMethodConfig,
   WALLET_ADAPTER_TYPE,
   WalletRegistry,
@@ -97,7 +96,6 @@ export interface ModalState {
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
-  wcAdapters: IWalletConnectExtensionAdapter[];
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
