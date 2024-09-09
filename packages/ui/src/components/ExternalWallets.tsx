@@ -100,9 +100,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
   useEffect(() => {
     if (isWalletDiscoveryReady) {
-      const buttons: ExternalButton[] = Object.keys(walletRegistry)
-        .filter((wallet) => adapterVisibilityMap[wallet] !== false)
-        .map((wallet): ExternalButton => {
+      const isWalletConnectAdapterIncluded = Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2);
+      const buttons: ExternalButton[] = Object.keys(walletRegistry).reduce((acc, wallet) => {
+        if (adapterVisibilityMap[wallet] !== false) {
           const walletRegistryItem = walletRegistry[wallet];
           let href = "";
           if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile && walletConnectUri) {
@@ -110,25 +110,22 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             const deepLink = walletRegistryItem?.mobile?.native;
             href = universalLink || deepLink ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri;
           }
-          return {
+          const button = {
             name: wallet,
             displayName: walletRegistryItem.name,
             href,
-            hasInjectedWallet: Object.keys(config).some((adapter) => adapter === wallet && config[adapter].isInjected),
-            hasWalletConnect:
-              Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2) &&
-              walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+            hasInjectedWallet: config[wallet]?.isInjected || false,
+            hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
             hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
             walletRegistryItem,
           };
-        })
-        .filter((button) => {
-          if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return false;
-          const walletRegistryItem = walletRegistry[button.name];
+          if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
           const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-          if (!chainNamespaces.has(chainNamespace)) return false;
-          return true;
-        });
+          if (!chainNamespaces.has(chainNamespace)) return acc;
+          acc.push(button);
+        }
+        return acc;
+      }, [] as ExternalButton[]);
       setTotalExternalWallets(buttons.length);
       // prioritize wallet that has injected wallet
       buttons.sort((a, b) => {
@@ -144,16 +141,18 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         .slice(0, 15); // show at most 15 wallets
       setExternalButtons(filteredButtons);
     } else {
-      const buttons: ExternalButton[] = Object.keys(config)
-        .filter((adapter) => ![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter))
-        .filter((adapter) => adapterVisibilityMap[adapter])
-        .map((adapter) => ({
-          name: adapter,
-          displayName: config[adapter].label || adapter,
-          hasInjectedWallet: config[adapter].isInjected,
-          hasWalletConnect: false,
-          hasInstallLinks: false,
-        }));
+      const buttons: ExternalButton[] = Object.keys(config).reduce((acc, adapter) => {
+        if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && adapterVisibilityMap[adapter]) {
+          acc.push({
+            name: adapter,
+            displayName: config[adapter].label || adapter,
+            hasInjectedWallet: config[adapter].isInjected,
+            hasWalletConnect: false,
+            hasInstallLinks: false,
+          });
+        }
+        return acc;
+      }, [] as ExternalButton[]);
       setExternalButtons(buttons);
     }
   }, [config, deviceDetails, walletConnectUri, adapterVisibilityMap, isWalletDiscoveryReady, walletRegistry, walletSearch, chainNamespace]);
