@@ -283,7 +283,7 @@ export type LoginMethodConfig = Record<
   string,
   {
     /**
-     * Display Name. If not provided, we use the default for openlogin app
+     * Display Name. If not provided, we use the default for auth app
      */
     name: string;
     /**
@@ -291,15 +291,15 @@ export type LoginMethodConfig = Record<
      */
     description?: string;
     /**
-     * Logo to be shown on mouse hover. If not provided, we use the default for openlogin app
+     * Logo to be shown on mouse hover. If not provided, we use the default for auth app
      */
     logoHover?: string;
     /**
-     * Logo to be shown on dark background (dark theme). If not provided, we use the default for openlogin app
+     * Logo to be shown on dark background (dark theme). If not provided, we use the default for auth app
      */
     logoLight?: string;
     /**
-     * Logo to be shown on light background (light theme). If not provided, we use the default for openlogin app
+     * Logo to be shown on light background (light theme). If not provided, we use the default for auth app
      */
     logoDark?: string;
     /**

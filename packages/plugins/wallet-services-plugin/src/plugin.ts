@@ -41,7 +41,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
@@ -72,7 +72,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
-    // Not connected yet to openlogin
+    // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
