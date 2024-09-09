@@ -33,7 +33,7 @@
     "@toruslabs/config": "^2.2.0",
     "@toruslabs/eslint-config-typescript": "^3.3.3",
     "@toruslabs/torus-scripts": "^6.1.2",
-    "@types/chai": "^4.3.18",
+    "@types/chai": "^4.3.19",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20",
     "chai": "^5.1.1",
@@ -42,7 +42,7 @@
     "eslint": "^8.57.0",
     "husky": "^9.1.5",
     "lerna": "^8.1.8",
-    "lint-staged": "^15.2.9",
+    "lint-staged": "^15.2.10",
     "mocha": "^10.7.3",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
@@ -53,8 +53,8 @@
     "typescript": "^5.5.4"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^19.6.2",
-    "@rollup/rollup-linux-x64-gnu": "^4.21.0"
+    "@nx/nx-linux-x64-gnu": "^19.6.5",
+    "@rollup/rollup-linux-x64-gnu": "^4.21.2"
   },
   "repository": {
     "type": "git",
