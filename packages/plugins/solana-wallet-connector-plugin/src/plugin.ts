@@ -30,7 +30,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.SOLANA;
 
@@ -62,7 +62,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.unsupportedAdapter();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
-    // Not connected yet to openlogin
+    // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
       this.userInfo = (await web3auth.getUserInfo()) as UserInfo;
@@ -111,7 +111,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
-    // Not connected yet to openlogin
+    // Not connected yet to auth
     if (!this.provider) {
       if (this.web3auth?.provider) {
         this.provider = this.web3auth.provider;
@@ -161,7 +161,7 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
 
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
-    if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN) throw WalletServicesPluginError.unsupportedAdapter();
+    if (this.web3auth?.connectedAdapterName !== WALLET_ADAPTERS.AUTH) throw WalletServicesPluginError.unsupportedAdapter();
     if (this.torusWalletInstance.isLoggedIn) {
       await this.torusWalletInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);

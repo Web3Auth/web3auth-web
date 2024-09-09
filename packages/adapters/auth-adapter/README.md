@@ -1,18 +1,18 @@
-# Web3Auth Openlogin Adapter
+# Web3Auth Auth Adapter
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/openlogin-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/openlogin-adapter/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/openlogin-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/openlogin-adapter@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth/auth-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/auth-adapter/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/auth-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/auth-adapter@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-This adapter is a wrapper around the [`openlogin`](https://www.npmjs.com/package/@toruslabs/openlogin) library from Web3Auth (previously Torus) and enables the main social login features of Web3Auth. By default, Web3Auth has
+This adapter is a wrapper around the [`auth`](https://www.npmjs.com/package/@web3auth/auth) library from Web3Auth (previously Torus) and enables the main social login features of Web3Auth. By default, Web3Auth has
 certain configuration set to enable a quick integration, however, for customising features, like Whitelabel,
-Custom Authentication, etc. you need to customise the Openlogin Adapter. With the Openlogin Adapter package installed and
+Custom Authentication, etc. you need to customise the Auth Adapter. With the Auth Adapter package installed and
 instantiated, you can explore a number of options and can customise the login experience of the user as per your needs.
 
 ## 📖 Documentation
 
-Read more about the Web3Auth Openlogin Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/openlogin).
+Read more about the Web3Auth Auth Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/auth).
 
 ## 💡 Features
 
@@ -29,9 +29,9 @@ Read more about the Web3Auth Openlogin Adapter in the [official Web3Auth Documen
 
 ## 📄 Basic Details
 
-- Adapter Name: `openlogin`
+- Adapter Name: `auth`
 
-- Package Name: [`@web3auth/openlogin-adapter`](https://web3auth.io/docs/sdk/web/openlogin)
+- Package Name: [`@web3auth/auth-adapter`](https://web3auth.io/docs/sdk/web/auth)
 
 - authMode: `WALLET`, `DAPP`
 
@@ -42,7 +42,7 @@ Read more about the Web3Auth Openlogin Adapter in the [official Web3Auth Documen
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/openlogin-adapter
+npm install --save @web3auth/auth-adapter
 ```
 
 ## 🩹 Example
@@ -50,7 +50,7 @@ npm install --save @web3auth/openlogin-adapter
 ### Using with `web3auth/web3auth` (Web3Auth Plug and Play Modal Package)
 
 ```js
-const openloginAdapter = new OpenloginAdapter({
+const authAdapter = new AuthAdapter({
   adapterSettings: {
     clientId,
     network: "testnet",
@@ -85,13 +85,13 @@ const openloginAdapter = new OpenloginAdapter({
     mfaLevel: "mandatory",
   },¯
 });
-web3auth.configureAdapter(openloginAdapter);
+web3auth.configureAdapter(authAdapter);
 ```
 
 ### Using with `web3auth/no-modal` (Web3Auth Plug and Play NoModal Package)
 
 ```js
-const openloginAdapter = new OpenloginAdapter({
+const authAdapter = new AuthAdapter({
   adapterSettings: {
     clientId,
     network: "testnet",
@@ -113,7 +113,7 @@ const openloginAdapter = new OpenloginAdapter({
     },
   },
 });
-web3auth.configureAdapter(openloginAdapter);
+web3auth.configureAdapter(authAdapter);
 ```
 
 Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)

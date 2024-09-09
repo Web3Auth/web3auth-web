@@ -1,3 +1,4 @@
+import { AuthAdapter, AuthOptions, getAuthDefaultOptions, LOGIN_PROVIDER, LoginConfig } from "@web3auth/auth-adapter";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_EVENTS,
@@ -21,14 +22,13 @@ import {
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { AuthOptions, getOpenloginDefaultOptions, LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import {
+  AUTH_PROVIDERS,
   capitalizeFirstLetter,
   getAdapterSocialLogins,
   getUserLanguage,
   LOGIN_MODAL_EVENTS,
   LoginModal,
-  OPENLOGIN_PROVIDERS,
   UIConfig,
 } from "@web3auth/ui";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
@@ -102,8 +102,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       const adapterConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {
-        [WALLET_ADAPTERS.OPENLOGIN]: {
-          label: WALLET_ADAPTERS.OPENLOGIN,
+        [WALLET_ADAPTERS.AUTH]: {
+          label: WALLET_ADAPTERS.AUTH,
           loginMethods: {
             [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
               name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
@@ -146,8 +146,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
         // Adapters to be shown on modal should be pre-configured.
-        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          const defaultOptions = getOpenloginDefaultOptions();
+        if (adapterName === WALLET_ADAPTERS.AUTH) {
+          const defaultOptions = getAuthDefaultOptions();
           const { clientId, useCoreKitKey, chainConfig, web3AuthNetwork, sessionTime, privateKeyProvider } = this.coreOptions;
           const finalChainConfig = {
             ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
@@ -156,14 +156,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (!privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required");
           }
-          const finalOpenloginAdapterSettings: Partial<AuthOptions> = {
+          const finalAuthAdapterSettings: Partial<AuthOptions> = {
             ...defaultOptions.adapterSettings,
             clientId,
             network: web3AuthNetwork,
             whiteLabel: this.options.uiConfig,
           };
           if (smsOtpEnabled !== undefined) {
-            finalOpenloginAdapterSettings.loginConfig = {
+            finalAuthAdapterSettings.loginConfig = {
               [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
                 showOnModal: smsOtpEnabled,
                 showOnDesktop: smsOtpEnabled,
@@ -173,22 +173,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             };
           }
           if (whitelist) {
-            finalOpenloginAdapterSettings.originData = whitelist.signed_urls;
+            finalAuthAdapterSettings.originData = whitelist.signed_urls;
           }
           if (this.options.uiConfig.uxMode) {
-            finalOpenloginAdapterSettings.uxMode = this.options.uiConfig.uxMode;
+            finalAuthAdapterSettings.uxMode = this.options.uiConfig.uxMode;
           }
-          const openloginAdapter = new OpenloginAdapter({
+          const authAdapter = new AuthAdapter({
             ...defaultOptions,
             clientId,
             useCoreKitKey,
             chainConfig: { ...finalChainConfig },
-            adapterSettings: finalOpenloginAdapterSettings,
+            adapterSettings: finalAuthAdapterSettings,
             sessionTime,
             web3AuthNetwork,
             privateKeyProvider,
           });
-          this.walletAdapters[adapterName] = openloginAdapter;
+          this.walletAdapters[adapterName] = authAdapter;
           return adapterName;
         }
         throw WalletInitializationError.invalidParams(`Adapter ${adapterName} is not configured`);
@@ -213,18 +213,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.walletAdapters[adapterName].setAdapterSettings({ chainConfig });
         }
 
-        if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-          const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+        if (adapterName === WALLET_ADAPTERS.AUTH) {
+          const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
           if (this.coreOptions.privateKeyProvider) {
-            if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+            if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
               throw WalletInitializationError.incompatibleChainNameSpace(
-                "private key provider is not compatible with provided chainNamespace for openlogin adapter"
+                "private key provider is not compatible with provided chainNamespace for auth adapter"
               );
             }
-            openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
+            authAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
           }
           if (smsOtpEnabled !== undefined) {
-            openloginAdapter.setAdapterSettings({
+            authAdapter.setAdapterSettings({
               loginConfig: {
                 [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
                   showOnModal: smsOtpEnabled,
@@ -236,14 +236,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             });
           }
           if (whitelist) {
-            openloginAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
+            authAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
           }
           if (this.options.uiConfig?.uxMode) {
-            openloginAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });
+            authAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });
           }
-          openloginAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
-          if (!openloginAdapter.privateKeyProvider) {
-            throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
+          authAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
+          if (!authAdapter.privateKeyProvider) {
+            throw WalletInitializationError.invalidParams("privateKeyProvider is required for auth adapter");
           }
         } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
           const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
@@ -404,7 +404,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.loginModal.addSocialLogins(
         adapterName,
         getAdapterSocialLogins(adapterName, (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods),
-        this.options.uiConfig?.loginMethodsOrder || OPENLOGIN_PROVIDERS,
+        this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS,
         {
           ...this.options.uiConfig,
           loginGridCol: this.options.uiConfig?.loginGridCol || 3,

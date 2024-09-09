@@ -1,4 +1,5 @@
-import { SafeEventEmitter, SafeEventEmitterProvider } from "@web3auth/auth";
+import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@web3auth/auth-adapter";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
@@ -31,7 +32,6 @@ import {
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
-import { LOGIN_PROVIDER, LoginConfig, OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import deepmerge from "deepmerge";
 
@@ -125,8 +125,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           useCoreKitKey: this.coreOptions.useCoreKitKey,
         });
       }
-      if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-        const openloginAdapter = this.walletAdapters[adapterName] as OpenloginAdapter;
+      if (adapterName === WALLET_ADAPTERS.AUTH) {
+        const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
 
         const { whitelabel } = projectConfig;
         this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel), this.coreOptions.uiConfig);
@@ -134,7 +134,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
         const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
         if (smsOtpEnabled !== undefined) {
-          openloginAdapter.setAdapterSettings({
+          authAdapter.setAdapterSettings({
             loginConfig: {
               [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
                 showOnModal: smsOtpEnabled,
@@ -146,7 +146,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         }
         if (whitelist) {
-          openloginAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
+          authAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
         }
 
         if (typeof keyExportEnabled === "boolean") {
@@ -156,16 +156,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
 
         if (this.coreOptions.privateKeyProvider) {
-          if (openloginAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+          if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
             throw WalletInitializationError.incompatibleChainNameSpace(
-              "private key provider is not compatible with provided chainNamespace for openlogin adapter"
+              "private key provider is not compatible with provided chainNamespace for auth adapter"
             );
           }
-          openloginAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
+          authAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
         }
-        openloginAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
-        if (!openloginAdapter.privateKeyProvider) {
-          throw WalletInitializationError.invalidParams("privateKeyProvider is required for openlogin adapter");
+        authAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
+        if (!authAdapter.privateKeyProvider) {
+          throw WalletInitializationError.invalidParams("privateKeyProvider is required for auth adapter");
         }
       } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
@@ -274,7 +274,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedAdapterName !== WALLET_ADAPTERS.OPENLOGIN)
+    if (this.connectedAdapterName !== WALLET_ADAPTERS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this adapter.`);
     return this.walletAdapters[this.connectedAdapterName].enableMFA(loginParams);
   }
@@ -386,8 +386,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           return;
         }
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
-        const { openloginInstance } = this.walletAdapters[this.connectedAdapterName] as OpenloginAdapter;
-        const { options, sessionId, sessionNamespace } = openloginInstance || {};
+        const { authInstance } = this.walletAdapters[this.connectedAdapterName] as AuthAdapter;
+        const { options, sessionId, sessionNamespace } = authInstance || {};
         await plugin.initWithWeb3Auth(this, options.whiteLabel);
         await plugin.connect({ sessionId, sessionNamespace });
       } catch (error: unknown) {

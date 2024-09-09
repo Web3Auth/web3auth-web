@@ -50,7 +50,7 @@ export interface UIConfig extends WhiteLabelData {
   adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 
   /**
-   * UX Mode for the openlogin adapter
+   * UX Mode for the auth adapter
    */
   uxMode?: UX_MODE_TYPE;
 }

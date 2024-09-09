@@ -32,7 +32,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@web3auth/openlogin-adapter": "^9.0.0-alpha.0"
+    "@web3auth/auth-adapter": "^9.0.0-alpha.0"
   },
   "dependencies": {
     "@web3auth/base": "^9.0.0-alpha.0",
