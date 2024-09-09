@@ -178,7 +178,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToWalletEvents() {
-    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: string[] = []) => {
+    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
       if ((accounts as string[]).length === 0) {
         this.wsEmbedInstance.hideTorusButton();
         if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();

@@ -33,7 +33,7 @@
     "@web3auth/no-modal": "^8.12.4"
   },
   "devDependencies": {
-    "@web3auth/auth": "^9.3.1",
+    "@web3auth/auth": "^9.3.2",
     "@web3auth/openlogin-adapter": "^8.12.4"
   },
   "peerDependencies": {
