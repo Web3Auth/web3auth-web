@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/openlogin-adapter",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.0",
   "description": "openlogin adapter for web3auth",
   "keywords": [
     "web3Auth/openlogin-adapter",
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@web3auth/auth": "^9.3.2",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
+    "@web3auth/base": "^9.0.0-alpha.0",
+    "@web3auth/base-provider": "^9.0.0-alpha.0",
     "deepmerge": "^4.3.1"
   },
   "lint-staged": {
