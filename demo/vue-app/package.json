@@ -35,7 +35,7 @@
     "lodash": "^4.17.21",
     "lodash.merge": "^4.6.2",
     "ts-custom-error": "^3.3.1",
-    "vue": "^3.4.38",
+    "vue": "^3.5.3",
     "web3": "^4.12.1"
   },
   "devDependencies": {
