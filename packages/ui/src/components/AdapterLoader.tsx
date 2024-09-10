@@ -34,15 +34,15 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
-    <div className="w3ajs-modal-loader w3a-modal__loader">
+    <div className="w3ajs-modal-loader w3a-modal__loader h-full">
       <div className="w3a-modal__loader-content">
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
                 <div className="w3a-modal__loader-app-logo">
-                  <img src={appLogo} className="block dark:hidden" alt="" />
-                  <img src={appLogo} className="hidden dark:block" alt="" />
+                  <img src={appLogo} className="block dark:hidden h-12 w-12" alt="" />
+                  <img src={appLogo} className="hidden dark:block h-12 w-12" alt="" />
                 </div>
                 <div className="w3a-modal__connector">
                   <div className="w3a-modal__connector-beat">
