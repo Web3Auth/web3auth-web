@@ -1,15 +1,28 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, WEB3AUTH_NETWORK } from "@web3auth/base";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  storageAvailable,
+  WALLET_ADAPTERS,
+  WEB3AUTH_NETWORK,
+} from "@web3auth/base";
+import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
+import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/default-solana-adapter";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { computed, InputHTMLAttributes, ref, watch } from "vue";
+import { computed, InputHTMLAttributes, onBeforeMount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import {
@@ -69,11 +82,15 @@ const adapterOptions = computed(() =>
   formData.value.chainNamespace === CHAIN_NAMESPACES.EIP155
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        { name: "auth-adapter", value: "auth" },
+        // { name: "auth-adapter", value: "auth" },
         { name: "torus-evm-adapter", value: "torus-evm" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
+        { name: "injected-adapters", value: "injected-evm" },
       ]
-    : [{ name: "torus-solana-adapter", value: "torus-solana" }]
+    : [
+        { name: "torus-solana-adapter", value: "torus-solana" },
+        { name: "injected-adapters", value: "injected-solana" },
+      ]
 );
 
 // Populate the private key provider based on the chain selected
@@ -95,7 +112,11 @@ const privateKeyProvider = computed((): IBaseProvider<string> | null => {
         },
       });
     default:
-      return null;
+      return new CommonPrivateKeyProvider({
+        config: {
+          chainConfig,
+        },
+      });
   }
 });
 
@@ -122,11 +143,7 @@ const options = computed((): Web3AuthOptions => {
 const loginMethodsConfig = computed(() => {
   if (formData.value.loginProviders.length === 0) return undefined;
 
-  if (
-    !Object.values(formData.value.loginMethods)
-      .map((x) => x.showOnModal)
-      .includes(true)
-  ) {
+  if (!Object.values(formData.value.loginMethods).some((x) => x.showOnModal)) {
     return undefined;
   }
 
@@ -144,18 +161,24 @@ const modalParams = computed(() => {
   return { modalConfig };
 });
 
-const getExternalAdapterByName = (name: string) => {
+const getExternalAdapterByName = async (name: string): Promise<IAdapter<unknown>[]> => {
   switch (name) {
     case "coinbase":
-      return new CoinbaseAdapter();
+      return [new CoinbaseAdapter()];
     // case "auth":
     //   return new AuthAdapter();
     case "torus-evm":
-      return new TorusWalletAdapter();
+      return [new TorusWalletAdapter()];
     case "torus-solana":
-      return new SolanaWalletAdapter();
+      return [new SolanaWalletAdapter()];
+    case "wallet-connect-v2":
+      return [new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } } })];
+    case "injected-evm":
+      return getInjectedEvmAdapters({ options: options.value });
+    case "injected-solana":
+      return getInjectedSolanaAdapters({ options: options.value });
     default:
-      return null;
+      return [];
   }
 };
 
@@ -169,8 +192,13 @@ const initW3A = async () => {
   web3Auth.value?.clearCache();
   web3Auth.value = new Web3Auth(options.value);
   for (let i = 0; i <= formData.value.adapters.length; i += 1) {
-    const externalAdapter = getExternalAdapterByName(formData.value.adapters[i]);
-    if (externalAdapter) web3Auth.value.configureAdapter(externalAdapter);
+    // eslint-disable-next-line no-await-in-loop
+    const externalAdapters = await getExternalAdapterByName(formData.value.adapters[i]);
+    if (externalAdapters?.length > 0) {
+      externalAdapters.forEach((externalAdapter) => {
+        if (!web3Auth.value?.getAdapter(externalAdapter.name)) web3Auth.value?.configureAdapter(externalAdapter);
+      });
+    }
   }
   if (isWalletPluginEnabled()) addPlugin(walletPlugin.value);
 
@@ -182,7 +210,25 @@ const init = async () => {
   initW3A();
 };
 
-init();
+onBeforeMount(() => {
+  if (storageAvailable("sessionStorage")) {
+    const storedValue = sessionStorage.getItem("state");
+    try {
+      if (storedValue) {
+        // console.log("storedValue", storedValue);
+        const json = JSON.parse(storedValue);
+        formData.value.adapters = json.adapters;
+        formData.value.chain = json.chain;
+        formData.value.chainNamespace = json.chainNamespace;
+        formData.value.loginProviders = json.loginProviders;
+        formData.value.network = json.network;
+        formData.value.whiteLabel = json.whiteLabel;
+        formData.value.walletPlugin = json.walletPlugin;
+      }
+    } catch (error) {}
+  }
+  init();
+});
 
 // Every time the form data changes, reinitialize the web3Auth object
 watch(formData.value, async () => {
@@ -260,9 +306,9 @@ const onSwitchChain = async () => {
 const onAddChain = async () => {
   try {
     await addAndSwitchChain({
-      chainId: "0x89",
+      chainId: "0xaa36a7",
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc-sepolia.tor.us",
+      rpcTarget: "https://1rpc.io/sepolia	",
       blockExplorerUrl: "https://sepolia.etherscan.io",
       displayName: "Sepolia",
       ticker: "ETH",

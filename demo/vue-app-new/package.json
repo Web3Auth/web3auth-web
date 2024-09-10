@@ -22,6 +22,7 @@
     "@web3auth/default-evm-adapter": "file:../../packages/adapters/default-evm-adapter",
     "@web3auth/default-solana-adapter": "file:../../packages/adapters/default-solana-adapter",
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
+    "@web3auth/base-provider": "file:../../packages/providers/base-provider",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
     "@web3auth/no-modal": "file:../../packages/no-modal",
