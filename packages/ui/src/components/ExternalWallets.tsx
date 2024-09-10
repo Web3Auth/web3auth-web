@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { ExternalButton, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
 import ExternalWalletButton from "./ExternalWallet/ExternalWalletButton";
-import ExternalWalletDetail from "./ExternalWallet/ExternalWalletDetail";
+import ExternalWalletConnect from "./ExternalWallet/ExternalWalletConnect";
 import ExternalWalletHeader from "./ExternalWallet/ExternalWalletHeader";
 import Loader from "./Loader";
 
@@ -95,6 +95,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       }
       canShowMap[adapter] = false;
     });
+    log.debug("adapter visibility map", canShowMap);
     setAdapterVisibilityMap(canShowMap);
   }, [config, handleExternalWalletClick, walletConnectUri, deviceDetails]);
 
@@ -104,18 +105,21 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       const buttons: ExternalButton[] = Object.keys(walletRegistry).reduce((acc, wallet) => {
         if (adapterVisibilityMap[wallet] !== false) {
           const walletRegistryItem = walletRegistry[wallet];
+          // don't include wallets that don't support sign v2
+          if (!walletRegistryItem.walletConnect?.sdks?.includes("sign_v2")) return acc;
           let href = "";
           if (deviceDetails.platform === bowser.PLATFORMS_MAP.mobile && walletConnectUri) {
             const universalLink = walletRegistryItem?.mobile?.universal;
             const deepLink = walletRegistryItem?.mobile?.native;
             href = universalLink || deepLink ? formatIOSMobile({ uri: walletConnectUri, universalLink, deepLink }) : walletConnectUri;
           }
+          // All injected wallets are present in wallet registry
           const button = {
             name: wallet,
             displayName: walletRegistryItem.name,
             href,
             hasInjectedWallet: config[wallet]?.isInjected || false,
-            hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+            hasWalletConnect: isWalletConnectAdapterIncluded,
             hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
             walletRegistryItem,
           };
@@ -126,22 +130,37 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         }
         return acc;
       }, [] as ExternalButton[]);
-      setTotalExternalWallets(buttons.length);
-      // prioritize wallet that has injected wallet
-      buttons.sort((a, b) => {
-        if (a.hasInjectedWallet && !b.hasInjectedWallet) return -1;
-        if (!a.hasInjectedWallet && b.hasInjectedWallet) return 1;
-        return 0;
-      });
-      const filteredButtons = buttons
+      const customAdapterButtons: ExternalButton[] = Object.keys(config).reduce((acc, adapter) => {
+        log.debug("external adapter installed buttons", adapter, adapterVisibilityMap[adapter]);
+        if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !config[adapter].isInjected && adapterVisibilityMap[adapter]) {
+          acc.push({
+            name: adapter,
+            displayName: config[adapter].label || adapter,
+            hasInjectedWallet: false,
+            hasWalletConnect: false,
+            hasInstallLinks: false,
+          });
+        }
+        return acc;
+      }, [] as ExternalButton[]);
+      setTotalExternalWallets(buttons.length + customAdapterButtons.length);
+      // sort wallets so that injected wallets come first and then ones without wallet connect and then rest
+      const injectedWallets = buttons.filter((button) => button.hasInjectedWallet);
+      const nonInjectedWallets = buttons.filter((button) => !button.hasInjectedWallet);
+
+      const filteredButtons = injectedWallets
+        .concat(customAdapterButtons)
+        .concat(nonInjectedWallets)
         .filter((button) => {
           if (!walletSearch) return true;
           return button.displayName.toLowerCase().includes(walletSearch.toLowerCase());
         })
         .slice(0, 15); // show at most 15 wallets
+      log.debug("external buttons", buttons, filteredButtons);
       setExternalButtons(filteredButtons);
     } else {
       const buttons: ExternalButton[] = Object.keys(config).reduce((acc, adapter) => {
+        log.debug("external buttons", adapter, adapterVisibilityMap[adapter]);
         if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && adapterVisibilityMap[adapter]) {
           acc.push({
             name: adapter,
@@ -160,16 +179,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const handleWalletClick = (button: ExternalButton) => {
     if (deviceDetails.platform === "desktop") {
       // if has injected wallet, connect to injected wallet
-      if (button.hasInjectedWallet) {
-        handleExternalWalletClick({ adapter: button.name });
-      } else {
+      if (!button.hasInjectedWallet && button.hasWalletConnect) {
         // else, show wallet detail
         setSelectedButton(button);
+        return;
       }
-    } else if (!button.href && button.hasInjectedWallet) {
-      // on mobile, if href is not available, connect to injected wallet
-      handleExternalWalletClick({ adapter: button.name });
     }
+    handleExternalWalletClick({ adapter: button.name });
   };
 
   return (
@@ -233,10 +249,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             </>
           ) : (
             // Wallet Detail
-            <ExternalWalletDetail
+            <ExternalWalletConnect
               connectButton={selectedButton}
-              goBack={() => setSelectedButton(null)}
               walletConnectUri={walletConnectUri}
+              goBack={() => setSelectedButton(null)}
               closeModal={closeModal}
             />
           ))}
