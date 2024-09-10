@@ -1,3 +1,4 @@
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth-adapter";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -9,7 +10,6 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import type { AuthUserInfo, LoginParams } from "@web3auth/openlogin-adapter";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";

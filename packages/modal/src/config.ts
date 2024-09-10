@@ -11,14 +11,8 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [SOLANA_ADAPTERS.OPENLOGIN]: {
-      label: "OpenLogin",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
-    [SOLANA_ADAPTERS.PHANTOM]: {
-      label: "Phantom",
+    [SOLANA_ADAPTERS.AUTH]: {
+      label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -35,14 +29,8 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [EVM_ADAPTERS.METAMASK]: {
-      label: "MetaMask",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
-    [EVM_ADAPTERS.OPENLOGIN]: {
-      label: "OpenLogin",
+    [EVM_ADAPTERS.AUTH]: {
+      label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -59,8 +47,8 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
 export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   adapters: {
-    [SOLANA_ADAPTERS.OPENLOGIN]: {
-      label: "OpenLogin",
+    [SOLANA_ADAPTERS.AUTH]: {
+      label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -71,8 +59,8 @@ export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
 export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   adapters: {
-    [EVM_ADAPTERS.OPENLOGIN]: {
-      label: "OpenLogin",
+    [EVM_ADAPTERS.AUTH]: {
+      label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
@@ -83,11 +71,13 @@ export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
 export const defaultOtherModalConfig: AdaptersModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.OTHER,
   adapters: {
-    [EVM_ADAPTERS.OPENLOGIN]: {
-      label: "OpenLogin",
+    [EVM_ADAPTERS.AUTH]: {
+      label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
     },
   },
 };
+
+export const walletRegistryUrl = "https://assets.web3auth.io/v1/wallet-registry.json";

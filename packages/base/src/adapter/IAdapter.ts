@@ -93,6 +93,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   provider: IProvider | null;
   adapterData?: unknown;
   connnected: boolean;
+  isInjected?: boolean;
   addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
@@ -272,6 +273,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
 export interface BaseAdapterConfig {
   label: string;
+  isInjected?: boolean;
   showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
@@ -281,7 +283,7 @@ export type LoginMethodConfig = Record<
   string,
   {
     /**
-     * Display Name. If not provided, we use the default for openlogin app
+     * Display Name. If not provided, we use the default for auth app
      */
     name: string;
     /**
@@ -289,15 +291,15 @@ export type LoginMethodConfig = Record<
      */
     description?: string;
     /**
-     * Logo to be shown on mouse hover. If not provided, we use the default for openlogin app
+     * Logo to be shown on mouse hover. If not provided, we use the default for auth app
      */
     logoHover?: string;
     /**
-     * Logo to be shown on dark background (dark theme). If not provided, we use the default for openlogin app
+     * Logo to be shown on dark background (dark theme). If not provided, we use the default for auth app
      */
     logoLight?: string;
     /**
-     * Logo to be shown on light background (light theme). If not provided, we use the default for openlogin app
+     * Logo to be shown on light background (light theme). If not provided, we use the default for auth app
      */
     logoDark?: string;
     /**
@@ -319,21 +321,6 @@ export type LoginMethodConfig = Record<
   }
 >;
 
-export interface IWalletConnectExtensionAdapter {
-  name: string;
-  chains: ChainNamespaceType[];
-  logo: string;
-  mobile: {
-    native: string;
-    universal: string;
-  };
-  desktop: {
-    native: string;
-    universal: string;
-  };
-}
-
 export type WalletConnectV2Data = {
   uri: string;
-  extensionAdapters: IWalletConnectExtensionAdapter[];
 };

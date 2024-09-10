@@ -35,6 +35,8 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
+  readonly isInjected = true;
+
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
   private wallet: WalletStandard | null = null;

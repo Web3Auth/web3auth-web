@@ -1,5 +1,13 @@
 import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { BaseAdapterConfig, IWalletConnectExtensionAdapter, LoginMethodConfig, WALLET_ADAPTER_TYPE, Web3AuthNoModalEvents } from "@web3auth/base";
+import {
+  BaseAdapterConfig,
+  ChainNamespaceType,
+  LoginMethodConfig,
+  WALLET_ADAPTER_TYPE,
+  WalletRegistry,
+  WalletRegistryItem,
+  Web3AuthNoModalEvents,
+} from "@web3auth/base";
 
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
@@ -42,9 +50,14 @@ export interface UIConfig extends WhiteLabelData {
   adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 
   /**
-   * UX Mode for the openlogin adapter
+   * UX Mode for the auth adapter
    */
   uxMode?: UX_MODE_TYPE;
+}
+
+export interface LoginModalProps extends UIConfig {
+  chainNamespace: ChainNamespaceType;
+  walletRegistry: WalletRegistry;
 }
 
 export const LOGIN_MODAL_EVENTS = {
@@ -83,7 +96,6 @@ export interface ModalState {
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
-  wcAdapters: IWalletConnectExtensionAdapter[];
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
@@ -97,4 +109,14 @@ export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-conn
 export type StateEmitterEvents = {
   STATE_UPDATED: (state: Partial<ModalState>) => void;
   MOUNTED: () => void;
+};
+
+export type ExternalButton = {
+  name: string;
+  displayName?: string;
+  href?: string;
+  hasInjectedWallet: boolean;
+  hasWalletConnect: boolean;
+  hasInstallLinks: boolean;
+  walletRegistryItem?: WalletRegistryItem;
 };

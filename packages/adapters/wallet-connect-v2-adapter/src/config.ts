@@ -1,75 +1,7 @@
 import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
-import { CHAIN_NAMESPACES, ChainNamespaceType, IWalletConnectExtensionAdapter } from "@web3auth/base";
+import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
 
 import { IAdapterSettings } from "./interface";
-
-export const WALLET_CONNECT_EXTENSION_ADAPTERS: IWalletConnectExtensionAdapter[] = [
-  {
-    name: "Rainbow",
-    chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-rainbow.svg",
-    mobile: {
-      native: "rainbow:",
-      universal: "https://rnbwapp.com",
-    },
-    desktop: {
-      native: "",
-      universal: "",
-    },
-  },
-  {
-    name: "MetaMask",
-    chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-metamask.svg",
-    mobile: {
-      native: "metamask:",
-      universal: "https://metamask.app.link",
-    },
-    desktop: {
-      native: "",
-      universal: "",
-    },
-  },
-  {
-    name: "Argent",
-    chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-argent.svg",
-    mobile: {
-      native: "argent://",
-      universal: "https://www.argent.xyz/app",
-    },
-    desktop: {
-      native: "",
-      universal: "",
-    },
-  },
-  {
-    name: "Trust Wallet",
-    chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-trust.svg",
-    mobile: {
-      native: "trust:",
-      universal: "https://link.trustwallet.com",
-    },
-    desktop: {
-      native: "",
-      universal: "",
-    },
-  },
-  {
-    name: "Zerion",
-    chains: [CHAIN_NAMESPACES.EIP155],
-    logo: "https://images.web3auth.io/login-zerion.svg",
-    mobile: {
-      native: "zerion://",
-      universal: "https://wallet.zerion.io",
-    },
-    desktop: {
-      native: "",
-      universal: "",
-    },
-  },
-];
 
 export enum DEFAULT_EIP155_METHODS {
   ETH_SEND_TRANSACTION = "eth_sendTransaction",

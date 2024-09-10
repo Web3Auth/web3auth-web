@@ -27,7 +27,9 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  name: string;
+  readonly name: string;
+
+  readonly isInjected = true;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
