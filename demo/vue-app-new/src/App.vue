@@ -2,7 +2,7 @@
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
-import Web3AuthProvider, { Web3AuthContextConfig } from "@web3auth/modal-vue-composables";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal-vue-composables";
 import { computed } from "vue";
 
 import { chainConfigs } from "./config";
