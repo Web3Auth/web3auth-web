@@ -182,16 +182,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       if (!button.hasInjectedWallet && button.hasWalletConnect) {
         // else, show wallet detail
         setSelectedButton(button);
-      } else {
-        handleExternalWalletClick({ adapter: button.name });
+        return;
       }
-    } else if (!button.href && button.hasInjectedWallet) {
-      // on mobile, if href is not available, connect to injected wallet
-      handleExternalWalletClick({ adapter: button.name });
-    } else {
-      // this must be an adapter wallet
-      handleExternalWalletClick({ adapter: button.name });
     }
+    handleExternalWalletClick({ adapter: button.name });
   };
 
   return (
