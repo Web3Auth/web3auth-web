@@ -1,11 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 @layer utilities {
-
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     @apply appearance-none;
@@ -22,7 +20,7 @@
 }
 
 #w3a-modal .w3a-modal__inner {
-  @apply flex flex-col w-full max-w-[392px] max-h-[95%] min-h-[630px] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-app-white dark:bg-app-gray-800 shadow-modal border border-app-gray-100 dark:border-app-gray-800;
+  @apply flex flex-col w-full max-w-[392px] max-h-[95%] overflow-x-hidden overflow-y-hidden rounded-[32px] opacity-0 relative bg-app-white dark:bg-app-gray-800 shadow-modal border border-app-gray-100 dark:border-app-gray-800;
   transform: scale(0);
   transition: all 150ms cubic-bezier(0.92, 0, 1, 0.67);
   transform-origin: center center;
@@ -36,7 +34,7 @@
 }
 
 #w3a-modal .w3a-modal__header {
-  @apply relative px-8 py-2;
+  @apply relative px-8 py-2 pt-0;
 }
 
 #w3a-modal .w3a-modal__content {
@@ -73,7 +71,11 @@
 }
 
 #w3a-modal button.w3a-header__button {
-  @apply absolute p-0 border-0 cursor-pointer top-5 right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
+  @apply absolute p-0 border-0 cursor-pointer top-[1.7rem] right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
+}
+
+#w3a-modal button.w3a-header__button_wallet {
+  @apply absolute p-0 border-0 cursor-pointer top-[1.2rem] right-7 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 /* BODY */
@@ -83,6 +85,10 @@
 
 #w3a-modal .w3a-group {
   @apply mb-4;
+}
+
+#w3a-modal .w3a-group-loader-height {
+  @apply h-[200px] flex justify-center items-center;
 }
 
 #w3a-modal .w3a-group:last-child {
@@ -112,15 +118,16 @@
 #w3a-modal ul.w3a-adapter-list {
   @apply grid grid-cols-6 overflow-y-auto gap-x-2 gap-y-2;
   padding: 1px;
-  max-height: 380px;
-  transition: max-height 0.35s;
+  height: calc(100dvh - 480px);
+  transition: height 0.35s;
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
   scrollbar-width: none;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
-  max-height: 108px;
-  transition: max-height 0.3s;
+  height: 100px;
+  overflow-y: hidden;
+  transition: height 0.3s;
   transition-timing-function: cubic-bezier(0, 0.73, 0.71, 1);
 }
 
@@ -165,7 +172,7 @@
 }
 
 #w3a-modal button.w3a-external-back {
-  @apply inline-flex items-center p-0 border-0 cursor-pointer bg-none text-app-gray-500 dark:text-app-gray-400 focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
+  @apply inline-flex items-center p-0 border-0 cursor-pointer bg-none text-app-gray-500 hover:text-app-gray-900 dark:text-app-gray-400 dark:hover:text-app-white focus:outline-app-gray-50 active:outline-app-gray-50 dark:focus:outline dark:focus:outline-1 dark:active:outline dark:active:outline-1 dark:focus:outline-app-gray-400 dark:active:outline-app-gray-400;
 }
 
 #w3a-modal .w3a-external-back .w3a-group__title {
@@ -201,8 +208,8 @@
   @apply flex gap-x-5 gap-y-[30px] p-0 pb-7 box-border flex-wrap;
 }
 
-#w3a-modal .w3a-wallet-connect-qr>canvas,
-#w3a-modal .w3a-wallet-connect-qr>svg {
+#w3a-modal .w3a-wallet-connect-qr > canvas,
+#w3a-modal .w3a-wallet-connect-qr > svg {
   @apply m-auto;
 }
 
@@ -210,7 +217,7 @@
   @apply no-underline;
 }
 
-#w3a-modal .w3a-wallet-connect__logo>img {
+#w3a-modal .w3a-wallet-connect__logo > img {
   @apply mt-0 mx-auto mb-4 w-[115px];
 }
 
@@ -295,13 +302,13 @@
   @apply inline-flex items-center justify-center h-11;
 }
 
-#w3a-modal button.w3a-button--login:hover>.hover-icon {
+#w3a-modal button.w3a-button--login:hover > .hover-icon {
   display: block;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal button.w3a-button--login:hover>.image-icon {
+#w3a-modal button.w3a-button--login:hover > .image-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
@@ -387,7 +394,7 @@
   @apply mt-auto text-xs text-[#b7b8bd];
 }
 
-#w3a-modal .w3a-spinner-power>img {
+#w3a-modal .w3a-spinner-power > img {
   @apply inline w-auto h-8;
 }
 
@@ -403,11 +410,13 @@
   border-radius: 100vw;
   background-size: 100% 100%;
   background-position: 0px 0px;
-  background-image: conic-gradient(from 0deg at 50% 50%,
-      var(--app-primary-600) 0%,
-      rgb(229, 231, 235, 0.8) 90deg,
-      rgb(229, 231, 235, 0.8) 270deg,
-      var(--app-primary-600) 360deg);
+  background-image: conic-gradient(
+    from 0deg at 50% 50%,
+    var(--app-primary-600) 0%,
+    rgb(229, 231, 235, 0.8) 90deg,
+    rgb(229, 231, 235, 0.8) 270deg,
+    var(--app-primary-600) 360deg
+  );
 
   -webkit-mask:
     radial-gradient(farthest-side, #000 98%, #0000) center/85% 85% no-repeat,
@@ -421,13 +430,14 @@
 }
 
 .dark #w3a-modal .w3a-spinner__spinner {
-  background-image: conic-gradient(from 0deg at 50% 50%,
-      var(--app-primary-500) 0%,
-      rgb(229, 231, 235, 0.2) 90deg,
-      rgb(229, 231, 235, 0.2) 270deg,
-      var(--app-primary-500) 360deg);
+  background-image: conic-gradient(
+    from 0deg at 50% 50%,
+    var(--app-primary-500) 0%,
+    rgb(229, 231, 235, 0.2) 90deg,
+    rgb(229, 231, 235, 0.2) 270deg,
+    var(--app-primary-500) 360deg
+  );
 }
-
 
 /* Loader Bridge */
 #w3a-modal .w3a-modal__loader-bridge {
@@ -443,15 +453,15 @@
 }
 
 #w3a-modal .w3a-modal__loader-app-logo img {
-  @apply max-h-[72px] max-w-[72px] w-[72px] h-auto;
+  @apply max-h-12 max-w-12 w-12 h-12 object-contain;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
-  @apply bg-app-gray-100 dark:bg-app-gray-50 w-[72px] h-[72px] flex rounded-full items-center justify-center;
+  @apply bg-app-gray-100 dark:bg-app-gray-50 w-14 h-14 flex rounded-full items-center justify-center p-1;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
-  @apply w-16 h-16;
+  @apply max-h-10 max-w-10 w-10 h-10 object-contain;
 }
 
 #w3a-modal .w3a-modal__loader-adapter img {
@@ -479,6 +489,7 @@
   border-radius: 50%;
   background: #808080;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  @apply animate-pulse bg-app-gray-200 dark:bg-app-gray-700;
 }
 
 .w3a-modal__connector-beat div:nth-child(1) {
