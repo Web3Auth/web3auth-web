@@ -2,14 +2,18 @@ import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { createPublicClient, defineChain, http, PublicClient } from "viem";
+import { Client, createPublicClient, defineChain, http } from "viem";
+import { createBundlerClient, createPaymasterClient, PaymasterClient } from "viem/account-abstraction";
 
 import { createAaMiddleware } from "../rpc/ethRpcMiddlewares";
 import { ISmartAccount } from "./smartAccounts";
+import { BundlerConfig, PaymasterConfig } from "./types";
+import { getProviderHandlers } from "./utils";
 
 export interface AccountAbstractionProviderConfig extends BaseProviderConfig {
-  chainConfig: CustomChainConfig;
   smartAccount: ISmartAccount;
+  bundlerConfig: BundlerConfig;
+  paymasterConfig?: PaymasterConfig;
 }
 export interface AccountAbstractionProviderState extends BaseProviderState {}
 
@@ -24,6 +28,8 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     eoaProvider: IProvider;
     smartAccount: ISmartAccount;
     chainConfig: CustomChainConfig;
+    bundlerConfig: BundlerConfig;
+    paymasterConfig?: PaymasterConfig;
   }): Promise<AccountAbstractionProvider> => {
     const providerFactory = new AccountAbstractionProvider({ config: params });
     await providerFactory.setupProvider(params.eoaProvider);
@@ -31,6 +37,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   };
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
+    // setup public client for viem smart account
     const client = createPublicClient({
       chain: defineChain({
         id: Number.parseInt(this.config.chainConfig.chainId, 16), // id in number form
@@ -59,11 +66,36 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     });
     const smartAccount = await this.config.smartAccount.getSmartAccount({
       owner: eoaProvider,
-      client: client as PublicClient,
+      client: client as Client,
     });
 
+    // setup bundler and paymaster
+    let paymasterClient: PaymasterClient | undefined;
+    if (this.config.paymasterConfig) {
+      paymasterClient = createPaymasterClient({
+        transport: http(this.config.paymasterConfig.url),
+        ...this.config.paymasterConfig,
+      });
+    }
+    const bundlerClient = createBundlerClient({
+      account: smartAccount,
+      client: client as Client,
+      transport: http(this.config.bundlerConfig.url),
+      paymaster: paymasterClient,
+      ...this.config.bundlerConfig,
+    });
+
+    const providerHandlers = getProviderHandlers({
+      bundlerClient,
+      smartAccount,
+    });
+
+    // setup rpc engine and AA middleware
     const engine = new JRPCEngine();
-    const aaMiddleware = await createAaMiddleware({ ethProvider: eoaProvider, chainConfig: this.config.chainConfig, smartAccount });
+    const aaMiddleware = await createAaMiddleware({
+      eoaProvider,
+      handlers: providerHandlers,
+    });
     engine.push(aaMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);

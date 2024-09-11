@@ -1,42 +1,107 @@
-// import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, SafeEventEmitterProvider } from "@web3auth/auth";
-// import { CustomChainConfig } from "@web3auth/base";
-// import { TransactionParams } from "@web3auth/ethereum-provider";
-// import { Hex } from "viem";
-// import { SmartAccount } from "viem/account-abstraction";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
+import { IProvider } from "@web3auth/base";
+import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider";
 
-// export async function createAaMiddleware(params: {
-//   ethProvider: SafeEventEmitterProvider;
-//   chainConfig: CustomChainConfig;
-//   smartAccount: SmartAccount;
-// }): Promise<JRPCMiddleware<unknown, unknown>> {
-//   const [eoaAddress] = (await params.ethProvider.request({ method: "eth_accounts" })) as string[];
+export async function createAaMiddleware({
+  eoaProvider,
+  handlers,
+}: {
+  eoaProvider: IProvider;
+  handlers: Pick<IProviderHandlers, "getAccounts" | "getPrivateKey" | "processTransaction">;
+}): Promise<JRPCMiddleware<unknown, unknown>> {
+  // const [eoaAddress] = (await eoaProvider.request({ method: "eth_accounts" })) as string[];
 
-//   // TODO: we can return aaAddress only and map eoa address from state
-//   // All request from dapp to this provider will use aaAddress
-//   async function getAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-//     // eslint-disable-next-line no-console
-//     console.log("getAccounts", req, res);
-//     const aaAddress = (await aaAdapter.getSmartAccountAddress()) as string;
-//     // eslint-disable-next-line require-atomic-updates
-//     res.result = [eoaAddress, aaAddress];
-//   }
+  async function lookupAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    res.result = await handlers.getAccounts(req);
+  }
 
-//   async function sendTransaction(req: JRPCRequest<TransactionParams>, res: JRPCResponse<unknown>): Promise<void> {
-//     const txParams = req.params[0];
-//     const txData = {
-//       to: (txParams.to || "") as Hex,
-//       value: txParams.value ? txParams.value : BigInt(0),
-//       data: (txParams.data || "0x") as Hex,
-//     };
+  async function lookupDefaultAccount(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    const accounts = await handlers.getAccounts(req);
+    res.result = accounts[0] || null;
+  }
 
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     const txHash = await aaAdapter.sendTransaction(txData as any);
+  async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!handlers.getPrivateKey) {
+      throw rpcErrors.methodNotSupported();
+    }
+    res.result = handlers.getPrivateKey(req);
+  }
 
-//     res.result = txHash;
-//   }
+  /**
+   * Validates the keyholder address, and returns a normalized (i.e. lowercase)
+   * copy of it.
+   *
+   * an error
+   */
+  async function validateAndNormalizeKeyholder(address: string, req: JRPCRequest<unknown>): Promise<string> {
+    if (typeof address === "string" && address.length > 0) {
+      // ensure address is included in provided accounts
+      const accounts: string[] = await handlers.getAccounts(req);
+      const normalizedAccounts: string[] = accounts.map((_address) => _address.toLowerCase());
+      const normalizedAddress: string = address.toLowerCase();
 
-//   return createScaffoldMiddleware({
-//     eth_accounts: createAsyncMiddleware(getAccounts),
-//     eth_sendTransaction: createAsyncMiddleware(sendTransaction) as JRPCMiddleware<unknown, unknown>,
-//   });
-// }
+      if (normalizedAccounts.includes(normalizedAddress)) {
+        return normalizedAddress;
+      }
+    }
+    throw rpcErrors.invalidParams({
+      message: `Invalid parameters: must provide an Ethereum address.`,
+    });
+  }
+
+  async function sendTransaction(req: JRPCRequest<TransactionParams>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!handlers.processTransaction) {
+      throw rpcErrors.methodNotSupported();
+    }
+    const txParams: TransactionParams =
+      (req.params as TransactionParams[])[0] ||
+      ({
+        from: "",
+      } as TransactionParams);
+    txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
+    res.result = handlers.processTransaction(txParams, req);
+  }
+
+  async function signTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    res.result = await eoaProvider.request({
+      method: "eth_signTransaction",
+      params: req.params,
+    });
+  }
+
+  async function ethSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    res.result = await eoaProvider.request({
+      method: "eth_sign",
+      params: req.params,
+    });
+  }
+
+  async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    res.result = await eoaProvider.request({
+      method: "eth_signTypedData_v4",
+      params: req.params,
+    });
+  }
+
+  async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    res.result = await eoaProvider.request({
+      method: "personal_sign",
+      params: req.params,
+    });
+  }
+
+  return createScaffoldMiddleware({
+    // account lookups
+    eth_accounts: createAsyncMiddleware(lookupAccounts),
+    eth_private_key: createAsyncMiddleware(fetchPrivateKey),
+    private_key: createAsyncMiddleware(fetchPrivateKey),
+    eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
+    // tx signatures
+    eth_sendTransaction: createAsyncMiddleware(sendTransaction),
+    eth_signTransaction: createAsyncMiddleware(signTransaction),
+    // message signatures
+    eth_sign: createAsyncMiddleware(ethSign),
+    eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
+    personal_sign: createAsyncMiddleware(personalSign),
+  });
+}
