@@ -143,7 +143,7 @@ export const getBalance = async (provider: IProvider, uiConsole: any) => {
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     const balance = await web3.eth.getBalance(accounts[0]);
-    uiConsole("balance", balance);
+    uiConsole("balance", balance.toString());
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);
