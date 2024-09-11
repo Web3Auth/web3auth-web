@@ -140,7 +140,7 @@ export default function Modal(props: ModalProps) {
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
-        <div className="w3a-group__title">{t("modal.external.title")}</div>
+        {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
@@ -183,7 +183,7 @@ export default function Modal(props: ModalProps) {
   return (
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
-        <div className={modalTransitionClasses.join(" ")}>
+        <div className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""}`}>
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <>
               <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
