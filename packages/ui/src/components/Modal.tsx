@@ -66,6 +66,8 @@ export default function Modal(props: ModalProps) {
     closeModal,
   } = props;
 
+  const [transition, setTransition] = useState("");
+
   useEffect(() => {
     stateListener.emit("MOUNTED");
     stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
@@ -146,13 +148,17 @@ export default function Modal(props: ModalProps) {
           type="button"
           className="w-full w3ajs-external-toggle__button"
           onClick={() => {
-            handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
               return {
                 ...prevState,
                 externalWalletsVisibility: true,
               };
             });
+            setTransition("slide-enter");
+            handleShowExternalWallets(modalState.externalWalletsInitialized);
+            setTimeout(() => {
+              setTransition("slide-exit");
+            }, 300);
           }}
         >
           {t("modal.external.connect")}
@@ -183,7 +189,13 @@ export default function Modal(props: ModalProps) {
   return (
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
-        <div className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""}`}>
+        <div
+          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""} ${
+            (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
+              ? ""
+              : "h-[567px]"
+          }`}
+        >
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <>
               <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
@@ -203,7 +215,7 @@ export default function Modal(props: ModalProps) {
               </div>
             </>
           ) : (
-            <div>
+            <div className={`transition-wrapper ${transition}`}>
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
               !modalState.externalWalletsVisibility ? (
                 <>
@@ -231,7 +243,7 @@ export default function Modal(props: ModalProps) {
                   </div>
                 </>
               ) : (
-                <div className="w3a-modal__content w3ajs-content">
+                <div className="w3a-modal__content_external_wallet w3ajs-content">
                   <ExternalWallets
                     modalStatus={modalState.status}
                     showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
