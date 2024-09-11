@@ -130,7 +130,7 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
   try {
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
-    uiConsole(chainId.toString());
+    uiConsole("chainId", chainId.toString());
     return chainId.toString();
   } catch (error) {
     log.error("Error", error);

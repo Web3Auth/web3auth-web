@@ -255,7 +255,7 @@ const printToConsole = (...args: unknown[]) => {
 };
 
 const onGetUserInfo = async () => {
-  printToConsole("User Info", userInfo);
+  printToConsole("User Info", userInfo.value);
 };
 
 const clearConsole = () => {
