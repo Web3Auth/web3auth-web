@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import { ExternalButton, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
 import ExternalWalletButton from "./ExternalWallet/ExternalWalletButton";
-import ExternalWalletConnect from "./ExternalWallet/ExternalWalletConnect";
+// import ExternalWalletConnect from "./ExternalWallet/ExternalWalletConnect";
+import ExternalWalletDetail from "./ExternalWallet/ExternalWalletDetails";
 import ExternalWalletHeader from "./ExternalWallet/ExternalWalletHeader";
 import Loader from "./Loader";
 
@@ -102,6 +103,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     if (isWalletDiscoveryReady) {
       const isWalletConnectAdapterIncluded = Object.keys(config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2);
       const defaultButtonKeys = new Set(Object.keys(walletRegistry.default));
+      log.info(defaultButtonKeys, "DEFAULT KEYS");
 
       const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
         return Object.keys(wallets).reduce((acc, wallet) => {
@@ -120,7 +122,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             displayName: walletRegistryItem.name,
             href,
             hasInjectedWallet: config[wallet]?.isInjected || false,
-            hasWalletConnect: isWalletConnectAdapterIncluded,
+            hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
             hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
             walletRegistryItem,
           };
@@ -192,13 +194,16 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const handleWalletClick = (button: ExternalButton) => {
     if (deviceDetails.platform === "desktop") {
       // if has injected wallet, connect to injected wallet
-      if (!button.hasInjectedWallet && button.hasWalletConnect) {
+      if (button.hasInjectedWallet) {
+        handleExternalWalletClick({ adapter: button.name });
+      } else {
         // else, show wallet detail
         setSelectedButton(button);
-        return;
       }
+    } else if (!button.href && button.hasInjectedWallet) {
+      // on mobile, if href is not available, connect to injected wallet
+      handleExternalWalletClick({ adapter: button.name });
     }
-    handleExternalWalletClick({ adapter: button.name });
   };
 
   return (
@@ -267,10 +272,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             </>
           ) : (
             // Wallet Detail
-            <ExternalWalletConnect
+            <ExternalWalletDetail
               connectButton={selectedButton}
-              walletConnectUri={walletConnectUri}
               goBack={() => setSelectedButton(null)}
+              walletConnectUri={walletConnectUri}
               closeModal={closeModal}
             />
           ))
