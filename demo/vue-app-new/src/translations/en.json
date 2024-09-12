@@ -61,7 +61,9 @@
       "btnSignAllTransactions": "Sign All Transactions",
       "btnShowWalletUI": "Show Wallet UI",
       "btnShowCheckout": "Show Checkout",
-      "btnShowWalletConnectScanner": "Show WalletConnect Scanner"
+      "btnShowWalletConnectScanner": "Show WalletConnect Scanner",
+      "btnSignTypedData_v4": "Sign Typed Data v4",
+      "btnSignPersonalMsg": "Sign Personal Message"
     }
   }
 }
