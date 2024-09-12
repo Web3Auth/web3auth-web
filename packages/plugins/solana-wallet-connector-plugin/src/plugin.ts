@@ -7,6 +7,7 @@ import {
   IPlugin,
   IProvider,
   IWeb3AuthCore,
+  log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -18,7 +19,6 @@ import {
   WALLET_ADAPTERS,
   WalletServicesPluginError,
 } from "@web3auth/base";
-import log from "loglevel";
 
 export type ProviderInfo = {
   provider?: SafeEventEmitterProvider;

@@ -10,6 +10,7 @@ import {
   IPlugin,
   IProvider,
   IWeb3AuthCore,
+  log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -20,7 +21,6 @@ import {
   WalletServicesPluginError,
 } from "@web3auth/base";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
-import log from "loglevel";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
