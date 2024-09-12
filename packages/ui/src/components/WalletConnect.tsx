@@ -37,7 +37,7 @@ function WalletConnect(props: WalletConnectProps) {
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
       <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">
         <div className="w3a-wallet-connect__container-desktop">
-          {/* <div className="text-app-gray-500 dark:text-app-gray-400 text-xs">Scan the QR code with a wallet that supports WalletConnect.</div> */}
+          {/* <div className="text-app-gray-500 dark:text-app-gray-400 text-xs">{t("modal.external.walletconnect-subtitle")}</div> */}
           <div
             className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md mb-2"
             tabIndex={0}
