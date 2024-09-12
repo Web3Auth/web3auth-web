@@ -32,10 +32,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@walletconnect/sign-client": "^2.x",
-    "@walletconnect/types": "^2.x",
-    "@walletconnect/utils": "^2.x"
+    "@babel/runtime": "^7.x"
   },
   "dependencies": {
     "@web3auth/auth": "^9.3.3",
@@ -43,9 +40,7 @@
     "@web3auth/base-evm-adapter": "^9.0.0-alpha.4",
     "@web3auth/base-provider": "^9.0.0-alpha.4",
     "@web3auth/ethereum-provider": "^9.0.0-alpha.5",
-    "deepmerge": "^4.3.1"
-  },
-  "devDependencies": {
+    "deepmerge": "^4.3.1",
     "@walletconnect/sign-client": "^2.16.1",
     "@walletconnect/types": "^2.16.1",
     "@walletconnect/utils": "^2.16.1"
