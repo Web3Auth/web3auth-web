@@ -25,7 +25,7 @@
     "@wallet-standard/app": "^1.0.1",
     "@wallet-standard/base": "^1.0.1",
     "@wallet-standard/features": "^1.0.3",
-    "@web3auth/auth": "^9.3.2",
+    "@web3auth/auth": "^9.3.3",
     "@web3auth/base": "^9.0.0-alpha.1",
     "@web3auth/base-solana-adapter": "^9.0.0-alpha.1",
     "@web3auth/solana-provider": "^9.0.0-alpha.1",
