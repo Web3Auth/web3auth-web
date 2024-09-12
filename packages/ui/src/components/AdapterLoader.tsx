@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
-import Footer from "./Footer";
+// import Footer from "./Footer";
 import Icon from "./Icon";
 import Image from "./Image";
 
@@ -17,7 +17,7 @@ interface DetailedLoaderProps {
   onClose: () => void;
 }
 
-const closeIcon = <Icon iconName="close" />;
+const closeIcon = <Icon iconName="x-light" darkIconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
@@ -71,8 +71,6 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
-
-        <Footer />
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>

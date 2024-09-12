@@ -49,8 +49,8 @@ function Header(props: HeaderProps) {
           </div>
         </div>
       </div>
-      <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn">
-        <Icon iconName="close" />
+      <button type="button" onClick={onClose} className="w3a-header__button w3ajs-close-btn ">
+        <Icon iconName="x-light" darkIconName="x-dark" />
       </button>
     </div>
   );
