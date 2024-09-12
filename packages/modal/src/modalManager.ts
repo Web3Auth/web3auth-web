@@ -85,7 +85,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
-    let walletRegistry: WalletRegistry = {};
+    let walletRegistry: WalletRegistry = { others: {}, default: {} };
     try {
       walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
     } catch (e) {
