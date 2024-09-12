@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-services-plugin",
-  "version": "9.0.0-alpha.2",
+  "version": "9.0.0-alpha.3",
   "description": "Wallet services for which can be used with Web3Auth or private key providers used inside Web3Auth",
   "keywords": [
     "web3Auth/wallet-services-plugin",
@@ -36,7 +36,7 @@
   "dependencies": {
     "@web3auth/auth": "^9.3.3",
     "@web3auth/base": "^9.0.0-alpha.2",
-    "@web3auth/no-modal": "^9.0.0-alpha.2",
+    "@web3auth/no-modal": "^9.0.0-alpha.3",
     "@web3auth/ws-embed": "^3.0.0",
     "loglevel": "^1.9.2"
   },
