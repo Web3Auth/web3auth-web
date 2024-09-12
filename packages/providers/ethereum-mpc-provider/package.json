@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-mpc-provider",
-  "version": "9.0.0-alpha.4",
+  "version": "9.0.0-alpha.5",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -25,7 +25,7 @@
     "@web3auth/auth": "^9.3.3",
     "@web3auth/base": "^9.0.0-alpha.4",
     "@web3auth/base-provider": "^9.0.0-alpha.4",
-    "@web3auth/ethereum-provider": "^9.0.0-alpha.4",
+    "@web3auth/ethereum-provider": "^9.0.0-alpha.5",
     "ethers": "^6.13.2"
   },
   "peerDependencies": {
