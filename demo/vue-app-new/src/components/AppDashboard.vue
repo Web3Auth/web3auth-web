@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
 import { useI18n } from "vue-i18n";
 
+import { getV4TypedData } from "../config";
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
@@ -145,6 +148,69 @@ const onSignMessage = async () => {
 const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
 };
+
+const onSignTypedData_v4 = async () => {
+  try {
+    printToConsole("Initiating sign typed data v4");
+
+    const chain = await getChainId(provider.value as IProvider, () => {});
+    const accounts = await getAccounts(provider.value as IProvider, () => {});
+    const typedData = getV4TypedData(chain as string);
+    let signTypedDataV4VerifyResult = "";
+    // const signedMessage = await ethersProvider?.send("eth_signTypedData_v4", [account.value, JSON.stringify(typedData)]);
+
+    const from = accounts?.[0];
+
+    const signedMessage = (await provider.value?.request({
+      method: METHOD_TYPES.ETH_SIGN_TYPED_DATA_V4,
+      params: [from, JSON.stringify(typedData)],
+    })) as string;
+
+    const msg = TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
+    const recoveredAddr = recoverAddress(msg, signedMessage);
+    if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
+      log(`Successfully verified signer as ${recoveredAddr}`);
+      signTypedDataV4VerifyResult = recoveredAddr;
+    } else {
+      throw new Error(`Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
+    }
+    printToConsole(`Success`, { signedMessage, verify: signTypedDataV4VerifyResult });
+  } catch (error) {
+    log(error);
+    printToConsole("Failed", (error as Error).message);
+  }
+};
+
+const onSignPersonalMsg = async () => {
+  try {
+    printToConsole("Initiating personal sign");
+    const message = "Example `personal_sign` messages";
+    const accounts = await getAccounts(provider.value as IProvider, () => {});
+    const from = accounts?.[0];
+    let personalSignVerifySigUtilResult = "";
+    // const signedMessage = await ethersProvider?.send("personal_sign", [message, account.value]);
+    const msg = `0x${Buffer.from(message, "utf8").toString("hex")}`;
+    const signedMessage = (await provider.value?.request({
+      method: METHOD_TYPES.PERSONAL_SIGN,
+      params: [msg, from, "Example password"],
+    })) as string;
+
+    // Verify
+    const recoveredAddr = verifyMessage(message, signedMessage);
+
+    if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
+      log(`SigUtil Successfully verified signer as ${recoveredAddr}`);
+      personalSignVerifySigUtilResult = recoveredAddr;
+    } else {
+      throw new Error(`SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
+    }
+
+    printToConsole(`Success`, { signedMessage, verify: personalSignVerifySigUtilResult });
+  } catch (error) {
+    log(error);
+    printToConsole("Failed", (error as Error).message);
+  }
+};
 </script>
 
 <template>
@@ -186,6 +252,12 @@ const onSignAllTransactions = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignTypedData_v4">
+            {{ t("app.buttons.btnSignTypedData_v4") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
+            {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
         </Card>
         <Card v-if="isDisplay('solServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">

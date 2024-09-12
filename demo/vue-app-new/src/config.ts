@@ -1,3 +1,4 @@
+import { SignTypedDataMessageV4 } from "@toruslabs/ethereum-controllers";
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 
@@ -131,3 +132,34 @@ export type FormData = {
     logoLight: string;
   };
 };
+
+export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
+  types: {
+    Person: [
+      { name: "name", type: "string" },
+      { name: "wallet", type: "address" },
+    ],
+    Mail: [
+      { name: "from", type: "Person" },
+      { name: "to", type: "Person" },
+      { name: "contents", type: "string" },
+    ],
+  },
+  domain: {
+    name: "Ether Mail",
+    version: "1",
+    chainId: Number(chainId),
+    verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+  },
+  message: {
+    from: {
+      name: "Cow",
+      wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+    },
+    to: {
+      name: "Bob",
+      wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    },
+    contents: "Hello, Bob!",
+  },
+});
