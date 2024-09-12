@@ -10,10 +10,11 @@ import i18n from "../localeImport";
 interface WalletConnectProps {
   walletConnectUri: string;
   logoImage?: string;
+  primaryColor?: string;
 }
 
 function WalletConnect(props: WalletConnectProps) {
-  const { walletConnectUri, logoImage } = props;
+  const { walletConnectUri, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
@@ -60,7 +61,7 @@ function WalletConnect(props: WalletConnectProps) {
               logoHeight={32}
               logoWidth={32}
               logoPadding={10}
-              // eyeColor="#f42bd2"
+              eyeColor={primaryColor}
             />
           </div>
           <div className="text-xs">{t("modal.external.walletconnect-copy")}</div>

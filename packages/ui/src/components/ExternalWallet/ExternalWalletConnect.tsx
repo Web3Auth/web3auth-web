@@ -42,7 +42,11 @@ export default function ExternalWalletConnect(props: ExternalWalletConnectProps)
           {!walletConnectUri ? (
             <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />
           ) : (
-            <WalletConnect walletConnectUri={walletConnectUri} logoImage={`https://images.web3auth.io/login-${connectButton.name}.svg`} />
+            <WalletConnect
+              walletConnectUri={walletConnectUri}
+              logoImage={`https://images.web3auth.io/login-${connectButton.name}.svg`}
+              primaryColor={connectButton.walletRegistryItem.primaryColor}
+            />
           )}
 
           {/* Install links */}
