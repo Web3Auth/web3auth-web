@@ -156,16 +156,27 @@ watch(formData, () => {
 watch(
   () => formData.adapters,
   async () => {
+    let adapters: IAdapter<unknown>[] = [];
     for (let i = 0; i <= formData.adapters.length; i += 1) {
       // eslint-disable-next-line no-await-in-loop
-      externalAdapters.value = await getExternalAdapterByName(formData.adapters[i]);
+      adapters = adapters.concat(await getExternalAdapterByName(formData.adapters[i]));
     }
+    externalAdapters.value = adapters;
   }
 );
+
+const configs = computed(() => {
+  return {
+    adapters: externalAdapters.value,
+    web3AuthOptions: options.value,
+    plugins: walletPlugins.value,
+    modalConfig: modalParams.value,
+  };
+});
 </script>
 
 <template>
-  <Web3AuthProvider :config="{ adapters: externalAdapters, web3AuthOptions: options, plugins: walletPlugins, modalConfig: modalParams }">
+  <Web3AuthProvider :config="configs">
     <AppHeader />
     <main class="flex-1 p-1">
       <div class="relative">
