@@ -21,7 +21,7 @@ export default function ExternalWalletButton(props: ExternalWalletButtonProps) {
       variant="tertiary"
       type="button"
       onClick={() => handleWalletClick(button)}
-      className="w-full rounded-xl size-xl flex !justify-between items-center !bg-app-gray-100 hover:!bg-app-gray-200 !px-2"
+      className="w-full rounded-xl size-xl flex !justify-between items-center bg-app-gray-100 hover:bg-app-gray-200 dark:bg-app-gray-700 dark:hover:bg-app-gray-800 !px-2"
       title={adapterConfig?.label || button.name}
     >
       <div className="flex items-center">

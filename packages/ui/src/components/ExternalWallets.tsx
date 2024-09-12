@@ -233,21 +233,23 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                   {t("modal.external.no-wallets-found")}
                 </div>
               ) : (
-                <ul className="w3a-adapter-list w3ajs-wallet-adapters mt-4">
-                  {externalButtons.map((button) => {
-                    return (
-                      <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name}>
-                        {deviceDetails.platform === "desktop" ? (
-                          <ExternalWalletButton button={button} adapterConfig={config[button.name]} handleWalletClick={handleWalletClick} />
-                        ) : (
-                          <a href={button.href} target="_blank" className="w-full" rel="noreferrer noopener">
+                <div className="w3a-adapter-list-container">
+                  <ul className="w3a-adapter-list w3ajs-wallet-adapters mt-4">
+                    {externalButtons.map((button) => {
+                      return (
+                        <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name}>
+                          {deviceDetails.platform === "desktop" ? (
                             <ExternalWalletButton button={button} adapterConfig={config[button.name]} handleWalletClick={handleWalletClick} />
-                          </a>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                          ) : (
+                            <a href={button.href} target="_blank" className="w-full" rel="noreferrer noopener">
+                              <ExternalWalletButton button={button} adapterConfig={config[button.name]} handleWalletClick={handleWalletClick} />
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               )}
             </>
           ) : (

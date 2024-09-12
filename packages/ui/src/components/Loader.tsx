@@ -2,7 +2,7 @@ import { ADAPTER_STATUS, log } from "@web3auth/base";
 import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
-import Footer from "./Footer";
+// import Footer from "./Footer";
 import Icon from "./Icon";
 
 interface LoaderProps {
@@ -44,7 +44,7 @@ export default function Loader(props: LoaderProps) {
           )}
         </div>
 
-        <Footer />
+        {/* <Footer /> */}
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
