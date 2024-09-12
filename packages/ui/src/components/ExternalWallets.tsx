@@ -211,7 +211,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   };
 
   return (
-    <div className="w3ajs-external-wallet w3a-group">
+    <div className={`w3ajs-external-wallet w3a-group ${totalExternalWallets === 0 ? "w3a-group-loader-height" : ""}`}>
       <div className="w3a-external-container w3ajs-external-container">
         {/* Loader */}
         {totalExternalWallets === 0 ? (
@@ -230,7 +230,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               />
 
               {/* Search */}
-              {walletDiscoverySupported && (
+              {totalExternalWallets > 15 && (
                 <div className="py-4">
                   <input
                     className="w-full w3a-text-field"
@@ -255,7 +255,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                   {t("modal.external.no-wallets-found")}
                 </div>
               ) : (
-                <div className="w3a-adapter-list-container">
+                <div className={`w3a-adapter-list-container ${totalExternalWallets < 15 ? "py-4" : ""}`}>
                   <ul className="w3a-adapter-list w3ajs-wallet-adapters">
                     {externalButtons.map((button) => {
                       return (
