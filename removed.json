@@ -1,0 +1,1697 @@
+{
+  "a4": {
+    "app": {
+      "android": "finance.a4.mobile",
+      "ios": "id1623005090"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:250",
+      "eip155:43114",
+      "eip155:56",
+      "eip155:97"
+    ],
+    "name": "A4 Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "airgap": {
+    "app": {
+      "android": "it.airgap.wallet",
+      "ios": "id1420996542"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "mobile": {
+      "native": "airgap-wallet://wc"
+    },
+    "name": "AirGap Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#50249f"
+  },
+  "apollox": {
+    "app": {
+      "android": "com.apollox.android",
+      "ios": "id1589405398"
+    },
+    "chains": [
+      "eip155:56"
+    ],
+    "desktop": {
+      "universal": "https://app.apollox.finance"
+    },
+    "mobile": {
+      "universal": "https://app.apollox.finance/wc"
+    },
+    "name": "ApolloX",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "argent-x": {
+    "app": {
+      "android": "im.argent.contractwalletclient",
+      "chrome": "dlcobpjiigpikoobohmabehhmhfoodbb",
+      "edge": "ajcicjlkibolbeaaagejfhnofogocgcj",
+      "firefox": "argent-x",
+      "ios": "id1358741926"
+    },
+    "chains": [],
+    "name": "Argent X",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "assure": {
+    "app": {
+      "android": "com.neuxs.assure",
+      "ios": "id1604825026"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:128",
+      "eip155:56",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182"
+    ],
+    "mobile": {
+      "native": "assure://wc",
+      "universal": "https://www.assure.pro/Official"
+    },
+    "name": "Assure",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "aton": {
+    "app": {
+      "android": "com.platon.aton",
+      "ios": "id1473112418"
+    },
+    "chains": [
+      "eip155:201030",
+      "eip155:210309"
+    ],
+    "name": "ATON",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "backpack": {
+    "app": {
+      "chrome": "aflkmfhebedbjioipglgcbcmnbpgliof"
+    },
+    "chains": [
+      "eip155:1",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "name": "Backpack",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "bitpay": {
+    "app": {
+      "android": "com.bitpay.wallet",
+      "ios": "id1149581638"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:5",
+      "eip155:80001"
+    ],
+    "mobile": {
+      "native": "bitpay://",
+      "universal": "https://link.bitpay.com"
+    },
+    "name": "BitPay Wallet",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#2240C4"
+  },
+  "block": {
+    "app": {
+      "chrome": "bopcbmipnjdcdfflfgjdgdjejmgpoaab"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:137",
+      "eip155:200",
+      "eip155:250",
+      "eip155:3",
+      "eip155:30",
+      "eip155:31",
+      "eip155:4",
+      "eip155:4002",
+      "eip155:420",
+      "eip155:42161",
+      "eip155:421611",
+      "eip155:43113",
+      "eip155:43114",
+      "eip155:5",
+      "eip155:56",
+      "eip155:69",
+      "eip155:80001",
+      "eip155:97"
+    ],
+    "name": "BlockWallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "blocto": {
+    "app": {
+      "android": "com.portto.blocto",
+      "ios": "id1481181682"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:137",
+      "eip155:420",
+      "eip155:42161",
+      "eip155:43113",
+      "eip155:43114",
+      "eip155:5",
+      "eip155:56",
+      "eip155:80001",
+      "eip155:97"
+    ],
+    "mobile": {
+      "native": "blocto://",
+      "universal": "https://blocto.app"
+    },
+    "name": "Blocto",
+    "walletConnect": [],
+    "primaryColor": "#5E678A"
+  },
+  "braavos": {
+    "app": {
+      "android": "app.braavos.wallet",
+      "chrome": "jnlgamecbpmbajjfhmmmlhejkemejdma",
+      "edge": "hkkpjehhcnhgefhbdcgfkeegglpjchdc",
+      "firefox": "braavos-wallet",
+      "ios": "id1636013523"
+    },
+    "chains": [],
+    "name": "Braavos",
+    "walletConnect": [],
+    "primaryColor": "#FABB38"
+  },
+  "brave": {
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:1313161554",
+      "eip155:137",
+      "eip155:250",
+      "eip155:4",
+      "eip155:42220",
+      "eip155:44787",
+      "eip155:5",
+      "eip155:56",
+      "eip155:80001",
+      "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+    ],
+    "desktop": {
+      "install": {
+        "chrome": "https://brave.com/wallet/"
+      }
+    },
+    "name": "Brave Wallet",
+    "walletConnect": [],
+    "primaryColor": "#4B49C6"
+  },
+  "brise": {
+    "app": {
+      "android": "com.brise.wallet"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:56"
+    ],
+    "name": "BRISE Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "card": {
+    "app": {
+      "android": "https://cardstack.com/android",
+      "ios": "https://cardstack.com/ios"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:100"
+    ],
+    "mobile": {
+      "native": "cardwallet://wc",
+      "universal": "https://wallet.cardstack.com/wc"
+    },
+    "name": "Card Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "coinbase": {
+    "app": {
+      "android": "org.toshi",
+      "chrome": "hnfanknocfeofbddgcijnmhnfnkdnaad",
+      "ios": "id1278383455"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:137",
+      "eip155:250",
+      "eip155:42161",
+      "eip155:43114",
+      "eip155:56",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "name": "Coinbase Wallet",
+    "walletConnect": [],
+    "primaryColor": "#1648F9"
+  },
+  "coincircle": {
+    "app": {
+      "android": "com.coincircle",
+      "ios": "id1470350344"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "mobile": {
+      "universal": "https://coincircle.com/app/walletconnect/wc"
+    },
+    "name": "CoinCircle",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#2499c4"
+  },
+  "coingrig": {
+    "app": {
+      "android": "com.coingrig",
+      "ios": "id1583464451"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:25",
+      "eip155:43114",
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "coingrig://wc",
+      "universal": "https://link.coingrig.com/wc"
+    },
+    "name": "Coingrig",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "coinomi": {
+    "app": {
+      "android": "com.coinomi.wallet",
+      "ios": "id1333588809"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "coinomi://wc",
+      "universal": "https://coinomi.page.link/wc"
+    },
+    "name": "Coinomi",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "compass": {
+    "app": {
+      "chrome": "anokgmphncpekkhclmingpimjmcooifb"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "name": "Compass Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#224874"
+  },
+  "dapper": {
+    "app": {
+      "android": "fake-to-get-dapper-to-appear",
+      "ios": "fake-to-get-dapper-to-appear"
+    },
+    "chains": [],
+    "name": "Dapper",
+    "walletConnect": [],
+    "primaryColor": "#762FBE"
+  },
+  "dawn": {
+    "app": {
+      "ios": "id1673143782"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:137",
+      "eip155:42161"
+    ],
+    "name": "Dawn Wallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "defiant": {
+    "app": {
+      "android": "ar.com.andinasmart.defiant",
+      "ios": "id1559622756"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:1284",
+      "eip155:1285",
+      "eip155:137",
+      "eip155:250",
+      "eip155:3",
+      "eip155:30",
+      "eip155:31",
+      "eip155:4002",
+      "eip155:42",
+      "eip155:42161",
+      "eip155:421611",
+      "eip155:42220",
+      "eip155:43113",
+      "eip155:43114",
+      "eip155:44787",
+      "eip155:56",
+      "eip155:69",
+      "eip155:80001",
+      "eip155:97"
+    ],
+    "mobile": {
+      "native": "defiantapp://wc",
+      "universal": "https://defiantapp.tech/wc"
+    },
+    "name": "Defiant",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00bd57"
+  },
+  "dohrnii": {
+    "app": {
+      "android": "io.dohrnii.wallet",
+      "ios": "id1624702756"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:56"
+    ],
+    "name": "Dohrnii Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "edge": {
+    "app": {
+      "android": "co.edgesecure.app",
+      "ios": "id1344400091"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "mobile": {
+      "native": "edge://wc",
+      "universal": "https://deep.edge.app/wc"
+    },
+    "name": "Edge Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#66EDA8"
+  },
+  "enkrypt": {
+    "app": {
+      "chrome": "kkpllkodjeloidieedojogacfhpaihoh",
+      "edge": "gfenajajnjjmmdojhdjmnngomkhlnfjl",
+      "firefox": "enkrypt"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:200",
+      "eip155:30",
+      "eip155:31",
+      "eip155:336",
+      "eip155:5",
+      "eip155:61",
+      "eip155:66",
+      "eip155:686",
+      "eip155:88",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+      "polkadot:b0a8d493285c2df73290dfb7e61f870f"
+    ],
+    "name": "Enkrypt",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "enno": {
+    "app": {
+      "android": "com.app.awqsome.ennowallet",
+      "ios": "id1577011660"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:43114",
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "ennowallet://wc"
+    },
+    "name": "Enno Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "fil": {
+    "app": {
+      "android": "https://filwallet.co/",
+      "ios": "id1572930901"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:56"
+    ],
+    "mobile": {
+      "universal": "https://h5.filwallet.co/wc"
+    },
+    "name": "FILWallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "finoaconnect": {
+    "app": {
+      "ios": "id1484058524"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "name": "FinoaConnect",
+    "walletConnect": {
+      "sdks": [
+        "auth_v1",
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "frame": {
+    "app": {
+      "chrome": "ldcoohedfbjoobcadoglnnmmfbdlmmhf"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:137",
+      "eip155:42161",
+      "eip155:5"
+    ],
+    "name": "Frame",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "gamestop": {
+    "app": {
+      "ios": "https://wallet.gamestop.com/wallets"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "name": "GameStop Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "glow": {
+    "app": {
+      "chrome": "ojbcfhjmpigfobfclfflafhblgemeidi",
+      "edge": "niihfokdlimbddhfmngnplgfcgpmlido",
+      "firefox": "glow-solana-wallet"
+    },
+    "chains": [],
+    "name": "Glow",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "goldbit": {
+    "app": {
+      "android": "com.goldbitpro.wallet",
+      "ios": "id1551914030"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "mobile": {
+      "native": "goldbit://wc"
+    },
+    "name": "GoldBit",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "haven": {
+    "app": {
+      "android": "io.wallet.haven",
+      "ios": "id1634596545"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:56"
+    ],
+    "name": "Haven Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#194AF9"
+  },
+  "ime": {
+    "app": {
+      "android": "com.iMe.android",
+      "ios": "id1450480822"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:250",
+      "eip155:3",
+      "eip155:4002",
+      "eip155:56",
+      "eip155:80001",
+      "eip155:97"
+    ],
+    "mobile": {
+      "native": "wc://wc"
+    },
+    "name": "iMe",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#0154D6"
+  },
+  "injected": {
+    "chains": [],
+    "name": "Injected Wallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "iskra": {
+    "app": {
+      "browser": "https://iskra.world/"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:8217",
+      "eip155:8453"
+    ],
+    "desktop": {
+      "universal": "https://iskra.world/"
+    },
+    "name": "Iskra Wallet",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00000"
+  },
+  "itoken": {
+    "app": {
+      "android": "com.huobionchainwallet.gp",
+      "ios": "id1433883012"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:250",
+      "eip155:43114",
+      "eip155:56",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "mobile": {
+      "native": "huobiwallet://wc"
+    },
+    "name": "iToken Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#2d67f8"
+  },
+  "klever": {
+    "app": {
+      "android": "cash.klever.blockchain.wallet",
+      "ios": "id1525584688"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:128",
+      "eip155:137",
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "kleverwallet://wc",
+      "universal": "https://klever.page.link/wc"
+    },
+    "name": "Klever Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#DC3F89"
+  },
+  "leather": {
+    "app": {
+      "chrome": "ldinpeekobnhjjdofggfgjlcehhmanlj"
+    },
+    "chains": [],
+    "name": "Leather",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "lilico": {
+    "app": {
+      "chrome": "hpclkefagolihohboafpheddmmgdffjm"
+    },
+    "chains": [],
+    "name": "Lilico",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "localtrade": {
+    "app": {
+      "android": "com.localtrade.wallet",
+      "ios": "id1602772298"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:56"
+    ],
+    "mobile": {
+      "universal": "https://ws.lab.localtrade.cc"
+    },
+    "name": "LocalTrade Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00957B"
+  },
+  "locker-token": {
+    "app": {
+      "android": "com.lockertoken",
+      "ios": "id1619140841"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:30",
+      "eip155:31",
+      "eip155:80001"
+    ],
+    "name": "Locker Token",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "magic-eden": {
+    "app": {
+      "chrome": "mkpegjkblkkefacfnmkajcjmabijhclg"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:8453",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "name": "Magic Eden",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "mpc": {
+    "app": {
+      "android": "xyz.mpcwallet.pro",
+      "ios": "id6443522988"
+    },
+    "chains": [
+      "cosmos:cosmoshub-4",
+      "eip155:1",
+      "eip155:128",
+      "eip155:137",
+      "eip155:210309",
+      "eip155:42161",
+      "eip155:43114",
+      "eip155:56",
+      "eip155:61"
+    ],
+    "name": "MPCWallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "mywallid": {
+    "app": {
+      "chrome": "eknlkogikcabnjbjnhmjllabckeapdii"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "name": "MyWalliD",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#009FB1"
+  },
+  "nefti": {
+    "app": {
+      "android": "com.NEFTiPEDiA.mp"
+    },
+    "chains": [
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "nefti://nefti.id/asset/wc",
+      "universal": "https://nefti.id/asset/"
+    },
+    "name": "NeftiWallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#37747E"
+  },
+  "nightly": {
+    "app": {
+      "chrome": "fiikommddbeccaoicoejoniammnalkfa",
+      "edge": "fiikommddbeccaoicoejoniammnalkfa",
+      "opera": "fiikommddbeccaoicoejoniammnalkfa"
+    },
+    "chains": [],
+    "name": "Nightly",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "numio": {
+    "app": {
+      "android": "com.numio.pay",
+      "ios": "id1538072952"
+    },
+    "chains": [
+      "eip155:1"
+    ],
+    "name": "Numio",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#222222"
+  },
+  "okse": {
+    "app": {
+      "android": "wallet.okse.io",
+      "ios": "id1555914591"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:106",
+      "eip155:128",
+      "eip155:1313161554",
+      "eip155:250",
+      "eip155:3",
+      "eip155:4",
+      "eip155:40",
+      "eip155:42",
+      "eip155:43114",
+      "eip155:5",
+      "eip155:56",
+      "eip155:88"
+    ],
+    "mobile": {
+      "native": "oksewallet://wc",
+      "universal": "https://okse.io/"
+    },
+    "name": "Okse Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#e51b23"
+  },
+  "opera": {
+    "chains": [],
+    "name": "Opera",
+    "walletConnect": [],
+    "primaryColor": "#F39020"
+  },
+  "opera-crypto-browser": {
+    "app": {
+      "ios": "id1604311726"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:3",
+      "eip155:4",
+      "eip155:42",
+      "eip155:56"
+    ],
+    "desktop": {
+      "install": {
+        "chrome": "https://www.opera.com/crypto/next",
+        "edge": "https://www.opera.com/crypto/next",
+        "firefox": "https://www.opera.com/crypto/next"
+      }
+    },
+    "mobile": {
+      "native": "cryptobrowser://wc"
+    },
+    "name": "Opera Crypto Browser",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "ownbit": {
+    "app": {
+      "android": "com.bitbill.www",
+      "ios": "id1321798216"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:43114",
+      "eip155:56",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182"
+    ],
+    "name": "Ownbit",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "oxalus": {
+    "app": {
+      "android": "io.oxalus.wallet",
+      "ios": "id1620111723"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:42",
+      "eip155:43113",
+      "eip155:43114",
+      "eip155:56",
+      "eip155:80001",
+      "eip155:97"
+    ],
+    "mobile": {
+      "native": "oxalus://wc",
+      "universal": "https://oxalus.page.link/wc"
+    },
+    "name": "Oxalus Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "paybolt": {
+    "app": {
+      "android": "com.fincrypt.paybolt",
+      "ios": "id1599880290"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:56"
+    ],
+    "mobile": {
+      "native": "paybolt://Wallet/wc"
+    },
+    "name": "PayBolt",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#000000"
+  },
+  "pera": {
+    "app": {
+      "android": "com.algorand.android",
+      "ios": "id1459898525"
+    },
+    "chains": [],
+    "name": "Pera Wallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "phantom": {
+    "app": {
+      "android": "app.phantom",
+      "chrome": "bfnaelmomeimhlpmgjnjophhpkkoljpa",
+      "firefox": "phantom-app",
+      "ios": "id1598432977"
+    },
+    "chains": [
+      "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+    ],
+    "name": "Phantom",
+    "walletConnect": [],
+    "primaryColor": "#4B49C6"
+  },
+  "rabby": {
+    "app": {
+      "chrome": "acmacodkjbdgmoleebolmdjonilkdbch"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:128",
+      "eip155:1284",
+      "eip155:1285",
+      "eip155:1313161554",
+      "eip155:137",
+      "eip155:250",
+      "eip155:30",
+      "eip155:40",
+      "eip155:42161",
+      "eip155:42220",
+      "eip155:56",
+      "eip155:66"
+    ],
+    "name": "Rabby",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "realt": {
+    "app": {
+      "android": "co.realt.bridge",
+      "ios": "id1545585469"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:100",
+      "eip155:3",
+      "eip155:4",
+      "eip155:5"
+    ],
+    "name": "RealT Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "rice": {
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:43114",
+      "eip155:56"
+    ],
+    "desktop": {
+      "universal": "https://ricewallet.io"
+    },
+    "mobile": {
+      "native": "ricewallet://wc",
+      "universal": "https://ricewallet.io"
+    },
+    "name": "RiceWallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#3361f4"
+  },
+  "safematrix": {
+    "app": {
+      "android": "https://download.safematrix.io/abm/safematrix.apk",
+      "ios": "id1613333481"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:4",
+      "eip155:56",
+      "eip155:97"
+    ],
+    "mobile": {
+      "universal": "https://safematrix.io/wc"
+    },
+    "name": "Safematrix",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#ff3366"
+  },
+  "safemoon": {
+    "app": {
+      "android": "net.safemoon.androidwallet",
+      "ios": "id1579735495"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:250",
+      "eip155:42161",
+      "eip155:43114",
+      "eip155:56",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "mobile": {
+      "native": "safemoon://",
+      "universal": "https://safemoon.com/wc"
+    },
+    "name": "SafeMoon",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00a79d"
+  },
+  "sender": {
+    "app": {
+      "android": "com.sender_wallet_mobile",
+      "chrome": "epapihdplajcdnnkdeiahlgigofloibg",
+      "ios": "id1637821762"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:137",
+      "eip155:42161",
+      "eip155:43114",
+      "eip155:56",
+      "near:mainnet"
+    ],
+    "name": "Sender",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "slavi": {
+    "app": {
+      "android": "com.defiwalletmobile",
+      "ios": "id1610125496"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:56",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    ],
+    "mobile": {
+      "native": "slaviwallet://wc",
+      "universal": "https://www.slaviwallet.io/wc"
+    },
+    "name": "Slavi Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#F2C75B"
+  },
+  "snowball": {
+    "app": {
+      "android": "money.snowball.defi",
+      "ios": "id1449662311"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:56"
+    ],
+    "mobile": {
+      "universal": "https://app.snowball.exchange/app"
+    },
+    "name": "Snowball",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#292E39"
+  },
+  "solflare": {
+    "app": {
+      "android": "com.solflare.mobile",
+      "chrome": "bhhhlbepdkbapadjdnnojkbgioiodbic",
+      "ios": "id1580902717"
+    },
+    "chains": [],
+    "name": "Solflare Wallet",
+    "walletConnect": [],
+    "primaryColor": "#FC7227"
+  },
+  "soulswap": {
+    "app": {
+      "ios": "id6469735252"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:137",
+      "eip155:250",
+      "eip155:4002",
+      "eip155:42161",
+      "eip155:43113",
+      "eip155:43114",
+      "eip155:56",
+      "eip155:8453",
+      "eip155:97",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+      "polkadot:b0a8d493285c2df73290dfb7e61f870f"
+    ],
+    "desktop": {
+      "install": {
+        "chrome": "https://apps.apple.com/us/app/soulwallet-defi-portal/id6469735252"
+      }
+    },
+    "mobile": {
+      "native": "soulwallet://wc"
+    },
+    "name": "SoulSwap",
+    "walletConnect": {
+      "sdks": [
+        "auth_v1",
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#6A00FF"
+  },
+  "superb": {
+    "app": {
+      "chrome": "ihhmoeonfhbinhpknjpldgbdaiadkgdp"
+    },
+    "chains": [],
+    "name": "Superb",
+    "walletConnect": [],
+    "primaryColor": "#FF008A"
+  },
+  "swop": {
+    "app": {
+      "android": "com.travisheron.swopapp",
+      "ios": "id1593201322"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137"
+    ],
+    "mobile": {
+      "native": "swopapp://"
+    },
+    "name": "SWOP",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#000000"
+  },
+  "taho": {
+    "app": {
+      "chrome": "eajafomhmkipbjmfmhebemolkcicgfmd"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:5"
+    ],
+    "name": "Taho",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "tk-finance": {
+    "app": {
+      "android": "com.trustkeysnetwork",
+      "ios": "id1601968967"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:3",
+      "eip155:56",
+      "eip155:97"
+    ],
+    "mobile": {
+      "native": "tk://wc",
+      "universal": "https://trustkeys.network"
+    },
+    "name": "TK Finance",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "tofee-wallet-official": {
+    "app": {
+      "ios": "id6504269605"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:56",
+      "eip155:8194"
+    ],
+    "mobile": {
+      "native": "tofee://wallet",
+      "universal": "https://tofee.app/"
+    },
+    "name": "Tofee Wallet Official",
+    "walletConnect": [
+      "auth_v1",
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00000"
+  },
+  "treasure": {
+    "app": {
+      "android": "com.crypto.treasure"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:128",
+      "eip155:137",
+      "eip155:200",
+      "eip155:25",
+      "eip155:250",
+      "eip155:4",
+      "eip155:42220",
+      "eip155:43114",
+      "eip155:56"
+    ],
+    "name": "TREASURE",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "unisat": {
+    "app": {
+      "chrome": "ppbibelpcjmhbdihakflkdcoccbgbkpo"
+    },
+    "chains": [],
+    "name": "UniSat Wallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  },
+  "uvtoken": {
+    "app": {
+      "android": "https://wallet.uvtoken.com/static/download/android/uvtoken.apk",
+      "ios": "id1552556395"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:128",
+      "eip155:56",
+      "eip155:65",
+      "eip155:66",
+      "eip155:97",
+      "polkadot:91b171bb158e2d3848fa23a9f1c25182"
+    ],
+    "name": "UvToken",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "volt:-defi": {
+    "app": {
+      "android": "finance.voltage.app",
+      "ios": "id6444159237"
+    },
+    "chains": [
+      "eip155:122"
+    ],
+    "mobile": {
+      "native": "volt://wc",
+      "universal": "https://get.voltage.finance/wc"
+    },
+    "name": "Volt: DeFi",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "wallet-3": {
+    "app": {
+      "android": "jp.co.chainbow.wallet3.mobile",
+      "ios": "id1597395741"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:100",
+      "eip155:128",
+      "eip155:1284",
+      "eip155:1285",
+      "eip155:1313161554",
+      "eip155:137",
+      "eip155:1666600000",
+      "eip155:2020",
+      "eip155:25",
+      "eip155:250",
+      "eip155:28",
+      "eip155:42161",
+      "eip155:42220",
+      "eip155:43114",
+      "eip155:56",
+      "eip155:66",
+      "eip155:8217"
+    ],
+    "desktop": {
+      "native": "wallet3://wc"
+    },
+    "mobile": {
+      "native": "wallet3://wc"
+    },
+    "name": "Wallet 3",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "wallypto": {
+    "app": {
+      "android": "xyz.wallypto",
+      "ios": "id1639302472"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:1001",
+      "eip155:11155111",
+      "eip155:8217",
+      "hedera:mainnet",
+      "hedera:testnet"
+    ],
+    "mobile": {
+      "native": "wallypto://"
+    },
+    "name": "Wallypto",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00000"
+  },
+  "web3auth": {
+    "app": {
+      "browser": "https://wallet.web3auth.io"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:10",
+      "eip155:11",
+      "eip155:12",
+      "eip155:13",
+      "eip155:137",
+      "eip155:14",
+      "eip155:15",
+      "eip155:16",
+      "eip155:17",
+      "eip155:18",
+      "eip155:19",
+      "eip155:2",
+      "eip155:20",
+      "eip155:22",
+      "eip155:23",
+      "eip155:25",
+      "eip155:27",
+      "eip155:28",
+      "eip155:3",
+      "eip155:30",
+      "eip155:31",
+      "eip155:32",
+      "eip155:33",
+      "eip155:35",
+      "eip155:38",
+      "eip155:4",
+      "eip155:40",
+      "eip155:41",
+      "eip155:42",
+      "eip155:43",
+      "eip155:44",
+      "eip155:5",
+      "eip155:50",
+      "eip155:51",
+      "eip155:52",
+      "eip155:53",
+      "eip155:55",
+      "eip155:56",
+      "eip155:58",
+      "eip155:59",
+      "eip155:6",
+      "eip155:60",
+      "eip155:61",
+      "eip155:62",
+      "eip155:63",
+      "eip155:64",
+      "eip155:65",
+      "eip155:67",
+      "eip155:68",
+      "eip155:69",
+      "eip155:7",
+      "eip155:76",
+      "eip155:77",
+      "eip155:78",
+      "eip155:8",
+      "eip155:82",
+      "eip155:821",
+      "eip155:83",
+      "eip155:85",
+      "eip155:9",
+      "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+      "xrpl:0",
+      "xrpl:1",
+      "xrpl:2"
+    ],
+    "desktop": {
+      "universal": "https://wallet.web3auth.io"
+    },
+    "name": "Web3Auth",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00000"
+  },
+  "xcapit": {
+    "app": {
+      "android": "com.xcapit.app",
+      "ios": "id1545648148"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:30",
+      "eip155:56"
+    ],
+    "mobile": {
+      "universal": "https://app.xcapit.com/links/wc"
+    },
+    "name": "Xcapit",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#00000"
+  },
+  "xfun": {
+    "app": {
+      "android": "com.xfun.wallet",
+      "ios": "id1612225910"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+      "eip155:3",
+      "eip155:80001"
+    ],
+    "mobile": {
+      "native": "xfunwallet://wc",
+      "universal": "https://xfun.io/wc"
+    },
+    "name": "XFUN Wallet",
+    "walletConnect": {
+      "sdks": [
+        "sign_v1"
+      ]
+    },
+    "primaryColor": "#FFFFFF"
+  },
+  "xportal": {
+    "app": {
+      "android": "com.elrond.maiar.wallet",
+      "ios": "id1519405832"
+    },
+    "chains": [
+      "eip155:1",
+      "eip155:11155111",
+      "mvx:1",
+      "mvx:D",
+      "mvx:T"
+    ],
+    "mobile": {
+      "native": "xportal://",
+      "universal": "https://xport.al"
+    },
+    "name": "xPortal",
+    "walletConnect": [
+      "sign_v1",
+      "sign_v2"
+    ],
+    "primaryColor": "#00000"
+  },
+  "xverse": {
+    "app": {
+      "android": "com.secretkeylabs.xverse",
+      "chrome": "idnnbdplmphpflfnlkomgpfbpcgelopg",
+      "ios": "id1552272513"
+    },
+    "chains": [],
+    "mobile": {
+      "inAppBrowser": "xverse://browser?url={{encodedDappURI}}"
+    },
+    "name": "Xverse Wallet",
+    "walletConnect": [],
+    "primaryColor": "#00000"
+  }
+}

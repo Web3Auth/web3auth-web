@@ -154,17 +154,17 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       }, [] as ExternalButton[]);
 
       const allButtons = [...defaultButtons, ...otherButtons];
-      const sortedButtons = [
-        ...allButtons.filter((button) => button.hasInjectedWallet),
-        ...customAdapterButtons,
-        ...allButtons.filter((button) => !button.hasInjectedWallet),
-      ].filter((button) => defaultButtonKeys.has(button.name));
 
       // Filter and set external buttons based on search input
       if (walletSearch) {
         const filteredList = allButtons.filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
         setExternalButtons(filteredList);
       } else {
+        const sortedButtons = [
+          ...allButtons.filter((button) => button.hasInjectedWallet),
+          ...customAdapterButtons,
+          ...allButtons.filter((button) => !button.hasInjectedWallet),
+        ].filter((button) => defaultButtonKeys.has(button.name));
         setExternalButtons(sortedButtons);
       }
 
