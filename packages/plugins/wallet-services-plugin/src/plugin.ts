@@ -166,6 +166,10 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     await this.wsEmbedInstance.showWalletUi();
   }
 
+  async cleanup(): Promise<void> {
+    return this.wsEmbedInstance.cleanUp();
+  }
+
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported adapter throw error
     if (this.wsEmbedInstance.isLoggedIn) {
