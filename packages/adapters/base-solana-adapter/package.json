@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-solana-adapter",
-  "version": "9.0.0-alpha.2",
+  "version": "9.0.0-alpha.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^6.1.2",
-    "@web3auth/base": "^9.0.0-alpha.2",
+    "@web3auth/base": "^9.0.0-alpha.4",
     "bs58": "^5.0.0"
   },
   "files": [
