@@ -2,6 +2,7 @@ import { AuthAdapter, AuthOptions, getAuthDefaultOptions, LOGIN_PROVIDER, LoginC
 import {
   ADAPTER_CATEGORY,
   ADAPTER_EVENTS,
+  ADAPTER_NAMES,
   ADAPTER_STATUS,
   BaseAdapterConfig,
   cloneDeep,
@@ -126,7 +127,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
       // start with the default config of adapter.
       let adapterConfig = this.modalConfig.adapters?.[adapterName] || {
-        label: adapterName.split("-").map(capitalizeFirstLetter).join(" "),
+        label: ADAPTER_NAMES[adapterName] || adapterName.split("-").map(capitalizeFirstLetter).join(" "),
         showOnModal: true,
         showOnMobile: true,
         showOnDesktop: true,
