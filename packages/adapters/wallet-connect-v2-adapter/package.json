@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "9.0.0-alpha.1",
+  "version": "9.0.0-alpha.2",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "@web3auth/auth": "^9.3.3",
-    "@web3auth/base": "^9.0.0-alpha.1",
-    "@web3auth/base-evm-adapter": "^9.0.0-alpha.1",
-    "@web3auth/base-provider": "^9.0.0-alpha.1",
-    "@web3auth/ethereum-provider": "^9.0.0-alpha.1",
+    "@web3auth/base": "^9.0.0-alpha.2",
+    "@web3auth/base-evm-adapter": "^9.0.0-alpha.2",
+    "@web3auth/base-provider": "^9.0.0-alpha.2",
+    "@web3auth/ethereum-provider": "^9.0.0-alpha.2",
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {
