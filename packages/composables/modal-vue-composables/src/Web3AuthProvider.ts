@@ -15,7 +15,7 @@ import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 
 export const Web3AuthContextKey = Symbol("Web3AuthContextKey") as InjectionKey<IWeb3AuthContext>;
 
-export default defineComponent({
+export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
   props: {
     config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
@@ -99,9 +99,9 @@ export default defineComponent({
     };
 
     watch(
-      [web3Auth, () => props.config],
+      [() => props.config],
       () => {
-        if (web3Auth.value) return;
+        // if (web3Auth.value) return;
 
         const resetHookState = () => {
           provider.value = null;

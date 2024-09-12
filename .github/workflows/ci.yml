@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node: ["18.x"]
+        node: ["21.x"]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -27,41 +27,42 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Build demo
-        if: github.ref == 'refs/heads/master'
-        run: |
-          cd demo/vue-app
-          npm run install:local
-          npm install
-          npm run build
-
       # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/v9'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION_US }}
 
-      # Copy the files from build folder to the S3 bucket
-      # Upload to S3
-      - name: sync s3
-        if: github.ref == 'refs/heads/master'
+      - name: Build new vue demo app
+        if: github.ref == 'refs/heads/v9'
+        run: |
+          cd demo/vue-app-new
+          npm install
+          npm run build
+
+        # Copy the files from build folder to the S3 bucket
+        # Upload to S3
+      - name: sync vue app new s3
+        if: github.ref == 'refs/heads/v9'
         uses: jakejarvis/s3-sync-action@master
         env:
-          SOURCE_DIR: "./demo/vue-app/dist"
+          SOURCE_DIR: "./demo/vue-app-new/dist"
           AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: "demo-app.web3auth.io"
+          AWS_S3_BUCKET: "demo-sdk.web3auth.io"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      # Invalidate Cloudfront (this action)
-      - name: invalidate
-        if: github.ref == 'refs/heads/master'
+  
+        # Invalidate Cloudfront (this action)
+      - name: invalidate vue app new s3
+        if: github.ref == 'refs/heads/v9'
         uses: chaitanyapotti/cloudfront-update-distribution@v2
         with:
-          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_NEW_DEMO_APP_DISTRIBUTION_ID }}
           cloudfront-invalidation-path: "/*"
           cloudfront-invalidation-required: true
           cloudfront-wait-for-service-update: false
+     
+ 

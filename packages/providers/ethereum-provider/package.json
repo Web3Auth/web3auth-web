@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "9.0.0-alpha.0",
+  "version": "9.0.0-alpha.5",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -21,11 +21,11 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^6.1.0",
+    "@toruslabs/base-controllers": "^6.1.2",
     "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.3.2",
-    "@web3auth/base": "^9.0.0-alpha.0",
-    "@web3auth/base-provider": "^9.0.0-alpha.0",
+    "@web3auth/auth": "^9.3.3",
+    "@web3auth/base": "^9.0.0-alpha.4",
+    "@web3auth/base-provider": "^9.0.0-alpha.4",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.5",
     "@types/json-rpc-random-id": "^1.0.3",
-    "@walletconnect/types": "^2.16.0"
+    "@walletconnect/types": "^2.16.1"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
