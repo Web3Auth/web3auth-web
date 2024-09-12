@@ -1,3 +1,4 @@
+import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
@@ -9,6 +10,7 @@ import {
   IPlugin,
   IProvider,
   IWeb3AuthCore,
+  log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -19,7 +21,6 @@ import {
   WalletServicesPluginError,
 } from "@web3auth/base";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
-import log from "loglevel";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
@@ -151,19 +152,23 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     }
   }
 
-  async showWalletConnectScanner(): Promise<void> {
+  async showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletConnectScanner();
+    return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
-  async showCheckout(): Promise<void> {
+  async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showCheckout();
+    return this.wsEmbedInstance.showCheckout(showCheckoutParams);
   }
 
-  async showWalletUi(): Promise<void> {
+  async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletUi();
+    return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
+  }
+
+  async cleanup(): Promise<void> {
+    return this.wsEmbedInstance.cleanUp();
   }
 
   async disconnect(): Promise<void> {

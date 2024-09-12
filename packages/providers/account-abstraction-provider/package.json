@@ -19,16 +19,14 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@ethereumjs/common": "^4.4.0",
-    "@ethereumjs/tx": "^5.4.0",
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^6.0.3",
-    "@web3auth/auth": "^9.3.1",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
-    "@web3auth/ethereum-provider": "^8.12.4",
+    "@toruslabs/base-controllers": "^6.1.2",
+    "@web3auth/auth": "^9.3.3",
+    "@web3auth/base": "^9.0.0-alpha.4",
+    "@web3auth/base-provider": "^9.0.0-alpha.4",
+    "@web3auth/ethereum-provider": "^9.0.0-alpha.5",
     "permissionless": "^0.2.0",
-    "viem": "^2.21.4"
+    "viem": "^2.21.6"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

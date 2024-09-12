@@ -51,4 +51,5 @@ export interface IPlugin extends SafeEventEmitter {
   initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void>;
   connect(params: PluginConnectParams): Promise<void>;
   disconnect(): Promise<void>;
+  cleanup(): Promise<void>;
 }

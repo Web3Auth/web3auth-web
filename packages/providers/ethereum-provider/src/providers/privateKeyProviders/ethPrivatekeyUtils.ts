@@ -100,6 +100,7 @@ export function getProviderHandlers({
       await validateTypedSignMessageDataV4(msgParams, chainId);
       const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const ethersPrivateKey = new SigningKey(privKeyBuffer);
+      if (data.types.EIP712Domain) delete data.types.EIP712Domain;
       const signature = ethersPrivateKey.sign(TypedDataEncoder.hash(data.domain, data.types, data.message)).serialized;
       return signature;
     },

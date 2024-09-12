@@ -7,6 +7,7 @@ import {
   IPlugin,
   IProvider,
   IWeb3AuthCore,
+  log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -18,7 +19,6 @@ import {
   WALLET_ADAPTERS,
   WalletServicesPluginError,
 } from "@web3auth/base";
-import log from "loglevel";
 
 export type ProviderInfo = {
   provider?: SafeEventEmitterProvider;
@@ -169,6 +169,10 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     } else {
       throw WalletServicesPluginError.invalidSession("Torus Wallet plugin is not connected");
     }
+  }
+
+  async cleanup(): Promise<void> {
+    return this.torusWalletInstance.cleanUp();
   }
 
   private subscribeToProviderEvents(provider: IProvider) {

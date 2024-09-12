@@ -12,7 +12,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.95.3",
     "@toruslabs/constants": "^14.0.0",
-    "@toruslabs/openlogin-utils": "^8.2.1",
+    "@web3auth/auth": "^9.3.3",
     "@toruslabs/vue-components": "^7.8.3",
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/base": "file:../../packages/base",

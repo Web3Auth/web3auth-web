@@ -1,4 +1,4 @@
-import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 
 import { FormConfigSettings } from "./interfaces";
@@ -110,7 +110,7 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
       showOnMobile: false,
     },
   }),
-  {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>,
+  {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
 export type FormData = {

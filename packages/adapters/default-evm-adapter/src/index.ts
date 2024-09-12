@@ -3,6 +3,7 @@ import {
   CustomChainConfig,
   getChainConfig,
   IAdapter,
+  IProvider,
   IWeb3AuthCoreOptions,
   normalizeWalletName,
   WalletInitializationError,
@@ -27,7 +28,7 @@ export const getInjectedAdapters = async (params: { options: IWeb3AuthCoreOption
   const injectedProviders = mipd.getProviders().map((providerDetail) => {
     return new InjectedEvmAdapter({
       name: normalizeWalletName(providerDetail.info.name),
-      provider: providerDetail.provider,
+      provider: providerDetail.provider as IProvider,
       chainConfig: finalChainConfig,
       clientId,
       sessionTime,
