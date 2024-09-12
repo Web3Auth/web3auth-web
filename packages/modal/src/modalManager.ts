@@ -370,6 +370,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
+    // we do it like this because we don't want one slow adapter to delay the load of the entire external wallet section.
     Object.keys(this.walletAdapters).forEach(async (adapterName) => {
       const adapter = this.walletAdapters[adapterName];
       if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
