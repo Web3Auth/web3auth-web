@@ -209,7 +209,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               {/* Search */}
               {isWalletDiscoveryReady && (
-                <div className="pt-4">
+                <div className="py-4">
                   <input
                     className="w-full w3a-text-field"
                     name="passwordless-input"
@@ -234,7 +234,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                 </div>
               ) : (
                 <div className="w3a-adapter-list-container">
-                  <ul className="w3a-adapter-list w3ajs-wallet-adapters mt-4">
+                  <ul className="w3a-adapter-list w3ajs-wallet-adapters">
                     {externalButtons.map((button) => {
                       return (
                         <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name}>

@@ -36,9 +36,9 @@ function WalletConnect(props: WalletConnectProps) {
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
       <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">
         <div className="w3a-wallet-connect__container-desktop">
-          <div className="text-app-gray-500 dark:text-app-gray-400">{t("modal.external.walletconnect-subtitle")}</div>
+          {/* <div className="text-app-gray-500 dark:text-app-gray-400 text-xs">Scan the QR code with a wallet that supports WalletConnect.</div> */}
           <div
-            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md my-2"
+            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md mb-2"
             tabIndex={0}
             role="button"
             onClick={handleCopy}
@@ -57,9 +57,13 @@ function WalletConnect(props: WalletConnectProps) {
               removeQrCodeBehindLogo
               logoImage={logoImage || WALLET_CONNECT_LOGO}
               value={walletConnectUri}
+              logoHeight={32}
+              logoWidth={32}
+              logoPadding={10}
+              // eyeColor="#f42bd2"
             />
           </div>
-          <div>{t("modal.external.walletconnect-copy")}</div>
+          <div className="text-xs">{t("modal.external.walletconnect-copy")}</div>
         </div>
       </div>
     </div>

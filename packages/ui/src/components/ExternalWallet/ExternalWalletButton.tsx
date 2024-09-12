@@ -21,12 +21,12 @@ export default function ExternalWalletButton(props: ExternalWalletButtonProps) {
       variant="tertiary"
       type="button"
       onClick={() => handleWalletClick(button)}
-      className="w-full rounded-xl size-xl flex !justify-between items-center bg-app-gray-100 hover:bg-app-gray-200 dark:bg-app-gray-700 dark:hover:bg-app-gray-800 !px-2"
+      className="w-full rounded-xl size-xl flex !justify-between items-center wallet-btn"
       title={adapterConfig?.label || button.name}
     >
       <div className="flex items-center">
-        <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} fallbackImageId="wallet" height="30" width="30" isButton />
-        <p className="ml-2 text-left">{adapterConfig?.label || button.displayName}</p>
+        <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} fallbackImageId="wallet" height="24" width="24" isButton />
+        <p className="ml-2 text-left text-sm">{adapterConfig?.label || button.displayName}</p>
       </div>
       {button.hasInjectedWallet && (
         <span className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium bg-app-primary-100 text-app-primary-800">
