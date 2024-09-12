@@ -37,9 +37,10 @@ export interface WalletRegistryItem {
     universal?: string;
     inAppBrowser?: string;
   };
+  primaryColor?: string;
 }
 
-export type WalletRegistry = Record<string, WalletRegistryItem>;
+export type WalletRegistry = { others: Record<string, WalletRegistryItem>; default: Record<string, WalletRegistryItem> };
 
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
   let storageExists = false;

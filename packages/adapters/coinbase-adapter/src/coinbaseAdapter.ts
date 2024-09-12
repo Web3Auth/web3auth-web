@@ -72,7 +72,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
       ...this.coinbaseOptions,
       appChainIds: [Number.parseInt(this.chainConfig.chainId, 16)],
     });
-    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "all" });
+    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {

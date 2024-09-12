@@ -267,13 +267,13 @@
 
 /* Adapter List */
 #w3a-modal div.w3a-adapter-list-container {
-  height: calc(100dvh - 450px);
+  height: 380px;
   scrollbar-width: none;
   overflow-y: auto;
 }
 
 #w3a-modal ul.w3a-adapter-list {
-  @apply grid grid-cols-6 overflow-y-auto gap-x-2 gap-y-2 h-[294px];
+  @apply grid grid-cols-6 overflow-y-auto gap-x-2 gap-y-2;
   padding: 1px;
   transition: height 0.35s;
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
@@ -612,7 +612,7 @@
 }
 
 #w3a-modal .w3a-modal__loader-social-logo {
-  @apply bg-app-gray-100 dark:bg-app-gray-50 w-14 h-14 flex rounded-full items-center justify-center p-1;
+  @apply w-14 h-14 flex rounded-full items-center justify-center p-1;
 }
 
 #w3a-modal .w3a-modal__loader-social-logo img {
@@ -670,6 +670,10 @@
 .w3a-modal__connector-beat div:nth-child(5) {
   left: 56px;
   animation: beat5 2.4s infinite;
+}
+
+.wallet-btn {
+  @apply !bg-app-gray-100 hover:!bg-app-gray-200 dark:!bg-app-gray-700 dark:hover:bg-app-gray-800;
 }
 
 @keyframes beat1 {

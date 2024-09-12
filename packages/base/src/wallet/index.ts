@@ -30,5 +30,5 @@ export const ADAPTER_NAMES = {
   [MULTI_CHAIN_ADAPTERS.SFA]: "SFA",
   [SOLANA_ADAPTERS.TORUS_SOLANA]: "Torus",
   [EVM_ADAPTERS.TORUS_EVM]: "Torus",
-  [EVM_ADAPTERS.COINBASE]: "Coinbase",
+  [EVM_ADAPTERS.COINBASE]: "Coinbase Smart Wallet",
 };
