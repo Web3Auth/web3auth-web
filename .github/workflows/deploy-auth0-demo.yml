@@ -9,7 +9,7 @@ jobs:
   auth0-react-app:
     strategy:
       matrix:
-        node: ["18.x"]
+        node: ["20.x"]
         os: [ubuntu-latest]
         demo: [auth0-react-app]
 
@@ -28,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node }}
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
-          
+
       - name: Build ${{ matrix.demo }} demo
         if: ((github.event_name == 'release') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-demos]')))
         run: |

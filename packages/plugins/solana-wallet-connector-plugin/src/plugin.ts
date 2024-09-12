@@ -171,6 +171,10 @@ export class SolanaWalletConnectorPlugin extends SafeEventEmitter implements IPl
     }
   }
 
+  async cleanup(): Promise<void> {
+    return this.torusWalletInstance.cleanUp();
+  }
+
   private subscribeToProviderEvents(provider: IProvider) {
     provider.on("accountsChanged", (accounts: string[] = []) => {
       this.setSelectedAddress(accounts[0]);
