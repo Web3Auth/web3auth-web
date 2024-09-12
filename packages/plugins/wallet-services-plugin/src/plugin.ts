@@ -1,3 +1,4 @@
+import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
@@ -151,19 +152,19 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     }
   }
 
-  async showWalletConnectScanner(): Promise<void> {
+  async showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletConnectScanner();
+    return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
-  async showCheckout(): Promise<void> {
+  async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showCheckout();
+    return this.wsEmbedInstance.showCheckout(showCheckoutParams);
   }
 
-  async showWalletUi(): Promise<void> {
+  async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletUi();
+    return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
   }
 
   async cleanup(): Promise<void> {
