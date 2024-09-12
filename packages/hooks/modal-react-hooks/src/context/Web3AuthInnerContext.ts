@@ -122,6 +122,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setIsMFAEnabled(false);
       setIsConnected(false);
       setStatus(null);
+      // TODO:
+      // setIsInitialized(false)
     };
 
     resetHookState();
