@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IProvider, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../services/ethHandlers";
@@ -15,7 +14,7 @@ const { log } = console;
 
 const formData = formDataStore;
 
-const { userInfo, isConnected, provider, switchChain, addAndSwitchChain } = useWeb3Auth();
+const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
 
 const isDisplay = (name: string): boolean => {
   switch (name) {
@@ -37,23 +36,17 @@ const isDisplay = (name: string): boolean => {
   }
 };
 
-const walletPlugins = computed(() => {
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [];
-  const { logoDark, logoLight } = formData.walletPlugin;
-  const walletServicesPlugin = new WalletServicesPlugin({
-    walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
-  });
-  return [walletServicesPlugin];
-});
-
 const showWalletUI = async () => {
-  await walletPlugins.value?.[0].showWalletUi();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showWalletUi();
 };
 const showCheckout = async () => {
-  await walletPlugins.value?.[0].showCheckout();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showCheckout();
 };
 const showWalletConnectScanner = async () => {
-  await walletPlugins.value?.[0].showWalletConnectScanner();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showWalletConnectScanner();
 };
 
 const clearConsole = () => {
