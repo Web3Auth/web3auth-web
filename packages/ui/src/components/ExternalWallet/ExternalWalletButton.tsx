@@ -23,7 +23,15 @@ export default function ExternalWalletButton(props: ExternalWalletButtonProps) {
       title={button.name}
     >
       <div className="flex items-center">
-        <Image imageId={`login-${button.name}`} hoverImageId={`login-${button.name}`} fallbackImageId="wallet" height="24" width="24" isButton />
+        <Image
+          imageId={`login-${button.name}`}
+          hoverImageId={`login-${button.name}`}
+          fallbackImageId="wallet"
+          height="24"
+          width="24"
+          isButton
+          extension={button.imgExtension}
+        />
         <p className="ml-2 text-left text-sm">{button.displayName}</p>
       </div>
       {button.hasInjectedWallet && (
