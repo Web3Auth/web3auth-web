@@ -21,16 +21,16 @@ const closeIcon = <Icon iconName="x-light" darkIconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
-  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
+  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} height="30" width="30" />;
   const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-    }
+    // if (modalStatus === MODAL_STATUS.CONNECTED) {
+    //   setTimeout(() => {
+    //     onClose();
+    //   }, 3000);
+    // }
   }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
