@@ -15,7 +15,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={imageId}
-        className="image-icon"
+        className="image-icon object-contain rounded"
         onError={({ currentTarget }) => {
           if (fallbackImageId) {
             // eslint-disable-next-line no-param-reassign
@@ -26,7 +26,13 @@ export default function Image(props: ImageProps) {
         }}
       />
       {isButton ? (
-        <img src={`https://images.web3auth.io/${hoverImageId}.svg`} height={height} width={width} alt={hoverImageId} className="hover-icon" />
+        <img
+          src={`https://images.web3auth.io/${hoverImageId}.svg`}
+          height={height}
+          width={width}
+          alt={hoverImageId}
+          className="hover-icon object-contain rounded"
+        />
       ) : null}
     </>
   );

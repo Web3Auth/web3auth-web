@@ -41,7 +41,7 @@ a.t-btn:not(.t-btn-text) {
 }
 #w3a-modal .size-xl {
   height: 52px;
-  @apply px-6 py-3.5 text-base;
+  @apply px-4 py-3.5 text-base;
 }
 /* #w3a-modal .icon {
   @apply rounded-full;
@@ -160,13 +160,13 @@ a.t-btn:not(.t-btn-text) {
 #w3a-modal .btn-link {
   @apply no-underline;
 }
-#w3a-modal button.t-btn:hover>.hover-icon {
+#w3a-modal button.t-btn:hover > .hover-icon {
   display: block;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
 }
 
-#w3a-modal button.t-btn:hover>.image-icon {
+#w3a-modal button.t-btn:hover > .image-icon {
   display: none;
   transition: display 150ms;
   transition-timing-function: cubic-bezier(0, 0.54, 0.63, 0.99);
