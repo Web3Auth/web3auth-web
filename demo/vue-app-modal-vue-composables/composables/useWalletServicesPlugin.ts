@@ -9,6 +9,13 @@ export function useWalletServicesPlugin() {
   const isPluginConnected = ref<boolean>(false);
 
   watch(isInitialized, (newIsInitialized) => {
+    if (newIsInitialized) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      walletServicesPlugin.value = plugin;
+    }
+  });
+
+  watch(walletServicesPlugin, (newWalletServicesPlugin, prevWalletServicesPlugin) => {
     const connectedListener = () => {
       isPluginConnected.value = true;
     };
@@ -17,17 +24,16 @@ export function useWalletServicesPlugin() {
       isPluginConnected.value = false;
     };
 
-    if (newIsInitialized) {
-      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-      walletServicesPlugin.value = plugin;
+    // unregister previous listeners
+    if (prevWalletServicesPlugin && newWalletServicesPlugin !== prevWalletServicesPlugin) {
+      prevWalletServicesPlugin.off(PLUGIN_EVENTS.CONNECTED, connectedListener);
+      prevWalletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
     }
 
-    if (walletServicesPlugin.value) {
-      walletServicesPlugin.value.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
-      walletServicesPlugin.value.on(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
+    if (newWalletServicesPlugin && newWalletServicesPlugin !== prevWalletServicesPlugin) {
+      newWalletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
+      newWalletServicesPlugin.on(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
     }
-
-    // TODO: handle off case disconnect listeners
   });
 
   const showWalletConnectScanner = async () => {
