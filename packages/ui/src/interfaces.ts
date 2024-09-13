@@ -119,4 +119,5 @@ export type ExternalButton = {
   hasWalletConnect: boolean;
   hasInstallLinks: boolean;
   walletRegistryItem?: WalletRegistryItem;
+  imgExtension?: string;
 };

@@ -117,7 +117,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             href = universalLink || deepLink;
           }
 
-          const button = {
+          const button: ExternalButton = {
             name: wallet,
             displayName: walletRegistryItem.name,
             href,
@@ -125,12 +125,14 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
             hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
             walletRegistryItem,
+            imgExtension: walletRegistryItem.imgExtension || "svg",
           };
 
           if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
 
           const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-          if (!chainNamespaces.has(chainNamespace)) return acc;
+          const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+          if (!chainNamespaces.has(chainNamespace) && !injectedChainNamespaces.has(chainNamespace)) return acc;
 
           acc.push(button);
           return acc;
