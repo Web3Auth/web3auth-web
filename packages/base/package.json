@@ -26,7 +26,8 @@
     "@web3auth/auth": "^9.3.3",
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.2",
-    "ts-custom-error": "^3.3.1"
+    "ts-custom-error": "^3.3.1",
+    "vue": "^3.5.4"
   },
   "files": [
     "dist"

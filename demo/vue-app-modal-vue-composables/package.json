@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@toruslabs/base-controllers": "^6.1.2",
     "@web3auth/base": "file:../../packages/base",
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",

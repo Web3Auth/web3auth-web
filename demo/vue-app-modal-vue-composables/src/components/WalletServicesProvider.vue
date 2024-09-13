@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from '@web3auth/base';
+import { EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from '@web3auth/base';
 import { WalletServicesPlugin } from '@web3auth/wallet-services-plugin';
-import { ref, watch } from 'vue';
+import { inject, InjectionKey, provide, Ref, ref, watch } from 'vue';
+import { IWalletServicesContext } from '../interfaces';
+import { IWeb3AuthContext } from '@web3auth/modal-vue-composables';
+// TODO: don't import from modal/no-modal since we dont know which one the plugin will be used with
 
-const props = defineProps<{ web3AuthContext: IBaseWeb3AuthHookContext}>()
-const { getPlugin, isInitialized } = props.web3AuthContext;
+const props = defineProps<{ web3AuthContextKey: InjectionKey<IWeb3AuthContext> }>()
+const web3AuthContext = inject(props.web3AuthContextKey)
+// TODO: what error should be here?
+if (!web3AuthContext) throw WalletServicesPluginError.fromCode(1000, "`WalletServicesProvider` must be wrapped by `Web3AuthProvider`");
+
+const { getPlugin, isInitialized } = web3AuthContext
 
 const walletServicesPlugin = ref<WalletServicesPlugin | null>(null);
 const isPluginConnected = ref<boolean>(false);
@@ -57,7 +64,13 @@ const showCheckout = async () => {
   return walletServicesPlugin.value.showCheckout();
 };
 
-
+provide<IWalletServicesContext>('wallet_services', {
+    plugin: walletServicesPlugin as Ref<WalletServicesPlugin| null>,
+    isPluginConnected,
+    showWalletConnectScanner,
+    showCheckout,
+    showWalletUI,
+})
 </script>
 
 <template>

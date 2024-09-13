@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { Web3AuthProvider, Web3AuthContextKey } from "@web3auth/modal-vue-composables";
+import { Web3AuthContextKey, Web3AuthProvider } from "@web3auth/modal-vue-composables";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { CHAIN_NAMESPACES, IBaseWeb3AuthHookContext, WalletInitializationError, WEB3AUTH_NETWORK } from "@web3auth/base";
+import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
 import Home from "./components/Home.vue";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import WalletServicesProvider from "./components/WalletServicesProvider.vue";
-import { inject } from "vue";
 
 const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
-
-const web3AuthContext = inject<IBaseWeb3AuthHookContext>(Web3AuthContextKey)
-  if (!web3AuthContext) {
-    // TODO: improve err msg
-    throw WalletInitializationError.fromCode(1000, "usage of useWeb3Auth not wrapped in `Web3AuthContextProvider`.");
-  }
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -46,7 +39,7 @@ const walletServicesPlugin = new WalletServicesPlugin()
       plugins: [walletServicesPlugin]
     }"
   >
-    <WalletServicesProvider :web3AuthContext="web3AuthContext">
+    <WalletServicesProvider :web3AuthContextKey="Web3AuthContextKey">
       <Home />
     </WalletServicesProvider>
   </Web3AuthProvider>
