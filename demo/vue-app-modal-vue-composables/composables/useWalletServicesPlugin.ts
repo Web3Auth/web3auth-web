@@ -1,10 +1,9 @@
-import { EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
-import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { ref, watch } from "vue";
 
-export function useWalletServicesPlugin() {
-  const { getPlugin, isInitialized } = useWeb3Auth();
+export function useWalletServicesPlugin(web3Auth: IBaseWeb3AuthHookContext) {
+  const { getPlugin, isInitialized } = web3Auth;
   const walletServicesPlugin = ref<WalletServicesPlugin | null>(null);
   const isPluginConnected = ref<boolean>(false);
 
