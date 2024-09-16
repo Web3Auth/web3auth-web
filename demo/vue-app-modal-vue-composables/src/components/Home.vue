@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useWeb3Auth } from '@web3auth/modal-vue-composables';
-import { useWalletServicesPlugin } from '../composables/useWalletServicesPlugin';
+import { useWalletServicesPlugin } from '@web3auth/wallet-services-plugin-vue-composables';
 import { watch } from 'vue';
 
 const { isInitialized, connect, initError, isConnected, logout } = useWeb3Auth()

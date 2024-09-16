@@ -14,6 +14,7 @@
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
     "@web3auth/wallet-services-plugin": "file:../../packages/plugins/wallet-services-plugin",
+    "@web3auth/wallet-services-plugin-vue-composables": "file:../../packages/composables/wallet-services-plugin-vue-composables",
     "vue": "^3.4.37"
   },
   "devDependencies": {

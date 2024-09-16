@@ -4,7 +4,7 @@ import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
 import Home from "./components/Home.vue";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import WalletServicesProvider from "./components/WalletServicesProvider.vue";
+import { WalletServicesProvider } from "@web3auth/wallet-services-plugin-vue-composables";
 
 const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
 
