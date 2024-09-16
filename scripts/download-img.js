@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-// eslint-disable-next-line import/no-extraneous-dependencies
-const axios = require("axios"); // Install axios
+
+// const axios = require("axios"); // Install axios
 
 // Load the JSON data
 const rawData = fs.readFileSync("./wallet-registry-updated.json");
@@ -18,21 +18,42 @@ const sanitizeFileName = (name) => {
 };
 
 const saveFile = (response, fileName) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const filePath = path.join("./wallet-logos", fileName);
-    const writer = fs.createWriteStream(filePath);
 
-    response.data.pipe(writer);
+    const reader = response.body.getReader();
+    const writableStream = fs.createWriteStream(filePath);
 
-    writer.on("finish", () => {
-      console.log(`Successfully saved ${fileName}`);
-      resolve();
-    });
+    // Function to read and write chunks
+    const pump = async () => {
+      const { done, value } = await reader.read();
+      if (done) {
+        writableStream.end();
+        console.log(`Successfully saved ${fileName}`);
+        resolve(); // Close the writable stream when done
+        return;
+      }
+      writableStream.write(value); // Write the chunk to the file
+      pump(); // Continue reading
+    };
 
-    writer.on("error", (err) => {
-      console.error(`Error saving ${fileName}:`, err);
-      reject(err);
-    });
+    pump();
+
+    // const writer = fs.createWriteStream(filePath);
+
+    // console.log(response);
+
+    // response.body.pipe(writer);
+
+    // writer.on("finish", () => {
+    //   console.log(`Successfully saved ${fileName}`);
+    //   resolve();
+    // });
+
+    // writer.on("error", (err) => {
+    //   console.error(`Error saving ${fileName}:`, err);
+    //   reject(err);
+    // });
   });
 };
 
@@ -44,10 +65,8 @@ const processWallets = async () => {
     const { image_id } = value;
     if (image_id) {
       try {
-        const response = await axios({
-          method: "get",
-          url: `${baseUrl}${image_id}`,
-          responseType: "stream",
+        const response = await fetch(`${baseUrl}${image_id}`, {
+          method: "GET",
           headers: {
             "x-project-id": "bd4997ce3ede37c95770ba10a3804dad",
             "x-sdk-type": "w3m",
@@ -56,15 +75,21 @@ const processWallets = async () => {
           },
         });
 
-        const contentType = response.headers["content-type"];
+        console.log(response.headers.get("Content-Type"), "CONTENT TYPE");
+        // Check if the response is ok (status 200-299)
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status ${key}: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("Content-Type");
         const extension = contentType.split("/").pop();
-        const fileName = `login-${sanitizeFileName(key)}.${extension}`;
+        const fileName = `login-${sanitizeFileName(key)}.${extension}`.replace("+xml", "");
         console.log(fileName);
         await saveFile(response, fileName);
 
         // await uploadToS3(response.data, fileName);
       } catch (error) {
-        console.error(`Failed to process ${name}:`, error.message);
+        console.error(`Failed to process: ${key}`, error.message);
       }
     } else {
       console.log("NO IMAGE ID", key);
