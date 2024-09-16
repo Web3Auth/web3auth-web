@@ -5,7 +5,7 @@ import { defineComponent, h, inject, provide, Ref, ref, watch } from "vue";
 import { WalletServicesContextKey } from "./context";
 import { IWalletServicesContext } from "./interfaces";
 
-export interface IWeb3AuthContext {
+interface IWeb3AuthContext {
   isInitialized: Ref<boolean>;
   getPlugin(pluginName: string): IPlugin | null;
 }
