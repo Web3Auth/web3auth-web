@@ -10,11 +10,9 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
+import { defineComponent, h, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
-
-export const Web3AuthContextKey = Symbol("Web3AuthContextKey") as InjectionKey<IWeb3AuthContext>;
 
 export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
@@ -211,7 +209,7 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    provide(Web3AuthContextKey, {
+    provide<IWeb3AuthContext>("web3auth_context", {
       web3Auth,
       isConnected,
       isInitialized,
