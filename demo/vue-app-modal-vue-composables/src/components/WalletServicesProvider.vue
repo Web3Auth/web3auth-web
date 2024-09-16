@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError } from '@web3auth/base';
 import { WalletServicesPlugin } from '@web3auth/wallet-services-plugin';
-import { inject, InjectionKey, provide, Ref, ref, watch } from 'vue';
+import { inject, provide, Ref, ref, watch } from 'vue';
 import { IWalletServicesContext } from '../interfaces';
+import { WalletServicesContextKey } from '../context';
 
 export interface IWeb3AuthContext {
   getPlugin(pluginName: string): IPlugin | null;
@@ -11,8 +12,6 @@ export interface IWeb3AuthContext {
 
 const web3AuthContext = inject<IWeb3AuthContext>("web3auth_context")
 if (!web3AuthContext) throw WalletServicesPluginError.fromCode(1000, "`WalletServicesProvider` must be wrapped by `Web3AuthProvider`");
-
-const WalletServicesContextKey = Symbol("WalletServicesContextKey") as InjectionKey<IWalletServicesContext>;
 
 const { getPlugin, isInitialized } = web3AuthContext
 
