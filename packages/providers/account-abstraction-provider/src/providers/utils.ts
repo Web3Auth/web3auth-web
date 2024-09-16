@@ -35,7 +35,9 @@ export function getProviderHandlers({
         maxPriorityFeePerGas,
         callGasLimit: gasLimit,
       });
-      return txHash;
+
+      const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: txHash });
+      return receipt.receipt.transactionHash;
     },
   };
 }
