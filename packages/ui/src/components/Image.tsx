@@ -5,13 +5,14 @@ export interface ImageProps {
   height?: string;
   width?: string;
   fallbackImageId?: string;
+  extension?: string;
 }
 export default function Image(props: ImageProps) {
-  const { hoverImageId, imageId, isButton = false, height = "auto", width = "auto", fallbackImageId } = props;
+  const { hoverImageId, imageId, isButton = false, height = "auto", width = "auto", fallbackImageId, extension = "svg" } = props;
   return (
     <>
       <img
-        src={`https://images.web3auth.io/${imageId}.svg`}
+        src={`https://images.web3auth.io/${imageId}.${extension}`}
         height={height}
         width={width}
         alt={imageId}
@@ -27,7 +28,7 @@ export default function Image(props: ImageProps) {
       />
       {isButton ? (
         <img
-          src={`https://images.web3auth.io/${hoverImageId}.svg`}
+          src={`https://images.web3auth.io/${hoverImageId}.${extension}`}
           height={height}
           width={width}
           alt={hoverImageId}
