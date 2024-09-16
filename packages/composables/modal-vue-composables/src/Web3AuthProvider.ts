@@ -101,8 +101,6 @@ export const Web3AuthProvider = defineComponent({
     watch(
       [() => props.config],
       () => {
-        // if (web3Auth.value) return;
-
         const resetHookState = () => {
           provider.value = null;
           userInfo.value = null;
@@ -126,27 +124,30 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    watch([web3Auth], async () => {
-      if (web3Auth) {
-        try {
-          initError.value = null;
-          isInitializing.value = true;
-          const { modalConfig } = props.config;
-          if (modalConfig) {
-            await web3Auth.value.initModal({ modalConfig });
-          } else {
-            await web3Auth.value.initModal();
+    watch(
+      web3Auth,
+      async (newWeb3Auth) => {
+        if (newWeb3Auth) {
+          try {
+            initError.value = null;
+            isInitializing.value = true;
+            const { modalConfig } = props.config;
+            if (modalConfig) {
+              await newWeb3Auth.initModal({ modalConfig });
+            } else {
+              await newWeb3Auth.initModal();
+            }
+          } catch (error) {
+            initError.value = error as Error;
+          } finally {
+            isInitializing.value = false;
           }
-          triggerRef(web3Auth);
-        } catch (error) {
-          initError.value = error as Error;
-        } finally {
-          isInitializing.value = false;
         }
-      }
-    });
+      },
+      { immediate: true }
+    );
 
-    watch([web3Auth, isConnected], () => {
+    watch(isConnected, () => {
       if (web3Auth.value) {
         const addState = async (web3AuthInstance: Web3Auth) => {
           provider.value = web3AuthInstance.provider;

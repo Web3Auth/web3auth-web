@@ -4,6 +4,7 @@ import { get } from "@toruslabs/http-helpers";
 import type { WEB3AUTH_NETWORK_TYPE, WhiteLabelData } from "@web3auth/auth";
 
 import { WEB3AUTH_NETWORK } from "./adapter/IAdapter";
+import { ChainNamespaceType } from "./chain/IChainInterface";
 
 export interface WhitelistResponse {
   urls: string[];
@@ -37,9 +38,15 @@ export interface WalletRegistryItem {
     universal?: string;
     inAppBrowser?: string;
   };
+  primaryColor?: string;
+  injected?: {
+    namespace: ChainNamespaceType;
+    injected_id: string;
+  }[];
+  imgExtension?: string;
 }
 
-export type WalletRegistry = Record<string, WalletRegistryItem>;
+export type WalletRegistry = { others: Record<string, WalletRegistryItem>; default: Record<string, WalletRegistryItem> };
 
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
   let storageExists = false;

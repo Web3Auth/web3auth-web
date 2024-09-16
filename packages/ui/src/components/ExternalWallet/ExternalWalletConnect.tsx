@@ -42,12 +42,16 @@ export default function ExternalWalletConnect(props: ExternalWalletConnectProps)
           {!walletConnectUri ? (
             <Loader modalStatus={MODAL_STATUS.CONNECTING} canEmit={false} />
           ) : (
-            <WalletConnect walletConnectUri={walletConnectUri} logoImage={`https://images.web3auth.io/login-${connectButton.name}.svg`} />
+            <WalletConnect
+              walletConnectUri={walletConnectUri}
+              logoImage={`https://images.web3auth.io/login-${connectButton.name}.${connectButton.imgExtension}`}
+              primaryColor={connectButton.walletRegistryItem.primaryColor}
+            />
           )}
 
           {/* Install links */}
           {connectButton.hasInstallLinks && (
-            <div className="flex flex-row items-center justify-between gap-2 bg-app-gray-50 dark:bg-app-gray-700 text-app-gray-900 dark:text-app-white px-3 py-2 rounded-xl mt-3">
+            <div className="flex flex-row items-center justify-between gap-2 bg-app-gray-50 dark:bg-app-gray-700 text-app-gray-900 dark:text-app-white px-3 py-2 rounded-xl">
               <span className="text-sm truncate flex-grow-0">
                 {t("modal.external.dont-have")} <span>{connectButton.displayName}</span>?
               </span>

@@ -10,10 +10,11 @@ import i18n from "../localeImport";
 interface WalletConnectProps {
   walletConnectUri: string;
   logoImage?: string;
+  primaryColor?: string;
 }
 
 function WalletConnect(props: WalletConnectProps) {
-  const { walletConnectUri, logoImage } = props;
+  const { walletConnectUri, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
@@ -36,9 +37,9 @@ function WalletConnect(props: WalletConnectProps) {
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
       <div className="w3ajs-wallet-connect__container w3a-wallet-connect__container">
         <div className="w3a-wallet-connect__container-desktop">
-          <div className="text-app-gray-500 dark:text-app-gray-400">{t("modal.external.walletconnect-subtitle")}</div>
+          {/* <div className="text-app-gray-500 dark:text-app-gray-400 text-xs">{t("modal.external.walletconnect-subtitle")}</div> */}
           <div
-            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md my-2"
+            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md mb-2"
             tabIndex={0}
             role="button"
             onClick={handleCopy}
@@ -57,9 +58,13 @@ function WalletConnect(props: WalletConnectProps) {
               removeQrCodeBehindLogo
               logoImage={logoImage || WALLET_CONNECT_LOGO}
               value={walletConnectUri}
+              logoHeight={32}
+              logoWidth={32}
+              logoPadding={10}
+              eyeColor={primaryColor}
             />
           </div>
-          <div>{t("modal.external.walletconnect-copy")}</div>
+          <div className="text-xs">{t("modal.external.walletconnect-copy")}</div>
         </div>
       </div>
     </div>
