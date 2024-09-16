@@ -104,7 +104,6 @@ export const Web3AuthProvider = defineComponent({
           userInfo.value = null;
           isMFAEnabled.value = false;
           isConnected.value = false;
-          // TODO: isInitialized.value = false
           status.value = null;
         };
 
