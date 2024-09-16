@@ -26,11 +26,11 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
 
   useEffect(() => {
     log.debug("adapter loader re-rendering");
-    // if (modalStatus === MODAL_STATUS.CONNECTED) {
-    //   setTimeout(() => {
-    //     onClose();
-    //   }, 3000);
-    // }
+    if (modalStatus === MODAL_STATUS.CONNECTED) {
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    }
   }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
