@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Web3AuthContextKey, Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
 import Home from "./components/Home.vue";
@@ -39,7 +39,7 @@ const walletServicesPlugin = new WalletServicesPlugin()
       plugins: [walletServicesPlugin]
     }"
   >
-    <WalletServicesProvider :web3AuthContextKey="Web3AuthContextKey">
+    <WalletServicesProvider>
       <Home />
     </WalletServicesProvider>
   </Web3AuthProvider>
