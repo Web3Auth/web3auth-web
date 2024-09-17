@@ -165,6 +165,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         const filteredList = allButtons
           .concat(customAdapterButtons)
           .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
+
+        log.debug("filteredLists", filteredList);
         setExternalButtons(filteredList);
       } else {
         const sortedButtons = [
@@ -277,7 +279,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                         </li>
                       );
                     })}
-                    {externalButtons.length >= 15 && (
+                    {totalExternalWallets > 10 && !walletSearch && (
                       <li className="flex flex-col items-center justify-center gap-y-0.5 my-4 w-full mx-auto w3a-adapter-item--full">
                         <p className="text-xs text-app-gray-500 dark:text-app-gray-400">{t("modal.external.search-text")}</p>
                         <p className="text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.external.search-subtext")}</p>
