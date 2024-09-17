@@ -116,7 +116,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      params.modalConfig = deepmerge(cloneDeep(params.modalConfig), adapterConfig);
+      params.modalConfig = deepmerge(cloneDeep(adapterConfig), params.modalConfig);
     }
 
     await this.loginModal.initModal();
