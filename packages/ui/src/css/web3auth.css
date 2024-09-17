@@ -274,15 +274,16 @@
 
 #w3a-modal ul.w3a-adapter-list {
   @apply grid grid-cols-6 overflow-y-auto gap-x-2 gap-y-2;
+  max-height: 500px;
   padding: 1px;
-  transition: height 0.35s;
+  transition: max-height 0.35s;
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
-  height: 100px;
+  max-height: 100px;
   overflow-y: hidden;
-  transition: height 0.3s;
+  transition: max-height 0.3s;
   transition-timing-function: cubic-bezier(0, 0.73, 0.71, 1);
 }
 
