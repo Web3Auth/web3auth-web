@@ -121,7 +121,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
       }
 
-      params.modalConfig = deepmerge(cloneDeep(adapterConfig), params.modalConfig);
+      params.modalConfig = deepmerge(adapterConfig, cloneDeep(params.modalConfig));
     }
 
     await this.loginModal.initModal();
