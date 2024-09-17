@@ -17,7 +17,19 @@ function mergeWalletData(target, source) {
     target.injected = null;
   }
 
-  target.imgExtension = source.image_id ? "webp" : "svg";
+  // console.log(target.name);
+
+  if (target.name === "bitfrost") {
+    target.imgExtension = "svg";
+  } else {
+    target.imgExtension = source.image_id ? "webp" : "svg";
+  }
+
+  // if (source.image_id) {
+  //   target.image_id = source.image_id;
+  // } else {
+  //   target.image_id = null;
+  // }
 
   if (source.chains) {
     if (!target.chains) {
@@ -33,14 +45,26 @@ function mergeWalletData(target, source) {
 }
 
 // Create a map of wallet names to their data in the registry
-const registryMap = new Map(walletRegistry.data.map((wallet) => [wallet.name.toLowerCase(), wallet]));
+const registryMap = new Map(walletRegistry.data.map((wallet) => [wallet.name.toLowerCase().trim().replace(/ /g, "-"), wallet]));
 const othersMap = Object.keys(mergedUpdated.others);
 const defaultMap = Object.keys(mergedUpdated.default);
 
 // Function to merge data for a category
 function mergeCategoryData(category) {
   for (const walletName in category) {
-    const registryWallet = registryMap.get(walletName.toLowerCase());
+    const withWalletSuffix = `${walletName.toLowerCase()}-wallet`;
+    const withNoHiphenSpace = `${walletName.toLowerCase()}wallet`;
+    const removingDot = `${walletName.toLowerCase()}.wallet`;
+    const includeKeys = new Map([["bonuz-social-id", "bonuz-social-smart-wallet"]]);
+    const registryWallet =
+      registryMap.get(walletName.toLowerCase()) ||
+      registryMap.get(withWalletSuffix) ||
+      registryMap.get(withNoHiphenSpace) ||
+      registryMap.get(removingDot) ||
+      (includeKeys.has(walletName.toLowerCase()) && registryMap.get(includeKeys.get(walletName.toLowerCase())));
+    if (walletName === "3s") {
+      console.log(walletName, registryWallet, "MERGE");
+    }
     if (registryWallet) {
       mergeWalletData(category[walletName], registryWallet);
     }
@@ -71,6 +95,7 @@ function convertToMergedFormat(registryWallet) {
     },
     injected: registryWallet.injected || null,
     primaryColor: "#00000",
+    // image_id: registryWallet?.image_id || null,
     imgExtension: registryWallet?.image_id ? "webp" : "svg",
   };
 }
@@ -118,9 +143,41 @@ const removeKeys = [
   "trust-asset",
   "ultimate",
   "uniblow",
-  "t+",
+  "talk+",
   "torus",
   "web3auth",
+  "crypto.com",
+  "mpcvault",
+  "tokoin",
+  "volt:-defi",
+  "cogni-",
+  "amaze",
+  "at",
+  "block",
+  "bonuz-social-id",
+  "cool",
+  "cyber",
+  "did",
+  "face",
+  "fox",
+  "fxwallet",
+  "gatewallet",
+  "imota",
+  "islami",
+  "kraken",
+  "math",
+  "ozone",
+  "plt",
+  "pools",
+  "rice",
+  "scramberry",
+  "sub",
+  "super",
+  "t+",
+  "thor",
+  "tidus",
+  "wemix",
+  "x9",
 ];
 
 const removeJSONKeys = () => {
@@ -138,6 +195,9 @@ function addImgExt(data) {
     if (!data[keys].imgExtension) {
       data[keys].imgExtension = "svg";
     }
+    // if (!data[keys].image_id) {
+    //   data[keys].image_id = null;
+    // }
   }
 }
 addImgExt(mergedUpdated.default);
