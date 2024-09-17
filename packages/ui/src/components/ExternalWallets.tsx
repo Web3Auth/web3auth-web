@@ -165,6 +165,8 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
         const filteredList = allButtons
           .concat(customAdapterButtons)
           .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
+
+        log.debug("filteredLists", filteredList);
         setExternalButtons(filteredList);
       } else {
         const sortedButtons = [
@@ -198,17 +200,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespace, walletDiscoverySupported]);
 
   const handleWalletClick = (button: ExternalButton) => {
-    if (deviceDetails.platform === "desktop") {
-      // if has injected wallet, connect to injected wallet
-      if (button.hasInjectedWallet) {
-        handleExternalWalletClick({ adapter: button.name });
-      } else {
-        // else, show wallet detail
-        setSelectedButton(button);
-      }
-    } else if (!button.href && button.hasInjectedWallet) {
-      // on mobile, if href is not available, connect to injected wallet
+    // if has injected wallet, connect to injected wallet
+    // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
+    if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
       handleExternalWalletClick({ adapter: button.name });
+    } else {
+      // else, show wallet detail
+      setSelectedButton(button);
     }
   };
 
@@ -262,22 +260,24 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                     {externalButtons.map((button) => {
                       return (
                         <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name + button.displayName}>
-                          {deviceDetails.platform === "desktop" ? (
-                            <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
-                          ) : (
-                            <a
-                              href={button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri}
-                              target="_blank"
-                              className="w-full"
-                              rel="noreferrer noopener"
-                            >
+                          {deviceDetails.platform === "desktop" && <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />}
+                          {deviceDetails.platform !== "desktop" &&
+                            (button.href && button.hasWalletConnect && !button.hasInjectedWallet ? (
+                              <a
+                                href={button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri}
+                                target="_blank"
+                                className="w-full"
+                                rel="noreferrer noopener"
+                              >
+                                <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
+                              </a>
+                            ) : (
                               <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
-                            </a>
-                          )}
+                            ))}
                         </li>
                       );
                     })}
-                    {externalButtons.length >= 15 && (
+                    {totalExternalWallets > 10 && !walletSearch && (
                       <li className="flex flex-col items-center justify-center gap-y-0.5 my-4 w-full mx-auto w3a-adapter-item--full">
                         <p className="text-xs text-app-gray-500 dark:text-app-gray-400">{t("modal.external.search-text")}</p>
                         <p className="text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.external.search-subtext")}</p>

@@ -11,7 +11,7 @@ async function mergeJsonFiles(file1Path, file2Path, outputPath) {
     const json1 = JSON.parse(data1);
     const json2 = JSON.parse(data2);
 
-    const obj1 = Object.keys(json1.groups);
+    // const obj1 = Object.keys(json1.groups);
 
     const walletKeys = Object.keys(json2);
 
@@ -30,21 +30,21 @@ async function mergeJsonFiles(file1Path, file2Path, outputPath) {
       }
     });
 
-    const updatedJSON = { ...json2 };
+    // const updatedJSON = { ...json2 };
 
-    const finalJSON = {};
+    // const finalJSON = {};
 
-    const updatedJSONKeys = Object.keys(updatedJSON);
-    updatedJSONKeys.forEach((a) => {
-      if (obj1.includes(a)) {
-        finalJSON.default = { ...finalJSON.default, [a]: updatedJSON[a] };
-      } else {
-        finalJSON.others = { ...finalJSON.others, [a]: updatedJSON[a] };
-      }
-    });
+    // const updatedJSONKeys = Object.keys(updatedJSON);
+    // updatedJSONKeys.forEach((a) => {
+    //   if (obj1.includes(a)) {
+    //     finalJSON.default = { ...finalJSON.default, [a]: updatedJSON[a] };
+    //   } else {
+    //     finalJSON.others = { ...finalJSON.others, [a]: updatedJSON[a] };
+    //   }
+    // });
 
     // Write the merged JSON to a new file
-    await fs.writeFile(outputPath, JSON.stringify(finalJSON, null, 2));
+    await fs.writeFile(outputPath, JSON.stringify(json2, null, 2));
     console.log(`Merged JSON has been written to ${outputPath}`);
   } catch (error) {
     console.error("Error merging JSON files:", error);
@@ -52,4 +52,4 @@ async function mergeJsonFiles(file1Path, file2Path, outputPath) {
 }
 
 // Call the function to merge JSON files
-mergeJsonFiles("./dynamic-registry.json", "./wallet-registry-web3auth-old.json", "wallet-registry-web3auth-new.json");
+mergeJsonFiles("./dynamic-registry.json", "./wallet-registry-web3auth-old.json", "wallet-registry-web3auth.json");

@@ -5,7 +5,8 @@ const fs = require("fs");
 
 // Read the input files
 const walletRegistry = JSON.parse(fs.readFileSync("./wallet-registry-wc.json", "utf8"));
-const mergedUpdated = JSON.parse(fs.readFileSync("./wallet-registry-web3auth-new.json", "utf8"));
+const mergedUpdated = JSON.parse(fs.readFileSync("./wallet-registry-web3auth.json", "utf8"));
+// const mergedUpdated = JSON.parse(fs.readFileSync("./wallet-registry-web3auth-new.json", "utf8"));
 
 console.log(walletRegistry.count);
 
@@ -46,8 +47,8 @@ function mergeWalletData(target, source) {
 
 // Create a map of wallet names to their data in the registry
 const registryMap = new Map(walletRegistry.data.map((wallet) => [wallet.name.toLowerCase().trim().replace(/ /g, "-"), wallet]));
-const othersMap = Object.keys(mergedUpdated.others);
-const defaultMap = Object.keys(mergedUpdated.default);
+const othersMap = Object.keys(mergedUpdated);
+// const defaultMap = Object.keys(mergedUpdated.default);
 
 // Function to merge data for a category
 function mergeCategoryData(category) {
@@ -72,8 +73,9 @@ function mergeCategoryData(category) {
 }
 
 // Merge data for 'default' and 'others' categories
-mergeCategoryData(mergedUpdated.default);
-mergeCategoryData(mergedUpdated.others);
+// mergeCategoryData(mergedUpdated.default);
+// mergeCategoryData(mergedUpdated.others);
+mergeCategoryData(mergedUpdated);
 
 // Function to convert registry wallet to merged updated format
 function convertToMergedFormat(registryWallet, otherWallet) {
@@ -118,16 +120,16 @@ for (const [_, wallet] of registryMap) {
   // uniswap-wallet
   const walletKey = wallet.name.toLowerCase().replace(/\| /g, "").replace(/ /g, "-");
   const suffixRemoveKey = walletKey.replace("-wallet", "");
-  const normalNotExist = !othersMap.includes(walletKey) && !defaultMap.includes(walletKey);
-  const suffixRemoveNotExist = !othersMap.includes(suffixRemoveKey) && !defaultMap.includes(suffixRemoveKey);
+  const normalNotExist = !othersMap.includes(walletKey);
+  const suffixRemoveNotExist = !othersMap.includes(suffixRemoveKey);
   const NotExist = normalNotExist || suffixRemoveNotExist;
   if (["uniswap", "uniswap-wallet"].includes(walletKey)) {
     console.log(normalNotExist, suffixRemoveNotExist, walletKey, suffixRemoveKey, NotExist);
   }
   if (NotExist)
-    mergedUpdated.others[!suffixRemoveNotExist ? suffixRemoveKey : walletKey] = convertToMergedFormat(
+    mergedUpdated[!suffixRemoveNotExist ? suffixRemoveKey : walletKey] = convertToMergedFormat(
       wallet,
-      mergedUpdated.others[!suffixRemoveNotExist ? suffixRemoveKey : walletKey]
+      mergedUpdated[!suffixRemoveNotExist ? suffixRemoveKey : walletKey]
     );
 }
 
@@ -164,7 +166,7 @@ const removeKeys = [
   "talk+",
   "torus",
   "web3auth",
-  "crypto.com",
+  "crypto.com-defi-wallet",
   "mpcvault",
   "tokoin",
   "volt:-defi",
@@ -200,8 +202,8 @@ const removeKeys = [
 
 const removeJSONKeys = () => {
   for (const keys of removeKeys) {
-    if (mergedUpdated.others[keys]) {
-      delete mergedUpdated.others[keys];
+    if (mergedUpdated[keys]) {
+      delete mergedUpdated[keys];
     }
   }
 };
@@ -218,9 +220,46 @@ function addImgExt(data) {
     // }
   }
 }
-addImgExt(mergedUpdated.default);
-addImgExt(mergedUpdated.others);
 
-fs.writeFileSync("wallet-registry-updated.json", JSON.stringify(mergedUpdated, null, 2));
+// addImgExt(mergedUpdated.default);
+// addImgExt(mergedUpdated.others);
+addImgExt(mergedUpdated);
+
+const defaultKeys = [
+  "metamask",
+  "phantom",
+  "trust",
+  "ronin",
+  "coinbase",
+  "rainbow",
+  "exodus",
+  "okx",
+  "solflare",
+  "ledger-live",
+  "crypto.com",
+  "zerion",
+  "argent",
+  "torus",
+  "safe",
+];
+
+const updatedJSON = { others: {}, default: {} };
+
+function groupJson(data) {
+  for (const [keys, value] of Object.entries(data)) {
+    if (defaultKeys.includes(keys.toLowerCase())) {
+      updatedJSON.default[keys] = value;
+    } else {
+      updatedJSON.others[keys] = value;
+    }
+    // if (!data[keys].image_id) {
+    //   data[keys].image_id = null;
+    // }
+  }
+}
+
+groupJson(mergedUpdated);
+
+fs.writeFileSync("wallet-registry-web3auth-updated.json", JSON.stringify(updatedJSON, null, 2));
 // Write the updated data back to the file
 console.log("Merge completed successfully.");
