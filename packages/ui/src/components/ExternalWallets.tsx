@@ -198,17 +198,13 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespace, walletDiscoverySupported]);
 
   const handleWalletClick = (button: ExternalButton) => {
-    if (deviceDetails.platform === "desktop") {
-      // if has injected wallet, connect to injected wallet
-      if (button.hasInjectedWallet) {
-        handleExternalWalletClick({ adapter: button.name });
-      } else {
-        // else, show wallet detail
-        setSelectedButton(button);
-      }
-    } else if (!button.href && button.hasInjectedWallet) {
-      // on mobile, if href is not available, connect to injected wallet
+    // if has injected wallet, connect to injected wallet
+    // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
+    if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
       handleExternalWalletClick({ adapter: button.name });
+    } else {
+      // else, show wallet detail
+      setSelectedButton(button);
     }
   };
 
@@ -262,18 +258,20 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                     {externalButtons.map((button) => {
                       return (
                         <li className="w3a-adapter-item w3a-adapter-item--full" key={button.name + button.displayName}>
-                          {deviceDetails.platform === "desktop" ? (
-                            <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
-                          ) : (
-                            <a
-                              href={button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri}
-                              target="_blank"
-                              className="w-full"
-                              rel="noreferrer noopener"
-                            >
+                          {deviceDetails.platform === "desktop" && <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />}
+                          {deviceDetails.platform !== "desktop" &&
+                            (button.href && button.hasWalletConnect && !button.hasInjectedWallet ? (
+                              <a
+                                href={button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri}
+                                target="_blank"
+                                className="w-full"
+                                rel="noreferrer noopener"
+                              >
+                                <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
+                              </a>
+                            ) : (
                               <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
-                            </a>
-                          )}
+                            ))}
                         </li>
                       );
                     })}
