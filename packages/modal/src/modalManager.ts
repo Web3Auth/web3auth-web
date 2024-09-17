@@ -116,6 +116,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
+      const localSmsOtpEnabled = params.modalConfig[WALLET_ADAPTERS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnModal;
+      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
+        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
+      }
+
       params.modalConfig = deepmerge(cloneDeep(adapterConfig), params.modalConfig);
     }
 
