@@ -43,7 +43,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.SOLANA]: [
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: "https://rpc.ankr.com/solana_devnet",
+      rpcTarget: "https://api.devnet.solana.com",
       blockExplorerUrl: "https://solscan.io",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x3",
