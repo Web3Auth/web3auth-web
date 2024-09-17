@@ -129,7 +129,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
 
         const { whitelabel } = projectConfig;
-        this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel), this.coreOptions.uiConfig);
+        this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel || {}), this.coreOptions.uiConfig);
         if (!this.coreOptions.uiConfig.mode) this.coreOptions.uiConfig.mode = "light";
 
         const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
