@@ -8,6 +8,7 @@ import {
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthContextKey,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { defineComponent, h, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
@@ -209,7 +210,7 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    provide<IWeb3AuthContext>("web3auth_context", {
+    provide<IWeb3AuthContext>(Web3AuthContextKey, {
       web3Auth,
       isConnected,
       isInitialized,

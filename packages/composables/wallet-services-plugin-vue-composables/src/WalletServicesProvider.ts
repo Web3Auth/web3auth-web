@@ -1,4 +1,4 @@
-import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
+import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError, Web3AuthContextKey } from "@web3auth/base";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent, h, inject, provide, Ref, ref, watch } from "vue";
 
@@ -13,7 +13,7 @@ interface IWeb3AuthContext {
 export const WalletServicesProvider = defineComponent({
   name: "WalletServicesProvider",
   setup() {
-    const web3AuthContext = inject<IWeb3AuthContext>("web3auth_context");
+    const web3AuthContext = inject<IWeb3AuthContext>(Web3AuthContextKey);
     if (!web3AuthContext) throw WalletServicesPluginError.fromCode(1000, "`WalletServicesProvider` must be wrapped by `Web3AuthProvider`");
 
     const { getPlugin, isInitialized } = web3AuthContext;
