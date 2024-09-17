@@ -76,8 +76,12 @@ mergeCategoryData(mergedUpdated.default);
 mergeCategoryData(mergedUpdated.others);
 
 // Function to convert registry wallet to merged updated format
-function convertToMergedFormat(registryWallet) {
-  return {
+function convertToMergedFormat(registryWallet, otherWallet) {
+  if (["uniswap", "Uniswap Wallet"].includes(registryWallet.name)) {
+    console.log(registryWallet.name, "CALLED", otherWallet);
+  }
+
+  const obj = {
     name: registryWallet.name,
     chains: registryWallet.chains || [],
     app: {
@@ -98,6 +102,16 @@ function convertToMergedFormat(registryWallet) {
     // image_id: registryWallet?.image_id || null,
     imgExtension: registryWallet?.image_id ? "webp" : "svg",
   };
+
+  if (otherWallet?.walletConnect) {
+    obj.walletConnect = otherWallet?.walletConnect;
+  }
+
+  if (otherWallet?.primaryColor) {
+    obj.primaryColor = otherWallet?.primaryColor;
+  }
+
+  return obj;
 }
 
 for (const [_, wallet] of registryMap) {
@@ -107,10 +121,14 @@ for (const [_, wallet] of registryMap) {
   const normalNotExist = !othersMap.includes(walletKey) && !defaultMap.includes(walletKey);
   const suffixRemoveNotExist = !othersMap.includes(suffixRemoveKey) && !defaultMap.includes(suffixRemoveKey);
   const NotExist = normalNotExist || suffixRemoveNotExist;
-  // if (["uniswap", "uniswap-wallet"].includes(walletKey)) {
-  //   console.log(normalNotExist, suffixRemoveNotExist, walletKey, suffixRemoveKey);
-  // }
-  if (NotExist) mergedUpdated.others[!suffixRemoveNotExist ? suffixRemoveKey : walletKey] = convertToMergedFormat(wallet);
+  if (["uniswap", "uniswap-wallet"].includes(walletKey)) {
+    console.log(normalNotExist, suffixRemoveNotExist, walletKey, suffixRemoveKey, NotExist);
+  }
+  if (NotExist)
+    mergedUpdated.others[!suffixRemoveNotExist ? suffixRemoveKey : walletKey] = convertToMergedFormat(
+      wallet,
+      mergedUpdated.others[!suffixRemoveNotExist ? suffixRemoveKey : walletKey]
+    );
 }
 
 const removeKeys = [
