@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS, getChainConfig, getEvmChainConfig } from "@web3auth/base";
-import { OpenloginAdapter, OpenloginAdapterOptions, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
-// import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
-// import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-adapter";
+import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
+import { AuthAdapter, AuthLoginParams } from "@web3auth/auth-adapter";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-//import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
@@ -22,32 +15,28 @@ function App() {
   useEffect(() => {
     const init = async () => {
       try {
+        const chainConfig = {
+          displayName: "Ethereum Mainnet",
+          chainId: "0x1",
+          rpcTarget: `https://rpc.ankr.com/eth`,
+          blockExplorerUrl: "https://etherscan.io/",
+          ticker: "ETH",
+          tickerName: "Ethereum",
+          logo: "https://images.toruswallet.io/eth.svg",
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+        }
+        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig } });
+
         const web3auth = new Web3AuthNoModal({
           clientId,
-          chainConfig: {
-            displayName: "Ethereum Mainnet",
-            chainId: "0x1",
-            rpcTarget: `https://rpc.ankr.com/eth`,
-            blockExplorerUrl: "https://etherscan.io/",
-            ticker: "ETH",
-            tickerName: "Ethereum",
-            logo: "https://images.toruswallet.io/eth.svg",
-            chainNamespace: CHAIN_NAMESPACES.EIP155,
-          },
           web3AuthNetwork: "sapphire_devnet",
+          privateKeyProvider
         });
 
         setWeb3auth(web3auth);
 
-        const openloginAdapter = new OpenloginAdapter({
-          privateKeyProvider: new EthereumPrivateKeyProvider({
-            config: {
-              chainConfig: getEvmChainConfig(1) as CustomChainConfig,
-            },
-          }),
-        });
-        web3auth.configureAdapter(openloginAdapter);
-
+        const authAdapter = new AuthAdapter();
+        web3auth.configureAdapter(authAdapter);
 
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
@@ -66,7 +55,7 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const web3authProvider = await web3auth.connectTo<OpenloginLoginParams>(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: "google" });
+    const web3authProvider = await web3auth.connectTo<AuthLoginParams>(WALLET_ADAPTERS.AUTH, { loginProvider: "google" });
     setProvider(web3authProvider);
   };
 
