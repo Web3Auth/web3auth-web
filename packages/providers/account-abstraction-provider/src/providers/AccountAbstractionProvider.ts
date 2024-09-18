@@ -1,9 +1,9 @@
+import { createFetchMiddleware } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { Client, createPublicClient, defineChain, http } from "viem";
-import { createBundlerClient, createPaymasterClient, PaymasterClient } from "viem/account-abstraction";
+import { BundlerClient, createBundlerClient, createPaymasterClient, PaymasterClient, SmartAccount } from "viem/account-abstraction";
 
 import { createAaMiddleware } from "../rpc/ethRpcMiddlewares";
 import { ISmartAccount } from "./smartAccounts";
@@ -11,22 +11,38 @@ import { BundlerConfig, PaymasterConfig } from "./types";
 import { getProviderHandlers } from "./utils";
 
 export interface AccountAbstractionProviderConfig extends BaseProviderConfig {
-  smartAccount: ISmartAccount;
+  smartAccountInit: ISmartAccount;
   bundlerConfig: BundlerConfig;
   paymasterConfig?: PaymasterConfig;
 }
 export interface AccountAbstractionProviderState extends BaseProviderState {}
 
 export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
-  privateKeyProvider: EthereumPrivateKeyProvider;
+  private _smartAccount: SmartAccount | null;
+
+  private _bundlerClient: BundlerClient | null;
+
+  private _paymasterClient: PaymasterClient | null;
 
   constructor({ config, state }: { config: AccountAbstractionProviderConfig; state?: AccountAbstractionProviderState }) {
     super({ config, state });
   }
 
+  get smartAccount(): SmartAccount | null {
+    return this._smartAccount;
+  }
+
+  get bundlerClient(): BundlerClient | null {
+    return this._bundlerClient;
+  }
+
+  get paymasterClient(): PaymasterClient | null {
+    return this._paymasterClient;
+  }
+
   public static getProviderInstance = async (params: {
     eoaProvider: IProvider;
-    smartAccount: ISmartAccount;
+    smartAccountInit: ISmartAccount;
     chainConfig: CustomChainConfig;
     bundlerConfig: BundlerConfig;
     paymasterConfig?: PaymasterConfig;
@@ -64,30 +80,29 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       }),
       transport: http(),
     });
-    const smartAccount = await this.config.smartAccount.getSmartAccount({
+    this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
       owner: eoaProvider,
       client: client as Client,
     });
 
     // setup bundler and paymaster
-    let paymasterClient: PaymasterClient | undefined;
     if (this.config.paymasterConfig) {
-      paymasterClient = createPaymasterClient({
+      this._paymasterClient = createPaymasterClient({
         transport: http(this.config.paymasterConfig.url),
         ...this.config.paymasterConfig,
       });
     }
-    const bundlerClient = createBundlerClient({
-      account: smartAccount,
+    this._bundlerClient = createBundlerClient({
+      account: this.smartAccount,
       client: client as Client,
       transport: http(this.config.bundlerConfig.url),
-      paymaster: paymasterClient,
+      paymaster: this._paymasterClient,
       ...this.config.bundlerConfig,
     });
 
     const providerHandlers = getProviderHandlers({
-      bundlerClient,
-      smartAccount,
+      bundlerClient: this._bundlerClient,
+      smartAccount: this._smartAccount,
     });
 
     // setup rpc engine and AA middleware
@@ -96,7 +111,9 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       eoaProvider,
       handlers: providerHandlers,
     });
+    const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.config.chainConfig.rpcTarget });
     engine.push(aaMiddleware);
+    engine.push(fetchMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
   }
