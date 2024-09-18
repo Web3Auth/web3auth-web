@@ -7,6 +7,7 @@ import { IWalletServicesContext } from "./interfaces";
 
 interface IWeb3AuthContext {
   isInitialized: Ref<boolean>;
+  isConnected: Ref<boolean>;
   getPlugin(pluginName: string): IPlugin | null;
 }
 
@@ -16,14 +17,22 @@ export const WalletServicesProvider = defineComponent({
     const web3AuthContext = inject<IWeb3AuthContext>(Web3AuthContextKey);
     if (!web3AuthContext) throw WalletServicesPluginError.fromCode(1000, "`WalletServicesProvider` must be wrapped by `Web3AuthProvider`");
 
-    const { getPlugin, isInitialized } = web3AuthContext;
+    const { getPlugin, isInitialized, isConnected } = web3AuthContext;
 
     const walletServicesPlugin = ref<WalletServicesPlugin | null>(null);
     const isPluginConnected = ref<boolean>(false);
+
     watch(isInitialized, (newIsInitialized) => {
       if (newIsInitialized) {
         const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
         walletServicesPlugin.value = plugin;
+      }
+    });
+
+    watch(isConnected, (newIsConnected) => {
+      if (newIsConnected) {
+        const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+        if (!walletServicesPlugin.value) walletServicesPlugin.value = plugin;
       }
     });
 

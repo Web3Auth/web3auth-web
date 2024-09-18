@@ -11,7 +11,7 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
   const [isPluginConnected, setIsPluginConnected] = useState<boolean>(false);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
   const web3AuthContext = useContext(context);
-  const { getPlugin, isInitialized } = web3AuthContext;
+  const { getPlugin, isInitialized, isConnected } = web3AuthContext;
 
   useEffect(() => {
     if (isInitialized) {
@@ -19,6 +19,13 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
       setWalletServicesPlugin(plugin);
     }
   }, [isInitialized, getPlugin]);
+
+  useEffect(() => {
+    if (isConnected) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      if (!walletServicesPlugin) setWalletServicesPlugin(plugin);
+    }
+  }, [isConnected, getPlugin, walletServicesPlugin]);
 
   useEffect(() => {
     const connectedListener = () => {
