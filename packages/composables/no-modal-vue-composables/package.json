@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal-vue-composables",
-  "version": "9.0.0-alpha.9",
+  "version": "9.0.0",
   "description": "Vue composables to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
     "web3Auth/no-modal-vue-composables",
@@ -29,12 +29,12 @@
     "dist"
   ],
   "dependencies": {
-    "@web3auth/base": "^9.0.0-alpha.9",
-    "@web3auth/no-modal": "^9.0.0-alpha.9"
+    "@web3auth/base": "^9.0.0",
+    "@web3auth/no-modal": "^9.0.0"
   },
   "devDependencies": {
     "@web3auth/auth": "^9.3.3",
-    "@web3auth/auth-adapter": "^9.0.0-alpha.9"
+    "@web3auth/auth-adapter": "^9.0.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
