@@ -128,6 +128,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
           height="100"
           width="100"
           isButton
+          extension={connectButton.imgExtension}
         />
       </div>
 
