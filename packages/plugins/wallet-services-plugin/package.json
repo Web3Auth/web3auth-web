@@ -31,7 +31,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^6.1.2"
+    "@toruslabs/ethereum-controllers": "^6.1.3"
   },
   "dependencies": {
     "@web3auth/auth": "^9.3.3",
