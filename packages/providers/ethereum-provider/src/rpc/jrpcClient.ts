@@ -1,13 +1,5 @@
 import { createFetchMiddleware } from "@toruslabs/base-controllers";
-import {
-  Block,
-  JRPCEngineEndCallback,
-  JRPCEngineNextCallback,
-  JRPCMiddleware,
-  JRPCRequest,
-  JRPCResponse,
-  mergeMiddleware,
-} from "@toruslabs/openlogin-jrpc";
+import { Block, JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequest, JRPCResponse, mergeMiddleware } from "@web3auth/auth";
 import type { CustomChainConfig } from "@web3auth/base";
 
 export function createChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, string> {

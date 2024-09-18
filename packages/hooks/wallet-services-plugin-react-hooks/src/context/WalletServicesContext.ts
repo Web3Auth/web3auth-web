@@ -1,3 +1,4 @@
+import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/base";
 import { type WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -10,6 +11,21 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
   const [isPluginConnected, setIsPluginConnected] = useState<boolean>(false);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
   const web3AuthContext = useContext(context);
+  const { getPlugin, isInitialized, isConnected } = web3AuthContext;
+
+  useEffect(() => {
+    if (isInitialized) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      setWalletServicesPlugin(plugin);
+    }
+  }, [isInitialized, getPlugin]);
+
+  useEffect(() => {
+    if (isConnected) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      if (!walletServicesPlugin) setWalletServicesPlugin(plugin);
+    }
+  }, [isConnected, getPlugin, walletServicesPlugin]);
 
   useEffect(() => {
     const connectedListener = () => {
@@ -19,13 +35,6 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
     const disconnectedListener = () => {
       setIsPluginConnected(false);
     };
-
-    const { getPlugin, isInitialized } = web3AuthContext;
-
-    if (isInitialized) {
-      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-      setWalletServicesPlugin(plugin);
-    }
 
     if (walletServicesPlugin) {
       walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
@@ -38,28 +47,37 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
         walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
       }
     };
-  }, [walletServicesPlugin, web3AuthContext]);
+  }, [walletServicesPlugin]);
 
-  const showWalletConnectScanner = useCallback(async () => {
-    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
+  const showWalletConnectScanner = useCallback(
+    async (showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]) => {
+      if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+      if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
-    return walletServicesPlugin.showWalletConnectScanner();
-  }, [walletServicesPlugin, isPluginConnected]);
+      return walletServicesPlugin.showWalletConnectScanner(showWalletConnectParams);
+    },
+    [walletServicesPlugin, isPluginConnected]
+  );
 
-  const showWalletUI = useCallback(async () => {
-    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
+  const showWalletUI = useCallback(
+    async (showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]) => {
+      if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+      if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
-    return walletServicesPlugin.showWalletUi();
-  }, [walletServicesPlugin, isPluginConnected]);
+      return walletServicesPlugin.showWalletUi(showWalletUiParams);
+    },
+    [walletServicesPlugin, isPluginConnected]
+  );
 
-  const showCheckout = useCallback(async () => {
-    if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
-    if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
+  const showCheckout = useCallback(
+    async (showCheckoutParams?: BaseEmbedControllerState["showCheckout"]) => {
+      if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+      if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
 
-    return walletServicesPlugin.showCheckout();
-  }, [walletServicesPlugin, isPluginConnected]);
+      return walletServicesPlugin.showCheckout(showCheckoutParams);
+    },
+    [walletServicesPlugin, isPluginConnected]
+  );
 
   const value = useMemo(() => {
     return {

@@ -1,7 +1,5 @@
-import type { AccessListEIP2930TxData, FeeMarketEIP1559TxData, TxData } from "@ethereumjs/tx";
-import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import type { JRPCRequest } from "@toruslabs/openlogin-jrpc";
-
+import type { JRPCRequest } from "@web3auth/auth";
+import type { TransactionLike, TypedDataDomain, TypedDataField } from "ethers";
 export interface IAccountHandlers {
   updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
 }
@@ -24,29 +22,37 @@ export interface IChainSwitchHandlers {
   switchChain: (params: { chainId: string }) => Promise<void>;
 }
 
-export interface ExtendedAccessListEIP2930TxData extends AccessListEIP2930TxData {
-  from: string;
-}
-
-export interface ExtendedFeeMarketEIP1559Transaction extends FeeMarketEIP1559TxData {
-  from: string;
-}
-
-export interface ExtendedTxData extends TxData {
-  from: string;
-}
-
-export type TransactionParams = ExtendedFeeMarketEIP1559Transaction & ExtendedAccessListEIP2930TxData & ExtendedTxData & { input?: string };
+export type TransactionParams<A = string> = TransactionLike<A> & { input?: string };
 
 export interface MessageParams<T> {
   from: string;
   data: T;
 }
 
-export interface TypedMessageParams<T> {
+export interface BaseRequestParams {
+  /**
+   * Unique id for each request
+   */
+  id?: string;
+  /**
+   * Address to send this transaction from.
+   */
   from: string;
-  version: string;
-  data: T;
+
+  /**
+   * Domain requested from
+   */
+  origin?: string;
+}
+
+export type SignTypedDataMessageV4 = {
+  types: Record<string, TypedDataField[]>;
+  domain: TypedDataDomain;
+  message: Record<string, unknown>;
+};
+
+export interface TypedMessageParams extends BaseRequestParams {
+  data: string | SignTypedDataMessageV4;
 }
 
 export interface WalletMiddlewareOptions {
@@ -56,9 +62,7 @@ export interface WalletMiddlewareOptions {
   processPersonalMessage?: (msgParams: MessageParams<string>, req: JRPCRequest<unknown>) => Promise<string>;
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
   processSignTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
-  processTypedMessage?: (msgParams: MessageParams<TypedDataV1>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
-  processTypedMessageV3?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
-  processTypedMessageV4?: (msgParams: TypedMessageParams<TypedMessage<MessageTypes>>, req: JRPCRequest<unknown>, version: string) => Promise<string>;
+  processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>) => Promise<string>;
 }
 
 export type IProviderHandlers = WalletMiddlewareOptions;

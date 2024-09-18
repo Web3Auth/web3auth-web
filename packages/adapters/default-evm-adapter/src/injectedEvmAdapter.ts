@@ -27,7 +27,9 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  name: string;
+  readonly name: string;
+
+  readonly isInjected = true;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -62,7 +64,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
         await this.connect();
       }
     } catch (error) {
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -89,7 +91,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError(`Failed to login with ${this.name} injected wallet`);
     }

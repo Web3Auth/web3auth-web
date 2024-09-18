@@ -1,6 +1,6 @@
+import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { type WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -8,7 +8,9 @@ import {
   CustomChainConfig,
   EVM_PLUGINS,
   IPlugin,
+  IProvider,
   IWeb3AuthCore,
+  log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -19,7 +21,6 @@ import {
   WalletServicesPluginError,
 } from "@web3auth/base";
 import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
-import log from "loglevel";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
@@ -41,13 +42,13 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.OPENLOGIN, WALLET_ADAPTERS.SFA];
+  readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
   public wsEmbedInstance: WsEmbed;
 
-  private provider: SafeEventEmitterProvider | null = null;
+  private provider: IProvider | null = null;
 
   private web3auth: IWeb3AuthCore | null = null;
 
@@ -72,7 +73,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
     if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
-    // Not connected yet to openlogin
+    // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
@@ -151,19 +152,23 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     }
   }
 
-  async showWalletConnectScanner(): Promise<void> {
+  async showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletConnectScanner();
+    return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
-  async showCheckout(): Promise<void> {
+  async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showCheckout();
+    return this.wsEmbedInstance.showCheckout(showCheckoutParams);
   }
 
-  async showWalletUi(): Promise<void> {
+  async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {
     if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
-    await this.wsEmbedInstance.showWalletUi();
+    return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
+  }
+
+  async cleanup(): Promise<void> {
+    return this.wsEmbedInstance.cleanUp();
   }
 
   async disconnect(): Promise<void> {
@@ -178,7 +183,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   private subscribeToWalletEvents() {
-    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: string[] = []) => {
+    this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
       if ((accounts as string[]).length === 0) {
         this.wsEmbedInstance.hideTorusButton();
         if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
@@ -186,9 +191,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     });
   }
 
-  private subscribeToProviderEvents(provider: SafeEventEmitterProvider) {
-    provider.on("accountsChanged", (data: { accounts: string[] } = { accounts: [] }) => {
-      this.setSelectedAddress(data.accounts[0]);
+  private subscribeToProviderEvents(provider: IProvider) {
+    provider.on("accountsChanged", (accounts: string[] = []) => {
+      this.setSelectedAddress(accounts[0]);
     });
 
     provider.on("chainChanged", (chainId: string) => {

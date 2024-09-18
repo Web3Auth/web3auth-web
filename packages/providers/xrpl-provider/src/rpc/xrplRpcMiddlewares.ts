@@ -1,5 +1,5 @@
 import { randomId } from "@toruslabs/base-controllers";
-import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
 import { CustomChainConfig } from "@web3auth/base";
 import { SubmitResponse, Transaction } from "xrpl";
 

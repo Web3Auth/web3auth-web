@@ -99,7 +99,7 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       }
     } catch (error) {
       log.error("Failed to connect with torus evm provider", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error);
+      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -137,13 +137,17 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, {
+        adapter: WALLET_ADAPTERS.TORUS_EVM,
+        reconnected: this.rehydrated,
+        provider: this.provider,
+      } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = ADAPTER_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_STATUS.ERRORED, error);
+      this.emit(ADAPTER_STATUS.ERRORED, error as Web3AuthError);
       throw error instanceof Web3AuthError ? error : WalletLoginError.connectionError("Failed to login with torus wallet", error);
     }
   }

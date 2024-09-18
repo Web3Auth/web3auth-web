@@ -1,4 +1,4 @@
-import { JRPCRequest, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { CustomChainConfig } from "@web3auth/base";
 import { generateSeed, sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
@@ -15,9 +15,11 @@ const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: st
 export async function getProviderHandlers({
   privKey: web3authKey,
   chainConfig,
+  keyExportEnabled,
 }: {
   privKey: string;
   chainConfig: CustomChainConfig;
+  keyExportEnabled: boolean;
 }): Promise<IProviderHandlers> {
   const client = new Client(chainConfig.wsTarget);
   await client.connect();
@@ -28,6 +30,7 @@ export async function getProviderHandlers({
       return [accAddress];
     },
     getKeyPair: async (_: JRPCRequest<unknown>): Promise<KeyPair> => {
+      if (!keyExportEnabled) throw providerErrors.custom({ message: "Private key export is disabled", code: 4902 });
       return deriveKeypair(web3authKey);
     },
     getPublicKey: async (_: JRPCRequest<unknown>): Promise<string> => {

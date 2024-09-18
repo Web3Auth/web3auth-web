@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.8",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -10,8 +10,9 @@
     "ethereum",
     "walletconnect"
   ],
-  "main": "dist/walletConnectV2Adapter.cjs.js",
-  "module": "dist/walletConnectV2Adapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/walletConnectV2Adapter.umd.min.js",
   "jsdelivr": "dist/walletConnectV2Adapter.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -31,24 +32,18 @@
     "dist"
   ],
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@walletconnect/sign-client": "^2.x",
-    "@walletconnect/types": "^2.x",
-    "@walletconnect/utils": "^2.x"
+    "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@toruslabs/openlogin-jrpc": "^8.3.0",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-evm-adapter": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
-    "@web3auth/ethereum-provider": "^8.12.4",
-    "lodash.merge": "^4.6.2"
-  },
-  "devDependencies": {
-    "@types/lodash.merge": "^4.6.9",
-    "@walletconnect/sign-client": "^2.14.0",
-    "@walletconnect/types": "^2.14.0",
-    "@walletconnect/utils": "^2.14.0"
+    "@walletconnect/sign-client": "^2.16.1",
+    "@walletconnect/types": "^2.16.1",
+    "@walletconnect/utils": "^2.16.1",
+    "@web3auth/auth": "^9.3.3",
+    "@web3auth/base": "^9.0.0-alpha.8",
+    "@web3auth/base-evm-adapter": "^9.0.0-alpha.8",
+    "@web3auth/base-provider": "^9.0.0-alpha.8",
+    "@web3auth/ethereum-provider": "^9.0.0-alpha.8",
+    "deepmerge": "^4.3.1"
   },
   "lint-staged": {
     "!(*d).ts": [

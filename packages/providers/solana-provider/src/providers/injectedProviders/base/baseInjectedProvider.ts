@@ -1,4 +1,4 @@
-import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@toruslabs/openlogin-jrpc";
+import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 

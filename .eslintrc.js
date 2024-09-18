@@ -4,16 +4,13 @@ module.exports = {
   root: true,
   extends: ["@toruslabs/eslint-config-typescript"],
   parser: "@typescript-eslint/parser",
+  ignorePatterns: ["*.config.js", ".eslintrc.js"],
   parserOptions: {
     sourceType: "module",
-    ecmaVersion: 11,
+    ecmaVersion: 2022,
     project: "./tsconfig.json",
   },
-  ignorePatterns: ["*.config.js", "*.d.ts", ".eslintrc.js"],
-  env: {
-    es2020: true,
-    browser: true,
-    node: true,
-    mocha: true,
+  rules: {
+    camelcase: 0,
   },
 };

@@ -1,12 +1,6 @@
-import type { MessageTypes, TypedDataV1, TypedMessage } from "@metamask/eth-sig-util";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@toruslabs/openlogin-jrpc";
+import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
-
-function resemblesAddress(str: string): boolean {
-  // hex prefix 2 + 20 bytes
-  return str.length === 2 + 20 * 2;
-}
 
 export function createWalletMiddleware({
   getAccounts,
@@ -15,8 +9,6 @@ export function createWalletMiddleware({
   processPersonalMessage,
   processTransaction,
   processSignTransaction,
-  processTypedMessage,
-  processTypedMessageV3,
   processTypedMessageV4,
 }: WalletMiddlewareOptions): JRPCMiddleware<string, unknown> {
   if (!getAccounts) {
@@ -102,69 +94,47 @@ export function createWalletMiddleware({
     if (!processEthSignMessage) {
       throw rpcErrors.methodNotSupported();
     }
-
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: string = (req.params as string[])[1];
+    let msgParams: MessageParams<string> = req.params as MessageParams<string>;
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams<string> = {
-      ...extraParams,
-      from: address,
-      data: message,
-    };
+
+    if (Array.isArray(req.params)) {
+      if (!(req.params.length === 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [address, message]`);
+
+      const params = req.params as [string, string];
+      const address = params[0];
+      const message = params[1];
+
+      msgParams = {
+        from: address,
+        data: message,
+      };
+    }
+    msgParams = { ...extraParams, ...msgParams };
 
     res.result = await processEthSignMessage(msgParams, req);
-  }
-
-  async function signTypedData(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processTypedMessage) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const message: TypedDataV1 = (req.params as TypedDataV1[])[0];
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[1], req);
-    const version = "V1";
-    const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
-    const msgParams: MessageParams<TypedDataV1> = {
-      ...extraParams,
-      from: address,
-      data: message,
-    };
-
-    res.result = await processTypedMessage(msgParams, req, version);
-  }
-
-  async function signTypedDataV3(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    if (!processTypedMessageV3) {
-      throw rpcErrors.methodNotSupported();
-    }
-
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
-    const version = "V3";
-    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
-      data: message,
-      from: address,
-      version,
-    };
-
-    res.result = await processTypedMessageV3(msgParams, req, version);
   }
 
   async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!processTypedMessageV4) {
       throw rpcErrors.methodNotSupported();
     }
+    if (!req?.params) throw new Error("WalletMiddleware - missing params");
 
-    const address: string = await validateAndNormalizeKeyholder((req.params as string[])[0], req);
-    const message: TypedMessage<MessageTypes> = (req.params as TypedMessage<MessageTypes>[])[1];
-    const version = "V4";
-    const msgParams: TypedMessageParams<TypedMessage<MessageTypes>> = {
-      data: message,
-      from: address,
-      version,
-    };
+    let msgParams: TypedMessageParams = req.params as TypedMessageParams;
 
-    res.result = await processTypedMessageV4(msgParams, req, version);
+    if (Array.isArray(req.params)) {
+      if (!(req.params.length === 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [address, typedData]`);
+
+      const params = req.params as [string, string];
+      const address = params[0];
+      const message = params[1];
+
+      msgParams = {
+        from: address,
+        data: message,
+      };
+    }
+    res.result = await processTypedMessageV4(msgParams, req);
   }
 
   async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
@@ -172,42 +142,31 @@ export function createWalletMiddleware({
       throw rpcErrors.methodNotSupported();
     }
 
-    // process normally
-    const firstParam: string = (req.params as string[])[0];
-    const secondParam: string = (req.params as string[])[1];
-    // non-standard "extraParams" to be appended to our "msgParams" obj
+    let msgParams: MessageParams<string> = req.params as MessageParams<string>;
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
 
-    // We initially incorrectly ordered these parameters.
-    // To gracefully respect users who adopted this API early,
-    // we are currently gracefully recovering from the wrong param order
-    // when it is clearly identifiable.
-    //
-    // That means when the first param is definitely an address,
-    // and the second param is definitely not, but is hex.
-    let address: string, message: string;
-    if (resemblesAddress(firstParam) && !resemblesAddress(secondParam)) {
-      let warning = `The eth_personalSign method requires params ordered `;
-      warning += `[message, address]. This was previously handled incorrectly, `;
-      warning += `and has been corrected automatically. `;
-      warning += `Please switch this param order for smooth behavior in the future.`;
-      (res as { warning: string }).warning = warning;
+    if (Array.isArray(req.params)) {
+      if (!(req.params.length >= 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [message, address]`);
 
-      address = firstParam;
-      message = secondParam;
-    } else {
-      message = firstParam;
-      address = secondParam;
+      const params = req.params as [string, string];
+      if (typeof params[0] === "object") {
+        const { challenge, address } = params[0] as { challenge: string; address: string };
+        msgParams = {
+          from: address,
+          data: challenge,
+        };
+      } else {
+        const message = params[0];
+        const address = params[1];
+
+        msgParams = {
+          from: address,
+          data: message,
+        };
+      }
     }
-    address = await validateAndNormalizeKeyholder(address, req);
+    msgParams = { ...extraParams, ...msgParams };
 
-    const msgParams: MessageParams<string> = {
-      ...extraParams,
-      from: address,
-      data: message,
-    };
-
-    // eslint-disable-next-line require-atomic-updates
     res.result = await processPersonalMessage(msgParams, req);
   }
 
@@ -229,8 +188,6 @@ export function createWalletMiddleware({
     eth_signTransaction: createAsyncMiddleware(signTransaction),
     // message signatures
     eth_sign: createAsyncMiddleware(ethSign),
-    eth_signTypedData: createAsyncMiddleware(signTypedData),
-    eth_signTypedData_v3: createAsyncMiddleware(signTypedDataV3),
     eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
     personal_sign: createAsyncMiddleware(personalSign),
   });

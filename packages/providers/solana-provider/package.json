@@ -1,10 +1,11 @@
 {
   "name": "@web3auth/solana-provider",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.8",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "main": "dist/solanaProvider.cjs.js",
-  "module": "dist/solanaProvider.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/solanaProvider.umd.min.js",
   "jsdelivr": "dist/solanaProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -19,20 +20,18 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^5.10.0",
-    "@toruslabs/openlogin-ed25519": "^8.1.0",
-    "@toruslabs/openlogin-jrpc": "^8.3.0",
+    "@toruslabs/base-controllers": "^6.1.2",
     "@toruslabs/tweetnacl-js": "^1.0.4",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-provider": "^8.12.4",
+    "@web3auth/auth": "^9.3.3",
+    "@web3auth/base": "^9.0.0-alpha.8",
+    "@web3auth/base-provider": "^9.0.0-alpha.8",
     "bn.js": "^5.2.1",
     "bs58": "^5.0.0",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.95.2",
-    "@solflare-wallet/sdk": "^1.4.2",
-    "@types/bn.js": "^5.1.5",
+    "@solana/web3.js": "^1.95.3",
+    "@types/bn.js": "^5.1.6",
     "@types/bs58": "^4.0.4",
     "@types/json-rpc-random-id": "^1.0.3"
   },

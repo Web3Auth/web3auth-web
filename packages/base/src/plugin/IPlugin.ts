@@ -1,5 +1,4 @@
-import { type SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { type SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES } from "../chain/IChainInterface";
 import { type IWeb3AuthCore } from "../core/IWeb3Auth";
@@ -52,4 +51,5 @@ export interface IPlugin extends SafeEventEmitter {
   initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void>;
   connect(params: PluginConnectParams): Promise<void>;
   disconnect(): Promise<void>;
+  cleanup(): Promise<void>;
 }

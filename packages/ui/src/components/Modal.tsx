@@ -1,12 +1,10 @@
-import type { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { LOGIN_PROVIDER } from "@toruslabs/openlogin-utils";
-import { ADAPTER_NAMES, log } from "@web3auth/base";
-import cloneDeep from "lodash.clonedeep";
-import deepmerge from "lodash.merge";
+import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
+import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WalletRegistry } from "@web3auth/base";
+import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType } from "../interfaces";
+import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../interfaces";
 import i18n from "../localeImport";
 import AdapterLoader from "./AdapterLoader";
 import Button from "./Button";
@@ -18,9 +16,11 @@ import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
 
 interface ModalProps {
-  stateListener: SafeEventEmitter;
+  stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
+  chainNamespace: ChainNamespaceType;
+  walletRegistry?: WalletRegistry;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
@@ -28,8 +28,6 @@ interface ModalProps {
 }
 
 log.enableAll();
-
-// const DETAILED_ADAPTERS = [WALLET_ADAPTERS.PHANTOM, WALLET_ADAPTERS.METAMASK];
 
 export default function Modal(props: ModalProps) {
   const [modalTransitionClasses, setModalTransitionClasses] = useState(["w3a-modal__inner"]);
@@ -53,11 +51,22 @@ export default function Modal(props: ModalProps) {
     detailedLoaderAdapter: "",
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
-    wcAdapters: [],
   });
   const [t] = useTranslation(undefined, { i18n });
 
-  const { stateListener, appLogo, appName, handleSocialLoginClick, handleExternalWalletClick, handleShowExternalWallets, closeModal } = props;
+  const {
+    stateListener,
+    appLogo,
+    appName,
+    chainNamespace,
+    walletRegistry,
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleShowExternalWallets,
+    closeModal,
+  } = props;
+
+  const [transition, setTransition] = useState("");
 
   useEffect(() => {
     stateListener.emit("MOUNTED");
@@ -133,19 +142,23 @@ export default function Modal(props: ModalProps) {
   const externalWalletButton = (
     <div className="w3ajs-external-wallet w3a-group">
       <div className="w3a-external-toggle w3ajs-external-toggle">
-        <div className="w3a-group__title">{t("modal.external.title")}</div>
+        {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
           className="w-full w3ajs-external-toggle__button"
           onClick={() => {
-            handleShowExternalWallets(modalState.externalWalletsInitialized);
             setModalState((prevState) => {
               return {
                 ...prevState,
                 externalWalletsVisibility: true,
               };
             });
+            setTransition("slide-enter");
+            handleShowExternalWallets(modalState.externalWalletsInitialized);
+            setTimeout(() => {
+              setTransition("slide-exit");
+            }, 300);
           }}
         >
           {t("modal.external.connect")}
@@ -176,62 +189,77 @@ export default function Modal(props: ModalProps) {
   return (
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
-        <div className={modalTransitionClasses.join(" ")}>
-          <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
+        <div
+          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""} ${
+            (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
+              ? ""
+              : "h-[567px]"
+          }`}
+        >
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
-            <div className="w3a-modal__content w3ajs-content">
-              {/* {modalState.detailedLoaderAdapter ? ( */}
-              <AdapterLoader
-                onClose={onCloseLoader}
-                appLogo={appLogo}
-                modalStatus={modalState.status}
-                message={t(modalState.postLoadingMessage)}
-                adapter={modalState.detailedLoaderAdapter}
-                adapterName={modalState.detailedLoaderAdapterName}
-              />
-              {/* ) : ( */}
-              {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
-              {/* )} */}
-            </div>
+            <>
+              <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
+              <div className="w3a-modal__content w3ajs-content">
+                {/* {modalState.detailedLoaderAdapter ? ( */}
+                <AdapterLoader
+                  onClose={onCloseLoader}
+                  appLogo={appLogo}
+                  modalStatus={modalState.status}
+                  message={t(modalState.postLoadingMessage)}
+                  adapter={modalState.detailedLoaderAdapter}
+                  adapterName={modalState.detailedLoaderAdapterName}
+                />
+                {/* ) : ( */}
+                {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
+                {/* )} */}
+              </div>
+            </>
           ) : (
-            <div className="w3a-modal__content w3ajs-content">
+            <div className={`transition-wrapper ${transition}`}>
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
               !modalState.externalWalletsVisibility ? (
                 <>
-                  {areSocialLoginsVisible ? (
-                    <SocialLogins
-                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                      socialLoginsConfig={modalState.socialLoginsConfig}
-                    />
-                  ) : null}
+                  <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
+                  <div className="w3a-modal__content w3ajs-content">
+                    {areSocialLoginsVisible ? (
+                      <SocialLogins
+                        handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                        socialLoginsConfig={modalState.socialLoginsConfig}
+                      />
+                    ) : null}
 
-                  {(isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && (
-                    <SocialLoginPasswordless
-                      isEmailVisible={isEmailPasswordlessLoginVisible}
-                      isSmsVisible={isSmsPasswordlessLoginVisible}
-                      adapter={modalState.socialLoginsConfig?.adapter}
-                      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-                      isPrimaryBtn={isEmailPrimary}
-                    />
-                  )}
+                    {(isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && (
+                      <SocialLoginPasswordless
+                        isEmailVisible={isEmailPasswordlessLoginVisible}
+                        isSmsVisible={isSmsPasswordlessLoginVisible}
+                        adapter={modalState.socialLoginsConfig?.adapter}
+                        handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                        isPrimaryBtn={isEmailPrimary}
+                      />
+                    )}
 
-                  {/* button to show external wallets */}
-                  {modalState.hasExternalWallets && externalWalletButton}
+                    {/* button to show external wallets */}
+                    {modalState.hasExternalWallets && externalWalletButton}
+                  </div>
                 </>
               ) : (
-                <ExternalWallets
-                  modalStatus={modalState.status}
-                  showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
-                  handleExternalWalletClick={preHandleExternalWalletClick}
-                  walletConnectUri={modalState.walletConnectUri}
-                  wcAdapters={modalState.wcAdapters}
-                  config={modalState.externalWalletsConfig}
-                  hideExternalWallets={() =>
-                    setModalState((prevState) => {
-                      return { ...prevState, externalWalletsVisibility: false };
-                    })
-                  }
-                />
+                <div className="w3a-modal__content_external_wallet w3ajs-content">
+                  <ExternalWallets
+                    modalStatus={modalState.status}
+                    showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
+                    handleExternalWalletClick={preHandleExternalWalletClick}
+                    chainNamespace={chainNamespace}
+                    walletConnectUri={modalState.walletConnectUri}
+                    config={modalState.externalWalletsConfig}
+                    hideExternalWallets={() =>
+                      setModalState((prevState) => {
+                        return { ...prevState, externalWalletsVisibility: false };
+                      })
+                    }
+                    walletRegistry={walletRegistry}
+                    closeModal={closeModal}
+                  />
+                </div>
               )}
             </div>
           )}

@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@toruslabs/openlogin-jrpc";
+import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/auth";
 import {
   CustomChainConfig,
   IBaseProvider,
@@ -10,6 +10,8 @@ import {
   WalletProviderError,
 } from "@web3auth/base";
 
+import { BaseProviderEvents } from "./interfaces";
+
 export interface BaseProviderState extends BaseState {
   chainId: string;
 }
@@ -18,26 +20,33 @@ export interface BaseProviderConfig extends BaseConfig {
   chainConfig: CustomChainConfig;
   networks?: Record<string, CustomChainConfig>;
   skipLookupNetwork?: boolean;
+  keyExportEnabled?: boolean;
 }
 
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
-  extends BaseController<C, S>
+  extends BaseController<C, S, BaseProviderEvents<S>>
   implements IBaseProvider<P>
 {
   // should be Assigned in setupProvider
   public _providerEngineProxy: SafeEventEmitterProvider | null = null;
+
+  // set to true when the keyExportEnabled flag is set by code.
+  // This is to prevent the flag from being overridden by the dashboard config.
+  private keyExportFlagSetByCode = false;
 
   constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
     if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
     if (!config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chainConfig");
     if (!config.chainConfig.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chainConfig");
+    if (typeof config.keyExportEnabled === "boolean") this.keyExportFlagSetByCode = true;
     this.defaultState = {
       chainId: "loading",
     } as S;
     this.defaultConfig = {
       chainConfig: config.chainConfig,
       networks: { [config.chainConfig.chainId]: config.chainConfig },
+      keyExportEnabled: typeof config.keyExportEnabled === "boolean" ? config.keyExportEnabled : true,
     } as C;
     super.initialize();
   }
@@ -119,6 +128,14 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       (this._providerEngineProxy as any).setTarget(provider);
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
+    }
+  }
+
+  public setKeyExportFlag(flag: boolean): void {
+    if (!this.keyExportFlagSetByCode) {
+      this.configure({
+        keyExportEnabled: flag,
+      } as Partial<C>);
     }
   }
 

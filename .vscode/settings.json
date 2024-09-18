@@ -1,4 +1,5 @@
 {
+  "editor.tabSize": 2,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
   },
@@ -12,5 +13,5 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": ["JRPC", "openlogin", "Solana"]
+  "cSpell.words": ["JRPC","Solana"]
 }

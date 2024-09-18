@@ -8,6 +8,7 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "react/no-is-mounted": 0,
     "no-console": 2,
     "@typescript-eslint/no-throw-literal": 0,
     "import/extensions": [

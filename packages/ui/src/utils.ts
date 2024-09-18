@@ -1,22 +1,22 @@
 import { get, post } from "@toruslabs/http-helpers";
-import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@toruslabs/openlogin-utils";
+import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@web3auth/auth";
 import { log, LoginMethodConfig, WALLET_ADAPTERS, WalletInitializationError } from "@web3auth/base";
 
-import { OPENLOGIN_PROVIDERS, OPENLOGIN_PROVIDERS_NAMES } from "./config";
+import { AUTH_PROVIDERS, AUTH_PROVIDERS_NAMES } from "./config";
 
 export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: LoginMethodConfig = {}): LoginMethodConfig => {
   const finalLoginMethodsConfig: LoginMethodConfig = {};
-  if (adapterName === WALLET_ADAPTERS.OPENLOGIN) {
-    OPENLOGIN_PROVIDERS.forEach((loginMethod) => {
+  if (adapterName === WALLET_ADAPTERS.AUTH) {
+    AUTH_PROVIDERS.forEach((loginMethod) => {
       const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {
-        name: OPENLOGIN_PROVIDERS_NAMES[loginMethod],
+        name: AUTH_PROVIDERS_NAMES[loginMethod],
         showOnMobile: true,
         showOnModal: true,
         showOnDesktop: true,
       };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
-    log.debug("OpenLogin login method ui config", finalLoginMethodsConfig);
+    log.debug("auth login method ui config", finalLoginMethodsConfig);
   } else {
     throw WalletInitializationError.invalidParams(`${adapterName} is not a valid adapter`);
   }

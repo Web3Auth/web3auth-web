@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
-import Footer from "./Footer";
+// import Footer from "./Footer";
 import Icon from "./Icon";
 import Image from "./Image";
 
@@ -17,11 +17,11 @@ interface DetailedLoaderProps {
   onClose: () => void;
 }
 
-const closeIcon = <Icon iconName="close" />;
+const closeIcon = <Icon iconName="x-light" darkIconName="close" />;
 
 export default function DetailedLoader(props: DetailedLoaderProps) {
   const { adapter, appLogo, message, modalStatus, adapterName, onClose } = props;
-  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} />;
+  const providerIcon = adapter === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${adapter}`} height="30" width="30" />;
   const [t] = useTranslation(undefined, { i18n });
 
   useEffect(() => {
@@ -34,15 +34,15 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
-    <div className="w3ajs-modal-loader w3a-modal__loader">
+    <div className="w3ajs-modal-loader w3a-modal__loader h-full">
       <div className="w3a-modal__loader-content">
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
                 <div className="w3a-modal__loader-app-logo">
-                  <img src={appLogo} className="block dark:hidden" alt="" />
-                  <img src={appLogo} className="hidden dark:block" alt="" />
+                  <img src={appLogo} className="block dark:hidden h-12 w-12" alt="" />
+                  <img src={appLogo} className="hidden dark:block h-12 w-12" alt="" />
                 </div>
                 <div className="w3a-modal__connector">
                   <div className="w3a-modal__connector-beat">
@@ -71,8 +71,6 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
-
-        <Footer />
       </div>
       {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>

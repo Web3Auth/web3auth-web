@@ -1,3 +1,4 @@
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth-adapter";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -10,7 +11,6 @@ import {
   WalletLoginError,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
@@ -27,7 +27,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [connectError, setConnectError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
-  const [userInfo, setUserInfo] = useState<Partial<OpenloginUserInfo> | null>(null);
+  const [userInfo, setUserInfo] = useState<Partial<AuthUserInfo> | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<ADAPTER_STATUS_TYPE | null>(null);
@@ -69,6 +69,22 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [config]);
 
   useEffect(() => {
+    async function init() {
+      try {
+        setInitError(null);
+        setIsInitializing(true);
+        await web3Auth.init();
+      } catch (error) {
+        setInitError(error as Error);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+
+    if (web3Auth) init();
+  }, [web3Auth]);
+
+  useEffect(() => {
     const addState = async () => {
       setProvider(web3Auth.provider);
       const userState = await web3Auth.getUserInfo();
@@ -88,22 +104,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
   }, [web3Auth, isConnected]);
 
-  // TODO: Init ourselves in v9
   // TODO: don't throw error in init, connect in v9
-
-  const init = useCallback(async () => {
-    if (!web3Auth) throw WalletInitializationError.notReady();
-    try {
-      setInitError(null);
-      setIsInitializing(true);
-      await web3Auth.init();
-    } catch (error) {
-      setInitError(error as Error);
-      throw error;
-    } finally {
-      setIsInitializing(false);
-    }
-  }, [web3Auth]);
 
   useEffect(() => {
     const notReadyListener = () => setStatus(ADAPTER_STATUS.NOT_READY);
@@ -228,7 +229,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       userInfo,
       isMFAEnabled,
       status,
-      init,
       getPlugin,
       connectTo,
       enableMFA,
@@ -251,7 +251,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     userInfo,
     isMFAEnabled,
     status,
-    init,
     connectTo,
     getPlugin,
     enableMFA,

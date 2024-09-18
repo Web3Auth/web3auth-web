@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/coinbase-adapter",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.8",
   "description": "coinbase adapter for web3auth",
   "keywords": [
     "web3Auth/coinbase-adapter",
@@ -10,8 +10,9 @@
     "ethereum",
     "coinbase"
   ],
-  "main": "dist/coinbaseAdapter.cjs.js",
-  "module": "dist/coinbaseAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/coinbaseAdapter.umd.min.js",
   "jsdelivr": "dist/coinbaseAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -35,8 +36,8 @@
     "@coinbase/wallet-sdk": "^4.x"
   },
   "dependencies": {
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-evm-adapter": "^8.12.4"
+    "@web3auth/base": "^9.0.0-alpha.8",
+    "@web3auth/base-evm-adapter": "^9.0.0-alpha.8"
   },
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.0.4"

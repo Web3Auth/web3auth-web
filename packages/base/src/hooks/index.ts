@@ -1,4 +1,5 @@
-import { LoginParams, OpenloginUserInfo } from "@toruslabs/openlogin-utils";
+import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 
 import { ADAPTER_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
@@ -7,7 +8,7 @@ import { IPlugin } from "../plugin";
 export interface IBaseWeb3AuthHookContext {
   isConnected: boolean;
   provider: IProvider | null;
-  userInfo: Partial<OpenloginUserInfo> | null;
+  userInfo: Partial<AuthUserInfo> | null;
   isMFAEnabled: boolean;
   isInitialized: boolean;
   status: ADAPTER_STATUS_TYPE | null;
@@ -23,7 +24,7 @@ export interface IBaseWeb3AuthHookContext {
 
 export interface IBaseWalletServicesHookContext {
   isPluginConnected: boolean;
-  showWalletConnectScanner(): Promise<void>;
-  showCheckout(): Promise<void>;
-  showWalletUI(): Promise<void>;
+  showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void>;
+  showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void>;
+  showWalletUI(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void>;
 }

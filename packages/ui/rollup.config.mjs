@@ -5,7 +5,7 @@ import svgr from "@svgr/rollup";
 import path from "path";
 import postcss from "rollup-plugin-postcss";
 
-const config = {
+export const baseConfig = {
   output: [{ dir: path.resolve("./dist/"), format: "es", sourcemap: true }],
   plugins: [
     postcss({
@@ -20,5 +20,3 @@ const config = {
     json(),
   ],
 };
-
-export default config;

@@ -7,18 +7,9 @@ jobs:
   demo:
     strategy:
       matrix:
-        node: ["18.x"]
+        node: ["20.x"]
         os: [ubuntu-latest]
-        demo:
-          [
-            react-app,
-            next-app,
-            angular-app,
-            firebase-next-app,
-            firebase-react-app,
-            whitelabel-app,
-            starkex-react-app,
-          ]
+        demo: [react-app, next-app, angular-app, firebase-next-app, firebase-react-app, whitelabel-app, starkex-react-app]
 
     runs-on: ${{ matrix.os }}
 

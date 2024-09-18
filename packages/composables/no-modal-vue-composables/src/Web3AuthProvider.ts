@@ -1,3 +1,4 @@
+import type { AuthUserInfo, LoginParams } from "@web3auth/auth-adapter";
 import {
   ADAPTER_EVENTS,
   type ADAPTER_STATUS_TYPE,
@@ -7,16 +8,14 @@ import {
   WALLET_ADAPTER_TYPE,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthContextKey,
 } from "@web3auth/base";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import type { LoginParams, OpenloginUserInfo } from "@web3auth/openlogin-adapter";
-import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
+import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 
-export const Web3AuthContextKey = Symbol("Web3AuthContextKey") as InjectionKey<IWeb3AuthContext>;
-
-export default defineComponent({
+export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
   props: {
     config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
@@ -24,7 +23,7 @@ export default defineComponent({
   setup(props) {
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
     const provider = ref<IProvider | null>(null);
-    const userInfo = ref<Partial<OpenloginUserInfo> | null>(null);
+    const userInfo = ref<Partial<AuthUserInfo> | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<ADAPTER_STATUS_TYPE | null>(null);
 
@@ -46,26 +45,10 @@ export default defineComponent({
       return web3Auth.value.getPlugin(name);
     };
 
-    const init = async () => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      try {
-        initError.value = null;
-        isInitializing.value = true;
-        await web3Auth.value.init();
-        triggerRef(web3Auth);
-      } catch (error) {
-        initError.value = error as Error;
-        throw error;
-      } finally {
-        isInitializing.value = false;
-      }
-    };
-
     const enableMFA = async (loginParams?: Partial<LoginParams>) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.enableMFA(loginParams);
-      triggerRef(web3Auth);
       const localUserInfo = await web3Auth.value.getUserInfo();
       userInfo.value = localUserInfo;
       isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
@@ -75,7 +58,6 @@ export default defineComponent({
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.logout(logoutParams);
-      triggerRef(web3Auth);
     };
 
     const connectTo = async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
@@ -84,11 +66,9 @@ export default defineComponent({
         connectError.value = null;
         isConnecting.value = true;
         const localProvider = await web3Auth.value.connectTo(walletName, loginParams);
-        triggerRef(web3Auth);
         return localProvider;
       } catch (error) {
         connectError.value = error as Error;
-        throw error;
       } finally {
         isConnecting.value = false;
       }
@@ -116,10 +96,8 @@ export default defineComponent({
     };
 
     watch(
-      [web3Auth, () => props.config],
+      [() => props.config],
       () => {
-        if (web3Auth.value) return;
-
         const resetHookState = () => {
           provider.value = null;
           userInfo.value = null;
@@ -143,7 +121,25 @@ export default defineComponent({
       { immediate: true }
     );
 
-    watch([web3Auth, isConnected], () => {
+    watch(
+      web3Auth,
+      async (newWeb3Auth) => {
+        if (newWeb3Auth) {
+          try {
+            initError.value = null;
+            isInitializing.value = true;
+            await newWeb3Auth.init();
+          } catch (error) {
+            initError.value = error as Error;
+          } finally {
+            isInitializing.value = false;
+          }
+        }
+      },
+      { immediate: true }
+    );
+
+    watch(isConnected, () => {
       if (web3Auth.value) {
         const addState = async (web3AuthInstance: Web3AuthNoModal) => {
           provider.value = web3AuthInstance.provider;
@@ -211,7 +207,7 @@ export default defineComponent({
       { immediate: true }
     );
 
-    provide(Web3AuthContextKey, {
+    provide<IWeb3AuthContext>(Web3AuthContextKey, {
       web3Auth,
       isConnected,
       isInitialized,
@@ -220,7 +216,6 @@ export default defineComponent({
       isMFAEnabled,
       status,
       getPlugin,
-      init,
       connectTo,
       enableMFA,
       logout,

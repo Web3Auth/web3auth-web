@@ -1,7 +1,16 @@
-import { SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import { WhiteLabelData } from "@toruslabs/openlogin-utils";
+import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 
-import { ADAPTER_STATUS_TYPE, IAdapter, IBaseProvider, IProvider, OPENLOGIN_NETWORK_TYPE, UserAuthInfo, UserInfo } from "../adapter/IAdapter";
+import {
+  ADAPTER_EVENTS,
+  ADAPTER_STATUS_TYPE,
+  AdapterEvents,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  UserAuthInfo,
+  UserInfo,
+  WEB3AUTH_NETWORK_TYPE,
+} from "../adapter/IAdapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
@@ -44,7 +53,7 @@ export interface IWeb3AuthCoreOptions {
    * Web3Auth Network to use for the session & the issued idToken
    * @defaultValue mainnet
    */
-  web3AuthNetwork?: OPENLOGIN_NETWORK_TYPE;
+  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
 
   /**
    * Uses core-kit key with web3auth provider
@@ -91,5 +100,10 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
 }
+
+export type Web3AuthNoModalEvents = AdapterEvents & {
+  [ADAPTER_EVENTS.READY]: () => void;
+  MODAL_VISIBILITY: (visibility: boolean) => void;
+};
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

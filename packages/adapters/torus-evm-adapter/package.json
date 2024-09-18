@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-evm-adapter",
-  "version": "8.12.4",
+  "version": "9.0.0-alpha.8",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
     "web3Auth/torus-evm-adapter",
@@ -10,8 +10,9 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/torusEvmAdapter.cjs.js",
-  "module": "dist/torusEvmAdapter.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/torusEvmAdapter.umd.min.js",
   "jsdelivr": "dist/torusEvmAdapter.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -35,8 +36,8 @@
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^5.0.0",
-    "@web3auth/base": "^8.12.4",
-    "@web3auth/base-evm-adapter": "^8.12.4"
+    "@web3auth/base": "^9.0.0-alpha.8",
+    "@web3auth/base-evm-adapter": "^9.0.0-alpha.8"
   },
   "lint-staged": {
     "!(*d).ts": [
