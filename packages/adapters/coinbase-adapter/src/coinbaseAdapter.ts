@@ -38,8 +38,6 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
-  public coinbaseInstance: CoinbaseWalletSDK | null = null;
-
   private coinbaseProvider: ProviderInterface | null = null;
 
   private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
@@ -68,11 +66,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
-    this.coinbaseInstance = new CoinbaseWalletSDK({
+    const coinbaseInstance = new CoinbaseWalletSDK({
       ...this.coinbaseOptions,
       appChainIds: [Number.parseInt(this.chainConfig.chainId, 16)],
     });
-    this.coinbaseProvider = this.coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
+    this.coinbaseProvider = coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {
