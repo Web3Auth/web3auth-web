@@ -1,23 +1,23 @@
 {
-  "name": "@web3auth/modal-vue-composables",
+  "name": "@web3auth/wallet-services-plugin-vue-composables",
   "version": "9.0.0-alpha.8",
-  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
+  "description": "Vue composables to simplify integration with web3Auth wallet services plugin SDK.",
   "keywords": [
-    "web3Auth/modal-vue-composables",
+    "web3Auth/wallet-services-plugin-vue-composables",
     "web3Auth",
     "blockchain",
     "vue composables",
     "web3Auth composables",
-    "web3Auth modal vue composables"
+    "webAuth wallet-services plugin vue composables"
   ],
   "sideEffects": false,
   "main": "dist/lib.cjs/index.js",
   "module": "dist/lib.esm/index.js",
-  "unpkg": "dist/modalVueComposables.umd.min.js",
-  "jsdelivr": "dist/modalVueComposables.umd.min.js",
+  "unpkg": "dist/walletServicesPluginVueComposables.umd.min.js",
+  "jsdelivr": "dist/walletServicesPluginVueComposables.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/wallet-services-plugin-vue-composables#readme",
   "license": "ISC",
   "scripts": {
     "dev": "torus-scripts start",
@@ -29,12 +29,9 @@
     "dist"
   ],
   "dependencies": {
+    "@toruslabs/base-controllers": "^6.1.2",
     "@web3auth/base": "^9.0.0-alpha.8",
-    "@web3auth/modal": "^9.0.0-alpha.8"
-  },
-  "devDependencies": {
-    "@web3auth/auth": "^9.3.3",
-    "@web3auth/auth-adapter": "^9.0.0-alpha.8"
+    "@web3auth/wallet-services-plugin": "^9.0.0-alpha.8"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

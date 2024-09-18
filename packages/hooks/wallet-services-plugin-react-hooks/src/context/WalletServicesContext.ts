@@ -11,6 +11,21 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
   const [isPluginConnected, setIsPluginConnected] = useState<boolean>(false);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
   const web3AuthContext = useContext(context);
+  const { getPlugin, isInitialized, isConnected } = web3AuthContext;
+
+  useEffect(() => {
+    if (isInitialized) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      setWalletServicesPlugin(plugin);
+    }
+  }, [isInitialized, getPlugin]);
+
+  useEffect(() => {
+    if (isConnected) {
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      if (!walletServicesPlugin) setWalletServicesPlugin(plugin);
+    }
+  }, [isConnected, getPlugin, walletServicesPlugin]);
 
   useEffect(() => {
     const connectedListener = () => {
@@ -20,13 +35,6 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
     const disconnectedListener = () => {
       setIsPluginConnected(false);
     };
-
-    const { getPlugin, isInitialized } = web3AuthContext;
-
-    if (isInitialized) {
-      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-      setWalletServicesPlugin(plugin);
-    }
 
     if (walletServicesPlugin) {
       walletServicesPlugin.on(PLUGIN_EVENTS.CONNECTED, connectedListener);
@@ -39,7 +47,7 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
         walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
       }
     };
-  }, [walletServicesPlugin, web3AuthContext]);
+  }, [walletServicesPlugin]);
 
   const showWalletConnectScanner = useCallback(
     async (showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]) => {

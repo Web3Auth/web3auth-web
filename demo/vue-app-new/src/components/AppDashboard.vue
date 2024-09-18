@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, WALLET_PLUGINS } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IProvider, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
@@ -31,7 +31,11 @@ const isDisplay = (name: string): boolean => {
       return formData.chainNamespace === CHAIN_NAMESPACES.SOLANA;
 
     case "walletServices":
-      return formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.walletPlugin.enable;
+      return (
+        formData.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+        formData.walletPlugin.enable &&
+        web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
+      );
 
     default: {
       return false;

@@ -7,13 +7,12 @@ import {
   type IProvider,
   WalletInitializationError,
   WalletLoginError,
+  Web3AuthContextKey,
 } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
-import { defineComponent, h, InjectionKey, PropType, provide, ref, shallowRef, triggerRef, watch } from "vue";
+import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
-
-export const Web3AuthContextKey = Symbol("Web3AuthContextKey") as InjectionKey<IWeb3AuthContext>;
 
 export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
@@ -49,7 +48,6 @@ export const Web3AuthProvider = defineComponent({
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.enableMFA(loginParams);
-      triggerRef(web3Auth);
       const localUserInfo = await web3Auth.value.getUserInfo();
       userInfo.value = localUserInfo;
       isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
@@ -59,7 +57,6 @@ export const Web3AuthProvider = defineComponent({
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.logout(logoutParams);
-      triggerRef(web3Auth);
     };
 
     const connect = async () => {
@@ -68,7 +65,6 @@ export const Web3AuthProvider = defineComponent({
         connectError.value = null;
         isConnecting.value = true;
         const localProvider = await web3Auth.value.connect();
-        triggerRef(web3Auth);
         return localProvider;
       } catch (error) {
         connectError.value = error as Error;
@@ -215,7 +211,7 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    provide(Web3AuthContextKey, {
+    provide<IWeb3AuthContext>(Web3AuthContextKey, {
       web3Auth,
       isConnected,
       isInitialized,

@@ -82,7 +82,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     const { whitelabel } = projectConfig;
-    this.options.uiConfig = deepmerge(cloneDeep(whitelabel), this.options.uiConfig);
+    this.options.uiConfig = deepmerge(cloneDeep(whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
@@ -116,7 +116,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      params.modalConfig = deepmerge(cloneDeep(params.modalConfig), adapterConfig);
+      const localSmsOtpEnabled = params.modalConfig[WALLET_ADAPTERS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnModal;
+      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
+        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
+      }
+
+      params.modalConfig = deepmerge(adapterConfig, cloneDeep(params.modalConfig));
     }
 
     await this.loginModal.initModal();
