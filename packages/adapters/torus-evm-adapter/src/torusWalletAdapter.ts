@@ -137,7 +137,11 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       this.torusInstance.showTorusButton();
-      this.emit(ADAPTER_STATUS.CONNECTED, { adapter: WALLET_ADAPTERS.TORUS_EVM, reconnected: this.rehydrated } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_STATUS.CONNECTED, {
+        adapter: WALLET_ADAPTERS.TORUS_EVM,
+        reconnected: this.rehydrated,
+        provider: this.provider,
+      } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {
       // ready again to be connected
