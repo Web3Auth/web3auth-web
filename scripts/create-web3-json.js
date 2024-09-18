@@ -19,14 +19,14 @@ async function mergeJsonFiles(file1Path, file2Path, outputPath) {
       const walletData =
         json1.groups?.[wallet] || json1.groups?.[`${wallet}wallet`] || json1.wallets?.[wallet] || json1.wallets?.[`${wallet}wallet`] || null;
 
-      if (wallet === "aktionariat") {
-        console.log(walletData, "HELLO");
-      }
+      // if (wallet === "aktionariat") {
+      //   console.log(walletData, "HELLO");
+      // }
 
       if (walletData) {
-        json2[wallet].primaryColor = walletData?.brand?.primaryColor || "#00000";
+        json2[wallet].primaryColor = walletData?.brand?.primaryColor || "#000000";
       } else {
-        json2[wallet].primaryColor = "#00000";
+        json2[wallet].primaryColor = "#000000";
       }
     });
 
