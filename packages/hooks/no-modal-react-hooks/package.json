@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal-react-hooks",
-  "version": "9.0.0-alpha.8",
+  "version": "9.0.0-alpha.9",
   "description": "React hooks to simplify integration with web3Auth no-modal SDK.",
   "keywords": [
     "web3Auth/no-modal-react-hooks",
@@ -32,11 +32,11 @@
     "dist"
   ],
   "devDependencies": {
-    "@web3auth/auth-adapter": "^9.0.0-alpha.8"
+    "@web3auth/auth-adapter": "^9.0.0-alpha.9"
   },
   "dependencies": {
-    "@web3auth/base": "^9.0.0-alpha.8",
-    "@web3auth/no-modal": "^9.0.0-alpha.8"
+    "@web3auth/base": "^9.0.0-alpha.9",
+    "@web3auth/no-modal": "^9.0.0-alpha.9"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
