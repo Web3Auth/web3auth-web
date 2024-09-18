@@ -82,7 +82,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     const { whitelabel } = projectConfig;
-    this.options.uiConfig = deepmerge(cloneDeep(whitelabel), this.options.uiConfig);
+    this.options.uiConfig = deepmerge(cloneDeep(whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 

@@ -91,7 +91,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       this.adapterOptions.loginSettings = wc2Settings.loginSettings;
     }
 
-    this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings, this.adapterOptions.adapterSettings);
+    this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings || {}, this.adapterOptions.adapterSettings || {});
 
     const { adapterSettings } = this.adapterOptions;
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
