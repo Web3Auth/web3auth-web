@@ -307,7 +307,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     walletAdapter.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
-      this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider));
+
+      let finalProvider = provider;
+      // setup aa provider after adapter is connected and private key provider is setup
+      if (this.coreOptions.aAProvider) {
+        await this.coreOptions.aAProvider.setupProvider(provider);
+        finalProvider = this.coreOptions.aAProvider;
+      }
+
+      this.commonJRPCProvider.updateProviderEngineProxy(
+        (finalProvider as IBaseProvider<unknown>).provider || (finalProvider as SafeEventEmitterProvider)
+      );
       this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
       this.cacheWallet(data.adapter);
