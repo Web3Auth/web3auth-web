@@ -100,7 +100,7 @@ function convertToMergedFormat(registryWallet, otherWallet) {
       universal: registryWallet.webapp_link || null,
     },
     injected: registryWallet.injected || null,
-    primaryColor: "#00000",
+    primaryColor: "#000000",
     // image_id: registryWallet?.image_id || null,
     imgExtension: registryWallet?.image_id ? "webp" : "svg",
   };

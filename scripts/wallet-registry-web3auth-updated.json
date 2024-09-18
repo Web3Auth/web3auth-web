@@ -1,162 +1,5 @@
 {
   "default": {
-    "argent": {
-      "app": {
-        "android": "im.argent.contractwalletclient",
-        "ios": "id1358741926"
-      },
-      "chains": [
-        "eip155:1"
-      ],
-      "imgExtension": "webp",
-      "injected": null,
-      "mobile": {
-        "native": "argent://app/wc",
-        "universal": "https://www.argent.xyz/app"
-      },
-      "name": "Argent",
-      "primaryColor": "#00000",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "coinbase": {
-      "app": {
-        "android": "https://play.google.com/store/apps/details?id=org.toshi",
-        "browser": "https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad?hl=en",
-        "ios": "https://apps.apple.com/app/apple-store/id1278383455"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:10",
-        "eip155:100",
-        "eip155:137",
-        "eip155:250",
-        "eip155:42161",
-        "eip155:43114",
-        "eip155:56",
-        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
-      ],
-      "desktop": {
-        "native": null,
-        "universal": null
-      },
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "isCoinbaseWallet",
-          "namespace": "eip155"
-        }
-      ],
-      "mobile": {
-        "native": null,
-        "universal": null
-      },
-      "name": "Coinbase Wallet",
-      "primaryColor": "#1648F9",
-      "walletConnect": []
-    },
-    "crypto.com": {
-      "app": {
-        "android": "com.defi.wallet",
-        "ios": "id1512048310"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:10",
-        "eip155:100",
-        "eip155:108",
-        "eip155:1284",
-        "eip155:1285",
-        "eip155:1313161554",
-        "eip155:137",
-        "eip155:25",
-        "eip155:250",
-        "eip155:42161",
-        "eip155:42220",
-        "eip155:56",
-        "eip155:8217"
-      ],
-      "imgExtension": "svg",
-      "mobile": {
-        "native": "dfw://",
-        "universal": "https://wallet.crypto.com"
-      },
-      "name": "Crypto.com | DeFi Wallet",
-      "primaryColor": "#00000",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "exodus": {
-      "app": {
-        "android": "exodusmovement.exodus",
-        "chrome": "aholpfdialjgjfhomihkjbmgjidlcdno",
-        "ios": "id1414384820"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:137",
-        "eip155:43114",
-        "eip155:56",
-        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
-      ],
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "isExodus",
-          "namespace": "eip155"
-        }
-      ],
-      "mobile": {
-        "native": "exodus://wc",
-        "universal": "https://exodus.com/m"
-      },
-      "name": "Exodus",
-      "primaryColor": "#00000",
-      "walletConnect": {
-        "sdks": [
-          "auth_v1",
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "ledger-live": {
-      "app": {
-        "android": "com.ledger.live",
-        "ios": "id1361671700"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:137",
-        "eip155:4",
-        "eip155:56"
-      ],
-      "desktop": {
-        "native": "ledgerlive://wc"
-      },
-      "imgExtension": "webp",
-      "injected": null,
-      "mobile": {
-        "native": "ledgerlive://wc",
-        "universal": "https://r354.adj.st/wc?adj_t=t2esmlk"
-      },
-      "name": "Ledger Live",
-      "primaryColor": "#00000",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
     "metamask": {
       "app": {
         "android": "io.metamask",
@@ -189,48 +32,6 @@
         ]
       }
     },
-    "okx": {
-      "app": {
-        "android": "https://play.google.com/store/apps/details?id=com.okinc.okex.gp",
-        "browser": "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
-        "ios": "https://apps.apple.com/us/app/okx-buy-bitcoin-eth-crypto/id1327268470"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:137",
-        "eip155:43114",
-        "eip155:56",
-        "eip155:66",
-        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
-      ],
-      "desktop": {
-        "native": null,
-        "universal": null
-      },
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "isPLC",
-          "namespace": "eip155"
-        },
-        {
-          "injected_id": "isPLC",
-          "namespace": "solana"
-        }
-      ],
-      "mobile": {
-        "native": "okex://main",
-        "universal": "https://www.okx.com/download"
-      },
-      "name": "OKX Wallet",
-      "primaryColor": "#00000",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
     "phantom": {
       "app": {
         "android": "app.phantom",
@@ -256,136 +57,6 @@
       ],
       "name": "Phantom",
       "primaryColor": "#4B49C6",
-      "walletConnect": []
-    },
-    "rainbow": {
-      "app": {
-        "android": "me.rainbow",
-        "chrome": "opfgelmcmbiajamepnmloijbpoleiama",
-        "edge": "cpojfbodiccabbabgimdeohkkpjfpbnf",
-        "firefox": "rainbow-extension",
-        "ios": "id1457119021"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:10",
-        "eip155:137",
-        "eip155:42161",
-        "eip155:56",
-        "eip155:7777777",
-        "eip155:8453"
-      ],
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "isRainbow",
-          "namespace": "eip155"
-        }
-      ],
-      "mobile": {
-        "native": "rainbow://wc",
-        "universal": "https://rnbwapp.com/wc"
-      },
-      "name": "Rainbow",
-      "primaryColor": "#001e59",
-      "walletConnect": {
-        "sdks": [
-          "auth_v1",
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "ronin": {
-      "app": {
-        "android": "https://play.google.com/store/apps/details?id=com.skymavis.genesis",
-        "browser": "https://chrome.google.com/webstore/detail/ronin-wallet/fnjhmkhhmkbjkkabndcnnogagogbneec",
-        "ios": "https://apps.apple.com/us/app/ronin-wallet/id1592675001"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:137",
-        "eip155:2020",
-        "eip155:56"
-      ],
-      "desktop": {
-        "native": null,
-        "universal": null
-      },
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "window.ronin.provider.isRonin",
-          "namespace": "eip155"
-        }
-      ],
-      "mobile": {
-        "native": "roninwallet://",
-        "universal": "https://wallet.roninchain.com"
-      },
-      "name": "Ronin Wallet",
-      "primaryColor": "#1273EA",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "safe": {
-      "app": {
-        "android": "io.gnosis.safe",
-        "ios": "id1515759131"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:10",
-        "eip155:100",
-        "eip155:1313161554",
-        "eip155:137",
-        "eip155:246",
-        "eip155:4",
-        "eip155:42161",
-        "eip155:43114",
-        "eip155:5",
-        "eip155:56",
-        "eip155:73799"
-      ],
-      "imgExtension": "webp",
-      "injected": null,
-      "mobile": {
-        "native": "safe://",
-        "universal": "https://app.safe.global/"
-      },
-      "name": "Safe",
-      "primaryColor": "#12FF80",
-      "walletConnect": {
-        "sdks": [
-          "sign_v1",
-          "sign_v2"
-        ]
-      }
-    },
-    "solflare": {
-      "app": {
-        "android": "com.solflare.mobile",
-        "chrome": "bhhhlbepdkbapadjdnnojkbgioiodbic",
-        "ios": "id1580902717"
-      },
-      "chains": [
-        "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
-        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
-        "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
-      ],
-      "imgExtension": "webp",
-      "injected": [
-        {
-          "injected_id": "solflare",
-          "namespace": "solana"
-        }
-      ],
-      "name": "Solflare Wallet",
-      "primaryColor": "#FC7227",
       "walletConnect": []
     },
     "trust": {
@@ -452,6 +123,278 @@
         ]
       }
     },
+    "ronin": {
+      "app": {
+        "android": "https://play.google.com/store/apps/details?id=com.skymavis.genesis",
+        "browser": "https://chrome.google.com/webstore/detail/ronin-wallet/fnjhmkhhmkbjkkabndcnnogagogbneec",
+        "ios": "https://apps.apple.com/us/app/ronin-wallet/id1592675001"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:137",
+        "eip155:2020",
+        "eip155:56"
+      ],
+      "desktop": {
+        "native": null,
+        "universal": null
+      },
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "window.ronin.provider.isRonin",
+          "namespace": "eip155"
+        }
+      ],
+      "mobile": {
+        "native": "roninwallet://",
+        "universal": "https://wallet.roninchain.com"
+      },
+      "name": "Ronin Wallet",
+      "primaryColor": "#1273EA",
+      "walletConnect": {
+        "sdks": [
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "coinbase": {
+      "app": {
+        "android": "https://play.google.com/store/apps/details?id=org.toshi",
+        "browser": "https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad?hl=en",
+        "ios": "https://apps.apple.com/app/apple-store/id1278383455"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:10",
+        "eip155:100",
+        "eip155:137",
+        "eip155:250",
+        "eip155:42161",
+        "eip155:43114",
+        "eip155:56",
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+      ],
+      "desktop": {
+        "native": null,
+        "universal": null
+      },
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "isCoinbaseWallet",
+          "namespace": "eip155"
+        }
+      ],
+      "mobile": {
+        "native": null,
+        "universal": null
+      },
+      "name": "Coinbase Wallet",
+      "primaryColor": "#1648F9",
+      "walletConnect": []
+    },
+    "rainbow": {
+      "app": {
+        "android": "me.rainbow",
+        "chrome": "opfgelmcmbiajamepnmloijbpoleiama",
+        "edge": "cpojfbodiccabbabgimdeohkkpjfpbnf",
+        "firefox": "rainbow-extension",
+        "ios": "id1457119021"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:10",
+        "eip155:137",
+        "eip155:42161",
+        "eip155:56",
+        "eip155:7777777",
+        "eip155:8453"
+      ],
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "isRainbow",
+          "namespace": "eip155"
+        }
+      ],
+      "mobile": {
+        "native": "rainbow://wc",
+        "universal": "https://rnbwapp.com/wc"
+      },
+      "name": "Rainbow",
+      "primaryColor": "#001e59",
+      "walletConnect": {
+        "sdks": [
+          "auth_v1",
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "exodus": {
+      "app": {
+        "android": "exodusmovement.exodus",
+        "chrome": "aholpfdialjgjfhomihkjbmgjidlcdno",
+        "ios": "id1414384820"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:137",
+        "eip155:43114",
+        "eip155:56",
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+      ],
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "isExodus",
+          "namespace": "eip155"
+        }
+      ],
+      "mobile": {
+        "native": "exodus://wc",
+        "universal": "https://exodus.com/m"
+      },
+      "name": "Exodus",
+      "primaryColor": "#000000",
+      "walletConnect": {
+        "sdks": [
+          "auth_v1",
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "okx": {
+      "app": {
+        "android": "https://play.google.com/store/apps/details?id=com.okinc.okex.gp",
+        "browser": "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
+        "ios": "https://apps.apple.com/us/app/okx-buy-bitcoin-eth-crypto/id1327268470"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:137",
+        "eip155:43114",
+        "eip155:56",
+        "eip155:66",
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+      ],
+      "desktop": {
+        "native": null,
+        "universal": null
+      },
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "isPLC",
+          "namespace": "eip155"
+        },
+        {
+          "injected_id": "isPLC",
+          "namespace": "solana"
+        }
+      ],
+      "mobile": {
+        "native": "okex://main",
+        "universal": "https://www.okx.com/download"
+      },
+      "name": "OKX Wallet",
+      "primaryColor": "#000000",
+      "walletConnect": {
+        "sdks": [
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "solflare": {
+      "app": {
+        "android": "com.solflare.mobile",
+        "chrome": "bhhhlbepdkbapadjdnnojkbgioiodbic",
+        "ios": "id1580902717"
+      },
+      "chains": [
+        "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+        "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+      ],
+      "imgExtension": "webp",
+      "injected": [
+        {
+          "injected_id": "solflare",
+          "namespace": "solana"
+        }
+      ],
+      "name": "Solflare Wallet",
+      "primaryColor": "#FC7227",
+      "walletConnect": []
+    },
+    "ledger-live": {
+      "app": {
+        "android": "com.ledger.live",
+        "ios": "id1361671700"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:137",
+        "eip155:4",
+        "eip155:56"
+      ],
+      "desktop": {
+        "native": "ledgerlive://wc"
+      },
+      "imgExtension": "webp",
+      "injected": null,
+      "mobile": {
+        "native": "ledgerlive://wc",
+        "universal": "https://r354.adj.st/wc?adj_t=t2esmlk"
+      },
+      "name": "Ledger Live",
+      "primaryColor": "#000000",
+      "walletConnect": {
+        "sdks": [
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "crypto.com": {
+      "app": {
+        "android": "com.defi.wallet",
+        "ios": "id1512048310"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:10",
+        "eip155:100",
+        "eip155:108",
+        "eip155:1284",
+        "eip155:1285",
+        "eip155:1313161554",
+        "eip155:137",
+        "eip155:25",
+        "eip155:250",
+        "eip155:42161",
+        "eip155:42220",
+        "eip155:56",
+        "eip155:8217"
+      ],
+      "imgExtension": "svg",
+      "mobile": {
+        "native": "dfw://",
+        "universal": "https://wallet.crypto.com"
+      },
+      "name": "Crypto.com | DeFi Wallet",
+      "primaryColor": "#000000",
+      "walletConnect": {
+        "sdks": [
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
     "zerion": {
       "app": {
         "android": "io.zerion.android",
@@ -498,6 +441,63 @@
       "walletConnect": {
         "sdks": [
           "auth_v1",
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "argent": {
+      "app": {
+        "android": "im.argent.contractwalletclient",
+        "ios": "id1358741926"
+      },
+      "chains": [
+        "eip155:1"
+      ],
+      "imgExtension": "webp",
+      "injected": null,
+      "mobile": {
+        "native": "argent://app/wc",
+        "universal": "https://www.argent.xyz/app"
+      },
+      "name": "Argent",
+      "primaryColor": "#000000",
+      "walletConnect": {
+        "sdks": [
+          "sign_v1",
+          "sign_v2"
+        ]
+      }
+    },
+    "safe": {
+      "app": {
+        "android": "io.gnosis.safe",
+        "ios": "id1515759131"
+      },
+      "chains": [
+        "eip155:1",
+        "eip155:10",
+        "eip155:100",
+        "eip155:1313161554",
+        "eip155:137",
+        "eip155:246",
+        "eip155:4",
+        "eip155:42161",
+        "eip155:43114",
+        "eip155:5",
+        "eip155:56",
+        "eip155:73799"
+      ],
+      "imgExtension": "webp",
+      "injected": null,
+      "mobile": {
+        "native": "safe://",
+        "universal": "https://app.safe.global/"
+      },
+      "name": "Safe",
+      "primaryColor": "#12FF80",
+      "walletConnect": {
+        "sdks": [
           "sign_v1",
           "sign_v2"
         ]
@@ -555,7 +555,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "37x",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -578,7 +578,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "3mint",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -641,7 +641,7 @@
       ],
       "imgExtension": "svg",
       "name": "A4 Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -760,7 +760,7 @@
         "universal": null
       },
       "name": "Absolute Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -854,7 +854,7 @@
         "universal": null
       },
       "name": "Alicebob Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -950,7 +950,7 @@
         "universal": "https://aw.app"
       },
       "name": "AlphaWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "altme": {
       "app": {
@@ -1011,7 +1011,7 @@
         "universal": null
       },
       "name": "AmazeWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "ambire": {
       "app": {
@@ -1125,7 +1125,7 @@
         "universal": "https://app.apollox.finance/wc"
       },
       "name": "ApolloX",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -1159,7 +1159,7 @@
         "universal": "https://gw.arculus.co/app"
       },
       "name": "Arculus Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1178,7 +1178,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Argent X",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "arianee": {
@@ -1205,7 +1205,7 @@
         "universal": "https://i.arian.ee"
       },
       "name": "Arianee Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -1229,7 +1229,7 @@
         "universal": "https://portal.armana.io/wc?uri="
       },
       "name": "Armana Portal",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1254,7 +1254,7 @@
         "universal": "https://www.assure.pro/Official"
       },
       "name": "Assure",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -1281,7 +1281,7 @@
         "universal": null
       },
       "name": "AT.Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "aton": {
       "app": {
@@ -1295,7 +1295,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "ATON",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -1318,7 +1318,7 @@
         "native": "aurora-pass://wc"
       },
       "name": "Aurora Pass",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1375,7 +1375,7 @@
         "universal": "https://azcoiner.com/"
       },
       "name": "AZCoiner",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -1400,7 +1400,7 @@
         }
       ],
       "name": "Backpack",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -1424,7 +1424,7 @@
         "native": "balletcrypto://"
       },
       "name": "Ballet Crypto",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -1463,7 +1463,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "BC Vault",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1517,7 +1517,7 @@
         "universal": "https://play.google.com/store/apps/details?id=com.beanbag.wallet"
       },
       "name": "BeanBag",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -1583,7 +1583,7 @@
         "universal": "https://main.apple.bee9527.com"
       },
       "name": "BeeWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "best": {
       "app": {
@@ -1636,7 +1636,7 @@
         "universal": "https://bettatrade.page.link/Fc4u"
       },
       "name": "Bettatrade",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1658,7 +1658,7 @@
         "native": "bharatbox://wc"
       },
       "name": "BharatBox App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1702,7 +1702,7 @@
         "universal": "https://app.bifrostwallet.com"
       },
       "name": "Bifrost Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1737,7 +1737,7 @@
         "universal": "https://app.binance.com/cedefi"
       },
       "name": "Binance Web3 Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -1767,7 +1767,7 @@
         "universal": "https://binance.us/universal_JHHGDSKDJ/wc"
       },
       "name": "Binance.US",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1786,7 +1786,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "BitBox",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -1816,7 +1816,7 @@
         "universal": "https://wallet.bitcoin.com/"
       },
       "name": "Bitcoin.com Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1841,7 +1841,7 @@
         "native": "bifrostwallet://wallet-connect/wc"
       },
       "name": "BitFrost",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -1880,7 +1880,7 @@
         "universal": "https://bkapp.vip"
       },
       "name": "Bitget Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2130,7 +2130,7 @@
         "native": "bitpiewc://wc"
       },
       "name": "Bitpie",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2200,7 +2200,7 @@
         "universal": "https://bitso.com/web3-wallet"
       },
       "name": "Bitso Web3 Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2233,7 +2233,7 @@
         "universal": "https://bitverseapp.page.link/wc"
       },
       "name": "Bitverse",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2264,7 +2264,7 @@
         "universal": null
       },
       "name": "BlackFort Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2348,7 +2348,7 @@
         "native": "blockaura://walletconnect/wc"
       },
       "name": "Blockaura",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2373,7 +2373,7 @@
         "universal": "https://www.blockchain.com"
       },
       "name": "Blockchain.com",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2427,7 +2427,7 @@
         "universal": null
       },
       "name": "BlockWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "blocto": {
       "app": {
@@ -2472,7 +2472,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Bloom",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2500,7 +2500,7 @@
         "universal": null
       },
       "name": "BMA Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2535,7 +2535,7 @@
         "universal": null
       },
       "name": "Bonuz Social Smart Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "braavos": {
       "app": {
@@ -2641,7 +2641,7 @@
       ],
       "imgExtension": "svg",
       "name": "BRISE Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -2721,7 +2721,7 @@
         "universal": "https://app.burritowallet.com/wc"
       },
       "name": "Burrito",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2773,7 +2773,7 @@
         "universal": null
       },
       "name": "Bybit Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -2796,7 +2796,7 @@
         "native": "hideoutWallet://wc"
       },
       "name": "ByteBank",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2819,7 +2819,7 @@
         "native": "caesium-app://walletconnect/wc"
       },
       "name": "Caesium",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -2849,7 +2849,7 @@
         "universal": null
       },
       "name": "Cake Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -3244,7 +3244,7 @@
         "universal": "https://walletconnect.usecapsule.com/"
       },
       "name": "Capsule",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3268,7 +3268,7 @@
         "universal": "https://wallet.cardstack.com/wc"
       },
       "name": "Card Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -3300,7 +3300,7 @@
         "universal": "https://catecoin.app/apple-app-site-association"
       },
       "name": "Catecoin Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3347,7 +3347,7 @@
         "native": "chainapp://wc"
       },
       "name": "Chain",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -3407,7 +3407,7 @@
         "universal": "https://cling.carrieverse.com/apple-app-site-association"
       },
       "name": "Cling Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3465,7 +3465,7 @@
         "universal": null
       },
       "name": "Cobalt Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -3577,7 +3577,7 @@
         "native": "coinwallet://wc"
       },
       "name": "CoinWallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3633,7 +3633,7 @@
         "universal": "https://coin98.com/"
       },
       "name": "Coin98 Super Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3681,7 +3681,7 @@
         "universal": "https://link.coingrig.com/wc"
       },
       "name": "Coingrig",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -3709,7 +3709,7 @@
         "universal": null
       },
       "name": "Coininn Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -3732,7 +3732,7 @@
         "universal": "https://coinomi.page.link/wc"
       },
       "name": "Coinomi",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -3760,7 +3760,7 @@
         "universal": "http://coinstats.app"
       },
       "name": "CoinStats",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3812,7 +3812,7 @@
         "universal": null
       },
       "name": "CoinWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "compass": {
       "app": {
@@ -3855,7 +3855,7 @@
         "native": "competenceid://wc"
       },
       "name": "Competence.id",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -3896,7 +3896,7 @@
         "universal": null
       },
       "name": "CoolWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "copiosa": {
       "app": {
@@ -4038,7 +4038,7 @@
         "universal": null
       },
       "name": "Cryptnox Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -4070,7 +4070,7 @@
         "universal": null
       },
       "name": "Cryptnox Bridge",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "cryptokara": {
       "app": {
@@ -4493,7 +4493,7 @@
         "universal": "https://play.google.com/store/apps/details?id=com.cryptokara&hl=en_US"
       },
       "name": "Cryptokara",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -4562,7 +4562,7 @@
         "universal": "https://wallet.cyber.co"
       },
       "name": "CyberWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "cypher": {
       "app": {
@@ -4620,7 +4620,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Cypherock cySync",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -4670,7 +4670,7 @@
         "universal": "https://link.dcentwallet.com"
       },
       "name": "D'CENT Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -4717,7 +4717,7 @@
         "universal": null
       },
       "name": "Dawn Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "defiant": {
@@ -4779,7 +4779,7 @@
         "universal": "https://pwa.dextrade.com/wc"
       },
       "name": "DexTrade",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -4830,7 +4830,7 @@
         "universal": "https://dfinnwallet-link.vercel.app/"
       },
       "name": "Dfinn Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -4902,7 +4902,7 @@
         "universal": "https://dgpub.app.link/wc"
       },
       "name": "DGPub App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -4937,7 +4937,7 @@
         "universal": "https://didwallet.io/i"
       },
       "name": "DIDWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "dohrnii": {
       "app": {
@@ -4961,7 +4961,7 @@
         "universal": null
       },
       "name": "Dohrnii Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -4987,7 +4987,7 @@
         "native": "dolletwc://wc"
       },
       "name": "Dollet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5017,7 +5017,7 @@
         "universal": "https://dosivault.page.link/qL6j"
       },
       "name": "DOSI Vault",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -5037,7 +5037,7 @@
       },
       "imgExtension": "svg",
       "name": "DreamOS",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5091,7 +5091,7 @@
         "native": "dropp://wc"
       },
       "name": "Dropp",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -5208,7 +5208,7 @@
         "universal": "https://api.valleysound.xyz/vss/*"
       },
       "name": "Echooo Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5322,7 +5322,7 @@
         }
       ],
       "name": "Enkrypt",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -5344,7 +5344,7 @@
         "native": "ennowallet://wc"
       },
       "name": "Enno Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -5391,7 +5391,7 @@
         "universal": "https://essentials.web3essentials.io/wc"
       },
       "name": "Essentials",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5413,7 +5413,7 @@
         "native": "myapp://home/wc"
       },
       "name": "Ethos Self-Custody Vault",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5436,7 +5436,7 @@
         "universal": "https://everspace.app/deeplink"
       },
       "name": "Everspace",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -5472,7 +5472,7 @@
         "universal": "https://fx.wallet/wc"
       },
       "name": "f(x)Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "facewallet": {
       "app": {
@@ -5509,7 +5509,7 @@
         "universal": null
       },
       "name": "Facewallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "fastex": {
       "app": {
@@ -5558,7 +5558,7 @@
         "universal": "https://autonomy.io/apps/wc"
       },
       "name": "Feral File",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5580,7 +5580,7 @@
         "universal": "https://h5.filwallet.co/wc"
       },
       "name": "FILWallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -5597,7 +5597,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "FinoaConnect",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -5625,7 +5625,7 @@
         "universal": "https://ios.fintoken.pro/app"
       },
       "name": "FINTOKEN",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5685,7 +5685,7 @@
         "native": "fireblocks-wc://wc"
       },
       "name": "Fireblocks",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5722,7 +5722,7 @@
         "universal": null
       },
       "name": "Fizen Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -5836,7 +5836,7 @@
         "universal": null
       },
       "name": "Fncy Mobile Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5866,7 +5866,7 @@
         "universal": "https://link.foxwallet.com"
       },
       "name": "FoxWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "frame": {
       "app": {
@@ -5887,7 +5887,7 @@
         }
       ],
       "name": "Frame",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "frontier": {
@@ -5968,7 +5968,7 @@
         "native": "fxwallet://wc"
       },
       "name": "FxWallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -5996,7 +5996,7 @@
         "universal": null
       },
       "name": "GameStop Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -6088,7 +6088,7 @@
         "universal": "https://www.gateex.cc/web3/wc"
       },
       "name": "GateWallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6124,7 +6124,7 @@
         "universal": "https://gemwallet.com"
       },
       "name": "Gem Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6142,7 +6142,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Glow",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "goldbit": {
@@ -6158,7 +6158,7 @@
         "native": "goldbit://wc"
       },
       "name": "GoldBit",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -6185,7 +6185,7 @@
         "universal": "https://wallet.gooddollar.org/wc"
       },
       "name": "GoodDollar",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6247,7 +6247,7 @@
         "universal": null
       },
       "name": "Grindery Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "gryfyn": {
       "chains": [
@@ -6342,7 +6342,7 @@
         "universal": "https://hacken.ai"
       },
       "name": "hAI by Hacken",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6440,7 +6440,7 @@
         "universal": null
       },
       "name": "HARTi Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6471,7 +6471,7 @@
         "universal": "https://link.hashpack.app"
       },
       "name": "HashPack",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6515,7 +6515,7 @@
         "native": "helix-id://helix-id.com/wc"
       },
       "name": "helix id",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6533,7 +6533,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Hellō",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6562,7 +6562,7 @@
         "universal": "https://my.herewallet"
       },
       "name": "HERE Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6624,7 +6624,7 @@
         "universal": "https://staging-referral.holdstation.com/wallet-connect?uri="
       },
       "name": "Holdstation Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6649,7 +6649,7 @@
       },
       "imgExtension": "svg",
       "name": "Hoo!Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6738,7 +6738,7 @@
         "native": "hyperPay://wc"
       },
       "name": "HyperPay",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6762,7 +6762,7 @@
         "native": "ivirse://wc"
       },
       "name": "IApp",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -6787,7 +6787,7 @@
         "native": "icewal://wc"
       },
       "name": "icewal",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6810,7 +6810,7 @@
         "native": "wc://wc"
       },
       "name": "ID Pocket",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -6871,7 +6871,7 @@
         "universal": null
       },
       "name": "Imota ",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "impact": {
       "app": {
@@ -6893,7 +6893,7 @@
         "universal": null
       },
       "name": "Impact Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7021,7 +7021,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Injected Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "internet-money": {
@@ -7066,7 +7066,7 @@
         "universal": "https://internetmoney.io"
       },
       "name": "Internet Money Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -7128,7 +7128,7 @@
         "universal": null
       },
       "name": "Iskra Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": [
         "sign_v1",
         "sign_v2"
@@ -7155,7 +7155,7 @@
         "universal": "https://islamicoin.finance/.well-known/assetlinks.json"
       },
       "name": "ISLAMIwallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "itoken": {
       "app": {
@@ -7203,7 +7203,7 @@
         "universal": null
       },
       "name": "Jade Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -7228,7 +7228,7 @@
         "native": "jbw://walletconnect/wc"
       },
       "name": "Jambo",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -7254,7 +7254,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "JoyID Passkey",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7308,7 +7308,7 @@
         "native": "kaikas://walletconnect/wc"
       },
       "name": "Kaikas",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7373,7 +7373,7 @@
         }
       ],
       "name": "Kayros",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7418,7 +7418,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "KeepKey Desktop",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7476,7 +7476,7 @@
         "native": "keplrwallet://wcV2/wc"
       },
       "name": "Keplr",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7497,7 +7497,7 @@
         "universal": "https://app.keychain.money/wc"
       },
       "name": "Keychain",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -7542,7 +7542,7 @@
         "universal": "https://keyring.app/wc"
       },
       "name": "KEYRING PRO",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -7703,7 +7703,7 @@
         "universal": null
       },
       "name": "Kraken Wallet ",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "kresus-superapp": {
       "app": {
@@ -7721,7 +7721,7 @@
         "native": "com.kresus.superapp://wc"
       },
       "name": "Kresus SuperApp",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7866,7 +7866,7 @@
         "universal": null
       },
       "name": "Leap Cosmos Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7881,7 +7881,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Leather",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "legacy": {
@@ -7911,7 +7911,7 @@
         "universal": null
       },
       "name": "Legacy Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -7955,7 +7955,7 @@
         }
       ],
       "name": "LichtBit",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -8051,7 +8051,7 @@
         "native": "w3akvrn://wc"
       },
       "name": "Life DeFi",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8073,7 +8073,7 @@
         "native": "com.oice://wc"
       },
       "name": "LikerLand App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8088,7 +8088,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Lilico",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "lobstr": {
@@ -8111,7 +8111,7 @@
         "universal": "https://lobstr.co/uni/wc"
       },
       "name": "LOBSTR Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -8161,7 +8161,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Locker Token",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -8189,7 +8189,7 @@
         "universal": null
       },
       "name": "Lode Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8211,7 +8211,7 @@
         "native": "loopring://wc"
       },
       "name": "Loopring",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -8260,7 +8260,7 @@
         }
       ],
       "name": "Magic Eden",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "marble": {
@@ -8352,7 +8352,7 @@
         "universal": "https://www.mathwallet.org"
       },
       "name": "MathWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "mdao": {
       "app": {
@@ -8414,7 +8414,7 @@
         "universal": null
       },
       "name": "Me Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -8438,7 +8438,7 @@
         "native": "meld://walletconnect/wc"
       },
       "name": "MELDapp",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8467,7 +8467,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "meta-WONDER-verse",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8536,7 +8536,7 @@
         "universal": "http://www.dota168.org/"
       },
       "name": "MetaWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "meter": {
       "app": {
@@ -8565,7 +8565,7 @@
         "universal": null
       },
       "name": "Meter Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -8626,7 +8626,7 @@
         "universal": "https://midoin.app.link"
       },
       "name": "midoin",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8702,7 +8702,7 @@
         "universal": "https://go.miraiapp.io"
       },
       "name": "Mirai App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8726,7 +8726,7 @@
         "native": "mixin://wc"
       },
       "name": "Mixin Messenger",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8754,7 +8754,7 @@
         "universal": null
       },
       "name": "Modular Wallet Prod",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -8806,7 +8806,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "MoonPay Account",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -8858,7 +8858,7 @@
       ],
       "imgExtension": "svg",
       "name": "MPCWallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -8894,7 +8894,7 @@
         "universal": "https://ulink.mpcvault.com/wccallback"
       },
       "name": "MPCVault | Team crypto wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "muza": {
       "app": {
@@ -8915,7 +8915,7 @@
         "universal": "https://muza.co/app"
       },
       "name": "MUZA",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8944,7 +8944,7 @@
         "universal": null
       },
       "name": "My Cloud Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -8988,7 +8988,7 @@
         "universal": "https://nabox.io/app/*/wc"
       },
       "name": "Nabox",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9011,7 +9011,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Nash",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9055,7 +9055,7 @@
         "native": "nptwc://wc"
       },
       "name": "NEOPIN",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9127,7 +9127,7 @@
         }
       ],
       "name": "Newmoney.AI",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9161,7 +9161,7 @@
         "universal": "https://nicegram.app/"
       },
       "name": "Nicegram Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "nightly": {
       "app": {
@@ -9172,7 +9172,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Nightly",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "nitrogen": {
@@ -9197,7 +9197,7 @@
         "universal": "https://nitrogen.org/wc"
       },
       "name": "Nitrogen Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -9244,7 +9244,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "NoF",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -9279,7 +9279,7 @@
         "universal": null
       },
       "name": "Noone Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9310,7 +9310,7 @@
         "universal": null
       },
       "name": "Nova Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -9328,7 +9328,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Nova Spektr",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -9391,7 +9391,7 @@
         "universal": "https://apple.vimworld.org"
       },
       "name": "Nufinetes",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -9439,7 +9439,7 @@
         "universal": "https://www.oasys-wallet.com/wc/wc"
       },
       "name": "Oasys Passport",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -9692,7 +9692,7 @@
         "universal": "https://app.onekey.so/wc/connect/wc"
       },
       "name": "OneKey",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -9737,7 +9737,7 @@
         "native": "ontoprovider://wc"
       },
       "name": "ONTO",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -9771,7 +9771,7 @@
         "universal": "https://openwallet.finance/"
       },
       "name": "Open Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "opera": {
       "chains": [],
@@ -9810,7 +9810,7 @@
         "native": "cryptobrowser://wc"
       },
       "name": "Opera Crypto Browser",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -9873,7 +9873,7 @@
         "universal": null
       },
       "name": "Orion",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "ownbit": {
       "app": {
@@ -9889,7 +9889,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Ownbit",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -9923,7 +9923,7 @@
         "universal": "https://oxalus.page.link/?apn=io.oxalus.wallet&isi=1620111723&ibi=io.oxalus.wallet&link=https://deeplink.oxalus.io"
       },
       "name": "Oxalus Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -9950,7 +9950,7 @@
         "universal": null
       },
       "name": "OzoneWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "pali": {
       "app": {
@@ -9984,7 +9984,7 @@
         "universal": null
       },
       "name": "Pali Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10387,7 +10387,7 @@
         "universal": null
       },
       "name": "PassPay Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -10434,7 +10434,7 @@
         "native": "pay.cool://deepLinkView/wc"
       },
       "name": "paycool",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10459,7 +10459,7 @@
         "native": " payperless.com://wc"
       },
       "name": "Payperless",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -10500,7 +10500,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "Pera Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "pier": {
@@ -10548,7 +10548,7 @@
         "native": "pillarwallet://wc"
       },
       "name": "Pillar",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10694,7 +10694,7 @@
         "universal": "https://plasma-wallet.com"
       },
       "name": "Plasma Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10722,7 +10722,7 @@
         "universal": "https://app.plena.finance/app/d7KJGPgkKBKoSSWy9/wc"
       },
       "name": "Plena-App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -10751,7 +10751,7 @@
         "universal": "https://pltwallet.io/"
       },
       "name": "PLTwallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "plus": {
       "app": {
@@ -10774,7 +10774,7 @@
         "universal": "https://pluswallet.app"
       },
       "name": "Plus Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10798,7 +10798,7 @@
         "native": "plutope://wc"
       },
       "name": "Plutope",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -10826,7 +10826,7 @@
         "universal": "https://pockie.app.link"
       },
       "name": "pockie",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10858,7 +10858,7 @@
         "universal": null
       },
       "name": "poolswallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "prema": {
       "app": {
@@ -10958,7 +10958,7 @@
         "universal": "https://wallet.qubic.app"
       },
       "name": "Qubic Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -10995,7 +10995,7 @@
         }
       ],
       "name": "Rabby",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -11018,7 +11018,7 @@
         "native": "readywallet://wc"
       },
       "name": "Ready",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11040,7 +11040,7 @@
       ],
       "imgExtension": "svg",
       "name": "RealT Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -11073,7 +11073,7 @@
         "native": "renegade-web3wallet://wc"
       },
       "name": "Renegade",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11103,7 +11103,7 @@
         }
       ],
       "name": "Reunit",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11134,7 +11134,7 @@
         "universal": "https://ricewallet.io"
       },
       "name": "RiceWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "ripio-portal": {
       "app": {
@@ -11158,7 +11158,7 @@
         "native": "ripio://portal/wc"
       },
       "name": "Ripio Portal",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -11230,7 +11230,7 @@
         "universal": null
       },
       "name": "Robinhood Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11254,7 +11254,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Rovi Money",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11311,7 +11311,7 @@
         "native": "saas://success/wc"
       },
       "name": "SA ASSISTANT",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11341,7 +11341,7 @@
         "native": "metaone://wc"
       },
       "name": "Saakuru All-in-One crypto App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11371,7 +11371,7 @@
         "universal": null
       },
       "name": "Sabay Wallet App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -11387,7 +11387,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Safe App Syscoin",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11543,7 +11543,7 @@
         "universal": null
       },
       "name": "Sahal Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -11567,7 +11567,7 @@
         "native": "SaitaPro://app/wc"
       },
       "name": "SaitaPro",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11595,7 +11595,7 @@
         "universal": null
       },
       "name": "SampleW",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "savl": {
       "app": {
@@ -11648,7 +11648,7 @@
         "universal": "https://link1.bsg.scramberry.io"
       },
       "name": "ScramberryWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "scramble": {
       "app": {
@@ -11694,7 +11694,7 @@
         "universal": "https://wsweb.secuxtech.com"
       },
       "name": "SecuX",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11719,7 +11719,7 @@
       ],
       "imgExtension": "svg",
       "name": "Sender",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -11846,7 +11846,7 @@
         "native": "shido://wc"
       },
       "name": "Shido App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11864,7 +11864,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "ShimmerSea",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11901,7 +11901,7 @@
         "universal": null
       },
       "name": "Shinobi-Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -11938,7 +11938,7 @@
         "universal": null
       },
       "name": "Silk",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "sinohope": {
       "app": {
@@ -12139,7 +12139,7 @@
         "universal": "https://link.spatium.net"
       },
       "name": "Spatium",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12167,7 +12167,7 @@
         "universal": "https://spotonchain.ai/wc"
       },
       "name": "Spot On Chain App",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12202,7 +12202,7 @@
         "universal": null
       },
       "name": "Stasis Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -12286,7 +12286,7 @@
         "universal": null
       },
       "name": "Streakk Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12316,7 +12316,7 @@
         "universal": null
       },
       "name": "StrikeX Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -12360,7 +12360,7 @@
         "universal": "https://mobile.subwallet.app/"
       },
       "name": "SubWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "suku": {
       "app": {
@@ -12424,7 +12424,7 @@
         "universal": "https://www.superex.live"
       },
       "name": "SuperWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "swop": {
       "app": {
@@ -12470,7 +12470,7 @@
         "universal": null
       },
       "name": "T+ Wallet ",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "taho": {
       "app": {
@@ -12488,7 +12488,7 @@
         }
       ],
       "name": "Taho",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -12522,7 +12522,7 @@
         "universal": null
       },
       "name": "Talken Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12591,7 +12591,7 @@
         "universal": null
       },
       "name": "Tellaw Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -12622,7 +12622,7 @@
         "universal": null
       },
       "name": "The Pulse Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -12654,7 +12654,7 @@
         "universal": null
       },
       "name": "Theta Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12686,7 +12686,7 @@
         "universal": "https://ews.thirdweb.com/wc"
       },
       "name": "thirdweb",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12758,7 +12758,7 @@
         "universal": null
       },
       "name": "THORWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "tidus-wallet-": {
       "app": {
@@ -12785,7 +12785,7 @@
         "universal": null
       },
       "name": "Tidus Wallet ",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "timeless-wallet": {
       "app": {
@@ -12813,7 +12813,7 @@
         "universal": "https://timelesswallet.xyz"
       },
       "name": "Timeless Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "timeless-x": {
       "app": {
@@ -12855,7 +12855,7 @@
         "universal": "https://timelesswallet.xyz/wc"
       },
       "name": "Timeless X",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -12880,7 +12880,7 @@
         "universal": "https://trustkeys.network"
       },
       "name": "TK Finance",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -12911,7 +12911,7 @@
         "universal": "https://api.tobiwallet.app/dapp/wallet-connect/redirect/wc"
       },
       "name": "Tobi",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -12942,7 +12942,7 @@
         "universal": "https://tofee.app/"
       },
       "name": "Tofee Wallet Official",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": [
         "auth_v1",
         "sign_v1",
@@ -13020,7 +13020,7 @@
         "universal": null
       },
       "name": "Tokoin | My-T Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "tomipay": {
       "app": {
@@ -13095,7 +13095,7 @@
         "universal": null
       },
       "name": "tomo extension wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -13119,7 +13119,7 @@
         "native": "transi://wc"
       },
       "name": "Transi",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13147,7 +13147,7 @@
       ],
       "imgExtension": "svg",
       "name": "TREASURE",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -13224,7 +13224,7 @@
         "universal": "https://trustkeys.network/"
       },
       "name": "TrustKeys Web3 SocialFi",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -13281,7 +13281,7 @@
         "native": "uiwallet://?uri=/wc"
       },
       "name": "UIIC",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13316,7 +13316,7 @@
         "native": "ukisshub://wc"
       },
       "name": "UKISS Hub",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13405,7 +13405,7 @@
         "universal": null
       },
       "name": "UniPass Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -13421,7 +13421,7 @@
       "chains": [],
       "imgExtension": "svg",
       "name": "UniSat Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "uniswap": {
@@ -13506,7 +13506,7 @@
         "universal": "https://unstoppabledomains.com/mobile/wc"
       },
       "name": "Unstoppable Domains",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13537,7 +13537,7 @@
         "universal": null
       },
       "name": "UPBOND Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13566,7 +13566,7 @@
         "universal": null
       },
       "name": "UPTN",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "utorg": {
       "app": {
@@ -13596,7 +13596,7 @@
         "universal": "https://link.utorg.com/zp0f/wc"
       },
       "name": "UTORG",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13621,7 +13621,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "UvToken",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -13670,7 +13670,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Venly",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -13696,7 +13696,7 @@
         "native": "verso://wc"
       },
       "name": "Verso",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13719,7 +13719,7 @@
         "native": "veworld://org.vechain.veworld.app/wc"
       },
       "name": "VeWorld Mobile",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13748,7 +13748,7 @@
         "universal": null
       },
       "name": "VIVE Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13810,7 +13810,7 @@
         "native": "wallacy://wc"
       },
       "name": "Wallacy",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13853,7 +13853,7 @@
         "native": "wallet3://wc"
       },
       "name": "Wallet 3",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -13879,7 +13879,7 @@
         "native": "wallypto://"
       },
       "name": "Wallypto",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": [
         "sign_v1",
         "sign_v2"
@@ -13905,7 +13905,7 @@
         "universal": null
       },
       "name": "WemixWallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "wombat": {
       "app": {
@@ -13959,7 +13959,7 @@
         "native": "ullawallet://wc"
       },
       "name": "WOW EARN",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -13990,7 +13990,7 @@
         "universal": null
       },
       "name": "X9Wallet",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "xcapit": {
       "app": {
@@ -14009,7 +14009,7 @@
         "universal": "https://app.xcapit.com/links/wc"
       },
       "name": "Xcapit",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1"
@@ -14052,7 +14052,7 @@
         "universal": null
       },
       "name": "XDEFI Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -14132,7 +14132,7 @@
         "universal": "https://xport.al"
       },
       "name": "xPortal",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": [
         "sign_v1",
         "sign_v2"
@@ -14175,7 +14175,7 @@
         "inAppBrowser": "xverse://browser?url={{encodedDappURI}}"
       },
       "name": "Xverse Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": []
     },
     "youba": {
@@ -14192,7 +14192,7 @@
       "imgExtension": "webp",
       "injected": null,
       "name": "Youba",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -14226,7 +14226,7 @@
         "universal": "https://yusewallet.page.link/tobR"
       },
       "name": "Yuse Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v2"
@@ -14578,7 +14578,7 @@
         "native": "zeal://walletconnect/wc"
       },
       "name": "Zeal",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -14605,7 +14605,7 @@
         "native": "zel://wc"
       },
       "name": "Zelcore",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
@@ -14637,7 +14637,7 @@
         "universal": null
       },
       "name": "Zelus Wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "auth_v1",
@@ -14703,7 +14703,7 @@
         "universal": null
       },
       "name": "Zypto",
-      "primaryColor": "#00000"
+      "primaryColor": "#000000"
     },
     "αu": {
       "app": {
@@ -14725,7 +14725,7 @@
         "universal": "https://alphauwallet.page.link/?apn=com.kddi.wallet&ibi=com.kddi.wallet&isi=6444401106&link=https://web.wallet.alpha-u.io/intro.html"
       },
       "name": "αU wallet",
-      "primaryColor": "#00000",
+      "primaryColor": "#000000",
       "walletConnect": {
         "sdks": [
           "sign_v1",
