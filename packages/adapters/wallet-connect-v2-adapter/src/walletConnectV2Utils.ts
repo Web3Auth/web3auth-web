@@ -50,6 +50,9 @@ export function getProviderHandlers({ connector, chainId }: { connector: ISignCl
     getPrivateKey: async () => {
       throw rpcErrors.methodNotSupported();
     },
+    getPublicKey: async () => {
+      throw rpcErrors.methodNotSupported();
+    },
     getAccounts: async (_: JRPCRequest<unknown>) => {
       return getAccounts(connector);
     },

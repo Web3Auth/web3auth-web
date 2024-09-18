@@ -15,6 +15,7 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
   const {
     getAccounts,
     getPrivateKey,
+    getPublicKey,
     processTransaction,
     processSignTransaction,
     processEthSignMessage,
@@ -28,6 +29,7 @@ export function createEthMiddleware(providerHandlers: IProviderHandlers): JRPCMi
     createWalletMiddleware({
       getAccounts,
       getPrivateKey,
+      getPublicKey,
       processTransaction,
       processEthSignMessage,
       processSignTransaction,

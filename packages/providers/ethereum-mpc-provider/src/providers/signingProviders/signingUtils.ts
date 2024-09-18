@@ -121,9 +121,13 @@ export function getProviderHandlers({
     },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
       throw providerErrors.custom({
-        message: "Provider cannot return private key",
+        message: "MPC Provider cannot return private key",
         code: 4902,
       });
+    },
+    getPublicKey: async (_: JRPCRequest<unknown>) => {
+      const pubKey = await getPublic();
+      return `0x${pubKey.toString("hex")}`;
     },
     processTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
