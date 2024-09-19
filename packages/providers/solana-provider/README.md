@@ -12,6 +12,7 @@ Web3Auth Solana Provider can be used to interact with wallet or connected Solana
 Read more about Web3Auth Solana Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/solana#getting-a-provider-from-any-secp256k1-private-key).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -109,11 +110,11 @@ const signSolanaMessage = async (provider: SafeEventEmitterProvider): Promise<st
 })();
 ```
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 

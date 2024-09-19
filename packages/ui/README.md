@@ -36,7 +36,7 @@ Checkout the examples for your preferred blockchain and platform in our [example
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 
