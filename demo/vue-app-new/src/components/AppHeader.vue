@@ -33,23 +33,23 @@ watch(status, () => {
 </script>
 
 <template>
-  <nav class="bg-white sticky top-0 z-50 w-full z-20 top-0 start-0 border-gray-200 dark:border-gray-600">
+  <nav class="bg-white sticky w-full z-20 top-0 start-0 border-gray-200 dark:border-gray-600">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
       <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
         <img :src="`/web3auth.svg`" class="h-8" alt="W3A Logo" />
       </a>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <Button v-if="isDisplay('btnLogout')" block size="xs" pill variant="secondary" @click="onLogout">
+        <Button v-if="isDisplay('btnLogout')" block size="xs" pill variant="tertiary" @click="onLogout">
           {{ t("app.btnLogout") }}
         </Button>
         <Button v-else block size="xs" pill variant="secondary" @click="() => {}">
           {{ t("app.documentation") }}
         </Button>
       </div>
-      <div id="navbar-sticky" class="items-center justify-between w-full md:flex md:w-auto md:order-1">
-        <div v-if="isDisplay('appHeading')" class="max-sm:w-full">
-          <h1 class="leading-tight text-3xl font-extrabold">{{ $t("app.title") }}</h1>
-          <p class="leading-tight text-1xl">{{ $t("app.description") }}</p>
+      <div id="navbar-sticky" class="items-center justify-between w-full md:flex md:w-auto md:order-1 text-center">
+        <div v-if="isDisplay('appHeading')" class="max-sm:w-full max-sm:mt-4">
+          <h1 class="leading-tight text-2xl sm:text-3xl font-bold">{{ $t("app.title") }}</h1>
+          <p class="leading-tight text-lg sm:text-xl">{{ $t("app.description") }}</p>
         </div>
       </div>
     </div>

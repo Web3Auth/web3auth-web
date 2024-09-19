@@ -218,12 +218,11 @@ const onSignPersonalMsg = async () => {
 </script>
 
 <template>
-  <div v-if="isDisplay('dashboard')" class="grid gap-0">
-    <div class="grid grid-cols-8 gap-0">
-      <div class="col-span-1"></div>
-      <Card class="px-4 py-4 gird col-span-2">
+  <div v-if="isDisplay('dashboard')" class="w-full h-full px-10">
+    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 h-full">
+      <Card class="px-4 py-4 gird col-span-1 lg:col-span-2 h-full !rounded-3xl md:!rounded-r-none !shadow-none">
         <div class="mb-2">
-          <Button block size="xs" pill variant="secondary" data-testid="btnClearConsole" @click="clearConsole">
+          <Button block size="xs" pill variant="tertiary" data-testid="btnClearConsole" @click="clearConsole">
             {{ $t("app.buttons.btnClearConsole") }}
           </Button>
         </div>
@@ -244,7 +243,7 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
         </Card>
-        <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
+        <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
             {{ t("app.buttons.btnGetAccounts") }}
@@ -280,7 +279,10 @@ const onSignPersonalMsg = async () => {
           </Button>
         </Card>
       </Card>
-      <Card id="console" class="px-4 py-4 col-span-4 overflow-y-auto">
+      <Card
+        id="console"
+        class="px-4 py-4 col-span-1 md:col-span-3 lg:col-span-4 overflow-y-auto h-full !rounded-3xl md:!rounded-l-none md:!border-l-0 !shadow-none"
+      >
         <pre class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"></pre>
       </Card>
     </div>
