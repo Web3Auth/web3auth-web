@@ -1,5 +1,6 @@
 import { addHexPrefix, isHexString, PrefixedHexString, privateToAddress, stripHexPrefix } from "@ethereumjs/util";
 import { signMessage } from "@toruslabs/base-controllers";
+import { getPublicCompressed } from "@toruslabs/eccrypto";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
 import { hashMessage, SigningKey, TypedDataEncoder } from "ethers";
@@ -37,6 +38,10 @@ export function getProviderHandlers({
 }): IProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [`0x${Buffer.from(privateToAddress(Buffer.from(privKey, "hex"))).toString("hex")}`],
+    getPublicKey: async (_: JRPCRequest<unknown>) => {
+      const publicKey = getPublicCompressed(Buffer.from(stripHexPrefix(privKey), "hex"));
+      return `0x${Buffer.from(publicKey).toString("hex")}`;
+    },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
       if (!keyExportEnabled)
         throw providerErrors.custom({

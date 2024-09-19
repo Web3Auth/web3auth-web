@@ -5,6 +5,7 @@ import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddle
 export function createWalletMiddleware({
   getAccounts,
   getPrivateKey,
+  getPublicKey,
   processEthSignMessage,
   processPersonalMessage,
   processTransaction,
@@ -177,10 +178,19 @@ export function createWalletMiddleware({
     res.result = getPrivateKey(req);
   }
 
+  async function fetchPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!getPublicKey) {
+      throw rpcErrors.methodNotSupported();
+    }
+    res.result = getPublicKey(req);
+  }
+
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
+    eth_public_key: createAsyncMiddleware(fetchPublicKey),
+    public_key: createAsyncMiddleware(fetchPublicKey),
     private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures

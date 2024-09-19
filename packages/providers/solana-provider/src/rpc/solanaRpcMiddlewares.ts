@@ -5,6 +5,7 @@ import { TransactionOrVersionedTransaction } from "../interface";
 export interface IProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
+  getPublicKey: (req: JRPCRequest<unknown>) => Promise<string>;
   getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
   signTransaction: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>) => Promise<TransactionOrVersionedTransaction>;
   signAllTransactions: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>) => Promise<TransactionOrVersionedTransaction[]>;
@@ -22,6 +23,22 @@ export function createGetAccountsMiddleware({ getAccounts }: { getAccounts: IPro
     // This calls from the prefs controller
     const accounts = await getAccounts(request);
     response.result = accounts;
+    return undefined;
+  });
+}
+
+export function createGetPublicKeyMiddleware({
+  getPublicKey,
+}: {
+  getPublicKey: IProviderHandlers["getPublicKey"];
+}): JRPCMiddleware<unknown, unknown> {
+  return createAsyncMiddleware(async (request, response, next) => {
+    const { method } = request;
+    if (method !== "getPublicKey") return next();
+
+    if (!getPublicKey) throw new Error("WalletMiddleware - opts.getPublicKey not provided");
+    const publicKey = await getPublicKey(request);
+    response.result = publicKey;
     return undefined;
   });
 }
@@ -58,8 +75,17 @@ export function createGenericJRPCMiddleware<T, U>(targetMethod: string, handler:
 }
 
 export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRPCMiddleware<unknown, unknown> {
-  const { getAccounts, requestAccounts, signTransaction, signAndSendTransaction, signAllTransactions, signMessage, getPrivateKey, getSecretKey } =
-    providerHandlers;
+  const {
+    getAccounts,
+    requestAccounts,
+    signTransaction,
+    signAndSendTransaction,
+    signAllTransactions,
+    signMessage,
+    getPrivateKey,
+    getSecretKey,
+    getPublicKey,
+  } = providerHandlers;
 
   return mergeMiddleware([
     createRequestAccountsMiddleware({ requestAccounts }),
@@ -79,6 +105,8 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("private_key", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<void, string>("public_key", getPublicKey) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<void, string>("solanaPublicKey", getPublicKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey) as JRPCMiddleware<unknown, unknown>,
   ]);
 }

@@ -1,9 +1,10 @@
 import Bowser from "bowser";
 import copyToClipboard from "copy-to-clipboard";
-import { memo, useMemo, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
+import { ThemedContext } from "../context/ThemeContext";
 import { WALLET_CONNECT_LOGO } from "../interfaces";
 import i18n from "../localeImport";
 
@@ -15,6 +16,7 @@ interface WalletConnectProps {
 
 function WalletConnect(props: WalletConnectProps) {
   const { walletConnectUri, logoImage, primaryColor } = props;
+  const { isDark } = useContext(ThemedContext);
 
   const isDesktop = useMemo<boolean>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
@@ -32,6 +34,12 @@ function WalletConnect(props: WalletConnectProps) {
       setIsCopied(false);
     }, 3000);
   };
+
+  const root = document.documentElement;
+  const whiteColor = "#FFFFFF";
+  const blackColor = "#000000";
+  const modalColor = getComputedStyle(root)?.getPropertyValue("--app-gray-800")?.trim() || "#1f2a37";
+  const qrColor = primaryColor.toLowerCase() === "#ffffff" ? "#000000" : primaryColor;
 
   return (
     <div className="w3ajs-wallet-connect w3a-wallet-connect">
@@ -61,7 +69,9 @@ function WalletConnect(props: WalletConnectProps) {
               logoHeight={32}
               logoWidth={32}
               logoPadding={10}
-              eyeColor={primaryColor}
+              eyeColor={isDark ? whiteColor : qrColor}
+              bgColor={isDark ? modalColor : whiteColor}
+              fgColor={isDark ? whiteColor : blackColor}
             />
           </div>
           <div className="text-xs">{t("modal.external.walletconnect-copy")}</div>

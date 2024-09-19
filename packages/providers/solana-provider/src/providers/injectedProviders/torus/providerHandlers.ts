@@ -12,6 +12,13 @@ export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProvi
       });
       return accounts;
     },
+    getPublicKey: async () => {
+      const publicKeys = await injectedProvider.request<unknown, string[]>({
+        method: "solana_requestAccounts",
+        params: {},
+      });
+      return publicKeys[0];
+    },
 
     getAccounts: async () => {
       const accounts = await injectedProvider.request<unknown, string[]>({

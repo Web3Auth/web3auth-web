@@ -26,7 +26,7 @@ export async function getProviderHandlers({
       return [keyPair.publicKey.toBase58()];
     },
     getAccounts: async () => [keyPair.publicKey.toBase58()],
-
+    getPublicKey: async () => keyPair.publicKey.toBase58(),
     getPrivateKey: async () => {
       if (!keyExportEnabled) {
         throw providerErrors.custom({ message: "Private key export is disabled", code: 4902 });
