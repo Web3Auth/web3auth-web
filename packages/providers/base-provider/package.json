@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-provider",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -22,7 +22,7 @@
   "dependencies": {
     "@toruslabs/base-controllers": "^6.1.2",
     "@web3auth/auth": "^9.3.3",
-    "@web3auth/base": "^9.0.0",
+    "@web3auth/base": "^9.0.1",
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {

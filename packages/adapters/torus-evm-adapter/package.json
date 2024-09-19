@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/torus-evm-adapter",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "torus wallet adapter for web3auth",
   "keywords": [
     "web3Auth/torus-evm-adapter",
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@toruslabs/torus-embed": "^5.0.0",
-    "@web3auth/base": "^9.0.0",
-    "@web3auth/base-evm-adapter": "^9.0.0"
+    "@web3auth/base": "^9.0.1",
+    "@web3auth/base-evm-adapter": "^9.0.1"
   },
   "lint-staged": {
     "!(*d).ts": [
