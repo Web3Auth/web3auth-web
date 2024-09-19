@@ -12,6 +12,7 @@ Web3Auth Base Evm Adapter contains a base class for EVM adapters.
 Read more about the Web3Auth in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -34,15 +35,14 @@ npm install --save @web3auth/base-evm-adapter
 ```ts
 import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
 
-
-export class EvmAdapter extends BaseEvmAdapter<void> {
-}
+export class EvmAdapter extends BaseEvmAdapter<void> {}
 ```
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
 
 ## 🌐 Demo
-Check out the [Web3Auth](https://demo-app.web3auth.io/) Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+
+Check out the [Web3Auth](https://demo.web3auth.io) Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 
