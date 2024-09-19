@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IProvider, log } from "@web3auth/base";
+import { verifyMessage } from "ethers";
 import Web3 from "web3";
 
 export const sendEth = async (provider: IProvider, uiConsole: any) => {
@@ -15,7 +16,7 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
     uiConsole("txRes", txRes);
   } catch (error) {
     log.info("error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
   }
 };
 
@@ -110,7 +111,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     // uiConsole("signedMessage orog", signedMessage);
   } catch (error) {
     log.error("error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
   }
 };
 
@@ -122,7 +123,7 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
     return accounts;
   } catch (error) {
     log.error("Error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
     return [];
   }
 };
@@ -134,7 +135,7 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
     return chainId.toString();
   } catch (error) {
     log.error("Error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
     return undefined;
   }
 };
@@ -146,7 +147,7 @@ export const getBalance = async (provider: IProvider, uiConsole: any) => {
     uiConsole("balance", balance.toString());
   } catch (error) {
     log.error("Error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
   }
 };
 
@@ -164,6 +165,45 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     uiConsole("txRes", txRes);
   } catch (error) {
     log.info("error", error);
-    uiConsole("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
+  }
+};
+
+export const signPersonalMessage = async (provider: IProvider, uiConsole: any) => {
+  try {
+    const web3 = new Web3(provider as any);
+    const accounts = await web3.eth.getAccounts();
+    const from = accounts[0];
+
+    const originalMessage = "Example `personal_sign` messages";
+
+    // Sign the message
+    const signedMessage = await web3.eth.personal.sign(originalMessage, from, "Example password");
+
+    // const ethProvider = new BrowserProvider(provider);
+    // const ethersignMsg = await ethProvider.send("personal_sign", [originalMessage, from, "Example password"]);
+    // const test = await eipVerifyMessage({
+    //   provider: ethProvider,
+    //   message: originalMessage,
+    //   signature: signedMessage,
+    //   // signer: from,
+    //   signer: "0x815b6ca0fc76f3d2407c861b2aead9adb6bd2519",
+    // });
+
+    // Verify
+    let personalSignVerifySigUtilResult = "";
+    const recoveredAddr = verifyMessage(originalMessage, signedMessage);
+
+    if (recoveredAddr.toLowerCase() === "0x815b6ca0fc76f3d2407c861b2aead9adb6bd2519"?.toLowerCase()) {
+      log.info(`SigUtil Successfully verified signer as ${recoveredAddr}`);
+      personalSignVerifySigUtilResult = recoveredAddr;
+    } else {
+      throw new Error(`SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
+    }
+
+    uiConsole(`Success`, { signedMessage, verify: personalSignVerifySigUtilResult });
+  } catch (error) {
+    log.error("Error", error);
+    uiConsole("Error", error instanceof Error ? error.message : error);
   }
 };

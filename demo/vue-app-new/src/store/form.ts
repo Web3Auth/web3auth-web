@@ -21,4 +21,5 @@ export const formDataStore = reactive<FormData>({
     logoLight: "",
     logoDark: "",
   },
+  useAAProvider: false,
 });

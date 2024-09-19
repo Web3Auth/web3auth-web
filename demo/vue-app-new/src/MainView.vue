@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
+import {
+  AccountAbstractionProvider,
+  BiconomySmartAccount,
+  ISmartAccount,
+  KernelSmartAccount,
+  LightSmartAccount,
+  SafeSmartAccount,
+  SimpleSmartAccount,
+  TrustSmartAccount,
+} from "@web3auth/account-abstraction-provider";
+import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
@@ -12,12 +22,13 @@ import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { entryPoint06Address } from "viem/account-abstraction";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds } from "./config";
+import { chainConfigs, clientIds, DefaultBundlerUrl } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
@@ -66,6 +77,64 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
   }
 });
 
+const aaProvider = computed((): IBaseProvider<IProvider> | undefined => {
+  const { useAAProvider } = formData;
+  if (!useAAProvider) return undefined;
+
+  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+  // setup aa provider
+  let smartAccountInit: ISmartAccount;
+  switch (formData.smartAccountType) {
+    case "biconomy":
+      smartAccountInit = new BiconomySmartAccount({
+        entryPoint: {
+          address: entryPoint06Address,
+          version: "0.6",
+        },
+      });
+      break;
+    case "simple":
+      smartAccountInit = new SimpleSmartAccount({});
+      break;
+    case "kernel":
+      smartAccountInit = new KernelSmartAccount({});
+      break;
+    case "light":
+      smartAccountInit = new LightSmartAccount({
+        version: "2.0.0",
+      });
+      break;
+    case "trust":
+      smartAccountInit = new TrustSmartAccount({
+        entryPoint: {
+          address: entryPoint06Address,
+          version: "0.6",
+        },
+      });
+      break;
+
+    case "safe":
+    default:
+      smartAccountInit = new SafeSmartAccount({
+        version: "1.4.1",
+      });
+      break;
+  }
+
+  return new AccountAbstractionProvider({
+    config: {
+      chainConfig,
+      bundlerConfig: { url: formData.bundlerUrl ?? DefaultBundlerUrl },
+      paymasterConfig: formData.paymasterUrl
+        ? {
+            url: formData.paymasterUrl,
+          }
+        : undefined,
+      smartAccountInit,
+    },
+  });
+});
+
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const {
@@ -76,6 +145,7 @@ const options = computed((): Web3AuthOptions => {
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
+    aAProvider: aaProvider.value,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;
@@ -142,6 +212,10 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
+        formData.useAAProvider = json.useAAProvider;
+        formData.smartAccountType = json.smartAccountType;
+        formData.bundlerUrl = json.bundlerUrl;
+        formData.paymasterUrl = json.paymasterUrl;
       }
     } catch (error) {}
   }

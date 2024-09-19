@@ -114,6 +114,19 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
+export type SmartAccountType = "safe" | "biconomy" | "kernel" | "light" | "simple" | "trust";
+
+export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
+  { name: "Safe", value: "safe" },
+  { name: "Biconomy", value: "biconomy" },
+  { name: "Kernel", value: "kernel" },
+  { name: "Light", value: "light" },
+  { name: "Simple", value: "simple" },
+  { name: "Trust", value: "trust" },
+];
+
+export const DefaultBundlerUrl = "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_23iPJbjhpHGDrx4VbYorjC";
+
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
@@ -131,6 +144,10 @@ export type FormData = {
     logoDark: string;
     logoLight: string;
   };
+  useAAProvider: boolean;
+  smartAccountType?: SmartAccountType;
+  bundlerUrl?: string;
+  paymasterUrl?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
