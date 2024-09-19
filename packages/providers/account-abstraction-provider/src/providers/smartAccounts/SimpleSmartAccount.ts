@@ -7,7 +7,7 @@ import { ISmartAccount } from "./types";
 
 type SimpleSmartAccountParameters = Parameters<typeof toSimpleSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
 
-type SimpleSmartAccountConfig = Omit<SimpleSmartAccountParameters, "owners" | "client">;
+type SimpleSmartAccountConfig = Omit<SimpleSmartAccountParameters, "owner" | "client">;
 
 export class SimpleSmartAccount implements ISmartAccount {
   private options: SimpleSmartAccountConfig;

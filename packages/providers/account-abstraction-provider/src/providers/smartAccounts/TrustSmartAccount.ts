@@ -7,7 +7,7 @@ import { ISmartAccount } from "./types";
 
 type TrustSmartAccountParameters = Parameters<typeof toTrustSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
 
-type TrustSmartAccountConfig = Omit<TrustSmartAccountParameters, "owners" | "client" | "address" | "nonceKey" | "index">;
+type TrustSmartAccountConfig = Omit<TrustSmartAccountParameters, "owner" | "client" | "address" | "nonceKey" | "index">;
 
 export class TrustSmartAccount implements ISmartAccount {
   private options: TrustSmartAccountConfig;

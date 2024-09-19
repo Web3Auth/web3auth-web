@@ -5,7 +5,7 @@ import { SmartAccount } from "viem/account-abstraction";
 
 import { ISmartAccount } from "./types";
 
-type LightSmartAccountConfig = Omit<ToLightSmartAccountParameters, "owners" | "client" | "index" | "address" | "nonceKey">;
+type LightSmartAccountConfig = Omit<ToLightSmartAccountParameters, "owner" | "client" | "index" | "address" | "nonceKey">;
 
 export class LightSmartAccount implements ISmartAccount {
   private options: LightSmartAccountConfig;
