@@ -12,13 +12,17 @@ async function getLastActiveSession(signClient: ISignClient): Promise<SessionTyp
   return null;
 }
 
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(window.navigator.userAgent);
+}
+
 export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: number, method: string, params: U): Promise<T> {
   const session = await getLastActiveSession(signClient);
   if (!session) {
     throw providerErrors.disconnected();
   }
 
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && isMobileDevice()) {
     if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
       window.location.href = session.peer.metadata.redirect.native;
     }
