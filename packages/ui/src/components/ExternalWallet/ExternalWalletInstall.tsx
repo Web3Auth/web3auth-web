@@ -65,14 +65,12 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
   const { connectButton, goBack, closeModal } = props;
   const [t] = useTranslation(undefined, { i18n });
 
-  const deviceDetails = useMemo<{ platform: platform; browser: browser; os: mobileOs; logoLight: string; logoDark: string }>(() => {
+  const deviceDetails = useMemo<{ platform: platform; browser: browser; os: mobileOs }>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
     return {
       platform: browser.getPlatformType() as platform,
       browser: browser.getBrowserName().toLowerCase() as browser,
       os: browser.getOSName() as mobileOs,
-      logoLight: `${browser.getBrowserName().toLowerCase()}-light`,
-      logoDark: `${browser.getBrowserName().toLowerCase()}-dark`,
     };
   }, []);
 
@@ -120,10 +118,10 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2 wallet-link-btn">
             <Image
-              imageId={deviceDetails.logoLight}
-              darkImageId={deviceDetails.logoDark}
-              hoverImageId={deviceDetails.logoLight}
-              darkHoverImageId={deviceDetails.logoDark}
+              imageId={deviceDetails.browser}
+              darkImageId={deviceDetails.browser}
+              hoverImageId={deviceDetails.browser}
+              darkHoverImageId={deviceDetails.browser}
               height="30"
               width="30"
               isButton
