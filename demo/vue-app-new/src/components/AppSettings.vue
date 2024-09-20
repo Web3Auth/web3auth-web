@@ -29,6 +29,7 @@ const adapterOptions = computed(() =>
       ]
     : [
         { name: "torus-solana-adapter", value: "torus-solana" },
+        { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
         { name: "injected-adapters", value: "injected-solana" },
       ]
 );

@@ -15,7 +15,17 @@ export enum DEFAULT_EIP155_METHODS {
   SWITCH_ETHEREUM_CHAIN = "wallet_switchEthereumChain",
 }
 
+export enum DEFAULT_SOLANA_METHODS {
+  SIGN_TRANSACTION = "solana_signTransaction",
+  SIGN_MESSAGE = "solana_signMessage",
+}
+
 export enum DEFAULT_EIP_155_EVENTS {
+  ETH_CHAIN_CHANGED = "chainChanged",
+  ETH_ACCOUNTS_CHANGED = "accountsChanged",
+}
+
+export enum DEFAULT_SOLANA_EVENTS {
   ETH_CHAIN_CHANGED = "chainChanged",
   ETH_ACCOUNTS_CHANGED = "accountsChanged",
 }
@@ -107,6 +117,8 @@ export const getSupportedMethodsByNamespace = (namespace: string) => {
   switch (namespace) {
     case CHAIN_NAMESPACES.EIP155:
       return Object.values(DEFAULT_EIP155_METHODS);
+    case CHAIN_NAMESPACES.SOLANA:
+      return Object.values(DEFAULT_SOLANA_METHODS);
     default:
       throw new Error(`No default methods for namespace: ${namespace}`);
   }
@@ -116,6 +128,8 @@ export const getSupportedEventsByNamespace = (namespace: string) => {
   switch (namespace) {
     case CHAIN_NAMESPACES.EIP155:
       return Object.values(DEFAULT_EIP_155_EVENTS);
+    case CHAIN_NAMESPACES.SOLANA:
+      return Object.values(DEFAULT_SOLANA_EVENTS);
     default:
       throw new Error(`No default events for namespace: ${namespace}`);
   }
@@ -143,7 +157,7 @@ export const getWalletConnectV2Settings = async (
   adapterSettings: IAdapterSettings;
   loginSettings: EngineTypes.ConnectParams;
 }> => {
-  if (namespace === CHAIN_NAMESPACES.EIP155) {
+  if (namespace === CHAIN_NAMESPACES.EIP155 || namespace === CHAIN_NAMESPACES.SOLANA) {
     const appMetadata = await getSiteMetadata();
     const adapterSettings: IAdapterSettings = {
       walletConnectInitOptions: {
@@ -159,7 +173,7 @@ export const getWalletConnectV2Settings = async (
     };
 
     const chainNamespaces = chainIds.map((chainId) => {
-      return `${namespace}:${parseInt(chainId, 16)}`;
+      return `${namespace}:${namespace === CHAIN_NAMESPACES.EIP155 ? parseInt(chainId, 16) : chainId}`;
     });
 
     const loginSettings: EngineTypes.ConnectParams = {

@@ -1,1 +1,3 @@
-module.exports = require("../../../torus.config");
+module.exports = {
+  esm: true,
+}

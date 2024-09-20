@@ -8,8 +8,8 @@ import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
 import { useI18n } from "vue-i18n";
 
 import { getV4TypedData } from "../config";
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../services/ethHandlers";
-import { signAllTransactions, signAndSendTransaction, signMessage } from "../services/solHandlers";
+import { getAccounts, getBalance, getChainId, sendEth, signEthMessage } from "../services/ethHandlers";
+import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });

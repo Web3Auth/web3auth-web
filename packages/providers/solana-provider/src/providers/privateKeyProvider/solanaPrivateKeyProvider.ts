@@ -2,15 +2,9 @@ import { getED25519Key, JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors,
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
+import { AddSolanaChainParameter, IChainSwitchHandlers } from "../../rpc";
 import { createJsonRpcClient } from "../../rpc/JrpcClient";
-import {
-  AddSolanaChainParameter,
-  createAccountMiddleware,
-  createChainSwitchMiddleware,
-  createSolanaMiddleware,
-  IAccountHandlers,
-  IChainSwitchHandlers,
-} from "../../rpc/solanaRpcMiddlewares";
+import { createAccountMiddleware, createChainSwitchMiddleware, createSolanaMiddleware, IAccountHandlers } from "../../rpc/solanaRpcMiddlewares";
 import { getProviderHandlers } from "./solanaPrivateKeyUtils";
 
 export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {

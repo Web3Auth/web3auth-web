@@ -2,8 +2,9 @@ import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 
+import { IProviderHandlers } from "../../../rpc";
 import { createConfigMiddleware } from "../../../rpc/JrpcClient";
-import { createSolanaMiddleware, IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
+import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 
 export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderConfig, BaseProviderState, P> {
   constructor({ config, state }: { config: BaseProviderConfig; state?: BaseProviderState }) {
