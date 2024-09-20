@@ -6,11 +6,15 @@ import { CustomChainConfig } from "../chain/IChainInterface";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
+  isInitialized: boolean;
+  isInitializing: boolean;
+  initError: unknown;
   isConnected: boolean;
+  isConnecting: boolean;
+  connectError: unknown;
   provider: IProvider | null;
   userInfo: Partial<AuthUserInfo> | null;
   isMFAEnabled: boolean;
-  isInitialized: boolean;
   status: ADAPTER_STATUS_TYPE | null;
   enableMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;

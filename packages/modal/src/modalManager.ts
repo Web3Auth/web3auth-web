@@ -116,7 +116,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      const localSmsOtpEnabled = params.modalConfig[WALLET_ADAPTERS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS].showOnModal;
+      const localSmsOtpEnabled = params.modalConfig[WALLET_ADAPTERS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
       if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
         throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
       }
@@ -380,7 +380,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     Object.keys(this.walletAdapters).forEach(async (adapterName) => {
       const adapter = this.walletAdapters[adapterName];
       if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
-        log.debug("init external wallet", this.cachedAdapter, adapterName);
+        log.debug("init external wallet", this.cachedAdapter, adapterName, adapter.status);
         this.subscribeToAdapterEvents(adapter);
         // we are not initializing cached adapter here as it is already being initialized in initModal before.
         if (this.cachedAdapter === adapterName) {
@@ -396,7 +396,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               return undefined;
             })
             .catch((error) => log.error(error, "error while initializing adapter", adapterName));
-        } else if (adapter.status === ADAPTER_STATUS.READY) {
+        } else if (adapter.status === ADAPTER_STATUS.READY || adapter.status === ADAPTER_STATUS.CONNECTING) {
+          // we use connecting status for wallet connect
           const adapterModalConfig = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
           adaptersConfig[adapterName] = { ...adapterModalConfig, isInjected: adapter.isInjected };
           this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });

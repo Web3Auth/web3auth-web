@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-evm-adapter",
-  "version": "9.0.0",
+  "version": "9.0.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -20,9 +20,9 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@web3auth/base": "^9.0.0",
-    "@web3auth/base-evm-adapter": "^9.0.0",
-    "@web3auth/wallet-connect-v2-adapter": "^9.0.0",
+    "@web3auth/base": "^9.0.2",
+    "@web3auth/base-evm-adapter": "^9.0.2",
+    "@web3auth/wallet-connect-v2-adapter": "^9.0.2",
     "mipd": "^0.0.7"
   },
   "files": [

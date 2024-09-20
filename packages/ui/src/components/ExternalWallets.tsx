@@ -52,10 +52,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [t] = useTranslation(undefined, { i18n });
 
   const walletDiscoverySupported = useMemo(() => {
-    const walletConnectSupported = Object.keys(config || {}).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2);
-    const supported = walletRegistry && Object.keys(walletRegistry).length > 0 && walletConnectSupported;
+    // console.log("config", config);
+    const supported = walletRegistry && Object.keys(walletRegistry).length > 0;
     return supported;
-  }, [config, walletRegistry]);
+  }, [walletRegistry]);
 
   const deviceDetails = useMemo<{ platform: platform; os: os; browser: browser }>(() => {
     const browser = bowser.getParser(window.navigator.userAgent);
@@ -127,7 +127,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             walletRegistryItem,
             imgExtension: walletRegistryItem.imgExtension || "svg",
           };
-
+          // const isBrowserExtensionAvailable = walletRegistryItem.app?.chrome || walletRegistryItem.app?.firefox || walletRegistryItem.app?.edge;
           if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
 
           const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));

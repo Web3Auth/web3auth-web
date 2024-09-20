@@ -252,11 +252,9 @@ const configs = computed(() => {
 <template>
   <Web3AuthProvider :config="configs">
     <AppHeader />
-    <main class="flex-1 p-1">
-      <div class="relative">
-        <AppSettings />
-        <AppDashboard />
-      </div>
+    <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+      <AppSettings />
+      <AppDashboard />
     </main>
   </Web3AuthProvider>
 </template>

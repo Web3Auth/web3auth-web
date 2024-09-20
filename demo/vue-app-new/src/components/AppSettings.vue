@@ -69,18 +69,20 @@ const isActiveTab = (index: number) => activeTab.value === index;
 <template>
   <div v-if="isDisplay('form')" class="grid grid-cols-8 gap-0">
     <div class="col-span-0 sm:col-span-1 lg:col-span-2"></div>
-    <Card class="h-auto col-span-8 px-8 py-8 sm:col-span-6 lg:col-span-4">
-      <div class="text-3xl font-bold leading-tight text-center">{{ $t("app.greeting") }}</div>
-      <div class="mb-12 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }">{{ status }}</Tag>
+    <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
+      <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
+      <div class="my-4 font-extrabold leading-tight text-center">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === 'ready' }]">{{ status }}</Tag>
         &nbsp;
-        <Tag v-bind="{ minWidth: 'inherit' }">{{ isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET" }}</Tag>
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': isInitialized }]">
+          {{ isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET" }}
+        </Tag>
       </div>
-      <Tabs>
-        <Tab variant="button" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
-        <Tab variant="button" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
-        <Tab variant="button" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
-        <Tab variant="button" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
+      <Tabs class="mb-4">
+        <Tab variant="underline" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
+        <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
+        <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
+        <Tab variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
       </Tabs>
       <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select
@@ -367,7 +369,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           Connect
         </Button>
       </div>
-      <div class="px-0 mt-4 mb-5 text-base font-medium text-app-gray-900 dark:text-app-gray-200">
+      <div class="px-0 mt-4 mb-5 text-sm font-normal text-app-gray-900 dark:text-app-gray-200">
         Reach out to us at
         <a class="underline text-app-primary-600 dark:text-app-primary-500" href="mailto:hello@tor.us">hello@tor.us</a>
         or
