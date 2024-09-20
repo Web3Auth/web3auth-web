@@ -38,8 +38,8 @@
       "prettier --write"
     ]
   },
-  "main": "dist/modal.cjs.js",
-  "module": "dist/modal.esm.js",
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "name": "@web3auth/modal",
   "peerDependencies": {
     "@babel/runtime": "^7.x",

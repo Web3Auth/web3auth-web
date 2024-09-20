@@ -111,7 +111,9 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
     // if browser is brave, use chrome extension
     const browserType = deviceDetails.browser === "brave" ? "chrome" : deviceDetails.browser;
     const browserExtensionConfig = connectButton.walletRegistryItem.app || {};
-    const browserExtensionId = browserExtensionConfig[browserType];
+    const extensionForCurrentBrowser =
+      browserExtensionConfig.browser && browserExtensionConfig.browser.includes(browserType) ? browserExtensionConfig.browser : undefined;
+    const browserExtensionId = browserExtensionConfig[browserType] || extensionForCurrentBrowser;
     const browserExtensionUrl = browserExtensionId ? getBrowserExtensionUrl(browserType, browserExtensionId) : null;
     const installLink = browserExtensionUrl ? (
       <li key={deviceDetails.browser}>
