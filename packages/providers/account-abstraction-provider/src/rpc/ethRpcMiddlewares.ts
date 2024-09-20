@@ -1,17 +1,31 @@
+import { isHexString } from "@ethereumjs/util";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 import { IProvider } from "@web3auth/base";
 import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider";
+import { TypedDataEncoder } from "ethers";
+import { Chain, createWalletClient, Hex, http } from "viem";
+import { SmartAccount } from "viem/account-abstraction";
 
-import { MessageParams, TypedMessageParams } from "./types";
+import { MessageParams, SignTypedDataMessageV4, TypedMessageParams } from "./types";
 
 export async function createAaMiddleware({
   eoaProvider,
+  smartAccount,
+  chain,
   handlers,
 }: {
   eoaProvider: IProvider;
+  smartAccount: SmartAccount;
+  chain: Chain;
   handlers: Pick<IProviderHandlers, "getAccounts" | "getPrivateKey" | "processTransaction">;
 }): Promise<JRPCMiddleware<unknown, unknown>> {
   const [eoaAddress] = (await eoaProvider.request({ method: "eth_accounts" })) as string[];
+
+  const walletClient = createWalletClient({
+    account: smartAccount,
+    chain,
+    transport: http(),
+  });
 
   /**
    * Validates the keyholder address, and returns a normalized (i.e. lowercase)
@@ -94,85 +108,117 @@ export async function createAaMiddleware({
       txParams.from = await normalizeSignSenderAddress(txParams.from, req);
     }
 
-    res.result = await eoaProvider.request({
-      method: "eth_signTransaction",
-      params: req.params,
+    const request = await walletClient.prepareTransactionRequest({
+      account: smartAccount,
+      to: txParams.to,
+      value: txParams.value,
+      kzg: undefined,
+      chain: undefined,
     });
+    // TODO: correct transaction request type
+    res.result = await walletClient.signTransaction(request as unknown as Parameters<typeof walletClient.signTransaction>[0]);
   }
 
   async function ethSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    // normalize sender address
+    let msgParams: MessageParams<string> = req.params as MessageParams<string>;
+    const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
+
     if (Array.isArray(req.params)) {
       if (!(req.params.length === 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [address, message]`);
 
       const params = req.params as [string, string];
-      const addressIndex = 0;
-      const address = params[addressIndex];
+      const address = params[0];
+      const message = params[1];
 
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      params[addressIndex] = normalizedAddress;
-    } else {
-      const msgParams: MessageParams<string> = req.params as MessageParams<string>;
-      const address = msgParams.from;
-
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      msgParams.from = normalizedAddress;
+      msgParams = {
+        from: address,
+        data: message,
+      };
     }
+    msgParams = { ...extraParams, ...msgParams };
 
-    res.result = await eoaProvider.request({
-      method: "eth_sign",
-      params: req.params,
+    res.result = await walletClient.signMessage({
+      account: smartAccount,
+      message: {
+        raw: msgParams.data as Hex,
+      },
     });
   }
 
   async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    // normalize sender address
+    if (!req?.params) throw new Error("WalletMiddleware - missing params");
+
+    let msgParams: TypedMessageParams = req.params as TypedMessageParams;
+
     if (Array.isArray(req.params)) {
       if (!(req.params.length === 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [address, typedData]`);
 
       const params = req.params as [string, string];
-      const addressIndex = 0;
-      const address = params[addressIndex];
+      const address = params[0];
+      const message = params[1];
 
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      params[addressIndex] = normalizedAddress;
-    } else {
-      const msgParams: TypedMessageParams = req.params as TypedMessageParams;
-      const address = msgParams.from;
-
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      msgParams.from = normalizedAddress;
+      msgParams = {
+        from: address,
+        data: message,
+      };
     }
 
-    res.result = await eoaProvider.request({
-      method: "eth_signTypedData_v4",
-      params: req.params,
+    const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+
+    // Deduce the primary type using ethers
+    const typedData = TypedDataEncoder.from(data.types);
+    const { primaryType } = typedData;
+
+    res.result = await walletClient.signTypedData({
+      account: smartAccount,
+      domain: {
+        ...data.domain,
+        verifyingContract: data.domain.verifyingContract as Hex,
+        salt: data.domain.salt as Hex,
+        chainId: Number(data.domain.chainId),
+      },
+      primaryType,
+      types: data.types,
+      message: data.message,
     });
   }
 
   async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    // normalize sender address
+    let msgParams: MessageParams<string> = req.params as MessageParams<string>;
+    const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
+
     if (Array.isArray(req.params)) {
       if (!(req.params.length >= 2)) throw new Error(`WalletMiddleware - incorrect params for ${req.method} method. expected [message, address]`);
 
       const params = req.params as [string, string];
-      const addressIndex = 1;
-      const address = params[addressIndex];
+      if (typeof params[0] === "object") {
+        const { challenge, address } = params[0] as { challenge: string; address: string };
+        msgParams = {
+          from: address,
+          data: challenge,
+        };
+      } else {
+        const message = params[0];
+        const address = params[1];
 
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      params[addressIndex] = normalizedAddress;
-    } else {
-      const msgParams: MessageParams<string> = req.params as MessageParams<string>;
-      const address = msgParams.from;
-
-      const normalizedAddress = await normalizeSignSenderAddress(address, req);
-      msgParams.from = normalizedAddress;
+        msgParams = {
+          from: address,
+          data: message,
+        };
+      }
     }
+    msgParams = { ...extraParams, ...msgParams };
 
-    res.result = await eoaProvider.request({
-      method: "personal_sign",
-      params: req.params,
+    const message = msgParams.data;
+    const signed = await walletClient.signMessage({
+      account: smartAccount,
+      message: isHexString(message)
+        ? {
+            raw: message,
+          }
+        : message,
     });
+    res.result = signed;
   }
 
   async function requestAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {

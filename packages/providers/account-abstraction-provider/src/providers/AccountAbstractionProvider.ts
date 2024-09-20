@@ -2,7 +2,7 @@ import { createFetchMiddleware } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { Client, createPublicClient, defineChain, http } from "viem";
+import { Client, createPublicClient, defineChain, http, PublicClient } from "viem";
 import { BundlerClient, createBundlerClient, createPaymasterClient, PaymasterClient, SmartAccount } from "viem/account-abstraction";
 
 import { createAaMiddleware } from "../rpc/ethRpcMiddlewares";
@@ -19,6 +19,8 @@ export interface AccountAbstractionProviderState extends BaseProviderState {}
 
 export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
   private _smartAccount: SmartAccount | null;
+
+  private _publicClient: PublicClient | null;
 
   private _bundlerClient: BundlerClient | null;
 
@@ -53,36 +55,37 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   };
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    // setup public client for viem smart account
-    const client = createPublicClient({
-      chain: defineChain({
-        id: Number.parseInt(this.config.chainConfig.chainId, 16), // id in number form
-        name: this.config.chainConfig.displayName,
-        rpcUrls: {
-          default: {
-            http: [this.config.chainConfig.rpcTarget],
-            webSocket: [this.config.chainConfig.wsTarget],
-          },
+    const chain = defineChain({
+      id: Number.parseInt(this.config.chainConfig.chainId, 16), // id in number form
+      name: this.config.chainConfig.displayName,
+      rpcUrls: {
+        default: {
+          http: [this.config.chainConfig.rpcTarget],
+          webSocket: [this.config.chainConfig.wsTarget],
         },
-        blockExplorers: this.config.chainConfig.blockExplorerUrl
-          ? {
-              default: {
-                name: "explorer", // TODO: correct name if chain config has it
-                url: this.config.chainConfig.blockExplorerUrl,
-              },
-            }
-          : undefined,
-        nativeCurrency: {
-          name: this.config.chainConfig.tickerName,
-          symbol: this.config.chainConfig.ticker,
-          decimals: this.config.chainConfig.decimals || 18,
-        },
-      }),
-      transport: http(),
+      },
+      blockExplorers: this.config.chainConfig.blockExplorerUrl
+        ? {
+            default: {
+              name: "explorer", // TODO: correct name if chain config has it
+              url: this.config.chainConfig.blockExplorerUrl,
+            },
+          }
+        : undefined,
+      nativeCurrency: {
+        name: this.config.chainConfig.tickerName,
+        symbol: this.config.chainConfig.ticker,
+        decimals: this.config.chainConfig.decimals || 18,
+      },
     });
+    // setup public client for viem smart account
+    this._publicClient = createPublicClient({
+      chain,
+      transport: http(),
+    }) as PublicClient;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
       owner: eoaProvider,
-      client: client as Client,
+      client: this._publicClient as Client,
     });
 
     // setup bundler and paymaster
@@ -94,7 +97,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     }
     this._bundlerClient = createBundlerClient({
       account: this.smartAccount,
-      client: client as Client,
+      client: this._publicClient as Client,
       transport: http(this.config.bundlerConfig.url),
       paymaster: this._paymasterClient,
       ...this.config.bundlerConfig,
@@ -110,6 +113,8 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     const aaMiddleware = await createAaMiddleware({
       eoaProvider,
       handlers: providerHandlers,
+      smartAccount: this._smartAccount,
+      chain,
     });
     const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.config.chainConfig.rpcTarget });
     engine.push(aaMiddleware);

@@ -18,6 +18,9 @@ export function getProviderHandlers({
         code: 4903,
       });
     },
+    getPublicKey: async (_: JRPCRequest<unknown>) => {
+      throw new Error("Not implemented");
+    },
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
       const { to, value, data, maxFeePerGas, maxPriorityFeePerGas, gasLimit } = txParams;
