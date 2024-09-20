@@ -96,7 +96,7 @@ export const Web3AuthProvider = defineComponent({
     };
 
     watch(
-      [() => props.config],
+      () => props.config,
       () => {
         const resetHookState = () => {
           provider.value = null;
