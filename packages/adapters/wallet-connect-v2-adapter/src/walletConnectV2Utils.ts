@@ -17,6 +17,13 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: nu
   if (!session) {
     throw providerErrors.disconnected();
   }
+
+  if (typeof window !== "undefined") {
+    if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
+      window.location.href = session.peer.metadata.redirect.native;
+    }
+  }
+
   return signClient.request<T>({
     topic: session.topic,
     chainId: `eip155:${chainId}`,
