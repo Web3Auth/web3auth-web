@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { recoverAddress, TypedDataEncoder } from "ethers";
 import { useI18n } from "vue-i18n";
 
-import { getV4TypedData } from "../config";
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signPersonalMessage, signTransaction } from "../services/ethHandlers";
+import {
+  getAccounts,
+  getBalance,
+  getChainId,
+  sendEth,
+  signEthMessage,
+  signPersonalMessage,
+  signTransaction,
+  signTypedMessage,
+} from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 
@@ -154,35 +160,7 @@ const onSignAllTransactions = async () => {
 };
 
 const onSignTypedData_v4 = async () => {
-  try {
-    printToConsole("Initiating sign typed data v4");
-
-    const chain = await getChainId(provider.value as IProvider, () => {});
-    const accounts = await getAccounts(provider.value as IProvider, () => {});
-    const typedData = getV4TypedData(chain as string);
-    let signTypedDataV4VerifyResult = "";
-    // const signedMessage = await ethersProvider?.send("eth_signTypedData_v4", [account.value, JSON.stringify(typedData)]);
-
-    const from = accounts?.[0];
-
-    const signedMessage = (await provider.value?.request({
-      method: METHOD_TYPES.ETH_SIGN_TYPED_DATA_V4,
-      params: [from, JSON.stringify(typedData)],
-    })) as string;
-
-    const msg = TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
-    const recoveredAddr = recoverAddress(msg, signedMessage);
-    if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
-      log(`Successfully verified signer as ${recoveredAddr}`);
-      signTypedDataV4VerifyResult = recoveredAddr;
-    } else {
-      throw new Error(`Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
-    }
-    printToConsole(`Success`, { signedMessage, verify: signTypedDataV4VerifyResult });
-  } catch (error) {
-    log(error);
-    printToConsole("Failed", (error as Error).message);
-  }
+  await signTypedMessage(provider.value as IProvider, printToConsole);
 };
 
 const onSignPersonalMsg = async () => {
@@ -226,6 +204,9 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignTransaction">
+            {{ t("app.buttons.btnSignTransaction") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}

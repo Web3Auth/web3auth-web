@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IProvider, log } from "@web3auth/base";
-import { verifyMessage } from "ethers";
+import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
+import { BrowserProvider } from "ethers";
 import Web3 from "web3";
+
+import { getV4TypedData } from "../config";
 
 export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
@@ -35,80 +38,8 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
 
     const message = "Some string";
     const hash = web3.utils.sha3(message) as string;
-    const sig = await web3.eth.personal.sign(hash, fromAddress, "");
+    const sig = await web3.eth.sign(hash, fromAddress);
     uiConsole("personal sign", sig);
-    // const originalMessage = {
-    //   types: {
-    //     EIP712Domain: [
-    //       {
-    //         name: "name",
-    //         type: "string",
-    //       },
-    //       {
-    //         name: "version",
-    //         type: "string",
-    //       },
-    //       {
-    //         name: "chainId",
-    //         type: "uint256",
-    //       },
-    //       {
-    //         name: "verifyingContract",
-    //         type: "address",
-    //       },
-    //     ],
-    //     Person: [
-    //       {
-    //         name: "name",
-    //         type: "string",
-    //       },
-    //       {
-    //         name: "wallet",
-    //         type: "address",
-    //       },
-    //     ],
-    //     Mail: [
-    //       {
-    //         name: "from",
-    //         type: "Person",
-    //       },
-    //       {
-    //         name: "to",
-    //         type: "Person",
-    //       },
-    //       {
-    //         name: "contents",
-    //         type: "string",
-    //       },
-    //     ],
-    //   },
-    //   primaryType: "Mail",
-    //   domain: {
-    //     name: "Ether Mail",
-    //     version: "1",
-    //     chainId: 1,
-    //     verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-    //   },
-    //   message: {
-    //     from: {
-    //       name: "Cow",
-    //       wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
-    //     },
-    //     to: {
-    //       name: "Bob",
-    //       wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-    //     },
-    //     contents: "Hello, Bob!",
-    //   },
-    // };
-    // const params = [originalMessage, fromAddress];
-    // const method = "eth_signTypedData";
-
-    // const signedMessage = await provider.request({
-    //   method,
-    //   params,
-    // });
-    // uiConsole("signedMessage orog", signedMessage);
   } catch (error) {
     log.error("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
@@ -180,28 +111,40 @@ export const signPersonalMessage = async (provider: IProvider, uiConsole: any) =
     // Sign the message
     const signedMessage = await web3.eth.personal.sign(originalMessage, from, "Example password");
 
-    // const ethProvider = new BrowserProvider(provider);
-    // const ethersignMsg = await ethProvider.send("personal_sign", [originalMessage, from, "Example password"]);
-    // const test = await eipVerifyMessage({
-    //   provider: ethProvider,
-    //   message: originalMessage,
-    //   signature: signedMessage,
-    //   // signer: from,
-    //   signer: "0x815b6ca0fc76f3d2407c861b2aead9adb6bd2519",
-    // });
+    const ethProvider = new BrowserProvider(provider);
+    const valid = await eipVerifyMessage({
+      provider: ethProvider,
+      message: originalMessage,
+      signature: signedMessage,
+      signer: from,
+    });
 
-    // Verify
-    let personalSignVerifySigUtilResult = "";
-    const recoveredAddr = verifyMessage(originalMessage, signedMessage);
+    uiConsole(`Success`, { signedMessage, verify: valid });
+  } catch (error) {
+    log.error("Error", error);
+    uiConsole("Error", error instanceof Error ? error.message : error);
+  }
+};
 
-    if (recoveredAddr.toLowerCase() === "0x815b6ca0fc76f3d2407c861b2aead9adb6bd2519"?.toLowerCase()) {
-      log.info(`SigUtil Successfully verified signer as ${recoveredAddr}`);
-      personalSignVerifySigUtilResult = recoveredAddr;
-    } else {
-      throw new Error(`SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
-    }
+export const signTypedMessage = async (provider: IProvider, uiConsole: any) => {
+  try {
+    const chain = await getChainId(provider as IProvider, () => {});
+    const accounts = await getAccounts(provider as IProvider, () => {});
+    const typedData = getV4TypedData(chain as string);
 
-    uiConsole(`Success`, { signedMessage, verify: personalSignVerifySigUtilResult });
+    const web3 = new Web3(provider as any);
+    const from = accounts?.[0] as string;
+
+    const signedMessage = await web3.eth.signTypedData(from, typedData);
+    const ethProvider = new BrowserProvider(provider);
+    const valid = await eipVerifyMessage({
+      provider: ethProvider,
+      typedData,
+      signature: signedMessage,
+      signer: from,
+    });
+
+    uiConsole(`Success`, { signedMessage, verify: valid });
   } catch (error) {
     log.error("Error", error);
     uiConsole("Error", error instanceof Error ? error.message : error);
