@@ -24,7 +24,7 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: nu
 
   if (typeof window !== "undefined" && isMobileDevice()) {
     if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
-      window.location.href = session.peer.metadata.redirect.native;
+      window.open(session.peer.metadata.redirect.native, "_blank");
     }
   }
 
