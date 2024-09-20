@@ -8,6 +8,7 @@
   "unpkg": "dist/accountAbstractionProvider.umd.min.js",
   "jsdelivr": "dist/accountAbstractionProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
+  "sideEffects": false,
   "author": "Torus Labs",
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
@@ -27,7 +28,7 @@
     "@web3auth/ethereum-provider": "^9.0.0",
     "ethers": "^6.13.2",
     "permissionless": "^0.2.1",
-    "viem": "^2.21.9"
+    "viem": "^2.21.10"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
