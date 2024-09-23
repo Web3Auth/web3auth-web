@@ -71,11 +71,6 @@ export async function createAaMiddleware({
     res.result = await handlers.getAccounts(req);
   }
 
-  async function lookupDefaultAccount(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    const accounts = await handlers.getAccounts(req);
-    res.result = accounts[0] || null;
-  }
-
   async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!handlers.getPrivateKey) {
       throw rpcErrors.methodNotSupported();
@@ -226,7 +221,6 @@ export async function createAaMiddleware({
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
     private_key: createAsyncMiddleware(fetchPrivateKey),
-    eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),
     eth_signTransaction: createAsyncMiddleware(signTransaction),
