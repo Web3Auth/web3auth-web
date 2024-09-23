@@ -94,8 +94,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     }).add(transactionInstruction);
 
     const signedTx = await solWeb3.signTransaction(transaction);
-
-    // const res = await conn.sendRawTransaction(signedTx.serialize());
+    log.info("signedTx", signedTx);
     uiConsole("signature", signedTx);
     return { signature: signedTx };
   } catch (error) {
@@ -111,7 +110,7 @@ export const signMessage = async (provider: IProvider, uiConsole: any) => {
     const msg = Buffer.from("Test Signing Message ", "utf8");
     const res = await solWeb3.signMessage(new Uint8Array(msg));
     const parsedResult = base58.encode(res);
-    uiConsole(parsedResult);
+    uiConsole("solana signed message", parsedResult);
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);

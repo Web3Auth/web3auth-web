@@ -29,6 +29,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
+import base58 from "bs58";
 import deepmerge from "deepmerge";
 
 import { getWalletConnectV2Settings } from "./config";
@@ -196,10 +197,13 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     return {};
   }
 
-  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+  async disconnect(
+    options: { cleanup?: boolean; sessionRemovedByWallet?: boolean } = { cleanup: false, sessionRemovedByWallet: false }
+  ): Promise<void> {
     const { cleanup } = options;
     if (!this.connector || !this.connected || !this.activeSession?.topic) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
+    if (!options.sessionRemovedByWallet)
+      await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
     this.rehydrated = false;
     if (cleanup) {
       this.connector = null;
@@ -217,7 +221,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     const { chainNamespace, chainId } = this.chainConfig;
     const accounts = await this.provider.request<never, string[]>({
-      method: "eth_accounts",
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "eth_accounts" : "getAccounts",
     });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
@@ -239,12 +243,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace);
-      const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
-
-      const signedMessage = await this.provider.request<[string, string], string>({
-        method: "personal_sign",
-        params: [hexChallenge, accounts[0]],
-      });
+      const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
 
       const idToken = await verifySignedChallenge(
         chainNamespace,
@@ -353,6 +352,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   private async onConnectHandler() {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
+    this.subscribeEvents();
     if (this.adapterOptions.adapterSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({
         config: {
@@ -363,7 +363,6 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
       });
     }
     await this.wcProvider.setupProvider(this.connector);
-    this.subscribeEvents();
     this.cleanupPendingPairings();
     this.status = ADAPTER_STATUS.CONNECTED;
     this.emit(ADAPTER_EVENTS.CONNECTED, {
@@ -388,9 +387,17 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
     this.connector.events.on("session_delete", () => {
       // Session was deleted -> reset the dapp state, clean up from user session, etc.
-
-      this.disconnect();
+      this.disconnect({ sessionRemovedByWallet: true });
     });
+  }
+
+  private async _getSignedMessage(challenge: string, accounts: string[], chainNamespace: ChainNamespaceType): Promise<string> {
+    const signedMessage = await this.provider.request<string[] | { message: Uint8Array }, string | Uint8Array>({
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "personal_sign" : "signMessage",
+      params: chainNamespace === CHAIN_NAMESPACES.EIP155 ? [challenge, accounts[0]] : { message: Buffer.from(challenge) },
+    });
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) return base58.encode(signedMessage as Uint8Array);
+    return signedMessage as string;
   }
 }
 

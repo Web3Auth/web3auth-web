@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
@@ -13,7 +13,6 @@ import { signAllTransactions, signAndSendTransaction, signMessage, signTransacti
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
-const { log } = console;
 
 const formData = formDataStore;
 
@@ -111,7 +110,7 @@ const onGetBalance = async () => {
 };
 
 const onSwitchChain = async () => {
-  log("switching chain");
+  log.info("switching chain");
   try {
     await switchChain({ chainId: "0x89" });
     printToConsole("switchedChain");
@@ -153,6 +152,16 @@ const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
 };
 
+const authenticateUser = async () => {
+  try {
+    const idToken = await web3Auth.value?.authenticateUser();
+    printToConsole("idToken", idToken);
+  } catch (error) {
+    log.error("authenticateUser error", error);
+    printToConsole("authenticateUser error", error);
+  }
+};
+
 const onSignTypedData_v4 = async () => {
   try {
     printToConsole("Initiating sign typed data v4");
@@ -173,14 +182,14 @@ const onSignTypedData_v4 = async () => {
     const msg = TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
     const recoveredAddr = recoverAddress(msg, signedMessage);
     if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
-      log(`Successfully verified signer as ${recoveredAddr}`);
+      log.info(`Successfully verified signer as ${recoveredAddr}`);
       signTypedDataV4VerifyResult = recoveredAddr;
     } else {
       throw new Error(`Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
     }
     printToConsole(`Success`, { signedMessage, verify: signTypedDataV4VerifyResult });
   } catch (error) {
-    log(error);
+    log.error(error);
     printToConsole("Failed", (error as Error).message);
   }
 };
@@ -203,7 +212,7 @@ const onSignPersonalMsg = async () => {
     const recoveredAddr = verifyMessage(message, signedMessage);
 
     if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
-      log(`SigUtil Successfully verified signer as ${recoveredAddr}`);
+      log.info(`SigUtil Successfully verified signer as ${recoveredAddr}`);
       personalSignVerifySigUtilResult = recoveredAddr;
     } else {
       throw new Error(`SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
@@ -211,7 +220,7 @@ const onSignPersonalMsg = async () => {
 
     printToConsole(`Success`, { signedMessage, verify: personalSignVerifySigUtilResult });
   } catch (error) {
-    log(error);
+    log.error(error);
     printToConsole("Failed", (error as Error).message);
   }
 };
@@ -262,6 +271,7 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
         <Card v-if="isDisplay('solServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
           <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
@@ -277,6 +287,7 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
       </Card>
       <Card

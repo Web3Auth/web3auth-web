@@ -35,6 +35,7 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.95.3",
     "@toruslabs/base-controllers": "^6.1.2",
     "@walletconnect/sign-client": "^2.16.1",
     "@walletconnect/types": "^2.16.1",

@@ -134,28 +134,24 @@ export function getSolProviderHandlers({ connector, chainId }: { connector: ISig
       throw rpcErrors.methodNotSupported();
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      // eslint-disable-next-line no-console
-      console.log("signMessage", req);
       const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(connector, `solana:${chainId}`, "solana_signMessage", {
         message: base58.encode(req.params.message),
       });
-      // eslint-disable-next-line no-console
-      console.log("signMessage res", methodRes);
       return base58.decode(methodRes.signature);
     },
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
-      // eslint-disable-next-line no-console
-      console.log("signTransaction", req);
+      const [{ PublicKey }, accounts] = await Promise.all([import("@solana/web3.js"), getAccounts(connector)]);
+      if (accounts.length === 0) {
+        throw providerErrors.disconnected();
+      }
       const methodRes = await sendJrpcRequest<{ signature: string }, { transaction: string }>(
         connector,
         `solana:${chainId}`,
         "solana_signTransaction",
         { transaction: req.params.message.serialize({ requireAllSignatures: false }).toString("base64") }
       );
-      // TODO: add signatures here.
       const finalTransaction = req.params.message;
-      // eslint-disable-next-line no-console
-      console.log("signTransaction", methodRes);
+      finalTransaction.addSignature(new PublicKey(accounts[0]), Buffer.from(base58.decode(methodRes.signature)));
       return finalTransaction;
     },
   };
