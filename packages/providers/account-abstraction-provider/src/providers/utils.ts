@@ -1,5 +1,6 @@
 import { addHexPrefix, isHexString } from "@ethereumjs/util";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
+import { IProvider } from "@web3auth/base";
 import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider/src";
 import { TypedDataEncoder } from "ethers";
 import { Chain, createWalletClient, Hex, http } from "viem";
@@ -11,10 +12,12 @@ export function getProviderHandlers({
   bundlerClient,
   smartAccount,
   chain,
+  eoaProvider,
 }: {
   smartAccount: SmartAccount;
   bundlerClient: BundlerClient;
   chain: Chain;
+  eoaProvider: IProvider;
 }): IProviderHandlers {
   const walletClient = createWalletClient({
     account: smartAccount,
@@ -63,7 +66,7 @@ export function getProviderHandlers({
         to: txParams.to,
         value: txParams.value,
         kzg: undefined,
-        chain: undefined,
+        chain,
       });
       return walletClient.signTransaction({
         account: smartAccount,
@@ -71,13 +74,8 @@ export function getProviderHandlers({
         ...request,
       });
     },
-    processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      return walletClient.signMessage({
-        account: smartAccount,
-        message: {
-          raw: msgParams.data as Hex,
-        },
-      });
+    processEthSignMessage: async (_: MessageParams<string>, req: JRPCRequest<unknown>): Promise<string> => {
+      return eoaProvider.request(req);
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const message = msgParams.data;
