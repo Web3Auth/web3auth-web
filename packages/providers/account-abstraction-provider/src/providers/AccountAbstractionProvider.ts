@@ -1,8 +1,7 @@
-import { createFetchMiddleware } from "@toruslabs/base-controllers";
-import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { CustomChainConfig, IProvider } from "@web3auth/base";
+import { JRPCEngine, providerAsMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
+import { CHAIN_NAMESPACES, CustomChainConfig, IProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
-import { Client, createPublicClient, defineChain, http, PublicClient } from "viem";
+import { Client, createPublicClient, defineChain, http } from "viem";
 import { BundlerClient, createBundlerClient, createPaymasterClient, PaymasterClient, SmartAccount } from "viem/account-abstraction";
 
 import { createAaMiddleware } from "../rpc/ethRpcMiddlewares";
@@ -15,12 +14,16 @@ export interface AccountAbstractionProviderConfig extends BaseProviderConfig {
   bundlerConfig: BundlerConfig;
   paymasterConfig?: PaymasterConfig;
 }
-export interface AccountAbstractionProviderState extends BaseProviderState {}
+export interface AccountAbstractionProviderState extends BaseProviderState {
+  eoaProvider?: IProvider;
+}
 
 export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
+  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
+
   private _smartAccount: SmartAccount | null;
 
-  private _publicClient: PublicClient | null;
+  private _publicClient: Client | null;
 
   private _bundlerClient: BundlerClient | null;
 
@@ -51,10 +54,19 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   }): Promise<AccountAbstractionProvider> => {
     const providerFactory = new AccountAbstractionProvider({ config: params });
     await providerFactory.setupProvider(params.eoaProvider);
+    providerFactory.update({ eoaProvider: params.eoaProvider });
     return providerFactory;
   };
 
+  public async enable(): Promise<string[]> {
+    if (!this.state.eoaProvider) throw providerErrors.custom({ message: "eoaProvider is not found in state, please pass it", code: 4902 });
+    await this.setupProvider(this.state.eoaProvider);
+    return this._providerEngineProxy.request({ method: "eth_accounts" });
+  }
+
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
+    const { chainNamespace } = this.config.chainConfig;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const chain = defineChain({
       id: Number.parseInt(this.config.chainConfig.chainId, 16), // id in number form
       name: this.config.chainConfig.displayName,
@@ -82,10 +94,10 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     this._publicClient = createPublicClient({
       chain,
       transport: http(),
-    }) as PublicClient;
+    }) as Client;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
       owner: eoaProvider,
-      client: this._publicClient as Client,
+      client: this._publicClient,
     });
 
     // setup bundler and paymaster
@@ -97,7 +109,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     }
     this._bundlerClient = createBundlerClient({
       account: this.smartAccount,
-      client: this._publicClient as Client,
+      client: this._publicClient,
       transport: http(this.config.bundlerConfig.url),
       paymaster: this._paymasterClient,
       ...this.config.bundlerConfig,
@@ -116,22 +128,34 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       smartAccount: this._smartAccount,
       chain,
     });
-    const fetchMiddleware = createFetchMiddleware({ rpcTarget: this.config.chainConfig.rpcTarget });
     engine.push(aaMiddleware);
-    engine.push(fetchMiddleware);
+    const eoaMiddleware = providerAsMiddleware(eoaProvider);
+    engine.push(eoaMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
+    eoaProvider.once("chainChanged", () => {
+      this.setupChainSwitchMiddleware();
+    });
   }
 
   public async updateAccount(_params: { privateKey: string }): Promise<void> {
-    throw providerErrors.unsupportedMethod("updateAccount");
+    throw providerErrors.unsupportedMethod("updateAccount. Please call it on eoaProvider");
   }
 
   public async switchChain(_params: { chainId: string }): Promise<void> {
-    throw providerErrors.unsupportedMethod("switchChain");
+    throw providerErrors.unsupportedMethod("switchChain. Please call it on eoaProvider");
   }
 
   protected async lookupNetwork(): Promise<string> {
-    throw providerErrors.unsupportedMethod("lookupNetwork");
+    throw providerErrors.unsupportedMethod("lookupNetwork. Please call it on eoaProvider");
+  }
+
+  private async setupChainSwitchMiddleware() {
+    const chainConfig = await this._providerEngineProxy.request<never, CustomChainConfig>({ method: "eth_provider_config" });
+    this.update({ chainId: chainConfig.chainId });
+    this.configure({
+      chainConfig: { ...chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155, chainId: chainConfig.chainId, rpcTarget: chainConfig.rpcTarget },
+    });
+    return this.setupProvider(this.state.eoaProvider);
   }
 }

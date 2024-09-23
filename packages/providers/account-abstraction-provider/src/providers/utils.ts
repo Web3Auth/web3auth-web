@@ -1,7 +1,7 @@
 import { addHexPrefix } from "@ethereumjs/util";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider/src";
-import { BundlerClient, SmartAccount } from "viem/account-abstraction";
+import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
 
 export function getProviderHandlers({
   bundlerClient,
@@ -19,13 +19,15 @@ export function getProviderHandlers({
       });
     },
     getPublicKey: async (_: JRPCRequest<unknown>) => {
-      throw new Error("Not implemented");
+      throw providerErrors.custom({
+        message: "Smart accounts do not have a public key. Use address instead.",
+        code: 4903,
+      });
     },
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const { to, value, data, maxFeePerGas, maxPriorityFeePerGas, gasLimit } = txParams;
-      // @ts-expect-error - TODO: having type instantiation excessively deep error
-      const txHash = await bundlerClient.sendUserOperation({
+      const { to, value, data, maxFeePerGas, maxPriorityFeePerGas } = txParams;
+      const userOperationParams: SendUserOperationParameters = {
         account: smartAccount,
         calls: [
           {
@@ -34,13 +36,14 @@ export function getProviderHandlers({
             data,
           },
         ],
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        callGasLimit: gasLimit,
-      });
-
-      const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: txHash });
-      return receipt.receipt.transactionHash;
+        maxFeePerGas: BigInt(maxFeePerGas),
+        maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
+        paymaster: true,
+      };
+      // @ts-expect-error viem types are too deep
+      const userOpHash = await bundlerClient.sendUserOperation(userOperationParams);
+      const receipt = await bundlerClient.getUserOperation({ hash: userOpHash });
+      return receipt.transactionHash;
     },
   };
 }

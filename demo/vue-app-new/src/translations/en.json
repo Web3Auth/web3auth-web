@@ -15,7 +15,7 @@
       "logoLight": "Logo Light",
       "logoDark": "Logo Dark"
     },
-    "aaProvider": {
+    "accountAbstractionProvider": {
       "title": "Account Abstraction Provider",
       "smartAccountType": "Smart Account Type",
       "bundlerUrl": "Bundler Url",

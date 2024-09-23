@@ -77,9 +77,9 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
   }
 });
 
-const aaProvider = computed((): IBaseProvider<IProvider> | undefined => {
-  const { useAAProvider } = formData;
-  if (!useAAProvider) return undefined;
+const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
+  const { useAccountAbstractionProvider } = formData;
+  if (!useAccountAbstractionProvider) return undefined;
 
   const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
   // setup aa provider
@@ -94,10 +94,10 @@ const aaProvider = computed((): IBaseProvider<IProvider> | undefined => {
       });
       break;
     case "simple":
-      smartAccountInit = new SimpleSmartAccount({});
+      smartAccountInit = new SimpleSmartAccount();
       break;
     case "kernel":
-      smartAccountInit = new KernelSmartAccount({});
+      smartAccountInit = new KernelSmartAccount();
       break;
     case "light":
       smartAccountInit = new LightSmartAccount({
@@ -145,7 +145,7 @@ const options = computed((): Web3AuthOptions => {
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
-    aAProvider: aaProvider.value,
+    accountAbstractionProvider: accountAbstractionProvider.value,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;
@@ -212,7 +212,7 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
-        formData.useAAProvider = json.useAAProvider;
+        formData.useaccountAbstractionProvider = json.useaccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
         formData.bundlerUrl = json.bundlerUrl;
         formData.paymasterUrl = json.paymasterUrl;

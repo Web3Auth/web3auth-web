@@ -221,28 +221,12 @@ export async function createAaMiddleware({
     res.result = signed;
   }
 
-  async function requestAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await eoaProvider.request({
-      method: "eth_requestAccounts",
-      params: req.params,
-    });
-  }
-
-  async function updateAccount(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await eoaProvider.request({
-      method: "wallet_updateAccount",
-      params: req.params,
-    });
-  }
-
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
     private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
-    eth_requestAccounts: createAsyncMiddleware(requestAccounts),
-    wallet_updateAccount: createAsyncMiddleware(updateAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),
     eth_signTransaction: createAsyncMiddleware(signTransaction),

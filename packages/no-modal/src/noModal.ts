@@ -310,9 +310,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       let finalProvider = provider;
       // setup aa provider after adapter is connected and private key provider is setup
-      if (this.coreOptions.aAProvider) {
-        await this.coreOptions.aAProvider.setupProvider(provider);
-        finalProvider = this.coreOptions.aAProvider;
+      if (this.coreOptions.accountAbstractionProvider) {
+        await this.coreOptions.accountAbstractionProvider.setupProvider(provider);
+        finalProvider = this.coreOptions.accountAbstractionProvider;
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(

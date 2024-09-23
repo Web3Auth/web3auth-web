@@ -12,7 +12,7 @@ type KernelSmartAccountConfig = Omit<KernelSmartAccountParameters, "owners" | "c
 export class KernelSmartAccount implements ISmartAccount {
   private options: KernelSmartAccountConfig;
 
-  constructor(options: KernelSmartAccountConfig) {
+  constructor(options?: KernelSmartAccountConfig) {
     this.options = options;
   }
 
@@ -20,7 +20,7 @@ export class KernelSmartAccount implements ISmartAccount {
     params: { owner: IProvider; client: Client } & Pick<KernelSmartAccountParameters, "address" | "nonceKey" | "index">
   ): Promise<SmartAccount> {
     return toEcdsaKernelSmartAccount({
-      ...this.options,
+      ...(this.options || {}),
       ...params,
       owners: [params.owner as EIP1193Provider],
       client: params.client,

@@ -51,7 +51,7 @@ const isDisabled = (name: string): boolean => {
     case "smartAccountType":
     case "bundlerUrl":
     case "paymasterUrl":
-      return !formData.useAAProvider;
+      return !formData.useAccountAbstractionProvider;
 
     default: {
       return false;
@@ -120,35 +120,35 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :show-check-box="true"
         />
         <Toggle
-          v-model="formData.useAAProvider"
-          data-testid="aaProvider"
+          v-model="formData.useAccountAbstractionProvider"
+          data-testid="accountAbstractionProvider"
           :show-label="true"
           :size="'small'"
-          :label-disabled="$t('app.aaProvider.title')"
-          :label-enabled="$t('app.aaProvider.title')"
+          :label-disabled="$t('app.accountAbstractionProvider.title')"
+          :label-enabled="$t('app.accountAbstractionProvider.title')"
           class="my-2"
         />
         <Select
           v-model="formData.smartAccountType"
           data-testid="smartAccountType"
-          :label="$t('app.aaProvider.smartAccountType')"
-          :aria-label="$t('app.aaProvider.smartAccountType')"
-          :placeholder="$t('app.aaProvider.smartAccountType')"
+          :label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :aria-label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
           :options="SmartAccountOptions"
           :disabled="isDisabled('smartAccountType')"
         />
         <TextField
           v-model="formData.bundlerUrl"
-          :label="$t('app.aaProvider.bundlerUrl')"
-          :aria-label="$t('app.aaProvider.bundlerUrl')"
-          :placeholder="$t('app.aaProvider.bundlerUrl')"
+          :label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
           :disabled="isDisabled('bundlerUrl')"
         />
         <TextField
           v-model="formData.paymasterUrl"
-          :label="$t('app.aaProvider.paymasterUrl')"
-          :aria-label="$t('app.aaProvider.paymasterUrl')"
-          :placeholder="$t('app.aaProvider.paymasterUrl')"
+          :label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
           :disabled="isDisabled('paymasterUrl')"
         />
       </Card>

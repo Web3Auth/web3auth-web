@@ -74,7 +74,7 @@ export interface IWeb3AuthCoreOptions {
   /**
    * Account abstraction provider for your chain namespace
    */
-  aAProvider?: IBaseProvider<IProvider>;
+  accountAbstractionProvider?: IBaseProvider<IProvider>;
 
   /**
    * Whether to use AA with external wallet

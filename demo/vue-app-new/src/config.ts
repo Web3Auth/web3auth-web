@@ -144,7 +144,7 @@ export type FormData = {
     logoDark: string;
     logoLight: string;
   };
-  useAAProvider: boolean;
+  useAccountAbstractionProvider: boolean;
   smartAccountType?: SmartAccountType;
   bundlerUrl?: string;
   paymasterUrl?: string;

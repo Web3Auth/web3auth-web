@@ -28,7 +28,7 @@
     "@web3auth/ethereum-provider": "^9.0.2",
     "ethers": "^6.13.2",
     "permissionless": "^0.2.1",
-    "viem": "^2.21.10"
+    "viem": "^2.21.12"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

@@ -1,7 +1,7 @@
 import { IProvider } from "@web3auth/base";
 import { toTrustSmartAccount } from "permissionless/accounts";
 import { Client, EIP1193Provider } from "viem";
-import { SmartAccount } from "viem/account-abstraction";
+import { entryPoint06Address, SmartAccount } from "viem/account-abstraction";
 
 import { ISmartAccount } from "./types";
 
@@ -12,7 +12,7 @@ type TrustSmartAccountConfig = Omit<TrustSmartAccountParameters, "owner" | "clie
 export class TrustSmartAccount implements ISmartAccount {
   private options: TrustSmartAccountConfig;
 
-  constructor(options: TrustSmartAccountConfig) {
+  constructor(options?: TrustSmartAccountConfig) {
     this.options = options;
   }
 
@@ -20,7 +20,11 @@ export class TrustSmartAccount implements ISmartAccount {
     params: { owner: IProvider; client: Client } & Pick<TrustSmartAccountParameters, "address" | "nonceKey" | "index">
   ): Promise<SmartAccount> {
     return toTrustSmartAccount({
-      ...this.options,
+      ...(this.options || {}),
+      entryPoint: {
+        address: this.options?.entryPoint?.address || entryPoint06Address,
+        version: this.options?.entryPoint?.version || "0.6",
+      },
       ...params,
       owner: params.owner as EIP1193Provider,
       client: params.client,
