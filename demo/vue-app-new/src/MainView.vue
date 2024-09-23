@@ -86,12 +86,7 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   let smartAccountInit: ISmartAccount;
   switch (formData.smartAccountType) {
     case "biconomy":
-      smartAccountInit = new BiconomySmartAccount({
-        entryPoint: {
-          address: entryPoint06Address,
-          version: "0.6",
-        },
-      });
+      smartAccountInit = new BiconomySmartAccount();
       break;
     case "simple":
       smartAccountInit = new SimpleSmartAccount();
@@ -100,24 +95,15 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
       smartAccountInit = new KernelSmartAccount();
       break;
     case "light":
-      smartAccountInit = new LightSmartAccount({
-        version: "2.0.0",
-      });
+      smartAccountInit = new LightSmartAccount();
       break;
     case "trust":
-      smartAccountInit = new TrustSmartAccount({
-        entryPoint: {
-          address: entryPoint06Address,
-          version: "0.6",
-        },
-      });
+      smartAccountInit = new TrustSmartAccount();
       break;
 
     case "safe":
     default:
-      smartAccountInit = new SafeSmartAccount({
-        version: "1.4.1",
-      });
+      smartAccountInit = new SafeSmartAccount();
       break;
   }
 
