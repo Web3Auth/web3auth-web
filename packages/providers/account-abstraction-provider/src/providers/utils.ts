@@ -1,4 +1,5 @@
 import { addHexPrefix, isHexString } from "@ethereumjs/util";
+import { sleep } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { IProvider } from "@web3auth/base";
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
@@ -55,22 +56,48 @@ export function getProviderHandlers({
       };
       // @ts-expect-error viem types are too deep
       const userOpHash = await bundlerClient.sendUserOperation(userOperationParams);
-      const receipt = await bundlerClient.getUserOperation({ hash: userOpHash });
-      return receipt.transactionHash;
+      while (true) {
+        // keep checking for user operation until it is online to return the transaction hash
+        // without needing to wait for the receipt
+        try {
+          const receipt = await bundlerClient.getUserOperation({ hash: userOpHash });
+          return receipt.transactionHash;
+        } catch (error) {
+          if (error instanceof Error && error.message.toLowerCase().includes("could not be found")) {
+            await sleep(1000);
+            continue;
+          } else {
+            throw error;
+          }
+        }
+      }
     },
     processSignTransaction: async (txParams: TransactionParams): Promise<string> => {
-      const request = await walletClient.prepareTransactionRequest({
+      const { to, value, data, maxFeePerGas, maxPriorityFeePerGas } = txParams;
+      const request = await bundlerClient.prepareUserOperation({
         account: smartAccount,
-        to: txParams.to,
-        value: txParams.value,
-        kzg: undefined,
-        chain,
+        calls: [
+          {
+            to,
+            value,
+            data,
+          },
+        ],
+        maxFeePerGas: maxFeePerGas ? BigInt(maxFeePerGas) : undefined,
+        maxPriorityFeePerGas: maxPriorityFeePerGas ? BigInt(maxPriorityFeePerGas) : undefined,
+        paymaster: true,
       });
-      return walletClient.signTransaction({
-        account: smartAccount,
-        chain,
-        ...request,
+      const signature = await smartAccount.signUserOperation({
+        callData: request.callData,
+        callGasLimit: request.callGasLimit,
+        maxFeePerGas: request.maxFeePerGas,
+        maxPriorityFeePerGas: request.maxPriorityFeePerGas,
+        nonce: request.nonce,
+        preVerificationGas: request.preVerificationGas,
+        verificationGasLimit: request.verificationGasLimit,
+        signature: request.signature,
       });
+      return signature;
     },
     processEthSignMessage: async (_: MessageParams<string>, req: JRPCRequest<unknown>): Promise<string> => {
       return eoaProvider.request(req);
