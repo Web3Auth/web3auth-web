@@ -118,6 +118,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     const providerHandlers = getProviderHandlers({
       bundlerClient: this._bundlerClient,
       smartAccount: this._smartAccount,
+      chain,
     });
 
     // setup rpc engine and AA middleware
@@ -125,8 +126,6 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     const aaMiddleware = await createAaMiddleware({
       eoaProvider,
       handlers: providerHandlers,
-      smartAccount: this._smartAccount,
-      chain,
     });
     engine.push(aaMiddleware);
     const eoaMiddleware = providerAsMiddleware(eoaProvider);

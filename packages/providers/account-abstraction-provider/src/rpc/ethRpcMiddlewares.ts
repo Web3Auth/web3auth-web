@@ -1,31 +1,17 @@
-import { isHexString } from "@ethereumjs/util";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 import { IProvider } from "@web3auth/base";
 import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider";
-import { TypedDataEncoder } from "ethers";
-import { Chain, createWalletClient, Hex, http } from "viem";
-import { SmartAccount } from "viem/account-abstraction";
 
-import { MessageParams, SignTypedDataMessageV4, TypedMessageParams } from "./types";
+import { MessageParams, TypedMessageParams } from "./types";
 
 export async function createAaMiddleware({
   eoaProvider,
-  smartAccount,
-  chain,
   handlers,
 }: {
   eoaProvider: IProvider;
-  smartAccount: SmartAccount;
-  chain: Chain;
-  handlers: Pick<IProviderHandlers, "getAccounts" | "getPrivateKey" | "processTransaction">;
+  handlers: IProviderHandlers;
 }): Promise<JRPCMiddleware<unknown, unknown>> {
   const [eoaAddress] = (await eoaProvider.request({ method: "eth_accounts" })) as string[];
-
-  const walletClient = createWalletClient({
-    account: smartAccount,
-    chain,
-    transport: http(),
-  });
 
   /**
    * Validates the keyholder address, and returns a normalized (i.e. lowercase)
@@ -103,15 +89,7 @@ export async function createAaMiddleware({
       txParams.from = await normalizeSignSenderAddress(txParams.from, req);
     }
 
-    const request = await walletClient.prepareTransactionRequest({
-      account: smartAccount,
-      to: txParams.to,
-      value: txParams.value,
-      kzg: undefined,
-      chain: undefined,
-    });
-    // TODO: correct transaction request type
-    res.result = await walletClient.signTransaction(request as unknown as Parameters<typeof walletClient.signTransaction>[0]);
+    res.result = await handlers.processSignTransaction(txParams, req);
   }
 
   async function ethSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
@@ -132,12 +110,7 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    res.result = await walletClient.signMessage({
-      account: smartAccount,
-      message: {
-        raw: msgParams.data as Hex,
-      },
-    });
+    res.result = await handlers.processEthSignMessage(msgParams, req);
   }
 
   async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
@@ -158,24 +131,7 @@ export async function createAaMiddleware({
       };
     }
 
-    const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-
-    // Deduce the primary type using ethers
-    const typedData = TypedDataEncoder.from(data.types);
-    const { primaryType } = typedData;
-
-    res.result = await walletClient.signTypedData({
-      account: smartAccount,
-      domain: {
-        ...data.domain,
-        verifyingContract: data.domain.verifyingContract as Hex,
-        salt: data.domain.salt as Hex,
-        chainId: Number(data.domain.chainId),
-      },
-      primaryType,
-      types: data.types,
-      message: data.message,
-    });
+    res.result = await handlers.processTypedMessageV4(msgParams, req);
   }
 
   async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
@@ -204,16 +160,7 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    const message = msgParams.data;
-    const signed = await walletClient.signMessage({
-      account: smartAccount,
-      message: isHexString(message)
-        ? {
-            raw: message,
-          }
-        : message,
-    });
-    res.result = signed;
+    res.result = await handlers.processPersonalMessage(msgParams, req);
   }
 
   return createScaffoldMiddleware({

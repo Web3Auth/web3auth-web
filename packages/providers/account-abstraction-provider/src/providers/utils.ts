@@ -1,15 +1,27 @@
-import { addHexPrefix } from "@ethereumjs/util";
+import { addHexPrefix, isHexString } from "@ethereumjs/util";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider/src";
+import { TypedDataEncoder } from "ethers";
+import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
+
+import { MessageParams, SignTypedDataMessageV4, TypedMessageParams } from "../rpc";
 
 export function getProviderHandlers({
   bundlerClient,
   smartAccount,
+  chain,
 }: {
   smartAccount: SmartAccount;
   bundlerClient: BundlerClient;
+  chain: Chain;
 }): IProviderHandlers {
+  const walletClient = createWalletClient({
+    account: smartAccount,
+    chain,
+    transport: http(),
+  });
+
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => [smartAccount.address],
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
@@ -44,6 +56,58 @@ export function getProviderHandlers({
       const userOpHash = await bundlerClient.sendUserOperation(userOperationParams);
       const receipt = await bundlerClient.getUserOperation({ hash: userOpHash });
       return receipt.transactionHash;
+    },
+    processSignTransaction: async (txParams: TransactionParams): Promise<string> => {
+      const request = await walletClient.prepareTransactionRequest({
+        account: smartAccount,
+        to: txParams.to,
+        value: txParams.value,
+        kzg: undefined,
+        chain: undefined,
+      });
+      return walletClient.signTransaction({
+        account: smartAccount,
+        chain,
+        ...request,
+      });
+    },
+    processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
+      return walletClient.signMessage({
+        account: smartAccount,
+        message: {
+          raw: msgParams.data as Hex,
+        },
+      });
+    },
+    processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
+      const message = msgParams.data;
+      return walletClient.signMessage({
+        account: smartAccount,
+        message: isHexString(message)
+          ? {
+              raw: message,
+            }
+          : message,
+      });
+    },
+    processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
+      const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+
+      // Deduce the primary type using ethers
+      const typedData = TypedDataEncoder.from(data.types);
+      const { primaryType } = typedData;
+      return walletClient.signTypedData({
+        account: smartAccount,
+        domain: {
+          ...data.domain,
+          verifyingContract: data.domain.verifyingContract as Hex,
+          salt: data.domain.salt as Hex,
+          chainId: Number(data.domain.chainId),
+        },
+        primaryType,
+        types: data.types,
+        message: data.message,
+      });
     },
   };
 }
