@@ -93,7 +93,21 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
       to: accounts[0],
       value: web3.utils.toWei("0.01", "ether"),
     });
-    uiConsole("txRes", txRes);
+    // convert bigint to string
+    uiConsole("txRes", {
+      ...txRes,
+      tx: {
+        ...txRes.tx,
+        chainId: txRes.tx.chainId?.toString(),
+        gas: txRes.tx.gas?.toString(),
+        maxFeePerGas: txRes.tx.maxFeePerGas?.toString(),
+        maxPriorityFeePerGas: txRes.tx.maxPriorityFeePerGas?.toString(),
+        nonce: txRes.tx.nonce?.toString(),
+        type: txRes.tx.type.toString(),
+        v: txRes.tx.v?.toString(),
+        value: txRes.tx.value?.toString(),
+      },
+    });
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
