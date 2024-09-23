@@ -29,7 +29,7 @@
     "dist"
   ],
   "dependencies": {
-    "@toruslabs/base-controllers": "^6.1.2",
+    "@toruslabs/base-controllers": "^6.1.4",
     "@web3auth/base": "^9.0.2",
     "@web3auth/wallet-services-plugin": "^9.0.2"
   },
