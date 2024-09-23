@@ -11,12 +11,31 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     log.info("pubKey", accounts);
-    const txRes = await web3.eth.sendTransaction({
-      from: accounts[0],
-      to: accounts[0],
-      value: web3.utils.toWei("0.01", "ether"),
+    const txRes = await web3.eth.sendTransaction(
+      {
+        from: accounts[0],
+        to: accounts[0],
+        value: web3.utils.toWei("0.01", "ether"),
+      },
+      undefined,
+      {
+        // checkRevertBeforeSending: false,
+      }
+    );
+    // check for big int before logging to not break the stringify
+    uiConsole("txRes", {
+      blockHash: txRes.blockHash,
+      transactionHash: txRes.transactionHash,
+      transactionIndex: txRes.transactionIndex.toString(),
+      blockNumber: txRes.blockNumber.toString(),
+      cumulativeGasUsed: txRes.cumulativeGasUsed.toString(),
+      effectiveGasPrice: txRes.effectiveGasPrice?.toString(),
+      from: txRes.from,
+      to: txRes.to,
+      gasUsed: txRes.gasUsed.toString(),
+      status: txRes.status.toString(),
+      type: txRes.type?.toString(),
     });
-    uiConsole("txRes", txRes);
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
@@ -93,7 +112,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
       to: accounts[0],
       value: web3.utils.toWei("0.01", "ether"),
     });
-    // convert bigint to string
+    // check for big int before logging to not break the stringify
     uiConsole("txRes", {
       ...txRes,
       tx: {

@@ -21,6 +21,15 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+      blockExplorerUrl: "https://sepolia.etherscan.io",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+      chainId: "0xaa36a7",
+      ticker: "ETH",
+      tickerName: "Sepolia Testnet",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
       rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
       blockExplorerUrl: "https://testnet.bscscan.com",
       logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
@@ -125,7 +134,9 @@ export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = 
   { name: "Trust", value: "trust" },
 ];
 
-export const DefaultBundlerUrl = "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_23iPJbjhpHGDrx4VbYorjC";
+export const getDefaultBundlerUrl = (chainId: string): string => {
+  return `https://api.pimlico.io/v2/${Number(chainId)}/rpc?apikey=${import.meta.env.VITE_APP_PIMLICO_API_KEY}`;
+};
 
 export type FormData = {
   // authMode: string;

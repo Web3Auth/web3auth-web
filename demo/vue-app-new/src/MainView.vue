@@ -22,13 +22,12 @@ import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { entryPoint06Address } from "viem/account-abstraction";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds, DefaultBundlerUrl } from "./config";
+import { chainConfigs, clientIds, getDefaultBundlerUrl } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
@@ -110,7 +109,7 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   return new AccountAbstractionProvider({
     config: {
       chainConfig,
-      bundlerConfig: { url: formData.bundlerUrl ?? DefaultBundlerUrl },
+      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
       paymasterConfig: formData.paymasterUrl
         ? {
             url: formData.paymasterUrl,
@@ -132,6 +131,7 @@ const options = computed((): Web3AuthOptions => {
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
     accountAbstractionProvider: accountAbstractionProvider.value,
+    useAAWithExternalWallet: true,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;
@@ -198,7 +198,7 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
-        formData.useaccountAbstractionProvider = json.useaccountAbstractionProvider;
+        formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
         formData.bundlerUrl = json.bundlerUrl;
         formData.paymasterUrl = json.paymasterUrl;
