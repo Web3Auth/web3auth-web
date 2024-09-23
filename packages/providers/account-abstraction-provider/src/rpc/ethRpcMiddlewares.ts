@@ -1,8 +1,6 @@
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 import { IProvider } from "@web3auth/base";
-import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider";
-
-import { MessageParams, TypedMessageParams } from "./types";
+import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 
 export async function createAaMiddleware({
   eoaProvider,
@@ -176,4 +174,17 @@ export async function createAaMiddleware({
     eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
     personal_sign: createAsyncMiddleware(personalSign),
   });
+}
+
+export function eoaProviderAsMiddleware(provider: IProvider): JRPCMiddleware<unknown, unknown> {
+  return async (req, res, _next, end) => {
+    // send request to provider
+    try {
+      const providerRes = await provider.request(req);
+      res.result = providerRes;
+      return end();
+    } catch (error) {
+      return end(error as Error);
+    }
+  };
 }

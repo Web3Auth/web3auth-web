@@ -1,12 +1,10 @@
 import { addHexPrefix, isHexString } from "@ethereumjs/util";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { IProvider } from "@web3auth/base";
-import { IProviderHandlers, TransactionParams } from "@web3auth/ethereum-provider/src";
+import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 import { TypedDataEncoder } from "ethers";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
-
-import { MessageParams, SignTypedDataMessageV4, TypedMessageParams } from "../rpc";
 
 export function getProviderHandlers({
   bundlerClient,

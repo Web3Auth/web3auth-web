@@ -1,10 +1,10 @@
-import { JRPCEngine, providerAsMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
+import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CustomChainConfig, IProvider, WalletInitializationError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import { Client, createPublicClient, defineChain, http } from "viem";
 import { BundlerClient, createBundlerClient, createPaymasterClient, PaymasterClient, SmartAccount } from "viem/account-abstraction";
 
-import { createAaMiddleware } from "../rpc/ethRpcMiddlewares";
+import { createAaMiddleware, eoaProviderAsMiddleware } from "../rpc/ethRpcMiddlewares";
 import { ISmartAccount } from "./smartAccounts";
 import { BundlerConfig, PaymasterConfig } from "./types";
 import { getProviderHandlers } from "./utils";
@@ -119,6 +119,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       bundlerClient: this._bundlerClient,
       smartAccount: this._smartAccount,
       chain,
+      eoaProvider,
     });
 
     // setup rpc engine and AA middleware
@@ -128,7 +129,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       handlers: providerHandlers,
     });
     engine.push(aaMiddleware);
-    const eoaMiddleware = providerAsMiddleware(eoaProvider);
+    const eoaMiddleware = eoaProviderAsMiddleware(eoaProvider);
     engine.push(eoaMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
