@@ -34,6 +34,8 @@ const adapterOptions = computed(() =>
       ]
 );
 
+const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
+
 const isDisplay = (_name: string): boolean => {
   return !isConnected.value;
 };
@@ -87,7 +89,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
         <Tab variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
-        <Tab variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">Account Abstraction Provider</Tab>
+        <Tab v-if="showAAProviderSettings" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">Account Abstraction Provider</Tab>
       </Tabs>
       <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select

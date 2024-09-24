@@ -76,9 +76,11 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
   }
 });
 
+const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
+
 const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
   const { useAccountAbstractionProvider } = formData;
-  if (!useAccountAbstractionProvider) return undefined;
+  if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
 
   const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
   // setup aa provider
