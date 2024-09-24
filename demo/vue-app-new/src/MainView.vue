@@ -131,7 +131,7 @@ const options = computed((): Web3AuthOptions => {
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
     accountAbstractionProvider: accountAbstractionProvider.value,
-    useAAWithExternalWallet: true,
+    useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;

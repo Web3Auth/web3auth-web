@@ -19,7 +19,8 @@
       "title": "Account Abstraction Provider",
       "smartAccountType": "Smart Account Type",
       "bundlerUrl": "Bundler Url",
-      "paymasterUrl": "Paymaster Url"
+      "paymasterUrl": "Paymaster Url",
+      "useAAWithExternalWallet": "Use Account Abstraction Provider with external wallet"
     },
     "whiteLabel": {
       "title": "Enable White Label",

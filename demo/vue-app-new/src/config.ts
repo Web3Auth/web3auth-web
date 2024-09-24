@@ -166,6 +166,7 @@ export type FormData = {
     logoLight: string;
   };
   useAccountAbstractionProvider: boolean;
+  useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
   bundlerUrl?: string;
   paymasterUrl?: string;
