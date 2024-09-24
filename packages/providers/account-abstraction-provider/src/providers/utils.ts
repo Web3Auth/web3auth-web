@@ -82,7 +82,7 @@ export function getProviderHandlers({
     },
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
-      const { to, value, data, maxFeePerGas, maxPriorityFeePerGas } = txParams;
+      const { to, value, data } = txParams;
       const userOperationParams: SendUserOperationParameters = {
         account: smartAccount,
         calls: [
@@ -92,8 +92,7 @@ export function getProviderHandlers({
             data,
           },
         ],
-        maxFeePerGas: BigInt(maxFeePerGas),
-        maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
+        // should not use maxFeePerGas/maxPriorityFeePerGas from transaction params since that's fee for transaction not user operation and let bundler handle it instead
         paymaster: true,
       };
       // @ts-expect-error viem types are too deep
@@ -179,23 +178,35 @@ export function getProviderHandlers({
       });
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      try {
+        const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
 
-      // Deduce the primary type using ethers
-      const typedData = TypedDataEncoder.from(data.types);
-      const { primaryType } = typedData;
-      return walletClient.signTypedData({
-        account: smartAccount,
-        domain: {
-          ...data.domain,
-          verifyingContract: data.domain.verifyingContract as Hex,
-          salt: data.domain.salt as Hex,
-          chainId: Number(data.domain.chainId),
-        },
-        primaryType,
-        types: data.types,
-        message: data.message,
-      });
+        // Deduce the primary type using ethers
+        // remove EIP712Domain from types if it exists
+        // ethers already take care of EIP712Domain type and doesn't allow initiating with it
+        if (data.types.EIP712Domain) {
+          delete data.types.EIP712Domain;
+        }
+        const typedData = TypedDataEncoder.from(data.types);
+        const { primaryType } = typedData;
+        return await walletClient.signTypedData({
+          account: smartAccount,
+          domain: {
+            ...data.domain,
+            verifyingContract: data.domain.verifyingContract as Hex,
+            salt: data.domain.salt as Hex,
+            chainId: Number(data.domain.chainId),
+          },
+          primaryType,
+          types: data.types,
+          message: data.message,
+        });
+      } catch (error) {
+        throw providerErrors.custom({
+          message: error instanceof Error ? error.message : "Failed to sign typed data",
+          code: 4905,
+        });
+      }
     },
   };
 }
