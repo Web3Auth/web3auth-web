@@ -1,14 +1,14 @@
 {
-  "name": "@web3auth/base-evm-adapter",
-  "version": "9.0.2",
+  "name": "@web3auth/account-abstraction-provider",
+  "version": "9.0.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
-  "sideEffects": false,
   "main": "dist/lib.cjs/index.js",
   "module": "dist/lib.esm/index.js",
-  "unpkg": "dist/baseEvmAdapter.umd.min.js",
-  "jsdelivr": "dist/baseEvmAdapter.umd.min.js",
+  "unpkg": "dist/accountAbstractionProvider.umd.min.js",
+  "jsdelivr": "dist/accountAbstractionProvider.umd.min.js",
   "types": "dist/types/index.d.ts",
+  "sideEffects": false,
   "author": "Torus Labs",
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
@@ -20,15 +20,22 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
+    "@ethereumjs/util": "^9.1.0",
     "@toruslabs/base-controllers": "^6.1.4",
-    "@web3auth/base": "^9.0.2"
+    "@web3auth/auth": "^9.4.0",
+    "@web3auth/base": "^9.0.2",
+    "@web3auth/base-provider": "^9.0.2",
+    "@web3auth/ethereum-provider": "^9.0.2",
+    "ethers": "^6.13.2",
+    "permissionless": "^0.2.1",
+    "viem": "^2.21.12"
+  },
+  "peerDependencies": {
+    "@babel/runtime": "7.x"
   },
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "@babel/runtime": "^7.x"
-  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

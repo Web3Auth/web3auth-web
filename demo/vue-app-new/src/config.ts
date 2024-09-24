@@ -1,6 +1,6 @@
-import { SignTypedDataMessageV4 } from "@toruslabs/ethereum-controllers";
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
+import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -18,6 +18,15 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
       chainId: "0x1",
       ticker: "ETH",
       tickerName: "Ethereum",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+      blockExplorerUrl: "https://sepolia.etherscan.io",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+      chainId: "0xaa36a7",
+      ticker: "ETH",
+      tickerName: "Sepolia Testnet",
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -114,6 +123,21 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
+export type SmartAccountType = "safe" | "biconomy" | "kernel" | "light" | "simple" | "trust";
+
+export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
+  { name: "Safe", value: "safe" },
+  { name: "Biconomy", value: "biconomy" },
+  { name: "Kernel", value: "kernel" },
+  { name: "Light", value: "light" },
+  { name: "Simple", value: "simple" },
+  { name: "Trust", value: "trust" },
+];
+
+export const getDefaultBundlerUrl = (chainId: string): string => {
+  return `https://api.pimlico.io/v2/${Number(chainId)}/rpc?apikey=${import.meta.env.VITE_APP_PIMLICO_API_KEY}`;
+};
+
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
@@ -131,10 +155,32 @@ export type FormData = {
     logoDark: string;
     logoLight: string;
   };
+  useAccountAbstractionProvider: boolean;
+  smartAccountType?: SmartAccountType;
+  bundlerUrl?: string;
+  paymasterUrl?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
   types: {
+    // EIP712Domain: [
+    //   {
+    //     name: "name",
+    //     type: "string",
+    //   },
+    //   {
+    //     name: "version",
+    //     type: "string",
+    //   },
+    //   {
+    //     name: "chainId",
+    //     type: "uint256",
+    //   },
+    //   {
+    //     name: "verifyingContract",
+    //     type: "address",
+    //   },
+    // ],
     Person: [
       { name: "name", type: "string" },
       { name: "wallet", type: "address" },
