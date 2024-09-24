@@ -70,6 +70,16 @@ export interface IWeb3AuthCoreOptions {
    * Private key provider for your chain namespace
    */
   privateKeyProvider?: IBaseProvider<string>;
+
+  /**
+   * Account abstraction provider for your chain namespace
+   */
+  accountAbstractionProvider?: IBaseProvider<IProvider>;
+
+  /**
+   * Whether to use AA with external wallet
+   */
+  useAAWithExternalWallet?: boolean;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

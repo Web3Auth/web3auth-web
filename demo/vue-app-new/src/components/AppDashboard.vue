@@ -8,8 +8,8 @@ import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
 import { useI18n } from "vue-i18n";
 
 import { getV4TypedData } from "../config";
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage } from "../services/ethHandlers";
-import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction } from "../services/solHandlers";
+import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction as signEthTransaction } from "../services/ethHandlers";
+import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
@@ -140,8 +140,12 @@ const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
 
-const onSignTransaction = async () => {
-  await signTransaction(provider.value as IProvider, printToConsole);
+const onSignEthTransaction = async () => {
+  await signEthTransaction(provider.value as IProvider, printToConsole);
+};
+
+const onSignSolTransaction = async () => {
+  await signSolTransaction(provider.value as IProvider, printToConsole);
 };
 
 const onSignMessage = async () => {
@@ -228,7 +232,7 @@ const onSignPersonalMsg = async () => {
 
 <template>
   <div v-if="isDisplay('dashboard')" class="w-full h-full px-10">
-    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 h-full">
+    <div class="grid h-full grid-cols-1 md:grid-cols-4 lg:grid-cols-6">
       <Card class="px-4 py-4 gird col-span-1 lg:col-span-2 h-full !rounded-3xl md:!rounded-r-none !shadow-none">
         <div class="mb-2">
           <Button block size="xs" pill variant="tertiary" data-testid="btnClearConsole" @click="clearConsole">
@@ -240,8 +244,8 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
         </div>
-        <Card v-if="isDisplay('walletServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Wallet Service</div>
+        <Card v-if="isDisplay('walletServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
           <Button block size="xs" pill class="mb-2" @click="showWalletUI">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
@@ -253,7 +257,7 @@ const onSignPersonalMsg = async () => {
           </Button>
         </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
             {{ t("app.buttons.btnGetAccounts") }}
           </Button>
@@ -261,6 +265,9 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
+            {{ t("app.buttons.btnSignTransaction") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}
@@ -273,14 +280,14 @@ const onSignPersonalMsg = async () => {
           </Button>
           <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
-        <Card v-if="isDisplay('solServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+        <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignTransaction">
+          <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
@@ -294,7 +301,7 @@ const onSignPersonalMsg = async () => {
         id="console"
         class="px-4 py-4 col-span-1 md:col-span-3 lg:col-span-4 overflow-y-auto h-full !rounded-3xl md:!rounded-l-none md:!border-l-0 !shadow-none"
       >
-        <pre class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"></pre>
+        <pre class="max-h-screen overflow-x-auto overflow-y-auto text-base font-normal leading-6 text-black break-words whitespace-pre-line"></pre>
       </Card>
     </div>
   </div>

@@ -2,7 +2,7 @@ import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, WALLET_
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
@@ -134,7 +134,8 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         if (currentChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
           privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         } else {
-          privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
+          privateKeyProvider = new AccountAbstractionProvider({ config: { chainConfig: currentChainConfig } });
+          // privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         }
         setIsLoading(true);
         const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
@@ -196,6 +197,12 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
               // @ts-ignore
               buildEnv: "development",
               whiteLabel: { showWidgetButton: true },
+              walletUrls: {
+                production: {
+                  url: "http://localhost:4050",
+                  logLevel: "debug",
+                },
+              },
             },
           });
           subscribePluginEvents(walletServicesPlugin);
