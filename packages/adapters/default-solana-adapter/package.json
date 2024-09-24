@@ -20,6 +20,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
+    "@web3auth/wallet-connect-v2-adapter": "^9.1.0",
     "@solana/wallet-standard-features": "^1.2.0",
     "@solana/web3.js": "^1.95.3",
     "@wallet-standard/app": "^1.0.1",
