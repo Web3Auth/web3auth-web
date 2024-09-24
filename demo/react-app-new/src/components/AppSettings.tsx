@@ -144,7 +144,7 @@ const AppSettings: React.FC = () => {
     }
   };
 
-  return (
+  return !isConnected && (
     <div className="grid grid-cols-8 gap-0">
       <div className="col-span-0 sm:col-span-1 lg:col-span-2"></div>
       <Card className="h-auto px-8 py-8 col-span-8 sm:col-span-6 lg:col-span-4">

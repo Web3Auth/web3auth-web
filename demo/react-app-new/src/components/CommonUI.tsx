@@ -8,10 +8,10 @@ export const Tag: React.FC<{ text: string | null }> = ({ text }) => {
   );
 };
 
-export const Card: React.FC<{ children?: React.ReactNode, className: string }> = ({ children, className }) => {
+export const Card: React.FC<{ children?: React.ReactNode, className: string, id?: string }> = ({ children, className, id }) => {
   const classes = `rounded overflow-hidden shadow-lg h-auto ${className}`;
   return (
-    <div className={classes}>
+    <div className={classes} id={id}>
       {children}
     </div>
   );
