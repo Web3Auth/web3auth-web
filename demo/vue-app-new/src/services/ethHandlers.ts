@@ -1,40 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IProvider, log } from "@web3auth/base";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
-import { BrowserProvider } from "ethers";
-import Web3 from "web3";
+import { BrowserProvider, TypedDataEncoder } from "ethers";
+import { createPublicClient, createWalletClient, custom, extractChain, Hex, parseEther, parseTransaction, TypedDataDefinition } from "viem";
+import * as chains from "viem/chains";
 
 import { getV4TypedData } from "../config";
+import { formDataStore } from "../store/form";
+
+const viemChains = Object.values(chains);
 
 export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider);
-    const accounts = await web3.eth.getAccounts();
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
     log.info("pubKey", accounts);
-    const txRes = await web3.eth.sendTransaction(
-      {
-        from: accounts[0],
-        to: accounts[0],
-        value: web3.utils.toWei("0.01", "ether"),
-      },
-      undefined,
-      {
-        // checkRevertBeforeSending: false,
-      }
-    );
+    const request = await client.prepareTransactionRequest({
+      account: accounts[0],
+      to: accounts[0],
+      value: parseEther("0.01"),
+    });
+    const txHash = await client.sendTransaction({
+      ...request,
+      account: accounts[0],
+    });
+
+    const publicClient = createPublicClient({
+      chain,
+      transport: custom(provider),
+    });
+
+    const transaction = await publicClient.getTransaction({ hash: txHash });
     // check for big int before logging to not break the stringify
     uiConsole("txRes", {
-      blockHash: txRes.blockHash,
-      transactionHash: txRes.transactionHash,
-      transactionIndex: txRes.transactionIndex.toString(),
-      blockNumber: txRes.blockNumber.toString(),
-      cumulativeGasUsed: txRes.cumulativeGasUsed.toString(),
-      effectiveGasPrice: txRes.effectiveGasPrice?.toString(),
-      from: txRes.from,
-      to: txRes.to,
-      gasUsed: txRes.gasUsed.toString(),
-      status: txRes.status.toString(),
-      type: txRes.type?.toString(),
+      hash: transaction.hash,
+      from: transaction.from,
+      to: transaction.to,
+      gas: transaction.gas.toString(),
+      gasPrice: transaction.gasPrice?.toString(),
+      maxFeePerGas: transaction.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: transaction.maxPriorityFeePerGas?.toString(),
+      type: transaction.type?.toString(),
+      value: transaction.value.toString(),
+      chainId: transaction.chainId?.toString(),
     });
   } catch (error) {
     log.info("error", error);
@@ -44,21 +59,24 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
 
 export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3();
-    web3.setProvider(provider);
-    // hex message
-    // const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-    const fromAddress = (await web3.eth.getAccounts())[0];
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
+    const fromAddress = accounts[0];
     log.info("fromAddress", fromAddress);
-    // const signedMessage = await provider.request({
-    //   method: "eth_sign",
-    //   params: [fromAddress, message],
-    // });
 
     const message = "Some string";
-    const hash = web3.utils.sha3(message) as string;
-    const sig = await web3.eth.sign(hash, fromAddress);
-    uiConsole("personal sign", sig);
+    const sig = await client.request({
+      method: "eth_sign",
+      params: [fromAddress, message as Hex],
+    });
+    uiConsole("eth sign", sig);
   } catch (error) {
     log.error("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
@@ -67,8 +85,15 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
 
 export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<string[] | undefined> => {
   try {
-    const web3 = new Web3(provider);
-    const accounts = await web3.eth.getAccounts();
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
     uiConsole("accounts", accounts);
     return accounts;
   } catch (error) {
@@ -79,8 +104,15 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
 };
 export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
   try {
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const chainId = await client.getChainId();
     uiConsole("chainId", chainId.toString());
     return chainId.toString();
   } catch (error) {
@@ -91,9 +123,20 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
 };
 export const getBalance = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider);
-    const accounts = await web3.eth.getAccounts();
-    const balance = await web3.eth.getBalance(accounts[0]);
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
+    const publicClient = createPublicClient({
+      chain,
+      transport: custom(provider),
+    });
+    const balance = await publicClient.getBalance({ address: accounts[0] });
     uiConsole("balance", balance.toString());
   } catch (error) {
     log.error("Error", error);
@@ -103,30 +146,40 @@ export const getBalance = async (provider: IProvider, uiConsole: any) => {
 
 export const signTransaction = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider);
-    const accounts = await web3.eth.getAccounts();
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
 
     // only supported with social logins (openlogin adapter)
-    const txRes = await web3.eth.signTransaction({
-      from: accounts[0],
+    const serializedTx = await client.signTransaction({
+      account: accounts[0],
       to: accounts[0],
-      value: web3.utils.toWei("0.01", "ether"),
+      value: parseEther("0.01"),
     });
-    // check for big int before logging to not break the stringify
-    uiConsole("txRes", {
-      ...txRes,
-      tx: {
-        ...txRes.tx,
-        chainId: txRes.tx.chainId?.toString(),
-        gas: txRes.tx.gas?.toString(),
-        maxFeePerGas: txRes.tx.maxFeePerGas?.toString(),
-        maxPriorityFeePerGas: txRes.tx.maxPriorityFeePerGas?.toString(),
-        nonce: txRes.tx.nonce?.toString(),
-        type: txRes.tx.type.toString(),
-        v: txRes.tx.v?.toString(),
-        value: txRes.tx.value?.toString(),
-      },
-    });
+    if (formDataStore.useAccountAbstractionProvider) {
+      // serialized user operation can't be parsed like transaction
+      uiConsole("serialized user operation", serializedTx);
+    } else {
+      const txRes = parseTransaction(serializedTx);
+      // check for big int before logging to not break the stringify
+      uiConsole("txRes", {
+        ...txRes,
+        chainId: txRes.chainId?.toString(),
+        gas: txRes.gas?.toString(),
+        maxFeePerGas: txRes.maxFeePerGas?.toString(),
+        maxPriorityFeePerGas: txRes.maxPriorityFeePerGas?.toString(),
+        nonce: txRes.nonce?.toString(),
+        type: txRes.type?.toString(),
+        v: txRes.v?.toString(),
+        value: txRes.value?.toString(),
+      });
+    }
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
@@ -135,14 +188,24 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
 
 export const signPersonalMessage = async (provider: IProvider, uiConsole: any) => {
   try {
-    const web3 = new Web3(provider as any);
-    const accounts = await web3.eth.getAccounts();
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
     const from = accounts[0];
 
     const originalMessage = "Example `personal_sign` messages";
 
     // Sign the message
-    const signedMessage = await web3.eth.personal.sign(originalMessage, from, "Example password");
+    const signedMessage = await client.signMessage({
+      account: from,
+      message: originalMessage,
+    });
 
     const ethProvider = new BrowserProvider(provider);
     const valid = await eipVerifyMessage({
@@ -161,14 +224,25 @@ export const signPersonalMessage = async (provider: IProvider, uiConsole: any) =
 
 export const signTypedMessage = async (provider: IProvider, uiConsole: any) => {
   try {
-    const chain = await getChainId(provider as IProvider, () => {});
-    const accounts = await getAccounts(provider as IProvider, () => {});
-    const typedData = getV4TypedData(chain as string);
+    const chain = extractChain({
+      chains: viemChains as chains.Chain[],
+      id: Number(provider.chainId),
+    });
+    const client = createWalletClient({
+      chain,
+      transport: custom(provider),
+    });
+    const accounts = await client.getAddresses();
+    const from = accounts[0];
+    const typedData = getV4TypedData(provider.chainId);
 
-    const web3 = new Web3(provider as any);
-    const from = accounts?.[0] as string;
+    const typedDataEncoded = TypedDataEncoder.from(typedData.types);
 
-    const signedMessage = await web3.eth.signTypedData(from, typedData);
+    const signedMessage = await client.signTypedData({
+      account: from,
+      ...(typedData as unknown as TypedDataDefinition),
+      primaryType: typedDataEncoded.primaryType,
+    });
     const ethProvider = new BrowserProvider(provider);
     const valid = await eipVerifyMessage({
       provider: ethProvider,
