@@ -17,7 +17,7 @@ type PollOptions<data> = {
 };
 
 /**
- * @description Polls a function at a specified interval.
+ * Polls a function at a specified interval.
  * same poll function as viem/utils/poll
  */
 export function poll<data>(
@@ -114,7 +114,7 @@ export function getProviderHandlers({
               const receipt = await bundlerClient.getUserOperation({ hash: userOpHash });
               done(() => resolve(receipt.transactionHash));
             } catch (error) {
-              if (!(error instanceof Error && error.message.toLowerCase().includes("could not be found"))) {
+              if (!(error instanceof Error && error?.message?.toLowerCase()?.includes("could not be found"))) {
                 done(() => reject(error));
               }
             }
@@ -137,7 +137,7 @@ export function getProviderHandlers({
       });
     },
     processSignTransaction: async (txParams: TransactionParams): Promise<string> => {
-      const { to, value, data, maxFeePerGas, maxPriorityFeePerGas } = txParams;
+      const { to, value, data } = txParams;
       const request = await bundlerClient.prepareUserOperation({
         account: smartAccount,
         calls: [
@@ -147,8 +147,6 @@ export function getProviderHandlers({
             data,
           },
         ],
-        maxFeePerGas: maxFeePerGas ? BigInt(maxFeePerGas) : undefined,
-        maxPriorityFeePerGas: maxPriorityFeePerGas ? BigInt(maxPriorityFeePerGas) : undefined,
         paymaster: true,
       });
       const signature = await smartAccount.signUserOperation({
@@ -189,7 +187,7 @@ export function getProviderHandlers({
         }
         const typedData = TypedDataEncoder.from(data.types);
         const { primaryType } = typedData;
-        return await walletClient.signTypedData({
+        const signature = await walletClient.signTypedData({
           account: smartAccount,
           domain: {
             ...data.domain,
@@ -201,6 +199,7 @@ export function getProviderHandlers({
           types: data.types,
           message: data.message,
         });
+        return signature;
       } catch (error) {
         throw providerErrors.custom({
           message: error instanceof Error ? error.message : "Failed to sign typed data",
