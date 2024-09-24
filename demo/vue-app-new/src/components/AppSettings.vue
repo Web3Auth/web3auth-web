@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
@@ -73,7 +73,9 @@ const isActiveTab = (index: number) => activeTab.value === index;
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === 'ready' }]">{{ status }}</Tag>
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === ADAPTER_STATUS.READY }]">
+          {{ status }}
+        </Tag>
         &nbsp;
         <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': isInitialized }]">
           {{ isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET" }}
