@@ -86,6 +86,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
         <Tab variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
+        <Tab variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">Account Abstraction Provider</Tab>
       </Tabs>
       <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select
@@ -121,38 +122,6 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :options="adapterOptions"
           multiple
           :show-check-box="true"
-        />
-        <Toggle
-          v-model="formData.useAccountAbstractionProvider"
-          data-testid="accountAbstractionProvider"
-          :show-label="true"
-          :size="'small'"
-          :label-disabled="$t('app.accountAbstractionProvider.title')"
-          :label-enabled="$t('app.accountAbstractionProvider.title')"
-          class="my-2"
-        />
-        <Select
-          v-model="formData.smartAccountType"
-          data-testid="smartAccountType"
-          :label="$t('app.accountAbstractionProvider.smartAccountType')"
-          :aria-label="$t('app.accountAbstractionProvider.smartAccountType')"
-          :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
-          :options="SmartAccountOptions"
-          :disabled="isDisabled('smartAccountType')"
-        />
-        <TextField
-          v-model="formData.bundlerUrl"
-          :label="$t('app.accountAbstractionProvider.bundlerUrl')"
-          :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
-          :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
-          :disabled="isDisabled('bundlerUrl')"
-        />
-        <TextField
-          v-model="formData.paymasterUrl"
-          :label="$t('app.accountAbstractionProvider.paymasterUrl')"
-          :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
-          :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
-          :disabled="isDisabled('paymasterUrl')"
         />
       </Card>
       <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">
@@ -356,6 +325,40 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :aria-label="$t('app.walletPlugin.logoDark')"
           :placeholder="$t('app.walletPlugin.logoDark')"
           class="sm:col-span-2"
+        />
+      </Card>
+      <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
+        <Toggle
+          v-model="formData.useAccountAbstractionProvider"
+          data-testid="accountAbstractionProvider"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.accountAbstractionProvider.title')"
+          :label-enabled="$t('app.accountAbstractionProvider.title')"
+          class="my-2"
+        />
+        <Select
+          v-model="formData.smartAccountType"
+          data-testid="smartAccountType"
+          :label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :aria-label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
+          :options="SmartAccountOptions"
+          :disabled="isDisabled('smartAccountType')"
+        />
+        <TextField
+          v-model="formData.bundlerUrl"
+          :label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :disabled="isDisabled('bundlerUrl')"
+        />
+        <TextField
+          v-model="formData.paymasterUrl"
+          :label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :disabled="isDisabled('paymasterUrl')"
         />
       </Card>
       <div class="flex justify-center mt-5">
