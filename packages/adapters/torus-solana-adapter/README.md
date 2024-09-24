@@ -5,12 +5,14 @@
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Torus solana adapter allows allows your Web3Auth Instance to connect with torus wallet for solana blockchain.  
+Torus solana adapter allows allows your Web3Auth Instance to connect with torus wallet for solana blockchain.
+
 ## 📖 Documentation
 
 Read more about the Web3Auth Torus Solana Wallet Adapter in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/adapters/torus-solana).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -42,7 +44,6 @@ npm install --save @web3auth/torus-solana-adapter
 
 ## 🩹 Example
 
-
 ```ts
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 const solanaWalletAdapter = new SolanaWalletAdapter({
@@ -70,11 +71,11 @@ const solanaWalletAdapter = new SolanaWalletAdapter({
 web3auth.configureAdapter(solanaWalletAdapter);
 ```
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 

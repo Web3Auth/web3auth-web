@@ -1,5 +1,5 @@
 import Bowser from "bowser";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ExternalButton } from "../../interfaces";
@@ -19,7 +19,7 @@ type browser = "chrome" | "firefox" | "edge" | "brave";
 type mobileOs = "ios" | "android";
 
 const getBrowserExtensionUrl = (browserType: browser, walletId: string) => {
-  if (walletId.startsWith("https://")) return walletId;
+  if (walletId?.startsWith("https://")) return walletId;
   switch (browserType) {
     case "chrome":
       return `https://chrome.google.com/webstore/detail/${walletId}`;
@@ -33,7 +33,7 @@ const getBrowserExtensionUrl = (browserType: browser, walletId: string) => {
 };
 
 const getMobileInstallLink = (os: mobileOs, appId: string) => {
-  if (appId.includes("https://")) {
+  if (appId?.includes("https://")) {
     return appId;
   }
   switch (os) {
@@ -76,22 +76,34 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
 
   const mobileInstallLinks = () => {
     const installConfig = connectButton.walletRegistryItem.app || {};
-    const installLinks = Object.keys(installConfig)
-      .filter((os) => ["android", "ios"].includes(os))
-      .map((os) => {
-        const appId = installConfig[os as mobileOs];
-        const appUrl = getMobileInstallLink(os as mobileOs, appId);
-        return (
-          <li key={os} className="w-full">
-            <a href={appUrl} rel="noopener noreferrer" target="_blank">
-              <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2">
-                <Image imageId={os} hoverImageId={os} height="30" width="30" isButton />
-                <span>{t("modal.external.install-mobile-app", { os: getOsName(os) })}</span>
-              </Button>
-            </a>
-          </li>
-        );
-      });
+    const installLinks = Object.keys(installConfig).reduce((acc, os) => {
+      if (!["android", "ios"].includes(os)) return acc;
+      const appId = installConfig[os as mobileOs];
+      if (!appId) return acc;
+      const appUrl = getMobileInstallLink(os as mobileOs, appId);
+      if (!appUrl) return acc;
+      const logoLight = `${os}-light`;
+      const logoDark = `${os}-dark`;
+      acc.push(
+        <li key={os} className="w-full">
+          <a href={appUrl} rel="noopener noreferrer" target="_blank">
+            <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2 wallet-link-btn">
+              <Image
+                imageId={logoLight}
+                darkImageId={logoDark}
+                hoverImageId={logoLight}
+                darkHoverImageId={logoDark}
+                height="28"
+                width="28"
+                isButton
+              />
+              <span className="text-sm font-medium">{t("modal.external.install-mobile-app", { os: getOsName(os) })}</span>
+            </Button>
+          </a>
+        </li>
+      );
+      return acc;
+    }, [] as ReactNode[]);
     return installLinks;
   };
 
@@ -99,14 +111,26 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
     // if browser is brave, use chrome extension
     const browserType = deviceDetails.browser === "brave" ? "chrome" : deviceDetails.browser;
     const browserExtensionConfig = connectButton.walletRegistryItem.app || {};
-    const browserExtensionId = browserExtensionConfig[browserType];
+    const extensionForCurrentBrowser =
+      browserExtensionConfig.browser && browserExtensionConfig.browser.includes(browserType) ? browserExtensionConfig.browser : undefined;
+    const browserExtensionId = browserExtensionConfig[browserType] || extensionForCurrentBrowser;
     const browserExtensionUrl = browserExtensionId ? getBrowserExtensionUrl(browserType, browserExtensionId) : null;
     const installLink = browserExtensionUrl ? (
       <li key={deviceDetails.browser}>
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
-          <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2">
-            <Image imageId={deviceDetails.browser} hoverImageId={deviceDetails.browser} height="30" width="30" isButton />
-            <span>{t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}</span>
+          <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2 wallet-link-btn">
+            <Image
+              imageId={deviceDetails.browser}
+              darkImageId={deviceDetails.browser}
+              hoverImageId={deviceDetails.browser}
+              darkHoverImageId={deviceDetails.browser}
+              height="30"
+              width="30"
+              isButton
+            />
+            <span className="text-sm font-medium">
+              {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}
+            </span>
           </Button>
         </a>
       </li>

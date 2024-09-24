@@ -1,7 +1,7 @@
 import { addHexPrefix, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
 import { Block } from "@web3auth/auth";
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "@web3auth/base";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { AddressLike } from "ethers";
 
 import { TransactionParams } from "../../../rpc/interfaces";

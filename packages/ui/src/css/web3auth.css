@@ -267,7 +267,7 @@
 
 /* Adapter List */
 #w3a-modal div.w3a-adapter-list-container {
-  height: 380px;
+  height: 362px;
   scrollbar-width: none;
   overflow-y: auto;
 }
@@ -278,6 +278,7 @@
   padding: 1px;
   transition: max-height 0.35s;
   transition-timing-function: cubic-bezier(0.92, 0, 0.74, 1);
+  scrollbar-width: none;
 }
 
 #w3a-modal ul.w3a-adapter-list.w3a-adapter-list--shrink {
@@ -340,7 +341,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect {
-  @apply block mb-4 text-center;
+  @apply block mb-2.5 text-center;
 }
 
 #w3a-modal .w3a-wallet-connect.w3a-wallet-connect--hidden {
@@ -348,7 +349,7 @@
 }
 
 #w3a-modal .w3a-wallet-connect__container {
-  @apply bg-app-white dark:bg-app-gray-800 rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-4;
+  @apply bg-app-white dark:bg-app-gray-800 rounded-[10px] text-app-gray-500 dark:text-app-gray-400 text-xxs w-fit mx-auto min-w-[250px] py-2.5;
 }
 
 #w3a-modal .w3a-wallet-connect__container-desktop,
@@ -675,6 +676,18 @@
 
 .wallet-btn {
   @apply !bg-app-gray-100 hover:!bg-app-gray-200 dark:!bg-app-gray-700 dark:hover:bg-app-gray-800;
+}
+
+.wallet-link-btn {
+  @apply dark:!bg-app-gray-700 dark:hover:!bg-app-gray-700 !text-app-gray-900 dark:!text-app-white;
+}
+
+.wallet-link-btn img {
+  @apply w-7 h-7;
+}
+
+.wallet-adapter-container {
+  @apply h-[551px];
 }
 
 @keyframes beat1 {

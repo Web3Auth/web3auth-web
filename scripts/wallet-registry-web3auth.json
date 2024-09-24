@@ -46,7 +46,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "3mint": {
     "chains": [
@@ -67,7 +67,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "3s": {
     "app": {
@@ -120,7 +120,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "abc": {
     "app": {
@@ -213,7 +213,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "airgap": {
     "app": {
@@ -291,7 +291,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "alpha": {
     "app": {
@@ -392,7 +392,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ambire": {
     "app": {
@@ -512,7 +512,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "apollox": {
     "app": {
@@ -534,7 +534,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "arculus": {
     "app": {
@@ -562,7 +562,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "argent": {
     "app": {
@@ -583,7 +583,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "argent-x": {
     "app": {
@@ -596,7 +596,7 @@
     "chains": [],
     "name": "Argent X",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "arianee": {
     "app": {
@@ -622,7 +622,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "armana-portal": {
     "app": {
@@ -643,7 +643,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "assure": {
     "app": {
@@ -666,7 +666,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "at": {
     "app": {
@@ -691,7 +691,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "aton": {
     "app": {
@@ -708,7 +708,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "aurora-pass": {
     "app": {
@@ -730,7 +730,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "avacus": {
     "app": {
@@ -784,7 +784,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "backpack": {
     "app": {
@@ -800,7 +800,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ballet-crypto": {
     "app": {
@@ -824,7 +824,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bc-vault": {
     "chains": [
@@ -849,7 +849,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bcertin": {
     "app": {
@@ -890,7 +890,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bee": {
     "app": {
@@ -966,7 +966,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bharatbox-app": {
     "app": {
@@ -986,7 +986,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bifrost": {
     "app": {
@@ -1023,7 +1023,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "binance-web3": {
     "app": {
@@ -1052,7 +1052,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "binance.us": {
     "app": {
@@ -1079,7 +1079,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitbox": {
     "app": {
@@ -1095,7 +1095,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitcoin.com": {
     "app": {
@@ -1119,7 +1119,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitfrost": {
     "app": {
@@ -1142,7 +1142,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitget": {
     "app": {
@@ -1170,7 +1170,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitizen": {
     "app": {
@@ -1405,7 +1405,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitski": {
     "app": {
@@ -1460,7 +1460,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitverse": {
     "app": {
@@ -1492,7 +1492,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bitwinex": {
     "chains": [
@@ -1667,7 +1667,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "blackfort": {
     "app": {
@@ -1690,7 +1690,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "blade": {
     "app": {
@@ -1777,7 +1777,7 @@
     ],
     "name": "BlockWallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "blockaura": {
     "app": {
@@ -1796,7 +1796,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "blockchain.com": {
     "app": {
@@ -1819,7 +1819,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "blocto": {
     "app": {
@@ -1866,7 +1866,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bma": {
     "app": {
@@ -1885,7 +1885,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bonuz-social-id": {
     "app": {
@@ -1912,7 +1912,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "braavos": {
     "app": {
@@ -1994,7 +1994,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "broearn": {
     "app": {
@@ -2067,7 +2067,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bybit": {
     "app": {
@@ -2103,7 +2103,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "bytebank": {
     "app": {
@@ -2123,7 +2123,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "caesium": {
     "app": {
@@ -2144,7 +2144,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "cake": {
     "app": {
@@ -2166,7 +2166,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "callback": {
     "app": {
@@ -2211,7 +2211,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "capsule": {
     "chains": [
@@ -2582,7 +2582,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "card": {
     "app": {
@@ -2603,7 +2603,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "catecoin": {
     "app": {
@@ -2630,7 +2630,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "certhis": {
     "chains": [
@@ -2672,7 +2672,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "clave": {
     "app": {
@@ -2725,7 +2725,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "clot": {
     "app": {
@@ -2763,7 +2763,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coca": {
     "app": {
@@ -2865,7 +2865,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coin98-super": {
     "app": {
@@ -2910,7 +2910,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coinbase": {
     "app": {
@@ -2974,7 +2974,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coininn": {
     "app": {
@@ -2995,7 +2995,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coinomi": {
     "app": {
@@ -3016,7 +3016,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "coinstats": {
     "app": {
@@ -3044,7 +3044,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "compass": {
     "app": {
@@ -3080,7 +3080,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "concordium": {
     "app": {
@@ -3103,7 +3103,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "cool": {
     "app": {
@@ -3135,7 +3135,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "copiosa": {
     "app": {
@@ -3262,7 +3262,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "crypto.com": {
     "app": {
@@ -3296,7 +3296,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "cryptokara": {
     "app": {
@@ -3724,7 +3724,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "cvl": {
     "app": {
@@ -3778,7 +3778,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "cypher": {
     "app": {
@@ -3833,7 +3833,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "d'cent": {
     "app": {
@@ -3876,7 +3876,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dapper": {
     "app": {
@@ -3900,7 +3900,7 @@
     ],
     "name": "Dawn Wallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "defiant": {
     "app": {
@@ -3967,7 +3967,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dextrade": {
     "app": {
@@ -3990,7 +3990,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dfinn": {
     "app": {
@@ -4034,7 +4034,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dgg": {
     "app": {
@@ -4098,7 +4098,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "did": {
     "app": {
@@ -4125,7 +4125,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dmtoken": {
     "chains": [
@@ -4144,7 +4144,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dohrnii": {
     "app": {
@@ -4162,7 +4162,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dollet": {
     "app": {
@@ -4187,7 +4187,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dosi-vault": {
     "app": {
@@ -4209,7 +4209,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dreamos": {
     "chains": [
@@ -4229,7 +4229,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dropmate": {
     "app": {
@@ -4280,7 +4280,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ds-security-sa": {
     "app": {
@@ -4309,7 +4309,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "dttd": {
     "app": {
@@ -4413,7 +4413,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "edge": {
     "app": {
@@ -4509,7 +4509,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "enno": {
     "app": {
@@ -4530,7 +4530,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "essentials": {
     "app": {
@@ -4576,7 +4576,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "eth-q1": {
     "chains": [
@@ -4617,7 +4617,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ethos-self-custody-vault": {
     "app": {
@@ -4637,7 +4637,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "everspace": {
     "app": {
@@ -4657,7 +4657,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "exodus": {
     "app": {
@@ -4684,7 +4684,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "face": {
     "chains": [
@@ -4759,7 +4759,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fil": {
     "app": {
@@ -4779,7 +4779,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "finoaconnect": {
     "app": {
@@ -4795,7 +4795,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fintoken": {
     "app": {
@@ -4821,7 +4821,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fireblocks": {
     "app": {
@@ -4879,7 +4879,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fizen": {
     "app": {
@@ -4909,7 +4909,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fizz": {
     "app": {
@@ -4999,7 +4999,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "fox": {
     "app": {
@@ -5038,7 +5038,7 @@
     ],
     "name": "Frame",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "frontier": {
     "app": {
@@ -5111,7 +5111,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gamestop": {
     "app": {
@@ -5126,7 +5126,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gamic": {
     "app": {
@@ -5205,7 +5205,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gateweb3": {
     "app": {
@@ -5251,7 +5251,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gem": {
     "app": {
@@ -5281,7 +5281,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "glow": {
     "app": {
@@ -5292,7 +5292,7 @@
     "chains": [],
     "name": "Glow",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "goldbit": {
     "app": {
@@ -5311,7 +5311,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gooddollar": {
     "app": {
@@ -5337,7 +5337,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "gridlock": {
     "app": {
@@ -5450,7 +5450,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "halo": {
     "app": {
@@ -5521,7 +5521,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "hashpack": {
     "app": {
@@ -5547,7 +5547,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "haven": {
     "app": {
@@ -5588,7 +5588,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "hellō": {
     "chains": [
@@ -5604,7 +5604,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "here": {
     "app": {
@@ -5626,7 +5626,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "hippo": {
     "app": {
@@ -5675,7 +5675,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "hoo!": {
     "chains": [
@@ -5700,7 +5700,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "huddln": {
     "app": {
@@ -5777,7 +5777,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "iapp": {
     "app": {
@@ -5799,7 +5799,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "icewal": {
     "app": {
@@ -5823,7 +5823,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "id-pocket": {
     "app": {
@@ -5844,7 +5844,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ime": {
     "app": {
@@ -5912,7 +5912,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "imtoken": {
     "app": {
@@ -6015,7 +6015,7 @@
     "chains": [],
     "name": "Injected Wallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "internet-money": {
     "app": {
@@ -6063,7 +6063,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "iopay": {
     "app": {
@@ -6111,7 +6111,7 @@
       "sign_v1",
       "sign_v2"
     ],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "islami": {
     "app": {
@@ -6175,7 +6175,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "jambo": {
     "app": {
@@ -6198,7 +6198,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "joyid-passkey": {
     "chains": [
@@ -6221,7 +6221,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kabila": {
     "app": {
@@ -6269,7 +6269,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kax": {
     "app": {
@@ -6319,7 +6319,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "keeper": {
     "app": {
@@ -6360,7 +6360,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kelp": {
     "app": {
@@ -6414,7 +6414,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "keychain": {
     "chains": [
@@ -6434,7 +6434,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "keyring-pro": {
     "app": {
@@ -6477,7 +6477,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kigo": {
     "app": {
@@ -6620,7 +6620,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kresus-superapp": {
     "app": {
@@ -6642,7 +6642,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "kriptomat": {
     "app": {
@@ -6768,7 +6768,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "leather": {
     "app": {
@@ -6777,7 +6777,7 @@
     "chains": [],
     "name": "Leather",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ledger-live": {
     "app": {
@@ -6804,7 +6804,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "legacy": {
     "app": {
@@ -6827,7 +6827,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "levain": {
     "chains": [
@@ -6856,7 +6856,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "libera": {
     "app": {
@@ -6892,7 +6892,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "lif3": {
     "app": {
@@ -6977,7 +6977,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "likerland-app": {
     "app": {
@@ -6997,7 +6997,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "lilico": {
     "app": {
@@ -7006,7 +7006,7 @@
     "chains": [],
     "name": "Lilico",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "linen": {
     "app": {
@@ -7051,7 +7051,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "localtrade": {
     "app": {
@@ -7091,7 +7091,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "lode": {
     "chains": [
@@ -7108,7 +7108,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "loopring": {
     "app": {
@@ -7129,7 +7129,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "m1nty": {
     "app": {
@@ -7163,7 +7163,7 @@
     ],
     "name": "Magic Eden",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "marble": {
     "chains": [
@@ -7248,7 +7248,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "mdao": {
     "app": {
@@ -7301,7 +7301,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "meldapp": {
     "chains": [
@@ -7322,7 +7322,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "meta": {
     "app": {
@@ -7354,7 +7354,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "meta-wonder-verse": {
     "app": {
@@ -7381,7 +7381,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "metamask": {
     "app": {
@@ -7454,7 +7454,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "mew": {
     "app": {
@@ -7503,7 +7503,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "midoin": {
     "app": {
@@ -7524,7 +7524,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "minerva": {
     "app": {
@@ -7585,7 +7585,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "mixin-messenger": {
     "app": {
@@ -7607,7 +7607,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "modular-wallet-prod": {
     "app": {
@@ -7626,7 +7626,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "monarch": {
     "app": {
@@ -7669,7 +7669,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "moonstake": {
     "app": {
@@ -7716,7 +7716,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "mpcvault": {
     "app": {
@@ -7751,7 +7751,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "multix": {
     "chains": [
@@ -7798,7 +7798,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "my-cloud": {
     "chains": [
@@ -7815,7 +7815,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "mywallid": {
     "app": {
@@ -7855,7 +7855,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nash": {
     "app": {
@@ -7876,7 +7876,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nefti": {
     "app": {
@@ -7940,7 +7940,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nest": {
     "app": {
@@ -7990,7 +7990,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nightly": {
     "app": {
@@ -8001,7 +8001,7 @@
     "chains": [],
     "name": "Nightly",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nitrogen": {
     "app": {
@@ -8022,7 +8022,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nodle": {
     "app": {
@@ -8067,7 +8067,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "noone": {
     "app": {
@@ -8094,7 +8094,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nova": {
     "app": {
@@ -8116,7 +8116,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "nova-spektr": {
     "chains": [
@@ -8134,7 +8134,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "now": {
     "app": {
@@ -8211,7 +8211,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "numio": {
     "app": {
@@ -8250,7 +8250,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "oasys-passport": {
     "app": {
@@ -8279,7 +8279,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "obvious": {
     "app": {
@@ -8427,7 +8427,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "omni": {
     "app": {
@@ -8523,7 +8523,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "onto": {
     "app": {
@@ -8566,7 +8566,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "opera": {
     "chains": [],
@@ -8602,7 +8602,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "opto": {
     "app": {
@@ -8661,7 +8661,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ownbit": {
     "app": {
@@ -8680,7 +8680,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "oxalus": {
     "app": {
@@ -8707,7 +8707,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ozone": {
     "app": {
@@ -8726,7 +8726,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "pali": {
     "app": {
@@ -8758,7 +8758,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "panaroma": {
     "app": {
@@ -9125,7 +9125,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "paybolt": {
     "app": {
@@ -9168,7 +9168,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "payperless": {
     "app": {
@@ -9192,7 +9192,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "peakdefi": {
     "app": {
@@ -9224,7 +9224,7 @@
     "chains": [],
     "name": "Pera Wallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "phantom": {
     "app": {
@@ -9279,7 +9279,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "pillar": {
     "app": {
@@ -9304,7 +9304,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "pintu": {
     "app": {
@@ -9438,7 +9438,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "plena-app": {
     "app": {
@@ -9464,7 +9464,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "plt": {
     "app": {
@@ -9507,7 +9507,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "plutope": {
     "app": {
@@ -9530,7 +9530,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "pockie": {
     "app": {
@@ -9555,7 +9555,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "pools": {
     "app": {
@@ -9579,7 +9579,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "prema": {
     "app": {
@@ -9688,7 +9688,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "rabby": {
     "app": {
@@ -9717,7 +9717,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "rainbow": {
     "app": {
@@ -9770,7 +9770,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "realt": {
     "app": {
@@ -9790,7 +9790,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "renegade": {
     "app": {
@@ -9823,7 +9823,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "reunit": {
     "app": {
@@ -9845,7 +9845,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "rice": {
     "chains": [
@@ -9889,7 +9889,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "roam": {
     "app": {
@@ -9947,7 +9947,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ronin": {
     "app": {
@@ -9997,7 +9997,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "rss": {
     "app": {
@@ -10071,7 +10071,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "saakuru-all-in-one-crypto-app": {
     "app": {
@@ -10099,7 +10099,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "sabay-wallet-app": {
     "app": {
@@ -10119,7 +10119,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "safe": {
     "app": {
@@ -10167,7 +10167,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "safematrix": {
     "app": {
@@ -10301,7 +10301,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "saitapro": {
     "app": {
@@ -10322,7 +10322,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "savl": {
     "app": {
@@ -10372,7 +10372,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "scramble": {
     "app": {
@@ -10415,7 +10415,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "sender": {
     "app": {
@@ -10438,7 +10438,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "sequel": {
     "app": {
@@ -10549,7 +10549,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "shimmersea": {
     "chains": [
@@ -10565,7 +10565,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "shinobi": {
     "app": {
@@ -10594,7 +10594,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "sinohope": {
     "app": {
@@ -10660,7 +10660,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "slavi": {
     "app": {
@@ -10730,7 +10730,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "smartrush": {
     "chains": [
@@ -10751,7 +10751,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "snowball": {
     "app": {
@@ -10790,7 +10790,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "solflare": {
     "app": {
@@ -10862,7 +10862,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "spot-on-chain-app": {
     "app": {
@@ -10888,7 +10888,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "stasis": {
     "app": {
@@ -10916,7 +10916,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "status": {
     "app": {
@@ -10986,7 +10986,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "strikex": {
     "app": {
@@ -11009,7 +11009,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "sub": {
     "app": {
@@ -11038,7 +11038,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "suku": {
     "app": {
@@ -11079,7 +11079,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "superb": {
     "app": {
@@ -11131,7 +11131,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "taho": {
     "app": {
@@ -11147,7 +11147,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "talk+": {
     "app": {
@@ -11172,7 +11172,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "talken": {
     "app": {
@@ -11199,7 +11199,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tangem": {
     "app": {
@@ -11254,7 +11254,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "the-pulse": {
     "app": {
@@ -11277,7 +11277,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "theta": {
     "app": {
@@ -11300,7 +11300,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "thirdweb": {
     "chains": [
@@ -11330,7 +11330,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tholos": {
     "app": {
@@ -11391,7 +11391,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tidus": {
     "app": {
@@ -11455,7 +11455,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tk-finance": {
     "app": {
@@ -11478,7 +11478,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tobi": {
     "app": {
@@ -11509,7 +11509,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tofee-wallet-official": {
     "app": {
@@ -11530,7 +11530,7 @@
       "sign_v1",
       "sign_v2"
     ],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tokenpocket": {
     "app": {
@@ -11593,7 +11593,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "tomipay": {
     "app": {
@@ -11645,7 +11645,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "torus": {
     "chains": [
@@ -11703,7 +11703,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "treasure": {
     "app": {
@@ -11729,7 +11729,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "trust": {
     "app": {
@@ -11798,7 +11798,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "trustee": {
     "app": {
@@ -11868,7 +11868,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "u2u": {
     "app": {
@@ -11916,7 +11916,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ukiss-hub": {
     "app": {
@@ -11949,7 +11949,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "ultimate": {
     "app": {
@@ -12070,7 +12070,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "unisat": {
     "app": {
@@ -12079,7 +12079,7 @@
     "chains": [],
     "name": "UniSat Wallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "uniswap": {
     "app": {
@@ -12152,7 +12152,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "upbond": {
     "chains": [
@@ -12168,7 +12168,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "utorg": {
     "app": {
@@ -12202,7 +12202,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "uvtoken": {
     "app": {
@@ -12224,7 +12224,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "valora": {
     "app": {
@@ -12270,7 +12270,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "verso": {
     "app": {
@@ -12294,7 +12294,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "veworld-mobile": {
     "app": {
@@ -12315,7 +12315,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "vive": {
     "app": {
@@ -12333,7 +12333,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "volt": {
     "app": {
@@ -12374,7 +12374,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "wallacy": {
     "app": {
@@ -12406,7 +12406,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "wallet-3": {
     "app": {
@@ -12446,7 +12446,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "wallypto": {
     "app": {
@@ -12469,7 +12469,7 @@
       "sign_v1",
       "sign_v2"
     ],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "web3auth": {
     "app": {
@@ -12552,7 +12552,7 @@
       "sign_v1",
       "sign_v2"
     ],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "wemix": {
     "app": {
@@ -12572,7 +12572,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "wombat": {
     "app": {
@@ -12624,7 +12624,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "x9": {
     "app": {
@@ -12646,7 +12646,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "xcapit": {
     "app": {
@@ -12668,7 +12668,7 @@
         "sign_v1"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "xdefi": {
     "app": {
@@ -12694,7 +12694,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "xellar": {
     "app": {
@@ -12768,7 +12768,7 @@
       "sign_v1",
       "sign_v2"
     ],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "xucre": {
     "app": {
@@ -12805,7 +12805,7 @@
     },
     "name": "Xverse Wallet",
     "walletConnect": [],
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "youba": {
     "app": {
@@ -12826,7 +12826,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "yuse": {
     "app": {
@@ -12851,7 +12851,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "zeal": {
     "app": {
@@ -13197,7 +13197,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "zelcore": {
     "app": {
@@ -13222,7 +13222,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "zelus": {
     "app": {
@@ -13247,7 +13247,7 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   },
   "zengo": {
     "app": {
@@ -13335,6 +13335,6 @@
         "sign_v2"
       ]
     },
-    "primaryColor": "#00000"
+    "primaryColor": "#000000"
   }
 }

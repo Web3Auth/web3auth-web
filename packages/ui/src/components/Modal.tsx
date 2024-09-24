@@ -193,7 +193,7 @@ export default function Modal(props: ModalProps) {
           className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""} ${
             (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
               ? ""
-              : "h-[567px]"
+              : "wallet-adapter-container"
           }`}
         >
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (

@@ -27,6 +27,7 @@ export interface WalletRegistryItem {
     sdks: string[];
   };
   app?: {
+    browser?: string;
     android?: string;
     ios?: string;
     chrome?: string;

@@ -1,3 +1,7 @@
+import { useContext } from "react";
+
+import { ThemedContext } from "../context/ThemeContext";
+
 export interface ImageProps {
   hoverImageId?: string;
   imageId: string;
@@ -6,13 +10,30 @@ export interface ImageProps {
   width?: string;
   fallbackImageId?: string;
   extension?: string;
+  darkImageId?: string;
+  darkHoverImageId?: string;
 }
 export default function Image(props: ImageProps) {
-  const { hoverImageId, imageId, isButton = false, height = "auto", width = "auto", fallbackImageId, extension = "svg" } = props;
+  const {
+    hoverImageId,
+    darkHoverImageId,
+    imageId,
+    darkImageId,
+    isButton = false,
+    height = "auto",
+    width = "auto",
+    fallbackImageId,
+    extension = "svg",
+  } = props;
+  const { isDark } = useContext(ThemedContext);
+
+  const imgName = isDark && darkImageId ? darkImageId : imageId;
+  const hoverImgName = isDark && darkHoverImageId ? darkHoverImageId : hoverImageId;
+
   return (
     <>
       <img
-        src={`https://images.web3auth.io/${imageId}.${extension}`}
+        src={`https://images.web3auth.io/${imgName}.${extension}`}
         height={height}
         width={width}
         alt={imageId}
@@ -28,7 +49,7 @@ export default function Image(props: ImageProps) {
       />
       {isButton ? (
         <img
-          src={`https://images.web3auth.io/${hoverImageId}.${extension}`}
+          src={`https://images.web3auth.io/${hoverImgName}.${extension}`}
           height={height}
           width={width}
           alt={hoverImageId}

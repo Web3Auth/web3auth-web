@@ -32,11 +32,11 @@ npm i --save @web3auth/wallet-services-plugin
 
 ## 🩹 Example
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 

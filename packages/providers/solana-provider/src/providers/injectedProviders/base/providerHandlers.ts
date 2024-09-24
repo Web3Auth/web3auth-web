@@ -9,6 +9,9 @@ export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): 
     requestAccounts: async () => {
       return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
     },
+    getPublicKey: async () => {
+      return injectedProvider.publicKey ? bs58.encode(injectedProvider.publicKey.toBytes()) : "";
+    },
     getAccounts: async () => (injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : []),
     getPrivateKey: async () => {
       throw rpcErrors.methodNotSupported();

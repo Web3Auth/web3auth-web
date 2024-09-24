@@ -10,7 +10,7 @@
     "@toruslabs/eslint-config-typescript": "^3.3.3",
     "@toruslabs/torus-scripts": "^6.1.2",
     "@types/chai": "^4.3.19",
-    "@types/mocha": "^10.0.7",
+    "@types/mocha": "^10.0.8",
     "@types/node": "^20",
     "chai": "^5.1.1",
     "cross-env": "^7.0.3",
@@ -50,8 +50,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^19.7.2",
-    "@rollup/rollup-linux-x64-gnu": "^4.21.2"
+    "@nx/nx-linux-x64-gnu": "^19.7.3",
+    "@rollup/rollup-linux-x64-gnu": "^4.21.3"
   },
   "private": true,
   "repository": {

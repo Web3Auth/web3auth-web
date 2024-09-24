@@ -96,8 +96,8 @@ export const Web3AuthProvider = defineComponent({
     };
 
     watch(
-      [() => props.config],
-      () => {
+      () => props.config,
+      (newConfig) => {
         const resetHookState = () => {
           provider.value = null;
           userInfo.value = null;
@@ -107,7 +107,7 @@ export const Web3AuthProvider = defineComponent({
         };
 
         resetHookState();
-        const { web3AuthOptions, adapters = [], plugins = [] } = props.config;
+        const { web3AuthOptions, adapters = [], plugins = [] } = newConfig;
         const web3AuthInstance = new Web3AuthNoModal(web3AuthOptions);
         if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
         if (plugins.length) {

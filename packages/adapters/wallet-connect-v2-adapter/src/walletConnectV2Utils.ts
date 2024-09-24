@@ -12,11 +12,22 @@ async function getLastActiveSession(signClient: ISignClient): Promise<SessionTyp
   return null;
 }
 
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(window.navigator.userAgent);
+}
+
 export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: number, method: string, params: U): Promise<T> {
   const session = await getLastActiveSession(signClient);
   if (!session) {
     throw providerErrors.disconnected();
   }
+
+  if (typeof window !== "undefined" && isMobileDevice()) {
+    if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
+      window.open(session.peer.metadata.redirect.native, "_blank");
+    }
+  }
+
   return signClient.request<T>({
     topic: session.topic,
     chainId: `eip155:${chainId}`,
@@ -48,6 +59,9 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
 export function getProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IProviderHandlers {
   return {
     getPrivateKey: async () => {
+      throw rpcErrors.methodNotSupported();
+    },
+    getPublicKey: async () => {
       throw rpcErrors.methodNotSupported();
     },
     getAccounts: async (_: JRPCRequest<unknown>) => {

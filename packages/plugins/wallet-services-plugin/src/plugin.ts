@@ -37,6 +37,8 @@ type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "c
   confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
 };
 
+export { BUTTON_POSITION, type BUTTON_POSITION_TYPE, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/ws-embed";
+
 export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
 
