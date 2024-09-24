@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
@@ -34,8 +34,6 @@ const adapterOptions = computed(() =>
       ]
 );
 
-const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
-
 const isDisplay = (_name: string): boolean => {
   return !isConnected.value;
 };
@@ -57,6 +55,9 @@ const isDisabled = (name: string): boolean => {
     case "useAAWithExternalWallet":
       return !formData.useAccountAbstractionProvider;
 
+    case "accountAbstraction":
+      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+
     default: {
       return false;
     }
@@ -68,6 +69,12 @@ const onTabChange = (index: number) => {
   activeTab.value = index;
 };
 const isActiveTab = (index: number) => activeTab.value === index;
+
+const onChainNamespaceChange = (value: string) => {
+  log.info("onChainNamespaceChange", value);
+  formData.chain = chainConfigs[value as ChainNamespaceType][0].chainId;
+  formData.adapters = [];
+};
 </script>
 
 <template>
@@ -88,8 +95,12 @@ const isActiveTab = (index: number) => activeTab.value === index;
         <Tab variant="underline" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
-        <Tab variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
-        <Tab v-if="showAAProviderSettings" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">Account Abstraction Provider</Tab>
+        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">
+          Wallet Plugin
+        </Tab>
+        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
+          Account Abstraction Provider
+        </Tab>
       </Tabs>
       <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select
@@ -107,6 +118,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :aria-label="$t('app.chainNamespace')"
           :placeholder="$t('app.chainNamespace')"
           :options="chainNamespaceOptions"
+          @update:model-value="onChainNamespaceChange"
         />
         <Select
           v-model="formData.chain"
