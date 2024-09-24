@@ -319,8 +319,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
-      this.status = ADAPTER_STATUS.CONNECTED;
       this.connectedAdapterName = data.adapter;
+      this.status = ADAPTER_STATUS.CONNECTED;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
       this.connectToPlugins(data);

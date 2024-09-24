@@ -195,7 +195,7 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
         </div>
-        <Card v-if="isDisplay('walletServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+        <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
           <Button block size="xs" pill class="mb-2" @click="showWalletUI">
             {{ $t("app.buttons.btnShowWalletUI") }}
