@@ -5,7 +5,7 @@ import { SafeEventEmitterProvider, WalletInitializationError } from "@web3auth/b
 import bs58 from "bs58";
 
 import { TransactionOrVersionedTransaction } from "../../interface";
-import { IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
+import { IProviderHandlers } from "../../rpc";
 
 export async function getProviderHandlers({
   privKey,

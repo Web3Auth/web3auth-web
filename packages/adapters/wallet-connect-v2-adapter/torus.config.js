@@ -1,1 +1,1 @@
-module.exports = require("../../../torus.config");
+module.exports = require('../../../torus.config.js');

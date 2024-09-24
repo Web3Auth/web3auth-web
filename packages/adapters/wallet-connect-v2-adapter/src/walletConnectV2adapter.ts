@@ -1,3 +1,4 @@
+import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
@@ -10,12 +11,17 @@ import {
   ADAPTER_STATUS_TYPE,
   AdapterInitOptions,
   AdapterNamespaceType,
+  BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  getSavedToken,
   IProvider,
   log,
+  saveToken,
+  UserAuthInfo,
   UserInfo,
   WALLET_ADAPTERS,
   WalletConnectV2Data,
@@ -23,19 +29,19 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@web3auth/base";
-import { BaseEvmAdapter } from "@web3auth/base-evm-adapter";
+import base58 from "bs58";
 import deepmerge from "deepmerge";
 
 import { getWalletConnectV2Settings } from "./config";
 import { WalletConnectV2AdapterOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
-class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
+class WalletConnectV2Adapter extends BaseAdapter<void> {
   readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V2;
 
-  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
 
-  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.OTHER;
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
@@ -75,7 +81,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
-    await super.init();
     super.checkInitializationRequirements();
     const projectId = this.adapterOptions.adapterSettings?.walletConnectInitOptions?.projectId;
     if (!projectId) {
@@ -92,7 +97,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     }
 
     this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings || {}, this.adapterOptions.adapterSettings || {});
-
     const { adapterSettings } = this.adapterOptions;
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
@@ -189,11 +193,13 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    await super.disconnectSession();
+  async disconnect(
+    options: { cleanup?: boolean; sessionRemovedByWallet?: boolean } = { cleanup: false, sessionRemovedByWallet: false }
+  ): Promise<void> {
     const { cleanup } = options;
     if (!this.connector || !this.connected || !this.activeSession?.topic) throw WalletLoginError.notConnectedError("Not connected with wallet");
-    await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
+    if (!options.sessionRemovedByWallet)
+      await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
     this.rehydrated = false;
     if (cleanup) {
       this.connector = null;
@@ -204,7 +210,52 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       this.status = ADAPTER_STATUS.READY;
     }
     this.activeSession = null;
-    await super.disconnect();
+    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+  }
+
+  async authenticateUser(): Promise<UserAuthInfo> {
+    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    const { chainNamespace, chainId } = this.chainConfig;
+    const accounts = await this.provider.request<never, string[]>({
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "eth_accounts" : "getAccounts",
+    });
+    if (accounts && accounts.length > 0) {
+      const existingToken = getSavedToken(accounts[0] as string, this.name);
+      if (existingToken) {
+        const isExpired = checkIfTokenIsExpired(existingToken);
+        if (!isExpired) {
+          return { idToken: existingToken };
+        }
+      }
+
+      const payload = {
+        domain: window.location.origin,
+        uri: window.location.href,
+        address: accounts[0],
+        chainId: parseInt(chainId, 16),
+        version: "1",
+        nonce: Math.random().toString(36).slice(2),
+        issuedAt: new Date().toISOString(),
+      };
+
+      const challenge = await signChallenge(payload, chainNamespace);
+      const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
+
+      const idToken = await verifySignedChallenge(
+        chainNamespace,
+        signedMessage as string,
+        challenge,
+        this.name,
+        this.sessionTime,
+        this.clientId,
+        this.web3AuthNetwork
+      );
+      saveToken(accounts[0] as string, this.name, idToken);
+      return {
+        idToken,
+      };
+    }
+    throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   public async enableMFA(): Promise<void> {
@@ -246,7 +297,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
         await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
       }
 
-      log.debug("creating new session for web3auth wallet connect");
       const { uri, approval } = await this.connector.connect(this.adapterOptions.loginSettings);
 
       const qrcodeModal = this.adapterOptions?.adapterSettings?.qrcodeModal;
@@ -298,6 +348,7 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
   private async onConnectHandler() {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("Chain config is not set");
+    this.subscribeEvents();
     if (this.adapterOptions.adapterSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({
         config: {
@@ -308,7 +359,6 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
       });
     }
     await this.wcProvider.setupProvider(this.connector);
-    this.subscribeEvents();
     this.cleanupPendingPairings();
     this.status = ADAPTER_STATUS.CONNECTED;
     this.emit(ADAPTER_EVENTS.CONNECTED, {
@@ -333,9 +383,17 @@ class WalletConnectV2Adapter extends BaseEvmAdapter<void> {
 
     this.connector.events.on("session_delete", () => {
       // Session was deleted -> reset the dapp state, clean up from user session, etc.
-
-      this.disconnect();
+      this.disconnect({ sessionRemovedByWallet: true });
     });
+  }
+
+  private async _getSignedMessage(challenge: string, accounts: string[], chainNamespace: ChainNamespaceType): Promise<string> {
+    const signedMessage = await this.provider.request<string[] | { message: Uint8Array }, string | Uint8Array>({
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "personal_sign" : "signMessage",
+      params: chainNamespace === CHAIN_NAMESPACES.EIP155 ? [challenge, accounts[0]] : { message: Buffer.from(challenge) },
+    });
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) return base58.encode(signedMessage as Uint8Array);
+    return signedMessage as string;
   }
 }
 

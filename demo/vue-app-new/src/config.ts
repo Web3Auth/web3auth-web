@@ -50,6 +50,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
   ],
   [CHAIN_NAMESPACES.SOLANA]: [
+    // Ref: https://namespaces.chainagnostic.org/solana/caip10
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
       rpcTarget: "https://api.devnet.solana.com",
@@ -57,7 +58,16 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x3",
       ticker: "SOL",
-      tickerName: "Solana",
+      tickerName: "Solana Devnet",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
+      blockExplorerUrl: "https://explorer.solana.com",
+      logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
+      chainId: "0x1",
+      ticker: "SOL",
+      tickerName: "Solana Mainnet",
     },
   ],
   [CHAIN_NAMESPACES.CASPER]: [],
