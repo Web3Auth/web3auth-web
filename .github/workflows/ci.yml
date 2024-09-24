@@ -42,6 +42,8 @@ jobs:
           cd demo/vue-app-new
           npm install
           npm run build
+        env: 
+          VITE_SOLANA_MAINNET_RPC: ${{ secrets.VITE_SOLANA_MAINNET_RPC }}
 
         # Copy the files from build folder to the S3 bucket
         # Upload to S3

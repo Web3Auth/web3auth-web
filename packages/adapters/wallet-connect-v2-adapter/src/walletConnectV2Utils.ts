@@ -12,6 +12,8 @@ import type {
 import type { IProviderHandlers as SolProviderHandlers, TransactionOrVersionedTransaction } from "@web3auth/solana-provider";
 import base58 from "bs58";
 
+import { SOLANA_CAIP_CHAIN_MAP } from "./config";
+
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
     const lastKeyIndex = signClient.session.keys.length - 1;
@@ -134,9 +136,14 @@ export function getSolProviderHandlers({ connector, chainId }: { connector: ISig
       throw rpcErrors.methodNotSupported();
     },
     signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(connector, `solana:${chainId}`, "solana_signMessage", {
-        message: base58.encode(req.params.message),
-      });
+      const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(
+        connector,
+        `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
+        "solana_signMessage",
+        {
+          message: base58.encode(req.params.message),
+        }
+      );
       return base58.decode(methodRes.signature);
     },
     signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
@@ -146,7 +153,7 @@ export function getSolProviderHandlers({ connector, chainId }: { connector: ISig
       }
       const methodRes = await sendJrpcRequest<{ signature: string }, { transaction: string }>(
         connector,
-        `solana:${chainId}`,
+        `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
         "solana_signTransaction",
         { transaction: req.params.message.serialize({ requireAllSignatures: false }).toString("base64") }
       );

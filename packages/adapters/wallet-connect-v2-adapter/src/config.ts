@@ -26,9 +26,15 @@ export enum DEFAULT_EIP_155_EVENTS {
 }
 
 export enum DEFAULT_SOLANA_EVENTS {
-  ETH_CHAIN_CHANGED = "chainChanged",
-  ETH_ACCOUNTS_CHANGED = "accountsChanged",
+  SOL_CHAIN_CHANGED = "chainChanged",
+  SOL_ACCOUNTS_CHANGED = "accountsChanged",
 }
+
+export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
+  "0x1": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+  "0x2": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+  "0x3": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+};
 
 /**
  * Extracts a name for the site from the DOM
@@ -173,7 +179,7 @@ export const getWalletConnectV2Settings = async (
     };
 
     const chainNamespaces = chainIds.map((chainId) => {
-      return `${namespace}:${namespace === CHAIN_NAMESPACES.EIP155 ? parseInt(chainId, 16) : chainId}`;
+      return `${namespace}:${namespace === CHAIN_NAMESPACES.SOLANA ? SOLANA_CAIP_CHAIN_MAP[chainId] : parseInt(chainId, 16)}`;
     });
 
     const loginSettings: EngineTypes.ConnectParams = {

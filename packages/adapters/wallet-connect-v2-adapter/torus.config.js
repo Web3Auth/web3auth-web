@@ -1,3 +1,1 @@
-module.exports = {
-  esm: true,
-}
+module.exports = require('../../../torus.config.js');

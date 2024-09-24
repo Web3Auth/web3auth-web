@@ -41,6 +41,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
   ],
   [CHAIN_NAMESPACES.SOLANA]: [
+    // Ref: https://namespaces.chainagnostic.org/solana/caip10
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
       rpcTarget: "https://api.devnet.solana.com",
@@ -52,10 +53,10 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: "https://api.devnet.solana.com",
+      rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
       blockExplorerUrl: "https://explorer.solana.com",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-      chainId: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      chainId: "0x1",
       ticker: "SOL",
       tickerName: "Solana Mainnet",
     },

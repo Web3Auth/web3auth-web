@@ -92,15 +92,11 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
       [this.chainConfig?.chainId as string],
       projectId
     );
-    // eslint-disable-next-line no-console
-    console.log("wc settings", wc2Settings);
     if (!this.adapterOptions.loginSettings || Object.keys(this.adapterOptions.loginSettings).length === 0) {
       this.adapterOptions.loginSettings = wc2Settings.loginSettings;
     }
 
     this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings || {}, this.adapterOptions.adapterSettings || {});
-    // eslint-disable-next-line no-console
-    console.log("wc settings", this.adapterOptions.loginSettings);
     const { adapterSettings } = this.adapterOptions;
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
