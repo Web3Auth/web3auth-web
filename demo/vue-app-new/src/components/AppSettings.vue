@@ -52,6 +52,7 @@ const isDisabled = (name: string): boolean => {
     case "smartAccountType":
     case "bundlerUrl":
     case "paymasterUrl":
+    case "useAAWithExternalWallet":
       return !formData.useAccountAbstractionProvider;
 
     case "accountAbstraction":
@@ -350,6 +351,16 @@ const onChainNamespaceChange = (value: string) => {
           :label-disabled="$t('app.accountAbstractionProvider.title')"
           :label-enabled="$t('app.accountAbstractionProvider.title')"
           class="my-2"
+        />
+        <Toggle
+          v-model="formData.useAAWithExternalWallet"
+          data-testid="useAAWithExternalWallet"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.accountAbstractionProvider.useAAWithExternalWallet')"
+          :label-enabled="$t('app.accountAbstractionProvider.useAAWithExternalWallet')"
+          class="my-2"
+          :disabled="isDisabled('useAAWithExternalWallet')"
         />
         <Select
           v-model="formData.smartAccountType"
