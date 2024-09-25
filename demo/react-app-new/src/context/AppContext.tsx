@@ -254,7 +254,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
       clientId: clientIds[network],
       privateKeyProvider,
       web3AuthNetwork: network,
-      // enableLogging: true,
+      uiConfig: whiteLabel.enable ? { ...whiteLabel.config } : undefined,
+      enableLogging: true,
     };
   }, [network, privateKeyProvider]);
 
@@ -287,14 +288,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
 
   useEffect(() => {
     if(formData) {
-      // setNetWork(formData.network);
-      // setChainNamespace(formData.chainNamespace);
-      // setChain(formData.chain);
-      // setWhiteLabel(formData.whiteLabel);
-      // setLoginProviders(formData.loginProviders);
-      // setAdapters(formData.adapters);
-      // setLoginMethods(formData.loginMethods);
-      // setWalletPlugin(formData.walletPlugin);
+      setNetWork(formData.network);
+      setChainNamespace(formData.chainNamespace);
+      setChain(formData.chain);
+      setWhiteLabel(formData.whiteLabel);
+      setLoginProviders(formData.loginProviders);
+      setAdapters(formData.adapters);
+      setLoginMethods(formData.loginMethods);
+      setWalletPlugin(formData.walletPlugin);
     }
   }, []);
 

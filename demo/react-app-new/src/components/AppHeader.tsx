@@ -31,11 +31,10 @@ const AppHeader: React.FC = () => {
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="/web3auth.svg" className="h-8" alt="W3A Logo" />
         </a>
-        network: {network}, {status}, {isConnected}
         <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
           {isDisplay.btnLogout ? (
             <Button onClick={onLogout}>
-              Button
+              {t('app.btnLogout')}
             </Button>
           ) : (
             <Button onClick={()=>{}}>

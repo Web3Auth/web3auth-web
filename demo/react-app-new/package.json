@@ -36,8 +36,11 @@
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/wallet-connect-v2-adapter": "file:../../packages/adapters/wallet-connect-v2-adapter",
     "@web3auth/wallet-services-plugin": "file:../../packages/plugins/wallet-services-plugin",
+    "i18next": "^23.15.1",
+    "i18next-browser-languagedetector": "^8.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^15.0.2",
     "usehooks-ts": "^3.1.0",
     "web3": "^4.13.0"
   },

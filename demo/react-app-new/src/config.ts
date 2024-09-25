@@ -4,6 +4,19 @@ import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, IAdapter, IBas
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 
+export const languageOptions: { label: string; value: LANGUAGE_TYPE }[] = [
+  { label: "English", value: LANGUAGES.en },
+  { label: "German", value: LANGUAGES.de },
+  { label: "Japanese", value: LANGUAGES.ja },
+  { label: "Korean", value: LANGUAGES.ko },
+  { label: "Mandarin", value: LANGUAGES.zh },
+  { label: "Spanish", value: LANGUAGES.es },
+  { label: "French", value: LANGUAGES.fr },
+  { label: "Portuguese", value: LANGUAGES.pt },
+  { label: "Dutch", value: LANGUAGES.nl },
+  { label: "Turkish", value: LANGUAGES.tr },
+];
+
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
   types: {
     Person: [

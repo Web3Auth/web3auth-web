@@ -2,7 +2,7 @@ import { useAppContext } from '@/context';
 import { useState, useEffect } from 'react';
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 
-import { networkOptions, chainNamespaceOptions, chainConfigs, loginProviderOptions } from '../config'
+import { networkOptions, chainNamespaceOptions, chainConfigs, loginProviderOptions, languageOptions } from '../config'
 import { log } from 'console';
 
 interface Option {
@@ -11,7 +11,7 @@ interface Option {
 }
 
 const useOptions = () => {
-  const { network, chainNamespace, chain, adapters } = useAppContext();
+  const { chainNamespace, chain } = useAppContext();
 
   const [chainOptions, setChainOptions] = useState<Option[]>([]);
   const [adapterOptions, setAdapterOptions] = useState<Option[]>([]);
@@ -44,6 +44,7 @@ const useOptions = () => {
     chainOptions,
     adapterOptions,
     loginProviderOptions,
+    languageOptions,
   };
 };
 

@@ -41,7 +41,8 @@ export const Select: React.FC<{
   value: string[];
   onChange: (value: string[]) => void;
   multiple?: boolean;
-}> = ({ label, options, value, onChange, multiple = false }) => {
+  disabled?: boolean;
+}> = ({ label, options, value, onChange, multiple = false, disabled = false }) => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     onChange(selectedOptions);
@@ -49,13 +50,14 @@ export const Select: React.FC<{
 
   return (
     <div className="mb-4">
-      <label className="block text-gray-700 text-sm font-bold mb-2">{label}</label>
+      <label className={`block text-gray-700 text-sm font-bold mb-2 ${disabled ? 'opacity-50' : ''}`}>{label}</label>
       <div className="relative">
         <select
-          value={value}
+          value={multiple?value: value[0]}
           onChange={handleChange}
           multiple={multiple}
-          className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+          disabled={disabled}
+          className={`block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -73,23 +75,23 @@ export const Select: React.FC<{
   );
 };
 
-export const Button: React.FC<{ onClick: () => void; className?: string; children: React.ReactNode }> = ({ onClick, className = '', children }) => {
-  const classes = `bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${className}`;
+export const Button: React.FC<{ onClick: () => void; className?: string; children: React.ReactNode; disabled?: boolean }> = ({ onClick, className = '', children, disabled = false }) => {
+  const classes = `bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
   return (
-    <button onClick={onClick} className={classes}>
+    <button onClick={!disabled ? onClick : undefined} className={classes} disabled={disabled}>
       {children}
     </button>
   );
 };
 
-export const Toggle: React.FC<{ isOn: boolean; onToggle: () => void; label: string }> = ({ isOn, onToggle, label }) => {
+export const Toggle: React.FC<{ isOn: boolean; onToggle: () => void; label: string; disabled?: boolean }> = ({ isOn, onToggle, label, disabled = false }) => {
   return (
     <div className="flex items-center">
       <div
-        onClick={onToggle}
+        onClick={!disabled ? onToggle : undefined}
         className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer ${
           isOn ? 'bg-blue-500' : 'bg-gray-300'
-        }`}
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div
           className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${
@@ -97,7 +99,7 @@ export const Toggle: React.FC<{ isOn: boolean; onToggle: () => void; label: stri
           }`}
         ></div>
       </div>
-      <span className="ml-3 text-gray-700">{label}</span>
+      <span className={`ml-3 text-gray-700 ${disabled ? 'opacity-50' : ''}`}>{label}</span>
     </div>
   );
 };
@@ -109,7 +111,8 @@ export const TextField: React.FC<{
   placeholder?: string;
   type?: string;
   className?: string;
-}> = ({ label, value, onChange, placeholder = '', type = 'text', className = '' }) => {
+  disabled?: boolean;
+}> = ({ label, value, onChange, placeholder = '', type = 'text', className = '', disabled = false }) => {
   const classNameValue = `mb-4 ${className}`;
   return (
     <div className={classNameValue}>
@@ -120,6 +123,7 @@ export const TextField: React.FC<{
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        disabled={disabled}
       />
     </div>
   );
@@ -129,7 +133,8 @@ export const ColorPicker: React.FC<{
   label: string;
   color: string;
   onChange: (color: string) => void;
-}> = ({ label, color, onChange }) => {
+  disabled?: boolean;
+}> = ({ label, color, onChange, disabled = false }) => {
   const [currentColor, setCurrentColor] = useState(color);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,19 +145,21 @@ export const ColorPicker: React.FC<{
 
   return (
     <div className="mb-4">
-      <label className="block text-gray-700 text-sm font-bold mb-2">{label}</label>
+      <label className={`block text-gray-700 text-sm font-bold mb-2 ${disabled ? 'opacity-50' : ''}`}>{label}</label>
       <div className="flex items-center">
         <input
           type="color"
           value={currentColor}
           onChange={handleChange}
-          className="w-10 h-10 p-0 border-none"
+          className={`w-10 h-10 p-0 border-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={disabled}
         />
         <input
           type="text"
           value={currentColor}
           onChange={handleChange}
-          className="ml-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className={`ml-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={disabled}
         />
       </div>
     </div>

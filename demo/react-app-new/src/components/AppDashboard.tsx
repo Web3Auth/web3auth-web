@@ -224,7 +224,7 @@ const AppDashboard: React.FC = () => {
             {isDisplay.walletServices &&(
               <Card className="px-4 py-4 gap-4 h-auto mb-2">
                 <div className="text-xl font-bold leading-tight text-left mb-2">Wallet Service</div>
-                <Button onClick={showWalletUI}>
+                <Button onClick={showWalletUI} >
                   { t("app.buttons.btnShowWalletUI") }
                 </Button>
                 <Button className="mb-2" onClick={showWalletConnectScanner}>
@@ -238,21 +238,21 @@ const AppDashboard: React.FC = () => {
             {isDisplay.ethServices &&( 
               <Card className="px-4 py-4 gap-4 h-auto mb-2">
                 <div className="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
-                <Button className="mb-2" onClick={onGetAccounts}>
+                <Button className="m-2" onClick={onGetAccounts} >
                   { t("app.buttons.btnGetAccounts") }
                 </Button>
-                <Button className="mb-2" onClick={onGetBalance}>
+                <Button className="m-2" onClick={onGetBalance}>
                   { t("app.buttons.btnGetBalance") }
                 </Button>
-                <Button className="mb-2" onClick={onSendEth}>{ t("app.buttons.btnSendEth") }</Button>
-                <Button className="mb-2" onClick={onSignEthMessage}>{ t("app.buttons.btnSignEthMessage") }</Button>
-                <Button className="mb-2" onClick={getConnectedChainId}>
+                <Button className="m-2" onClick={onSendEth}>{ t("app.buttons.btnSendEth") }</Button>
+                <Button className="m-2" onClick={onSignEthMessage}>{ t("app.buttons.btnSignEthMessage") }</Button>
+                <Button className="m-2" onClick={getConnectedChainId}>
                   { t("app.buttons.btnGetConnectedChainId") }
                 </Button>
-                <Button className="mb-2" onClick={onSignTypedData_v4}>
+                <Button className="m-2" onClick={onSignTypedData_v4}>
                   { t("app.buttons.btnSignTypedData_v4") }
                 </Button>
-                <Button className="mb-2" onClick={onSignPersonalMsg}>
+                <Button className="m-2" onClick={onSignPersonalMsg}>
                   { t("app.buttons.btnSignPersonalMsg") }
                 </Button>
               </Card>
@@ -260,16 +260,16 @@ const AppDashboard: React.FC = () => {
             {isDisplay.solServices &&(
               <Card className="px-4 py-4 gap-4 h-auto mb-2">
                 <div className="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
-                <Button className="mb-2" onClick={onAddChain}>{ t("app.buttons.btnAddChain") }</Button>
-                <Button className="mb-2" onClick={onSwitchChain}>{ t("app.buttons.btnSwitchChain") }</Button>
-                <Button className="mb-2" onClick={onSignAndSendTransaction}>
+                <Button className="m-2" onClick={onAddChain}>{ t("app.buttons.btnAddChain") }</Button>
+                <Button className="m-2" onClick={onSwitchChain}>{ t("app.buttons.btnSwitchChain") }</Button>
+                <Button className="m-2" onClick={onSignAndSendTransaction}>
                   { t("app.buttons.btnSignAndSendTransaction") }
                 </Button>
-                <Button className="mb-2" onClick={onSignTransaction}>
+                <Button className="m-2" onClick={onSignTransaction}>
                   { t("app.buttons.btnSignTransaction") }
                 </Button>
-                <Button className="mb-2" onClick={onSignMessage}>{ t("app.buttons.btnSignMessage") }</Button>
-                <Button className="mb-2" onClick={onSignAllTransactions}>
+                <Button className="m-2" onClick={onSignMessage}>{ t("app.buttons.btnSignMessage") }</Button>
+                <Button className="m-2" onClick={onSignAllTransactions}>
                   { t("app.buttons.btnSignAllTransactions") }
                 </Button>
               </Card>

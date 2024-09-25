@@ -4,18 +4,12 @@ import { useTranslation } from "react-i18next";
 import { useAppContext } from "../context";
 import useOptions from "../hooks/useOptions";
 import {
-  CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CustomChainConfig,
-  IAdapter,
-  IBaseProvider,
-  WALLET_ADAPTERS,
-  WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/base";
 
 import { Button, Card, ColorPicker, Select, Tabs, Tag, TextField, Toggle } from "./CommonUI";
-import { LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
+import { LANGUAGE_TYPE, LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
 
 const AppSettings: React.FC = () => {
   const {
@@ -39,7 +33,7 @@ const AppSettings: React.FC = () => {
   const { t } = useTranslation();
   const { status, logout, isConnected, isInitialized, connect } = useWeb3Auth();
 
-  const { networkOptions, chainNamespaceOptions, chainOptions, adapterOptions, loginProviderOptions } = useOptions();
+  const { networkOptions, chainNamespaceOptions, chainOptions, adapterOptions, loginProviderOptions, languageOptions } = useOptions();
 
   const [activeTab, setActiveTab] = useState("General");
 
@@ -144,13 +138,17 @@ const AppSettings: React.FC = () => {
     }
   };
 
+  const onChangLanguage = (value: string) => {
+    setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, defaultLanguage: value as LANGUAGE_TYPE } });
+  }
+
   return !isConnected && (
     <div className="grid grid-cols-8 gap-0">
       <div className="col-span-0 sm:col-span-1 lg:col-span-2"></div>
       <Card className="h-auto px-8 py-8 col-span-8 sm:col-span-6 lg:col-span-4">
         <div className="text-3xl font-bold leading-tight text-center">{t("app.greeting")}</div>
         <div className="leading-tight font-extrabold text-center mb-12">
-          <Tag text={status} />
+          <Tag text={status} /> 
           &nbsp;
           <Tag text={isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET"} />
         </div>
@@ -158,19 +156,19 @@ const AppSettings: React.FC = () => {
         {activeTab === "General" && (
           <Card className="grid grid-cols-1 gap-2 py-4 px-4 shadow-none">
             <Select
-              label="$t('app.network')"
+              label={t('app.network')}
               options={networkOptions}
               onChange={(value) => setNetWork(value[0] as WEB3AUTH_NETWORK_TYPE)}
               value={[network]}
             />
             <Select
-              label="$t('app.chainNamespace')"
+              label={t('app.chainNamespace')}
               options={chainNamespaceOptions}
               value={[chainNamespace]}
               onChange={(value) => setChainNamespace(value[0] as ChainNamespaceType)}
             />
-            <Select label="$t('app.chain')" options={chainOptions} value={[chain]} onChange={(value) => setChain(value[0])} />
-            <Select label="$t('app.adapters')" options={adapterOptions} value={adapters} onChange={onChangeAdapters} multiple={true} />
+            <Select label={t('app.chain')} options={chainOptions} value={[chain]} onChange={(value) => setChain(value[0])} />
+            <Select label={t('app.adapters')} options={adapterOptions} value={adapters} onChange={onChangeAdapters} multiple={true} />
           </Card>
         )}
         {activeTab === "WhiteLabel" && (
@@ -180,29 +178,32 @@ const AppSettings: React.FC = () => {
               label={t("app.whiteLabel.useLogoLoader")}
               isOn={Boolean(whiteLabel.config.useLogoLoader)}
               onToggle={() => onToggle("whiteLabel.config.useLogoLoader")}
+              disabled={!whiteLabel.enable}
             />
             <TextField
               label={t("app.whiteLabel.appName")}
               value={whiteLabel.config.appName || ""}
               onChange={(value) => onTextFieldChange("whiteLabel.config.appName", value)}
+              disabled={!whiteLabel.enable}
             />
             <Select
               label={t("app.whiteLabel.defaultLanguage")}
-              options={[{ value: "en", label: "English" }]}
-              value={["en"]}
-              onChange={(value) => {}}
+              options={languageOptions}
+              value={[whiteLabel.config.defaultLanguage || ''] as LANGUAGE_TYPE[]}
+              onChange={(value) => onChangLanguage(value[0])}
+              disabled={!whiteLabel.enable}
             />
-            <TextField className="col-span-2" label={t("app.whiteLabel.appUrl")} value={whiteLabel.config.appUrl || ""} onChange={(value) => {}} />
-            <TextField label={t("app.whiteLabel.logoLight")} value={whiteLabel.config.logoLight || ""} onChange={(value) => {}} />
-            <TextField label={t("app.whiteLabel.logoDark")} value={whiteLabel.config.logoDark || ""} onChange={(value) => {}} />
-            <ColorPicker label={t("app.whiteLabel.primary")} color={whiteLabel.config.theme?.primary || ""} onChange={(color) => {}} />
-            <ColorPicker label={t("app.whiteLabel.primaryColor")} color={whiteLabel.config.theme?.onPrimary || ""} onChange={(color) => {}} />
+            <TextField className="col-span-2" label={t("app.whiteLabel.appUrl")} value={whiteLabel.config.appUrl || ""} onChange={(value) => {}} disabled={!whiteLabel.enable} />
+            <TextField label={t("app.whiteLabel.logoLight")} value={whiteLabel.config.logoLight || ""} onChange={(value) => {}} disabled={!whiteLabel.enable} />
+            <TextField label={t("app.whiteLabel.logoDark")} value={whiteLabel.config.logoDark || ""} onChange={(value) => {}} disabled={!whiteLabel.enable}/>
+            <ColorPicker label={t("app.whiteLabel.primary")} color={whiteLabel.config.theme?.primary || ""} onChange={(color) => {}} disabled={!whiteLabel.enable} />
+            <ColorPicker label={t("app.whiteLabel.primaryColor")} color={whiteLabel.config.theme?.onPrimary || ""} onChange={(color) => {}} disabled={!whiteLabel.enable} />
           </Card>
         )}
         {activeTab === "Login Provider" && (
           <Card className="grid grid-cols-1 gap-2 py-4 px-4 shadow-none">
             <Select
-              label="$t('app.loginProvider')"
+              label={t('app.loginProvider')}
               options={loginProviderOptions}
               value={loginProviders}
               onChange={onChangeLoginProviders}
@@ -260,11 +261,13 @@ const AppSettings: React.FC = () => {
               label={t("app.walletPlugin.logoLight")}
               value={walletPlugin.logoLight || ""}
               onChange={(value) => onTextFieldChange("walletPlugin.logoLight", value)}
+              disabled={!walletPlugin.enable}
             />
             <TextField
               label={t("app.walletPlugin.logoDark")}
               value={walletPlugin.logoDark || ""}
               onChange={(value) => onTextFieldChange("walletPlugin.logoDark", value)}
+              disabled={!walletPlugin.enable}
             />
           </Card>
         )}
