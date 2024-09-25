@@ -3,7 +3,7 @@ import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 
 import { getInjectedAdapters } from "./injectedAdapters";
 
-export const getDefaultExternalAdapters = async (params: { options: IWeb3AuthCoreOptions }): Promise<IAdapter<unknown>[]> => {
+export const getDefaultExternalAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
   const { options } = params;
   const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
