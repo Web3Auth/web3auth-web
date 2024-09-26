@@ -223,7 +223,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
     return modalConfig;
   },[loginMethodsConfig]);
   
-  const chainConfig = useMemo<CustomChainConfig>(() => (chainConfigs[chainNamespace as ChainNamespaceType] || []).find((x) => x.chainId === chain) || chainConfigs[chainNamespace as ChainNamespaceType][0], [chainNamespace, chain]);
+  const chainConfig = useMemo<CustomChainConfig>(() => {
+    if (!chainNamespace) return {} as CustomChainConfig;
+
+    const chainConfigByNamespace = chainConfigs[chainNamespace as ChainNamespaceType] || [];
+    
+    if (!chainConfigByNamespace.length) return {} as CustomChainConfig
+
+    return chainConfigByNamespace.find((x) => x.chainId === chain) || chainConfigByNamespace[0];
+
+  }, [chainNamespace, chain]);
 
   const privateKeyProvider = useMemo<IBaseProvider<string>>(() => {
     if((chainOptions || chainOptions > 0) && !chainOptions.map(option => option.value).includes(chain)) setChain(chainOptions[0].value);
