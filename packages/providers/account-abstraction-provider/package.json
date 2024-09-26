@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/account-abstraction-provider",
-  "version": "9.2.0-alpha.0",
+  "version": "9.2.0-alpha.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/lib.cjs/index.js",
