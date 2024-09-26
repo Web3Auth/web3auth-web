@@ -67,7 +67,10 @@ export function getProviderHandlers({
   });
 
   return {
-    getAccounts: async (_: JRPCRequest<unknown>) => [smartAccount.address],
+    getAccounts: async (_: JRPCRequest<unknown>) => {
+      const accounts = await eoaProvider.request<never, string[]>({ method: "eth_accounts" });
+      return [smartAccount.address, ...accounts];
+    },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
       throw providerErrors.custom({
         message: "Smart accounts do not have private key",
