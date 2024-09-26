@@ -45,6 +45,10 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     return this._paymasterClient;
   }
 
+  get publicClient(): Client | null {
+    return this._publicClient;
+  }
+
   public static getProviderInstance = async (params: {
     eoaProvider: IProvider;
     smartAccountInit: ISmartAccount;
