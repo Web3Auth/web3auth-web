@@ -1,7 +1,7 @@
 import { addHexPrefix, isHexString } from "@ethereumjs/util";
 import { sleep } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
-import { IProvider } from "@web3auth/base";
+import { IProvider, log } from "@web3auth/base";
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
 import { TypedDataEncoder } from "ethers";
 import { Chain, createWalletClient, Hex, http } from "viem";
@@ -68,8 +68,13 @@ export function getProviderHandlers({
 
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => {
-      const accounts = await eoaProvider.request<never, string[]>({ method: "eth_accounts" });
-      return [smartAccount.address, ...accounts];
+      const [smartAccounts, eoaAccounts] = await Promise.all([
+        smartAccount.getAddress(),
+        eoaProvider.request<never, string[]>({ method: "eth_accounts" }),
+      ]);
+      log.info("smartAccounts", smartAccounts);
+      log.info("eoaAccounts", eoaAccounts);
+      return [smartAccounts, ...eoaAccounts];
     },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
       throw providerErrors.custom({

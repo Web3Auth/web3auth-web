@@ -4,7 +4,9 @@ import {
   BiconomySmartAccount,
   ISmartAccount,
   KernelSmartAccount,
+  LightSmartAccount,
   SafeSmartAccount,
+  SimpleSmartAccount,
   TrustSmartAccount,
 } from "@web3auth/account-abstraction-provider";
 import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
@@ -92,6 +94,12 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
       break;
     case "trust":
       smartAccountInit = new TrustSmartAccount();
+      break;
+    case "light":
+      smartAccountInit = new LightSmartAccount();
+      break;
+    case "simple":
+      smartAccountInit = new SimpleSmartAccount();
       break;
     case "safe":
     default:
