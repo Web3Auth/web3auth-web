@@ -155,7 +155,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   }
 
   private async setupChainSwitchMiddleware() {
-    const chainConfig = await this._providerEngineProxy.request<never, CustomChainConfig>({ method: "eth_provider_config" });
+    const chainConfig = await this.state.eoaProvider.request<never, CustomChainConfig>({ method: "eth_provider_config" });
     this.update({ chainId: chainConfig.chainId });
     this.configure({
       chainConfig: { ...chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155, chainId: chainConfig.chainId, rpcTarget: chainConfig.rpcTarget },
