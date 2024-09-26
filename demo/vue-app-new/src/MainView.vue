@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
   AccountAbstractionProvider,
-  BiconomySmartAccount,
+  // BiconomySmartAccount,
   ISmartAccount,
   KernelSmartAccount,
-  LightSmartAccount,
+  // LightSmartAccount,
   SafeSmartAccount,
-  SimpleSmartAccount,
-  TrustSmartAccount,
+  // SimpleSmartAccount,
+  // TrustSmartAccount,
 } from "@web3auth/account-abstraction-provider";
 import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
@@ -86,21 +86,21 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   // setup aa provider
   let smartAccountInit: ISmartAccount;
   switch (formData.smartAccountType) {
-    case "biconomy":
-      smartAccountInit = new BiconomySmartAccount();
-      break;
+    // case "biconomy":
+    //   smartAccountInit = new BiconomySmartAccount();
+    //   break;
     case "kernel":
       smartAccountInit = new KernelSmartAccount();
       break;
-    case "trust":
-      smartAccountInit = new TrustSmartAccount();
-      break;
-    case "light":
-      smartAccountInit = new LightSmartAccount();
-      break;
-    case "simple":
-      smartAccountInit = new SimpleSmartAccount();
-      break;
+    // case "trust":
+    //   smartAccountInit = new TrustSmartAccount();
+    //   break;
+    // case "light":
+    //   smartAccountInit = new LightSmartAccount();
+    //   break;
+    // case "simple":
+    //   smartAccountInit = new SimpleSmartAccount();
+    //   break;
     case "safe":
     default:
       smartAccountInit = new SafeSmartAccount();
