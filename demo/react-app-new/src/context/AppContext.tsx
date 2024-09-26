@@ -208,7 +208,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
   },[loginMethodsConfig]);
   
   const chainConfig = useMemo<CustomChainConfig>(() => {
-    let result = {} as CustomChainConfig;
     if(!chainNamespace || !chain || !chainConfigs[chainNamespace as ChainNamespaceType].length) return chainConfigs[CHAIN_NAMESPACES.EIP155][0];
 
     return chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain)
@@ -247,7 +246,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
       uiConfig: whiteLabel?.enable ? { ...whiteLabel.config } : undefined,
       enableLogging: true,
     };
-  }, [network, privateKeyProvider]);
+  }, [network, privateKeyProvider, whiteLabel]);
 
   const web3authContextConfig = useMemo<Web3AuthContextConfig>(() => ({
     adapters: web3authAdapters,
@@ -271,8 +270,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
         walletPlugin,
       }
     )
-
-    
 
   }, [network, chainNamespace, chain, whiteLabel, loginProviders, adapters, loginMethods, walletPlugin]);
 
