@@ -143,7 +143,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
     logoDark: "",
     logoLight: "",
   });
-  const chainOptions = useMemo<Option[]>(() => chainConfigs[chainNamespace as ChainNamespaceType].map((x) => ({ label: `${x.chainId} ${x.tickerName}`, value: x.chainId })), [chainNamespace, chain]);
+  const chainOptions = useMemo<Option[]>(() => (chainConfigs[chainNamespace as ChainNamespaceType]|| []).map((x) => ({ label: `${x.chainId} ${x.tickerName}`, value: x.chainId })), [chainNamespace, chain]);
 
   const adapterOptions = useMemo<Option[]>(() => chainNamespace === CHAIN_NAMESPACES.EIP155 ?
     [
@@ -204,9 +204,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
   }, [walletPlugin, chainNamespace]);
 
   const loginMethodsConfig = useMemo(() => {
-    if (loginProviders.length === 0) return undefined;
+    if (loginProviders?.length) return undefined;
   
-    if (!Object.values(loginMethods).some((x) => x.showOnModal)) {
+    if (!Object.values(loginMethods || {}).some((x) => x.showOnModal)) {
       return undefined;
     }
 
@@ -223,7 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
     return modalConfig;
   },[loginMethodsConfig]);
   
-  const chainConfig = useMemo<CustomChainConfig>(() => chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain) || chainConfigs[chainNamespace as ChainNamespaceType][0], [chainNamespace, chain]);
+  const chainConfig = useMemo<CustomChainConfig>(() => (chainConfigs[chainNamespace as ChainNamespaceType] || []).find((x) => x.chainId === chain) || chainConfigs[chainNamespace as ChainNamespaceType][0], [chainNamespace, chain]);
 
   const privateKeyProvider = useMemo<IBaseProvider<string>>(() => {
     if((chainOptions || chainOptions > 0) && !chainOptions.map(option => option.value).includes(chain)) setChain(chainOptions[0].value);
