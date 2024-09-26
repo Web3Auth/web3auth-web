@@ -57,8 +57,6 @@ type AppContextType = {
     logoLight: string;
   };
   setWalletPlugin: (walletPlugin: { enable: boolean; logoDark: string; logoLight: string }) => void;
-  chainOptions: Option[];
-  adapterOptions: Option[];
   web3authContextConfig: Web3AuthContextConfig;
 };
 
@@ -122,8 +120,6 @@ const AppContext = createContext<AppContextType>({
   setWalletPlugin: () => {},
 
   web3authContextConfig: web3authInitialConfig,
-  chainOptions: [],
-  adapterOptions: [],
 });
 
 export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }) => {
@@ -143,19 +139,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
     logoDark: "",
     logoLight: "",
   });
-  const chainOptions = useMemo<Option[]>(() => (chainConfigs[chainNamespace as ChainNamespaceType]|| []).map((x) => ({ label: `${x.chainId} ${x.tickerName}`, value: x.chainId })), [chainNamespace, chain]);
 
-  const adapterOptions = useMemo<Option[]>(() => chainNamespace === CHAIN_NAMESPACES.EIP155 ?
-    [
-      { label: "coinbase-adapter", value: "coinbase" },
-      { label: "torus-evm-adapter", value: "torus-evm" },
-      { label: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-      { label: "injected-adapters", value: "injected-evm" },
-    ] :
-    [
-      { label: "torus-solana-adapter", value: "torus-solana" },
-      { label: "injected-adapters", value: "injected-solana" },
-    ], [chainNamespace]);
   const [formData, setFormData, clearFormData] = useSessionStorage<AppContextType>('formData', {} as AppContextType);
 
   const getExternalAdapterByName = async (name: string): Promise<IAdapter<unknown>[]> => {
@@ -204,9 +188,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
   }, [walletPlugin, chainNamespace]);
 
   const loginMethodsConfig = useMemo(() => {
-    if (loginProviders?.length) return undefined;
+    if (loginProviders?.length === 0) return undefined;
   
-    if (!Object.values(loginMethods || {}).some((x) => x.showOnModal)) {
+    if (loginMethods && !Object.values(loginMethods).some((x) => x.showOnModal)) {
       return undefined;
     }
 
@@ -224,18 +208,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
   },[loginMethodsConfig]);
   
   const chainConfig = useMemo<CustomChainConfig>(() => {
-    if (!chainNamespace) return {} as CustomChainConfig;
+    let result = {} as CustomChainConfig;
+    if(!chainNamespace || !chain || !chainConfigs[chainNamespace as ChainNamespaceType].length) return chainConfigs[CHAIN_NAMESPACES.EIP155][0];
 
-    const chainConfigByNamespace = chainConfigs[chainNamespace as ChainNamespaceType] || [];
-    
-    if (!chainConfigByNamespace.length) return {} as CustomChainConfig
+    return chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain)
+      || chainConfigs[chainNamespace as ChainNamespaceType][0]
 
-    return chainConfigByNamespace.find((x) => x.chainId === chain) || chainConfigByNamespace[0];
-
-  }, [chainNamespace, chain]);
+  } , [chainNamespace, chain]);
 
   const privateKeyProvider = useMemo<IBaseProvider<string>>(() => {
-    if((chainOptions || chainOptions > 0) && !chainOptions.map(option => option.value).includes(chain)) setChain(chainOptions[0].value);
     switch (chainNamespace) {
       case CHAIN_NAMESPACES.EIP155:
         return new EthereumPrivateKeyProvider({
@@ -260,10 +241,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
 
   const web3authOptions = useMemo<Web3AuthOptions>(() => {
     return {
-      clientId: clientIds[network],
+      clientId: clientIds[network || WEB3AUTH_NETWORK.TESTNET],
       privateKeyProvider,
       web3AuthNetwork: network,
-      uiConfig: whiteLabel.enable ? { ...whiteLabel.config } : undefined,
+      uiConfig: whiteLabel?.enable ? { ...whiteLabel.config } : undefined,
       enableLogging: true,
     };
   }, [network, privateKeyProvider]);
@@ -328,8 +309,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
       setWalletPlugin,
 
       web3authContextConfig,
-      chainOptions,
-      adapterOptions,
     }}>
       {children}
     </AppContext.Provider>

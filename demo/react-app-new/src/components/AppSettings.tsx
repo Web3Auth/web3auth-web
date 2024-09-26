@@ -43,26 +43,28 @@ const AppSettings: React.FC = () => {
 
   const onChangeAdapters = (value: string[]) => {
     const [adapter] = value;
-
-    if (adapters.includes(adapter)) {
-      setAdapters(adapters.filter((x) => x !== adapter));
+    const adaps = adapters || [];
+    if (adaps.includes(adapter)) {
+      setAdapters(adaps.filter((x) => x !== adapter));
     } else {
-      setAdapters(adapters.concat(adapter));
+      setAdapters(adaps.concat(adapter));
     }
   };
 
   const onChangeLoginProviders = (value: string[]) => {
     const [loginProvider] = value;
 
-    if (loginProviders.includes(loginProvider as LOGIN_PROVIDER_TYPE)) {
-      setLoginProviders(loginProviders.filter((x) => x !== loginProvider));
+    const providers = loginProviders || [];
+
+    if (providers.includes(loginProvider as LOGIN_PROVIDER_TYPE)) {
+      setLoginProviders(providers.filter((x) => x !== loginProvider));
     } else {
-      setLoginProviders(loginProviders.concat(loginProvider as LOGIN_PROVIDER_TYPE));
+      setLoginProviders(providers.concat(loginProvider as LOGIN_PROVIDER_TYPE));
     }
   };
 
   const onChangeLoginMethods = (loginProvider: LOGIN_PROVIDER_TYPE, fieldName: string, value: string) => {
-    const method = loginMethods[loginProvider];
+    const method = loginMethods?.[loginProvider];
     switch (fieldName) {
       case "name":
         setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, name: value } });
@@ -80,16 +82,16 @@ const AppSettings: React.FC = () => {
         setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, logoDark: value } });
         break;
       case "mainOption":
-        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, mainOption: !method.mainOption } });
+        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, mainOption: !method?.mainOption } });
         break;
       case "showOnModal":
-        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnModal: !method.showOnModal } });
+        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnModal: !method?.showOnModal } });
         break;
       case "showOnDesktop":
-        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnDesktop: !method.showOnDesktop } });
+        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnDesktop: !method?.showOnDesktop } });
         break;
       case "showOnMobile":
-        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnMobile: !method.showOnMobile } });
+        setLoginMethods({ ...loginMethods, [loginProvider]: { ...method, showOnMobile: !method?.showOnMobile } });
         break;
       default:
         break;
@@ -99,13 +101,13 @@ const AppSettings: React.FC = () => {
   const onToggle = (fieldName: string) => {
     switch (fieldName) {
       case "whiteLabel.enable":
-        setWhiteLabel({ enable: !whiteLabel.enable, config: whiteLabel.config });
+        setWhiteLabel({ enable: !whiteLabel?.enable, config: whiteLabel?.config });
         break;
       case "whiteLabel.config.useLogoLoader":
-        setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, useLogoLoader: !whiteLabel.config.useLogoLoader } });
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, useLogoLoader: !whiteLabel?.config?.useLogoLoader } });
         break;
       case "walletPlugin.enable":
-        setWalletPlugin({ enable: !walletPlugin.enable, logoLight: walletPlugin.logoLight, logoDark: walletPlugin.logoDark });
+        setWalletPlugin({ enable: !walletPlugin?.enable, logoLight: walletPlugin?.logoLight, logoDark: walletPlugin?.logoDark });
         break;
       default:
         break;
@@ -115,22 +117,28 @@ const AppSettings: React.FC = () => {
   const onTextFieldChange = (fieldName: string, value: string) => {
     switch (fieldName) {
       case "whiteLabel.config.appName":
-        setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, appName: value } });
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, appName: value } });
         break;
       case "whiteLabel.config.appUrl":
-        setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, appUrl: value } });
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, appUrl: value } });
         break;
       case "whiteLabel.config.logoLight":
-        setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, logoLight: value } });
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, logoLight: value } });
         break;
       case "whiteLabel.config.logoDark":
-        setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, logoDark: value } });
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, logoDark: value } });
+        break;
+      case "whiteLabel.config.primary":
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, theme: { ...whiteLabel?.config?.theme, primary: value } } });
+        break;
+      case "whiteLabel.config.primaryColor":
+        setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, theme: { ...whiteLabel?.config?.theme, onPrimary: value } } });
         break;
       case "walletPlugin.logoLight":
-        setWalletPlugin({ enable: walletPlugin.enable, logoLight: value, logoDark: walletPlugin.logoDark });
+        setWalletPlugin({ enable: walletPlugin?.enable, logoLight: value, logoDark: walletPlugin?.logoDark });
         break;
       case "walletPlugin.logoDark":
-        setWalletPlugin({ enable: walletPlugin.enable, logoLight: walletPlugin.logoLight, logoDark: value });
+        setWalletPlugin({ enable: walletPlugin?.enable, logoLight: walletPlugin?.logoLight, logoDark: value });
         break;
       
       default:
@@ -139,7 +147,7 @@ const AppSettings: React.FC = () => {
   };
 
   const onChangLanguage = (value: string) => {
-    setWhiteLabel({ enable: whiteLabel.enable, config: { ...whiteLabel.config, defaultLanguage: value as LANGUAGE_TYPE } });
+    setWhiteLabel({ enable: whiteLabel?.enable, config: { ...whiteLabel?.config, defaultLanguage: value as LANGUAGE_TYPE } });
   }
 
   return !isConnected && (
@@ -173,44 +181,44 @@ const AppSettings: React.FC = () => {
         )}
         {activeTab === "WhiteLabel" && (
           <Card className="grid grid-cols-1 sm:grid-cols-2 gap-2 py-4 px-4 shadow-none">
-            <Toggle label={t("app.whiteLabel.title")} isOn={Boolean(whiteLabel.enable)} onToggle={() => onToggle("whiteLabel.enable")} />
+            <Toggle label={t("app.whiteLabel.title")} isOn={Boolean(whiteLabel?.enable)} onToggle={() => onToggle("whiteLabel.enable")} />
             <Toggle
               label={t("app.whiteLabel.useLogoLoader")}
-              isOn={Boolean(whiteLabel.config.useLogoLoader)}
+              isOn={Boolean(whiteLabel?.config?.useLogoLoader)}
               onToggle={() => onToggle("whiteLabel.config.useLogoLoader")}
-              disabled={!whiteLabel.enable}
+              disabled={!whiteLabel?.enable}
             />
             <TextField
               label={t("app.whiteLabel.appName")}
-              value={whiteLabel.config.appName || ""}
+              value={whiteLabel?.config?.appName || ""}
               onChange={(value) => onTextFieldChange("whiteLabel.config.appName", value)}
-              disabled={!whiteLabel.enable}
+              disabled={!whiteLabel?.enable}
             />
             <Select
               label={t("app.whiteLabel.defaultLanguage")}
               options={languageOptions}
-              value={[whiteLabel.config.defaultLanguage || ''] as LANGUAGE_TYPE[]}
+              value={[whiteLabel?.config?.defaultLanguage || ''] as LANGUAGE_TYPE[]}
               onChange={(value) => onChangLanguage(value[0])}
-              disabled={!whiteLabel.enable}
+              disabled={!whiteLabel?.enable}
             />
-            <TextField className="col-span-2" label={t("app.whiteLabel.appUrl")} value={whiteLabel.config.appUrl || ""} onChange={(value) => {}} disabled={!whiteLabel.enable} />
-            <TextField label={t("app.whiteLabel.logoLight")} value={whiteLabel.config.logoLight || ""} onChange={(value) => {}} disabled={!whiteLabel.enable} />
-            <TextField label={t("app.whiteLabel.logoDark")} value={whiteLabel.config.logoDark || ""} onChange={(value) => {}} disabled={!whiteLabel.enable}/>
-            <ColorPicker label={t("app.whiteLabel.primary")} color={whiteLabel.config.theme?.primary || ""} onChange={(color) => {}} disabled={!whiteLabel.enable} />
-            <ColorPicker label={t("app.whiteLabel.primaryColor")} color={whiteLabel.config.theme?.onPrimary || ""} onChange={(color) => {}} disabled={!whiteLabel.enable} />
+            <TextField className="col-span-2" label={t("app.whiteLabel.appUrl")} value={whiteLabel?.config?.appUrl || ""} onChange={(value) => onTextFieldChange("whiteLabel.config.appUrl", value)} disabled={!whiteLabel?.enable} />
+            <TextField label={t("app.whiteLabel.logoLight")} value={whiteLabel?.config?.logoLight || ""} onChange={(value) => onTextFieldChange("whiteLabel.config.logoLight", value)} disabled={!whiteLabel?.enable} />
+            <TextField label={t("app.whiteLabel.logoDark")} value={whiteLabel?.config?.logoDark || ""} onChange={(value) => onTextFieldChange("whiteLabel.config.logoDark", value)} disabled={!whiteLabel?.enable}/>
+            <ColorPicker label={t("app.whiteLabel.primary")} color={whiteLabel?.config?.theme?.primary || ""} onChange={(value) => onTextFieldChange("whiteLabel.config.primary", value)} disabled={!whiteLabel?.enable} />
+            <ColorPicker label={t("app.whiteLabel.primaryColor")} color={whiteLabel?.config?.theme?.onPrimary || ""} onChange={(value) => onTextFieldChange("whiteLabel.config.primaryColor", value)} disabled={!whiteLabel?.enable} />
           </Card>
         )}
         {activeTab === "Login Provider" && (
           <Card className="grid grid-cols-1 gap-2 py-4 px-4 shadow-none">
             <Select
-              label={t('app.loginProvider')}
+              label={t('app.loginProviderTitle')}
               options={loginProviderOptions}
               value={loginProviders}
               onChange={onChangeLoginProviders}
               multiple={true}
             />
-            {loginProviders.map((p, index) => {
-              const method = loginMethods[p];
+            {(loginProviders || []).map((p, index) => {
+              const method = loginMethods?.[p] || {};
               const { name, description, logoHover, logoLight, logoDark, mainOption, showOnModal, showOnDesktop, showOnMobile } = method;
               return (
                 <Card key={index} className="px-4 py-4 grid grid-cols-1 sm:grid-cols-2 gap-2 shadow-none border">
@@ -256,18 +264,18 @@ const AppSettings: React.FC = () => {
         )}
         {activeTab === "Wallet Plugin" && (
           <Card className="grid grid-cols-1 gap-2 py-4 px-4 shadow-none">
-            <Toggle label={t("app.walletPlugin.enable")} isOn={Boolean(walletPlugin.enable)} onToggle={() => onToggle("walletPlugin.enable")} />
+            <Toggle label={t("app.walletPlugin.enable")} isOn={Boolean(walletPlugin?.enable)} onToggle={() => onToggle("walletPlugin.enable")} />
             <TextField
               label={t("app.walletPlugin.logoLight")}
-              value={walletPlugin.logoLight || ""}
+              value={walletPlugin?.logoLight || ""}
               onChange={(value) => onTextFieldChange("walletPlugin.logoLight", value)}
-              disabled={!walletPlugin.enable}
+              disabled={!walletPlugin?.enable}
             />
             <TextField
               label={t("app.walletPlugin.logoDark")}
-              value={walletPlugin.logoDark || ""}
+              value={walletPlugin?.logoDark || ""}
               onChange={(value) => onTextFieldChange("walletPlugin.logoDark", value)}
-              disabled={!walletPlugin.enable}
+              disabled={!walletPlugin?.enable}
             />
           </Card>
         )}

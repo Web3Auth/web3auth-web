@@ -17,6 +17,7 @@ const useOptions = () => {
   const [adapterOptions, setAdapterOptions] = useState<Option[]>([]);
 
   useEffect(() => {
+    if(!chainConfigs[chainNamespace as ChainNamespaceType]?.length) return;
     setChainOptions( chainConfigs[chainNamespace as ChainNamespaceType].map((x) => ({
       label: `${x.chainId} ${x.tickerName}`,
       value: x.chainId,

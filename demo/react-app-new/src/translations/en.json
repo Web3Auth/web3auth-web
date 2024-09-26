@@ -24,10 +24,10 @@
       "logoLight": "Light Logo",
       "logoDark": "Dark Logo",
       "useLogoLoader": "Use Logo Loader",
-      "primaryColor": "Primary Color",
-      "onPrimaryColor": "On Primary Color"
+      "primary": "Primary Color",
+      "primaryColor": "On Primary Color"
     },
-    "loginMethod": {
+    "loginProvider": {
       "name": "Name",
       "description": "Description",
       "logoHover": "Logo Hover",
@@ -38,6 +38,7 @@
       "showOnDesktop": "on Desktop?",
       "showOnMobile": "on Mobile?"
     },
+    "loginProviderTitle": "Login Provider",
     "adapter": {
       "sessionTime": "Session Time"
     },
