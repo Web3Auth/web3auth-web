@@ -2,8 +2,8 @@ import { createBundlerClient, createPaymasterClient } from "viem/account-abstrac
 
 export type BundlerConfig = {
   url: string;
-} & Pick<Parameters<typeof createBundlerClient>[0], "key" | "name" | "cacheTime" | "pollingInterval" | "userOperation" | "rpcSchema">;
+} & Pick<Parameters<typeof createBundlerClient>[0], "key" | "name" | "cacheTime" | "pollingInterval" | "userOperation" | "rpcSchema" | "transport">;
 
 export type PaymasterConfig = {
   url: string;
-} & Pick<Parameters<typeof createPaymasterClient>[0], "key" | "name" | "pollingInterval" | "rpcSchema">;
+} & Pick<Parameters<typeof createPaymasterClient>[0], "key" | "name" | "pollingInterval" | "rpcSchema" | "cacheTime" | "transport">;
