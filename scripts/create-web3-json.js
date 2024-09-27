@@ -52,4 +52,4 @@ async function mergeJsonFiles(file1Path, file2Path, outputPath) {
 }
 
 // Call the function to merge JSON files
-mergeJsonFiles("./dynamic-registry.json", "./wallet-registry-web3auth-old.json", "wallet-registry-web3auth.json");
+mergeJsonFiles("./wallet-registry-web3auth-old.json", "wallet-registry-web3auth.json");

@@ -1,17 +1,18 @@
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletInitializationError, WalletLoginError } from "@web3auth/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletLoginError } from "@web3auth/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@web3auth/base-provider";
 import {
   AddEthereumChainParameter,
   createChainSwitchMiddleware,
   createEthMiddleware,
-  createJsonRpcClient,
-  IChainSwitchHandlers,
+  createJsonRpcClient as createEthJsonRpcClient,
+  IChainSwitchHandlers as IEthChainSwitchHandlers,
 } from "@web3auth/ethereum-provider";
+import { createJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "@web3auth/solana-provider";
 
-import { addChain, getAccounts, getProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
   chainConfig: CustomChainConfig;
@@ -22,8 +23,6 @@ export interface WalletConnectV2ProviderState extends BaseProviderState {
 }
 
 export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, WalletConnectV2ProviderState, ISignClient> {
-  readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
-
   private connector: ISignClient | null = null;
 
   constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
@@ -52,8 +51,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   public async setupProvider(connector: ISignClient): Promise<void> {
-    const { chainNamespace } = this.config.chainConfig;
-    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     this.onConnectorStateUpdate(connector);
     await this.setupEngine(connector);
   }
@@ -107,18 +104,27 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   private async setupEngine(connector: ISignClient): Promise<void> {
+    if (this.config.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return this.setupEthEngine(connector);
+    } else if (this.config.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return this.setupSolEngine(connector);
+    }
+    throw new Error(`Unsupported chainNamespace: ${this.config.chainConfig.chainNamespace}`);
+  }
+
+  private async setupEthEngine(connector: ISignClient): Promise<void> {
     const { chainId } = this.config.chainConfig;
     const numChainId = parseInt(chainId, 16);
-    const providerHandlers = getProviderHandlers({ connector, chainId: numChainId });
+    const providerHandlers = getEthProviderHandlers({ connector, chainId: numChainId });
     const jrpcRes = await getAccounts(connector);
 
     this.update({
       accounts: jrpcRes || [],
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
-    const chainSwitchMiddleware = this.getChainSwitchMiddleware();
+    const chainSwitchMiddleware = this.getEthChainSwitchMiddleware();
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    const { networkMiddleware } = createEthJsonRpcClient(this.config.chainConfig as CustomChainConfig);
     engine.push(ethMiddleware);
     engine.push(chainSwitchMiddleware);
     engine.push(networkMiddleware);
@@ -126,8 +132,25 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.updateProviderEngineProxy(provider);
   }
 
-  private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
-    const chainSwitchHandlers: IChainSwitchHandlers = {
+  private async setupSolEngine(connector: ISignClient): Promise<void> {
+    const { chainId } = this.config.chainConfig;
+    const providerHandlers = getSolProviderHandlers({ connector, chainId });
+    const jrpcRes = await getAccounts(connector);
+
+    this.update({
+      accounts: jrpcRes || [],
+    });
+    const solMiddleware = createSolanaMiddleware(providerHandlers);
+    const engine = new JRPCEngine();
+    const { networkMiddleware } = createSolJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    engine.push(solMiddleware);
+    engine.push(networkMiddleware);
+    const provider = providerFromEngine(engine);
+    this.updateProviderEngineProxy(provider);
+  }
+
+  private getEthChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
+    const chainSwitchHandlers: IEthChainSwitchHandlers = {
       addChain: async (params: AddEthereumChainParameter): Promise<void> => {
         const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
         this.addChain({

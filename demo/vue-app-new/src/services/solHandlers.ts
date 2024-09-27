@@ -2,6 +2,7 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { CustomChainConfig, IProvider, log } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
+import base58 from "bs58";
 
 const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
@@ -77,6 +78,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const pubKey = await solWeb3.requestAccounts();
+    log.info("pubKey", pubKey);
 
     const block = await conn.getLatestBlockhash("finalized");
     const transactionInstruction = SystemProgram.transfer({
@@ -92,8 +94,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     }).add(transactionInstruction);
 
     const signedTx = await solWeb3.signTransaction(transaction);
-
-    // const res = await conn.sendRawTransaction(signedTx.serialize());
+    log.info("signedTx", signedTx);
     uiConsole("signature", signedTx);
     return { signature: signedTx };
   } catch (error) {
@@ -108,7 +109,8 @@ export const signMessage = async (provider: IProvider, uiConsole: any) => {
     const solWeb3 = new SolanaWallet(provider);
     const msg = Buffer.from("Test Signing Message ", "utf8");
     const res = await solWeb3.signMessage(new Uint8Array(msg));
-    uiConsole(res);
+    const parsedResult = base58.encode(res);
+    uiConsole("solana signed message", parsedResult);
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);

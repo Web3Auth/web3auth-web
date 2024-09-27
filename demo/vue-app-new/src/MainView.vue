@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
+import {
+  AccountAbstractionProvider,
+  // BiconomySmartAccount,
+  ISmartAccount,
+  KernelSmartAccount,
+  // LightSmartAccount,
+  SafeSmartAccount,
+  // SimpleSmartAccount,
+  // TrustSmartAccount,
+} from "@web3auth/account-abstraction-provider";
+import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
@@ -17,7 +27,7 @@ import { computed, onBeforeMount, ref, watch } from "vue";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds } from "./config";
+import { chainConfigs, clientIds, getDefaultBundlerUrl } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
@@ -66,6 +76,51 @@ const privateKeyProvider = computed((): IBaseProvider<string> => {
   }
 });
 
+const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
+
+const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
+  const { useAccountAbstractionProvider } = formData;
+  if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
+
+  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+  // setup aa provider
+  let smartAccountInit: ISmartAccount;
+  switch (formData.smartAccountType) {
+    // case "biconomy":
+    //   smartAccountInit = new BiconomySmartAccount();
+    //   break;
+    case "kernel":
+      smartAccountInit = new KernelSmartAccount();
+      break;
+    // case "trust":
+    //   smartAccountInit = new TrustSmartAccount();
+    //   break;
+    // case "light":
+    //   smartAccountInit = new LightSmartAccount();
+    //   break;
+    // case "simple":
+    //   smartAccountInit = new SimpleSmartAccount();
+    //   break;
+    case "safe":
+    default:
+      smartAccountInit = new SafeSmartAccount();
+      break;
+  }
+
+  return new AccountAbstractionProvider({
+    config: {
+      chainConfig,
+      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
+      paymasterConfig: formData.paymasterUrl
+        ? {
+            url: formData.paymasterUrl,
+          }
+        : undefined,
+      smartAccountInit,
+    },
+  });
+});
+
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const {
@@ -76,6 +131,8 @@ const options = computed((): Web3AuthOptions => {
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
+    accountAbstractionProvider: accountAbstractionProvider.value,
+    useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;
@@ -142,6 +199,10 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
+        formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
+        formData.smartAccountType = json.smartAccountType;
+        formData.bundlerUrl = json.bundlerUrl;
+        formData.paymasterUrl = json.paymasterUrl;
       }
     } catch (error) {}
   }

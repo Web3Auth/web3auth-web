@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { recoverAddress, TypedDataEncoder, verifyMessage } from "ethers";
 import { useI18n } from "vue-i18n";
 
-import { getV4TypedData } from "../config";
-import { getAccounts, getBalance, getChainId, sendEth, signEthMessage, signTransaction } from "../services/ethHandlers";
-import { signAllTransactions, signAndSendTransaction, signMessage } from "../services/solHandlers";
+import {
+  getAccounts,
+  getBalance,
+  getChainId,
+  sendEth,
+  signEthMessage,
+  signPersonalMessage,
+  signTransaction as signEthTransaction,
+  signTypedMessage,
+} from "../services/ethHandlers";
+import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
-const { log } = console;
 
 const formData = formDataStore;
 
@@ -111,7 +116,7 @@ const onGetBalance = async () => {
 };
 
 const onSwitchChain = async () => {
-  log("switching chain");
+  log.info("switching chain");
   try {
     await switchChain({ chainId: "0x89" });
     printToConsole("switchedChain");
@@ -141,8 +146,12 @@ const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
 
-const onSignTransaction = async () => {
-  await signTransaction(provider.value as IProvider, printToConsole);
+const onSignEthTransaction = async () => {
+  await signEthTransaction(provider.value as IProvider, printToConsole);
+};
+
+const onSignSolTransaction = async () => {
+  await signSolTransaction(provider.value as IProvider, printToConsole);
 };
 
 const onSignMessage = async () => {
@@ -153,73 +162,28 @@ const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
 };
 
-const onSignTypedData_v4 = async () => {
+const authenticateUser = async () => {
   try {
-    printToConsole("Initiating sign typed data v4");
-
-    const chain = await getChainId(provider.value as IProvider, () => {});
-    const accounts = await getAccounts(provider.value as IProvider, () => {});
-    const typedData = getV4TypedData(chain as string);
-    let signTypedDataV4VerifyResult = "";
-    // const signedMessage = await ethersProvider?.send("eth_signTypedData_v4", [account.value, JSON.stringify(typedData)]);
-
-    const from = accounts?.[0];
-
-    const signedMessage = (await provider.value?.request({
-      method: METHOD_TYPES.ETH_SIGN_TYPED_DATA_V4,
-      params: [from, JSON.stringify(typedData)],
-    })) as string;
-
-    const msg = TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
-    const recoveredAddr = recoverAddress(msg, signedMessage);
-    if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
-      log(`Successfully verified signer as ${recoveredAddr}`);
-      signTypedDataV4VerifyResult = recoveredAddr;
-    } else {
-      throw new Error(`Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
-    }
-    printToConsole(`Success`, { signedMessage, verify: signTypedDataV4VerifyResult });
+    const idToken = await web3Auth.value?.authenticateUser();
+    printToConsole("idToken", idToken);
   } catch (error) {
-    log(error);
-    printToConsole("Failed", (error as Error).message);
+    log.error("authenticateUser error", error);
+    printToConsole("authenticateUser error", error);
   }
 };
 
+const onSignTypedData_v4 = async () => {
+  await signTypedMessage(provider.value as IProvider, printToConsole);
+};
+
 const onSignPersonalMsg = async () => {
-  try {
-    printToConsole("Initiating personal sign");
-    const message = "Example `personal_sign` messages";
-    const accounts = await getAccounts(provider.value as IProvider, () => {});
-    const from = accounts?.[0];
-    let personalSignVerifySigUtilResult = "";
-    // const signedMessage = await ethersProvider?.send("personal_sign", [message, account.value]);
-    const msg = `0x${Buffer.from(message, "utf8").toString("hex")}`;
-    const signedMessage = (await provider.value?.request({
-      method: METHOD_TYPES.PERSONAL_SIGN,
-      params: [msg, from, "Example password"],
-    })) as string;
-
-    // Verify
-    const recoveredAddr = verifyMessage(message, signedMessage);
-
-    if (recoveredAddr.toLowerCase() === from?.toLowerCase()) {
-      log(`SigUtil Successfully verified signer as ${recoveredAddr}`);
-      personalSignVerifySigUtilResult = recoveredAddr;
-    } else {
-      throw new Error(`SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
-    }
-
-    printToConsole(`Success`, { signedMessage, verify: personalSignVerifySigUtilResult });
-  } catch (error) {
-    log(error);
-    printToConsole("Failed", (error as Error).message);
-  }
+  await signPersonalMessage(provider.value as IProvider, printToConsole);
 };
 </script>
 
 <template>
   <div v-if="isDisplay('dashboard')" class="w-full h-full px-10">
-    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 h-full">
+    <div class="grid h-full grid-cols-1 md:grid-cols-4 lg:grid-cols-6">
       <Card class="px-4 py-4 gird col-span-1 lg:col-span-2 h-full !rounded-3xl md:!rounded-r-none !shadow-none">
         <div class="mb-2">
           <Button block size="xs" pill variant="tertiary" data-testid="btnClearConsole" @click="clearConsole">
@@ -231,8 +195,8 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
         </div>
-        <Card v-if="isDisplay('walletServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Wallet Service</div>
+        <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
           <Button block size="xs" pill class="mb-2" @click="showWalletUI">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
@@ -244,7 +208,7 @@ const onSignPersonalMsg = async () => {
           </Button>
         </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
             {{ t("app.buttons.btnGetAccounts") }}
           </Button>
@@ -252,6 +216,9 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
+            {{ t("app.buttons.btnSignTransaction") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}
@@ -262,28 +229,30 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
-        <Card v-if="isDisplay('solServices')" class="px-4 py-4 gap-4 h-auto mb-2" :shadow="false">
-          <div class="text-xl font-bold leading-tight text-left mb-2">Sample Transaction</div>
+        <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignTransaction">
+          <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
       </Card>
       <Card
         id="console"
         class="px-4 py-4 col-span-1 md:col-span-3 lg:col-span-4 overflow-y-auto h-full !rounded-3xl md:!rounded-l-none md:!border-l-0 !shadow-none"
       >
-        <pre class="whitespace-pre-line overflow-x-auto font-normal text-base leading-6 text-black break-words overflow-y-auto max-h-screen"></pre>
+        <pre class="max-h-screen overflow-x-auto overflow-y-auto text-base font-normal leading-6 text-black break-words whitespace-pre-line"></pre>
       </Card>
     </div>
   </div>

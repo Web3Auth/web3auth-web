@@ -1,7 +1,7 @@
 import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 
 import { ITorusWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
-import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
+import { IProviderHandlers } from "../../../rpc";
 
 export const getTorusHandlers = (injectedProvider: ITorusWalletProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {

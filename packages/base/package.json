@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "9.0.2",
+  "version": "9.2.0-alpha.0",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -20,7 +20,7 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^6.1.2",
+    "@toruslabs/base-controllers": "^6.1.4",
     "@toruslabs/constants": "^14.0.0",
     "@toruslabs/http-helpers": "^7.0.0",
     "@web3auth/auth": "^9.3.3",

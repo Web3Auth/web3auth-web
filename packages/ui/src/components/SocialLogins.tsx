@@ -68,6 +68,8 @@ export default function SocialLogins(props: SocialLoginProps) {
     LOGIN_PROVIDER.JWT,
     LOGIN_PROVIDER.SMS_PASSWORDLESS,
     LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
+    LOGIN_PROVIDER.AUTHENTICATOR,
+    LOGIN_PROVIDER.PASSKEYS,
   ];
 
   return (

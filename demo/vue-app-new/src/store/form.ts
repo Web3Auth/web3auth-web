@@ -21,4 +21,6 @@ export const formDataStore = reactive<FormData>({
     logoLight: "",
     logoDark: "",
   },
+  useAccountAbstractionProvider: false,
+  useAAWithExternalWallet: true,
 });

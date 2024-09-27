@@ -15,6 +15,13 @@
       "logoLight": "Logo Light",
       "logoDark": "Logo Dark"
     },
+    "accountAbstractionProvider": {
+      "title": "Account Abstraction Provider",
+      "smartAccountType": "Smart Account Type",
+      "bundlerUrl": "Bundler Url",
+      "paymasterUrl": "Paymaster Url",
+      "useAAWithExternalWallet": "Use Account Abstraction Provider with external wallet"
+    },
     "whiteLabel": {
       "title": "Enable White Label",
       "appName": "App Name",

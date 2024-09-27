@@ -1,18 +1,7 @@
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
 
 import { TransactionOrVersionedTransaction } from "../interface";
-
-export interface IProviderHandlers {
-  requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
-  getPublicKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  getPrivateKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signTransaction: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>) => Promise<TransactionOrVersionedTransaction>;
-  signAllTransactions: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>) => Promise<TransactionOrVersionedTransaction[]>;
-  signAndSendTransaction: (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>) => Promise<{ signature: string }>;
-  getSecretKey: (req: JRPCRequest<unknown>) => Promise<string>;
-  signMessage: (req: JRPCRequest<{ message: Uint8Array; display?: string }>) => Promise<Uint8Array>;
-}
+import { AddSolanaChainParameter, IChainSwitchHandlers, IProviderHandlers } from "./interfaces";
 
 export function createGetAccountsMiddleware({ getAccounts }: { getAccounts: IProviderHandlers["getAccounts"] }): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware(async (request, response, next) => {
@@ -110,23 +99,7 @@ export function createSolanaMiddleware(providerHandlers: IProviderHandlers): JRP
     createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey) as JRPCMiddleware<unknown, unknown>,
   ]);
 }
-export interface AddSolanaChainParameter {
-  chainId: string; // A 0x-prefixed hexadecimal string
-  chainName: string;
-  nativeCurrency: {
-    name: string;
-    symbol: string; // 2-6 characters long
-    decimals: 18;
-  };
-  rpcUrls: string[];
-  blockExplorerUrls?: string[];
-  iconUrls?: string[];
-}
 
-export interface IChainSwitchHandlers {
-  addNewChainConfig: (req: JRPCRequest<AddSolanaChainParameter>) => Promise<void>;
-  switchSolanaChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
-}
 export function createChainSwitchMiddleware({ addNewChainConfig, switchSolanaChain }: IChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   return mergeMiddleware([
     createGenericJRPCMiddleware<AddSolanaChainParameter, void>("addSolanaChain", addNewChainConfig) as JRPCMiddleware<unknown, unknown>,

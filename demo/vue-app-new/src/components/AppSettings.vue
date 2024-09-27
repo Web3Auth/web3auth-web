@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
-import { chainConfigs, chainNamespaceOptions, languageOptions, loginProviderOptions, networkOptions } from "../config";
+import { chainConfigs, chainNamespaceOptions, languageOptions, loginProviderOptions, networkOptions, SmartAccountOptions } from "../config";
 import { formDataStore } from "../store/form";
 
 const formData = formDataStore;
@@ -29,6 +29,7 @@ const adapterOptions = computed(() =>
       ]
     : [
         { name: "torus-solana-adapter", value: "torus-solana" },
+        { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
         { name: "injected-adapters", value: "injected-solana" },
       ]
 );
@@ -48,6 +49,15 @@ const isDisabled = (name: string): boolean => {
     case "btnConnect":
       return !isInitialized.value;
 
+    case "smartAccountType":
+    case "bundlerUrl":
+    case "paymasterUrl":
+    case "useAAWithExternalWallet":
+      return !formData.useAccountAbstractionProvider;
+
+    case "accountAbstraction":
+      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+
     default: {
       return false;
     }
@@ -59,15 +69,23 @@ const onTabChange = (index: number) => {
   activeTab.value = index;
 };
 const isActiveTab = (index: number) => activeTab.value === index;
+
+const onChainNamespaceChange = (value: string) => {
+  log.info("onChainNamespaceChange", value);
+  formData.chain = chainConfigs[value as ChainNamespaceType][0].chainId;
+  formData.adapters = [];
+};
 </script>
 
 <template>
   <div v-if="isDisplay('form')" class="grid grid-cols-8 gap-0">
     <div class="col-span-0 sm:col-span-1 lg:col-span-2"></div>
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
-      <div class="text-2xl sm:text-3xl font-bold leading-tight text-center">{{ $t("app.greeting") }}</div>
-      <div class="leading-tight font-extrabold text-center my-4">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === 'ready' }]">{{ status }}</Tag>
+      <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
+      <div class="my-4 font-extrabold leading-tight text-center">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === ADAPTER_STATUS.READY }]">
+          {{ status }}
+        </Tag>
         &nbsp;
         <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': isInitialized }]">
           {{ isInitialized ? "INITIALIZED" : "NOT_INITIALIZE_YET" }}
@@ -77,9 +95,14 @@ const isActiveTab = (index: number) => activeTab.value === index;
         <Tab variant="underline" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
-        <Tab variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">Wallet Plugin</Tab>
+        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">
+          Wallet Plugin
+        </Tab>
+        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
+          Account Abstraction Provider
+        </Tab>
       </Tabs>
-      <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
+      <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select
           v-model="formData.network"
           data-testid="selectNetwork"
@@ -95,6 +118,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :aria-label="$t('app.chainNamespace')"
           :placeholder="$t('app.chainNamespace')"
           :options="chainNamespaceOptions"
+          @update:model-value="onChainNamespaceChange"
         />
         <Select
           v-model="formData.chain"
@@ -115,7 +139,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           :show-check-box="true"
         />
       </Card>
-      <Card v-if="isActiveTab(1)" class="grid grid-cols-1 sm:grid-cols-2 gap-2 py-4 px-4" :shadow="false">
+      <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">
         <Toggle
           v-model="formData.whiteLabel.enable"
           data-testid="whitelabel"
@@ -217,7 +241,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           </template>
         </TextField>
       </Card>
-      <Card v-if="isActiveTab(2)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
+      <Card v-if="isActiveTab(2)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Select
           v-model="formData.loginProviders"
           data-testid="selectLoginProviders"
@@ -228,7 +252,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           multiple
           class=""
         />
-        <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="px-4 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-3">
           <div class="font-bold leading-tight text-left sm:col-span-2">{{ p }}</div>
           <Toggle
             v-model="formData.loginMethods[p].mainOption"
@@ -291,7 +315,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
           />
         </Card>
       </Card>
-      <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 py-4 px-4" :shadow="false">
+      <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Toggle
           v-model="formData.walletPlugin.enable"
           :disabled="isDisabled('walletServicePlugin')"
@@ -318,6 +342,50 @@ const isActiveTab = (index: number) => activeTab.value === index;
           class="sm:col-span-2"
         />
       </Card>
+      <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
+        <Toggle
+          v-model="formData.useAccountAbstractionProvider"
+          data-testid="accountAbstractionProvider"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.accountAbstractionProvider.title')"
+          :label-enabled="$t('app.accountAbstractionProvider.title')"
+          class="my-2"
+        />
+        <Toggle
+          v-model="formData.useAAWithExternalWallet"
+          data-testid="useAAWithExternalWallet"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.accountAbstractionProvider.useAAWithExternalWallet')"
+          :label-enabled="$t('app.accountAbstractionProvider.useAAWithExternalWallet')"
+          class="my-2"
+          :disabled="isDisabled('useAAWithExternalWallet')"
+        />
+        <Select
+          v-model="formData.smartAccountType"
+          data-testid="smartAccountType"
+          :label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :aria-label="$t('app.accountAbstractionProvider.smartAccountType')"
+          :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
+          :options="SmartAccountOptions"
+          :disabled="isDisabled('smartAccountType')"
+        />
+        <TextField
+          v-model="formData.bundlerUrl"
+          :label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
+          :disabled="isDisabled('bundlerUrl')"
+        />
+        <TextField
+          v-model="formData.paymasterUrl"
+          :label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
+          :disabled="isDisabled('paymasterUrl')"
+        />
+      </Card>
       <div class="flex justify-center mt-5">
         <Button
           :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
@@ -332,11 +400,11 @@ const isActiveTab = (index: number) => activeTab.value === index;
           Connect
         </Button>
       </div>
-      <div class="text-sm text-app-gray-900 dark:text-app-gray-200 font-normal mt-4 mb-5 px-0">
+      <div class="px-0 mt-4 mb-5 text-sm font-normal text-app-gray-900 dark:text-app-gray-200">
         Reach out to us at
-        <a class="text-app-primary-600 dark:text-app-primary-500 underline" href="mailto:hello@tor.us">hello@tor.us</a>
+        <a class="underline text-app-primary-600 dark:text-app-primary-500" href="mailto:hello@tor.us">hello@tor.us</a>
         or
-        <a class="text-app-primary-600 dark:text-app-primary-500 underline" href="https://t.me/torusdev">telegram group</a>
+        <a class="underline text-app-primary-600 dark:text-app-primary-500" href="https://t.me/torusdev">telegram group</a>
         .
       </div>
     </Card>

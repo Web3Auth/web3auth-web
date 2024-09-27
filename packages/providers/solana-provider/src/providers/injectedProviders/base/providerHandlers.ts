@@ -2,7 +2,7 @@ import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 import bs58 from "bs58";
 
 import { IBaseWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
-import { IProviderHandlers } from "../../../rpc/solanaRpcMiddlewares";
+import { IProviderHandlers } from "../../../rpc";
 
 export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): IProviderHandlers => {
   const providerHandlers: IProviderHandlers = {

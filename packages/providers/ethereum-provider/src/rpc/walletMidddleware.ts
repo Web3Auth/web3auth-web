@@ -50,11 +50,6 @@ export function createWalletMiddleware({
     res.result = await getAccounts(req);
   }
 
-  async function lookupDefaultAccount(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    const accounts = await getAccounts(req);
-    res.result = accounts[0] || null;
-  }
-
   //
   // transaction signatures
   //
@@ -192,7 +187,6 @@ export function createWalletMiddleware({
     eth_public_key: createAsyncMiddleware(fetchPublicKey),
     public_key: createAsyncMiddleware(fetchPublicKey),
     private_key: createAsyncMiddleware(fetchPrivateKey),
-    eth_coinbase: createAsyncMiddleware(lookupDefaultAccount),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),
     eth_signTransaction: createAsyncMiddleware(signTransaction),

@@ -1,5 +1,5 @@
 import { IWalletStandardProviderHandler } from "../../interface";
-import { IProviderHandlers } from "../../rpc/solanaRpcMiddlewares";
+import { IProviderHandlers } from "../../rpc";
 import { BaseInjectedProvider } from "./base/baseInjectedProvider";
 import { getBaseProviderHandlers } from "./base/providerHandlers";
 
