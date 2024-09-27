@@ -154,7 +154,6 @@ export function getProviderHandlers({
             data,
           },
         ],
-        paymaster: true,
       });
       const signature = await smartAccount.signUserOperation({
         callData: request.callData,
