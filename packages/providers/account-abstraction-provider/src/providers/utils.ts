@@ -96,7 +96,8 @@ export function getProviderHandlers({
         calls: [
           {
             to,
-            value,
+            // Explicit conversation required to avoid value being passed as hex
+            value: BigInt(value),
             data,
           },
         ],
@@ -150,7 +151,7 @@ export function getProviderHandlers({
         calls: [
           {
             to,
-            value,
+            value: BigInt(value),
             data,
           },
         ],
