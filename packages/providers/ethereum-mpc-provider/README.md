@@ -33,30 +33,31 @@ npm install --save @web3auth/ethereum-mpc-provider
 ## 🩹 Example
 
 ```ts
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-mpc-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
-const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
-  const web3 = new Web3(provider as any);
-  const accounts = await web3.eth.getAccounts();
-  // hex message
-  const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-  const signature = await web3.eth.sign(message, accounts[0]);
-  return signature;
+import { Web3AuthMPCCoreKit, WEB3AUTH_NETWORK, makeEthereumSigner } from "@web3auth/mpc-core-kit";
+import { EthereumSigningProvider } from '@web3auth/ethereum-mpc-provider';
+import { CHAIN_NAMESPACES } from "@web3auth/base";
+
+const chainConfig = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  chainId: "0x1", // Please use 0x1 for Mainnet
+  rpcTarget: "https://rpc.ankr.com/eth",
+  displayName: "Ethereum Mainnet",
+  blockExplorer: "https://etherscan.io/",
+  ticker: "ETH",
+  tickerName: "Ethereum",
 };
 
-(async () => {
-  const provider = await EthereumPrivateKeyProvider.getProviderInstance({
-    chainConfig: {
-      rpcTarget: "https://polygon-rpc.com",
-      chainId: "0x89", // hex chain id
-      networkName: "matic",
-      ticker: "matic",
-      tickerName: "matic",
-    },
-    privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
-  });
-  const signedMessage = await signEthMessage(provider);
-})();
+const coreKitInstance = new Web3AuthMPCCoreKit({
+  web3AuthClientId: "YOUR_WEB3AUTH_CLIENT_ID",
+  web3AuthNetwork: WEB3AUTH_NETWORK.MAINNET,
+  storage: window.localStorage,
+  manualSync: true, // This is the recommended approach
+  tssLib: tssLib
+});
+
+// Setup provider for EVM Chain
+const evmProvider = new EthereumSigningProvider({ config: { chainConfig } });
+evmProvider.setupProvider(makeEthereumSigner(coreKitInstance));
 ```
 
 Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
