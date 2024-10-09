@@ -1,4 +1,4 @@
-import CoinbaseWalletSDK, { AppMetadata, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+import { AppMetadata, CoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
