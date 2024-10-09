@@ -36,15 +36,17 @@ import config from "../config";
 import EthRpc from "../rpc/ethRpc.vue";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const polygonMumbaiConfig: any = {
+const polygonAmoyConfig: any = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  rpcTarget: "https://rpc-mumbai.maticvigil.com",
-  blockExplorerUrl: "https://mumbai-explorer.matic.today",
+  chainId: "0x13882", // hex of 80002, polygon testnet
+  rpcTarget: "https://rpc.ankr.com/polygon_amoy",
+  // Avoid using public rpcTarget in production.
+  // Use services like Infura, Quicknode etc
+  displayName: "Polygon Amoy Testnet",
+  blockExplorerUrl: "https://amoy.polygonscan.com/",
   logo: "https://cryptologos.cc/logos/polygon-matic-logo.png",
-  chainId: "0x13881",
-  displayName: "Polygon Mumbai Testnet",
-  ticker: "matic",
-  tickerName: "matic",
+  ticker: "POL",
+  tickerName: "Polygon Ecosystem Token",
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,9 +61,9 @@ const ethereumChainConfig: any = {
 };
 
 const polygonWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: polygonMumbaiConfig,
+  chainConfig: polygonAmoyConfig,
   clientId: config.clientId.testnet,
-  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonMumbaiConfig } }),
+  privateKeyProvider: new EthereumPrivateKeyProvider({ config: { chainConfig: polygonAmoyConfig } }),
   enableLogging: true,
 };
 

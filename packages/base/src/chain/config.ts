@@ -60,8 +60,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       rpcTarget: "https://rpc.ankr.com/polygon",
       displayName: "Polygon Mainnet",
       blockExplorerUrl: "https://polygonscan.com",
-      ticker: "MATIC",
-      tickerName: "Polygon",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
     };
   }
   if (chainId === 80002) {
@@ -72,8 +72,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       rpcTarget: "https://rpc.ankr.com/polygon_amoy",
       displayName: "Polygon Amoy Testnet",
       blockExplorerUrl: "https://www.oklink.com/amoy",
-      ticker: "MATIC",
-      tickerName: "Polygon",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
       decimals: 18,
     };
   }
