@@ -7,8 +7,6 @@ import { TypedDataEncoder } from "ethers";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
 
-import { PaymasterConfig } from "./types";
-
 type PollOptions<data> = {
   // Whether or not to emit when the polling starts.
   emitOnBegin?: boolean | undefined;
@@ -56,13 +54,11 @@ export function getProviderHandlers({
   smartAccount,
   chain,
   eoaProvider,
-  paymasterConfig,
 }: {
   smartAccount: SmartAccount;
   bundlerClient: BundlerClient;
   chain: Chain;
   eoaProvider: IProvider;
-  paymasterConfig?: PaymasterConfig;
 }): IProviderHandlers {
   const walletClient = createWalletClient({
     account: smartAccount,
@@ -105,7 +101,6 @@ export function getProviderHandlers({
             data,
           },
         ],
-        paymasterContext: paymasterConfig?.paymasterContext,
         // should not use maxFeePerGas/maxPriorityFeePerGas from transaction params since that's fee for transaction not user operation and let bundler handle it instead
       };
       // @ts-expect-error viem types are too deep
