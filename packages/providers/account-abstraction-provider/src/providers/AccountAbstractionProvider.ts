@@ -124,6 +124,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       smartAccount: this._smartAccount,
       chain,
       eoaProvider,
+      paymasterConfig: this.config.paymasterConfig,
     });
 
     // setup rpc engine and AA middleware

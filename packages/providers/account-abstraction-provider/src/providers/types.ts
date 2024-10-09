@@ -8,4 +8,5 @@ export type BundlerConfig = {
 export type PaymasterConfig = {
   url: string;
 } & Pick<Parameters<typeof createPaymasterClient>[0], "key" | "name" | "pollingInterval" | "rpcSchema" | "cacheTime"> &
-  Partial<Pick<Parameters<typeof createPaymasterClient>[0], "transport">>;
+  Partial<Pick<Parameters<typeof createPaymasterClient>[0], "transport">> &
+  Partial<Pick<Parameters<typeof createBundlerClient>[0], "paymasterContext">>;
