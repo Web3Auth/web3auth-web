@@ -141,6 +141,18 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       decimals: 18,
     };
   }
+  if (chainId === 1946) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      chainId: "0x79a",
+      rpcTarget: "https://rpc.minato.soneium.org",
+      displayName: "Soneium Minato Testnet",
+      blockExplorerUrl: "https://explorer-testnet.soneium.org",
+      ticker: "ETH",
+      tickerName: "ETH",
+      logo: "https://cryptologos.cc/logos/soneium-logo.png",
+    };
+  }
 
   return null;
 };
