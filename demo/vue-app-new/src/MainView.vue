@@ -196,6 +196,7 @@ onBeforeMount(() => {
         formData.chain = json.chain;
         formData.chainNamespace = json.chainNamespace;
         formData.loginProviders = json.loginProviders;
+        formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
@@ -232,6 +233,7 @@ const configs = computed(() => {
     web3AuthOptions: options.value,
     plugins: walletPlugins.value,
     modalConfig: modalParams.value,
+    hideWalletDiscovery: !formData.showWalletDiscovery,
   };
 });
 </script>
