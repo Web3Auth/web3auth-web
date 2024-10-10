@@ -1,3 +1,4 @@
+import type { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { AuthAdapter, AuthOptions, getAuthDefaultOptions, LOGIN_PROVIDER, LoginConfig } from "@web3auth/auth-adapter";
 import {
   ADAPTER_CATEGORY,
@@ -75,7 +76,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
-      projectConfig = await fetchProjectConfig(this.options.clientId, this.options.web3AuthNetwork);
+      projectConfig = await fetchProjectConfig(
+        this.options.clientId,
+        this.options.web3AuthNetwork,
+        (this.options.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name
+      );
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);

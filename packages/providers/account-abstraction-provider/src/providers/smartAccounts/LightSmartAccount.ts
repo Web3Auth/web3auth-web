@@ -3,11 +3,14 @@ import { toLightSmartAccount, ToLightSmartAccountParameters } from "permissionle
 import { Client, EIP1193Provider } from "viem";
 import { entryPoint07Address, SmartAccount } from "viem/account-abstraction";
 
+import { SMART_ACCOUNT } from "./constants";
 import { ISmartAccount } from "./types";
 
 type LightSmartAccountConfig = Omit<ToLightSmartAccountParameters, "owner" | "client" | "index" | "address" | "nonceKey">;
 
 export class LightSmartAccount implements ISmartAccount {
+  readonly name: string = SMART_ACCOUNT.LIGHT;
+
   private options: LightSmartAccountConfig;
 
   constructor(options?: LightSmartAccountConfig) {

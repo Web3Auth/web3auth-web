@@ -3,6 +3,7 @@ import { toTrustSmartAccount } from "permissionless/accounts";
 import { Client, EIP1193Provider } from "viem";
 import { entryPoint06Address, SmartAccount } from "viem/account-abstraction";
 
+import { SMART_ACCOUNT } from "./constants";
 import { ISmartAccount } from "./types";
 
 type TrustSmartAccountParameters = Parameters<typeof toTrustSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
@@ -10,6 +11,8 @@ type TrustSmartAccountParameters = Parameters<typeof toTrustSmartAccount>[0]; //
 type TrustSmartAccountConfig = Omit<TrustSmartAccountParameters, "owner" | "client" | "address" | "nonceKey" | "index">;
 
 export class TrustSmartAccount implements ISmartAccount {
+  readonly name: string = SMART_ACCOUNT.TRUST;
+
   private options: TrustSmartAccountConfig;
 
   constructor(options?: TrustSmartAccountConfig) {

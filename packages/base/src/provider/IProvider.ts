@@ -11,3 +11,7 @@ export const PROVIDER_EVENTS = {
   INITIALIZED: "initialized",
   ERRORED: "errored",
 };
+
+export interface IBaseSmartAccount {
+  name: string;
+}
