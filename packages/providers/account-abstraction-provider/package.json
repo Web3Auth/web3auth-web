@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/account-abstraction-provider",
-  "version": "9.2.0-alpha.7",
+  "version": "9.2.0-alpha.8",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "main": "dist/lib.cjs/index.js",
@@ -23,9 +23,9 @@
     "@ethereumjs/util": "^9.1.0",
     "@toruslabs/base-controllers": "^6.2.1",
     "@web3auth/auth": "^9.4.1",
-    "@web3auth/base": "^9.2.0-alpha.7",
-    "@web3auth/base-provider": "^9.2.0-alpha.7",
-    "@web3auth/ethereum-provider": "^9.2.0-alpha.7",
+    "@web3auth/base": "^9.2.0-alpha.8",
+    "@web3auth/base-provider": "^9.2.0-alpha.8",
+    "@web3auth/ethereum-provider": "^9.2.0-alpha.8",
     "ethers": "^6.13.3",
     "permissionless": "^0.2.7",
     "viem": "^2.21.19"
