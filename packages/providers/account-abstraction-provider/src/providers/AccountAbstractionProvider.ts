@@ -107,16 +107,16 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     // setup bundler and paymaster
     if (this.config.paymasterConfig) {
       this._paymasterClient = createPaymasterClient({
-        transport: http(this.config.paymasterConfig.url),
         ...this.config.paymasterConfig,
+        transport: this.config.paymasterConfig.transport ?? http(this.config.paymasterConfig.url),
       });
     }
     this._bundlerClient = createBundlerClient({
+      ...this.config.bundlerConfig,
       account: this.smartAccount,
       client: this._publicClient,
-      transport: http(this.config.bundlerConfig.url),
+      transport: this.config.bundlerConfig.transport ?? http(this.config.bundlerConfig.url),
       paymaster: this._paymasterClient,
-      ...this.config.bundlerConfig,
     });
 
     const providerHandlers = getProviderHandlers({
