@@ -3,7 +3,7 @@ import { toSafeSmartAccount } from "permissionless/accounts";
 import { Client, EIP1193Provider } from "viem";
 import { entryPoint07Address, SmartAccount } from "viem/account-abstraction";
 
-import { SMART_ACCOUNT_TYPE } from "./constants";
+import { SMART_ACCOUNT } from "./constants";
 import { ISmartAccount } from "./types";
 
 type SafeSmartAccountParameters = Parameters<typeof toSafeSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
@@ -14,7 +14,7 @@ type SafeSmartAccountConfig = Omit<
 >;
 
 export class SafeSmartAccount implements ISmartAccount {
-  readonly name: string = SMART_ACCOUNT_TYPE.SAFE;
+  readonly name: string = SMART_ACCOUNT.SAFE;
 
   private options: SafeSmartAccountConfig;
 

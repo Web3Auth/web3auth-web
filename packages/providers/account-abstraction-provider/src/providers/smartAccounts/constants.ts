@@ -1,4 +1,4 @@
-export const SMART_ACCOUNT_TYPE = {
+export const SMART_ACCOUNT = {
   BICONOMY: "biconomy",
   KERNAL: "kernal",
   LIGHT: "light",
