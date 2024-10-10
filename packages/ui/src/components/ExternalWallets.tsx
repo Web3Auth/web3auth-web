@@ -52,8 +52,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
   const [t] = useTranslation(undefined, { i18n });
 
   const walletDiscoverySupported = useMemo(() => {
-    // console.log("config", config);
-    const supported = walletRegistry && Object.keys(walletRegistry).length > 0;
+    const supported = walletRegistry && Object.keys(walletRegistry.default).length > 0 && Object.keys(walletRegistry.others).length > 0;
     return supported;
   }, [walletRegistry]);
 

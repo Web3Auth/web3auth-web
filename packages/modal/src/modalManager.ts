@@ -36,7 +36,7 @@ import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import deepmerge from "deepmerge";
 
 import { defaultOtherModalConfig, walletRegistryUrl } from "./config";
-import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig } from "./interface";
+import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig, ModalConfigParams } from "./interface";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -70,7 +70,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.modalConfig = modalConfig;
   }
 
-  public async initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void> {
+  public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
@@ -87,10 +87,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    try {
-      walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
-    } catch (e) {
-      log.error("Failed to fetch wallet registry", e);
+    if (!params?.hideWalletDiscovery) {
+      try {
+        walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
+      } catch (e) {
+        log.error("Failed to fetch wallet registry", e);
+      }
     }
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
@@ -337,6 +339,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
+      // if wallet connect adapter is available but hideWalletDiscovery is true then don't consider it as external wallet
+      if (adapterName !== WALLET_ADAPTERS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
       return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
