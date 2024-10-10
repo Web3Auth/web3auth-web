@@ -340,7 +340,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     const hasExternalWallets = allAdapters.some((adapterName) => {
       // if wallet connect adapter is available but hideWalletDiscovery is true then don't consider it as external wallet
-      if (adapterName !== WALLET_ADAPTERS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
+      if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
       return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
