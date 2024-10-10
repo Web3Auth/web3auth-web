@@ -11,7 +11,7 @@ type KernelSmartAccountParameters = Parameters<typeof toEcdsaKernelSmartAccount>
 type KernelSmartAccountConfig = Omit<KernelSmartAccountParameters, "owners" | "client" | "address" | "nonceKey" | "index">;
 
 export class KernelSmartAccount implements ISmartAccount {
-  readonly name: string = SMART_ACCOUNT.KERNAL;
+  readonly name: string = SMART_ACCOUNT.KERNEL;
 
   private options: KernelSmartAccountConfig;
 
