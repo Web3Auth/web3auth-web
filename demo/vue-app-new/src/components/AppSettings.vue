@@ -138,6 +138,15 @@ const onChainNamespaceChange = (value: string) => {
           multiple
           :show-check-box="true"
         />
+        <Toggle
+          v-model="formData.showWalletDiscovery"
+          data-testid="showWalletDiscovery"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.showWalletDiscovery')"
+          :label-enabled="$t('app.showWalletDiscovery')"
+          class="mb-2"
+        />
       </Card>
       <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">
         <Toggle

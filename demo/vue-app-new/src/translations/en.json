@@ -8,6 +8,7 @@
     "chain": "Chain",
     "loginProviders": "Login provider",
     "adapters": "Adapters",
+    "showWalletDiscovery": "Show Wallet Discovery",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
     "walletPlugin": {
