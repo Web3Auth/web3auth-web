@@ -92,13 +92,13 @@ export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
 export const fetchProjectConfig = async (
   clientId: string,
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE,
-  aaProviderEnabled: boolean
+  aaProvider?: string
 ): Promise<PROJECT_CONFIG_RESPONSE> => {
   const url = new URL(`${signerHost(web3AuthNetwork)}/api/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   url.searchParams.append("whitelist", "true");
-  if (aaProviderEnabled) url.searchParams.append("aa_provider", "true");
+  if (aaProvider) url.searchParams.append("aa_provider", aaProvider);
   const res = await get<PROJECT_CONFIG_RESPONSE>(url.href);
   return res;
 };

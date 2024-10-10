@@ -3,11 +3,14 @@ import { toBiconomySmartAccount, ToBiconomySmartAccountParameters } from "permis
 import { Client, EIP1193Provider } from "viem";
 import { entryPoint06Address, SmartAccount } from "viem/account-abstraction";
 
+import { SMART_ACCOUNT_TYPE } from "./constants";
 import { ISmartAccount } from "./types";
 
 type BiconomySmartAccountConfig = Pick<ToBiconomySmartAccountParameters, "entryPoint" | "ecdsaModuleAddress" | "factoryAddress">;
 
 export class BiconomySmartAccount implements ISmartAccount {
+  readonly name: string = SMART_ACCOUNT_TYPE.BICONOMY;
+
   private options: BiconomySmartAccountConfig;
 
   constructor(options?: BiconomySmartAccountConfig) {

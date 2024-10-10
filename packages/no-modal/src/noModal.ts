@@ -1,3 +1,4 @@
+import type { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@web3auth/auth-adapter";
 import {
@@ -100,7 +101,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       projectConfig = await fetchProjectConfig(
         this.coreOptions.clientId,
         this.coreOptions.web3AuthNetwork,
-        !!this.coreOptions.accountAbstractionProvider
+        (this.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name
       );
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
