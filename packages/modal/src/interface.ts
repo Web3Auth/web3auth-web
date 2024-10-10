@@ -8,7 +8,12 @@ export interface AdaptersModalConfig {
   adapters?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
 }
 
+export interface ModalConfigParams {
+  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  hideWalletDiscovery?: boolean;
+}
+
 export interface IWeb3AuthModal extends IWeb3Auth {
-  initModal(params?: { modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig> }): Promise<void>;
+  initModal(params?: ModalConfigParams): Promise<void>;
   connect(): Promise<IProvider | null>;
 }

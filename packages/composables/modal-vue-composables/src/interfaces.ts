@@ -6,6 +6,7 @@ import { Ref, ShallowRef } from "vue";
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
   modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  hideWalletDiscovery?: boolean;
   adapters?: IAdapter<unknown>[];
   plugins?: IPlugin[];
 };

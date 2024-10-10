@@ -158,6 +158,7 @@ export type FormData = {
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
+  showWalletDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
