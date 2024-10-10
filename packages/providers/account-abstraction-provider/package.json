@@ -27,7 +27,7 @@
     "@web3auth/base-provider": "^9.2.0-alpha.7",
     "@web3auth/ethereum-provider": "^9.2.0-alpha.7",
     "ethers": "^6.13.3",
-    "permissionless": "^0.2.6",
+    "permissionless": "^0.2.7",
     "viem": "^2.21.19"
   },
   "peerDependencies": {
