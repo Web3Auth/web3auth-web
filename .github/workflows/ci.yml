@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node: ["21.x"]
+        node: ["22.x"]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -42,7 +42,7 @@ jobs:
           cd demo/vue-app-new
           npm install
           npm run build
-        env: 
+        env:
           VITE_SOLANA_MAINNET_RPC: ${{ secrets.VITE_SOLANA_MAINNET_RPC }}
           VITE_APP_PIMLICO_API_KEY: ${{ secrets.PIMLICO_API_KEY }}
 
