@@ -74,6 +74,15 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
     try {
       await this.injectedProvider?.request({ method: "eth_requestAccounts" });
+      // switch chain if not connected to the right chain
+      if (this.injectedProvider.chainId !== this.chainConfig.chainId) {
+        try {
+          await this.switchChain(this.chainConfig, true);
+        } catch (error) {
+          await this.addChain(this.chainConfig, true);
+          await this.switchChain(this.chainConfig, true);
+        }
+      }
       this.status = ADAPTER_STATUS.CONNECTED;
       const disconnectHandler = () => {
         // ready to be connected again
