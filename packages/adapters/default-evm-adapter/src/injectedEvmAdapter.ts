@@ -70,10 +70,11 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
   async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
+    if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
     try {
-      await this.injectedProvider?.request({ method: "eth_requestAccounts" });
+      await this.injectedProvider.request({ method: "eth_requestAccounts" });
       // switch chain if not connected to the right chain
       if (this.injectedProvider.chainId !== this.chainConfig.chainId) {
         try {
@@ -85,14 +86,14 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       const chainDisconnectHandler = () => {
-        this.disconnect();
-        this.injectedProvider?.removeListener("disconnect", chainDisconnectHandler);
+        super.disconnect();
+        if (this.injectedProvider.removeListener) this.injectedProvider.removeListener("disconnect", chainDisconnectHandler);
       };
       this.injectedProvider.on("disconnect", chainDisconnectHandler);
       const accountDisconnectHandler = (accounts: string[]) => {
         if (accounts.length === 0) {
-          this.disconnect();
-          this.injectedProvider?.removeListener("accountsChanged", accountDisconnectHandler);
+          super.disconnect();
+          if (this.injectedProvider.removeListener) this.injectedProvider.removeListener("accountsChanged", accountDisconnectHandler);
         }
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
