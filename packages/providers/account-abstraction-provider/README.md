@@ -1,8 +1,7 @@
 # Web3Auth Account Abstraction Provider
 
-[![npm version](https://img.shields.io/npm/v/@web3auth-mpc/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/ethereum-provider/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/ethereum-provider@latest)
-
+![npm version](https://img.shields.io/npm/v/@web3auth/account-abstraction-provider.svg)
+![minzip](https://badgen.net/bundlephobia/minzip/@web3auth/account-abstraction-provider@latest)
 
 Web3Auth Account Abstraction Provider provides the native account abstraction for your application. This package can be used to generate the ERC 4337 compatible smart account for your application, and provides the necessary methods to interact with the smart account.
 
@@ -11,6 +10,7 @@ Web3Auth Account Abstraction Provider provides the native account abstraction fo
 Read more about Web3Auth Account Abstraction Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/pnp/web/providers/aa-provider).
 
 ## 💡 Features
+
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
@@ -54,15 +54,14 @@ const accountAbstractionProvider = new AccountAbstractionProvider({
     smartAccountInit: new SafeSmartAccount(),
     paymasterConfig: {
       url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
-    }
-  }
+    },
+  },
 });
 
 // Use this provider with your preferred Web3Auth Web SDK
 ```
 
 Checkout the examples for your preferred Web3Auth Web SDK in our [examples repository](https://github.com/Web3Auth/examples/)
-
 
 ## 💬 Troubleshooting and Support
 
