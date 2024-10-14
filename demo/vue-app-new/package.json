@@ -12,7 +12,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.95.3",
     "@toruslabs/constants": "^14.0.0",
-    "@toruslabs/ethereum-controllers": "^6.2.1",
+    "@toruslabs/ethereum-controllers": "^6.2.2",
     "@toruslabs/vue-components": "^7.8.4",
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/account-abstraction-provider": "file:../../packages/providers/account-abstraction-provider",
