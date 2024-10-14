@@ -86,13 +86,13 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       const chainDisconnectHandler = () => {
-        super.disconnect();
+        this.disconnect();
         if (this.injectedProvider.removeListener) this.injectedProvider.removeListener("disconnect", chainDisconnectHandler);
       };
       this.injectedProvider.on("disconnect", chainDisconnectHandler);
       const accountDisconnectHandler = (accounts: string[]) => {
         if (accounts.length === 0) {
-          super.disconnect();
+          this.disconnect();
           if (this.injectedProvider.removeListener) this.injectedProvider.removeListener("accountsChanged", accountDisconnectHandler);
         }
       };
