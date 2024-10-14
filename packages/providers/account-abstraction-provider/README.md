@@ -1,21 +1,21 @@
-# Web3Auth Ethereum MPC Provider
+# Web3Auth Account Abstraction Provider
 
 [![npm version](https://img.shields.io/npm/v/@web3auth-mpc/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth-mpc/ethereum-provider/v/latest)
 [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth-mpc/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth-mpc/ethereum-provider@latest)
 
-> Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Ethereum Provider can be used to interact with wallet or connected EVM compatible chain using RPC calls. This is an EIP-1193 compatible JRPC provider. This package exposes a class `EthereumPrivateKeyProvider`, which accepts a `secp251k1` private key and returns `EIP1193` compatible provider, which can be used with various wallet sdks.
+Web3Auth Account Abstraction Provider provides the native account abstraction for your application. This package can be used to generate the ERC 4337 compatible smart account for your application, and provides the necessary methods to interact with the smart account.
 
 ## 📖 Documentation
 
-Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/providers/evm#getting-a-provider-from-any-secp256k1-private-key).
+Read more about Web3Auth Account Abstraction Provider in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/pnp/web/providers/aa-provider).
 
 ## 💡 Features
 - Plug and Play, OAuth based Web3 Authentication Service
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
 - Threshold Cryptography based Key Reconstruction
+- Native Account Abstraction support
 - Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
 - Support for WebAuthn & Passwordless Login
 - Support for connecting to multiple wallets
@@ -26,43 +26,43 @@ Read more about Web3Auth Ethereum Provider in the [official Web3Auth Documentati
 ## 🔗 Installation
 
 ```shell
-npm install --save @web3auth/ethereum-mpc-provider
+npm install --save @web3auth/account-abstraction-provider
 ```
 
 ## 🩹 Example
 
 ```ts
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-mpc-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
-const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
-  const web3 = new Web3(provider as any);
-  const accounts = await web3.eth.getAccounts();
-  // hex message
-  const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-  const signature = await web3.eth.sign(message, accounts[0]);
-  return signature;
+import { AccountAbstractionProvider, SafeSmartAccount } from "@web3auth/account-abstraction-provider";
+
+const chainConfig = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  chainId: "0xaa36a7",
+  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+  displayName: "Ethereum Sepolia Testnet",
+  blockExplorerUrl: "https://sepolia.etherscan.io",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
 };
 
-(async () => {
-  const provider = await EthereumPrivateKeyProvider.getProviderInstance({
-    chainConfig: {
-      rpcTarget: "https://polygon-rpc.com",
-      chainId: "0x89", // hex chain id
-      networkName: "matic",
-      ticker: "matic",
-      tickerName: "matic",
+const accountAbstractionProvider = new AccountAbstractionProvider({
+  config: {
+    chainConfig,
+    bundlerConfig: {
+      url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
     },
-    privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
-  });
-  const signedMessage = await signEthMessage(provider);
-})();
+    smartAccountInit: new SafeSmartAccount(),
+    paymasterConfig: {
+      url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
+    }
+  }
+});
+
+// Use this provider with your preferred Web3Auth Web SDK
 ```
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/)
+Checkout the examples for your preferred Web3Auth Web SDK in our [examples repository](https://github.com/Web3Auth/examples/)
 
-## 🌐 Demo
-
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
 
 ## 💬 Troubleshooting and Support
 
