@@ -132,13 +132,13 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel";
+export type SmartAccountType = "safe" | "kernel" | "biconomy" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Safe", value: "safe" },
-  // { name: "Biconomy", value: "biconomy" },
+  { name: "Biconomy", value: "biconomy" },
   { name: "Kernel", value: "kernel" },
-  // { name: "Trust", value: "trust" },
+  { name: "Trust", value: "trust" },
   // { name: "Light", value: "light" },
   // { name: "Simple", value: "simple" },
 ];
