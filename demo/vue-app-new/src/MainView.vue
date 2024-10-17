@@ -164,7 +164,7 @@ const modalParams = computed(() => {
   return modalConfig;
 });
 
-const getExternalAdapterByName = async (name: string): Promise<IAdapter<unknown>[]> => {
+const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
   switch (name) {
     case "coinbase":
       return [new CoinbaseAdapter()];
@@ -220,8 +220,7 @@ watch(
   async () => {
     let adapters: IAdapter<unknown>[] = [];
     for (let i = 0; i <= formData.adapters.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      adapters = adapters.concat(await getExternalAdapterByName(formData.adapters[i]));
+      adapters = adapters.concat(getExternalAdapterByName(formData.adapters[i]));
     }
     externalAdapters.value = adapters;
   }
