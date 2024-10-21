@@ -25,8 +25,8 @@ async function signTx(
     ...finalTxParams,
     from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
   });
-
-  const vrs = await sign(Buffer.from(ethTx.unsignedHash));
+  const msgHash = stripHexPrefix(ethTx.unsignedHash);
+  const vrs = await sign(Buffer.from(msgHash, "hex"));
   let { v } = vrs;
   const { r, s } = vrs;
 
