@@ -12,7 +12,7 @@ import {
   TypedMessageParams,
   validateTypedSignMessageDataV4,
 } from "@web3auth/ethereum-provider";
-import { hashMessage, TypedDataEncoder } from "ethers";
+import { hashMessage, Signature, TypedDataEncoder } from "ethers";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
@@ -37,9 +37,7 @@ async function signTx(
 
   // addSignature will handle the v value
   const tx = ethTx;
-  tx.signature.v = BigInt(v);
-  tx.signature.r = r;
-  tx.signature.s = s;
+  tx.signature = Signature.from({ v, r: `0x${r.toString("hex")}`, s: `0x${s.toString("hex")}` });
 
   return tx.serialized as PrefixedHexString;
 }
