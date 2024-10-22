@@ -35,11 +35,11 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.95.3",
+    "@solana/web3.js": "^1.95.4",
     "@toruslabs/base-controllers": "^6.2.2",
-    "@walletconnect/sign-client": "^2.17.0",
-    "@walletconnect/types": "^2.17.0",
-    "@walletconnect/utils": "^2.17.0",
+    "@walletconnect/sign-client": "^2.17.1",
+    "@walletconnect/types": "^2.17.1",
+    "@walletconnect/utils": "^2.17.1",
     "@web3auth/auth": "^9.4.1",
     "@web3auth/base": "^9.2.3",
     "@web3auth/base-provider": "^9.2.3",

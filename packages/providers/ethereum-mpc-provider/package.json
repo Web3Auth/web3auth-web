@@ -26,7 +26,7 @@
     "@web3auth/base": "^9.2.3",
     "@web3auth/base-provider": "^9.2.3",
     "@web3auth/ethereum-provider": "^9.2.3",
-    "ethers": "^6.13.3"
+    "ethers": "^6.13.4"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
