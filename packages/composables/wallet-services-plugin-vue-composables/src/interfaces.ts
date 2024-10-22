@@ -7,6 +7,7 @@ export interface IBaseWalletServicesComposableContext {
   showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void>;
   showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void>;
   showWalletUI(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void>;
+  showSwap(showSwapParams?: BaseEmbedControllerState["showSwap"]): Promise<void>;
 }
 
 export interface IWalletServicesContext extends IBaseWalletServicesComposableContext {

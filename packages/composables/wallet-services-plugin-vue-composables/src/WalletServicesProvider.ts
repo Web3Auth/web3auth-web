@@ -1,3 +1,4 @@
+import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError, Web3AuthContextKey } from "@web3auth/base";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { defineComponent, h, inject, provide, Ref, ref, watch } from "vue";
@@ -57,25 +58,32 @@ export const WalletServicesProvider = defineComponent({
       }
     });
 
-    const showWalletConnectScanner = async () => {
+    const showWalletConnectScanner = async (showWalletConnectScannerParams?: BaseEmbedControllerState["showWalletConnect"]) => {
       if (!walletServicesPlugin.value) throw WalletServicesPluginError.notInitialized();
       if (!isPluginConnected.value) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      return walletServicesPlugin.value.showWalletConnectScanner();
+      return walletServicesPlugin.value.showWalletConnectScanner(showWalletConnectScannerParams);
     };
 
-    const showWalletUI = async () => {
+    const showWalletUI = async (showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]) => {
       if (!walletServicesPlugin.value) throw WalletServicesPluginError.notInitialized();
       if (!isPluginConnected.value) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      return walletServicesPlugin.value.showWalletUi();
+      return walletServicesPlugin.value.showWalletUi(showWalletUiParams);
     };
 
-    const showCheckout = async () => {
+    const showCheckout = async (showCheckoutParams?: BaseEmbedControllerState["showCheckout"]) => {
       if (!walletServicesPlugin.value) throw WalletServicesPluginError.notInitialized();
       if (!isPluginConnected.value) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      return walletServicesPlugin.value.showCheckout();
+      return walletServicesPlugin.value.showCheckout(showCheckoutParams);
+    };
+
+    const showSwap = async (showSwapParams?: BaseEmbedControllerState["showSwap"]) => {
+      if (!walletServicesPlugin.value) throw WalletServicesPluginError.notInitialized();
+      if (!isPluginConnected.value) throw WalletServicesPluginError.walletPluginNotConnected();
+
+      return walletServicesPlugin.value.showSwap(showSwapParams);
     };
 
     provide<IWalletServicesContext>(WalletServicesContextKey, {
@@ -84,6 +92,7 @@ export const WalletServicesProvider = defineComponent({
       showWalletConnectScanner,
       showCheckout,
       showWalletUI,
+      showSwap,
     });
   },
   render() {

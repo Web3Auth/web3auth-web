@@ -169,6 +169,11 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
   }
 
+  async showSwap(showSwapParams?: BaseEmbedControllerState["showSwap"]): Promise<void> {
+    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+    return this.wsEmbedInstance.showSwap(showSwapParams);
+  }
+
   async cleanup(): Promise<void> {
     return this.wsEmbedInstance.cleanUp();
   }

@@ -79,6 +79,16 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
     [walletServicesPlugin, isPluginConnected]
   );
 
+  const showSwap = useCallback(
+    async (showSwapParams?: BaseEmbedControllerState["showSwap"]) => {
+      if (!walletServicesPlugin) throw WalletServicesPluginError.notInitialized();
+      if (!isPluginConnected) throw WalletServicesPluginError.walletPluginNotConnected();
+
+      return walletServicesPlugin.showSwap(showSwapParams);
+    },
+    [walletServicesPlugin, isPluginConnected]
+  );
+
   const value = useMemo(() => {
     return {
       plugin: walletServicesPlugin,
@@ -86,8 +96,9 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
       showWalletConnectScanner,
       showCheckout,
       showWalletUI,
+      showSwap,
     };
-  }, [walletServicesPlugin, isPluginConnected, showWalletConnectScanner, showCheckout, showWalletUI]);
+  }, [walletServicesPlugin, isPluginConnected, showWalletConnectScanner, showCheckout, showWalletUI, showSwap]);
 
   return createElement(WalletServicesContext.Provider, { value }, children);
 }
