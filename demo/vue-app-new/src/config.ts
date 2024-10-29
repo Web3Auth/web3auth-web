@@ -40,13 +40,12 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc-mumbai.maticvigil.com",
-      blockExplorerUrl: "https://mumbai-explorer.matic.today",
-      logo: "https://cryptologos.cc/logos/polygon-matic-logo.png",
-      chainId: "0x13881",
-      displayName: "Polygon Mumbai Testnet",
-      ticker: "matic",
-      tickerName: "matic",
+      chainId: "0x13882",
+      rpcTarget: "https://rpc.ankr.com/polygon_amoy",
+      displayName: "Polygon Amoy Testnet",
+      blockExplorerUrl: "https://amoy.polygonscan.com/",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
     },
   ],
   [CHAIN_NAMESPACES.SOLANA]: [
@@ -133,13 +132,13 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel";
+export type SmartAccountType = "safe" | "kernel" | "biconomy" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Safe", value: "safe" },
-  // { name: "Biconomy", value: "biconomy" },
+  { name: "Biconomy", value: "biconomy" },
   { name: "Kernel", value: "kernel" },
-  // { name: "Trust", value: "trust" },
+  { name: "Trust", value: "trust" },
   // { name: "Light", value: "light" },
   // { name: "Simple", value: "simple" },
 ];
@@ -159,6 +158,7 @@ export type FormData = {
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
   adapters: string[];
+  showWalletDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;

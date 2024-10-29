@@ -5,13 +5,13 @@
   },
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
-    "@babel/register": "^7.24.6",
+    "@babel/register": "^7.25.9",
     "@toruslabs/config": "^2.2.0",
-    "@toruslabs/eslint-config-typescript": "^3.3.3",
-    "@toruslabs/torus-scripts": "^6.1.2",
+    "@toruslabs/eslint-config-typescript": "^3.3.4",
+    "@toruslabs/torus-scripts": "^6.1.5",
     "@types/chai": "^4.3.19",
-    "@types/mocha": "^10.0.8",
-    "@types/node": "^20",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "^22",
     "chai": "^5.1.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
@@ -25,8 +25,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "tslib": "^2.7.0",
-    "typescript": "^5.6.2"
+    "tslib": "^2.8.0",
+    "typescript": "^5.6.3"
   },
   "engines": {
     "node": ">=18.x",
@@ -50,8 +50,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^19.7.3",
-    "@rollup/rollup-linux-x64-gnu": "^4.21.3"
+    "@nx/nx-linux-x64-gnu": "^20.0.6",
+    "@rollup/rollup-linux-x64-gnu": "^4.24.2"
   },
   "private": true,
   "repository": {

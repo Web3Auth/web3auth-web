@@ -60,8 +60,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       rpcTarget: "https://rpc.ankr.com/polygon",
       displayName: "Polygon Mainnet",
       blockExplorerUrl: "https://polygonscan.com",
-      ticker: "MATIC",
-      tickerName: "Polygon",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
     };
   }
   if (chainId === 80002) {
@@ -72,8 +72,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       rpcTarget: "https://rpc.ankr.com/polygon_amoy",
       displayName: "Polygon Amoy Testnet",
       blockExplorerUrl: "https://www.oklink.com/amoy",
-      ticker: "MATIC",
-      tickerName: "Polygon",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
       decimals: 18,
     };
   }
@@ -139,6 +139,18 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       ticker: "KLAY",
       tickerName: "Klaytn",
       decimals: 18,
+    };
+  }
+  if (chainId === 1946) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      chainId: "0x79a",
+      rpcTarget: "https://rpc.minato.soneium.org",
+      displayName: "Soneium Minato Testnet",
+      blockExplorerUrl: "https://explorer-testnet.soneium.org",
+      ticker: "ETH",
+      tickerName: "ETH",
+      logo: "https://cryptologos.cc/logos/soneium-logo.png",
     };
   }
 

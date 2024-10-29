@@ -1,4 +1,4 @@
-import CoinbaseWalletSDK, { AppMetadata, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+import { AppMetadata, CoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 import {
   ADAPTER_CATEGORY,
   ADAPTER_CATEGORY_TYPE,
@@ -90,7 +90,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
-      const chainId = await this.coinbaseProvider.request<string>({ method: "eth_chainId" });
+      const chainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
       if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
         await this.addChain(this.chainConfig as CustomChainConfig);
         await this.switchChain(this.chainConfig as CustomChainConfig, true);

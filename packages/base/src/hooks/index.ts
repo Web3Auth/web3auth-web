@@ -29,6 +29,7 @@ export interface IBaseWeb3AuthHookContext {
 export interface IBaseWalletServicesHookContext {
   isPluginConnected: boolean;
   showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void>;
+  showSwap(showSwapParams?: BaseEmbedControllerState["showSwap"]): Promise<void>;
   showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void>;
   showWalletUI(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void>;
 }

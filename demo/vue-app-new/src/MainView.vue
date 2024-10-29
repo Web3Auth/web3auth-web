@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
   AccountAbstractionProvider,
-  // BiconomySmartAccount,
+  BiconomySmartAccount,
   ISmartAccount,
   KernelSmartAccount,
   // LightSmartAccount,
   SafeSmartAccount,
+  TrustSmartAccount,
   // SimpleSmartAccount,
-  // TrustSmartAccount,
 } from "@web3auth/account-abstraction-provider";
 import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
@@ -86,15 +86,15 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   // setup aa provider
   let smartAccountInit: ISmartAccount;
   switch (formData.smartAccountType) {
-    // case "biconomy":
-    //   smartAccountInit = new BiconomySmartAccount();
-    //   break;
+    case "biconomy":
+      smartAccountInit = new BiconomySmartAccount();
+      break;
     case "kernel":
       smartAccountInit = new KernelSmartAccount();
       break;
-    // case "trust":
-    //   smartAccountInit = new TrustSmartAccount();
-    //   break;
+    case "trust":
+      smartAccountInit = new TrustSmartAccount();
+      break;
     // case "light":
     //   smartAccountInit = new LightSmartAccount();
     //   break;
@@ -164,7 +164,7 @@ const modalParams = computed(() => {
   return modalConfig;
 });
 
-const getExternalAdapterByName = async (name: string): Promise<IAdapter<unknown>[]> => {
+const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
   switch (name) {
     case "coinbase":
       return [new CoinbaseAdapter()];
@@ -196,6 +196,7 @@ onBeforeMount(() => {
         formData.chain = json.chain;
         formData.chainNamespace = json.chainNamespace;
         formData.loginProviders = json.loginProviders;
+        formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
@@ -219,8 +220,7 @@ watch(
   async () => {
     let adapters: IAdapter<unknown>[] = [];
     for (let i = 0; i <= formData.adapters.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      adapters = adapters.concat(await getExternalAdapterByName(formData.adapters[i]));
+      adapters = adapters.concat(getExternalAdapterByName(formData.adapters[i]));
     }
     externalAdapters.value = adapters;
   }
@@ -232,6 +232,7 @@ const configs = computed(() => {
     web3AuthOptions: options.value,
     plugins: walletPlugins.value,
     modalConfig: modalParams.value,
+    hideWalletDiscovery: !formData.showWalletDiscovery,
   };
 });
 </script>

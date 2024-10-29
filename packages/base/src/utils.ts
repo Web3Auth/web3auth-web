@@ -89,11 +89,16 @@ export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
   return SIGNER_MAP[web3AuthNetwork ?? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET];
 };
 
-export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: WEB3AUTH_NETWORK_TYPE): Promise<PROJECT_CONFIG_RESPONSE> => {
+export const fetchProjectConfig = async (
+  clientId: string,
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE,
+  aaProvider?: string
+): Promise<PROJECT_CONFIG_RESPONSE> => {
   const url = new URL(`${signerHost(web3AuthNetwork)}/api/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   url.searchParams.append("whitelist", "true");
+  if (aaProvider) url.searchParams.append("aa_provider", aaProvider);
   const res = await get<PROJECT_CONFIG_RESPONSE>(url.href);
   return res;
 };

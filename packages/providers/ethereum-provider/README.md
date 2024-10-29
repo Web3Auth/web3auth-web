@@ -33,30 +33,34 @@ npm install --save @web3auth/ethereum-provider
 ## 🩹 Example
 
 ```ts
+import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import type { SafeEventEmitterProvider } from "@web3auth/base";
-const signEthMessage = async (provider: SafeEventEmitterProvider): Promise<string> => {
-  const web3 = new Web3(provider as any);
-  const accounts = await web3.eth.getAccounts();
-  // hex message
-  const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-  const signature = await web3.eth.sign(message, accounts[0]);
-  return signature;
+import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+const clientId = "YOUR_WEB3AUTH_CLIENT_ID"; // get from https://dashboard.web3auth.io
+
+const chainConfig = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  chainId: "0xaa36a7",
+  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+  // Avoid using public rpcTarget in production.
+  // Use services like Infura, Quicknode etc
+  displayName: "Ethereum Sepolia Testnet",
+  blockExplorerUrl: "https://sepolia.etherscan.io",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
 };
 
-(async () => {
-  const provider = await EthereumPrivateKeyProvider.getProviderInstance({
-    chainConfig: {
-      rpcTarget: "https://polygon-rpc.com",
-      chainId: "0x89", // hex chain id
-      networkName: "matic",
-      ticker: "matic",
-      tickerName: "matic",
-    },
-    privKey: "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
-  });
-  const signedMessage = await signEthMessage(provider);
-})();
+const privateKeyProvider = new EthereumPrivateKeyProvider({
+  config: { chainConfig },
+});
+
+const web3AuthOptions: Web3AuthOptions = {
+  clientId,
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+  privateKeyProvider,
+}
+const web3auth = new Web3Auth(web3AuthOptions);
 ```
 
 Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
