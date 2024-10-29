@@ -5,13 +5,13 @@
   },
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
-    "@babel/register": "^7.25.7",
+    "@babel/register": "^7.25.9",
     "@toruslabs/config": "^2.2.0",
     "@toruslabs/eslint-config-typescript": "^3.3.4",
     "@toruslabs/torus-scripts": "^6.1.5",
     "@types/chai": "^4.3.19",
     "@types/mocha": "^10.0.9",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "chai": "^5.1.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
@@ -50,8 +50,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^20.0.3",
-    "@rollup/rollup-linux-x64-gnu": "^4.24.0"
+    "@nx/nx-linux-x64-gnu": "^20.0.6",
+    "@rollup/rollup-linux-x64-gnu": "^4.24.2"
   },
   "private": true,
   "repository": {
