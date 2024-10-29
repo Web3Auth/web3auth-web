@@ -3,7 +3,6 @@ import { sleep } from "@toruslabs/base-controllers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { IProvider, log } from "@web3auth/base";
 import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "@web3auth/ethereum-provider";
-import { TypedDataEncoder } from "ethers";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
 
@@ -184,16 +183,8 @@ export function getProviderHandlers({
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams, _: JRPCRequest<unknown>): Promise<string> => {
       try {
-        const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
-
-        // Deduce the primary type using ethers
-        // remove EIP712Domain from types if it exists
-        // ethers already take care of EIP712Domain type and doesn't allow initiating with it
-        if (data.types.EIP712Domain) {
-          delete data.types.EIP712Domain;
-        }
-        const typedData = TypedDataEncoder.from(data.types);
-        const { primaryType } = typedData;
+        const data: SignTypedDataMessageV4 & { primaryType: string } =
+          typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
         const signature = await walletClient.signTypedData({
           account: smartAccount,
           domain: {
@@ -202,7 +193,7 @@ export function getProviderHandlers({
             salt: data.domain.salt as Hex,
             chainId: Number(data.domain.chainId),
           },
-          primaryType,
+          primaryType: data.primaryType,
           types: data.types,
           message: data.message,
         });
