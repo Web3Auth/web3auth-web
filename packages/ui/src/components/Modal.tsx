@@ -190,7 +190,7 @@ export default function Modal(props: ModalProps) {
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
         <div
-          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "p-6 pt-7" : ""} ${
+          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "w3a--p-6 w3a--pt-7" : ""} ${
             (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
               ? ""
               : "wallet-adapter-container"

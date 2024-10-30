@@ -90,11 +90,14 @@ export default function SocialLogins(props: SocialLoginProps) {
             return null;
           }
 
-          const loginMethodSpan = classNames("w3a-adapter-item", socialLoginsConfig?.uiConfig?.loginGridCol === 2 ? "col-span-3" : "col-span-2");
+          const loginMethodSpan = classNames(
+            "w3a-adapter-item",
+            socialLoginsConfig?.uiConfig?.loginGridCol === 2 ? "w3a--col-span-3" : "w3a--col-span-2"
+          );
 
           if (isMainOption || order === 1) {
             return (
-              <li className="col-span-6 w3a-adapter-item" key={method} style={{ order }}>
+              <li className="w3a--col-span-6 w3a-adapter-item" key={method} style={{ order }}>
                 <Button
                   variant="secondary"
                   onClick={() =>
@@ -103,11 +106,11 @@ export default function SocialLogins(props: SocialLoginProps) {
                       loginParams: { loginProvider: method, name, login_hint: "" },
                     })
                   }
-                  className="w-full"
+                  className="w3a--w-full"
                   title={name}
                 >
                   {providerIcon}
-                  <p className="ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
+                  <p className="w3a--ml-2">{t("modal.social.continueCustom", { adapter: name })}</p>
                 </Button>
               </li>
             );
@@ -122,7 +125,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                     loginParams: { loginProvider: method, name, login_hint: "" },
                   })
                 }
-                className="w-full"
+                className="w3a--w-full"
                 title={name}
               >
                 {providerIcon}
@@ -133,7 +136,7 @@ export default function SocialLogins(props: SocialLoginProps) {
       </ul>
       <div className="w3a-social__policy">{t("modal.social.policy")}</div>
       {canShowMore && (
-        <div className="text-right">
+        <div className="w3a--text-right">
           <button type="button" className={adapterButtonClass} onClick={expandClickHandler}>
             <span className="w3ajs-button-expand-text">{adapterExpandText}</span>
           </button>
