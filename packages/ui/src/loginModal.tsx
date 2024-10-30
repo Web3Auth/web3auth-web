@@ -88,6 +88,7 @@ export class LoginModal extends SafeEventEmitter {
     const darkState = { isDark: this.isDark };
 
     const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
+
     // Load new language resource
 
     if (useLang === LANGUAGES.de) {
@@ -164,6 +165,15 @@ export class LoginModal extends SafeEventEmitter {
         });
     } else if (useLang === LANGUAGES.tr) {
       import(`./i18n/turkish.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
+    } else if (useLang === LANGUAGES.en) {
+      import(`./i18n/english.json`)
         .then((messages) => {
           i18n.addResourceBundle(useLang as string, "translation", messages.default);
           return i18n.changeLanguage(useLang);
