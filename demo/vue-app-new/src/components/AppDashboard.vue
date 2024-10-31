@@ -16,6 +16,12 @@ import {
   signTypedMessage,
 } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
+import {
+  walletSendEth,
+  walletSignPersonalMessage,
+  walletSignTransaction as walletSignEthTransaction,
+  walletSignTypedMessage,
+} from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
@@ -48,19 +54,6 @@ const isDisplay = (name: string): boolean => {
   }
 };
 
-const showWalletUI = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletPlugin.showWalletUi();
-};
-const showCheckout = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletPlugin.showCheckout();
-};
-const showWalletConnectScanner = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletPlugin.showWalletConnectScanner();
-};
-
 const clearConsole = () => {
   const el = document.querySelector("#console>pre");
   const h1 = document.querySelector("#console>h1");
@@ -91,6 +84,37 @@ const printToConsole = (...args: unknown[]) => {
   }
 };
 
+// Wallet Services
+const showWalletUI = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showWalletUi();
+};
+const showCheckout = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showCheckout();
+};
+const showWalletConnectScanner = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletPlugin.showWalletConnectScanner();
+};
+const onWalletSignPersonalMessage = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+};
+const onWalletSignTypedData_v4 = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+};
+const onWalletSendEth = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
+};
+const onWalletSignEthTransaction = async () => {
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignEthTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
+};
+
+// Ethereum Provider
 const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
 };
@@ -205,6 +229,16 @@ const onSignPersonalMsg = async () => {
           </Button>
           <Button block size="xs" pill class="mb-2" @click="showCheckout">
             {{ $t("app.buttons.btnShowCheckout") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
+            {{ t("app.buttons.btnSignPersonalMsg") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onWalletSignTypedData_v4">
+            {{ t("app.buttons.btnSignTypedData_v4") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onWalletSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onWalletSignEthTransaction">
+            {{ t("app.buttons.btnSignTransaction") }}
           </Button>
         </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
