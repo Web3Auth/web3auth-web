@@ -3,6 +3,7 @@ const web3AuthBasePreset = require("@toruslabs/vue-components/web3auth-base-pres
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   presets: [web3AuthBasePreset],
+  prefix: "w3a--",
   darkMode: "class",
   content: ["./src/**/*.{html,js,ts,tsx,jsx}"],
   theme: {

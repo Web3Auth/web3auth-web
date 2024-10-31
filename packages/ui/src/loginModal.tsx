@@ -88,6 +88,7 @@ export class LoginModal extends SafeEventEmitter {
     const darkState = { isDark: this.isDark };
 
     const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
+
     // Load new language resource
 
     if (useLang === LANGUAGES.de) {
@@ -171,6 +172,15 @@ export class LoginModal extends SafeEventEmitter {
         .catch((error) => {
           log.error(error);
         });
+    } else if (useLang === LANGUAGES.en) {
+      import(`./i18n/english.json`)
+        .then((messages) => {
+          i18n.addResourceBundle(useLang as string, "translation", messages.default);
+          return i18n.changeLanguage(useLang);
+        })
+        .catch((error) => {
+          log.error(error);
+        });
     }
 
     return new Promise((resolve) => {
@@ -183,9 +193,9 @@ export class LoginModal extends SafeEventEmitter {
       });
       const container = createWrapper(this.uiConfig.modalZIndex);
       if (darkState.isDark) {
-        container.classList.add("dark");
+        container.classList.add("w3a--dark");
       } else {
-        container.classList.remove("dark");
+        container.classList.remove("w3a--dark");
       }
 
       const root = createRoot(container);

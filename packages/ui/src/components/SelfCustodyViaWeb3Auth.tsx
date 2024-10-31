@@ -6,10 +6,20 @@ export default function SelfCustodyViaWeb3Auth() {
   const [t] = useTranslation(undefined, { i18n });
 
   return (
-    <div className="flex items-center gap-2 justify-center">
-      <div className="text-xs text-app-gray-300 dark:text-app-gray-500">{t("modal.footer.message-new")}</div>
-      <img height="16" src="https://images.web3auth.io/web3auth-footer-logo-light.svg" alt="Web3Auth Logo Light" className="h-4 block dark:hidden" />
-      <img height="16" src="https://images.web3auth.io/web3auth-footer-logo-dark.svg" alt="Web3Auth Logo Dark" className="h-4 hidden dark:block" />
+    <div className="w3a--flex w3a--items-center w3a--gap-2 w3a--justify-center">
+      <div className="w3a--text-xs w3a--text-app-gray-300 dark:w3a--text-app-gray-500">{t("modal.footer.message-new")}</div>
+      <img
+        height="16"
+        src="https://images.web3auth.io/web3auth-footer-logo-light.svg"
+        alt="Web3Auth Logo Light"
+        className="w3a--h-4 w3a--block dark:w3a--hidden"
+      />
+      <img
+        height="16"
+        src="https://images.web3auth.io/web3auth-footer-logo-dark.svg"
+        alt="Web3Auth Logo Dark"
+        className="w3a--h-4 w3a--hidden dark:w3a--block"
+      />
     </div>
   );
 }

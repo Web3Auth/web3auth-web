@@ -85,9 +85,13 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
       const logoLight = `${os}-light`;
       const logoDark = `${os}-dark`;
       acc.push(
-        <li key={os} className="w-full">
+        <li key={os} className="w3a--w-full">
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
-            <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2 wallet-link-btn">
+            <Button
+              type="button"
+              variant="tertiary"
+              className="w3a--w-full !w3a--justify-start w3a--flex w3a--items-center w3a--gap-2 wallet-link-btn"
+            >
               <Image
                 imageId={logoLight}
                 darkImageId={logoDark}
@@ -97,7 +101,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
                 width="28"
                 isButton
               />
-              <span className="text-sm font-medium">{t("modal.external.install-mobile-app", { os: getOsName(os) })}</span>
+              <span className="w3a--text-sm w3a--font-medium">{t("modal.external.install-mobile-app", { os: getOsName(os) })}</span>
             </Button>
           </a>
         </li>
@@ -118,7 +122,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
     const installLink = browserExtensionUrl ? (
       <li key={deviceDetails.browser}>
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
-          <Button type="button" variant="tertiary" className="w-full !justify-start flex items-center gap-2 wallet-link-btn">
+          <Button type="button" variant="tertiary" className="w3a--w-full !w3a--justify-start w3a--flex w3a--items-center w3a--gap-2 wallet-link-btn">
             <Image
               imageId={deviceDetails.browser}
               darkImageId={deviceDetails.browser}
@@ -128,7 +132,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
               width="30"
               isButton
             />
-            <span className="text-sm font-medium">
+            <span className="w3a--text-sm w3a--font-medium">
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}
             </span>
           </Button>
@@ -144,7 +148,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
       <ExternalWalletHeader title={`${t("modal.external.get")} ${connectButton.displayName}`} goBack={goBack} closeModal={closeModal} />
 
       {/* Wallet image */}
-      <div className="flex justify-center my-6">
+      <div className="w3a--flex w3a--justify-center w3a--my-6">
         <Image
           imageId={`login-${connectButton.name}`}
           hoverImageId={`login-${connectButton.name}`}
@@ -157,7 +161,7 @@ export default function ExternalWalletInstall(props: ExternalWalletInstallProps)
       </div>
 
       {/* Download links */}
-      <ul className="flex flex-col gap-3">{deviceDetails.platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}</ul>
+      <ul className="w3a--flex w3a--flex-col w3a--gap-3">{deviceDetails.platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}</ul>
     </div>
   );
 }
