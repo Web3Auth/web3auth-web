@@ -51,11 +51,11 @@ export default function ExternalWalletConnect(props: ExternalWalletConnectProps)
 
           {/* Install links */}
           {connectButton.hasInstallLinks && (
-            <div className="flex flex-row items-center justify-between gap-2 bg-app-gray-50 dark:bg-app-gray-700 text-app-gray-900 dark:text-app-white px-3 py-2 rounded-xl">
-              <span className="text-sm truncate flex-grow-0">
+            <div className="w3a--flex w3a--flex-row w3a--items-center w3a--justify-between w3a--gap-2 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--px-3 w3a--py-2 w3a--rounded-xl">
+              <span className="w3a--text-sm w3a--truncate w3a--flex-grow-0">
                 {t("modal.external.dont-have")} <span>{connectButton.displayName}</span>?
               </span>
-              <Button type="button" variant="secondary" size="xs" className="flex-grow-1 flex-shrink-0" onClick={showWalletDownload}>
+              <Button type="button" variant="secondary" size="xs" className="w3a--flex-grow-1 w3a--flex-shrink-0" onClick={showWalletDownload}>
                 {t("modal.external.get-wallet")}
               </Button>
             </div>

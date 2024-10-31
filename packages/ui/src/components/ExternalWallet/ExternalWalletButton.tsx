@@ -19,10 +19,10 @@ export default function ExternalWalletButton(props: ExternalWalletButtonProps) {
       variant="tertiary"
       type="button"
       onClick={() => handleWalletClick(button)}
-      className="w-full rounded-xl size-xl flex !justify-between items-center wallet-btn"
+      className="w3a--w-full w3a--rounded-xl w3a--size-xl !w3a--justify-between w3a--items-center wallet-btn"
       title={button.name}
     >
-      <div className="flex items-center">
+      <div className="w3a--flex w3a--items-center">
         <Image
           imageId={`login-${button.name}`}
           hoverImageId={`login-${button.name}`}
@@ -32,10 +32,10 @@ export default function ExternalWalletButton(props: ExternalWalletButtonProps) {
           isButton
           extension={button.imgExtension}
         />
-        <p className="ml-2 text-left text-sm">{button.displayName}</p>
+        <p className="w3a--ml-2 w3a--text-left w3a--text-sm">{button.displayName}</p>
       </div>
       {button.hasInjectedWallet && (
-        <span className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium bg-app-primary-100 text-app-primary-800">
+        <span className="w3a--inline-flex w3a--items-center w3a--rounded-lg w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800">
           {t("modal.external.installed")}
         </span>
       )}

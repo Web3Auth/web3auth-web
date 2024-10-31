@@ -193,9 +193,9 @@ export class LoginModal extends SafeEventEmitter {
       });
       const container = createWrapper(this.uiConfig.modalZIndex);
       if (darkState.isDark) {
-        container.classList.add("dark");
+        container.classList.add("w3a--dark");
       } else {
-        container.classList.remove("dark");
+        container.classList.remove("w3a--dark");
       }
 
       const root = createRoot(container);

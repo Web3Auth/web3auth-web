@@ -25,7 +25,7 @@ function Button(props: ButtonProps) {
       disabled={disabled}
       // eslint-disable-next-line react/button-has-type
       type={type}
-      className={`t-btn t-btn-${variant} rounded-full ${sizeClass} ${className}`}
+      className={`t-btn t-btn-${variant} w3a--rounded-full ${sizeClass} ${className}`}
       onClick={onClick}
       title={title}
       style={style}

@@ -47,7 +47,7 @@ function WalletConnect(props: WalletConnectProps) {
         <div className="w3a-wallet-connect__container-desktop">
           {/* <div className="text-app-gray-500 dark:text-app-gray-400 text-xs">{t("modal.external.walletconnect-subtitle")}</div> */}
           <div
-            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr rounded-md mb-2"
+            className="w3ajs-wallet-connect-qr w3a-wallet-connect-qr w3a--rounded-md w3a--mb-2"
             tabIndex={0}
             role="button"
             onClick={handleCopy}
@@ -56,7 +56,7 @@ function WalletConnect(props: WalletConnectProps) {
             {isCopied && (
               <div className="tooltip">
                 Copied
-                <div className="absolute border-8 border-b-0 border-r-transparent border-t-app-gray-900 border-l-transparent top-[100%] left-[calc(50%_-_8px)]" />
+                <div className="w3a--absolute w3a--border-8 w3a--border-b-0 w3a--border-r-transparent w3a--border-t-app-gray-900 w3a--border-l-transparent w3a--top-[100%] w3a--left-[calc(50%_-_8px)]" />
               </div>
             )}
             <QRCode
