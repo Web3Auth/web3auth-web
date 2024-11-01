@@ -1,8 +1,7 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
-import { ChangeEvent, FormEvent, useContext, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../context/ThemeContext";
 import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
 import Button from "./Button";
@@ -17,7 +16,6 @@ interface SocialLoginPasswordlessProps {
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
   const { handleSocialLoginClick, adapter, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
-  const { isDark } = useContext(ThemedContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
@@ -90,17 +88,19 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       <div className="w3a-group__title">
         {t(title)}
         {isSmsVisible && (
-          <div className="relative flex flex-col items-center cursor-pointer group">
-            <Icon iconName={`information-circle${isDark ? "-light" : ""}`} />
-            <div className="absolute z-20 flex-col items-center hidden mb-5 top-4 group-hover:flex">
-              <div className="w-3 h-3 ml-[3px] -mb-2 rotate-45 bg-app-gray-50 dark:bg-app-gray-600" />
+          <div className="w3a--relative w3a--flex w3a--flex-col w3a--items-center w3a--cursor-pointer w3a--group">
+            <Icon iconName="information-circle-light" darkIconName="information-circle" />
+            <div className="w3a--absolute w3a--z-20 w3a--flex-col w3a--items-center w3a--hidden w3a--mb-5 w3a--top-4 group-hover:w3a--flex">
+              <div className="w3a--w-3 w3a--h-3 w3a--ml-[3px] -w3a--mb-2 w3a--rotate-45 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-600" />
               <div
-                className={`relative p-4 w-[300px] text-xs leading-none text-app-white rounded-md bg-app-gray-50 dark:bg-app-gray-600 shadow-lg ${
-                  isSmsVisible && !isEmailVisible ? "left-20" : "left-8"
+                className={`w3a--relative w3a--p-4 w3a--w-[300px] w3a--text-xs w3a--leading-none w3a--text-app-white w3a--rounded-md w3a--bg-app-gray-50 dark:w3a--bg-app-gray-600 w3a--shadow-lg ${
+                  isSmsVisible && !isEmailVisible ? "w3a--left-20" : "w3a--left-8"
                 }`}
               >
-                <div className="mb-1 text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.popup.phone-header")}</div>
-                <div className="text-xs text-app-gray-400">{t("modal.popup.phone-body")}</div>
+                <div className="w3a--mb-1 w3a--text-xs w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+                  {t("modal.popup.phone-header")}
+                </div>
+                <div className="w3a--text-xs w3a--text-app-gray-400">{t("modal.popup.phone-body")}</div>
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       </div>
       <form className="w3ajs-passwordless-form" onSubmit={(e) => handleFormSubmit(e)}>
         <input
-          className="w-full mb-4 w3a-text-field"
+          className="w3a--w-full w3a--mb-4 w3a-text-field"
           name="passwordless-input"
           required
           placeholder={`${t("modal.social.sms-placeholder-text")} ${placeholder}`}
@@ -123,7 +123,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
 
         {isValidInput === false && <div className="w3a-sms-field--error">{t(invalidInputErrorMessage)}</div>}
 
-        <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w-full" type="submit">
+        <Button variant={isPrimaryBtn ? "primary" : "tertiary"} disabled={fieldValue === ""} className="w3a--w-full" type="submit">
           {t("modal.social.passwordless-cta")}
         </Button>
       </form>

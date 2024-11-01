@@ -230,9 +230,9 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               {/* Search */}
               {totalExternalWallets > 15 && (
-                <div className="py-4">
+                <div className="w3a--py-4">
                   <input
-                    className="w-full w3a-text-field"
+                    className="w3a--w-full w3a-text-field"
                     name="passwordless-input"
                     required
                     value={walletSearch}
@@ -250,11 +250,11 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
 
               {/* Wallet List */}
               {externalButtons.length === 0 ? (
-                <div className="w-full text-center text-app-gray-400 dark:text-app-gray-500 py-6 flex justify-center items-center">
+                <div className="w3a--w-full w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500 w3a--py-6 w3a--flex w3a--justify-center w3a--items-center">
                   {t("modal.external.no-wallets-found")}
                 </div>
               ) : (
-                <div className={`w3a-adapter-list-container ${totalExternalWallets < 15 ? "py-4" : ""}`}>
+                <div className={`w3a-adapter-list-container ${totalExternalWallets < 15 ? "w3a--py-4" : ""}`}>
                   <ul className="w3a-adapter-list w3ajs-wallet-adapters">
                     {externalButtons.map((button) => {
                       return (
@@ -265,7 +265,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                               <a
                                 href={button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri}
                                 target="_blank"
-                                className="w-full"
+                                className="w3a--w-full"
                                 rel="noreferrer noopener"
                               >
                                 <ExternalWalletButton button={button} handleWalletClick={handleWalletClick} />
@@ -277,9 +277,11 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
                       );
                     })}
                     {totalExternalWallets > 10 && !walletSearch && (
-                      <li className="flex flex-col items-center justify-center gap-y-0.5 my-4 w-full mx-auto w3a-adapter-item--full">
-                        <p className="text-xs text-app-gray-500 dark:text-app-gray-400">{t("modal.external.search-text")}</p>
-                        <p className="text-xs font-medium text-app-gray-900 dark:text-app-white">{t("modal.external.search-subtext")}</p>
+                      <li className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-0.5 w3a--my-4 w3a--w-full w3a--mx-auto w3a-adapter-item--full">
+                        <p className="w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.external.search-text")}</p>
+                        <p className="w3a--text-xs w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+                          {t("modal.external.search-subtext")}
+                        </p>
                       </li>
                     )}
                   </ul>

@@ -49,13 +49,13 @@ const icons: Record<string, { image: string }> = {
 
 export default function Icon(props: IconProps) {
   const { iconName, iconTitle = "", height = "auto", width = "auto", darkIconName = "" } = props;
-  const h = height === "auto" ? "h-auto" : `h-[${height}px]`;
-  const w = width === "auto" ? "w-auto" : `w-[${width}px]`;
+  const h = height === "auto" ? "w3a--h-auto" : `w3a--h-[${height}px]`;
+  const w = width === "auto" ? "w3a--w-auto" : `w3a--w-[${width}px]`;
   return (
     <>
       {icons[iconName] && (
         <img
-          className={`${iconTitle ? "cursor-pointer" : ""} dark:hidden block ${h} ${w}`}
+          className={`${iconTitle ? "w3a--cursor-pointer" : ""} dark:w3a--hidden w3a--block ${h} ${w}`}
           height={height}
           width={width}
           src={icons[iconName].image}
@@ -65,7 +65,7 @@ export default function Icon(props: IconProps) {
       )}
       {icons[darkIconName] && (
         <img
-          className={`${iconTitle ? "cursor-pointer" : ""} hidden dark:block ${h} ${w}`}
+          className={`${iconTitle ? "w3a--cursor-pointer" : ""} w3a--hidden dark:w3a--block ${h} ${w}`}
           height={height}
           width={width}
           src={icons[darkIconName].image}

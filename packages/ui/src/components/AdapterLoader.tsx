@@ -34,15 +34,15 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
   }, [modalStatus, onClose]);
 
   return modalStatus !== MODAL_STATUS.INITIALIZED ? (
-    <div className="w3ajs-modal-loader w3a-modal__loader h-full">
+    <div className="w3ajs-modal-loader w3a-modal__loader w3a--h-full">
       <div className="w3a-modal__loader-content">
         <div className="w3a-modal__loader-info">
           {modalStatus === MODAL_STATUS.CONNECTING && (
             <>
               <div className="w3a-modal__loader-bridge">
                 <div className="w3a-modal__loader-app-logo">
-                  <img src={appLogo} className="block dark:hidden h-10 w-10" alt="" />
-                  <img src={appLogo} className="hidden dark:block h-10 w-10" alt="" />
+                  <img src={appLogo} className="w3a--block dark:w3a--hidden w3a--h-10 w3a--w-10" alt="" />
+                  <img src={appLogo} className="w3a--hidden dark:w3a--block w3a--h-10 w3a--w-10" alt="" />
                 </div>
                 <div className="w3a-modal__connector">
                   <div className="w3a-modal__connector-beat">
@@ -62,9 +62,9 @@ export default function DetailedLoader(props: DetailedLoaderProps) {
             </>
           )}
           {modalStatus === ADAPTER_STATUS.CONNECTED && (
-            <div className="flex flex-col items-center">
+            <div className="w3a--flex w3a--flex-col w3a--items-center">
               <Icon iconName="connected" />
-              <div className="w3ajs-modal-loader__message w3a-spinner-message mt-4">{message}</div>
+              <div className="w3ajs-modal-loader__message w3a-spinner-message w3a--mt-4">{message}</div>
             </div>
           )}
           {modalStatus === ADAPTER_STATUS.ERRORED && (

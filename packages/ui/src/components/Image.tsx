@@ -37,7 +37,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={imageId}
-        className="image-icon object-contain rounded"
+        className="image-icon w3a--object-contain w3a--rounded"
         onError={({ currentTarget }) => {
           if (fallbackImageId) {
             // eslint-disable-next-line no-param-reassign
@@ -53,7 +53,7 @@ export default function Image(props: ImageProps) {
           height={height}
           width={width}
           alt={hoverImageId}
-          className="hover-icon object-contain rounded"
+          className="hover-icon w3a--object-contain w3a--rounded"
         />
       ) : null}
     </>
