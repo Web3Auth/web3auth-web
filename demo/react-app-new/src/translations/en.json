@@ -10,6 +10,12 @@
     "adapters": "Adapters",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
+    "showWalletDiscovery": "Show Wallet Discovery",
+    "useAccountAbstractionProvider": "Account Abstraction Provider",
+    "useAAWithExternalWallet": "Use Account Abstraction Provider with External Wallet",
+    "smartAccountType": "Smart Account Type",
+    "bundlerUrl": "Bundler URL",
+    "paymasterUrl": "Paymaster URL",
     "walletPlugin": {
       "title": "Wallet Service Plugin",
       "logoLight": "Logo Light",

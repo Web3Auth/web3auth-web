@@ -23,7 +23,7 @@ const AppDashboard: React.FC = () => {
     const ethServices = chainNamespace === CHAIN_NAMESPACES.EIP155;
     const solServices = chainNamespace === CHAIN_NAMESPACES.SOLANA;
     const walletServices =
-      chainNamespace === CHAIN_NAMESPACES.EIP155 && walletPlugin.enable && web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH;
+      chainNamespace === CHAIN_NAMESPACES.EIP155 && walletPlugin?.enable && web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH;
     return {
       dashboard,
       ethServices,

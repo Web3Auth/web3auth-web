@@ -14,8 +14,8 @@
     "@toruslabs/constants": "^14.0.0",
     "@toruslabs/eslint-config-react": "^3.4.3",
     "@toruslabs/ethereum-controllers": "^6.1.3",
-    "@toruslabs/vue-components": "^7.8.3",
-    "@toruslabs/vue-icons": "^7.6.2",
+    "@toruslabs/react-components": "file:toruslabs-react-components-1.0.0.tgz",
+    "@web3auth/account-abstraction-provider": "file:../../packages/providers/account-abstraction-provider",
     "@web3auth/auth": "^9.4.0",
     "@web3auth/auth-adapter": "file:../../packages/adapters/auth-adapter",
     "@web3auth/base": "file:../../packages/base",
@@ -41,7 +41,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.0.2",
-    "usehooks-ts": "^3.1.0",
     "web3": "^4.13.0"
   },
   "devDependencies": {

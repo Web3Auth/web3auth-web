@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, IAdapter, IBaseProvider, IPlugin, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
-import { useSessionStorage } from 'usehooks-ts'
+import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, IAdapter, IBaseProvider, IPlugin, IProvider, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 import { Web3AuthContextConfig } from '@web3auth/modal-react-hooks';
 import { type ModalConfig, type Web3Auth, type Web3AuthOptions } from "@web3auth/modal";
-import { chainConfigs, clientIds, web3authInitialConfig } from '@/config';
+import { chainConfigs, chainNamespaceOptions, clientIds, getDefaultBundlerUrl, initWhiteLabel, languageOptions, loginProviderOptions, networkOptions, SmartAccountOptions, web3authInitialConfig } from '../config';
 import { EthereumPrivateKeyProvider } from '@web3auth/ethereum-provider';
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
@@ -15,6 +14,9 @@ import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/defa
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, SafeSmartAccount, TrustSmartAccount } from '@web3auth/account-abstraction-provider';
+import { BiconomySmartAccount } from '@web3auth/account-abstraction-provider';
+
 
 interface AppConfigSettings {
   name: string;
@@ -29,52 +31,64 @@ interface AppConfigSettings {
 }
 
 interface Option {
-  label: string;
+  name: string;
   value: string;
 }
 
 type AppContextType = {
+  // values for the form
   network: WEB3AUTH_NETWORK_TYPE;
-  setNetWork: (network: WEB3AUTH_NETWORK_TYPE) => void;
   chainNamespace: ChainNamespaceType;
-  setChainNamespace: (chainNamespace: ChainNamespaceType) => void;
   chain: string;
-  setChain: (chain: string) => void;
   whiteLabel: {
-    enable: boolean;
-    config: WhiteLabelData;
+    enable?: boolean;
+    config?: WhiteLabelData;
   };
-  setWhiteLabel: (whiteLabel: { enable: boolean; config: WhiteLabelData }) => void;
   loginProviders: LOGIN_PROVIDER_TYPE[];
-  setLoginProviders: (loginProviders: LOGIN_PROVIDER_TYPE[]) => void;
   adapters: string[];
-  setAdapters: (adapters: string[]) => void;
+  showWalletDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, AppConfigSettings>;
-  setLoginMethods: (loginMethods: Record<LOGIN_PROVIDER_TYPE, AppConfigSettings>) => void;
   walletPlugin: {
-    enable: boolean;
-    logoDark: string;
-    logoLight: string;
+    enable?: boolean;
+    logoDark?: string;
+    logoLight?: string;
   };
-  setWalletPlugin: (walletPlugin: { enable: boolean; logoDark: string; logoLight: string }) => void;
-  web3authContextConfig: Web3AuthContextConfig;
-};
+  useAccountAbstractionProvider: boolean;
+  useAAWithExternalWallet: boolean;
+  smartAccountType: string;
+  bundlerUrl: string;
+  paymasterUrl: string;
 
-const initWhiteLabel: WhiteLabelData = {
-  appName: "HelloDemo",
-  appUrl: "http://localhost:8080",
-  logoDark: "https://images.web3auth.io/example-hello.svg", // dark logo for light background
-  logoLight: "https://images.web3auth.io/example-hello-light.svg", // light logo for dark background
-  mode: "auto",
-  defaultLanguage: "en",
-  theme: {
-    primary: "#5DF0EB",
-    onPrimary: "black",
-  },
+  // setters for the form
+  setNetWork: (network: WEB3AUTH_NETWORK_TYPE) => void;
+  setChainNamespace: (chainNamespace: ChainNamespaceType) => void;
+  setChain: (chain: string) => void;
+  setWhiteLabel: (whiteLabel: { enable?: boolean; config?: WhiteLabelData }) => void;
+  setLoginProviders: (loginProviders: LOGIN_PROVIDER_TYPE[]) => void;
+  setAdapters: (adapters: string[]) => void;
+  setLoginMethods: (loginMethods: Record<LOGIN_PROVIDER_TYPE, AppConfigSettings>) => void;
+  setWalletPlugin: (walletPlugin: { enable?: boolean; logoDark?: string; logoLight?: string }) => void;
+  setShowWalletDiscovery: (showWalletDiscovery: boolean) => void;
+  setUseAccountAbstractionProvider: (useAccountAbstractionProvider: boolean) => void;
+  setUseAAWithExternalWallet: (useAAWithExternalWallet: boolean) => void;
+  setSmartAccountType: (smartAccountType: string) => void;
+  setBundlerUrl: (bundlerUrl: string) => void;
+  setPaymasterUrl: (paymasterUrl: string) => void;
+
+  // Web3Auth Config
+  web3authConfig: Web3AuthContextConfig;
+ 
+  // Options for the form
+  networkOptions: Option[];
+  chainNamespaceOptions: Option[];
+  chainOptions: Option[];
+  adapterOptions: Option[];
+  loginMethodOptions: Option[];
+  languageOptions: Option[];
+  loginProviderOptions: Option[];
+  smartAccountTypeOptions: Option[];
+  
 };
-const loginProviderOptions = Object.values(LOGIN_PROVIDER)
-  .filter((x) => x !== "jwt" && x !== "webauthn")
-  .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, AppConfigSettings> = loginProviderOptions.reduce(
   (acc, curr) => ({
@@ -110,6 +124,16 @@ const AppContext = createContext<AppContextType>({
     logoLight: "",
     logoDark: "",
   },
+  showWalletDiscovery: true,
+
+  useAccountAbstractionProvider: false,
+  useAAWithExternalWallet: true,
+  smartAccountType: "",
+  bundlerUrl: "",
+  paymasterUrl: "",
+
+  web3authConfig: {} as Web3AuthContextConfig,
+
   setNetWork: () => {},
   setChainNamespace: () => {},
   setChain: () => {},
@@ -118,29 +142,200 @@ const AppContext = createContext<AppContextType>({
   setAdapters: () => {},
   setLoginMethods: () => {},
   setWalletPlugin: () => {},
+  setShowWalletDiscovery: () => {},
+  setUseAccountAbstractionProvider: () => {},
+  setUseAAWithExternalWallet: () => {},
+  setSmartAccountType: () => {},
+  setBundlerUrl: () => {},
+  setPaymasterUrl: () => {},
 
-  web3authContextConfig: web3authInitialConfig,
+  networkOptions: [],
+  chainNamespaceOptions: [],
+  chainOptions: [],
+  adapterOptions: [],
+  loginMethodOptions: [],
+  languageOptions: [],
+  loginProviderOptions: [],
+  smartAccountTypeOptions: [],
 });
 
 export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }) => {
 
+  // General tab
   const [network, setNetWork] = useState<WEB3AUTH_NETWORK_TYPE>(WEB3AUTH_NETWORK.TESTNET);
   const [chainNamespace, setChainNamespace] = useState<ChainNamespaceType>(CHAIN_NAMESPACES.EIP155);
   const [chain, setChain] = useState<string>("0x1");
-  const [whiteLabel, setWhiteLabel] = useState<{ enable: boolean; config: WhiteLabelData }>({
+  const [adapters, setAdapters] = useState<string[]>([]);
+  const [showWalletDiscovery, setShowWalletDiscovery] = useState<boolean>(true);
+
+  // Whitelabel tab
+  const [whiteLabel, setWhiteLabel] = useState<{ enable?: boolean; config?: WhiteLabelData }>({
     enable: false,
     config: initWhiteLabel,
   });
+
+  // Login Providers tab
   const [loginProviders, setLoginProviders] = useState<LOGIN_PROVIDER_TYPE[]>([]);
-  const [adapters, setAdapters] = useState<string[]>([]);
   const [loginMethods, setLoginMethods] = useState<Record<LOGIN_PROVIDER_TYPE, AppConfigSettings>>(defaultLoginMethod);
-  const [walletPlugin, setWalletPlugin] = useState<{ enable: boolean; logoDark: string; logoLight: string }>({
+
+  // Wallet Plugin tab
+  const [walletPlugin, setWalletPlugin] = useState<{ enable?: boolean; logoDark?: string; logoLight?: string }>({
     enable: false,
     logoDark: "",
     logoLight: "",
   });
 
-  const [formData, setFormData, clearFormData] = useSessionStorage<AppContextType>('formData', {} as AppContextType);
+  // Account Abstraction tab
+  const [useAccountAbstractionProvider, setUseAccountAbstractionProvider] = useState<boolean>(false);
+  const [useAAWithExternalWallet, setUseAAWithExternalWallet] = useState<boolean>(true);
+  const [smartAccountType, setSmartAccountType] = useState<string>("biconomy");
+  const [bundlerUrl, setBundlerUrl] = useState<string>("");
+  const [paymasterUrl, setPaymasterUrl] = useState<string>("");
+
+  // External Adapters manipulation
+  const [externalAdapters, setExternalAdapters] = useState<IAdapter<unknown>[]>([]);
+  useEffect(() => {
+    const fetchAdapters = async () => {
+      let newAdapters: IAdapter<unknown>[] = [];
+      for (let i = 0; i < adapters.length; i += 1) {
+        newAdapters = newAdapters.concat(await getExternalAdapterByName(adapters[i]));
+      }
+      setExternalAdapters(newAdapters);
+    };
+    fetchAdapters();
+  }, [adapters]);
+
+
+  // Wallet Plugins manipulation  
+  const walletPlugins = useMemo<IPlugin[]>(() => {
+    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 || !walletPlugin?.enable) return [];
+    const { logoDark, logoLight } = walletPlugin;
+    const walletServicesPlugin = new WalletServicesPlugin({
+      walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
+    });
+    return [walletServicesPlugin];
+  }, [walletPlugin, chainNamespace]);
+  
+  // Modal Params manipulation
+  const loginMethodsConfig = useMemo(() => {
+    if (loginProviders.length === 0) return undefined;
+  
+    if (!Object.values(loginMethods).some((x) => x.showOnModal)) {
+      return undefined;
+    }
+  
+    const loginMethodsConfig = JSON.parse(JSON.stringify(loginMethods));
+    return loginMethodsConfig;
+  }, [loginProviders]);
+  
+  const modalParams = useMemo(() => {
+    const modalConfig = {
+      [WALLET_ADAPTERS.AUTH]: {
+        label: "auth",
+        loginMethods: loginMethodsConfig,
+      },
+    };
+    return modalConfig;
+  }, [loginMethodsConfig]);
+
+
+  const chainConfig = useMemo(() => chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain) || chainConfigs[chainNamespace as ChainNamespaceType][0], [chainNamespace, chain]);
+
+  // Populate the private key provider based on the chain selected
+  const privateKeyProvider = useMemo<IBaseProvider<string>>(() => {
+    switch (chainNamespace) {
+      case CHAIN_NAMESPACES.EIP155:
+        return new EthereumPrivateKeyProvider({
+          config: {
+            chainConfig,
+          },
+        });
+      case CHAIN_NAMESPACES.SOLANA:
+        return new SolanaPrivateKeyProvider({
+          config: {
+            chainConfig,
+          },
+        });
+      default:
+        return new CommonPrivateKeyProvider({
+          config: {
+            chainConfig,
+          },
+        });
+      }
+  }, [chainNamespace, chainConfig]);
+
+  // Account Abstraction Provider
+  const showAAProviderSettings = useMemo(() => chainNamespace === CHAIN_NAMESPACES.EIP155, [chainNamespace]);
+  const accountAbstractionProvider = useMemo((): IBaseProvider<IProvider> | undefined => {
+    if (!showAAProviderSettings || !useAccountAbstractionProvider) return undefined;
+  
+    const chainConfig = chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain)!;
+    // setup aa provider
+    let smartAccountInit: ISmartAccount;
+    switch (smartAccountType) {
+      case "biconomy":
+        smartAccountInit = new BiconomySmartAccount();
+        break;
+      case "kernel":
+        smartAccountInit = new KernelSmartAccount();
+        break;
+      case "trust":
+        smartAccountInit = new TrustSmartAccount();
+        break;
+      // case "light":
+      //   smartAccountInit = new LightSmartAccount();
+      //   break;
+      // case "simple":
+      //   smartAccountInit = new SimpleSmartAccount();
+      //   break;
+      case "safe":
+      default:
+        smartAccountInit = new SafeSmartAccount();
+        break;
+    }
+  
+    return new AccountAbstractionProvider({
+      config: {
+        chainConfig,
+        bundlerConfig: { url: bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
+        paymasterConfig: paymasterUrl
+          ? {
+              url: paymasterUrl,
+            }
+          : undefined,
+        smartAccountInit,
+      },
+    });
+  }, [chainNamespace, chain, useAAWithExternalWallet, useAccountAbstractionProvider]);
+
+  // Web3Auth Options
+  const web3authOptions = useMemo<Web3AuthOptions>(() => {
+    return {
+      clientId: clientIds[network],
+      privateKeyProvider: privateKeyProvider,
+      web3AuthNetwork: network,
+      uiConfig: whiteLabel?.enable ? { ...whiteLabel.config } : undefined,
+      accountAbstractionProvider: accountAbstractionProvider,
+      useAAWithExternalWallet: useAAWithExternalWallet,
+      // TODO: Add more options
+      // chainConfig?: CustomChainConfig;
+      // enableLogging?: boolean;
+      // storageKey?: "session" | "local";
+      // sessionTime?: number;
+      // useCoreKitKey?: boolean;
+      enableLogging: false,
+    };
+  },[network, privateKeyProvider, whiteLabel, useAAWithExternalWallet, accountAbstractionProvider]);
+
+  // Web3Auth Config
+  const web3authConfig = useMemo<Web3AuthContextConfig>(() => ({
+    adapters: externalAdapters,
+    plugins: walletPlugins,
+    modalConfig: modalParams,
+    web3AuthOptions: web3authOptions,
+    hideWalletDiscovery: !showWalletDiscovery,
+  }), [externalAdapters, walletPlugins, modalParams, web3authOptions, showWalletDiscovery]); 
 
   const getExternalAdapterByName = async (name: string): Promise<IAdapter<unknown>[]> => {
     switch (name) {
@@ -162,150 +357,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode}> = ({ children }
         return [];
     }
   };
-  
-  const [web3authAdapters, setWeb3authAdapters] = useState<IAdapter<unknown>[]>([]);
 
-  useEffect(() => {
-    const fetchAdapters = async () => {
-      let newAdapters: IAdapter<unknown>[] = [];
-      for (let i = 0; i < adapters.length; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        newAdapters = newAdapters.concat(await getExternalAdapterByName(adapters[i]));
-      }
-      setWeb3authAdapters(newAdapters);
-    };
+  const chainOptions = useMemo(() => chainConfigs[chainNamespace as ChainNamespaceType].map((x) => ({ name: `${x.chainId} ${x.tickerName}`, value: x.chainId })), [chainNamespace]);
 
-    fetchAdapters();
-  }, [adapters]);
-  
-  const web3authPlugins = useMemo<IPlugin[]>(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 || !walletPlugin.enable) return [];
-    const { logoDark, logoLight } = formData.walletPlugin;
-    const walletServicesPlugin = new WalletServicesPlugin({
-      walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
-    });
-    return [walletServicesPlugin];
-  }, [walletPlugin, chainNamespace]);
-
-  const loginMethodsConfig = useMemo(() => {
-    if (loginProviders?.length === 0) return undefined;
-  
-    if (loginMethods && !Object.values(loginMethods).some((x) => x.showOnModal)) {
-      return undefined;
-    }
-
-    return loginMethods;
-  }, [loginProviders, loginMethods]);
-
-  const modalParams = useMemo(() => {
-    const modalConfig = {
-      [WALLET_ADAPTERS.AUTH]: {
-        label: "auth",
-        loginMethods: loginMethodsConfig,
-      },
-    };
-    return modalConfig;
-  },[loginMethodsConfig]);
-  
-  const chainConfig = useMemo<CustomChainConfig>(() => {
-    if(!chainNamespace || !chain || !chainConfigs[chainNamespace as ChainNamespaceType].length) return chainConfigs[CHAIN_NAMESPACES.EIP155][0];
-
-    return chainConfigs[chainNamespace as ChainNamespaceType].find((x) => x.chainId === chain)
-      || chainConfigs[chainNamespace as ChainNamespaceType][0]
-
-  } , [chainNamespace, chain]);
-
-  const privateKeyProvider = useMemo<IBaseProvider<string>>(() => {
-    switch (chainNamespace) {
-      case CHAIN_NAMESPACES.EIP155:
-        return new EthereumPrivateKeyProvider({
-          config: {
-            chainConfig,
-          },
-        });
-      case CHAIN_NAMESPACES.SOLANA:
-        return new SolanaPrivateKeyProvider({
-          config: {
-            chainConfig,
-          },
-        });
-      default:
-        return new CommonPrivateKeyProvider({
-          config: {
-            chainConfig,
-          },
-        });
-    }
-  }, [chainNamespace, chain]);
-
-  const web3authOptions = useMemo<Web3AuthOptions>(() => {
-    return {
-      clientId: clientIds[network || WEB3AUTH_NETWORK.TESTNET],
-      privateKeyProvider,
-      web3AuthNetwork: network,
-      uiConfig: whiteLabel?.enable ? { ...whiteLabel.config } : undefined,
-      enableLogging: true,
-    };
-  }, [network, privateKeyProvider, whiteLabel]);
-
-  const web3authContextConfig = useMemo<Web3AuthContextConfig>(() => ({
-    adapters: web3authAdapters,
-    plugins: web3authPlugins,
-    modalConfig: modalParams,
-    web3AuthOptions: web3authOptions,
-  }), [web3authAdapters, web3authPlugins, modalParams, web3authOptions]);
-
-
-  useEffect(() => {
-    setFormData(
-      {
-        ...formData,
-        network,
-        chainNamespace,
-        chain,
-        whiteLabel,
-        loginProviders,
-        adapters,
-        loginMethods,
-        walletPlugin,
-      }
-    )
-
-  }, [network, chainNamespace, chain, whiteLabel, loginProviders, adapters, loginMethods, walletPlugin]);
-
-  useEffect(() => {
-    if(formData) {
-      setNetWork(formData.network);
-      setChainNamespace(formData.chainNamespace);
-      setChain(formData.chain);
-      setWhiteLabel(formData.whiteLabel);
-      setLoginProviders(formData.loginProviders);
-      setAdapters(formData.adapters);
-      setLoginMethods(formData.loginMethods);
-      setWalletPlugin(formData.walletPlugin);
-    }
-  }, []);
+  const adapterOptions = useMemo(() => chainNamespace === CHAIN_NAMESPACES.EIP155 ? [
+    { name: "coinbase-adapter", value: "coinbase" },
+    { name: "torus-evm-adapter", value: "torus-evm" },
+    { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
+    { name: "injected-adapters", value: "injected-evm" },
+  ] : [
+    { name: "torus-solana-adapter", value: "torus-solana" },
+    { name: "injected-adapters", value: "injected-solana" },
+  ], [chainNamespace]);
 
   return (
     <AppContext.Provider value={{ 
-      network, 
-      setNetWork,
-      chainNamespace,
-      setChainNamespace,
-      chain,
-      setChain,
-      whiteLabel,
-      setWhiteLabel,
-      loginProviders,
-      setLoginProviders,
-      adapters,
-      setAdapters,
-      loginMethods,
-      setLoginMethods,
-      walletPlugin,
-      setWalletPlugin,
+      web3authConfig,
 
-      web3authContextConfig,
+      network,
+      chainNamespace,
+      chain,
+      whiteLabel,
+      loginProviders,
+      adapters,
+      loginMethods,
+      walletPlugin,
+      showWalletDiscovery,
+      useAccountAbstractionProvider,
+      useAAWithExternalWallet,
+      smartAccountType,
+      bundlerUrl,
+      paymasterUrl,
+
+      setNetWork,
+      setChainNamespace,
+      setChain,
+      setWhiteLabel,
+      setLoginProviders,
+      setAdapters,
+      setLoginMethods,
+      setWalletPlugin,
+      setShowWalletDiscovery,
+      setUseAccountAbstractionProvider,
+      setUseAAWithExternalWallet,
+      setSmartAccountType,
+      setBundlerUrl,
+      setPaymasterUrl,
+
+      networkOptions,
+      chainNamespaceOptions,
+      chainOptions,
+      adapterOptions,
+      loginProviderOptions,
+      loginMethodOptions: loginProviderOptions,
+      languageOptions: languageOptions,
+      smartAccountTypeOptions: SmartAccountOptions,
+
     }}>
       {children}
     </AppContext.Provider>

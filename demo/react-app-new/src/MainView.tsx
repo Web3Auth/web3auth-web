@@ -6,9 +6,9 @@ import AppDashboard from "./components/AppDashboard";
 
 function Main() {
 
-  const { web3authContextConfig } = useAppContext();
+  const { web3authConfig } = useAppContext();
   return (
-    <Web3AuthProvider config={web3authContextConfig}>
+    <Web3AuthProvider config={web3authConfig}>
       <AppHeader />
       <main className="flex-1 p-1">
         <div className="relative">

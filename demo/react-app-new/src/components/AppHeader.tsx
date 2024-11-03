@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useWeb3Auth } from "@web3auth/modal-react-hooks";
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context';
-import { Button } from './CommonUI';
+import { Button } from '@toruslabs/react-components';
 
 const AppHeader: React.FC = () => {
-  const { network } = useAppContext();
   const { t } = useTranslation();
   const { status, logout, isConnected } = useWeb3Auth();
 
@@ -31,18 +29,18 @@ const AppHeader: React.FC = () => {
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="/web3auth.svg" className="h-8" alt="W3A Logo" />
         </a>
-        <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+        <div className="flex space-x-3 rtl:space-x-reverse">
           {isDisplay.btnLogout ? (
-            <Button onClick={onLogout}>
+            <Button onClick={onLogout} pill size="sm">
               {t('app.btnLogout')}
             </Button>
           ) : (
-            <Button onClick={()=>{}}>
+            <Button onClick={()=>{}} pill block size="sm" variant="secondary">
               {t('app.documentation')}
             </Button>
           )}
         </div>
-        <div id="navbar-sticky" className="items-center justify-between w-full md:flex md:w-auto md:order-1">
+        <div id="navbar-sticky" className="items-center justify-between w-full">
           {isDisplay.appHeading && (
             <div className="max-sm:w-full">
               <h1 className="leading-tight text-3xl font-extrabold">{t('app.title')}</h1>

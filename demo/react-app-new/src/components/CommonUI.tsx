@@ -9,7 +9,7 @@ export const Tag: React.FC<{ text: string | null }> = ({ text }) => {
 };
 
 export const Card: React.FC<{ children?: React.ReactNode, className: string, id?: string }> = ({ children, className, id }) => {
-  const classes = `rounded overflow-hidden shadow-lg h-auto ${className}`;
+  const classes = `rounded shadow-lg h-auto ${className}`;
   return (
     <div className={classes} id={id}>
       {children}
@@ -89,22 +89,22 @@ export const Toggle: React.FC<{ isOn: boolean; onToggle: () => void; label: stri
     <div className="flex items-center">
       <div
         onClick={!disabled ? onToggle : undefined}
-        className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer ${
-          isOn ? 'bg-blue-500' : 'bg-gray-300'
+        className={`w-9 h-5 flex items-center rounded-full p-0.5 cursor-pointer ${
+          isOn ? 'bg-emerald-300' : 'bg-gray-300'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div
-          className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${
-            isOn ? 'translate-x-6' : ''
+          className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+            isOn ? 'translate-x-4' : ''
           }`}
         ></div>
       </div>
-      <span className={`ml-3 text-gray-700 ${disabled ? 'opacity-50' : ''}`}>{label}</span>
+      <span className={`ml-2 text-sm text-gray-700 ${disabled ? 'opacity-50' : ''}`}>{label}</span>
     </div>
   );
 };
 
-export const TextField: React.FC<{
+export const TextInput: React.FC<{
   label: string;
   value: string;
   onChange: (value: string) => void;

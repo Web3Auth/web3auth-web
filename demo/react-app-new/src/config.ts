@@ -4,17 +4,17 @@ import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, IAdapter, IBas
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 
-export const languageOptions: { label: string; value: LANGUAGE_TYPE }[] = [
-  { label: "English", value: LANGUAGES.en },
-  { label: "German", value: LANGUAGES.de },
-  { label: "Japanese", value: LANGUAGES.ja },
-  { label: "Korean", value: LANGUAGES.ko },
-  { label: "Mandarin", value: LANGUAGES.zh },
-  { label: "Spanish", value: LANGUAGES.es },
-  { label: "French", value: LANGUAGES.fr },
-  { label: "Portuguese", value: LANGUAGES.pt },
-  { label: "Dutch", value: LANGUAGES.nl },
-  { label: "Turkish", value: LANGUAGES.tr },
+export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
+  { name: "English", value: LANGUAGES.en },
+  { name: "German", value: LANGUAGES.de },
+  { name: "Japanese", value: LANGUAGES.ja },
+  { name: "Korean", value: LANGUAGES.ko },
+  { name: "Mandarin", value: LANGUAGES.zh },
+  { name: "Spanish", value: LANGUAGES.es },
+  { name: "French", value: LANGUAGES.fr },
+  { name: "Portuguese", value: LANGUAGES.pt },
+  { name: "Dutch", value: LANGUAGES.nl },
+  { name: "Turkish", value: LANGUAGES.tr },
 ];
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
@@ -49,7 +49,7 @@ export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
 });
 
 
-export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ label: x, value: x }));
+export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
 export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
   [WEB3AUTH_NETWORK.MAINNET]: "BJRZ6qdDTbj6Vd5YXvV994TYCqY42-PxldCetmvGTUdoq6pkCqdpuC1DIehz76zuYdaq1RJkXGHuDraHRhCQHvA",
@@ -74,6 +74,15 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+      blockExplorerUrl: "https://sepolia.etherscan.io",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+      chainId: "0xaa36a7",
+      ticker: "ETH",
+      tickerName: "Sepolia Testnet",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
       rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
       blockExplorerUrl: "https://testnet.bscscan.com",
       logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
@@ -84,16 +93,16 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc-mumbai.maticvigil.com",
-      blockExplorerUrl: "https://mumbai-explorer.matic.today",
-      logo: "https://cryptologos.cc/logos/polygon-matic-logo.png",
-      chainId: "0x13881",
-      displayName: "Polygon Mumbai Testnet",
-      ticker: "matic",
-      tickerName: "matic",
+      chainId: "0x13882",
+      rpcTarget: "https://rpc.ankr.com/polygon_amoy",
+      displayName: "Polygon Amoy Testnet",
+      blockExplorerUrl: "https://amoy.polygonscan.com/",
+      ticker: "POL",
+      tickerName: "Polygon Ecosystem Token",
     },
   ],
   [CHAIN_NAMESPACES.SOLANA]: [
+    // Ref: https://namespaces.chainagnostic.org/solana/caip10
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
       rpcTarget: "https://api.devnet.solana.com",
@@ -101,7 +110,16 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x3",
       ticker: "SOL",
-      tickerName: "Solana",
+      tickerName: "Solana Devnet",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      rpcTarget: "https://api.devnet.solana.com",
+      blockExplorerUrl: "https://explorer.solana.com",
+      logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
+      chainId: "0x1",
+      ticker: "SOL",
+      tickerName: "Solana Mainnet",
     },
   ],
   [CHAIN_NAMESPACES.CASPER]: [],
@@ -109,11 +127,12 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.OTHER]: [],
 };
 
-export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).filter(x => chainConfigs[x].length > 0).map((x) => ({ label: x, value: x }));
+
+export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).filter(x => chainConfigs[x].length > 0).map((x) => ({ name: x, value: x }));
 
 export const loginProviderOptions = Object.values(LOGIN_PROVIDER)
   .filter((x) => x !== "jwt" && x !== "webauthn")
-  .map((x) => ({ label: x.replaceAll("_", " "), value: x }));
+  .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 const intialNetwork = WEB3AUTH_NETWORK.SAPPHIRE_DEVNET;
 const initalChainId = "0x1";
@@ -153,3 +172,31 @@ export const web3authInitialConfig = {
   },
 
 }
+
+export const initWhiteLabel: WhiteLabelData = {
+  appName: "HelloDemo",
+  appUrl: "http://localhost:8080",
+  logoDark: "https://images.web3auth.io/example-hello.svg", // dark logo for light background
+  logoLight: "https://images.web3auth.io/example-hello-light.svg", // light logo for dark background
+  mode: "auto",
+  defaultLanguage: "en",
+  theme: {
+    primary: "#5DF0EB",
+    onPrimary: "black",
+  },
+};
+
+export const getDefaultBundlerUrl = (chainId: string): string => {
+  return `https://api.pimlico.io/v2/${Number(chainId)}/rpc?apikey=${process.env.PIMLICO_API_KEY}`;
+};
+
+export type SmartAccountType = "safe" | "kernel" | "biconomy" | "trust";
+
+export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
+  { name: "Safe", value: "safe" },
+  { name: "Biconomy", value: "biconomy" },
+  { name: "Kernel", value: "kernel" },
+  { name: "Trust", value: "trust" },
+  // { name: "Light", value: "light" },
+  // { name: "Simple", value: "simple" },
+];
