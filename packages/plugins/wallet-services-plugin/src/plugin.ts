@@ -21,7 +21,7 @@ import {
   WALLET_ADAPTERS,
   WalletServicesPluginError,
 } from "@web3auth/base";
-import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
+import WsEmbed, { AccountAbstractionConfig, CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
@@ -99,12 +99,21 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!connectedChainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
     if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
+    const enableAccountAbstraction =
+      web3auth.coreOptions.useAAWithExternalWallet &&
+      (web3auth.connectedAdapterName === WALLET_ADAPTERS.AUTH ||
+        (web3auth.connectedAdapterName !== WALLET_ADAPTERS.AUTH && web3auth.coreOptions.useAAWithExternalWallet));
+    const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
+    const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
+    const bundlerConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig;
+
+    // TODO: fix this type casting when we start using accountAbstractionController
     const accountAbstractionConfig = {
-      enabled: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider) !== undefined,
-      smartAccountType: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name || undefined,
-      paymasterUrl: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig?.url || undefined,
-      bundlerUrl: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig?.url || undefined,
-    };
+      enabled: enableAccountAbstraction,
+      smartAccountType: smartAccountType || undefined,
+      paymasterConfig: paymasterConfig || undefined,
+      bundlerConfig: bundlerConfig || undefined,
+    } as AccountAbstractionConfig;
 
     const finalInitOptions = {
       ...this.walletInitOptions,
