@@ -1,5 +1,6 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
@@ -98,11 +99,19 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!connectedChainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
     if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
+    const accountAbstractionConfig = {
+      enabled: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider) !== undefined,
+      smartAccountType: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name || undefined,
+      paymasterUrl: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig?.url || undefined,
+      bundlerUrl: (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig?.url || undefined,
+    };
+
     const finalInitOptions = {
       ...this.walletInitOptions,
       chainConfig: connectedChainConfig as EthereumProviderConfig,
       enableLogging: this.web3auth.coreOptions?.enableLogging,
       whiteLabel: mergedWhitelabelSettings,
+      accountAbstractionConfig,
     };
 
     await this.wsEmbedInstance.init(finalInitOptions);
