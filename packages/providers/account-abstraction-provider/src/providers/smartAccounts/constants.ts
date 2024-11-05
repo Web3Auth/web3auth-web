@@ -1,5 +1,6 @@
 export const SMART_ACCOUNT = {
   BICONOMY: "biconomy",
+  NEXUS: "nexus",
   KERNEL: "kernel",
   LIGHT: "light",
   SAFE: "safe",
