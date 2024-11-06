@@ -3,6 +3,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "solid-js": "^1.8.11"
   },
   "description": "Ui modal for web3Auth",

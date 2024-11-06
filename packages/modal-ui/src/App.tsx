@@ -1,19 +1,17 @@
-import { batch, type Component, createSignal } from "solid-js";
+import { createSignal, type Component } from "solid-js";
+import { Modal } from "./components/Modal";
+import { Body } from "./components/Body";
 
 const App: Component = () => {
-  const [counter, setCounter] = createSignal(0);
-
-  const incrementCounter = () => {
-    batch(() => {
-      setCounter((c) => c + 1);
-    });
-  };
+  const [open, setOpen] = createSignal(false);
   return (
-    <>
-      <p class="text-4xl text-app-white text-center py-20 bg-app-primary-600">Hello tailwind! hello</p>
-      <br />
-      <button onClick={incrementCounter}>Click to increment - {counter()}</button>
-    </>
+    <div class="w-screen h-screen flex items-center justify-center flex-col gap-4">
+      <h1 class="text-3xl font-bold text-slate-700">Try out your new modal</h1>
+      <button onClick={() => setOpen(true)}>Open Modal</button>
+      <Modal open={open()} onClose={() => setOpen(false)} placement="center" padding={false} showCloseIcon>
+        <Body />
+      </Modal>
+    </div>
   );
 };
 

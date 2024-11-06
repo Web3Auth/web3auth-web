@@ -28,76 +28,7 @@ const config: Config = {
         xl: "1280px",
         "2xl": "1536px",
       },
-      boxShadow: {
-        DEFAULT: "0px 14px 28px rgba(46, 91, 255, 0.06)",
-        inner: "inset 0px 4px 28px rgba(46, 91, 255, 0.06)",
-        dark: "0 20px 28px rgba(0,0,0,0.16)",
-        dark2: "5px 5px 10px #212121, -5px -5px 10px rgb(55 56 60 / 25%)",
-      },
-      borderRadius: {
-        "4xl": "2rem",
-      },
-      backgroundImage: {
-        "gradient-conic": "conic-gradient(transparent, var(--tw-gradient-to))",
-      },
-      transitionDuration: {
-        "300": "300ms", // already exists in default config
-        "400": "400ms",
-        "500": "500ms",
-      },
-      transitionTimingFunction: {
-        "in-out-quint": "cubic-bezier(0.83, 0, 0.17, 1)",
-      },
-      translate: {
-        full: "100%",
-        "-full": "-100%",
-      },
-      transitionProperty: {
-        height: "height",
-        spacing: "margin, padding",
-      },
-      transformOrigin: {
-        top: "top",
-      },
-      scale: {
-        "0": "0",
-        "100": "1",
-      },
-      opacity: {
-        "0": "0",
-        "100": "1",
-      },
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        fadeOut: {
-          "0%": { opacity: "1" },
-          "100%": { opacity: "0" },
-        },
-        scaleIn: {
-          "0%": { transform: "scale(0.75)" },
-          "100%": { transform: "scale(1)" },
-        },
-        scaleOut: {
-          "0%": { transform: "scale(1)" },
-          "100%": { transform: "scale(0.75)" },
-        },
-        spin: {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-      },
-      animation: {
-        fadeIn: "fadeIn 0.3s ease-out forwards",
-        fadeOut: "fadeOut 0.3s ease-out forwards",
-        scaleIn: "scaleIn 0.3s ease-out forwards",
-        scaleOut: "scaleOut 0.3s ease-out forwards",
-        spin: "spin 1s linear infinite",
-      },
     },
-
     fontFamily: {
       header: ["Inter"],
       body: ["Inter"],

@@ -84,5 +84,8 @@
     "packages/plugins/*",
     "packages/providers/*",
     "packages/ui"
-  ]
+  ],
+  "dependencies": {
+    "tailwind-merge": "^2.5.4"
+  }
 }
