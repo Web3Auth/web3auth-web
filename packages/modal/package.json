@@ -7,8 +7,8 @@
     "@web3auth/auth-adapter": "^9.3.0",
     "@web3auth/base": "^9.3.0",
     "@web3auth/base-provider": "^9.3.0",
-    "@web3auth/no-modal": "^9.3.1",
-    "@web3auth/ui": "^9.3.1",
+    "@web3auth/no-modal": "^9.3.2",
+    "@web3auth/ui": "^9.3.2",
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {
@@ -69,5 +69,5 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "9.3.1"
+  "version": "9.3.2"
 }
