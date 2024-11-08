@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {
   AccountAbstractionProvider,
-  BiconomySmartAccount,
   ISmartAccount,
   KernelSmartAccount,
+  NexusSmartAccount,
   // LightSmartAccount,
   SafeSmartAccount,
   TrustSmartAccount,
@@ -86,8 +86,8 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   // setup aa provider
   let smartAccountInit: ISmartAccount;
   switch (formData.smartAccountType) {
-    case "biconomy":
-      smartAccountInit = new BiconomySmartAccount();
+    case "nexus":
+      smartAccountInit = new NexusSmartAccount();
       break;
     case "kernel":
       smartAccountInit = new KernelSmartAccount();
