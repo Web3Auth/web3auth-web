@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@toruslabs/solana-embed": "^2.1.0",
-    "@web3auth/auth": "^9.4.1",
+    "@web3auth/auth": "^9.5.0",
     "@web3auth/base": "^9.3.0",
     "@web3auth/no-modal": "^9.3.2",
     "loglevel": "^1.9.2"

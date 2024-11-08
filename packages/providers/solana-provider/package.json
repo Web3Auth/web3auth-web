@@ -20,9 +20,9 @@
     "pre-commit": "lint-staged --cwd ."
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^6.2.2",
+    "@toruslabs/base-controllers": "^6.2.4",
     "@toruslabs/tweetnacl-js": "^1.0.4",
-    "@web3auth/auth": "^9.4.1",
+    "@web3auth/auth": "^9.5.0",
     "@web3auth/base": "^9.3.0",
     "@web3auth/base-provider": "^9.3.0",
     "bn.js": "^5.2.1",

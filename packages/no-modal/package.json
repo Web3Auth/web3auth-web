@@ -37,7 +37,7 @@
     "@web3auth/wallet-connect-v2-adapter": "^9.x"
   },
   "dependencies": {
-    "@web3auth/auth": "^9.4.1",
+    "@web3auth/auth": "^9.5.0",
     "@web3auth/base": "^9.3.0",
     "@web3auth/base-provider": "^9.3.0",
     "deepmerge": "^4.3.1"
