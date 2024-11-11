@@ -1,3 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  padding: 0px !important;
+  margin: 0px !important;
+  box-sizing: border-box;
+}
+
+.w3a-parent-container {
+  font-family: "Inter";
+  position: relative;
+}

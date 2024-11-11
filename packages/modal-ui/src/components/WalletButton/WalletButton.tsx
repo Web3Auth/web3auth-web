@@ -5,13 +5,13 @@ export interface WalletButtonProps {
 
 const WalletButton = ({ label, ...props }: WalletButtonProps) => {
   return (
-    <button class="w-full flex items-center justify-between p-4 rounded-xl bg-app-gray-100 hover:shadow-md hover:translate-y-[0.5px] border border-app-gray-100 hover:border-app-gray-200" {...props}>
-      <div class="flex items-center gap-x-2">
-        <figure class="w-5 h-5 rounded-full bg-app-gray-300"></figure>
-        <p class="text-sm font-medium text-app-gray-900">{label}</p>
+    <button class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--bg-app-gray-100 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px] w3a--border w3a--border-app-gray-100 hover:w3a--border-app-gray-200" {...props}>
+      <div class="w3a--flex w3a--items-center w3a--gap-x-2">
+        <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--bg-app-gray-300"></figure>
+        <p class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900">{label}</p>
       </div>
 
-      <figure class="w-5 h-5 rounded-full bg-app-gray-300"></figure>
+      <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--bg-app-gray-300"></figure>
     </button>
   )
 }

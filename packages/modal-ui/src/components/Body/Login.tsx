@@ -11,24 +11,24 @@ const Login = ({ onExternalWalletClick }: LoginProps) => {
     if (onExternalWalletClick) onExternalWalletClick()
   }
   return (
-    <div class="flex flex-col gap-y-4 h-full">
-      <div class="flex flex-col items-start gap-y-1">
-        <p class="text-xl font-bold text-app-gray-900 dark:text-app-white">Sign in</p>
-        <p class="text-sm font-normal text-app-gray-500 dark:text-app-gray-400">Your Web3Auth wallet with one click</p>
+    <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--h-full">
+      <div class="w3a--flex w3a--flex-col w3a--items-start w3a--gap-y-1">
+        <p class="w3a--text-xl w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign in</p>
+        <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-400">Your Web3Auth wallet with one click</p>
       </div>
 
       <SocialLoginList />
 
 
-      <form class="flex flex-col gap-y-4 mt-auto">
-        <div class="flex flex-col gap-y-2">
-          <label class="text-sm font-semibold text-app-gray-900 text-start">Email or Phone</label>
-          <input placeholder="E.g. +00-123455/name@example.com" class="px-4 py-2.5 border border-app-gray-300 bg-app-gray-50 placeholder:text-app-gray-400 placeholder:text-sm placeholder:font-normal rounded-full" />
+      <form class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--mt-auto">
+        <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
+          <label class="w3a--text-sm w3a--font-semibold w3a--text-app-gray-900 w3a--text-start">Email or Phone</label>
+          <input placeholder="E.g. +00-123455/name@example.com" class="w3a--px-4 w3a--py-2.5 w3a--border w3a--border-app-gray-300 w3a--bg-app-gray-50 placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full" />
         </div>
-        <button class="w-full px-5 py-3 rounded-full bg-app-gray-100 disabled:text-app-gray-400 text-app-gray-900 text-sm font-medium">Continue with Email</button>
-        <div class="flex flex-col gap-y-2">
-          <label class="text-sm font-semibold text-app-gray-900 text-start">External Wallet</label>
-          <button class="w-full px-5 py-3 rounded-full bg-app-gray-100 disabled:text-app-gray-400 text-app-gray-900 text-sm font-medium" onClick={handleConnectWallet}>Connect with Wallet</button>
+        <button class="w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--bg-app-gray-100 disabled:w3a--text-app-gray-400 w3a--text-app-gray-900 w3a--text-sm w3a--font-medium">Continue with Email</button>
+        <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
+          <label class="w3a--text-sm w3a--font-semibold w3a--text-app-gray-900 w3a--text-start">External Wallet</label>
+          <button class="w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--bg-app-gray-100 disabled:w3a--text-app-gray-400 w3a--text-app-gray-900 w3a--text-sm w3a--font-medium" onClick={handleConnectWallet}>Connect with Wallet</button>
         </div>
       </form>
     </div>
