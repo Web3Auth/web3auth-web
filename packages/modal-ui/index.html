@@ -1,15 +1,75 @@
-<!doctype html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>Web3auth Modal UI</title>
+    <title>Test web3auth app</title>
   </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root" id="w3a-parent-container" class="w3a-parent-container"></div>
 
-    <script src="/src/index.tsx" type="module"></script>
+  <body>
+    <h1>Test web3auth app</h1>
+    <div>
+      <button class="show-modal" onclick="showModal()">Show Modal</button>
+    </div>
+    <script src="./dist/assets/index-De1Kpl9H.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/auth"></script>
+    <script>
+      let modal = null;
+      let testEventEmitter = null;
+      function showModal() {
+        console.log("open");
+        modal.open();
+        // testEventEmitter.emit("connecting", { adapter: "auth" })
+        // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
+        // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
+        // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
+      }
+      (async function init() {
+        try {
+          testEventEmitter = new Auth.SafeEventEmitter();
+          modal = new Ui({
+            adapterListener: testEventEmitter,
+            theme: "dark",
+            // version: "1",
+          });
+          await modal.initModal();
+          console.log("modal init");
+          modal.addSocialLogins(
+            "auth",
+            {
+              google: {
+                name: "google",
+              },
+              facebook: {
+                name: "facebook",
+              },
+              twitter: {
+                name: "twitter",
+              },
+              reddit: {
+                name: "reddit",
+              },
+              twitch: {
+                name: "twitch",
+              },
+              github: {
+                name: "github",
+              },
+            },
+            ["facebook"]
+          );
+          modal.initExternalWalletContainer();
+          modal.addWalletLogins(
+            {
+              "wallet-connect-v2": {
+                label: "wallet-connect-v2",
+              },
+            },
+            { showExternalWalletsOnly: false }
+          );
+          testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } });
+          // showModal()
+        } catch (error) {
+          console.log("error in ui", error);
+        }
+      })();
+    </script>
   </body>
 </html>
