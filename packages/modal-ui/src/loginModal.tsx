@@ -17,6 +17,7 @@ import {
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
 import { render } from "solid-js/web";
+import { ThemedContext } from "./context/ThemeContext";
 
 import { LoginModal as Modal } from "./components/LoginModal";
 // import { ThemedContext } from "./context/ThemeContext";
@@ -34,7 +35,6 @@ import {
 } from "./interfaces";
 import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
-import { Body } from "./components/Body";
 
 function createWrapper(parentZIndex: string): HTMLElement {
   const existingWrapper = document.getElementById("w3a-parent-container");
@@ -208,17 +208,19 @@ export class LoginModal extends SafeEventEmitter {
 
       render(
         () =>
-          <Modal
-            closeModal={this.closeModal}
-            stateListener={this.stateEmitter}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
-            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            chainNamespace={this.chainNamespace}
-            walletRegistry={this.walletRegistry}
-          />,
+          <ThemedContext.Provider value={darkState}>
+            <Modal
+              closeModal={this.closeModal}
+              stateListener={this.stateEmitter}
+              handleShowExternalWallets={this.handleShowExternalWallets}
+              handleExternalWalletClick={this.handleExternalWalletClick}
+              handleSocialLoginClick={this.handleSocialLoginClick}
+              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+              appName={this.uiConfig.appName}
+              chainNamespace={this.chainNamespace}
+              walletRegistry={this.walletRegistry}
+            />
+          </ThemedContext.Provider>,
         root!);
 
 
@@ -316,7 +318,7 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
-    listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
+    listener.on(ADAPTER_EVENTS.CONNECTING, (data: any) => {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.

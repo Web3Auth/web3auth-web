@@ -1,6 +1,7 @@
-// import { useContext } from "react";
+import { useContext } from "solid-js";
 
 import { mergeProps } from "solid-js";
+import { ThemedContext } from "../../context/ThemeContext";
 
 export interface ImageProps {
   hoverImageId?: string;
@@ -22,7 +23,7 @@ export default function Image(props: ImageProps) {
     extension: "svg"
   }, props)
 
-  const isDark = false;
+  const { isDark } = useContext(ThemedContext);
 
   const imgName = isDark && mergedProps.darkImageId ? mergedProps.darkImageId : mergedProps.imageId;
   const hoverImgName = isDark && mergedProps.darkHoverImageId ? mergedProps.darkHoverImageId : mergedProps.hoverImageId;
