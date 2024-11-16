@@ -190,10 +190,11 @@ export default function Modal(props: ModalProps) {
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
         <div
-          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "w3a--p-6 w3a--pt-7" : ""} ${(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
+          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "w3a--p-6 w3a--pt-7" : ""} ${
+            (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
               ? ""
               : "wallet-adapter-container"
-            }`}
+          }`}
         >
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <>
@@ -216,7 +217,7 @@ export default function Modal(props: ModalProps) {
           ) : (
             <div className={`transition-wrapper ${transition}`}>
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
-                !modalState.externalWalletsVisibility ? (
+              !modalState.externalWalletsVisibility ? (
                 <>
                   <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
                   <div className="w3a-modal__content w3ajs-content">
