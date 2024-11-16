@@ -140,13 +140,13 @@ export default function Modal(props: ModalProps) {
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
 
   const externalWalletButton = (
-    <div className="w3ajs-external-wallet w3a-group">
+    <div className="w3ajs-external-wallet w3a-group w3a--w-full">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
-          className="w-full w3ajs-external-toggle__button"
+          className="w3a--w-full w3ajs-external-toggle__button"
           onClick={() => {
             setModalState((prevState) => {
               return {
@@ -190,11 +190,10 @@ export default function Modal(props: ModalProps) {
     modalState.modalVisibilityDelayed && (
       <div id="w3a-modal" className="w3a-modal">
         <div
-          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "w3a--p-6 w3a--pt-7" : ""} ${
-            (areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
+          className={`${modalTransitionClasses.join(" ")} ${modalState.status !== MODAL_STATUS.INITIALIZED ? "w3a--p-6 w3a--pt-7" : ""} ${(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) && !modalState.externalWalletsVisibility
               ? ""
               : "wallet-adapter-container"
-          }`}
+            }`}
         >
           {modalState.status !== MODAL_STATUS.INITIALIZED ? (
             <>
@@ -217,7 +216,7 @@ export default function Modal(props: ModalProps) {
           ) : (
             <div className={`transition-wrapper ${transition}`}>
               {(areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible) &&
-              !modalState.externalWalletsVisibility ? (
+                !modalState.externalWalletsVisibility ? (
                 <>
                   <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
                   <div className="w3a-modal__content w3ajs-content">
