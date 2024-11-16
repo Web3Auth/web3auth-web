@@ -140,13 +140,14 @@ export default function Modal(props: ModalProps) {
   const isExternalPrimary = modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
 
   const externalWalletButton = (
-    <div className="w3ajs-external-wallet w3a-group">
+    <div className="w3ajs-external-wallet w3a-group w3a--w-full">
       <div className="w3a-external-toggle w3ajs-external-toggle">
         {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
-          className="w-full w3ajs-external-toggle__button"
+          className="w3a--w-full w3ajs-external-toggle__button"
+          style={{ width: "100%" }}
           onClick={() => {
             setModalState((prevState) => {
               return {
