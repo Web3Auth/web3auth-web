@@ -17,6 +17,7 @@ import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/defa
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
@@ -35,12 +36,17 @@ const formData = formDataStore;
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const walletPlugins = computed(() => {
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [];
+  const nftCheckoutPlugin = new NFTCheckoutPlugin({
+    modalZIndex: 1000,
+    contractId: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
+    apiKey: "pk_test_4ca499b1f017c2a96bac63493dca4ac2eb08d1e91de0a796d87137dc7278e0af",
+  });
+  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [nftCheckoutPlugin];
   const { logoDark, logoLight } = formData.walletPlugin;
   const walletServicesPlugin = new WalletServicesPlugin({
     walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
   });
-  return [walletServicesPlugin];
+  return [walletServicesPlugin, nftCheckoutPlugin];
 });
 
 const chainOptions = computed(() =>

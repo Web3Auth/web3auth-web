@@ -28,6 +28,7 @@
     "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/modal-vue-composables": "file:../../packages/composables/modal-vue-composables",
+    "@web3auth/nft-checkout-plugin": "file:../../packages/plugins/nft-checkout-plugin",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",
     "@web3auth/solana-provider": "file:../../packages/providers/solana-provider",

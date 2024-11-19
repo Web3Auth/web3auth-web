@@ -27,6 +27,7 @@ export type PluginNamespace = (typeof PLUGIN_NAMESPACES)[keyof typeof PLUGIN_NAM
 
 export const EVM_PLUGINS = {
   WALLET_SERVICES: "wallet-services",
+  NFT_CHECKOUT: "nft-checkout",
 } as const;
 
 export const SOLANA_PLUGINS = {

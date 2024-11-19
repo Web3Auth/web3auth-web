@@ -2,6 +2,7 @@
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { useI18n } from "vue-i18n";
 
@@ -48,6 +49,10 @@ const isDisplay = (name: string): boolean => {
   }
 };
 
+const showNFTCheckout = async () => {
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  nftCheckoutPlugin.show();
+};
 const showWalletUI = async () => {
   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
   await walletPlugin.showWalletUi();
@@ -230,6 +235,9 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
+          <Button block size="xs" pill class="mb-2" @click="showNFTCheckout">
+            {{ $t("app.buttons.btnShowNFTCheckout") }}
+          </Button>
         </Card>
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
