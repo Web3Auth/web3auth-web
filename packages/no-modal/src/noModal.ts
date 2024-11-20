@@ -398,13 +398,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private connectToPlugins(data: { adapter: WALLET_ADAPTER_TYPE }) {
     Object.values(this.plugins).map(async (plugin) => {
       try {
-        if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+        if (!plugin.SUPPORTED_ADAPTERS.includes("all") && !plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
           return;
         }
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
         const { authInstance } = this.walletAdapters[this.connectedAdapterName] as AuthAdapter;
         const { options, sessionId, sessionNamespace } = authInstance || {};
-        await plugin.initWithWeb3Auth(this, options.whiteLabel);
+        await plugin.initWithWeb3Auth(this, options?.whiteLabel);
         await plugin.connect({ sessionId, sessionNamespace });
       } catch (error: unknown) {
         // swallow error if connector adapter doesn't supports this plugin.

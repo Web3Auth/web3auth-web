@@ -18,7 +18,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  SUPPORTED_ADAPTERS = [] as string[]; // all adapters are supported
+  SUPPORTED_ADAPTERS = ["all"];
 
   pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
