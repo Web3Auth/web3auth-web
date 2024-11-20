@@ -36,17 +36,22 @@ const formData = formDataStore;
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const walletPlugins = computed(() => {
-  const nftCheckoutPlugin = new NFTCheckoutPlugin({
-    modalZIndex: 1000,
-    contractId: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
-    apiKey: "pk_test_4ca499b1f017c2a96bac63493dca4ac2eb08d1e91de0a796d87137dc7278e0af",
-  });
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [nftCheckoutPlugin];
-  const { logoDark, logoLight } = formData.walletPlugin;
-  const walletServicesPlugin = new WalletServicesPlugin({
-    walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
-  });
-  return [walletServicesPlugin, nftCheckoutPlugin];
+  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155) return [];
+  const plugins = [];
+  if (formData.nftCheckoutPlugin.enable) {
+    const nftCheckoutPlugin = new NFTCheckoutPlugin({
+      apiKey: "pk_test_4ca499b1f017c2a96bac63493dca4ac2eb08d1e91de0a796d87137dc7278e0af",
+    });
+    plugins.push(nftCheckoutPlugin);
+  }
+  if (formData.walletPlugin.enable) {
+    const { logoDark, logoLight } = formData.walletPlugin;
+    const walletServicesPlugin = new WalletServicesPlugin({
+      walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
+    });
+    plugins.push(walletServicesPlugin);
+  }
+  return plugins;
 });
 
 const chainOptions = computed(() =>
@@ -206,6 +211,7 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
+        formData.nftCheckoutPlugin = json.nftCheckoutPlugin;
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
         formData.bundlerUrl = json.bundlerUrl;

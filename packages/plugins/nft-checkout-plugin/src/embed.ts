@@ -1,5 +1,6 @@
 import { randomId } from "@toruslabs/base-controllers";
-import { THEME_MODES, WhiteLabelData } from "@web3auth/auth";
+import { THEME_MODES, WEB3AUTH_NETWORK_TYPE, WhiteLabelData } from "@web3auth/auth";
+import log from "loglevel";
 
 import {
   MESSAGE_HIDE_NFT_CHECKOUT,
@@ -12,12 +13,34 @@ import {
 } from "./enums";
 import { getTheme, htmlToElement } from "./utils";
 
+// preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
+(async function preLoadIframe() {
+  try {
+    if (typeof document === "undefined") return;
+    const nftCheckoutIframeHtml = document.createElement("link");
+    const nftCheckoutUrl = NFT_CHECKOUT_URLS.testing; // TODO: use production by default once we have it
+    nftCheckoutIframeHtml.href = `${nftCheckoutUrl}`;
+    nftCheckoutIframeHtml.crossOrigin = "anonymous";
+    nftCheckoutIframeHtml.type = "text/html";
+    nftCheckoutIframeHtml.rel = "prefetch";
+    if (nftCheckoutIframeHtml.relList && nftCheckoutIframeHtml.relList.supports) {
+      if (nftCheckoutIframeHtml.relList.supports("prefetch")) {
+        document.head.appendChild(nftCheckoutIframeHtml);
+      }
+    }
+  } catch (error) {
+    log.warn(error);
+  }
+})();
+
 export class NFTCheckoutEmbed {
-  private isInitialized: boolean;
+  web3AuthClientId: string;
+
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
+
+  isInitialized: boolean;
 
   private modalZIndex: number;
-
-  private contractId: string;
 
   private apiKey: string;
 
@@ -25,23 +48,31 @@ export class NFTCheckoutEmbed {
 
   private readonly embedNonce = randomId();
 
-  private iframe: HTMLIFrameElement | null = null;
-
-  constructor({ modalZIndex, contractId, apiKey }: { modalZIndex: number; contractId: string; apiKey: string }) {
+  constructor({
+    modalZIndex = 99999,
+    apiKey,
+    web3AuthClientId,
+    web3AuthNetwork,
+  }: {
+    modalZIndex?: number;
+    apiKey: string;
+    web3AuthClientId?: string;
+    web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
+  }) {
     this.isInitialized = false;
     this.modalZIndex = modalZIndex;
-    this.contractId = contractId;
     this.apiKey = apiKey;
+    this.web3AuthClientId = web3AuthClientId;
+    this.web3AuthNetwork = web3AuthNetwork;
   }
 
-  public async init({
-    buildEnv = NFT_CHECKOUT_BUILD_ENV.PRODUCTION,
-    whiteLabel,
-  }: {
-    buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE;
-    whiteLabel?: WhiteLabelData;
-  }): Promise<void> {
+  public async init(params: { buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE; whiteLabel?: WhiteLabelData }): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
+    if (this.getIframe()) throw new Error("Already initialized NFT Checkout iframe");
+    const {
+      buildEnv = NFT_CHECKOUT_BUILD_ENV.DEVELOPMENT, // TODO: use production by default once we have it
+      whiteLabel,
+    } = params;
     this.buildEnv = buildEnv;
 
     // construct nft checkout url
@@ -64,7 +95,6 @@ export class NFTCheckoutEmbed {
         allow="clipboard-write"
       ></iframe>`
     );
-    this.iframe = nftCheckoutIframe;
 
     return new Promise<void>((resolve, reject) => {
       try {
@@ -77,7 +107,8 @@ export class NFTCheckoutEmbed {
               {
                 type: MESSAGE_INIT,
                 apiKey: this.apiKey,
-                contractId: this.contractId,
+                web3AuthClientId: this.web3AuthClientId,
+                web3AuthNetwork: this.web3AuthNetwork,
                 whiteLabel,
               },
               nftCheckoutIframeUrl.origin
@@ -95,35 +126,44 @@ export class NFTCheckoutEmbed {
     });
   }
 
-  public show({ receiverAddress }: { receiverAddress?: string }): void {
+  public show({ receiverAddress, contractId }: { receiverAddress?: string; contractId: string }): void {
     if (!this.isInitialized) throw new Error("Call init() first");
-    if (!this.iframe) throw new Error("Iframe is not initialized");
+    const nftCheckoutIframe = this.getIframe();
+    if (!nftCheckoutIframe) throw new Error("Iframe is not initialized");
 
     // send message to iframe
     const nftCheckoutOrigin = new URL(NFT_CHECKOUT_URLS[this.buildEnv]).origin;
-    this.iframe.contentWindow.postMessage(
+    nftCheckoutIframe.contentWindow.postMessage(
       {
         type: MESSAGE_SHOW_NFT_CHECKOUT,
+        contractId,
         receiverAddress,
       },
       nftCheckoutOrigin
     );
     // show iframe
-    this.iframe.style.display = "block";
+    nftCheckoutIframe.style.display = "block";
   }
 
   public hide(): void {
     if (!this.isInitialized) throw new Error("Call init() first");
-    if (!this.iframe) throw new Error("Iframe is not initialized");
-
+    const nftCheckoutIframe = this.getIframe();
+    if (!nftCheckoutIframe) throw new Error("Iframe is not initialized");
     // hide iframe
-    this.iframe.style.display = "none";
+    nftCheckoutIframe.style.display = "none";
   }
 
   public cleanup(): void {
-    if (this.iframe) {
-      this.iframe.remove();
-      this.iframe = null;
+    const nftCheckoutIframe = this.getIframe();
+    if (nftCheckoutIframe) nftCheckoutIframe.remove();
+  }
+
+  private getIframe(): HTMLIFrameElement | null {
+    function isElement(element: unknown) {
+      return element instanceof Element || element instanceof Document;
     }
+    const nftCheckoutIframe = window.document.getElementById(`nftCheckoutIframe-${this.embedNonce}`);
+    if (!isElement(nftCheckoutIframe)) return null;
+    return nftCheckoutIframe as HTMLIFrameElement;
   }
 }

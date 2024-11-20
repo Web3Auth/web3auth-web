@@ -165,6 +165,9 @@ export type FormData = {
     logoDark: string;
     logoLight: string;
   };
+  nftCheckoutPlugin: {
+    enable: boolean;
+  };
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
@@ -220,3 +223,8 @@ export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
     contents: "Hello, Bob!",
   },
 });
+
+export const NFT_CHECKOUT_CONTRACT_ID = {
+  FREE_MINT: "b5b4de3f-0212-11ef-a08f-0242ac190003",
+  PAID_MINT: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
+};

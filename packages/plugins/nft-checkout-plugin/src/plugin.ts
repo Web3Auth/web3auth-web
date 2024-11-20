@@ -1,25 +1,24 @@
-import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
+import { SafeEventEmitter, WEB3AUTH_NETWORK_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_STATUS,
   EVM_PLUGINS,
   IPlugin,
   IWeb3AuthCore,
+  NFTCheckoutPluginError,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
-  WALLET_ADAPTERS,
 } from "@web3auth/base";
 
 import { NFTCheckoutEmbed } from "./embed";
-import { NFT_CHECKOUT_BUILD_ENV } from "./enums";
 
 export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.NFT_CHECKOUT;
 
   status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA]; // TODO: check this
+  SUPPORTED_ADAPTERS = [] as string[]; // all adapters are supported
 
   pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
@@ -31,17 +30,20 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   private receiverAddress: string | null = null;
 
-  constructor(params: { modalZIndex: number; contractId: string; apiKey: string }) {
+  constructor(params: { modalZIndex?: number; apiKey: string; web3AuthClientId?: string; web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE }) {
     super();
     this.nftCheckoutEmbedInstance = new NFTCheckoutEmbed(params);
   }
 
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void> {
     if (this.isInitialized) return;
+    if (!web3auth) throw NFTCheckoutPluginError.web3authRequired();
+
     this.web3auth = web3auth;
+    this.nftCheckoutEmbedInstance.web3AuthClientId = web3auth.coreOptions.clientId;
+    this.nftCheckoutEmbedInstance.web3AuthNetwork = web3auth.coreOptions.web3AuthNetwork;
 
     await this.nftCheckoutEmbedInstance.init({
-      buildEnv: NFT_CHECKOUT_BUILD_ENV.DEVELOPMENT, // TODO: remove this, use production only
       whiteLabel,
     });
 
@@ -51,33 +53,30 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async connect(): Promise<void> {
-    if (!this.isInitialized) throw new Error("Plugin is not initialized"); // TODO: create error in base
+    if (!this.isInitialized) throw NFTCheckoutPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) {
-      throw new Error("Web3Auth is not connected"); // TODO: create error in base
-    } else if (!this.web3auth.provider) {
-      throw new Error("Provider is required"); // TODO: create error in base
-    }
+    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) throw NFTCheckoutPluginError.web3AuthNotConnected();
+    if (!this.web3auth.provider) throw NFTCheckoutPluginError.providerRequired();
 
     const accounts = await this.web3auth.provider.request<never, string[]>({
       method: "eth_accounts",
     });
-    if (accounts.length === 0) throw new Error("No accounts found"); // TODO: create error in base
+    if (accounts.length === 0) throw NFTCheckoutPluginError.web3AuthNotConnected();
     this.receiverAddress = accounts[0];
 
     this.emit(PLUGIN_EVENTS.CONNECTED);
     this.status = PLUGIN_STATUS.CONNECTED;
   }
 
-  async show(): Promise<void> {
-    if (this.status !== PLUGIN_STATUS.CONNECTED) throw new Error("Plugin is not connected"); // TODO: create error in base
-    return this.nftCheckoutEmbedInstance.show({ receiverAddress: this.receiverAddress });
+  async show({ contractId }: { contractId: string }): Promise<void> {
+    if (this.status !== PLUGIN_STATUS.CONNECTED) NFTCheckoutPluginError.pluginNotConnected();
+    return this.nftCheckoutEmbedInstance.show({ receiverAddress: this.receiverAddress, contractId });
   }
 
   disconnect(): Promise<void> {
-    if (this.status !== PLUGIN_STATUS.CONNECTED) throw new Error("Plugin is not connected"); // TODO: create error in base
+    if (this.status !== PLUGIN_STATUS.CONNECTED) NFTCheckoutPluginError.pluginNotConnected();
     this.emit(PLUGIN_EVENTS.DISCONNECTED);
     this.status = PLUGIN_STATUS.DISCONNECTED;
     return Promise.resolve();

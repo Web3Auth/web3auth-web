@@ -6,6 +6,7 @@ import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { useI18n } from "vue-i18n";
 
+import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {
   getAccounts,
   getBalance,
@@ -43,15 +44,22 @@ const isDisplay = (name: string): boolean => {
         web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
       );
 
+    case "nftCheckoutServices":
+      return formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable;
+
     default: {
       return false;
     }
   }
 };
 
-const showNFTCheckout = async () => {
+const showPaidMintNFTCheckout = async () => {
   const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
-  nftCheckoutPlugin.show();
+  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
+};
+const showFreeMintNFTCheckout = async () => {
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
 };
 const showWalletUI = async () => {
   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
@@ -212,6 +220,15 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
         </Card>
+        <Card v-if="isDisplay('nftCheckoutServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">NFT Checkout Service</div>
+          <Button block size="xs" pill class="mb-2" @click="showFreeMintNFTCheckout">
+            {{ $t("app.buttons.btnShowFreeMintNFTCheckout") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="showPaidMintNFTCheckout">
+            {{ $t("app.buttons.btnShowPaidMintNFTCheckout") }}
+          </Button>
+        </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
@@ -235,9 +252,6 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
-          <Button block size="xs" pill class="mb-2" @click="showNFTCheckout">
-            {{ $t("app.buttons.btnShowNFTCheckout") }}
-          </Button>
         </Card>
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
