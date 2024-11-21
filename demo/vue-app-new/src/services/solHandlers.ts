@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { CustomChainConfig, IProvider, log } from "@web3auth/base";
-import { SolanaWallet } from "@web3auth/solana-provider";
+import { SolanaWallet, TransactionOrVersionedTransaction } from "@web3auth/solana-provider";
 import base58 from "bs58";
 
 const getConnection = async (provider: IProvider): Promise<Connection> => {
@@ -65,7 +65,7 @@ export const signAndSendTransaction = async (provider: IProvider, uiConsole: any
       feePayer: new PublicKey(pubKey[0]),
     }).add(transactionInstruction);
 
-    const signature = await solWeb3.signAndSendTransaction(transaction);
+    const signature = await solWeb3.signAndSendTransaction(transaction as unknown as TransactionOrVersionedTransaction);
     uiConsole("signature", signature);
   } catch (error) {
     log.error("Error", error);
@@ -93,7 +93,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
       feePayer: new PublicKey(pubKey[0]),
     }).add(transactionInstruction);
 
-    const signedTx = await solWeb3.signTransaction(transaction);
+    const signedTx = await solWeb3.signTransaction(transaction as unknown as TransactionOrVersionedTransaction);
     log.info("signedTx", signedTx);
     uiConsole("signature", signedTx);
     return { signature: signedTx };
@@ -126,9 +126,9 @@ export const signAllTransactions = async (provider: IProvider, uiConsole: any) =
     log.info("blockhash", blockhash);
 
     const signedTx = await solWeb3.signAllTransactions([
-      getNewTx(publicKeys, blockhash),
-      getNewTx(publicKeys, blockhash),
-      getNewTx(publicKeys, blockhash),
+      getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
+      getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
+      getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
     ]);
     log.info("signedTx", signedTx);
     uiConsole("signature", signedTx);

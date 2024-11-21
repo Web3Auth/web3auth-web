@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "9.3.0",
+  "version": "9.4.0",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -36,15 +36,15 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.95.4",
-    "@toruslabs/base-controllers": "^6.2.2",
-    "@walletconnect/sign-client": "^2.17.1",
-    "@walletconnect/types": "^2.17.1",
-    "@walletconnect/utils": "^2.17.1",
-    "@web3auth/auth": "^9.4.1",
-    "@web3auth/base": "^9.3.0",
-    "@web3auth/base-provider": "^9.3.0",
-    "@web3auth/ethereum-provider": "^9.3.0",
-    "@web3auth/solana-provider": "^9.3.0",
+    "@toruslabs/base-controllers": "^6.2.4",
+    "@walletconnect/sign-client": "^2.17.2",
+    "@walletconnect/types": "^2.17.2",
+    "@walletconnect/utils": "^2.17.2",
+    "@web3auth/auth": "^9.5.0",
+    "@web3auth/base": "^9.4.0",
+    "@web3auth/base-provider": "^9.4.0",
+    "@web3auth/ethereum-provider": "^9.4.0",
+    "@web3auth/solana-provider": "^9.4.0",
     "bs58": "^5.0.0",
     "deepmerge": "^4.3.1"
   },

@@ -347,7 +347,7 @@
 }
 
 #w3a-modal .w3a-external-toggle {
-  @apply w3a--block;
+  @apply w3a--block !w3a--w-full;
 }
 
 #w3a-modal .w3a-external-toggle.w3a-external-toggle--hidden {
