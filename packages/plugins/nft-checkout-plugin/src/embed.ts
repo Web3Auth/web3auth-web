@@ -70,7 +70,7 @@ export class NFTCheckoutEmbed {
     if (this.isInitialized) throw new Error("Already initialized");
     if (this.getIframe()) throw new Error("Already initialized NFT Checkout iframe");
     const {
-      buildEnv = NFT_CHECKOUT_BUILD_ENV.DEVELOPMENT, // TODO: use production by default once we have it
+      buildEnv = NFT_CHECKOUT_BUILD_ENV.TESTING, // TODO: use production by default once we have it
       whiteLabel,
     } = params;
     this.buildEnv = buildEnv;
