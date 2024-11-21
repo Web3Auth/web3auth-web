@@ -1,33 +1,30 @@
 # Web3Auth NFT Checkout Plugin
 
-[![npm version](https://img.shields.io/npm/v/@web3auth/wallet-services-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/wallet-services-plugin/v/latest)
-[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/wallet-services-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/wallet-services-plugin@latest)
+[![npm version](https://img.shields.io/npm/v/@web3auth/nft-checkout-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/nft-checkout-plugin/v/latest)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/nft-checkout-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/nft-checkout-plugin@latest)
 
 > Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
-Web3Auth Wallet Services Plugin helps you get the functionalities of the wallet services into your Web3Auth Instance. It helps you use your Web3Auth key in the wallet, making it easier for your end user to make transactions, add money into their wallet and even use it across different applications using wallet services.
+Web3Auth NFT Checkout Plugin is an NFT checkout service plugin that enables NFT purchases and transactions. It can be integrated with Web3Auth SDK for authentication or used as a standalone service for NFT payment processing.
 
 ## 📖 Documentation
 
-Read more about the Web3Auth Wallet Services Plugin in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/plugins/wallet-services).
+Read more about the Web3Auth NFT Checkout Plugin in the [official Web3Auth Documentation](https://web3auth.io/docs/sdk/web/plugins/nft-checkout).
 
 ## 💡 Features
+- Simple NFT checkout integration with Web3Auth
+- Support for multiple blockchain networks
+- Automated NFT minting and transfer post-payment
+- Real-time transaction status tracking
+- Secure payment processing
+- Support for multiple NFT standards (ERC721, ERC1155)
 
-- Plug and Play, OAuth based Web3 Authentication Service
-- Fully decentralized, non-custodial key infrastructure
-- End to end Whitelabelable solution
-- Threshold Cryptography based Key Reconstruction
-- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
-- Support for WebAuthn & Passwordless Login
-- Support for connecting to multiple wallets
-- DApp Active Session Management
-
-...and a lot more
+ ...and a lot more
 
 ## 🔗 Installation
 
 ```shell
-npm i --save @web3auth/wallet-services-plugin
+npm i --save @web3auth/nft-checkout-plugin
 ```
 
 ## 🩹 Example

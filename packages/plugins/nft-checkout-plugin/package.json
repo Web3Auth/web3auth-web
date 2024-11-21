@@ -1,7 +1,7 @@
 {
   "name": "@web3auth/nft-checkout-plugin",
   "version": "9.3.2",
-  "description": "NFT Checkout service for which can be used with Web3Auth",
+  "description": "An NFT checkout service plugin that enables NFT purchases and transactions. Can be integrated with Web3Auth SDK for authentication or used as a standalone service for NFT payment processing.",
   "keywords": [
     "web3Auth/nft-checkout-plugin",
     "web3Auth",
