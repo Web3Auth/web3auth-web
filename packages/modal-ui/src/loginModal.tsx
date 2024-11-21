@@ -1,5 +1,4 @@
 import "./index.css";
-
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
@@ -18,9 +17,7 @@ import {
 } from "@web3auth/base";
 import { render } from "solid-js/web";
 import { ThemedContext } from "./context/ThemeContext";
-
 import { LoginModal as Modal } from "./components/LoginModal";
-// import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
@@ -39,7 +36,6 @@ import { getUserLanguage } from "./utils/modal";
 function createWrapper(parentZIndex: string): HTMLElement {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
-
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
   parent.setAttribute("id", "w3a-parent-container");
@@ -207,7 +203,7 @@ export class LoginModal extends SafeEventEmitter {
       }
 
       render(
-        () =>
+        () => (
           <ThemedContext.Provider value={darkState}>
             <Modal
               closeModal={this.closeModal}
@@ -220,9 +216,10 @@ export class LoginModal extends SafeEventEmitter {
               chainNamespace={this.chainNamespace}
               walletRegistry={this.walletRegistry}
             />
-          </ThemedContext.Provider>,
-        root!);
-
+          </ThemedContext.Provider>
+        ),
+        root!
+      );
 
       if (this.uiConfig?.theme) {
         const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;

@@ -22,6 +22,10 @@
     "node": ">=18.x",
     "npm": ">=9.x"
   },
+  "files": [
+    "dist"
+  ],
+  "jsdelivr": "dist/ui.umd.min.js",
   "keywords": [
     "blockchain",
     "ethereum",
@@ -31,6 +35,8 @@
     "web3Auth/ui"
   ],
   "license": "MIT",
+  "main": "dist/lib.cjs/packages/ui/src/index.js",
+  "module": "dist/lib.esm/packages/ui/src/index.js",
   "name": "@web3auth/modal-ui",
   "publishConfig": {
     "access": "public"
@@ -45,5 +51,7 @@
     "serve": "vite preview",
     "start": "vite"
   },
+  "types": "dist/types/index.d.ts",
+  "unpkg": "dist/ui.umd.min.js",
   "version": "0.0.0"
 }
