@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base-evm-adapter",
-  "version": "9.4.3",
+  "version": "9.4.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^6.3.1",
-    "@web3auth/base": "^9.4.3"
+    "@web3auth/base": "^9.4.4"
   },
   "files": [
     "dist"
