@@ -53,5 +53,6 @@
   "keywords": [],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

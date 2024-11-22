@@ -69,5 +69,6 @@
   },
   "types": "dist/types/index.d.ts",
   "unpkg": "dist/modal.umd.min.js",
-  "version": "9.4.3"
+  "version": "9.4.3",
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }
