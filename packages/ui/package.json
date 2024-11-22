@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.5.2",
+    "@web3auth/auth": "^9.5.3",
     "@web3auth/base": "^9.4.2",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",

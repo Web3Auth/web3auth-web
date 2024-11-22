@@ -40,7 +40,7 @@
     "@walletconnect/sign-client": "^2.17.2",
     "@walletconnect/types": "^2.17.2",
     "@walletconnect/utils": "^2.17.2",
-    "@web3auth/auth": "^9.5.2",
+    "@web3auth/auth": "^9.5.3",
     "@web3auth/base": "^9.4.2",
     "@web3auth/base-provider": "^9.4.2",
     "@web3auth/ethereum-provider": "^9.4.2",

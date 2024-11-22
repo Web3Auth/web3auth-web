@@ -22,7 +22,7 @@
   "dependencies": {
     "@toruslabs/base-controllers": "^6.3.1",
     "@toruslabs/tweetnacl-js": "^1.0.4",
-    "@web3auth/auth": "^9.5.2",
+    "@web3auth/auth": "^9.5.3",
     "@web3auth/base": "^9.4.2",
     "@web3auth/base-provider": "^9.4.2",
     "bn.js": "^5.2.1",
