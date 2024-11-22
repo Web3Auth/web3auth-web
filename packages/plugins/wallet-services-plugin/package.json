@@ -31,10 +31,10 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^6.2.4"
+    "@toruslabs/ethereum-controllers": "^6.3.1"
   },
   "dependencies": {
-    "@web3auth/auth": "^9.5.0",
+    "@web3auth/auth": "^9.5.2",
     "@web3auth/base": "^9.4.0",
     "@web3auth/no-modal": "^9.4.0",
     "@web3auth/ws-embed": "^3.1.0",
