@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/auth-adapter",
-  "version": "9.4.2",
+  "version": "9.4.3",
   "description": "Auth adapter for Web3auth",
   "keywords": [
     "web3Auth/auth-adapter",
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@web3auth/auth": "^9.5.3",
-    "@web3auth/base": "^9.4.2",
-    "@web3auth/base-provider": "^9.4.2",
+    "@web3auth/base": "^9.4.3",
+    "@web3auth/base-provider": "^9.4.3",
     "deepmerge": "^4.3.1"
   },
   "lint-staged": {
