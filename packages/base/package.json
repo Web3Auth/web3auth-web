@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/base",
-  "version": "9.4.3",
+  "version": "9.4.4",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
