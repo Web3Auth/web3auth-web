@@ -1,10 +1,11 @@
 import { onMount, type Component } from "solid-js";
 import { LoginModal } from "./loginModal";
-// import { Auth } from "@web3auth/auth";
+import { SafeEventEmitter } from "@web3auth/auth";
+import { Web3AuthNoModalEvents } from "@web3auth/base";
 
 const App: Component = () => {
   onMount(async () => {
-    const adapterListener: any = null;
+    const adapterListener = new SafeEventEmitter<Web3AuthNoModalEvents>();
     const loginModal = new LoginModal({
       chainNamespace: "eip155",
       walletRegistry: { default: {}, others: {} },
