@@ -30,6 +30,26 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://mainnet.base.org",
+      blockExplorerUrl: "https://base.blockscout.com",
+      chainId: "0x2105",
+      displayName: "Base Mainnet",
+      ticker: "ETH",
+      tickerName: "Base Ethereum",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://sepolia.base.org",
+      blockExplorerUrl: "https://sepolia-explorer.base.org",
+      chainId: "0x14A34",
+      displayName: "Base Sepolia",
+      ticker: "ETH",
+      tickerName: "Base Sepolia Testnet",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
       rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
       blockExplorerUrl: "https://testnet.bscscan.com",
       logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
@@ -132,11 +152,11 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel" | "biconomy" | "trust";
+export type SmartAccountType = "safe" | "kernel" | "nexus" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Safe", value: "safe" },
-  { name: "Biconomy", value: "biconomy" },
+  { name: "Nexus", value: "nexus" },
   { name: "Kernel", value: "kernel" },
   { name: "Trust", value: "trust" },
   // { name: "Light", value: "light" },

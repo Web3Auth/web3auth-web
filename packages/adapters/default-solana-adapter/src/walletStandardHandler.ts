@@ -47,7 +47,7 @@ export class WalletStandardProviderHandler extends SafeEventEmitter implements I
   async signMessage(message: Uint8Array): Promise<{ signature: Uint8Array; publicKey: BN }> {
     const account = this.currentAccount;
     const signature = await this.wallet.features[SolanaSignMessage].signMessage({ account, message });
-    return { signature: signature[0].signature, publicKey: new BN(account.publicKey) };
+    return { signature: signature[0].signature, publicKey: new BN(Buffer.from(account.publicKey)) };
   }
 
   async signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T> {

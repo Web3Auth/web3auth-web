@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-vue-composables",
-  "version": "9.3.1",
+  "version": "9.4.4",
   "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-vue-composables",
@@ -29,12 +29,12 @@
     "dist"
   ],
   "dependencies": {
-    "@web3auth/base": "^9.3.0",
-    "@web3auth/modal": "^9.3.1"
+    "@web3auth/base": "^9.4.4",
+    "@web3auth/modal": "^9.4.4"
   },
   "devDependencies": {
-    "@web3auth/auth": "^9.4.1",
-    "@web3auth/auth-adapter": "^9.3.0"
+    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth-adapter": "^9.4.4"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
@@ -53,5 +53,6 @@
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"
-  }
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

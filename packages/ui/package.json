@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "9.3.1",
+  "version": "9.4.4",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -51,26 +51,26 @@
     "autoprefixer": "^10.4.20",
     "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
-    "postcss": "^8.4.47",
+    "postcss": "^8.4.49",
     "postcss-loader": "^8.1.1",
     "postcss-prefix-selector": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rollup-plugin-postcss": "^4.0.2",
     "style-loader": "^4.0.0",
-    "tailwindcss": "^3.4.14",
+    "tailwindcss": "^3.4.15",
     "url-loader": "^4.1.1"
   },
   "dependencies": {
     "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.4.1",
-    "@web3auth/base": "^9.3.0",
+    "@web3auth/auth": "^9.5.3",
+    "@web3auth/base": "^9.4.4",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
     "deepmerge": "^4.3.1",
-    "i18next": "^23.16.4",
-    "react-i18next": "^15.1.0",
+    "i18next": "^23.16.8",
+    "react-i18next": "^15.1.1",
     "react-qrcode-logo": "^3.0.0"
   },
   "lint-staged": {
@@ -92,5 +92,6 @@
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"
-  }
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

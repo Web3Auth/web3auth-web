@@ -319,7 +319,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.coreOptions.accountAbstractionProvider &&
         (data.adapter === WALLET_ADAPTERS.AUTH || (data.adapter !== WALLET_ADAPTERS.AUTH && this.coreOptions.useAAWithExternalWallet))
       ) {
-        await this.coreOptions.accountAbstractionProvider.setupProvider(provider);
+        await this.coreOptions.accountAbstractionProvider.setupProvider(provider); // Don't change this to finalProvider
         finalProvider = this.coreOptions.accountAbstractionProvider;
       }
 
