@@ -9,9 +9,7 @@ import { getV4TypedData } from "../config";
 export const walletSignPersonalMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
-    const accounts = await provider.request({ method: "eth_accounts" });
-    const smartAccountAddress = accounts[1];
-    const signer = await ethProvider.getSigner(smartAccountAddress);
+    const signer = await ethProvider.getSigner();
     const account = await signer.getAddress();
     const from = account;
 
@@ -37,9 +35,7 @@ export const walletSignPersonalMessage = async (provider: WalletServicesPlugin["
 export const walletSignTypedMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
-    const accounts = await provider.request({ method: "eth_accounts" });
-    const smartAccountAddress = accounts[1];
-    const signer = await ethProvider.getSigner(smartAccountAddress);
+    const signer = await ethProvider.getSigner();
     const account = await signer.getAddress();
     const from = account;
     const typedData = getV4TypedData(provider.chainId);
@@ -63,9 +59,7 @@ export const walletSignTypedMessage = async (provider: WalletServicesPlugin["pro
 export const walletSendEth = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
-    const accounts = await provider.request({ method: "eth_accounts" });
-    const smartAccountAddress = accounts[1];
-    const signer = await ethProvider.getSigner(smartAccountAddress);
+    const signer = await ethProvider.getSigner();
     const account = await signer.getAddress();
     const txRes = await signer.sendTransaction({
       from: account,
@@ -84,7 +78,7 @@ export const walletSignTransaction = async (provider: WalletServicesPlugin["prov
   try {
     const ethProvider = new BrowserProvider(provider);
     const accounts = await provider.request({ method: "eth_accounts" });
-    const smartAccountAddress = accounts[1];
+    const smartAccountAddress = accounts[0];
     const signer = await ethProvider.getSigner(smartAccountAddress);
     const account = await signer.getAddress();
     // only supported with social logins (openlogin adapter)
