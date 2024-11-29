@@ -109,10 +109,6 @@ const onWalletSendEth = async () => {
   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
-const onWalletSignEthTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletSignEthTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
-};
 
 // Ethereum Provider
 const onGetUserInfo = async () => {
@@ -237,9 +233,6 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnSignTypedData_v4") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onWalletSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
-          <Button block size="xs" pill class="mb-2" @click="onWalletSignEthTransaction">
-            {{ t("app.buttons.btnSignTransaction") }}
-          </Button>
         </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
