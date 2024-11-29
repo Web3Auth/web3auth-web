@@ -103,19 +103,23 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       web3auth.coreOptions.useAAWithExternalWallet &&
       (web3auth.connectedAdapterName === WALLET_ADAPTERS.AUTH ||
         (web3auth.connectedAdapterName !== WALLET_ADAPTERS.AUTH && web3auth.coreOptions.useAAWithExternalWallet));
-    const smartAccountAddress = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.smartAccount.address;
-    const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
-    const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
-    const bundlerConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig;
 
-    // TODO: fix this type casting when we start using accountAbstractionController
-    const accountAbstractionConfig = {
-      enabled: enableAccountAbstraction,
-      smartAccountAddress: smartAccountAddress || undefined,
-      smartAccountType: smartAccountType || undefined,
-      paymasterConfig: paymasterConfig || undefined,
-      bundlerConfig: bundlerConfig || undefined,
-    } as AccountAbstractionConfig;
+    let accountAbstractionConfig: AccountAbstractionConfig;
+
+    if (enableAccountAbstraction) {
+      const smartAccountAddress = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.smartAccount.address;
+      const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
+      const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
+      const bundlerConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig;
+
+      // TODO: fix this type casting when we start using accountAbstractionController
+      accountAbstractionConfig = {
+        smartAccountAddress: smartAccountAddress || undefined,
+        smartAccountType: smartAccountType || undefined,
+        paymasterConfig: paymasterConfig || undefined,
+        bundlerConfig: bundlerConfig || undefined,
+      } as AccountAbstractionConfig;
+    }
 
     const finalInitOptions = {
       ...this.walletInitOptions,
