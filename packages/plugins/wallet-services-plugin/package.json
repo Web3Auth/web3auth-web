@@ -38,7 +38,7 @@
     "@web3auth/auth": "^9.5.3",
     "@web3auth/base": "^9.4.5",
     "@web3auth/no-modal": "^9.4.5",
-    "@web3auth/ws-embed": "^3.1.6",
+    "@web3auth/ws-embed": "file:../../../web3auth-ws-embed-3.1.2.tgz",
     "loglevel": "^1.9.2"
   },
   "peerDependencies": {
