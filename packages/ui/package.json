@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "9.4.4",
+  "version": "9.4.5",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -64,13 +64,13 @@
   "dependencies": {
     "@toruslabs/http-helpers": "^7.0.0",
     "@web3auth/auth": "^9.5.3",
-    "@web3auth/base": "^9.4.4",
+    "@web3auth/base": "^9.4.5",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
     "deepmerge": "^4.3.1",
     "i18next": "^23.16.8",
-    "react-i18next": "^15.1.1",
+    "react-i18next": "^15.1.2",
     "react-qrcode-logo": "^3.0.0"
   },
   "lint-staged": {
