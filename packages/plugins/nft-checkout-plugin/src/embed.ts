@@ -50,13 +50,13 @@ export class NFTCheckoutEmbed {
     this.web3AuthClientId = web3AuthClientId;
   }
 
-  public async init(params: { buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE; whiteLabel?: WhiteLabelData }): Promise<void> {
+  public async init(params?: { buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE; whiteLabel?: WhiteLabelData }): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     if (this.getIframe()) throw new Error("Already initialized NFT Checkout iframe");
     const {
       buildEnv = NFT_CHECKOUT_BUILD_ENV.TESTING, // TODO: use production by default once we have it
       whiteLabel,
-    } = params;
+    } = params || {};
     this.buildEnv = buildEnv;
 
     // construct nft checkout url
@@ -71,7 +71,7 @@ export class NFTCheckoutEmbed {
       `<iframe
         id="nftCheckoutIframe-${this.embedNonce}"
         class="nftCheckoutIframe-${this.embedNonce}"
-        sandbox="allow-popups allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
+        sandbox="allow-popups allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox"
         src="${nftCheckoutIframeUrl.href}"
         style="display: none; position: fixed; top: 0; right: 0; width: 100%;
         height: 100%; border: none; border-radius: 0; z-index: ${this.modalZIndex.toString()};
