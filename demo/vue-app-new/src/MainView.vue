@@ -28,7 +28,7 @@ import { computed, onBeforeMount, ref, watch } from "vue";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds, getDefaultBundlerUrl } from "./config";
+import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
@@ -40,7 +40,7 @@ const walletPlugins = computed(() => {
   const plugins = [];
   if (formData.nftCheckoutPlugin.enable) {
     const nftCheckoutPlugin = new NFTCheckoutPlugin({
-      apiKey: "pk_test_4ca499b1f017c2a96bac63493dca4ac2eb08d1e91de0a796d87137dc7278e0af",
+      web3AuthClientId: NFT_CHECKOUT_CLIENT_ID,
     });
     plugins.push(nftCheckoutPlugin);
   }

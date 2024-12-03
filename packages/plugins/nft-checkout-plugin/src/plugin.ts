@@ -1,4 +1,4 @@
-import { SafeEventEmitter, WEB3AUTH_NETWORK_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
   ADAPTER_STATUS,
   EVM_PLUGINS,
@@ -30,7 +30,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   private receiverAddress: string | null = null;
 
-  constructor(params: { modalZIndex?: number; apiKey: string; web3AuthClientId?: string; web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE }) {
+  constructor(params: { modalZIndex?: number; web3AuthClientId: string }) {
     super();
     this.nftCheckoutEmbedInstance = new NFTCheckoutEmbed(params);
   }
@@ -40,9 +40,6 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
     if (!web3auth) throw NFTCheckoutPluginError.web3authRequired();
 
     this.web3auth = web3auth;
-    this.nftCheckoutEmbedInstance.web3AuthClientId = web3auth.coreOptions.clientId;
-    this.nftCheckoutEmbedInstance.web3AuthNetwork = web3auth.coreOptions.web3AuthNetwork;
-
     await this.nftCheckoutEmbedInstance.init({
       whiteLabel,
     });

@@ -1,5 +1,5 @@
 import { randomId } from "@toruslabs/base-controllers";
-import { THEME_MODES, WEB3AUTH_NETWORK_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { THEME_MODES, WhiteLabelData } from "@web3auth/auth";
 import log from "loglevel";
 
 import {
@@ -36,34 +36,18 @@ import { getTheme, htmlToElement } from "./utils";
 export class NFTCheckoutEmbed {
   web3AuthClientId: string;
 
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
-
   isInitialized: boolean;
 
   private modalZIndex: number;
-
-  private apiKey: string;
 
   private buildEnv: NFT_CHECKOUT_BUILD_ENV_TYPE;
 
   private readonly embedNonce = randomId();
 
-  constructor({
-    modalZIndex = 99999,
-    apiKey,
-    web3AuthClientId,
-    web3AuthNetwork,
-  }: {
-    modalZIndex?: number;
-    apiKey: string;
-    web3AuthClientId?: string;
-    web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
-  }) {
+  constructor({ modalZIndex = 99999, web3AuthClientId }: { modalZIndex?: number; web3AuthClientId: string }) {
     this.isInitialized = false;
     this.modalZIndex = modalZIndex;
-    this.apiKey = apiKey;
     this.web3AuthClientId = web3AuthClientId;
-    this.web3AuthNetwork = web3AuthNetwork;
   }
 
   public async init(params: { buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE; whiteLabel?: WhiteLabelData }): Promise<void> {
@@ -106,9 +90,7 @@ export class NFTCheckoutEmbed {
             nftCheckoutIframe.contentWindow.postMessage(
               {
                 type: MESSAGE_INIT,
-                apiKey: this.apiKey,
                 web3AuthClientId: this.web3AuthClientId,
-                web3AuthNetwork: this.web3AuthNetwork,
                 whiteLabel,
               },
               nftCheckoutIframeUrl.origin

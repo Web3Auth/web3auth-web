@@ -18,12 +18,7 @@ import {
   signTypedMessage,
 } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
-import {
-  walletSendEth,
-  walletSignPersonalMessage,
-  walletSignTransaction as walletSignEthTransaction,
-  walletSignTypedMessage,
-} from "../services/walletServiceHandlers";
+import { walletSendEth, walletSignPersonalMessage, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
