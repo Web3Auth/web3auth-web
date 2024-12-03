@@ -4,7 +4,15 @@ import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
-import { chainConfigs, chainNamespaceOptions, languageOptions, loginProviderOptions, networkOptions, SmartAccountOptions } from "../config";
+import {
+  chainConfigs,
+  chainNamespaceOptions,
+  confirmationStrategyOptions,
+  languageOptions,
+  loginProviderOptions,
+  networkOptions,
+  SmartAccountOptions,
+} from "../config";
 import { formDataStore } from "../store/form";
 
 const formData = formDataStore;
@@ -349,6 +357,15 @@ const onChainNamespaceChange = (value: string) => {
           :aria-label="$t('app.walletPlugin.logoDark')"
           :placeholder="$t('app.walletPlugin.logoDark')"
           class="sm:col-span-2"
+        />
+        <Select
+          v-model="formData.walletPlugin.confirmationStrategy"
+          data-testid="selectLoginProviders"
+          :label="$t('app.walletPlugin.confirmationStrategy')"
+          :aria-label="$t('app.walletPlugin.confirmationStrategy')"
+          :placeholder="$t('app.walletPlugin.confirmationStrategy')"
+          :options="confirmationStrategyOptions"
+          class=""
         />
       </Card>
       <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
