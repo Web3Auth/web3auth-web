@@ -40,12 +40,6 @@ const walletPlugins = computed(() => {
   const walletServicesPlugin = new WalletServicesPlugin({
     walletInitOptions: {
       whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
-      walletUrls: {
-        production: {
-          url: "https://develop-wallet.web3auth.io",
-          logLevel: "debug",
-        },
-      },
       confirmationStrategy,
     },
   });
