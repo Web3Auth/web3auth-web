@@ -45,9 +45,12 @@ const walletPlugins = computed(() => {
     plugins.push(nftCheckoutPlugin);
   }
   if (formData.walletPlugin.enable) {
-    const { logoDark, logoLight } = formData.walletPlugin;
+    const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
     const walletServicesPlugin = new WalletServicesPlugin({
-      walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
+      walletInitOptions: {
+        whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
+        confirmationStrategy,
+      },
     });
     plugins.push(walletServicesPlugin);
   }

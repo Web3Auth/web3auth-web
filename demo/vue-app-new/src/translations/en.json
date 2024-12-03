@@ -14,7 +14,8 @@
     "walletPlugin": {
       "title": "Wallet Service Plugin",
       "logoLight": "Logo Light",
-      "logoDark": "Logo Dark"
+      "logoDark": "Logo Dark",
+      "confirmationStrategy": "Confirmation Strategy"
     },
     "nftCheckoutPlugin": {
       "title": "NFT Checkout Plugin"
@@ -52,7 +53,6 @@
       "sessionTime": "Session Time"
     },
     "chainNamespace": "Chain namespace",
-
     "w3aStatus": "Web3Auth status ::::: {status}",
     "isConnected": "Is connected ::::: {isConnected}",
     "isInitialized": "Is initialized ::::: {isInitialized}",

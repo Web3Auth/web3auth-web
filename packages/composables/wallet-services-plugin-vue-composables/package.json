@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-services-plugin-vue-composables",
-  "version": "9.4.0",
+  "version": "9.5.0-alpha.0",
   "description": "Vue composables to simplify integration with web3Auth wallet services plugin SDK.",
   "keywords": [
     "web3Auth/wallet-services-plugin-vue-composables",
@@ -29,9 +29,9 @@
     "dist"
   ],
   "dependencies": {
-    "@toruslabs/base-controllers": "^6.2.4",
-    "@web3auth/base": "^9.4.0",
-    "@web3auth/wallet-services-plugin": "^9.4.0"
+    "@toruslabs/base-controllers": "^6.3.2",
+    "@web3auth/base": "^9.4.5",
+    "@web3auth/wallet-services-plugin": "^9.5.0-alpha.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
@@ -50,5 +50,6 @@
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"
-  }
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

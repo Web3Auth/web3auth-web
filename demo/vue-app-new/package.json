@@ -37,6 +37,7 @@
     "@web3auth/torus-solana-adapter": "file:../../packages/adapters/torus-solana-adapter",
     "@web3auth/wallet-connect-v2-adapter": "file:../../packages/adapters/wallet-connect-v2-adapter",
     "@web3auth/wallet-services-plugin": "file:../../packages/plugins/wallet-services-plugin",
+    "@web3auth/ws-embed": "^3.2.1",
     "bs58": "^5.0.0",
     "ethers": "^6.13.3",
     "vue": "^3.5.11",
