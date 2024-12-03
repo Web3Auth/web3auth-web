@@ -1,6 +1,5 @@
-import { useContext } from "solid-js";
+import { createMemo, mergeProps, useContext } from "solid-js";
 
-import { mergeProps } from "solid-js";
 import { ThemedContext } from "../../context/ThemeContext";
 
 export interface ImageProps {
@@ -16,38 +15,40 @@ export interface ImageProps {
 }
 
 export default function Image(props: ImageProps) {
-  const mergedProps = mergeProps({
-    isButton: false,
-    height: "auto",
-    width: "auto",
-    extension: "svg"
-  }, props)
+  const mergedProps = mergeProps(
+    {
+      isButton: false,
+      height: "auto",
+      width: "auto",
+      extension: "svg",
+    },
+    props
+  );
 
   const { isDark } = useContext(ThemedContext);
 
-  const imgName = isDark && mergedProps.darkImageId ? mergedProps.darkImageId : mergedProps.imageId;
-  const hoverImgName = isDark && mergedProps.darkHoverImageId ? mergedProps.darkHoverImageId : mergedProps.hoverImageId;
+  const imgName = createMemo(() => (isDark && mergedProps.darkImageId ? mergedProps.darkImageId : mergedProps.imageId));
+  const hoverImgName = createMemo(() => (isDark && mergedProps.darkHoverImageId ? mergedProps.darkHoverImageId : mergedProps.hoverImageId));
 
   return (
     <>
       <img
-        src={`https://images.web3auth.io/${imgName}.${mergedProps.extension}`}
+        src={`https://images.web3auth.io/${imgName()}.${mergedProps.extension}`}
         height={mergedProps.height}
         width={mergedProps.width}
         alt={mergedProps.imageId}
         class="w3a--object-contain w3a--rounded"
         onError={({ currentTarget }) => {
           if (mergedProps.fallbackImageId) {
-            // eslint-disable-next-line no-param-reassign
             currentTarget.onerror = null; // prevents looping
-            // eslint-disable-next-line no-param-reassign
+
             currentTarget.src = `https://images.web3auth.io/${mergedProps.fallbackImageId}.svg`;
           }
         }}
       />
       {mergedProps.isButton ? (
         <img
-          src={`https://images.web3auth.io/${hoverImgName}.${mergedProps.extension}`}
+          src={`https://images.web3auth.io/${hoverImgName()}.${mergedProps.extension}`}
           height={mergedProps.height}
           width={mergedProps.width}
           alt={mergedProps.hoverImageId}

@@ -1,3 +1,5 @@
+import { createMemo } from "solid-js";
+
 import { ExternalButton } from "../../interfaces";
 import { Image } from "../Image";
 
@@ -7,11 +9,11 @@ type browser = "chrome" | "firefox" | "edge" | "brave" | "safari";
 
 export interface WalletButtonProps {
   label: string;
-  onClick?: () => void
+  onClick?: () => void;
   button?: ExternalButton;
   deviceDetails?: { platform: platform; os: os; browser: browser };
   walletConnectUri: string | undefined;
-};
+}
 
 function formatIOSMobile(params: { uri: string; link?: string }) {
   const encodedUri: string = encodeURIComponent(params.uri);
@@ -21,20 +23,27 @@ function formatIOSMobile(params: { uri: string; link?: string }) {
 }
 
 const WalletButton = (props: WalletButtonProps) => {
-  const isLink = props.deviceDetails.platform !== "desktop" && props.button.href && props.button.hasWalletConnect && !props.button.hasInjectedWallet
-  const href = props.button.href ? formatIOSMobile({ uri: props.walletConnectUri, link: props.button.href }) : props.walletConnectUri;
-
+  const isLink = createMemo(
+    () => props.deviceDetails.platform !== "desktop" && props.button.href && props.button.hasWalletConnect && !props.button.hasInjectedWallet
+  );
+  const href = createMemo(() =>
+    props.button.href ? formatIOSMobile({ uri: props.walletConnectUri, link: props.button.href }) : props.walletConnectUri
+  );
 
   const handleBtnClick = () => {
-    if (href && isLink) {
-      window.open(href, '_blank');
+    if (href() && isLink()) {
+      window.open(href(), "_blank");
     } else if (props.onClick) {
       props.onClick();
     }
   };
 
   return (
-    <button class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--bg-app-gray-100 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px] w3a--border w3a--border-app-gray-100 hover:w3a--border-app-gray-200" onClick={handleBtnClick} {...props}>
+    <button
+      class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--bg-app-gray-100 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px] w3a--border w3a--border-app-gray-100 hover:w3a--border-app-gray-200"
+      onClick={handleBtnClick}
+      {...props}
+    >
       <div class="w3a--flex w3a--items-center w3a--gap-x-2">
         <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--bg-app-gray-300">
           <Image
@@ -55,7 +64,7 @@ const WalletButton = (props: WalletButtonProps) => {
         </span>
       )}
     </button>
-  )
-}
+  );
+};
 
-export default WalletButton
+export default WalletButton;

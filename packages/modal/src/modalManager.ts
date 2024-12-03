@@ -23,7 +23,6 @@ import {
   WalletRegistry,
 } from "@web3auth/base";
 import { CommonJRPCProvider } from "@web3auth/base-provider";
-import { Web3AuthNoModal } from "@web3auth/no-modal";
 import {
   AUTH_PROVIDERS,
   capitalizeFirstLetter,
@@ -32,7 +31,8 @@ import {
   LOGIN_MODAL_EVENTS,
   LoginModal,
   UIConfig,
-} from "@web3auth/ui";
+} from "@web3auth/modal-ui";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import deepmerge from "deepmerge";
 

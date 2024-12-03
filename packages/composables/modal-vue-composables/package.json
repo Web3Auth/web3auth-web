@@ -1,41 +1,38 @@
 {
-  "name": "@web3auth/modal-vue-composables",
-  "version": "9.3.1",
-  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
-  "keywords": [
-    "web3Auth/modal-vue-composables",
-    "web3Auth",
-    "blockchain",
-    "vue composables",
-    "web3Auth composables",
-    "web3Auth modal vue composables"
-  ],
-  "sideEffects": false,
-  "main": "dist/lib.cjs/index.js",
-  "module": "dist/lib.esm/index.js",
-  "unpkg": "dist/modalVueComposables.umd.min.js",
-  "jsdelivr": "dist/modalVueComposables.umd.min.js",
-  "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
-  "license": "ISC",
-  "scripts": {
-    "dev": "torus-scripts start",
-    "build": "torus-scripts build",
-    "lint": "eslint --fix 'src/**/*.ts'",
-    "prepack": "npm run build"
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "files": [
-    "dist"
-  ],
   "dependencies": {
     "@web3auth/base": "^9.3.0",
-    "@web3auth/modal": "^9.3.1"
+    "@web3auth/modal": "file:../../modal"
   },
+  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "devDependencies": {
     "@web3auth/auth": "^9.4.1",
     "@web3auth/auth-adapter": "^9.3.0"
   },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
+  "jsdelivr": "dist/modalVueComposables.umd.min.js",
+  "keywords": [
+    "blockchain",
+    "vue composables",
+    "web3Auth",
+    "web3Auth composables",
+    "web3Auth modal vue composables",
+    "web3Auth/modal-vue-composables"
+  ],
+  "license": "ISC",
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
+  "name": "@web3auth/modal-vue-composables",
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "vue": "^3.4.x"
@@ -47,11 +44,14 @@
     "type": "git",
     "url": "git+https://github.com/Web3Auth/Web3Auth.git"
   },
-  "bugs": {
-    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  "scripts": {
+    "build": "torus-scripts build",
+    "dev": "torus-scripts start",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "npm run build"
   },
-  "engines": {
-    "node": ">=18.x",
-    "npm": ">=9.x"
-  }
+  "sideEffects": false,
+  "types": "dist/types/index.d.ts",
+  "unpkg": "dist/modalVueComposables.umd.min.js",
+  "version": "9.3.1"
 }

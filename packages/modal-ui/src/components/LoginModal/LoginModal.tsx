@@ -1,10 +1,11 @@
-import { ChainNamespaceType, cloneDeep, log, WalletRegistry, ADAPTER_NAMES } from "@web3auth/base/src";
-import { StateEmitterEvents, SocialLoginEventType, ExternalWalletEventType, ModalState, MODAL_STATUS } from "../../interfaces";
+import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
+import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WalletRegistry } from "@web3auth/base/src";
+import deepmerge from "deepmerge";
+import { createEffect, createMemo, createSignal, on } from "solid-js";
+
+import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../../interfaces";
 import { Body } from "../Body";
 import { Modal } from "../Modal";
-import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
-import { createSignal, createEffect, on, createMemo } from "solid-js";
-import deepmerge from "deepmerge";
 
 export interface LoginModalProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
@@ -19,7 +20,6 @@ export interface LoginModalProps {
 }
 
 const LoginModal = (props: LoginModalProps) => {
-
   const [modalState, setModalState] = createSignal<ModalState>({
     externalWalletsVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
@@ -41,18 +41,21 @@ const LoginModal = (props: LoginModalProps) => {
     showExternalWalletsOnly: false,
   });
 
-  createEffect(on(() => props.stateListener,
-    () => {
-      props.stateListener.emit("MOUNTED");
-      props.stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
-        log.debug("state updated", newModalState);
-        setModalState((prevState) => {
-          const mergedState = cloneDeep(deepmerge(prevState, newModalState));
-          return mergedState;
+  createEffect(
+    on(
+      () => props.stateListener,
+      () => {
+        props.stateListener.emit("MOUNTED");
+        props.stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
+          log.debug("state updated", newModalState);
+          setModalState((prevState) => {
+            const mergedState = cloneDeep(deepmerge(prevState, newModalState));
+            return mergedState;
+          });
         });
-      });
-    }
-  ))
+      }
+    )
+  );
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { adapter } = params;
@@ -80,6 +83,7 @@ const LoginModal = (props: LoginModalProps) => {
     if (Object.keys(modalState().socialLoginsConfig?.loginMethods || {}).length === 0) return false;
 
     const isAnySocialLoginVisible = Object.entries(modalState().socialLoginsConfig?.loginMethods || {}).some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ([k, v]) => k !== LOGIN_PROVIDER.EMAIL_PASSWORDLESS && (v as any).showOnModal !== false
     );
     return isAnySocialLoginVisible;
@@ -96,14 +100,15 @@ const LoginModal = (props: LoginModalProps) => {
   });
 
   // Logging modal state and the result of areSocialLoginsVisible
-  log.info("modal state", modalState(), areSocialLoginsVisible());
+  createEffect(() => {
+    log.info("modal state", modalState(), areSocialLoginsVisible());
+  });
 
-  const isEmailPrimary = modalState().socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin";
-  const isExternalPrimary = modalState().socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin";
-  const showPasswordLessInput = isEmailPasswordLessLoginVisible() || isSmsPasswordLessLoginVisible();
-  const showExternalWalletButton = modalState().hasExternalWallets;
-  const showExternalWalletPage = (areSocialLoginsVisible() || showPasswordLessInput) &&
-    !modalState().externalWalletsVisibility;
+  const isEmailPrimary = createMemo(() => modalState().socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin");
+  const isExternalPrimary = createMemo(() => modalState().socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin");
+  const showPasswordLessInput = createMemo(() => isEmailPasswordLessLoginVisible() || isSmsPasswordLessLoginVisible());
+  const showExternalWalletButton = createMemo(() => modalState().hasExternalWallets);
+  const showExternalWalletPage = createMemo(() => (areSocialLoginsVisible() || showPasswordLessInput()) && !modalState().externalWalletsVisibility);
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
     setModalState((prevState) => {
@@ -112,25 +117,26 @@ const LoginModal = (props: LoginModalProps) => {
         externalWalletsVisibility: flag,
       };
     });
-  }
+  };
 
   return (
     <Modal open={true} placement="center" padding={false} showCloseIcon onClose={props.closeModal}>
-      <Body {...props}
-        showPasswordLessInput={showPasswordLessInput}
-        showExternalWalletButton={showExternalWalletButton}
+      <Body
+        {...props}
+        showPasswordLessInput={showPasswordLessInput()}
+        showExternalWalletButton={showExternalWalletButton()}
         handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
         socialLoginsConfig={modalState().socialLoginsConfig}
         areSocialLoginsVisible={areSocialLoginsVisible()}
-        isEmailPrimary={isEmailPrimary}
-        isExternalPrimary={isExternalPrimary}
-        showExternalWalletPage={showExternalWalletPage}
+        isEmailPrimary={isEmailPrimary()}
+        isExternalPrimary={isExternalPrimary()}
+        showExternalWalletPage={showExternalWalletPage()}
         handleExternalWalletBtnClick={handleExternalWalletBtnClick}
         modalState={modalState()}
         preHandleExternalWalletClick={preHandleExternalWalletClick}
       />
     </Modal>
-  )
+  );
 };
 
 export default LoginModal;

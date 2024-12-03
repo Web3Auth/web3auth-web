@@ -1,7 +1,8 @@
-import { onMount, type Component } from "solid-js";
-import { LoginModal } from "./loginModal";
 import { SafeEventEmitter } from "@web3auth/auth";
 import { Web3AuthNoModalEvents } from "@web3auth/base";
+import { type Component, onMount } from "solid-js";
+
+import { LoginModal } from "./loginModal";
 
 const App: Component = () => {
   onMount(async () => {
@@ -9,7 +10,7 @@ const App: Component = () => {
     const loginModal = new LoginModal({
       chainNamespace: "eip155",
       walletRegistry: { default: {}, others: {} },
-      adapterListener: adapterListener,
+      adapterListener,
     });
     await loginModal.initModal();
   });

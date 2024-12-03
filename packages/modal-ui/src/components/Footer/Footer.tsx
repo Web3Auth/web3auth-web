@@ -15,7 +15,7 @@ const Footer = () => {
         class="w3a--h-4 w3a--hidden dark:w3a--block"
       />
     </div>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

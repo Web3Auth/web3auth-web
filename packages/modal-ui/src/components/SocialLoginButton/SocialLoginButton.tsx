@@ -1,12 +1,13 @@
-import Image from "../Image/Image";
 import { LOGIN_PROVIDER } from "@web3auth/auth";
+
+import Image from "../Image/Image";
 export interface SocialLoginButtonProps {
   text?: string;
   showIcon?: boolean;
   showText?: boolean;
   method?: string;
   isDark?: boolean;
-  isPrimaryBtn?: boolean
+  isPrimaryBtn?: boolean;
   onClick?: (e: Event) => void;
 }
 
@@ -23,7 +24,11 @@ function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean)
 
 const SocialLoginButton = (props: SocialLoginButtonProps) => {
   return (
-    <button type="button" onClick={props.onClick} class="w3a--appearance-none w3a--w-full w3a--border w3a--border-app-gray-400 w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px]">
+    <button
+      type="button"
+      onClick={(e) => props.onClick?.(e)}
+      class="w3a--appearance-none w3a--w-full w3a--border w3a--border-app-gray-400 w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px]"
+    >
       {props.showIcon && getProviderIcon(props.method, props.isDark, props.isPrimaryBtn)}
       {props.showText && <p class="w3a--text-sm w3a--font-semibold">{props.text}</p>}
     </button>

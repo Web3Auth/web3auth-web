@@ -1,5 +1,6 @@
 import "./index.css";
-import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
+
+import { applyWhiteLabelTheme, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -16,8 +17,9 @@ import {
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
 import { render } from "solid-js/web";
-import { ThemedContext } from "./context/ThemeContext";
+
 import { LoginModal as Modal } from "./components/LoginModal";
+import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
@@ -30,7 +32,7 @@ import {
   StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
-import i18n from "./localeImport";
+// import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
 function createWrapper(parentZIndex: string): HTMLElement {
@@ -84,101 +86,94 @@ export class LoginModal extends SafeEventEmitter {
   initModal = async (): Promise<void> => {
     const darkState = { isDark: this.isDark };
 
-    const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
+    // const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
 
     // Load new language resource
 
-    if (useLang === LANGUAGES.de) {
-      import("./i18n/german.json")
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.ja) {
-      import(`./i18n/japanese.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.ko) {
-      import(`./i18n/korean.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.zh) {
-      import(`./i18n/mandarin.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.es) {
-      import(`./i18n/spanish.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.fr) {
-      import(`./i18n/french.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.pt) {
-      import(`./i18n/portuguese.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.nl) {
-      import(`./i18n/dutch.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.tr) {
-      import(`./i18n/turkish.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.en) {
-      import(`./i18n/english.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    }
+    // if (useLang === LANGUAGES.de) {
+    //   createRes
+    // } else if (useLang === LANGUAGES.ja) {
+    //   import(`./i18n/japanese.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.ko) {
+    //   import(`./i18n/korean.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.zh) {
+    //   import(`./i18n/mandarin.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.es) {
+    //   import(`./i18n/spanish.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.fr) {
+    //   import(`./i18n/french.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.pt) {
+    //   import(`./i18n/portuguese.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.nl) {
+    //   import(`./i18n/dutch.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.tr) {
+    //   import(`./i18n/turkish.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // } else if (useLang === LANGUAGES.en) {
+    //   import(`./i18n/english.json`)
+    //     .then((messages) => {
+    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
+    //       return i18n.changeLanguage(useLang);
+    //     })
+    //     .catch((error) => {
+    //       log.error(error);
+    //     });
+    // }
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
@@ -315,7 +310,7 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
-    listener.on(ADAPTER_EVENTS.CONNECTING, (data: any) => {
+    listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
       log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
