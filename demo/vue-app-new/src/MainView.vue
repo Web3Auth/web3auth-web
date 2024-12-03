@@ -42,7 +42,7 @@ const walletPlugins = computed(() => {
       whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
       walletUrls: {
         production: {
-          url: "https://test-wallet.web3auth.io",
+          url: "https://develop-wallet.web3auth.io",
           logLevel: "debug",
         },
       },
