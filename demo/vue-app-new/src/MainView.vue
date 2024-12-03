@@ -36,9 +36,12 @@ const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const walletPlugins = computed(() => {
   if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [];
-  const { logoDark, logoLight } = formData.walletPlugin;
+  const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
   const walletServicesPlugin = new WalletServicesPlugin({
-    walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
+    walletInitOptions: {
+      whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
+      confirmationStrategy,
+    },
   });
   return [walletServicesPlugin];
 });
