@@ -2,9 +2,11 @@
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { useI18n } from "vue-i18n";
 
+import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {
   getAccounts,
   getBalance,
@@ -16,12 +18,7 @@ import {
   signTypedMessage,
 } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
-import {
-  walletSendEth,
-  walletSignPersonalMessage,
-  walletSignTransaction as walletSignEthTransaction,
-  walletSignTypedMessage,
-} from "../services/walletServiceHandlers";
+import { walletSendEth, walletSignPersonalMessage, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
@@ -47,6 +44,9 @@ const isDisplay = (name: string): boolean => {
         formData.walletPlugin.enable &&
         web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
       );
+
+    case "nftCheckoutServices":
+      return formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable;
 
     default: {
       return false;
@@ -108,6 +108,16 @@ const onWalletSignTypedData_v4 = async () => {
 const onWalletSendEth = async () => {
   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
+};
+
+// NFT Checkout
+const showPaidMintNFTCheckout = async () => {
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
+};
+const showFreeMintNFTCheckout = async () => {
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
 };
 
 // Ethereum Provider
@@ -233,6 +243,15 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnSignTypedData_v4") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onWalletSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+        </Card>
+        <Card v-if="isDisplay('nftCheckoutServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">NFT Checkout Service</div>
+          <Button block size="xs" pill class="mb-2" @click="showFreeMintNFTCheckout">
+            {{ $t("app.buttons.btnShowFreeMintNFTCheckout") }}
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="showPaidMintNFTCheckout">
+            {{ $t("app.buttons.btnShowPaidMintNFTCheckout") }}
+          </Button>
         </Card>
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>

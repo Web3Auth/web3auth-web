@@ -17,6 +17,9 @@
       "logoDark": "Logo Dark",
       "confirmationStrategy": "Confirmation Strategy"
     },
+    "nftCheckoutPlugin": {
+      "title": "NFT Checkout Plugin"
+    },
     "accountAbstractionProvider": {
       "title": "Account Abstraction Provider",
       "smartAccountType": "Smart Account Type",
@@ -71,7 +74,9 @@
       "btnShowCheckout": "Show Checkout",
       "btnShowWalletConnectScanner": "Show WalletConnect Scanner",
       "btnSignTypedData_v4": "Sign Typed Data v4",
-      "btnSignPersonalMsg": "Sign Personal Message"
+      "btnSignPersonalMsg": "Sign Personal Message",
+      "btnShowFreeMintNFTCheckout": "Show Free Mint NFT",
+      "btnShowPaidMintNFTCheckout": "Show Paid Mint NFT"
     }
   }
 }

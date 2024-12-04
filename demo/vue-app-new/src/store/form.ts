@@ -23,6 +23,9 @@ export const formDataStore = reactive<FormData>({
     logoDark: "",
     confirmationStrategy: "default",
   },
+  nftCheckoutPlugin: {
+    enable: false,
+  },
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
 });

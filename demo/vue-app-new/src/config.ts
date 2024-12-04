@@ -187,6 +187,9 @@ export type FormData = {
     logoLight: string;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
   };
+  nftCheckoutPlugin: {
+    enable: boolean;
+  };
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
@@ -248,3 +251,10 @@ export const confirmationStrategyOptions: { name: string; value: string }[] = [
   { name: "Auto Approve", value: CONFIRMATION_STRATEGY.AUTO_APPROVE },
   { name: "Default", value: CONFIRMATION_STRATEGY.DEFAULT },
 ];
+
+export const NFT_CHECKOUT_CONTRACT_ID = {
+  FREE_MINT: "b5b4de3f-0212-11ef-a08f-0242ac190003",
+  PAID_MINT: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
+};
+
+export const NFT_CHECKOUT_CLIENT_ID = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";
