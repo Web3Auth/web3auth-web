@@ -14,7 +14,9 @@ export const NFT_CHECKOUT_URLS: Record<NFT_CHECKOUT_BUILD_ENV_TYPE, string> = {
   [NFT_CHECKOUT_BUILD_ENV.PRODUCTION]: "https://nft-checkout.web3auth.io",
 };
 
-export const MESSAGE_SETUP_COMPLETE = "setup_complete";
-export const MESSAGE_INIT = "init";
-export const MESSAGE_SHOW_NFT_CHECKOUT = "show_nft_checkout";
-export const MESSAGE_HIDE_NFT_CHECKOUT = "hide_nft_checkout";
+export const NFT_CHECKOUT_EMBED_MESSAGE_TYPES = {
+  INIT: "init",
+  SETUP_COMPLETE: "setup_complete",
+  SHOW_NFT_CHECKOUT: "show_nft_checkout",
+  HIDE_NFT_CHECKOUT: "hide_nft_checkout",
+} as const;

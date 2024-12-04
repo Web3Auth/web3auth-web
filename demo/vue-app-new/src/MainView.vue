@@ -40,7 +40,7 @@ const walletPlugins = computed(() => {
   const plugins = [];
   if (formData.nftCheckoutPlugin.enable) {
     const nftCheckoutPlugin = new NFTCheckoutPlugin({
-      web3AuthClientId: NFT_CHECKOUT_CLIENT_ID,
+      clientId: NFT_CHECKOUT_CLIENT_ID,
     });
     plugins.push(nftCheckoutPlugin);
   }

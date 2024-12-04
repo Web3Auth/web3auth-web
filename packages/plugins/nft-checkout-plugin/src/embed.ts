@@ -2,15 +2,7 @@ import { randomId } from "@toruslabs/base-controllers";
 import { THEME_MODES, WhiteLabelData } from "@web3auth/auth";
 import log from "loglevel";
 
-import {
-  MESSAGE_HIDE_NFT_CHECKOUT,
-  MESSAGE_INIT,
-  MESSAGE_SETUP_COMPLETE,
-  MESSAGE_SHOW_NFT_CHECKOUT,
-  NFT_CHECKOUT_BUILD_ENV,
-  NFT_CHECKOUT_BUILD_ENV_TYPE,
-  NFT_CHECKOUT_URLS,
-} from "./enums";
+import { NFT_CHECKOUT_BUILD_ENV, NFT_CHECKOUT_BUILD_ENV_TYPE, NFT_CHECKOUT_EMBED_MESSAGE_TYPES, NFT_CHECKOUT_URLS } from "./enums";
 import { getTheme, htmlToElement } from "./utils";
 
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
@@ -34,7 +26,7 @@ import { getTheme, htmlToElement } from "./utils";
 })();
 
 export class NFTCheckoutEmbed {
-  web3AuthClientId: string;
+  clientId: string;
 
   isInitialized: boolean;
 
@@ -44,10 +36,10 @@ export class NFTCheckoutEmbed {
 
   private readonly embedNonce = randomId();
 
-  constructor({ modalZIndex = 99999, web3AuthClientId }: { modalZIndex?: number; web3AuthClientId: string }) {
+  constructor({ modalZIndex = 99999, clientId }: { modalZIndex?: number; clientId: string }) {
     this.isInitialized = false;
     this.modalZIndex = modalZIndex;
-    this.web3AuthClientId = web3AuthClientId;
+    this.clientId = clientId;
   }
 
   public async init(params?: { buildEnv?: NFT_CHECKOUT_BUILD_ENV_TYPE; whiteLabel?: WhiteLabelData }): Promise<void> {
@@ -85,19 +77,19 @@ export class NFTCheckoutEmbed {
         window.document.body.appendChild(nftCheckoutIframe);
         const handleMessage = async (ev: MessageEvent) => {
           if (ev.origin !== nftCheckoutIframeUrl.origin) return;
-          if (ev.data.type === MESSAGE_SETUP_COMPLETE) {
+          if (ev.data.type === NFT_CHECKOUT_EMBED_MESSAGE_TYPES.SETUP_COMPLETE) {
             // send init params here
             nftCheckoutIframe.contentWindow.postMessage(
               {
-                type: MESSAGE_INIT,
-                web3AuthClientId: this.web3AuthClientId,
+                type: NFT_CHECKOUT_EMBED_MESSAGE_TYPES.INIT,
+                clientId: this.clientId,
                 whiteLabel,
               },
               nftCheckoutIframeUrl.origin
             );
             this.isInitialized = true;
             resolve();
-          } else if (ev.data.type === MESSAGE_HIDE_NFT_CHECKOUT) {
+          } else if (ev.data.type === NFT_CHECKOUT_EMBED_MESSAGE_TYPES.HIDE_NFT_CHECKOUT) {
             this.hide();
           }
         };
@@ -117,7 +109,7 @@ export class NFTCheckoutEmbed {
     const nftCheckoutOrigin = new URL(NFT_CHECKOUT_URLS[this.buildEnv]).origin;
     nftCheckoutIframe.contentWindow.postMessage(
       {
-        type: MESSAGE_SHOW_NFT_CHECKOUT,
+        type: NFT_CHECKOUT_EMBED_MESSAGE_TYPES.SHOW_NFT_CHECKOUT,
         contractId,
         receiverAddress,
       },

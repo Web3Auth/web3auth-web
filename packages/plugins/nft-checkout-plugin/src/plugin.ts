@@ -30,7 +30,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   private receiverAddress: string | null = null;
 
-  constructor(params: { modalZIndex?: number; web3AuthClientId: string }) {
+  constructor(params: { modalZIndex?: number; clientId: string }) {
     super();
     this.nftCheckoutEmbedInstance = new NFTCheckoutEmbed(params);
   }
