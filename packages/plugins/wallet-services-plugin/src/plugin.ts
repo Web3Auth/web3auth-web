@@ -101,7 +101,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
     const enableAccountAbstraction =
       web3auth.coreOptions.accountAbstractionProvider &&
-      web3auth.coreOptions.useAAWithExternalWallet &&
       (web3auth.connectedAdapterName === WALLET_ADAPTERS.AUTH ||
         (web3auth.connectedAdapterName !== WALLET_ADAPTERS.AUTH && web3auth.coreOptions.useAAWithExternalWallet));
 
