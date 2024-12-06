@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/wallet-connect-v2-adapter",
-  "version": "9.4.5",
+  "version": "9.5.0-alpha.1",
   "description": "wallet connect v2 adapter for web3auth",
   "keywords": [
     "@web3auth/wallet-connect-v2-adapter",
@@ -41,10 +41,10 @@
     "@walletconnect/types": "^2.17.2",
     "@walletconnect/utils": "^2.17.2",
     "@web3auth/auth": "^9.5.3",
-    "@web3auth/base": "^9.4.5",
-    "@web3auth/base-provider": "^9.4.5",
-    "@web3auth/ethereum-provider": "^9.4.5",
-    "@web3auth/solana-provider": "^9.4.5",
+    "@web3auth/base": "^9.5.0-alpha.1",
+    "@web3auth/base-provider": "^9.5.0-alpha.1",
+    "@web3auth/ethereum-provider": "^9.5.0-alpha.1",
+    "@web3auth/solana-provider": "^9.5.0-alpha.1",
     "bs58": "^5.0.0",
     "deepmerge": "^4.3.1"
   },
