@@ -12,14 +12,10 @@ const Main = () => {
     getBalance,
     signMessage,
     signTransaction,
-    signAndSendTransaction,
     web3Auth,
-    chain,
+    showWalletUi,
     addChain,
     switchChain,
-    getTokenBalance,
-    signAndSendTokenTransaction,
-    randomContractInteraction,
     showWalletConnectScanner,
     enableMFA,
   } = useWeb3Auth();
@@ -35,9 +31,6 @@ const Main = () => {
       <button onClick={getBalance} className={styles.card}>
         Get Balance
       </button>
-      <button onClick={getTokenBalance} className={styles.card}>
-        Get Token Balance
-      </button>
       <button onClick={signMessage} className={styles.card}>
         Sign Message
       </button>
@@ -50,25 +43,20 @@ const Main = () => {
       <button onClick={enableMFA} className={styles.card}>
         Enable MFA
       </button>
-      {(web3Auth?.connectedAdapterName === WALLET_ADAPTERS.OPENLOGIN || chain === "solana") && (
+      {web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH && (
         <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
         </button>
       )}
-      <button onClick={signAndSendTransaction} className={styles.card}>
-        Sign and Send Transaction
+
+      <button onClick={showWalletUi} className={styles.card}>
+        Show Wallet UI
       </button>
-      <button onClick={signAndSendTokenTransaction} className={styles.card}>
-        Sign and Send Token Transaction
-      </button>
-      <button onClick={randomContractInteraction} className={styles.card}>
-        Contract Interaction
-      </button>
-      {(chain !== "solana") && ( // not available for solana
+
       <button onClick={showWalletConnectScanner} className={styles.card}>
         Show WalletConnect Scanner
       </button>
-      )}
+
       <button onClick={logout} className={styles.card}>
         Log Out
       </button>

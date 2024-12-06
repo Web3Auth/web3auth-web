@@ -11,16 +11,6 @@ export const CHAIN_CONFIG = {
     logo: "https://images.toruswallet.io/eth.svg",
     chainNamespace: CHAIN_NAMESPACES.EIP155,
   } as CustomChainConfig,
-  solana: {
-    rpcTarget: "https://rpc.ankr.com/solana_devnet",
-    blockExplorerUrl: "https://explorer.solana.com/?cluster=devnet",
-    chainId: "0x3",
-    displayName: "Solana Devnet",
-    ticker: "SOL",
-    tickerName: "Solana",
-    logo: "https://images.toruswallet.io/sol.svg",
-    chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  } as CustomChainConfig,
   polygon: {
     rpcTarget: "https://rpc.ankr.com/polygon",
     blockExplorerUrl: "https://polygonscan.com/",
