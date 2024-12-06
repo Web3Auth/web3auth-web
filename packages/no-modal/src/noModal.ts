@@ -261,9 +261,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null> {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    const provider = await this.walletAdapters[walletName].connect(loginParams);
-    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider));
-    return this.provider;
+    return new Promise((resolve, reject) => {
+      this.once(ADAPTER_EVENTS.CONNECTED, (_) => {
+        resolve(this.provider);
+      });
+      this.once(ADAPTER_EVENTS.ERRORED, (err) => {
+        reject(err);
+      });
+      this.walletAdapters[walletName].connect(loginParams);
+    });
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
