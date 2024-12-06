@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-react-hooks",
-  "version": "9.5.0-alpha.1",
+  "version": "9.5.0-alpha.2",
   "description": "React hooks to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-react-hooks",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@web3auth/base": "^9.5.0-alpha.1",
-    "@web3auth/modal": "^9.5.0-alpha.1"
+    "@web3auth/modal": "^9.5.0-alpha.2"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",

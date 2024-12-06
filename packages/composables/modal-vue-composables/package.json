@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal-vue-composables",
-  "version": "9.5.0-alpha.1",
+  "version": "9.5.0-alpha.2",
   "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "keywords": [
     "web3Auth/modal-vue-composables",
@@ -30,7 +30,7 @@
   ],
   "dependencies": {
     "@web3auth/base": "^9.5.0-alpha.1",
-    "@web3auth/modal": "^9.5.0-alpha.1"
+    "@web3auth/modal": "^9.5.0-alpha.2"
   },
   "devDependencies": {
     "@web3auth/auth": "^9.5.3",
