@@ -1,6 +1,7 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
+import { CONFIRMATION_STRATEGY, CONFIRMATION_STRATEGY_TYPE } from "@web3auth/wallet-services-plugin";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -184,6 +185,10 @@ export type FormData = {
     enable: boolean;
     logoDark: string;
     logoLight: string;
+    confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
+  };
+  nftCheckoutPlugin: {
+    enable: boolean;
   };
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
@@ -240,3 +245,16 @@ export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
     contents: "Hello, Bob!",
   },
 });
+
+export const confirmationStrategyOptions: { name: string; value: string }[] = [
+  { name: "Modal", value: CONFIRMATION_STRATEGY.MODAL },
+  { name: "Auto Approve", value: CONFIRMATION_STRATEGY.AUTO_APPROVE },
+  { name: "Default", value: CONFIRMATION_STRATEGY.DEFAULT },
+];
+
+export const NFT_CHECKOUT_CONTRACT_ID = {
+  FREE_MINT: "b5b4de3f-0212-11ef-a08f-0242ac190003",
+  PAID_MINT: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
+};
+
+export const NFT_CHECKOUT_CLIENT_ID = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";

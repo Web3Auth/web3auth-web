@@ -17,6 +17,7 @@ import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/defa
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
@@ -27,7 +28,7 @@ import { computed, onBeforeMount, ref, watch } from "vue";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds, getDefaultBundlerUrl } from "./config";
+import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
@@ -35,12 +36,25 @@ const formData = formDataStore;
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const walletPlugins = computed(() => {
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 || !formData.walletPlugin.enable) return [];
-  const { logoDark, logoLight } = formData.walletPlugin;
-  const walletServicesPlugin = new WalletServicesPlugin({
-    walletInitOptions: { whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" } },
-  });
-  return [walletServicesPlugin];
+  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155) return [];
+  const plugins = [];
+  if (formData.nftCheckoutPlugin.enable) {
+    const nftCheckoutPlugin = new NFTCheckoutPlugin({
+      clientId: NFT_CHECKOUT_CLIENT_ID,
+    });
+    plugins.push(nftCheckoutPlugin);
+  }
+  if (formData.walletPlugin.enable) {
+    const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
+    const walletServicesPlugin = new WalletServicesPlugin({
+      walletInitOptions: {
+        whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
+        confirmationStrategy,
+      },
+    });
+    plugins.push(walletServicesPlugin);
+  }
+  return plugins;
 });
 
 const chainOptions = computed(() =>
@@ -200,6 +214,7 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
+        formData.nftCheckoutPlugin = json.nftCheckoutPlugin || {};
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
         formData.bundlerUrl = json.bundlerUrl;

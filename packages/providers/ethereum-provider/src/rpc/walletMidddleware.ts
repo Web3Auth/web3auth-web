@@ -183,6 +183,7 @@ export function createWalletMiddleware({
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
+    eth_requestAccounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
     eth_public_key: createAsyncMiddleware(fetchPublicKey),
     public_key: createAsyncMiddleware(fetchPublicKey),

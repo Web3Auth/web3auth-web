@@ -89,7 +89,10 @@
       "onPrimaryColor": "On Primary Color",
       "primaryColor": "Primary Color",
       "title": "Enable White Label",
-      "useLogoLoader": "Use Logo Loader"
+      "useLogoLoader": "Use Logo Loader",
+      "btnSignPersonalMsg": "Sign Personal Message",
+      "btnShowFreeMintNFTCheckout": "Show Free Mint NFT",
+      "btnShowPaidMintNFTCheckout": "Show Paid Mint NFT"
     }
   }
 }

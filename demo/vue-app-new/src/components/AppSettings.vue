@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
 import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/base";
-import { CheckoutPlugin } from "@web3auth/checkout-plugin";
+import { CHECKOUT_BUILD_ENV_TYPE, CheckoutPlugin } from "@web3auth/checkout-plugin";
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
-import { chainConfigs, chainNamespaceOptions, languageOptions, loginProviderOptions, networkOptions, SmartAccountOptions } from "../config";
+import {
+  chainConfigs,
+  chainNamespaceOptions,
+  confirmationStrategyOptions,
+  languageOptions,
+  loginProviderOptions,
+  networkOptions,
+  SmartAccountOptions,
+} from "../config";
 import { formDataStore } from "../store/form";
 
 const formData = formDataStore;
@@ -45,6 +53,9 @@ const isDisabled = (name: string): boolean => {
       return !formData.whiteLabel.enable;
 
     case "walletServicePlugin":
+      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+
+    case "nftCheckoutPlugin":
       return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
 
     case "btnConnect":
@@ -100,13 +111,13 @@ const checkoutFormData = ref({
   strictMode: false,
   chainId: "",
 });
-
 const onCheckoutClick = async () => {
   const checkoutPlugin = new CheckoutPlugin({
     ...checkoutFormData.value,
     apiKey: checkoutApiKey[checkoutFormData.value.buildEnv as keyof typeof checkoutApiKey],
     cryptoList: checkoutFormData.value.tokenList.split(",").map((x) => x.trim()),
     fiatList: checkoutFormData.value.fiatList.split(",").map((x) => x.trim()),
+    buildEnv: checkoutFormData.value.buildEnv as CHECKOUT_BUILD_ENV_TYPE,
   });
   await checkoutPlugin.init();
 };
@@ -118,7 +129,7 @@ const onCheckoutClick = async () => {
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === ADAPTER_STATUS.READY }]">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === ADAPTER_STATUS.READY }]">
           {{ status }}
         </Tag>
         &nbsp;
@@ -134,9 +145,12 @@ const onCheckoutClick = async () => {
           Wallet Plugin
         </Tab>
         <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
-          Account Abstraction Provider
+          NFT Checkout Plugin
         </Tab>
         <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
+          Account Abstraction Provider
+        </Tab>
+        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(6)" @click="onTabChange(6)">
           Checkout Plugin
         </Tab>
       </Tabs>
@@ -257,7 +271,7 @@ const onCheckoutClick = async () => {
               type="color"
               :value="formData.whiteLabel.config.theme?.primary"
               @input="
-                (e) => {
+                (e: Event) => {
                   const color = (e.target as InputHTMLAttributes).value;
                   formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, primary: color };
                 }
@@ -279,7 +293,7 @@ const onCheckoutClick = async () => {
               type="color"
               :value="formData.whiteLabel.config.theme?.onPrimary"
               @input="
-                (e) => {
+                (e: Event) => {
                   const color = (e.target as InputHTMLAttributes).value;
                   formData.whiteLabel.config.theme = { ...formData.whiteLabel.config.theme, onPrimary: color };
                 }
@@ -388,8 +402,28 @@ const onCheckoutClick = async () => {
           :placeholder="$t('app.walletPlugin.logoDark')"
           class="sm:col-span-2"
         />
+        <Select
+          v-model="formData.walletPlugin.confirmationStrategy"
+          data-testid="selectLoginProviders"
+          :label="$t('app.walletPlugin.confirmationStrategy')"
+          :aria-label="$t('app.walletPlugin.confirmationStrategy')"
+          :placeholder="$t('app.walletPlugin.confirmationStrategy')"
+          :options="confirmationStrategyOptions"
+          class=""
+        />
       </Card>
       <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
+        <Toggle
+          v-model="formData.nftCheckoutPlugin.enable"
+          :disabled="isDisabled('nftCheckoutPlugin')"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.nftCheckoutPlugin.title')"
+          :label-enabled="$t('app.nftCheckoutPlugin.title')"
+          class="mb-2"
+        />
+      </Card>
+      <Card v-if="isActiveTab(5)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <Toggle
           v-model="formData.useAccountAbstractionProvider"
           data-testid="accountAbstractionProvider"
@@ -433,7 +467,7 @@ const onCheckoutClick = async () => {
           :disabled="isDisabled('paymasterUrl')"
         />
       </Card>
-      <Card v-if="isActiveTab(5)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
+      <Card v-if="isActiveTab(6)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
         <div class="flex items-center justify-between gap-x-6">
           <Select
             v-model="checkoutFormData.buildEnv"
@@ -547,7 +581,7 @@ const onCheckoutClick = async () => {
         </div>
         <Button class="mt-4" @click="onCheckoutClick">Checkout</Button>
       </Card>
-      <div v-if="!isActiveTab(5)" class="flex justify-center mt-5">
+      <div v-if="!isActiveTab(6)" class="flex justify-center mt-5">
         <Button
           :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
           data-testid="loginButton"

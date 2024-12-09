@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ethereum-provider",
-  "version": "9.4.4",
+  "version": "9.5.0-alpha.2",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -21,12 +21,12 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^6.3.1",
+    "@toruslabs/base-controllers": "^6.3.2",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
     "@web3auth/auth": "^9.5.3",
-    "@web3auth/base": "^9.4.4",
-    "@web3auth/base-provider": "^9.4.4",
+    "@web3auth/base": "^9.5.0-alpha.1",
+    "@web3auth/base-provider": "^9.5.0-alpha.1",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
