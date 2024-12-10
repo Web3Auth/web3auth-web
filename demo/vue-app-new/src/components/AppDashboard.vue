@@ -214,7 +214,7 @@ const onSignPersonalMsg = async () => {
 <template>
   <div v-if="isDisplay('dashboard')" class="w-full h-full px-10">
     <div class="grid h-full grid-cols-1 md:grid-cols-4 lg:grid-cols-6">
-      <Card class="px-4 py-4 gird col-span-1 lg:col-span-2 h-full !rounded-3xl md:!rounded-r-none !shadow-none">
+      <Card class="px-4 py-4 grid col-span-1 lg:col-span-2 h-full !rounded-3xl md:!rounded-r-none !shadow-none">
         <div class="mb-2">
           <Button block size="xs" pill variant="tertiary" data-testid="btnClearConsole" @click="clearConsole">
             {{ $t("app.buttons.btnClearConsole") }}
