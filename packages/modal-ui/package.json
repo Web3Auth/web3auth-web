@@ -10,13 +10,13 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/lib.cjs/packages/ui/src/index.js",
-  "module": "dist/lib.esm/packages/ui/src/index.js",
-  "unpkg": "dist/ui.umd.min.js",
-  "jsdelivr": "dist/ui.umd.min.js",
+  "main": "dist/lib.cjs/packages/modal-ui/src/index.js",
+  "module": "dist/lib.esm/packages/modal-ui/src/index.js",
+  "unpkg": "dist/modal-ui.umd.min.js",
+  "jsdelivr": "dist/modal-ui.umd.min.js",
   "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/ui#readme",
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/modal-ui#readme",
   "license": "ISC",
   "scripts": {
     "test": "mocha --config ../../.mocharc.json test/**.ts",
