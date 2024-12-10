@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@web3auth/base": "^9.3.0",
-    "@web3auth/modal": "file:../../modal"
+    "@web3auth/modal": "^9.3.1"
   },
   "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "devDependencies": {
