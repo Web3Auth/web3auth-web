@@ -53,6 +53,15 @@ export const Web3AuthProvider = defineComponent({
       isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
     };
 
+    const manageMFA = async (loginParams?: Partial<LoginParams>) => {
+      if (!web3Auth.value) throw WalletInitializationError.notReady();
+      if (!isConnected.value) throw WalletLoginError.notConnectedError();
+      await web3Auth.value.manageMFA(loginParams);
+      const localUserInfo = await web3Auth.value.getUserInfo();
+      userInfo.value = localUserInfo;
+      isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
+    };
+
     const logout = async (logoutParams: { cleanup: boolean } = { cleanup: false }) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
@@ -222,6 +231,7 @@ export const Web3AuthProvider = defineComponent({
       getPlugin,
       connect,
       enableMFA,
+      manageMFA,
       logout,
       addAndSwitchChain,
       addChain,

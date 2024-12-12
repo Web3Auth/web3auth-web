@@ -171,6 +171,10 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
   public async enableMFA(): Promise<void> {
     throw new Error("Method Not implemented");
   }
+
+  public async manageMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
 }
 
 export { InjectedEvmAdapter };

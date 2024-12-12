@@ -27,6 +27,7 @@ export interface IWeb3AuthContext {
   showWalletConnectScanner: () => Promise<void>;
   showWalletUi: () => Promise<void>;
   enableMFA: () => Promise<void>;
+  manageMFA: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -47,6 +48,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   showWalletConnectScanner: async () => {},
   showWalletUi: async () => {},
   enableMFA: async () => {},
+  manageMFA: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -226,6 +228,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await web3Auth.enableMFA();
   };
 
+  const manageMFA = async () => {
+    if (!web3Auth) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    await web3Auth.manageMFA();
+  };
+
   const addChain = async () => {
     if (!provider) {
       uiConsole("provider not initialized yet");
@@ -343,6 +354,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     switchChain,
     showWalletConnectScanner,
     enableMFA,
+    manageMFA,
     showWalletUi,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;

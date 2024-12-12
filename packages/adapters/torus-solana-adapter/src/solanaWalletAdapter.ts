@@ -194,4 +194,8 @@ export class SolanaWalletAdapter extends BaseSolanaAdapter<void> {
   public async enableMFA(): Promise<void> {
     throw new Error("Method Not implemented");
   }
+
+  public async manageMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
 }

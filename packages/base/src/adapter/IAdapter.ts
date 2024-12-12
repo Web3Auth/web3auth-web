@@ -100,6 +100,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   connect(params?: T): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
+  manageMFA(params?: T): Promise<void>;
   setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
   switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
@@ -266,6 +267,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
+  abstract manageMFA(params?: T): Promise<void>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
   abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
