@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^6.3.2",
-    "@web3auth/auth": "^9.6.0",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "json-rpc-random-id": "^1.0.1"
   },
