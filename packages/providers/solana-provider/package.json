@@ -22,7 +22,7 @@
   "dependencies": {
     "@toruslabs/base-controllers": "^6.3.2",
     "@toruslabs/tweetnacl-js": "^1.0.4",
-    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/base-provider": "^9.5.0-alpha.1",
     "bn.js": "^5.2.1",
@@ -30,7 +30,7 @@
     "json-rpc-random-id": "^1.0.1"
   },
   "devDependencies": {
-    "@solana/web3.js": "^1.95.5",
+    "@solana/web3.js": "^1.95.8",
     "@types/bn.js": "^5.1.6",
     "@types/bs58": "^4.0.4",
     "@types/json-rpc-random-id": "^1.0.3"

@@ -162,6 +162,15 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth, isConnected]
   );
 
+  const manageMFA = useCallback(
+    async (loginParams: Partial<LoginParams>) => {
+      if (!web3Auth) throw WalletInitializationError.notReady();
+      if (!isConnected) throw WalletLoginError.notConnectedError();
+      await web3Auth.manageMFA(loginParams);
+    },
+    [web3Auth, isConnected]
+  );
+
   const logout = useCallback(
     async (logoutParams: { cleanup: boolean } = { cleanup: false }) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
@@ -232,6 +241,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       getPlugin,
       connectTo,
       enableMFA,
+      manageMFA,
       logout,
       addAndSwitchChain,
       addChain,
@@ -254,6 +264,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     connectTo,
     getPlugin,
     enableMFA,
+    manageMFA,
     logout,
     addAndSwitchChain,
     addChain,

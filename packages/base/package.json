@@ -23,7 +23,7 @@
     "@toruslabs/base-controllers": "^6.3.2",
     "@toruslabs/constants": "^14.2.0",
     "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth": "^9.6.1",
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.2",
     "ts-custom-error": "^3.3.1"

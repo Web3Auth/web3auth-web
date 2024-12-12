@@ -21,11 +21,11 @@
   },
   "dependencies": {
     "@solana/wallet-standard-features": "^1.2.0",
-    "@solana/web3.js": "^1.95.5",
+    "@solana/web3.js": "^1.95.8",
     "@wallet-standard/app": "^1.1.0",
     "@wallet-standard/base": "^1.1.0",
     "@wallet-standard/features": "^1.1.0",
-    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/base-solana-adapter": "^9.5.0-alpha.1",
     "@web3auth/solana-provider": "^9.5.0-alpha.1",

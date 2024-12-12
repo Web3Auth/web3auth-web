@@ -31,8 +31,8 @@
     "dist"
   ],
   "dependencies": {
-    "@toruslabs/base-controllers": "^6.2.4",
-    "@web3auth/auth": "^9.4.1",
+    "@toruslabs/base-controllers": "^6.3.2",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "loglevel": "^1.9.2"
   },

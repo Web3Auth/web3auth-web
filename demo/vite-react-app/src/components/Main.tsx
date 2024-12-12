@@ -18,6 +18,7 @@ const Main = () => {
     switchChain,
     showWalletConnectScanner,
     enableMFA,
+    manageMFA,
   } = useWeb3Auth();
 
   const loggedInView = (
@@ -42,6 +43,9 @@ const Main = () => {
       </button>
       <button onClick={enableMFA} className={styles.card}>
         Enable MFA
+      </button>
+      <button onClick={manageMFA} className={styles.card}>
+        Manage MFA
       </button>
       {web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH && (
         <button onClick={signTransaction} className={styles.card}>

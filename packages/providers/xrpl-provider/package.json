@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@toruslabs/base-controllers": "^6.3.2",
-    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/base-provider": "^9.5.0-alpha.1",
     "ripple-keypairs": "^1.3.1"

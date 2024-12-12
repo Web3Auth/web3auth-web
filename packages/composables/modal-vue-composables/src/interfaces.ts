@@ -27,6 +27,7 @@ interface IBaseWeb3AuthComposableContext {
   isInitialized: Ref<boolean>;
   status: Ref<ADAPTER_STATUS_TYPE | null>;
   enableMFA(params?: LoginParams): Promise<void>;
+  manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
   addAndSwitchChain(chainConfig: CustomChainConfig): Promise<void>;
   addPlugin(plugin: IPlugin): void;

@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@web3auth/account-abstraction-provider": "^9.5.0-alpha.2",
-    "@web3auth/auth": "^9.5.3",
+    "@web3auth/auth": "^9.6.1",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/no-modal": "^9.5.0-alpha.2",
     "@web3auth/ws-embed": "^3.2.1",
