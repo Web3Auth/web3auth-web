@@ -64,9 +64,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       if (!web3Auth) throw WalletInitializationError.notReady();
       if (!isConnected) throw WalletLoginError.notConnectedError();
       await web3Auth.manageMFA(loginParams);
-      const localUserInfo = await web3Auth.getUserInfo();
-      setUserInfo(localUserInfo);
-      setIsMFAEnabled(localUserInfo.isMfaEnabled || false);
     },
     [web3Auth, isConnected]
   );

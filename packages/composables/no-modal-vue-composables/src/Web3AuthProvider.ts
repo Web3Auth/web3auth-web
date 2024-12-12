@@ -58,9 +58,6 @@ export const Web3AuthProvider = defineComponent({
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       if (!isConnected.value) throw WalletLoginError.notConnectedError();
       await web3Auth.value.manageMFA(loginParams);
-      const localUserInfo = await web3Auth.value.getUserInfo();
-      userInfo.value = localUserInfo;
-      isMFAEnabled.value = localUserInfo.isMfaEnabled || false;
     };
 
     const logout = async (logoutParams: { cleanup: boolean } = { cleanup: false }) => {
