@@ -3,6 +3,7 @@ import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WalletRegistry } fro
 import deepmerge from "deepmerge";
 import { createEffect, createMemo, createSignal, on } from "solid-js";
 
+import { PAGES } from "../../constants";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../../interfaces";
 import { Body } from "../Body";
 import { Modal } from "../Modal";
@@ -39,6 +40,7 @@ const LoginModal = (props: LoginModalProps) => {
     detailedLoaderAdapter: "",
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
+    currentPage: PAGES.LOGIN,
   });
 
   createEffect(
@@ -101,7 +103,7 @@ const LoginModal = (props: LoginModalProps) => {
 
   // Logging modal state and the result of areSocialLoginsVisible
   createEffect(() => {
-    log.info("modal state", modalState(), areSocialLoginsVisible());
+    log.info("modal state", modalState(), areSocialLoginsVisible(), isEmailPasswordLessLoginVisible(), isSmsPasswordLessLoginVisible());
   });
 
   const isEmailPrimary = createMemo(() => modalState().socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin");
@@ -119,8 +121,43 @@ const LoginModal = (props: LoginModalProps) => {
     });
   };
 
+  const closeModal = () => {
+    setModalState((prevState) => ({
+      ...prevState,
+      externalWalletsVisibility: false,
+      modalVisibility: false,
+      currentPage: PAGES.LOGIN,
+    }));
+    props.closeModal();
+  };
+
+  const onCloseLoader = () => {
+    if (modalState().status === MODAL_STATUS.CONNECTED) {
+      setModalState({
+        ...modalState(),
+        modalVisibility: false,
+        externalWalletsVisibility: false,
+      });
+    }
+    if (modalState().status === MODAL_STATUS.ERRORED) {
+      setModalState({
+        ...modalState(),
+        modalVisibility: true,
+        status: MODAL_STATUS.INITIALIZED,
+      });
+    }
+  };
+
+  const showCloseIcon = createMemo(() => {
+    return (
+      modalState().status === MODAL_STATUS.INITIALIZED ||
+      modalState().status === MODAL_STATUS.CONNECTED ||
+      modalState().status === MODAL_STATUS.ERRORED
+    );
+  });
+
   return (
-    <Modal open={true} placement="center" padding={false} showCloseIcon onClose={props.closeModal}>
+    <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>
       <Body
         {...props}
         showPasswordLessInput={showPasswordLessInput()}
@@ -134,6 +171,10 @@ const LoginModal = (props: LoginModalProps) => {
         handleExternalWalletBtnClick={handleExternalWalletBtnClick}
         modalState={modalState()}
         preHandleExternalWalletClick={preHandleExternalWalletClick}
+        setModalState={setModalState}
+        onCloseLoader={onCloseLoader}
+        isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible()}
+        isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible()}
       />
     </Modal>
   );

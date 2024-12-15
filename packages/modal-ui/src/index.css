@@ -3,13 +3,41 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  padding: 0px !important;
-  margin: 0px !important;
-  box-sizing: border-box;
+@layer base {
+  body {
+    padding: 0px !important;
+    margin: 0px !important;
+    box-sizing: border-box;
+  }
+
+  .w3a-parent-container {
+    font-family: "Inter";
+    position: relative;
+  }
 }
 
-.w3a-parent-container {
-  font-family: "Inter";
-  position: relative;
+@layer utilities {
+  .w3a--loader-logo-size {
+    @apply w3a--h-10 w3a--w-10;
+  }
+
+  .w3a--header-logo-size {
+    @apply w3a--h-10 w3a--w-10;
+  }
+
+  .w3a--animate-circle {
+    @apply w3a--h-3 w3a--w-3 w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse;
+  }
+
+  .w3a--bottom {
+    @apply w3a--bottom-1 w3a--left-[50%] w3a--translate-x-[-50%];
+  }
+
+  .w3a--bottom-sheet-bg {
+    @apply w3a--bg-app-gray-600 w3a--opacity-50;
+  }
+
+  .w3a--bottom-sheet-width {
+    @apply w3a--w-[98%];
+  }
 }

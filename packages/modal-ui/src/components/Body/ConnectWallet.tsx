@@ -1,9 +1,12 @@
 import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import bowser from "bowser";
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
+import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
-import { ExternalButton, ModalStatusType } from "../../interfaces";
+import { CONNECT_WALLET_PAGES } from "../../constants";
+import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { WalletButton } from "../WalletButton";
+import { BodyContext } from "./Body";
 export interface ConnectWalletProps {
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { adapter: string }) => void;
@@ -15,32 +18,26 @@ export interface ConnectWalletProps {
   walletRegistry?: WalletRegistry;
 }
 
-// const WALLET_LIST = ['Metamask', 'Ronin Wallet', 'Phantom', 'Rainbow', 'Trust Wallet', 'Coinbase Wallet', 'Uniswap', 'Metamask', 'Ronin Wallet', 'Phantom', 'Rainbow', 'Trust Wallet', 'Coinbase Wallet', 'Uniswap', 'Metamask', 'Ronin Wallet', 'Phantom', 'Rainbow', 'Trust Wallet', 'Coinbase Wallet', 'Uniswap']
-
-const PAGES = {
-  CONNECT_WALLET: "Connect Wallet",
-  SELECTED_WALLET: "Selected Wallet",
-};
-
-type os = "iOS" | "Android";
-type platform = "mobile" | "desktop" | "tablet";
-type browser = "chrome" | "firefox" | "edge" | "brave" | "safari";
-
 const ConnectWallet = (props: ConnectWalletProps) => {
-  const [currentPage, setCurrentPage] = createSignal(PAGES.CONNECT_WALLET);
+  const { bodyState, setBodyState } = useContext(BodyContext);
+
+  const [currentPage, setCurrentPage] = createSignal(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = createSignal(false);
   const [externalButtons, setExternalButtons] = createSignal<ExternalButton[]>([]);
   const [totalExternalWallets, setTotalExternalWallets] = createSignal<number>(0);
-  // const [selectedButton, setSelectedButton] = createSignal<ExternalButton>(null);
+  const [selectedButton, setSelectedButton] = createSignal<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = createSignal<string>("");
 
+  // eslint-disable-next-line no-console, solid/reactivity
+  console.log(selectedButton(), "SELECTED BUTTON");
+
   const handleBack = () => {
-    if (!selectedWallet() && currentPage() === PAGES.CONNECT_WALLET && props.onBackClick) {
+    if (!selectedWallet() && currentPage() === CONNECT_WALLET_PAGES.CONNECT_WALLET && props.onBackClick) {
       props.onBackClick(false);
     }
 
     if (selectedWallet) {
-      setCurrentPage(PAGES.CONNECT_WALLET);
+      setCurrentPage(CONNECT_WALLET_PAGES.CONNECT_WALLET);
       setSelectedWallet(false);
     }
   };
@@ -52,11 +49,11 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   });
 
   const deviceDetails = createMemo<{ platform: platform; os: os; browser: browser }>(() => {
-    const browser = bowser.getParser(window.navigator.userAgent);
+    const browserData = bowser.getParser(window.navigator.userAgent);
     return {
-      platform: browser.getPlatformType() as platform,
-      os: browser.getOSName() as os,
-      browser: browser.getBrowserName().toLowerCase() as browser,
+      platform: browserData.getPlatformType() as platform,
+      os: browserData.getOSName() as os,
+      browser: browserData.getBrowserName().toLowerCase() as browser,
     };
   });
 
@@ -106,6 +103,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       const defaultButtonKeys = new Set(Object.keys(props.walletRegistry.default));
 
       const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
+        // eslint-disable-next-line solid/reactivity
         return Object.keys(wallets).reduce((acc, wallet) => {
           if (adapterVisibilityMap()[wallet] === false) return acc;
 
@@ -144,6 +142,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       const otherButtons = generateWalletButtons(props.walletRegistry.others);
 
       // Generate custom adapter buttons
+      // eslint-disable-next-line solid/reactivity
       const customAdapterButtons: ExternalButton[] = Object.keys(props.config).reduce((acc, adapter) => {
         if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !props.config[adapter].isInjected && adapterVisibilityMap()[adapter]) {
           log.debug("custom adapter", adapter, props.config[adapter]);
@@ -184,6 +183,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       // Move buttons outside the effect
       const buttons = createMemo(() => {
         const visibilityMap = adapterVisibilityMap();
+        // eslint-disable-next-line solid/reactivity
         return Object.keys(props.config).reduce((acc, adapter) => {
           if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
             acc.push({
@@ -213,17 +213,28 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       props.handleExternalWalletClick({ adapter: button.name });
     } else {
       // else, show wallet detail
-      // setSelectedButton(button);
+      setSelectedButton(button);
       setSelectedWallet(true);
-      setCurrentPage(PAGES.SELECTED_WALLET);
+      setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
     }
   };
 
   return (
     <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
       <div class="w3a--flex w3a--items-center w3a--justify-between">
-        <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--bg-app-gray-200 w3a--cursor-pointer" onClick={handleBack} />
-        <p class="w3a--text-base w3a--font-medium w3a--text-app-gray-900">{currentPage()}</p>
+        <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center" onClick={handleBack}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+            <path
+              fill="currentColor"
+              fill-rule="evenodd"
+              d="M9.707 16.707a1 1 0 0 1-1.414 0l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 1.414L5.414 9H17a1 1 0 1 1 0 2H5.414l4.293 4.293a1 1 0 0 1 0 1.414"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </figure>
+        <p class="w3a--text-base w3a--font-medium w3a--text-app-gray-900">
+          {currentPage() === CONNECT_WALLET_PAGES.SELECTED_WALLET ? selectedButton()?.displayName : currentPage()}
+        </p>
         <div class="w3a--w-5 w3a--h-5" />
       </div>
 
@@ -240,13 +251,13 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               onBlur={(e) => {
                 e.target.placeholder = `modal.external.search-wallet, ${totalExternalWallets()}`;
               }}
-              placeholder="Search through wallets..."
+              placeholder={`Search through wallets... ${totalExternalWallets()}`}
               class="w3a--w-full w3a--px-4 w3a--py-2.5 w3a--border w3a--border-app-gray-300 w3a--bg-app-gray-50 placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full"
             />
           </Show>
           <ul class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto">
             <Show
-              when={externalButtons.length !== 0}
+              when={externalButtons().length !== 0}
               fallback={
                 <div class="w3a--w-full w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500 w3a--py-6 w3a--flex w3a--justify-center w3a--items-center">
                   {"modal.external.no-wallets-found"}
@@ -269,33 +280,41 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         </div>
       ) : (
         <div class="w3a--contents">
-          <div class="w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto" />
+          <div class="w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+            <QRCodeCanvas
+              value={props.walletConnectUri || ""}
+              level="low"
+              backgroundColor="transparent"
+              backgroundAlpha={0}
+              foregroundColor="#000000"
+              foregroundAlpha={1}
+              width={300}
+              height={300}
+              x={0}
+              y={0}
+              maskType={MaskType.FLOWER_IN_SQAURE}
+            />
+          </div>
           <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 w3a--font-normal">
             Scan with a WalletConnect-supported wallet or click the QR code to copy to your clipboard.
           </p>
           <div class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--mt-auto w3a--bg-app-gray-50 w3a--rounded-xl w3a--p-3">
             <p class="w3a--text-sm w3a--text-app-gray-900">Don't have Trust Wallet?</p>
-            <button class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 w3a--rounded-full w3a--px-2 w3a--py-2">
+            <button
+              class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 w3a--rounded-full w3a--px-2 w3a--py-2"
+              onClick={() => {
+                setBodyState({
+                  ...bodyState,
+                  showWalletDetails: true,
+                  walletDetails: selectedButton(),
+                });
+              }}
+            >
               Get Wallet
             </button>
           </div>
         </div>
       )}
-
-      {/* <div class="absolute bottom-0 left-0 bg-app-white rounded-lg p-6 w-full flex flex-col gap-y-2 shadow-sm border border-app-gray-100">
-        <div class="flex items-center gap-x-2 w-full bg-app-gray-100 px-4 py-2 rounded-full">
-          <figure class="w-5 h-5 rounded-full bg-app-gray-200 cursor-pointer"></figure>
-          <p class="text-sm font-medium text-app-gray-900">Install Chrome</p>
-        </div>
-        <div class="flex items-center gap-x-2 w-full bg-app-gray-100 px-4 py-2 rounded-full">
-          <figure class="w-5 h-5 rounded-full bg-app-gray-200 cursor-pointer"></figure>
-          <p class="text-sm font-medium text-app-gray-900">Install Chrome</p>
-        </div>
-        <div class="flex items-center gap-x-2 w-full bg-app-gray-100 px-4 py-2 rounded-full">
-          <figure class="w-5 h-5 rounded-full bg-app-gray-200 cursor-pointer"></figure>
-          <p class="text-sm font-medium text-app-gray-900">Install Chrome</p>
-        </div>
-      </div> */}
     </div>
   );
 };

@@ -65,7 +65,8 @@
     "deepmerge": "^4.3.1",
     "solid-js": "^1.8.11",
     "tailwind-merge": "^2.5.5",
-    "@solid-primitives/i18n": "^2.1.1"
+    "@solid-primitives/i18n": "^2.1.1",
+    "solid-qr-code": "^0.1.11"
   },
   "lint-staged": {
     "!(*d).ts": [

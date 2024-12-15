@@ -96,6 +96,7 @@ export interface ModalState {
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
+  currentPage: string;
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
@@ -121,3 +122,18 @@ export type ExternalButton = {
   walletRegistryItem?: WalletRegistryItem;
   imgExtension?: string;
 };
+
+export type os = "iOS" | "Android";
+export type platform = "mobile" | "desktop" | "tablet";
+export type browser = "chrome" | "firefox" | "edge" | "safari" | "brave";
+export type mobileOs = "ios" | "android";
+
+export interface WalletAppConfig {
+  browser?: string;
+  android?: string;
+  ios?: string;
+  chrome?: string;
+  firefox?: string;
+  edge?: string;
+  brave?: string;
+}

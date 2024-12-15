@@ -35,7 +35,7 @@ import {
 // import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
-function createWrapper(parentZIndex: string): HTMLElement {
+function createWrapper(parentZIndex: string) {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
   const parent = document.createElement("section");
@@ -43,11 +43,7 @@ function createWrapper(parentZIndex: string): HTMLElement {
   parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
-  const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-container");
-  parent.appendChild(wrapper);
   document.body.appendChild(parent);
-  return wrapper;
 }
 
 export class LoginModal extends SafeEventEmitter {
@@ -80,10 +76,14 @@ export class LoginModal extends SafeEventEmitter {
   }
 
   get isDark(): boolean {
+    // eslint-disable-next-line no-console
+    console.log(this.uiConfig, "this.uiConfig");
     return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   initModal = async (): Promise<void> => {
+    // eslint-disable-next-line no-console
+    console.log(this.isDark, "this.isDark");
     const darkState = { isDark: this.isDark };
 
     // const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
@@ -184,14 +184,14 @@ export class LoginModal extends SafeEventEmitter {
         return resolve();
       });
 
-      const container = createWrapper(this.uiConfig.modalZIndex);
-      if (darkState.isDark) {
-        container.classList.add("w3a--dark");
-      } else {
-        container.classList.remove("w3a--dark");
-      }
+      createWrapper(this.uiConfig.modalZIndex);
 
       const root = document.getElementById("w3a-parent-container");
+      if (darkState.isDark) {
+        root?.classList.add("w3a--dark");
+      } else {
+        root?.classList.remove("w3a--dark");
+      }
 
       if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
         throw new Error("Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?");

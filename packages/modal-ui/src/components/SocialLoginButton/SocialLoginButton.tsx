@@ -19,7 +19,7 @@ function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean)
   if (isPrimaryBtn) {
     return <Image width="20" imageId={hoverId} hoverImageId={hoverId} isButton />;
   }
-  return <Image width="20" imageId={imageId} hoverImageId={hoverId} isButton />;
+  return <Image width="20" imageId={imageId} hoverImageId={hoverId} />;
 }
 
 const SocialLoginButton = (props: SocialLoginButtonProps) => {
@@ -30,7 +30,7 @@ const SocialLoginButton = (props: SocialLoginButtonProps) => {
       class="w3a--appearance-none w3a--w-full w3a--border w3a--border-app-gray-400 w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px]"
     >
       {props.showIcon && getProviderIcon(props.method, props.isDark, props.isPrimaryBtn)}
-      {props.showText && <p class="w3a--text-sm w3a--font-semibold">{props.text}</p>}
+      {props.showText && <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{props.text}</p>}
     </button>
   );
 };

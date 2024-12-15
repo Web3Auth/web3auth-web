@@ -1,4 +1,4 @@
-import { createMemo, mergeProps, useContext } from "solid-js";
+import { createMemo, mergeProps, Show, useContext } from "solid-js";
 
 import { ThemedContext } from "../../context/ThemeContext";
 
@@ -32,21 +32,25 @@ export default function Image(props: ImageProps) {
 
   return (
     <>
-      <img
-        src={`https://images.web3auth.io/${imgName()}.${mergedProps.extension}`}
-        height={mergedProps.height}
-        width={mergedProps.width}
-        alt={mergedProps.imageId}
-        class="w3a--object-contain w3a--rounded"
-        onError={({ currentTarget }) => {
-          if (mergedProps.fallbackImageId) {
-            currentTarget.onerror = null; // prevents looping
+      <Show
+        when={mergedProps.isButton}
+        fallback={
+          <img
+            src={`https://images.web3auth.io/${imgName()}.${mergedProps.extension}`}
+            height={mergedProps.height}
+            width={mergedProps.width}
+            alt={mergedProps.imageId}
+            class="w3a--object-contain w3a--rounded"
+            onError={({ currentTarget }) => {
+              if (mergedProps.fallbackImageId) {
+                currentTarget.onerror = null; // prevents looping
 
-            currentTarget.src = `https://images.web3auth.io/${mergedProps.fallbackImageId}.svg`;
-          }
-        }}
-      />
-      {mergedProps.isButton ? (
+                currentTarget.src = `https://images.web3auth.io/${mergedProps.fallbackImageId}.svg`;
+              }
+            }}
+          />
+        }
+      >
         <img
           src={`https://images.web3auth.io/${hoverImgName()}.${mergedProps.extension}`}
           height={mergedProps.height}
@@ -54,7 +58,7 @@ export default function Image(props: ImageProps) {
           alt={mergedProps.hoverImageId}
           class="w3a--object-contain w3a--rounded"
         />
-      ) : null}
+      </Show>
     </>
   );
 }

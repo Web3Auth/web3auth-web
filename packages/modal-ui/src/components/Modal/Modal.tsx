@@ -57,16 +57,16 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
       })}
     >
       <div
-        class={cn("w3a--bg-app-white w3a--rounded-3xl w3a--w-full sm:w3a--w-[400px] w3a--duration-500", {
+        class={cn("w3a--bg-app-white dark:!w3a--bg-app-gray-900 w3a--rounded-3xl w3a--w-full sm:w3a--w-[400px] w3a--duration-500", {
           "w3a--translate-y-0 w3a--delay-100": isOpen(),
           "w3a--translate-y-[100vh]": !isOpen(),
           "w3a--p-4": mergedProps.padding,
           "w3a--shadow-xl sm:w3a--shadow-lg": mergedProps.shadow,
-          "w3a--border w3a--border-app-gray-100": mergedProps.border,
+          "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": mergedProps.border,
         })}
       >
         {mergedProps.showCloseIcon && (
-          <div class="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--cursor-pointer">
+          <div class="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--cursor-pointer z-10">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={onCloseHandler}>
               <path
                 fill-rule="evenodd"

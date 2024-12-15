@@ -38,6 +38,9 @@ const WalletButton = (props: WalletButtonProps) => {
     }
   };
 
+  // eslint-disable-next-line no-console, solid/reactivity
+  console.log(props.button);
+
   return (
     <button
       class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--bg-app-gray-100 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px] w3a--border w3a--border-app-gray-100 hover:w3a--border-app-gray-200"
