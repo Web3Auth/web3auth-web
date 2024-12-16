@@ -21,14 +21,14 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^6.3.2",
-    "@web3auth/auth": "^9.6.1",
+    "@toruslabs/base-controllers": "^7.0.0",
+    "@web3auth/auth": "^9.6.2",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/base-provider": "^9.5.0-alpha.1",
     "@web3auth/ethereum-provider": "^9.5.0-alpha.2",
     "ethers": "^6.13.4",
-    "permissionless": "^0.2.22",
-    "viem": "^2.21.54"
+    "permissionless": "^0.2.23",
+    "viem": "^2.21.55"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"

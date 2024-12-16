@@ -21,10 +21,10 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^6.3.2",
+    "@toruslabs/base-controllers": "^7.0.0",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.6.1",
+    "@web3auth/auth": "^9.6.2",
     "@web3auth/base": "^9.5.0-alpha.1",
     "@web3auth/base-provider": "^9.5.0-alpha.1",
     "assert": "^2.1.0",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.6",
     "@types/json-rpc-random-id": "^1.0.3",
-    "@walletconnect/types": "^2.17.2"
+    "@walletconnect/types": "^2.17.3"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
