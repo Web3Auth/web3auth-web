@@ -252,10 +252,10 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 e.target.placeholder = `modal.external.search-wallet, ${totalExternalWallets()}`;
               }}
               placeholder={`Search through wallets... ${totalExternalWallets()}`}
-              class="w3a--w-full w3a--px-4 w3a--py-2.5 w3a--border w3a--border-app-gray-300 w3a--bg-app-gray-50 placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full"
+              class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
             />
           </Show>
-          <ul class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto">
+          <ul class="w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto">
             <Show
               when={externalButtons().length !== 0}
               fallback={
@@ -264,17 +264,19 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 </div>
               }
             >
-              <For each={externalButtons()}>
-                {(button) => (
-                  <WalletButton
-                    label={button.displayName}
-                    onClick={() => handleWalletClick(button)}
-                    button={button}
-                    deviceDetails={deviceDetails()}
-                    walletConnectUri={props.walletConnectUri}
-                  />
-                )}
-              </For>
+              <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
+                <For each={externalButtons()}>
+                  {(button) => (
+                    <WalletButton
+                      label={button.displayName}
+                      onClick={() => handleWalletClick(button)}
+                      button={button}
+                      deviceDetails={deviceDetails()}
+                      walletConnectUri={props.walletConnectUri}
+                    />
+                  )}
+                </For>
+              </div>
             </Show>
           </ul>
         </div>
@@ -295,13 +297,16 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               maskType={MaskType.FLOWER_IN_SQAURE}
             />
           </div>
-          <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 w3a--font-normal">
+          <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--font-normal">
             Scan with a WalletConnect-supported wallet or click the QR code to copy to your clipboard.
           </p>
-          <div class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--mt-auto w3a--bg-app-gray-50 w3a--rounded-xl w3a--p-3">
-            <p class="w3a--text-sm w3a--text-app-gray-900">Don't have Trust Wallet?</p>
+          <div
+            class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--mt-auto w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 
+      dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white w3a--rounded-xl w3a--p-3"
+          >
+            <p class="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">Don't have Trust Wallet?</p>
             <button
-              class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 w3a--rounded-full w3a--px-2 w3a--py-2"
+              class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 dark:w3a--text-app-white dark:w3a--border-app-white w3a--rounded-full w3a--px-2 w3a--py-2"
               onClick={() => {
                 setBodyState({
                   ...bodyState,

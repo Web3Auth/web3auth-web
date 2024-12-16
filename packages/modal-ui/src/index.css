@@ -17,6 +17,9 @@
 }
 
 @layer utilities {
+  .w3a--modal-bg {
+    @apply w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main;
+  }
   .w3a--loader-logo-size {
     @apply w3a--h-10 w3a--w-10;
   }
@@ -39,5 +42,17 @@
 
   .w3a--bottom-sheet-width {
     @apply w3a--w-[98%];
+  }
+
+  .w3a--connected-logo {
+    @apply w3a--w-16 w3a--h-16 w3a--text-app-green-500 dark:w3a--text-app-green-400;
+  }
+
+  .w3a--error-logo {
+    @apply w3a--w-16 w3a--h-16 w3a--text-app-red-500 dark:w3a--text-app-red-400;
+  }
+
+  .w3a--t-btn {
+    @apply w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white hover:w3a--bg-app-gray-300 dark:hover:w3a--bg-app-gray-400 disabled:w3a--bg-app-gray-300 disabled:w3a--text-app-gray-400 dark:disabled:w3a--bg-app-gray-700 dark:disabled:w3a--text-app-gray-600;
   }
 }

@@ -66,7 +66,8 @@
     "solid-js": "^1.8.11",
     "tailwind-merge": "^2.5.5",
     "@solid-primitives/i18n": "^2.1.1",
-    "solid-qr-code": "^0.1.11"
+    "solid-qr-code": "^0.1.11",
+    "solid-i18n": "^1.1.0"
   },
   "lint-staged": {
     "!(*d).ts": [

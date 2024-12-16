@@ -120,7 +120,7 @@ const Login = (props: LoginProps) => {
         <form class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--mt-auto">
           <Show when={mergedProps.showPasswordLessInput}>
             <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
-              <label class="w3a--text-sm w3a--font-semibold w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-start">{title()}</label>
+              <label class="w3a--text-sm w3a--font-medium w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-start">{title()}</label>
               <input
                 onInput={handleInputChange}
                 value={fieldValue()}
@@ -131,7 +131,8 @@ const Login = (props: LoginProps) => {
                 onBlur={(e) => {
                   e.target.placeholder = `${placeholder()}`;
                 }}
-                class="w3a--px-4 w3a--py-2.5 w3a--border w3a--border-app-gray-300 w3a--bg-app-gray-50 placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full"
+                class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300
+                 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
               />
             </div>
             <Show when={isValidInput() === false}>
@@ -141,7 +142,7 @@ const Login = (props: LoginProps) => {
             </Show>
             <button
               class={cn("w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--text-sm w3a--font-medium", {
-                "w3a--bg-app-gray-100 disabled:w3a--text-app-gray-400 w3a--text-app-gray-900": !props.isEmailPrimary,
+                "w3a--t-btn": !props.isEmailPrimary,
                 "w3a--bg-app-primary-600 disabled:w3a--bg-app-primary-500 w3a--text-app-white w3a--opacity-15": props.isEmailPrimary,
               })}
               onClick={handleFormSubmit}
@@ -151,12 +152,12 @@ const Login = (props: LoginProps) => {
           </Show>
           <Show when={mergedProps.showExternalWalletButton}>
             <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
-              <label class="w3a--text-sm w3a--font-semibold w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-start">
+              <label class="w3a--text-sm w3a--font-medium w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-start">
                 {"modal.external.title"}
               </label>
               <button
                 class={cn("w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--text-sm w3a--font-medium", {
-                  "w3a--bg-app-gray-100 disabled:w3a--text-app-gray-400 w3a--text-app-gray-900": !props.isExternalPrimary,
+                  "w3a--t-btn": !props.isEmailPrimary,
                   "w3a--bg-app-primary-600 disabled:w3a--bg-app-primary-500 w3a--text-app-white w3a--opacity-15": props.isExternalPrimary,
                 })}
                 onClick={handleConnectWallet}

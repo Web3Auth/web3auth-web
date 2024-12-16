@@ -52,16 +52,31 @@ const Loader = (props: LoaderProps) => {
       </Show>
 
       <Show when={props.modalStatus === ADAPTER_STATUS.CONNECTED}>
-        <div class="w3a--flex w3a--flex-col w3a--items-center">
-          {/* <Icon iconName="connected" /> */}
-          <p>Connected</p>
-          <div class="w3ajs-modal-loader__message w3a-spinner-message w3a--mt-4">{props.message}</div>
+        <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" class="w3a--connected-logo">
+            <path
+              fill="currentColor"
+              fill-rule="evenodd"
+              d="M6.267 3.455a3.07 3.07 0 0 0 1.745-.723 3.066 3.066 0 0 1 3.976 0 3.07 3.07 0 0 0 1.745.723 3.066 3.066 0 0 1 2.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 0 1 0 3.976 3.07 3.07 0 0 0-.723 1.745 3.066 3.066 0 0 1-2.812 2.812 3.07 3.07 0 0 0-1.745.723 3.066 3.066 0 0 1-3.976 0 3.07 3.07 0 0 0-1.745-.723 3.066 3.066 0 0 1-2.812-2.812 3.07 3.07 0 0 0-.723-1.745 3.066 3.066 0 0 1 0-3.976 3.07 3.07 0 0 0 .723-1.745 3.066 3.066 0 0 1 2.812-2.812m7.44 5.252a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <p class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{props.message}</p>
         </div>
       </Show>
 
       <Show when={props.modalStatus === ADAPTER_STATUS.ERRORED}>
-        <p>Errored</p>
-        <div class="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{props.message}</div>
+        <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" class="w3a--error-logo">
+            <path
+              fill="currentColor"
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 1 1-16.001 0A8 8 0 0 1 18 10m-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <p class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{props.message}</p>
+        </div>
       </Show>
     </div>
   );

@@ -1,5 +1,6 @@
 import "./index.css";
 
+// import * as i18n from "@solid-primitives/i18n";
 import { applyWhiteLabelTheme, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
@@ -16,10 +17,12 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
+// import { createResource } from "solid-js";
 import { render } from "solid-js/web";
 
 import { LoginModal as Modal } from "./components/LoginModal";
 import { ThemedContext } from "./context/ThemeContext";
+// import { en } from "./i18n";
 import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
@@ -32,6 +35,7 @@ import {
   StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
+// import fetchDictionary from "./localeImport";
 // import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
@@ -88,6 +92,12 @@ export class LoginModal extends SafeEventEmitter {
 
     // const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
 
+    // const [dict] = createResource(useLang, fetchDictionary, {
+    //   initialValue: i18n.flatten(en),
+    // });
+    // dict();
+
+    // const t = i18n.translator(dict);
     // Load new language resource
 
     // if (useLang === LANGUAGES.de) {

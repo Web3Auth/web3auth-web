@@ -112,10 +112,7 @@ const Body = (props: BodyProps) => {
       acc.push(
         <li class="w3a--w-full">
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
-            <button
-              type="button"
-              class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--bg-app-gray-100 w3a--px-4 w3a--py-2 w3a--rounded-full"
-            >
+            <button type="button" class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--t-btn w3a--px-4 w3a--py-2 w3a--rounded-full">
               <Image
                 imageId={logoLight}
                 darkImageId={logoDark}
@@ -147,10 +144,7 @@ const Body = (props: BodyProps) => {
     const installLink = browserExtensionUrl ? (
       <li>
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
-          <button
-            type="button"
-            class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--bg-app-gray-100 dark:w3a--bg-app-gray-700 w3a--px-4 w3a--py-2 w3a--rounded-full"
-          >
+          <button type="button" class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--t-btn w3a--px-4 w3a--py-2 w3a--rounded-full">
             <Image
               imageId={deviceDetails().browser}
               darkImageId={deviceDetails().browser}
@@ -219,7 +213,7 @@ const Body = (props: BodyProps) => {
             class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
             onClick={() => setBodyState({ showWalletDetails: false })}
           />
-          <div class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-white w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100">
+          <div class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600">
             <div class="w3a--flex w3a--justify-center w3a--my-6">
               <Image
                 imageId={`login-${bodyState.walletDetails.name}`}
