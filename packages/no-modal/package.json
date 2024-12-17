@@ -40,6 +40,7 @@
     "@web3auth/auth": "^9.6.2",
     "@web3auth/base": "^9.5.0",
     "@web3auth/base-provider": "^9.5.0",
+    "@web3auth/wallet-services-plugin": "^9.5.0",
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {

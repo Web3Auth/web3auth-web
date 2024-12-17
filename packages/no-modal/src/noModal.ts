@@ -19,6 +19,7 @@ import {
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
+  PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PROJECT_CONFIG_RESPONSE,
@@ -27,13 +28,15 @@ import {
   UserInfo,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
+  WALLET_PLUGINS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
-import { CommonJRPCProvider } from "@web3auth/base-provider";
+import { CommonJRPCProvider, CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { type WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import deepmerge from "deepmerge";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
@@ -342,6 +345,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
       this.connectToPlugins(data);
+      if (this.plugins[WALLET_PLUGINS.WALLET_SERVICES]) {
+        this.plugins[WALLET_PLUGINS.WALLET_SERVICES].on(PLUGIN_EVENTS.CONNECTED, () => {
+          (provider as CommonPrivateKeyProvider).updateProviderEngineProxy(
+            (this.plugins[WALLET_PLUGINS.WALLET_SERVICES] as WalletServicesPlugin).wsEmbedInstance.provider
+          );
+        });
+      }
       this.emit(ADAPTER_EVENTS.CONNECTED, { ...data });
     });
 

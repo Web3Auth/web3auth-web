@@ -14,11 +14,11 @@ import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
 import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
 import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/default-solana-adapter";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+// import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
 import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
-import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
+// import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
 import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
@@ -50,6 +50,12 @@ const walletPlugins = computed(() => {
       walletInitOptions: {
         whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
         confirmationStrategy,
+        // walletUrls: {
+        //   production: {
+        //     url: "http://localhost:4050",
+        //     logLevel: "debug",
+        //   },
+        // },
       },
     });
     plugins.push(walletServicesPlugin);
@@ -68,26 +74,31 @@ const chainOptions = computed(() =>
 const privateKeyProvider = computed((): IBaseProvider<string> => {
   const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
 
-  switch (formData.chainNamespace) {
-    case CHAIN_NAMESPACES.EIP155:
-      return new EthereumPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    case CHAIN_NAMESPACES.SOLANA:
-      return new SolanaPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    default:
-      return new CommonPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-  }
+  return new CommonPrivateKeyProvider({
+    config: {
+      chainConfig,
+    },
+  });
+  // switch (formData.chainNamespace) {
+  //   case CHAIN_NAMESPACES.EIP155:
+  //     return new EthereumPrivateKeyProvider({
+  //       config: {
+  //         chainConfig,
+  //       },
+  //     });
+  //   case CHAIN_NAMESPACES.SOLANA:
+  //     return new SolanaPrivateKeyProvider({
+  //       config: {
+  //         chainConfig,
+  //       },
+  //     });
+  //   default:
+  //     return new CommonPrivateKeyProvider({
+  //       config: {
+  //         chainConfig,
+  //       },
+  //     });
+  // }
 });
 
 const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
