@@ -2,6 +2,7 @@ import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { createEffect, createMemo, createSignal, mergeProps, Show } from "solid-js";
 
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, SocialLoginsConfig } from "../../interfaces";
+import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { validatePhoneNumber } from "../../utils/modal";
 import SocialLoginList from "../SocialLoginList";
@@ -72,9 +73,9 @@ const Login = (props: LoginProps) => {
   };
 
   const title = createMemo(() => {
-    if (mergedProps.isEmailPasswordLessLoginVisible && mergedProps.isSmsPasswordLessLoginVisible) return "modal.social.passwordless-title";
-    if (mergedProps.isEmailPasswordLessLoginVisible) return "modal.social.email";
-    return "modal.social.phone";
+    if (mergedProps.isEmailPasswordLessLoginVisible && mergedProps.isSmsPasswordLessLoginVisible) return t("modal.social.passwordless-title");
+    if (mergedProps.isEmailPasswordLessLoginVisible) return t("modal.social.email");
+    return t("modal.social.phone");
   });
 
   const placeholder = createMemo(() => {
@@ -84,9 +85,9 @@ const Login = (props: LoginProps) => {
   });
 
   const invalidInputErrorMessage = createMemo(() => {
-    if (mergedProps.isEmailPasswordLessLoginVisible && mergedProps.isSmsPasswordLessLoginVisible) return "modal.errors-invalid-number-email";
-    if (mergedProps.isEmailPasswordLessLoginVisible) return "modal.errors-invalid-email";
-    return "modal.errors-invalid-number";
+    if (mergedProps.isEmailPasswordLessLoginVisible && mergedProps.isSmsPasswordLessLoginVisible) return t("modal.errors-invalid-number-email");
+    if (mergedProps.isEmailPasswordLessLoginVisible) return t("modal.errors-invalid-email");
+    return t("modal.errors-invalid-number");
   });
 
   const handleConnectWallet = (e: MouseEvent) => {
@@ -97,7 +98,7 @@ const Login = (props: LoginProps) => {
   const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(mergedProps.appLogo) ? "" : mergedProps.appLogo));
 
   const subtitle = createMemo(() => {
-    return `modal.header-subtitle-name, ${mergedProps.appName}`;
+    return t("modal.header-subtitle-name", { appName: mergedProps.appName });
   });
 
   return (
@@ -108,7 +109,7 @@ const Login = (props: LoginProps) => {
             <img src={headerLogo()} alt="Logo" />
           </div>
         </Show>
-        <p class="w3a--text-xl w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">{"modal.header-title"}</p>
+        <p class="w3a--text-xl w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.header-title")}</p>
         <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{subtitle()}</p>
       </div>
 
@@ -136,7 +137,7 @@ const Login = (props: LoginProps) => {
               />
             </div>
             <Show when={isValidInput() === false}>
-              <div class="w3a--text-sm w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start">
+              <div class="w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start -w3a--mt-2">
                 {invalidInputErrorMessage()}
               </div>
             </Show>
@@ -147,13 +148,13 @@ const Login = (props: LoginProps) => {
               })}
               onClick={handleFormSubmit}
             >
-              {"modal.social.passwordless-cta"}
+              {t("modal.social.passwordless-cta")}
             </button>
           </Show>
           <Show when={mergedProps.showExternalWalletButton}>
             <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
               <label class="w3a--text-sm w3a--font-medium w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-start">
-                {"modal.external.title"}
+                {t("modal.external.title")}
               </label>
               <button
                 class={cn("w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--text-sm w3a--font-medium", {
@@ -162,7 +163,7 @@ const Login = (props: LoginProps) => {
                 })}
                 onClick={handleConnectWallet}
               >
-                {"modal.external.connect"}
+                {t("modal.external.connect")}
               </button>
             </div>
           </Show>

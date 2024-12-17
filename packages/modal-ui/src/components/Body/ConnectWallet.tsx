@@ -5,6 +5,7 @@ import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
+import { t } from "../../localeImport";
 import { WalletButton } from "../WalletButton";
 import { BodyContext } from "./Body";
 export interface ConnectWalletProps {
@@ -27,9 +28,6 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   const [totalExternalWallets, setTotalExternalWallets] = createSignal<number>(0);
   const [selectedButton, setSelectedButton] = createSignal<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = createSignal<string>("");
-
-  // eslint-disable-next-line no-console, solid/reactivity
-  console.log(selectedButton(), "SELECTED BUTTON");
 
   const handleBack = () => {
     if (!selectedWallet() && currentPage() === CONNECT_WALLET_PAGES.CONNECT_WALLET && props.onBackClick) {
@@ -249,9 +247,9 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 e.target.placeholder = "";
               }}
               onBlur={(e) => {
-                e.target.placeholder = `modal.external.search-wallet, ${totalExternalWallets()}`;
+                e.target.placeholder = t("modal.external.search-wallet", { count: `${totalExternalWallets()}` });
               }}
-              placeholder={`Search through wallets... ${totalExternalWallets()}`}
+              placeholder={t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })}
               class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
             />
           </Show>
@@ -260,7 +258,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               when={externalButtons().length !== 0}
               fallback={
                 <div class="w3a--w-full w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500 w3a--py-6 w3a--flex w3a--justify-center w3a--items-center">
-                  {"modal.external.no-wallets-found"}
+                  {t("modal.external.no-wallets-found")}
                 </div>
               }
             >
@@ -298,13 +296,15 @@ const ConnectWallet = (props: ConnectWalletProps) => {
             />
           </div>
           <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--font-normal">
-            Scan with a WalletConnect-supported wallet or click the QR code to copy to your clipboard.
+            {t("modal.external.walletconnect-copy")}
           </p>
           <div
             class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--mt-auto w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 
       dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white w3a--rounded-xl w3a--p-3"
           >
-            <p class="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">Don't have Trust Wallet?</p>
+            <p class="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">
+              {t("modal.external.dont-have")} <span>{selectedButton()?.displayName}</span>?
+            </p>
             <button
               class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 dark:w3a--text-app-white dark:w3a--border-app-white w3a--rounded-full w3a--px-2 w3a--py-2"
               onClick={() => {
@@ -315,7 +315,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 });
               }}
             >
-              Get Wallet
+              {t("modal.external.get-wallet")}
             </button>
           </div>
         </div>

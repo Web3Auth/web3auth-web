@@ -4,6 +4,7 @@ import { createEffect, createSignal, For, Show, useContext } from "solid-js";
 import { capitalizeFirstLetter } from "../../config";
 import { ThemedContext } from "../../context/ThemeContext";
 import { SocialLoginsConfig } from "../../interfaces";
+import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { SocialLoginButton } from "../SocialLoginButton";
 
@@ -49,9 +50,6 @@ const SocialLoginList = (props: SocialLoginListProps) => {
     const maxOptions = Object.keys(props.socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
       return props.socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
     });
-
-    // eslint-disable-next-line no-console
-    console.log(props.socialLoginsConfig.loginMethods, "loginMethods");
 
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
@@ -128,7 +126,7 @@ const SocialLoginList = (props: SocialLoginListProps) => {
           }
           showText={true}
           showIcon={true}
-          text={`modal.social.continueCustom ${mainOption().name}`}
+          text={t("modal.social.continueCustom", { adapter: mainOption().name })}
         />
       </Show>
 
@@ -186,7 +184,7 @@ const SocialLoginList = (props: SocialLoginListProps) => {
         </div>
       </Show>
 
-      <p class="w3a--text-xs w3a--font-normal w3a--text-app-gray-500 w3a--text-start">{"modal.social.policy"}</p>
+      <p class="w3a--text-xs w3a--font-normal w3a--text-app-gray-500 w3a--text-start">{t("modal.social.policy")}</p>
 
       <Show when={canShowMore()}>
         <button
@@ -194,7 +192,7 @@ const SocialLoginList = (props: SocialLoginListProps) => {
           class="w3a--text-xs w3a--font-normal w3a--text-app-primary-600 hover:w3a--text-app-primary-500 dark:w3a--text-app-primary-500 dark:hover:w3a--text-app-primary-600 w3a--text-right"
           onClick={handleExpand}
         >
-          {expand() ? "modal.social.view-less" : "modal.social.view-more"}
+          {expand() ? t("modal.social.view-less") : t("modal.social.view-more")}
         </button>
       </Show>
     </div>

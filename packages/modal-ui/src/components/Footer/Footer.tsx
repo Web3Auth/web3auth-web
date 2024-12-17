@@ -1,7 +1,8 @@
+import { t } from "../../localeImport";
 const Footer = () => {
   return (
     <div class="w3a--flex w3a--items-center w3a--gap-2 w3a--justify-center w3a--pt-6 w3a--mt-auto">
-      <div class="w3a--text-xs w3a--text-app-gray-300 dark:w3a--text-app-gray-500">{"modal.footer.message-new"}</div>
+      <div class="w3a--text-xs w3a--text-app-gray-300 dark:w3a--text-app-gray-500">{t("modal.footer.message-new")}</div>
       <img
         height="16"
         src="https://images.web3auth.io/web3auth-footer-logo-light.svg"

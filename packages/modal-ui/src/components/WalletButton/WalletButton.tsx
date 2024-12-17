@@ -1,6 +1,7 @@
 import { createMemo, Show } from "solid-js";
 
 import { ExternalButton } from "../../interfaces";
+import { t } from "../../localeImport";
 import { Image } from "../Image";
 
 type os = "iOS" | "Android";
@@ -38,9 +39,6 @@ const WalletButton = (props: WalletButtonProps) => {
     }
   };
 
-  // eslint-disable-next-line no-console, solid/reactivity
-  console.log(props.button);
-
   return (
     <button
       class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 
@@ -67,7 +65,7 @@ const WalletButton = (props: WalletButtonProps) => {
           class="w3a--inline-flex w3a--items-center w3a--rounded-lg w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
         dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"
         >
-          Installed
+          {t("modal.external.installed")}
         </span>
       </Show>
     </button>

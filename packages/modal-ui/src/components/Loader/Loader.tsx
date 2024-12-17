@@ -2,6 +2,7 @@ import { ADAPTER_STATUS } from "@web3auth/base";
 import { createEffect, createMemo, Show } from "solid-js";
 
 import { MODAL_STATUS, ModalStatusType } from "../../interfaces";
+import { t } from "../../localeImport";
 import { Image } from "../Image";
 
 export interface LoaderProps {
@@ -45,8 +46,12 @@ const Loader = (props: LoaderProps) => {
             {providerIcon()}
           </div>
           <div class="w3a--flex w3a--flex-col w3a--gap-y-1">
-            <div class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{`modal.adapter-loader.message1 ${props.adapterName}`}</div>
-            <div class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{`modal.adapter-loader.message2 ${props.adapterName}`}</div>
+            <div class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">
+              {t("modal.adapter-loader.message1", { adapter: props.adapterName })}
+            </div>
+            <div class="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">
+              {t("modal.adapter-loader.message2", { adapter: props.adapterName })}
+            </div>
           </div>
         </div>
       </Show>

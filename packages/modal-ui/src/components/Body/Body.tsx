@@ -1,7 +1,7 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
 import { ChainNamespaceType, WalletRegistry } from "@web3auth/base/src";
 import Bowser from "bowser";
-import { createContext, createEffect, createMemo, Show } from "solid-js";
+import { createContext, createMemo, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { PAGES } from "../../constants";
@@ -17,6 +17,7 @@ import {
   SocialLoginsConfig,
   StateEmitterEvents,
 } from "../../interfaces";
+import { t } from "../../localeImport";
 import { getBrowserExtensionUrl, getBrowserName, getMobileInstallLink, getOsName } from "../../utils/common";
 import Footer from "../Footer/Footer";
 import { Image } from "../Image";
@@ -68,10 +69,10 @@ const Body = (props: BodyProps) => {
     walletDetails: null,
   });
 
-  createEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log(props.socialLoginsConfig, "socialLoginsConfig", props.modalState, "modalState");
-  });
+  // createEffect(() => {
+  //   // eslint-disable-next-line no-console
+  //   console.log(props.socialLoginsConfig, "socialLoginsConfig", props.modalState, "modalState");
+  // });
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
     props.setModalState({
@@ -122,7 +123,7 @@ const Body = (props: BodyProps) => {
                 width="28"
                 isButton
               />
-              <span class="w3a--text-sm w3a--font-medium">{`modal.external.install-mobile-app, ${getOsName(os as mobileOs)}`}</span>
+              <span class="w3a--text-sm w3a--font-medium">{t("modal.external.install-mobile-app", { os: getOsName(os as mobileOs) })}</span>
             </button>
           </a>
         </li>
@@ -155,7 +156,7 @@ const Body = (props: BodyProps) => {
               isButton
             />
             <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
-              {`modal.external.install-browser-extension, ${getBrowserName(deviceDetails().browser)}`}
+              {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails().browser) })}
             </span>
           </button>
         </a>

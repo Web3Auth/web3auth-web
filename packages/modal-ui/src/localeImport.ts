@@ -1,49 +1,74 @@
-// import i18n from "i18next";
-// import { initReactI18next } from "react-i18next";
+import { createEffect, createSignal } from "solid-js";
 
-// import { en } from "./i18n";
-
-// const i18nInstance = i18n.createInstance() as typeof i18n;
-// i18nInstance.use(initReactI18next).init({
-//   resources: {
-//     en: { translation: en },
-//   },
-//   lng: "en",
-//   fallbackLng: "en",
-//   interpolation: { escapeValue: false },
-//   debug: false,
-//   react: {
-//     useSuspense: true,
-//   },
-// });
-
-// export default i18nInstance;
-
-import * as i18n from "@solid-primitives/i18n";
-
-import { en } from "./i18n";
-
-export type RawDictionary = typeof en;
-export type Dictionary = i18n.Flatten<RawDictionary>;
-
-const localeMap = {
-  en: "english",
-  fr: "french",
-  es: "spanish",
-  de: "german",
-  ja: "japanese",
-  ko: "korean",
-  zh: "mandarin",
-  pt: "portuguese",
-  tr: "turkish",
-  nl: "dutch",
+// Update type definitions
+type TranslationType = Record<string, Record<string, string>>;
+const languageMap: Record<string, () => Promise<{ default: TranslationType }>> = {
+  en: () => import("./i18n/english.json"),
+  fr: () => import("./i18n/french.json"),
+  de: () => import("./i18n/german.json"),
+  es: () => import("./i18n/spanish.json"),
+  pt: () => import("./i18n/portuguese.json"),
+  tr: () => import("./i18n/turkish.json"),
+  zh: () => import("./i18n/mandarin.json"),
+  ko: () => import("./i18n/korean.json"),
+  nl: () => import("./i18n/dutch.json"),
+  ja: () => import("./i18n/japanese.json"),
 };
 
-export type Locale = "en" | "fr" | "es" | "de" | "ja" | "ko" | "zh" | "pt" | "tr" | "nl";
+// Function to get the locale from localStorage or default to 'en'
+const storedLocale = localStorage.getItem("app-locale") || "en";
 
-async function fetchDictionary(locale: Locale): Promise<Dictionary> {
-  const { default: dict } = await import(`./i18n/${localeMap[locale]}.json`);
-  return i18n.flatten(dict) as Dictionary; // flatten the dictionary to make all nested keys available top-level
+// Signals to manage locale and translations
+const [locale, setLocale] = createSignal<string>(storedLocale);
+const [translations, setTranslations] = createSignal<TranslationType>({});
+
+// Function to load JSON dynamically and set translations
+async function loadTranslations(newLocale: string) {
+  const loader = languageMap[newLocale];
+  if (!loader) {
+    // eslint-disable-next-line no-console
+    console.error(`Locale '${newLocale}' is not supported.`);
+    return;
+  }
+
+  const { default: data } = await loader();
+  setTranslations(data as TranslationType);
 }
 
-export default fetchDictionary;
+// Function to change locale and persist it to localStorage
+async function changeLocale(newLocale: string) {
+  await loadTranslations(newLocale);
+  setLocale(newLocale);
+  localStorage.setItem("app-locale", newLocale); // Persist the new locale
+}
+
+// Recursive t function to handle nested keys and placeholders
+function t(key: string, placeholders: Record<string, string> = {}): string {
+  const keys = key.split(".");
+  let translation: unknown = translations();
+
+  // Traverse the nested keys
+  for (const k of keys) {
+    if (translation && typeof translation === "object") {
+      translation = (translation as Record<string, unknown>)[k];
+    } else if (!translation && translations()[keys[0]][key.split(".").slice(1).join(".")]) {
+      translation = translations()[keys[0]][key.split(".").slice(1).join(".")];
+    } else {
+      return key;
+    }
+  }
+
+  // Handle placeholders if it's a string
+  if (typeof translation === "string") {
+    return Object.entries(placeholders).reduce((str, [placeholder, value]) => str.replace(new RegExp(`{{${placeholder}}}`, "g"), value), translation);
+  }
+
+  return key;
+}
+
+// Replace direct call with createEffect
+createEffect(() => {
+  loadTranslations(locale());
+});
+
+export { changeLocale, locale, t };

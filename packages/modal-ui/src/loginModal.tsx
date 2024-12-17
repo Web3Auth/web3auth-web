@@ -1,6 +1,5 @@
 import "./index.css";
 
-// import * as i18n from "@solid-primitives/i18n";
 import { applyWhiteLabelTheme, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
@@ -17,12 +16,10 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/base";
-// import { createResource } from "solid-js";
 import { render } from "solid-js/web";
 
 import { LoginModal as Modal } from "./components/LoginModal";
 import { ThemedContext } from "./context/ThemeContext";
-// import { en } from "./i18n";
 import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
@@ -35,7 +32,7 @@ import {
   StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
-// import fetchDictionary from "./localeImport";
+import { changeLocale } from "./localeImport";
 // import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
@@ -80,110 +77,14 @@ export class LoginModal extends SafeEventEmitter {
   }
 
   get isDark(): boolean {
-    // eslint-disable-next-line no-console
-    console.log(this.uiConfig, "this.uiConfig");
     return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   initModal = async (): Promise<void> => {
-    // eslint-disable-next-line no-console
-    console.log(this.isDark, "this.isDark");
     const darkState = { isDark: this.isDark };
 
-    // const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
-
-    // const [dict] = createResource(useLang, fetchDictionary, {
-    //   initialValue: i18n.flatten(en),
-    // });
-    // dict();
-
-    // const t = i18n.translator(dict);
     // Load new language resource
-
-    // if (useLang === LANGUAGES.de) {
-    //   createRes
-    // } else if (useLang === LANGUAGES.ja) {
-    //   import(`./i18n/japanese.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.ko) {
-    //   import(`./i18n/korean.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.zh) {
-    //   import(`./i18n/mandarin.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.es) {
-    //   import(`./i18n/spanish.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.fr) {
-    //   import(`./i18n/french.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.pt) {
-    //   import(`./i18n/portuguese.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.nl) {
-    //   import(`./i18n/dutch.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.tr) {
-    //   import(`./i18n/turkish.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // } else if (useLang === LANGUAGES.en) {
-    //   import(`./i18n/english.json`)
-    //     .then((messages) => {
-    //       i18n.addResourceBundle(useLang as string, "translation", messages.default);
-    //       return i18n.changeLanguage(useLang);
-    //     })
-    //     .catch((error) => {
-    //       log.error(error);
-    //     });
-    // }
+    changeLocale(this.uiConfig.defaultLanguage || "en");
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
