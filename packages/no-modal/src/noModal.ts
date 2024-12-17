@@ -59,7 +59,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.privateKeyProvider && !options.chainConfig) {
+    if (!options.privateKeyProvider || !options.chainConfig) {
       throw WalletInitializationError.invalidParams("Please provide chainConfig or privateKeyProvider");
     }
     options.chainConfig = options.chainConfig || options.privateKeyProvider.currentChainConfig;
