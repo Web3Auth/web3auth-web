@@ -16,7 +16,7 @@ const languageMap: Record<string, () => Promise<{ default: TranslationType }>> =
 };
 
 // Function to get the locale from localStorage or default to 'en'
-const storedLocale = localStorage.getItem("app-locale") || "en";
+const storedLocale = localStorage.getItem("w3a--app-locale") || "en";
 
 // Signals to manage locale and translations
 const [locale, setLocale] = createSignal<string>(storedLocale);
@@ -39,7 +39,7 @@ async function loadTranslations(newLocale: string) {
 async function changeLocale(newLocale: string) {
   await loadTranslations(newLocale);
   setLocale(newLocale);
-  localStorage.setItem("app-locale", newLocale); // Persist the new locale
+  localStorage.setItem("w3a--app-locale", newLocale); // Persist the new locale
 }
 
 // Recursive t function to handle nested keys and placeholders
