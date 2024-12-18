@@ -60,7 +60,7 @@ const WalletButton = (props: WalletButtonProps) => {
         </figure>
         <p class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">{props.label}</p>
       </div>
-      <Show when={true}>
+      <Show when={props.button.hasInjectedWallet}>
         <span
           class="w3a--inline-flex w3a--items-center w3a--rounded-lg w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
         dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"

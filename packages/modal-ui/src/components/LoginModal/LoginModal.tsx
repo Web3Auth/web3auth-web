@@ -119,6 +119,7 @@ const LoginModal = (props: LoginModalProps) => {
         externalWalletsVisibility: flag,
       };
     });
+    if (props.handleShowExternalWallets) props.handleShowExternalWallets(modalState().externalWalletsInitialized);
   };
 
   const closeModal = () => {

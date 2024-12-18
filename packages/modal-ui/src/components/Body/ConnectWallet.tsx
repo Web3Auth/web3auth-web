@@ -255,7 +255,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
           </Show>
           <ul class="w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto">
             <Show
-              when={externalButtons().length !== 0}
+              when={externalButtons().length > 0}
               fallback={
                 <div class="w3a--w-full w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500 w3a--py-6 w3a--flex w3a--justify-center w3a--items-center">
                   {t("modal.external.no-wallets-found")}
