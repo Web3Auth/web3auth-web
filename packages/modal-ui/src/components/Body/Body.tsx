@@ -169,46 +169,60 @@ const Body = (props: BodyProps) => {
     <BodyContext.Provider value={{ bodyState, setBodyState }}>
       <div class="w3a--h-[760px] w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
         <Show
-          when={props.modalState.currentPage === PAGES.LOGIN && props.showExternalWalletPage && props.modalState.status === MODAL_STATUS.INITIALIZED}
+          when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
           fallback={
-            <Show when={props.modalState.currentPage === PAGES.LOGIN}>
-              <Loader
-                adapter={props.modalState.detailedLoaderAdapter}
-                adapterName={props.modalState.detailedLoaderAdapter}
-                modalStatus={props.modalState.status}
-                onClose={props.onCloseLoader}
-                appLogo={props.appLogo}
-              />
-            </Show>
+            <>
+              <Show
+                when={
+                  props.modalState.currentPage === PAGES.LOGIN && props.showExternalWalletPage && props.modalState.status === MODAL_STATUS.INITIALIZED
+                }
+              >
+                <Login
+                  {...props}
+                  showPasswordLessInput={props.showPasswordLessInput}
+                  showExternalWalletButton={props.showExternalWalletButton}
+                  handleSocialLoginClick={props.handleSocialLoginClick}
+                  socialLoginsConfig={props.socialLoginsConfig}
+                  areSocialLoginsVisible={props.areSocialLoginsVisible}
+                  isEmailPrimary={props.isEmailPrimary}
+                  isExternalPrimary={props.isExternalPrimary}
+                  handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+                  isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
+                  isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
+                />
+              </Show>
+              <Show
+                when={
+                  props.modalState.currentPage === PAGES.CONNECT_WALLET &&
+                  !props.showExternalWalletPage &&
+                  props.modalState.status === MODAL_STATUS.INITIALIZED
+                }
+              >
+                <ConnectWallet
+                  onBackClick={handleBackClick}
+                  modalStatus={props.modalState.status}
+                  showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
+                  handleExternalWalletClick={props.preHandleExternalWalletClick}
+                  chainNamespace={props.chainNamespace}
+                  walletConnectUri={props.modalState.walletConnectUri}
+                  config={props.modalState.externalWalletsConfig}
+                  walletRegistry={props.walletRegistry}
+                />
+              </Show>
+            </>
           }
         >
-          <Login
-            {...props}
-            showPasswordLessInput={props.showPasswordLessInput}
-            showExternalWalletButton={props.showExternalWalletButton}
-            handleSocialLoginClick={props.handleSocialLoginClick}
-            socialLoginsConfig={props.socialLoginsConfig}
-            areSocialLoginsVisible={props.areSocialLoginsVisible}
-            isEmailPrimary={props.isEmailPrimary}
-            isExternalPrimary={props.isExternalPrimary}
-            handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-            isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
-            isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
-          />
-        </Show>
-        <Show when={props.modalState.currentPage === PAGES.CONNECT_WALLET && !props.showExternalWalletPage}>
-          <ConnectWallet
-            onBackClick={handleBackClick}
+          <Loader
+            adapter={props.modalState.detailedLoaderAdapter}
+            adapterName={props.modalState.detailedLoaderAdapter}
             modalStatus={props.modalState.status}
-            showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
-            handleExternalWalletClick={props.preHandleExternalWalletClick}
-            chainNamespace={props.chainNamespace}
-            walletConnectUri={props.modalState.walletConnectUri}
-            config={props.modalState.externalWalletsConfig}
-            walletRegistry={props.walletRegistry}
+            onClose={props.onCloseLoader}
+            appLogo={props.appLogo}
           />
         </Show>
+
         <Footer />
+
         <Show when={bodyState.showWalletDetails}>
           <div
             class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
@@ -226,7 +240,6 @@ const Body = (props: BodyProps) => {
                 extension={bodyState.walletDetails.imgExtension}
               />
             </div>
-
             <ul class="w3a--flex w3a--flex-col w3a--gap-y-2">
               {deviceDetails().platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
             </ul>
