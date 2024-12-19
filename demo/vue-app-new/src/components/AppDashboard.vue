@@ -1,3 +1,4 @@
+<!-- eslint-disable no-console -->
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
@@ -18,7 +19,14 @@ import {
   signTypedMessage,
 } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
-import { walletSendEth, walletSignPersonalMessage, walletSignTypedMessage } from "../services/walletServiceHandlers";
+import {
+  walletGetAccounts,
+  walletGetBalance,
+  walletSendEth,
+  walletSignEthMessage,
+  walletSignPersonalMessage,
+  walletSignTypedMessage,
+} from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
@@ -126,15 +134,45 @@ const onGetUserInfo = async () => {
 };
 
 const onSendEth = async () => {
+  const timeBefore = performance.now();
   await sendEth(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onSendEth", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onSendEthWalletServices", timeTakenInSecondsWalletServices);
 };
 
 const onSignEthMessage = async () => {
+  const timeBefore = performance.now();
   await signEthMessage(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onSignEthMessage", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignEthMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onSignEthMessageWalletServices", timeTakenInSecondsWalletServices);
 };
 
 const onGetAccounts = async () => {
+  const timeBefore = performance.now();
   await getAccounts(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onGetAccounts", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletGetAccounts(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onGetAccountsWalletServices", timeTakenInSecondsWalletServices);
 };
 
 const getConnectedChainId = async () => {
@@ -142,7 +180,17 @@ const getConnectedChainId = async () => {
 };
 
 const onGetBalance = async () => {
+  const timeBefore = performance.now();
   await getBalance(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onGetBalance", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletGetBalance(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onGetBalanceWalletServices", timeTakenInSecondsWalletServices);
 };
 
 const onSwitchChain = async () => {
@@ -203,11 +251,31 @@ const authenticateUser = async () => {
 };
 
 const onSignTypedData_v4 = async () => {
+  const timeBefore = performance.now();
   await signTypedMessage(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onSignTypedData_v4", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onSignTypedData_v4WalletServices", timeTakenInSecondsWalletServices);
 };
 
 const onSignPersonalMsg = async () => {
+  const timeBefore = performance.now();
   await signPersonalMessage(provider.value as IProvider, printToConsole);
+  const timeAfter = performance.now();
+  const timeTakenInSeconds = (timeAfter - timeBefore) / 1000;
+  console.log("check: onSignPersonalMsg", timeTakenInSeconds);
+  const timeBeforeWalletServices = performance.now();
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+  const timeAfterWalletServices = performance.now();
+  const timeTakenInSecondsWalletServices = (timeAfterWalletServices - timeBeforeWalletServices) / 1000;
+  console.log("check: onSignPersonalMsgWalletServices", timeTakenInSecondsWalletServices);
 };
 </script>
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@web3auth/auth-adapter";
@@ -264,6 +265,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null> {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
+    console.log("check: connectTo", performance.now());
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, (_) => {
         resolve(this.provider);
@@ -344,9 +346,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = ADAPTER_STATUS.CONNECTED;
       this.cacheWallet(data.adapter);
       log.debug("connected", this.status, this.connectedAdapterName);
+
+      console.log("check: connectedToAdapter", performance.now());
       this.connectToPlugins(data);
       if (this.plugins[WALLET_PLUGINS.WALLET_SERVICES]) {
         this.plugins[WALLET_PLUGINS.WALLET_SERVICES].on(PLUGIN_EVENTS.CONNECTED, () => {
+          console.log("check: connectedToWalletServices", performance.now());
           (provider as CommonPrivateKeyProvider).updateProviderEngineProxy(
             (this.plugins[WALLET_PLUGINS.WALLET_SERVICES] as WalletServicesPlugin).wsEmbedInstance.provider
           );
