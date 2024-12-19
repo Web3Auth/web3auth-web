@@ -31,14 +31,14 @@
     "dist"
   ],
   "devDependencies": {
-    "@toruslabs/ethereum-controllers": "^7.0.0"
+    "@toruslabs/ethereum-controllers": "^7.0.1"
   },
   "dependencies": {
     "@web3auth/account-abstraction-provider": "^9.5.0",
     "@web3auth/auth": "^9.6.2",
     "@web3auth/base": "^9.5.0",
     "@web3auth/no-modal": "^9.5.0",
-    "@web3auth/ws-embed": "^3.2.1",
+    "@web3auth/ws-embed": "^3.4.0",
     "loglevel": "^1.9.2"
   },
   "peerDependencies": {

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^7.0.0",
+    "@toruslabs/base-controllers": "^7.0.1",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
     "@web3auth/auth": "^9.6.2",
