@@ -33,7 +33,6 @@ import {
   UIConfig,
 } from "./interfaces";
 import { changeLocale } from "./localeImport";
-// import i18n from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
 function createWrapper(parentZIndex: string) {
@@ -148,7 +147,6 @@ export class LoginModal extends SafeEventEmitter {
         uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {

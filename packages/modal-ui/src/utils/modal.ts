@@ -16,7 +16,6 @@ export const getAdapterSocialLogins = (adapterName: string, loginMethodsConfig: 
       };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
-    log.debug("auth login method ui config", finalLoginMethodsConfig);
   } else {
     throw WalletInitializationError.invalidParams(`${adapterName} is not a valid adapter`);
   }

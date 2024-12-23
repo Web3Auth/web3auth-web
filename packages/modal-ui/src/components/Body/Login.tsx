@@ -25,7 +25,7 @@ export interface LoginProps {
 const Login = (props: LoginProps) => {
   const mergedProps = mergeProps({ appName: "Web3Auth", appLogo: "" }, props);
   const [fieldValue, setFieldValue] = createSignal<string>("");
-  const [countryCode, setCountryCode] = createSignal<string>("");
+  // const [countryCode, setCountryCode] = createSignal<string>("");
   const [isValidInput, setIsValidInput] = createSignal<boolean | null>(null);
 
   const handleFormSubmit = async (e: Event) => {
@@ -41,7 +41,8 @@ const Login = (props: LoginProps) => {
       }
     }
     if (mergedProps.isSmsPasswordLessLoginVisible) {
-      const number = value.startsWith("+") ? value : `${countryCode()}${value}`;
+      const countryCode = "";
+      const number = value.startsWith("+") ? value : `${countryCode}${value}`;
       const result = await validatePhoneNumber(number);
       if (result) {
         return props.handleSocialLoginClick({
@@ -63,8 +64,7 @@ const Login = (props: LoginProps) => {
     //   }
     // };
     // if (mergedProps.isSmsPasswordLessLoginVisible) getLocation();
-    // eslint-disable-next-line no-console
-    console.log(setCountryCode);
+    // console.log(setCountryCode);
   });
 
   const handleInputChange = (e: { target: { value: string } }) => {

@@ -69,11 +69,6 @@ const Body = (props: BodyProps) => {
     walletDetails: null,
   });
 
-  // createEffect(() => {
-  //   // eslint-disable-next-line no-console
-  //   console.log(props.socialLoginsConfig, "socialLoginsConfig", props.modalState, "modalState");
-  // });
-
   const handleExternalWalletBtnClick = (flag: boolean) => {
     props.setModalState({
       ...props.modalState,
@@ -229,13 +224,19 @@ const Body = (props: BodyProps) => {
             onClick={() => setBodyState({ showWalletDetails: false })}
           />
           <div class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600">
-            <div class="w3a--flex w3a--justify-center w3a--my-6">
+            <div
+              class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full w3a--cursor-pointer"
+              onClick={() => setBodyState({ showWalletDetails: false })}
+              aria-hidden="true"
+              role="button"
+            />
+            <div class="w3a--flex w3a--justify-center w3a--my-4">
               <Image
                 imageId={`login-${bodyState.walletDetails.name}`}
                 hoverImageId={`login-${bodyState.walletDetails.name}`}
                 fallbackImageId="wallet"
-                height="100"
-                width="100"
+                height="80"
+                width="80"
                 isButton
                 extension={bodyState.walletDetails.imgExtension}
               />

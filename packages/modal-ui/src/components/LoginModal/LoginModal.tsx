@@ -101,11 +101,6 @@ const LoginModal = (props: LoginModalProps) => {
     return modalState().socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
   });
 
-  // Logging modal state and the result of areSocialLoginsVisible
-  createEffect(() => {
-    log.info("modal state", modalState(), areSocialLoginsVisible(), isEmailPasswordLessLoginVisible(), isSmsPasswordLessLoginVisible());
-  });
-
   const isEmailPrimary = createMemo(() => modalState().socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin");
   const isExternalPrimary = createMemo(() => modalState().socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin");
   const showPasswordLessInput = createMemo(() => isEmailPasswordLessLoginVisible() || isSmsPasswordLessLoginVisible());
