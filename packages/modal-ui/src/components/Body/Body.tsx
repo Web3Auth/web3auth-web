@@ -48,6 +48,7 @@ export interface BodyProps {
   onCloseLoader: () => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
+  handleBackClick: () => void;
 }
 
 interface BodyContextType {

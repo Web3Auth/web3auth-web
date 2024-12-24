@@ -152,6 +152,14 @@ const LoginModal = (props: LoginModalProps) => {
     );
   });
 
+  const handleBackClick = () => {
+    setModalState({
+      ...modalState(),
+      currentPage: PAGES.LOGIN,
+    });
+    log.debug("handleBackClick Body");
+  };
+
   return (
     <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>
       <Body
@@ -171,6 +179,7 @@ const LoginModal = (props: LoginModalProps) => {
         onCloseLoader={onCloseLoader}
         isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible()}
         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible()}
+        handleBackClick={handleBackClick}
       />
     </Modal>
   );

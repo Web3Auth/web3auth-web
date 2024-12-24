@@ -1,6 +1,6 @@
 import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import bowser from "bowser";
-import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
+import { createEffect, createMemo, createSignal, For, on, Show, useContext } from "solid-js";
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -30,11 +30,13 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   const [walletSearch, setWalletSearch] = createSignal<string>("");
 
   const handleBack = () => {
+    log.debug("handleBack", selectedWallet(), currentPage());
     if (!selectedWallet() && currentPage() === CONNECT_WALLET_PAGES.CONNECT_WALLET && props.onBackClick) {
+      log.debug("handleBack IF");
       props.onBackClick(false);
     }
 
-    if (selectedWallet) {
+    if (selectedWallet()) {
       setCurrentPage(CONNECT_WALLET_PAGES.CONNECT_WALLET);
       setSelectedWallet(false);
     }
@@ -54,11 +56,6 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       browser: browserData.getBrowserName().toLowerCase() as browser,
     };
   });
-
-  const handleWalletSearch = (e: InputEvent) => {
-    log.debug("handleWalletSearch", (e.target as HTMLInputElement).value);
-    setWalletSearch((e.target as HTMLInputElement).value);
-  };
 
   const adapterVisibilityMap = createMemo(() => {
     const canShowMap: Record<string, boolean> = {};
@@ -96,117 +93,126 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     }
   });
 
-  createEffect(() => {
-    if (walletDiscoverySupported()) {
-      const isWalletConnectAdapterIncluded = Object.keys(props.config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2);
-      const defaultButtonKeys = new Set(Object.keys(props.walletRegistry.default));
+  const isWalletConnectAdapterIncluded = createMemo(() => Object.keys(props.config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2));
+  const adapterVisibility = createMemo(() => adapterVisibilityMap());
+  const defaultButtonKeys = createMemo(() => new Set(Object.keys(props.walletRegistry.default)));
 
-      const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
-        // eslint-disable-next-line solid/reactivity
-        return Object.keys(wallets).reduce((acc, wallet) => {
-          if (adapterVisibilityMap()[wallet] === false) return acc;
+  const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
+    // eslint-disable-next-line solid/reactivity
+    return Object.keys(wallets).reduce((acc, wallet) => {
+      if (adapterVisibility()[wallet] === false) return acc;
 
-          const walletRegistryItem: WalletRegistryItem = wallets[wallet];
-          let href = "";
-          if (deviceDetails().platform === bowser.PLATFORMS_MAP.mobile) {
-            const universalLink = walletRegistryItem?.mobile?.universal;
-            const deepLink = walletRegistryItem?.mobile?.native;
-            href = universalLink || deepLink;
-          }
-
-          const button: ExternalButton = {
-            name: wallet,
-            displayName: walletRegistryItem.name,
-            href,
-            hasInjectedWallet: props.config[wallet]?.isInjected || false,
-            hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
-            hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
-            walletRegistryItem,
-            imgExtension: walletRegistryItem.imgExtension || "svg",
-          };
-
-          if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
-
-          const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-          const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-          if (!chainNamespaces.has(props.chainNamespace) && !injectedChainNamespaces.has(props.chainNamespace)) return acc;
-
-          acc.push(button);
-          return acc;
-        }, [] as ExternalButton[]);
-      };
-
-      // Generate buttons for default and other wallets
-      const defaultButtons = generateWalletButtons(props.walletRegistry.default);
-      const otherButtons = generateWalletButtons(props.walletRegistry.others);
-
-      // Generate custom adapter buttons
-      // eslint-disable-next-line solid/reactivity
-      const customAdapterButtons: ExternalButton[] = Object.keys(props.config).reduce((acc, adapter) => {
-        if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !props.config[adapter].isInjected && adapterVisibilityMap()[adapter]) {
-          log.debug("custom adapter", adapter, props.config[adapter]);
-          acc.push({
-            name: adapter,
-            displayName: props.config[adapter].label || adapter,
-            hasInjectedWallet: false,
-            hasWalletConnect: false,
-            hasInstallLinks: false,
-          });
-        }
-        return acc;
-      }, [] as ExternalButton[]);
-
-      const allButtons = [...defaultButtons, ...otherButtons];
-
-      log.debug("allButtons", allButtons);
-      log.debug("walletSearch", walletSearch());
-      // Filter and set external buttons based on search input
-      if (walletSearch()) {
-        const filteredList = allButtons
-          .concat(customAdapterButtons)
-          .filter((button) => button.name.toLowerCase().includes(walletSearch().toLowerCase()));
-
-        log.debug("filteredLists", filteredList);
-        setExternalButtons(filteredList);
-      } else {
-        const sortedButtons = [
-          ...allButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-          ...customAdapterButtons,
-          ...allButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-        ];
-        setExternalButtons(sortedButtons);
+      const walletRegistryItem: WalletRegistryItem = wallets[wallet];
+      let href = "";
+      if (deviceDetails().platform === bowser.PLATFORMS_MAP.mobile) {
+        const universalLink = walletRegistryItem?.mobile?.universal;
+        const deepLink = walletRegistryItem?.mobile?.native;
+        href = universalLink || deepLink;
       }
 
-      setTotalExternalWallets(allButtons.length + customAdapterButtons.length);
+      const button: ExternalButton = {
+        name: wallet,
+        displayName: walletRegistryItem.name,
+        href,
+        hasInjectedWallet: props.config[wallet]?.isInjected || false,
+        hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+        hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
+        walletRegistryItem,
+        imgExtension: walletRegistryItem.imgExtension || "svg",
+      };
 
-      log.debug("external buttons", allButtons);
-    } else {
-      // Move buttons outside the effect
-      const buttons = createMemo(() => {
-        const visibilityMap = adapterVisibilityMap();
-        // eslint-disable-next-line solid/reactivity
-        return Object.keys(props.config).reduce((acc, adapter) => {
-          if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
-            acc.push({
-              name: adapter,
-              displayName: props.config[adapter].label || adapter,
-              hasInjectedWallet: props.config[adapter].isInjected,
-              hasWalletConnect: false,
-              hasInstallLinks: false,
-            });
-          }
-          return acc;
-        }, [] as ExternalButton[]);
-      });
+      if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
 
-      // Use buttons() directly in the effect
+      const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+      if (!chainNamespaces.has(props.chainNamespace) && !injectedChainNamespaces.has(props.chainNamespace)) return acc;
 
-      // eslint-disable-next-line solid/reactivity
-      setExternalButtons(buttons());
-      // eslint-disable-next-line solid/reactivity
-      setTotalExternalWallets(buttons().length);
-    }
+      acc.push(button);
+      return acc;
+    }, [] as ExternalButton[]);
+  };
+
+  const customAdapterButtons = createMemo(() => {
+    // eslint-disable-next-line solid/reactivity
+    return Object.keys(props.config).reduce((acc, adapter) => {
+      if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !props.config[adapter].isInjected && adapterVisibilityMap()[adapter]) {
+        acc.push({
+          name: adapter,
+          displayName: props.config[adapter].label || adapter,
+          hasInjectedWallet: false,
+          hasWalletConnect: false,
+          hasInstallLinks: false,
+        });
+      }
+      return acc;
+    }, [] as ExternalButton[]);
   });
+
+  const allButtons = createMemo(() => {
+    return [...generateWalletButtons(props.walletRegistry.default), ...generateWalletButtons(props.walletRegistry.others)];
+  });
+
+  const filteredButtons = (searchValue: string) => {
+    return allButtons()
+      .concat(customAdapterButtons())
+      .filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
+  };
+
+  const sortedButtons = createMemo(() => {
+    log.debug("sortedButtons", allButtons());
+    return [
+      ...allButtons().filter((button) => button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
+      ...customAdapterButtons(),
+      ...allButtons().filter((button) => !button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
+    ];
+  });
+
+  const totalExternalWalletsLength = createMemo(() => {
+    return allButtons().length + customAdapterButtons().length;
+  });
+
+  const visibleButtons = createMemo(() => {
+    const visibilityMap = adapterVisibilityMap();
+    // eslint-disable-next-line solid/reactivity
+    return Object.keys(props.config).reduce((acc, adapter) => {
+      if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
+        acc.push({
+          name: adapter,
+          displayName: props.config[adapter].label || adapter,
+          hasInjectedWallet: props.config[adapter].isInjected,
+          hasWalletConnect: false,
+          hasInstallLinks: false,
+        });
+      }
+      return acc;
+    }, [] as ExternalButton[]);
+  });
+
+  const handleWalletSearch = (e: InputEvent) => {
+    const searchValue = (e.target as HTMLInputElement).value;
+    log.debug("handleWalletSearch", searchValue);
+    setWalletSearch(searchValue);
+    if (searchValue) {
+      setExternalButtons(filteredButtons(searchValue));
+    } else {
+      setExternalButtons(sortedButtons());
+    }
+  };
+
+  createEffect(
+    on(
+      () => walletDiscoverySupported(),
+      () => {
+        if (walletDiscoverySupported()) {
+          setExternalButtons(sortedButtons());
+          setTotalExternalWallets(totalExternalWalletsLength());
+        } else {
+          setExternalButtons(visibleButtons());
+          setTotalExternalWallets(visibleButtons().length);
+        }
+      }
+    )
+  );
 
   const handleWalletClick = (button: ExternalButton) => {
     // if has injected wallet, connect to injected wallet
@@ -229,7 +235,10 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   return (
     <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
       <div class="w3a--flex w3a--items-center w3a--justify-between">
-        <figure class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center" onClick={handleBack}>
+        <figure
+          class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center w3a--z-20"
+          onClick={handleBack}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" class="w3a--text-app-gray-900 dark:w3a--text-app-white">
             <path
               fill="currentColor"
@@ -242,7 +251,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         <p class="w3a--text-base w3a--font-medium w3a--text-app-gray-900">
           {currentPage() === CONNECT_WALLET_PAGES.SELECTED_WALLET ? selectedButton()?.displayName : currentPage()}
         </p>
-        <div class="w3a--w-5 w3a--h-5" />
+        <div class="w3a--w-5 w3a--h-5 w3a--z-[-1]" />
       </div>
 
       <Show
