@@ -36,7 +36,7 @@ export interface IWeb3AuthCoreOptions {
    */
   enableLogging?: boolean;
   /**
-   * setting to "local" will persist social login session accross browser tabs.
+   * setting to "local" will persist social login session across browser tabs.
    *
    * @defaultValue "local"
    */
