@@ -41,7 +41,7 @@ export interface UIConfig extends WhiteLabelData {
   /**
    * Decides which button will be the focus of the modal
    * For `socialLogin` the social icon will be colored
-   * For other options like `emailLogin` and `externalLogin` the respective buttons will be coverted into a primary button
+   * For other options like `emailLogin` and `externalLogin` the respective buttons will be converted into a primary button
    *
    * @defaultValue `socialLogin`
    */
