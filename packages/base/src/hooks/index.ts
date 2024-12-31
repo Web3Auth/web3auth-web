@@ -17,6 +17,7 @@ export interface IBaseWeb3AuthHookContext {
   isMFAEnabled: boolean;
   status: ADAPTER_STATUS_TYPE | null;
   enableMFA(params?: LoginParams): Promise<void>;
+  manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
   addAndSwitchChain(chainConfig: CustomChainConfig): Promise<void>;
   addPlugin(plugin: IPlugin): void;

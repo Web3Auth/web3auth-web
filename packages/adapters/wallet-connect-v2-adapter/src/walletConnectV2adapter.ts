@@ -262,6 +262,10 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     throw new Error("Method Not implemented");
   }
 
+  public async manageMFA(): Promise<void> {
+    throw new Error("Method Not implemented");
+  }
+
   private cleanupPendingPairings(): void {
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
     const inactivePairings = this.connector.pairing.getAll({ active: false });

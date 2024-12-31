@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/auth-adapter",
-  "version": "9.3.0",
+  "version": "9.5.1",
   "description": "Auth adapter for Web3auth",
   "keywords": [
     "web3Auth/auth-adapter",
@@ -35,9 +35,9 @@
     "@babel/runtime": "^7.x"
   },
   "dependencies": {
-    "@web3auth/auth": "^9.4.1",
-    "@web3auth/base": "^9.3.0",
-    "@web3auth/base-provider": "^9.3.0",
+    "@web3auth/auth": "^9.6.2",
+    "@web3auth/base": "^9.5.1",
+    "@web3auth/base-provider": "^9.5.1",
     "deepmerge": "^4.3.1"
   },
   "lint-staged": {
@@ -59,5 +59,6 @@
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"
-  }
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

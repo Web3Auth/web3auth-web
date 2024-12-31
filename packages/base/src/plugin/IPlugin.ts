@@ -27,6 +27,7 @@ export type PluginNamespace = (typeof PLUGIN_NAMESPACES)[keyof typeof PLUGIN_NAM
 
 export const EVM_PLUGINS = {
   WALLET_SERVICES: "wallet-services",
+  NFT_CHECKOUT: "nft-checkout",
 } as const;
 
 export const SOLANA_PLUGINS = {
@@ -49,7 +50,7 @@ export interface IPlugin extends SafeEventEmitter {
   SUPPORTED_ADAPTERS: WALLET_ADAPTER_TYPE[];
   pluginNamespace: PluginNamespace;
   initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void>;
-  connect(params: PluginConnectParams): Promise<void>;
+  connect(params?: PluginConnectParams): Promise<void>;
   disconnect(): Promise<void>;
   cleanup(): Promise<void>;
 }

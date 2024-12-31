@@ -156,6 +156,20 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     }
   }
 
+  public async manageMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    try {
+      await this.authInstance.manageMFA(params);
+    } catch (error: unknown) {
+      log.error("Failed to manage MFA with auth provider", error);
+      if (error instanceof Web3AuthError) {
+        throw error;
+      }
+      throw WalletLoginError.connectionError("Failed to manage MFA with auth", error);
+    }
+  }
+
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");

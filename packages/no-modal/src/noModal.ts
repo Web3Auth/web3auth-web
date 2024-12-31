@@ -261,9 +261,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null> {
     if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
-    const provider = await this.walletAdapters[walletName].connect(loginParams);
-    this.commonJRPCProvider.updateProviderEngineProxy((provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider));
-    return this.provider;
+    return new Promise((resolve, reject) => {
+      this.once(ADAPTER_EVENTS.CONNECTED, (_) => {
+        resolve(this.provider);
+      });
+      this.once(ADAPTER_EVENTS.ERRORED, (err) => {
+        reject(err);
+      });
+      this.walletAdapters[walletName].connect(loginParams);
+    });
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
@@ -282,6 +288,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.connectedAdapterName !== WALLET_ADAPTERS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this adapter.`);
     return this.walletAdapters[this.connectedAdapterName].enableMFA(loginParams);
+  }
+
+  async manageMFA<T>(loginParams?: T): Promise<void> {
+    if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedAdapterName !== WALLET_ADAPTERS.AUTH)
+      throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this adapter.`);
+    return this.walletAdapters[this.connectedAdapterName].manageMFA(loginParams);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
@@ -319,7 +332,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.coreOptions.accountAbstractionProvider &&
         (data.adapter === WALLET_ADAPTERS.AUTH || (data.adapter !== WALLET_ADAPTERS.AUTH && this.coreOptions.useAAWithExternalWallet))
       ) {
-        await this.coreOptions.accountAbstractionProvider.setupProvider(provider);
+        await this.coreOptions.accountAbstractionProvider.setupProvider(provider); // Don't change this to finalProvider
         finalProvider = this.coreOptions.accountAbstractionProvider;
       }
 
@@ -398,13 +411,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private connectToPlugins(data: { adapter: WALLET_ADAPTER_TYPE }) {
     Object.values(this.plugins).map(async (plugin) => {
       try {
-        if (!plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
+        if (!plugin.SUPPORTED_ADAPTERS.includes("all") && !plugin.SUPPORTED_ADAPTERS.includes(data.adapter)) {
           return;
         }
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
         const { authInstance } = this.walletAdapters[this.connectedAdapterName] as AuthAdapter;
         const { options, sessionId, sessionNamespace } = authInstance || {};
-        await plugin.initWithWeb3Auth(this, options.whiteLabel);
+        await plugin.initWithWeb3Auth(this, options?.whiteLabel);
         await plugin.connect({ sessionId, sessionNamespace });
       } catch (error: unknown) {
         // swallow error if connector adapter doesn't supports this plugin.

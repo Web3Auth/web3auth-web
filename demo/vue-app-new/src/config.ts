@@ -1,6 +1,7 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
 import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
+import { CONFIRMATION_STRATEGY, CONFIRMATION_STRATEGY_TYPE } from "@web3auth/wallet-services-plugin";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -27,6 +28,26 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
       chainId: "0xaa36a7",
       ticker: "ETH",
       tickerName: "Sepolia Testnet",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://mainnet.base.org",
+      blockExplorerUrl: "https://base.blockscout.com",
+      chainId: "0x2105",
+      displayName: "Base Mainnet",
+      ticker: "ETH",
+      tickerName: "Base Ethereum",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+    },
+    {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://sepolia.base.org",
+      blockExplorerUrl: "https://sepolia-explorer.base.org",
+      chainId: "0x14A34",
+      displayName: "Base Sepolia",
+      ticker: "ETH",
+      tickerName: "Base Sepolia Testnet",
+      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
     },
     {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -132,11 +153,11 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel" | "biconomy" | "trust";
+export type SmartAccountType = "safe" | "kernel" | "nexus" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Safe", value: "safe" },
-  { name: "Biconomy", value: "biconomy" },
+  { name: "Nexus", value: "nexus" },
   { name: "Kernel", value: "kernel" },
   { name: "Trust", value: "trust" },
   // { name: "Light", value: "light" },
@@ -164,6 +185,10 @@ export type FormData = {
     enable: boolean;
     logoDark: string;
     logoLight: string;
+    confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
+  };
+  nftCheckoutPlugin: {
+    enable: boolean;
   };
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
@@ -220,3 +245,16 @@ export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
     contents: "Hello, Bob!",
   },
 });
+
+export const confirmationStrategyOptions: { name: string; value: string }[] = [
+  { name: "Modal", value: CONFIRMATION_STRATEGY.MODAL },
+  { name: "Auto Approve", value: CONFIRMATION_STRATEGY.AUTO_APPROVE },
+  { name: "Default", value: CONFIRMATION_STRATEGY.DEFAULT },
+];
+
+export const NFT_CHECKOUT_CONTRACT_ID = {
+  FREE_MINT: "b5b4de3f-0212-11ef-a08f-0242ac190003",
+  PAID_MINT: "d1145a8b-98ae-44e0-ab63-2c9c8371caff",
+};
+
+export const NFT_CHECKOUT_CLIENT_ID = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";

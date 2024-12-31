@@ -1,38 +1,38 @@
 {
+  "name": "@web3auth/modal-vue-composables",
+  "version": "9.5.1",
+  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
+  "keywords": [
+    "web3Auth/modal-vue-composables",
+    "web3Auth",
+    "blockchain",
+    "vue composables",
+    "web3Auth composables",
+    "web3Auth modal vue composables"
+  ],
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
+  "unpkg": "dist/modalVueComposables.umd.min.js",
+  "jsdelivr": "dist/modalVueComposables.umd.min.js",
+  "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "dependencies": {
-    "@web3auth/base": "^9.3.0",
-    "@web3auth/modal": "^9.3.1"
+    "@web3auth/base": "^9.5.1",
+    "@web3auth/modal": "^9.5.1"
   },
-  "description": "Vue composables to simplify integration with web3Auth modal SDK.",
   "devDependencies": {
-    "@web3auth/auth": "^9.4.1",
-    "@web3auth/auth-adapter": "^9.3.0"
-  },
-  "engines": {
-    "node": ">=18.x",
-    "npm": ">=9.x"
+    "@web3auth/auth": "^9.6.2",
+    "@web3auth/auth-adapter": "^9.5.1"
   },
   "files": [
     "dist"
   ],
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/composables/modal-vue-composables#readme",
-  "jsdelivr": "dist/modalVueComposables.umd.min.js",
-  "keywords": [
-    "blockchain",
-    "vue composables",
-    "web3Auth",
-    "web3Auth composables",
-    "web3Auth modal vue composables",
-    "web3Auth/modal-vue-composables"
-  ],
   "license": "ISC",
-  "main": "dist/lib.cjs/index.js",
-  "module": "dist/lib.esm/index.js",
-  "name": "@web3auth/modal-vue-composables",
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "vue": "^3.4.x"
@@ -50,8 +50,9 @@
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepack": "npm run build"
   },
-  "sideEffects": false,
-  "types": "dist/types/index.d.ts",
-  "unpkg": "dist/modalVueComposables.umd.min.js",
-  "version": "9.3.1"
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
+  },
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

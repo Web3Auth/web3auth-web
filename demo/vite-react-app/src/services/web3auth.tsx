@@ -2,16 +2,16 @@ import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, WEB3AUT
 import { Web3Auth } from "@web3auth/modal";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
-import { getWalletProvider, IWalletProvider } from "./walletProvider";
+import * as ethHandler from "./ethHandler";
 import { PLUGIN_EVENTS } from "@web3auth/base";
-import walletServiceProvider from "./walletServiceProvider";
+import * as walletServiceHandler from "./walletServiceHandlers";
+import { AccountAbstractionProvider, SafeSmartAccount } from "@web3auth/account-abstraction-provider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
-  provider: IWalletProvider | null;
+  provider: IProvider | null;
   isLoading: boolean;
   user: unknown;
   chain: string;
@@ -22,14 +22,12 @@ export interface IWeb3AuthContext {
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
   signTransaction: () => Promise<void>;
-  signAndSendTransaction: () => Promise<void>;
   addChain: () => Promise<void>;
   switchChain: () => Promise<void>;
-  getTokenBalance: () => Promise<void>;
-  signAndSendTokenTransaction: () => Promise<void>;
-  randomContractInteraction: () => Promise<void>;
   showWalletConnectScanner: () => Promise<void>;
+  showWalletUi: () => Promise<void>;
   enableMFA: () => Promise<void>;
+  manageMFA: () => Promise<void>;
 }
 
 export const Web3AuthContext = createContext<IWeb3AuthContext>({
@@ -45,14 +43,12 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   getAccounts: async () => {},
   getBalance: async () => {},
   signTransaction: async () => {},
-  signAndSendTransaction: async () => {},
   addChain: async () => {},
   switchChain: async () => {},
-  getTokenBalance: async () => {},
-  signAndSendTokenTransaction: async () => {},
-  randomContractInteraction: async () => {},
   showWalletConnectScanner: async () => {},
+  showWalletUi: async () => {},
   enableMFA: async () => {},
+  manageMFA: async () => {},
 });
 
 export function useWeb3Auth(): IWeb3AuthContext {
@@ -69,22 +65,15 @@ interface IWeb3AuthProps {
   web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
   chain: CHAIN_CONFIG_TYPE;
 }
+const pimlicoAPIKey = import.meta.env.VITE_PIMLICO_API_KEY;
 
 export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, web3AuthNetwork, chain }: IWeb3AuthProps) => {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
-  const [provider, setProvider] = useState<IWalletProvider | null>(null);
-  const [waasProvider, setWaasProvider] = useState<IWalletProvider | null>(null);
+  const [provider, setProvider] = useState<IProvider | null>(null);
+  const [waasProvider, setWaasProvider] = useState<IProvider | null>(null);
   const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const setWalletProvider = useCallback(
-    (web3authProvider: IProvider) => {
-      const walletProvider = getWalletProvider(chain, web3authProvider, uiConsole);
-      setProvider(walletProvider);
-    },
-    [chain]
-  );
 
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
@@ -92,7 +81,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);
-        setWalletProvider(web3auth.provider!);
+        setProvider(web3auth.provider);
       });
 
       web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
@@ -113,8 +102,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       // Can subscribe to all PLUGIN_EVENTS and LOGIN_MODAL_EVENTS
       plugin.on(PLUGIN_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in to plugin");
-        const provider = walletServiceProvider(plugin.wsEmbedInstance.provider, uiConsole);
-        setWaasProvider(provider);
+        setWaasProvider(plugin.wsEmbedInstance?.provider as IProvider);
       });
 
       plugin.on(PLUGIN_EVENTS.CONNECTING, () => {
@@ -133,12 +121,19 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
-        let privateKeyProvider;
-        if (currentChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-          privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
-        } else {
-          privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
-        }
+        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
+        const accountAbstractionProvider = new AccountAbstractionProvider({
+          config: {
+            chainConfig: currentChainConfig,
+            bundlerConfig: {
+              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
+            },
+            smartAccountInit: new SafeSmartAccount(),
+            paymasterConfig: {
+              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
+            },
+          },
+        });
         setIsLoading(true);
         const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
 
@@ -147,6 +142,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           clientId,
           web3AuthNetwork,
           privateKeyProvider,
+          accountAbstractionProvider,
           chainConfig: currentChainConfig,
           uiConfig: {
             uxMode: "redirect",
@@ -168,18 +164,18 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         });
 
         // Wallet Services Plugin
-        if (currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-          const walletServicesPlugin = new WalletServicesPlugin({
-            wsEmbedOpts: {},
-            walletInitOptions: {
-              whiteLabel: { showWidgetButton: true },
-              confirmationStrategy: "modal",
-            },
-          });
-          subscribePluginEvents(walletServicesPlugin);
-          setWalletServicesPlugin(walletServicesPlugin);
-          web3AuthInstance.addPlugin(walletServicesPlugin);
-        }
+
+        const walletServicesPlugin = new WalletServicesPlugin({
+          wsEmbedOpts: {},
+          walletInitOptions: {
+            whiteLabel: { showWidgetButton: true },
+            confirmationStrategy: "modal",
+          },
+        });
+
+        subscribePluginEvents(walletServicesPlugin);
+        setWalletServicesPlugin(walletServicesPlugin);
+        web3AuthInstance.addPlugin(walletServicesPlugin);
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
@@ -191,7 +187,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       }
     }
     init();
-  }, [chain, web3AuthNetwork, setWalletProvider]);
+  }, [chain, web3AuthNetwork]);
 
   const login = async () => {
     if (!web3Auth) {
@@ -200,7 +196,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     const localProvider = await web3Auth.connect();
-    setWalletProvider(localProvider!);
+    setProvider(localProvider!);
   };
 
   const logout = async () => {
@@ -230,6 +226,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     await web3Auth.enableMFA();
+  };
+
+  const manageMFA = async () => {
+    if (!web3Auth) {
+      console.log("web3auth not initialized yet");
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    await web3Auth.manageMFA();
   };
 
   const addChain = async () => {
@@ -266,7 +271,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    await provider.getAccounts();
+    await ethHandler.getAccounts(provider, uiConsole);
   };
 
   const getBalance = async () => {
@@ -275,16 +280,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    await provider.getBalance();
-  };
-
-  const getTokenBalance = async () => {
-    if (!provider) {
-      console.log("provider not initialized yet");
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    await provider.getTokenBalance?.();
+    await ethHandler.getBalance(provider, uiConsole);
   };
 
   const signMessage = async () => {
@@ -293,7 +289,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    await provider.signMessage();
+    await ethHandler.signEthMessage(provider, uiConsole);
     // await waasProvider?.signMessage();
   };
 
@@ -303,34 +299,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("provider not initialized yet");
       return;
     }
-    await provider.signTransaction();
-  };
-
-  const signAndSendTransaction = async () => {
-    if (!provider) {
-      console.log("provider not initialized yet");
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    await provider.signAndSendTransaction();
-  };
-
-  const signAndSendTokenTransaction = async () => {
-    if (!provider) {
-      console.log("provider not initialized yet");
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    await provider.signAndSendTokenTransaction?.();
-  };
-
-  const randomContractInteraction = async () => {
-    if (!provider) {
-      console.log("provider not initialized yet");
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    await provider.randomContractInteraction?.();
+    await ethHandler.signTransaction(provider, uiConsole);
   };
 
   const showWalletConnectScanner = async () => {
@@ -345,6 +314,20 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       return;
     }
     await walletServicesPlugin.showWalletConnectScanner();
+  };
+
+  const showWalletUi = async () => {
+    if (!walletServicesPlugin) {
+      console.log("walletServicesPlugin not initialized yet");
+      uiConsole("walletServicesPlugin not initialized yet");
+      return;
+    }
+    if (web3Auth != null && web3Auth.status !== "connected") {
+      console.log("web3Auth not initialized yet");
+      uiConsole("web3Auth not initialized yet");
+      return;
+    }
+    await walletServicesPlugin.showWalletUi();
   };
 
   const uiConsole = (...args: unknown[]): void => {
@@ -367,14 +350,12 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getBalance,
     signMessage,
     signTransaction,
-    signAndSendTransaction,
     addChain,
     switchChain,
-    signAndSendTokenTransaction,
-    getTokenBalance,
-    randomContractInteraction,
     showWalletConnectScanner,
     enableMFA,
+    manageMFA,
+    showWalletUi,
   };
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;
 };

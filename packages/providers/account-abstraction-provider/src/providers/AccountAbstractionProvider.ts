@@ -97,7 +97,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     // setup public client for viem smart account
     this._publicClient = createPublicClient({
       chain,
-      transport: http(),
+      transport: http(this.config.chainConfig.rpcTarget),
     }) as Client;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
       owner: eoaProvider,

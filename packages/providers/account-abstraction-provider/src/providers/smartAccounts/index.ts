@@ -1,5 +1,6 @@
 export * from "./BiconomySmartAccount";
 export * from "./KernelSmartAccount";
+export * from "./NexusSmartAccount";
 export * from "./SafeSmartAccount";
 export * from "./TrustSmartAccount";
 // export * from "./LightSmartAccount";
