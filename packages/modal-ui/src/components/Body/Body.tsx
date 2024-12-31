@@ -1,7 +1,7 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, WalletRegistry } from "@web3auth/base/src";
+import { ChainNamespaceType, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
 import Bowser from "bowser";
-import { createContext, createMemo, Show } from "solid-js";
+import { createContext, createEffect, createMemo, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { PAGES } from "../../constants";
@@ -48,6 +48,7 @@ export interface BodyProps {
   onCloseLoader: () => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
+  handleBackClick: () => void;
 }
 
 interface BodyContextType {
@@ -159,6 +160,13 @@ const Body = (props: BodyProps) => {
     ) : null;
     return [installLink, ...mobileInstallLinks()];
   };
+
+  createEffect(() => {
+    const wcAvailable = (props.modalState.externalWalletsConfig[WALLET_ADAPTERS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
+    if (wcAvailable) {
+      props.handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
+    }
+  });
 
   return (
     <BodyContext.Provider value={{ bodyState, setBodyState }}>

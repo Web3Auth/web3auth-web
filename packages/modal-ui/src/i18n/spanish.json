@@ -21,6 +21,7 @@
     "external.installed": "Instalado",
     "external.no-wallets-found": "No se encontraron billeteras",
     "external.search-wallet": "Buscar a través de {{count}} billeteras...",
+    "external.search-wallet-loading": "Cargando...",
     "external.title": "Billetera Externa",
     "external.walletconnect-connect": "Conectar",
     "external.walletconnect-copy": "Escanee con una billetera compatible con WalletConnect o haga clic en el código QR para copiarlo en su portapapeles.",
