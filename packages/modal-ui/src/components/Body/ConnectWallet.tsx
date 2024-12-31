@@ -1,11 +1,12 @@
 import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import bowser from "bowser";
-import { createEffect, createMemo, createSignal, For, on, Show, useContext } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { t } from "../../localeImport";
+import { Image } from "../Image";
 import { WalletButton } from "../WalletButton";
 import { BodyContext } from "./Body";
 export interface ConnectWalletProps {
@@ -28,6 +29,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   const [totalExternalWallets, setTotalExternalWallets] = createSignal<number>(0);
   const [selectedButton, setSelectedButton] = createSignal<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = createSignal<string>("");
+  const [isLoading, setIsLoading] = createSignal<boolean>(true);
 
   const handleBack = () => {
     log.debug("handleBack", selectedWallet(), currentPage());
@@ -83,14 +85,6 @@ const ConnectWallet = (props: ConnectWalletProps) => {
 
     log.debug("adapter visibility map", canShowMap);
     return canShowMap;
-  });
-
-  createEffect(() => {
-    log.debug("loaded external wallets", props.config, props.walletConnectUri);
-    const wcAvailable = (props.config[WALLET_ADAPTERS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
-    if (wcAvailable && !props.walletConnectUri) {
-      props.handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
-    }
   });
 
   const isWalletConnectAdapterIncluded = createMemo(() => Object.keys(props.config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2));
@@ -199,20 +193,18 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     }
   };
 
-  createEffect(
-    on(
-      () => walletDiscoverySupported(),
-      () => {
-        if (walletDiscoverySupported()) {
-          setExternalButtons(sortedButtons());
-          setTotalExternalWallets(totalExternalWalletsLength());
-        } else {
-          setExternalButtons(visibleButtons());
-          setTotalExternalWallets(visibleButtons().length);
-        }
-      }
-    )
-  );
+  createEffect(() => {
+    if (walletDiscoverySupported()) {
+      setExternalButtons(sortedButtons());
+      setTotalExternalWallets(totalExternalWalletsLength());
+    } else {
+      setExternalButtons(visibleButtons());
+      setTotalExternalWallets(visibleButtons().length);
+    }
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  });
 
   const handleWalletClick = (button: ExternalButton) => {
     // if has injected wallet, connect to injected wallet
@@ -269,11 +261,13 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 onBlur={(e) => {
                   e.target.placeholder = t("modal.external.search-wallet", { count: `${totalExternalWallets()}` });
                 }}
-                placeholder={t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })}
+                placeholder={
+                  isLoading() ? t("modal.external.search-wallet-loading") : t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })
+                }
                 class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
               />
             </Show>
-            <ul class="w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto">
+            <ul class="w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto w3a--flex w3a--flex-col">
               <Show
                 when={externalButtons().length > 0}
                 fallback={
@@ -282,19 +276,26 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   </div>
                 }
               >
-                <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
-                  <For each={externalButtons()}>
-                    {(button) => (
-                      <WalletButton
-                        label={button.displayName}
-                        onClick={() => handleWalletClick(button)}
-                        button={button}
-                        deviceDetails={deviceDetails()}
-                        walletConnectUri={props.walletConnectUri}
-                      />
-                    )}
-                  </For>
-                </div>
+                <Show
+                  when={!isLoading()}
+                  fallback={
+                    <div class="w3a--text-app-white w3a--flex-1 w3a--h-full w3a--w-full w3a--animate-pulse w3a--rounded-lg w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
+                  }
+                >
+                  <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
+                    <For each={externalButtons()}>
+                      {(button) => (
+                        <WalletButton
+                          label={button.displayName}
+                          onClick={() => handleWalletClick(button)}
+                          button={button}
+                          deviceDetails={deviceDetails()}
+                          walletConnectUri={props.walletConnectUri}
+                        />
+                      )}
+                    </For>
+                  </div>
+                </Show>
               </Show>
             </ul>
           </div>
@@ -304,10 +305,20 @@ const ConnectWallet = (props: ConnectWalletProps) => {
           <Show
             when={props.walletConnectUri}
             fallback={
-              <div class="w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center" />
+              <div class="w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+                <Image
+                  imageId={`login-${selectedButton().name}`}
+                  hoverImageId={`login-${selectedButton().name}`}
+                  fallbackImageId="wallet"
+                  height="30"
+                  width="30"
+                  isButton
+                  extension={selectedButton().imgExtension}
+                />
+              </div>
             }
           >
-            <div class="w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+            <div class="w3a--relative w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
               <QRCodeCanvas
                 value={props.walletConnectUri || ""}
                 level="low"
@@ -321,6 +332,17 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 y={0}
                 maskType={MaskType.FLOWER_IN_SQAURE}
               />
+              <div class="w3a--absolute w3a--top-[45%] w3a--left-[45%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
+                <Image
+                  imageId={`login-${selectedButton().name}`}
+                  hoverImageId={`login-${selectedButton().name}`}
+                  fallbackImageId="wallet"
+                  height="20"
+                  width="20"
+                  isButton
+                  extension={selectedButton().imgExtension}
+                />
+              </div>
             </div>
           </Show>
 

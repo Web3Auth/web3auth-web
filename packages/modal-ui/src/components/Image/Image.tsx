@@ -12,6 +12,7 @@ export interface ImageProps {
   extension?: string;
   darkImageId?: string;
   darkHoverImageId?: string;
+  class?: string;
 }
 
 export default function Image(props: ImageProps) {
@@ -56,7 +57,7 @@ export default function Image(props: ImageProps) {
           height={mergedProps.height}
           width={mergedProps.width}
           alt={mergedProps.hoverImageId}
-          class="w3a--object-contain w3a--rounded"
+          class={`w3a--object-contain w3a--rounded ${mergedProps.class}`}
         />
       </Show>
     </>

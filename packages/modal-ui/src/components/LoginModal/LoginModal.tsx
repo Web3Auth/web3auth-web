@@ -68,7 +68,7 @@ const LoginModal = (props: LoginModalProps) => {
     }));
 
     // Call the passed-in handler with the params
-    props.handleExternalWalletClick(params);
+    if (props.handleExternalWalletClick) props.handleExternalWalletClick(params);
   };
 
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {

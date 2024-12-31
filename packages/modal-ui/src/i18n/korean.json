@@ -21,6 +21,7 @@
     "external.installed": "설치 완료",
     "external.no-wallets-found": "지갑을 찾을 수 없습니다.",
     "external.search-wallet": "{{count}}개의 지갑을 검색 중입니다...",
+    "external.search-wallet-loading": "로드 중...",
     "external.title": "외부 지갑",
     "external.walletconnect-connect": "연결",
     "external.walletconnect-copy": "WalletConnect 호환 지갑으로 스캔하거나, QR 코드를 클릭하여 클립보드에 복사하세요.",
