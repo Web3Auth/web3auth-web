@@ -4,8 +4,9 @@ import { createEffect, createMemo, createSignal, For, Show, useContext } from "s
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
-import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
+import { browser, DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { t } from "../../localeImport";
+import { cn } from "../../utils/common";
 import { Image } from "../Image";
 import { WalletButton } from "../WalletButton";
 import { BodyContext } from "./Body";
@@ -18,6 +19,7 @@ export interface ConnectWalletProps {
   modalStatus: ModalStatusType;
   chainNamespace: ChainNamespaceType;
   walletRegistry?: WalletRegistry;
+  appLogo?: string;
 }
 
 const ConnectWallet = (props: ConnectWalletProps) => {
@@ -224,6 +226,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     }
   };
 
+  const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(props.appLogo) ? "" : props.appLogo));
+
   return (
     <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
       <div class="w3a--flex w3a--items-center w3a--justify-between">
@@ -267,7 +271,12 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
               />
             </Show>
-            <ul class="w3a--h-[calc(100dvh_-_240px)] w3a--overflow-y-auto w3a--flex w3a--flex-col">
+            <ul
+              class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col", {
+                "w3a--h-[calc(100dvh_-_400px)]": headerLogo(),
+                "w3a--h-[calc(100dvh_-_460px)]": !headerLogo(),
+              })}
+            >
               <Show
                 when={externalButtons().length > 0}
                 fallback={
@@ -305,7 +314,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
           <Show
             when={props.walletConnectUri}
             fallback={
-              <div class="w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+              <div class="w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
                 <Image
                   imageId={`login-${selectedButton().name}`}
                   hoverImageId={`login-${selectedButton().name}`}
@@ -318,7 +327,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </div>
             }
           >
-            <div class="w3a--relative w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[320px] w3a--w-[320px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+            <div class="w3a--relative w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
               <QRCodeCanvas
                 value={props.walletConnectUri || ""}
                 level="low"
@@ -326,8 +335,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 backgroundAlpha={0}
                 foregroundColor="#000000"
                 foregroundAlpha={1}
-                width={300}
-                height={300}
+                width={280}
+                height={280}
                 x={0}
                 y={0}
                 maskType={MaskType.FLOWER_IN_SQAURE}

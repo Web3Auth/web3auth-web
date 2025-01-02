@@ -59,7 +59,7 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
       })}
     >
       <div
-        class={cn("w3a--modal-bg w3a--rounded-3xl w3a--w-full sm:w3a--w-[400px] w3a--duration-500", {
+        class={cn("w3a--modal-bg w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[380px] w3a--duration-500", {
           "w3a--translate-y-0 w3a--delay-100": isOpen(),
           "w3a--translate-y-[100vh]": !isOpen(),
           "w3a--p-4": mergedProps.padding,
