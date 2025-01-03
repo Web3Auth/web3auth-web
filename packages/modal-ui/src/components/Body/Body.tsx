@@ -171,6 +171,7 @@ const Body = (props: BodyProps) => {
   return (
     <BodyContext.Provider value={{ bodyState, setBodyState }}>
       <div class="w3a--h-auto w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
+        {/* Content */}
         <Show
           when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
           fallback={
@@ -228,13 +229,20 @@ const Body = (props: BodyProps) => {
             appLogo={props.appLogo}
           />
         </Show>
+
+        {/* Footer */}
         <Footer />
+
+        {/* Wallet Details */}
         <Show when={bodyState.showWalletDetails}>
           <div
             class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
             onClick={() => setBodyState({ showWalletDetails: false })}
           />
-          <div class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600">
+          <div
+            class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col 
+            w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600"
+          >
             <div
               class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full w3a--cursor-pointer"
               onClick={() => setBodyState({ showWalletDetails: false })}

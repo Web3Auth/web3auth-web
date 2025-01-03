@@ -213,7 +213,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
     if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
       props.handleExternalWalletClick({ adapter: button.name });
-    } else if (button.hasWalletConnect) {
+    } else if (button.hasWalletConnect && props.walletConnectUri) {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
@@ -254,7 +254,10 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         when={selectedWallet()}
         fallback={
           <div class="w3a--contents">
-            <Show when={totalExternalWallets() > 15}>
+            <Show
+              when={totalExternalWallets() > 15 && !isLoading()}
+              fallback={<div class="w3a--w-full w3a--h-[46px] w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
+            >
               <input
                 type="text"
                 value={walletSearch()}
@@ -268,6 +271,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 placeholder={
                   isLoading() ? t("modal.external.search-wallet-loading") : t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })
                 }
+                disabled={isLoading()}
                 class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
               />
             </Show>
@@ -288,7 +292,13 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 <Show
                   when={!isLoading()}
                   fallback={
-                    <div class="w3a--text-app-white w3a--flex-1 w3a--h-full w3a--w-full w3a--animate-pulse w3a--rounded-lg w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
+                    <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
+                      <For each={Array(6).fill(0)}>
+                        {(_) => (
+                          <div class="w3a--w-full w3a--h-[54px] w3a--animate-pulse w3a--rounded-lg w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
+                        )}
+                      </For>
+                    </div>
                   }
                 >
                   <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
@@ -327,7 +337,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </div>
             }
           >
-            <div class="w3a--relative w3a--bg-app-gray-200 w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
+            <div class="w3a--relative w3a--bg-app-gray-100 dark:w3a--bg-app-white w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
               <QRCodeCanvas
                 value={props.walletConnectUri || ""}
                 level="low"
@@ -335,8 +345,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 backgroundAlpha={0}
                 foregroundColor="#000000"
                 foregroundAlpha={1}
-                width={280}
-                height={280}
+                width={300}
+                height={300}
                 x={0}
                 y={0}
                 maskType={MaskType.FLOWER_IN_SQAURE}

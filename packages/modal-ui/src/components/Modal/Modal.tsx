@@ -15,7 +15,7 @@ export interface ModalProps {
 
 const Modal: Component<ModalProps> = (props: ModalProps) => {
   const mergedProps = mergeProps(
-    { open: false, padding: true, placement: "center", shadow: true, border: true, showCloseIcon: false },
+    { open: false, padding: true, placement: "center", shadow: true, border: false, showCloseIcon: false },
     props as ModalProps
   );
 
