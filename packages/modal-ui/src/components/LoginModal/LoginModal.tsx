@@ -1,5 +1,5 @@
 import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
-import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WalletRegistry } from "@web3auth/base/src";
+import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
 import deepmerge from "deepmerge";
 import { createEffect, createMemo, createSignal, on } from "solid-js";
 
@@ -45,7 +45,7 @@ const LoginModal = (props: LoginModalProps) => {
 
   createEffect(
     on(
-      () => props.stateListener,
+      () => [props.stateListener],
       () => {
         props.stateListener.emit("MOUNTED");
         props.stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
@@ -159,6 +159,21 @@ const LoginModal = (props: LoginModalProps) => {
     });
     log.debug("handleBackClick Body");
   };
+
+  createEffect(
+    on(
+      () => [modalState().externalWalletsConfig, modalState().walletConnectUri, props.handleExternalWalletClick],
+      ([config, walletConnectUri, handleExternalWalletClick]) => {
+        log.debug("modalState createEffect", modalState(), typeof handleExternalWalletClick === "function");
+        if (typeof config === "object") {
+          const wcAvailable = (config[WALLET_ADAPTERS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
+          if (wcAvailable && !walletConnectUri && typeof handleExternalWalletClick === "function") {
+            handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
+          }
+        }
+      }
+    )
+  );
 
   return (
     <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>

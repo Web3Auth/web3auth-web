@@ -1,7 +1,7 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
+import { ChainNamespaceType, WalletRegistry } from "@web3auth/base/src";
 import Bowser from "bowser";
-import { createContext, createEffect, createMemo, Match, Show, Suspense, Switch } from "solid-js";
+import { createContext, createMemo, Match, Show, Suspense, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { PAGES } from "../../constants";
@@ -160,13 +160,6 @@ const Body = (props: BodyProps) => {
     ) : null;
     return [installLink, ...mobileInstallLinks()];
   };
-
-  createEffect(() => {
-    const wcAvailable = (props.modalState.externalWalletsConfig[WALLET_ADAPTERS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
-    if (wcAvailable) {
-      props.handleExternalWalletClick({ adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
-    }
-  });
 
   return (
     <BodyContext.Provider value={{ bodyState, setBodyState }}>

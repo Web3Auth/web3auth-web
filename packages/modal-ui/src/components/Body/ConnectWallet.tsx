@@ -213,7 +213,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
     if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
       props.handleExternalWalletClick({ adapter: button.name });
-    } else if (button.hasWalletConnect && props.walletConnectUri) {
+    } else if (button.hasWalletConnect) {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
@@ -337,7 +337,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </div>
             }
           >
-            <div class="w3a--relative w3a--bg-app-gray-100 dark:w3a--bg-app-white w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
+            <div class="w3a--relative w3a--bg-app-gray-50 w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
               <QRCodeCanvas
                 value={props.walletConnectUri || ""}
                 level="low"
@@ -351,7 +351,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 y={0}
                 maskType={MaskType.FLOWER_IN_SQAURE}
               />
-              <div class="w3a--absolute w3a--top-[45%] w3a--left-[45%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
+              <div class="w3a--absolute w3a--top-[43%] w3a--left-[43%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
                 <Image
                   imageId={`login-${selectedButton().name}`}
                   hoverImageId={`login-${selectedButton().name}`}
