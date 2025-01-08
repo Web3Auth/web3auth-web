@@ -31,12 +31,13 @@ const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Aut
 const connectedAdapterName = ref("");
 
 const isDisplay = computed(() => {
+  const finalConnectedAdapterName = connectedAdapterName.value || web3Auth.value?.connectedAdapterName;
   return {
     dashboard: isConnected.value,
     ethServices: formData.chainNamespace === CHAIN_NAMESPACES.EIP155,
     solServices: formData.chainNamespace === CHAIN_NAMESPACES.SOLANA,
     walletServices:
-      formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.walletPlugin.enable && connectedAdapterName.value === WALLET_ADAPTERS.AUTH,
+      formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.walletPlugin.enable && finalConnectedAdapterName === WALLET_ADAPTERS.AUTH,
     nftCheckoutServices: formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable,
   };
 });
