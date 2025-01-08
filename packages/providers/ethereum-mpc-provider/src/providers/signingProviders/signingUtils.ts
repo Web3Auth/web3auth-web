@@ -170,6 +170,7 @@ export function getProviderHandlers({
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
       await validateTypedSignMessageDataV4(msgParams, chainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      if (data.types.EIP712Domain) delete data.types.EIP712Domain;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
     },
