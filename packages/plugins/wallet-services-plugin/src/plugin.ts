@@ -166,7 +166,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
         sessionId,
         sessionNamespace,
       });
-      if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
       this.emit(PLUGIN_EVENTS.CONNECTED);
@@ -216,7 +215,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   private subscribeToWalletEvents() {
     this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
       if ((accounts as string[]).length === 0) {
-        this.wsEmbedInstance.hideTorusButton();
         if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
       }
     });
@@ -229,12 +227,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
     provider.on("chainChanged", (chainId: string) => {
       this.setChainID(parseInt(chainId, 16));
-    });
-    provider.on("disconnect", () => {
-      this.wsEmbedInstance.hideTorusButton();
-    });
-    provider.on("connect", () => {
-      if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
     });
   }
 
@@ -250,7 +242,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       if (this.wsEmbedInstance.isLoggedIn) {
         await this.wsEmbedInstance.logout();
       }
-      this.wsEmbedInstance.hideTorusButton();
     });
   }
 
