@@ -4,14 +4,12 @@ import { Client, EIP1193Provider } from "viem";
 import { entryPoint07Address, SmartAccount } from "viem/account-abstraction";
 
 import { SMART_ACCOUNT } from "./constants";
-import { ISmartAccount } from "./types";
-
-type NexusSmartAccountConfig = Omit<ToNexusSmartAccountParameters, "owners" | "client" | "index" | "address">;
+import { ISmartAccount, NexusSmartAccountConfig } from "./types";
 
 export class NexusSmartAccount implements ISmartAccount {
   readonly name: string = SMART_ACCOUNT.NEXUS;
 
-  private options: NexusSmartAccountConfig;
+  public options: NexusSmartAccountConfig;
 
   constructor(options?: NexusSmartAccountConfig) {
     this.options = options;

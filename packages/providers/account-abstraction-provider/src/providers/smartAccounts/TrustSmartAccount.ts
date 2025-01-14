@@ -4,16 +4,12 @@ import { Client, EIP1193Provider } from "viem";
 import { entryPoint06Address, SmartAccount } from "viem/account-abstraction";
 
 import { SMART_ACCOUNT } from "./constants";
-import { ISmartAccount } from "./types";
-
-type TrustSmartAccountParameters = Parameters<typeof toTrustSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
-
-type TrustSmartAccountConfig = Omit<TrustSmartAccountParameters, "owner" | "client" | "address" | "nonceKey" | "index">;
+import { ISmartAccount, TrustSmartAccountConfig, TrustSmartAccountParameters } from "./types";
 
 export class TrustSmartAccount implements ISmartAccount {
   readonly name: string = SMART_ACCOUNT.TRUST;
 
-  private options: TrustSmartAccountConfig;
+  public options: TrustSmartAccountConfig;
 
   constructor(options?: TrustSmartAccountConfig) {
     this.options = options;

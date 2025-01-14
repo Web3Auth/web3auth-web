@@ -111,6 +111,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
       const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
       const bundlerConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig;
+      const smartAccountConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.options;
 
       // TODO: fix this type casting when we start using accountAbstractionController
       accountAbstractionConfig = {
@@ -118,6 +119,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
         smartAccountType: smartAccountType || undefined,
         paymasterConfig: paymasterConfig || undefined,
         bundlerConfig: bundlerConfig || undefined,
+        smartAccountConfig: smartAccountConfig || undefined,
       } as AccountAbstractionConfig;
     }
 
