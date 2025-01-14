@@ -3,9 +3,10 @@ import { signMessage } from "@toruslabs/base-controllers";
 import { getPublicCompressed } from "@toruslabs/eccrypto";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { log, SafeEventEmitterProvider } from "@web3auth/base";
-import { hashMessage, SigningKey, TypedDataEncoder } from "ethers";
+import { hashMessage, SigningKey } from "ethers";
+import { hashTypedData, validateTypedData } from "viem";
 
-import { IProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
+import { IProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../rpc/interfaces";
 import { TransactionFormatter } from "./TransactionFormatter/formatter";
 import { validateTypedSignMessageDataV4 } from "./TransactionFormatter/utils";
 
@@ -103,10 +104,10 @@ export function getProviderHandlers({
         });
       const chainId = await providerEngineProxy.request<never, string>({ method: "eth_chainId" });
       await validateTypedSignMessageDataV4(msgParams, chainId);
-      const data: SignTypedDataMessageV4 = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
+      const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const ethersPrivateKey = new SigningKey(privKeyBuffer);
-      if (data.types.EIP712Domain) delete data.types.EIP712Domain;
-      const signature = ethersPrivateKey.sign(TypedDataEncoder.hash(data.domain, data.types, data.message)).serialized;
+      validateTypedData(data);
+      const signature = ethersPrivateKey.sign(hashTypedData(data)).serialized;
       return signature;
     },
   };

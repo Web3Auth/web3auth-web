@@ -47,6 +47,7 @@ export function getProviderHandlers({
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
       const { to, value, data } = txParams;
+      // @ts-expect-error viem types are too deep
       const userOperationParams: SendUserOperationParameters = {
         account: smartAccount,
         calls: [
@@ -59,7 +60,7 @@ export function getProviderHandlers({
         ],
         // should not use maxFeePerGas/maxPriorityFeePerGas from transaction params since that's fee for transaction not user operation and let bundler handle it instead
       };
-      // @ts-expect-error viem types are too deep
+
       const userOpHash = await bundlerClient.sendUserOperation(userOperationParams);
 
       const txReceipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash });

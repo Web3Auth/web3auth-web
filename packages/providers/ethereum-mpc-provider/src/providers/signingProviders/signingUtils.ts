@@ -5,14 +5,14 @@ import { log } from "@web3auth/base";
 import {
   IProviderHandlers,
   MessageParams,
-  SignTypedDataMessageV4,
   SignTypedDataVersion,
   TransactionFormatter,
   TransactionParams,
   TypedMessageParams,
   validateTypedSignMessageDataV4,
 } from "@web3auth/ethereum-provider";
-import { hashMessage, Signature, TypedDataEncoder } from "ethers";
+import { hashMessage, Signature } from "ethers";
+import { hashTypedData, hexToBytes, validateTypedData } from "viem";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
@@ -89,9 +89,10 @@ async function signTypedData(
   if (data === null || data === undefined) {
     throw new Error("Missing data parameter");
   }
-  const message: SignTypedDataMessageV4 = typeof data === "string" ? JSON.parse(data) : data;
+  const message = typeof data === "string" ? JSON.parse(data) : data;
+  validateTypedData(message);
 
-  const { v, r, s } = await sign(Buffer.from(TypedDataEncoder.hash(message.domain, message.types, message.message).slice(2), "hex"));
+  const { v, r, s } = await sign(Buffer.from(hexToBytes(hashTypedData(message))));
 
   let modifiedV = v;
   if (modifiedV <= 1) {
