@@ -1,5 +1,5 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
-import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import type { AccountAbstractionConfig, EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
@@ -21,7 +21,7 @@ import {
   WALLET_ADAPTERS,
   WalletServicesPluginError,
 } from "@web3auth/base";
-import WsEmbed, { AccountAbstractionConfig, CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
+import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
