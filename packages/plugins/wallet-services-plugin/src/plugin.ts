@@ -99,14 +99,14 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!connectedChainConfig.ticker) throw WalletServicesPluginError.invalidParams("ticker is required in chainConfig");
     if (!connectedChainConfig.tickerName) throw WalletServicesPluginError.invalidParams("tickerName is required in chainConfig");
 
-    const enableAccountAbstraction =
+    const hasAaProvider =
       web3auth.coreOptions.accountAbstractionProvider &&
       (web3auth.connectedAdapterName === WALLET_ADAPTERS.AUTH ||
         (web3auth.connectedAdapterName !== WALLET_ADAPTERS.AUTH && web3auth.coreOptions.useAAWithExternalWallet));
 
     let accountAbstractionConfig: AccountAbstractionConfig;
 
-    if (enableAccountAbstraction) {
+    if (hasAaProvider) {
       const smartAccountAddress = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.smartAccount.address;
       const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
       const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
@@ -121,6 +121,9 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
         bundlerConfig: bundlerConfig || undefined,
         smartAccountConfig: smartAccountConfig || undefined,
       } as AccountAbstractionConfig;
+    } else if (this.walletInitOptions?.accountAbstractionConfig && Object.keys(this.walletInitOptions.accountAbstractionConfig).length > 0) {
+      // if wallet services plugin is initialized with accountAbstractionConfig we enable wallet service AA without AA provider
+      accountAbstractionConfig = this.walletInitOptions.accountAbstractionConfig;
     }
 
     const finalInitOptions = {
@@ -168,7 +171,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
         sessionId,
         sessionNamespace,
       });
-      if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
       this.emit(PLUGIN_EVENTS.CONNECTED);
@@ -218,7 +220,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   private subscribeToWalletEvents() {
     this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
       if ((accounts as string[]).length === 0) {
-        this.wsEmbedInstance.hideTorusButton();
         if (this.web3auth?.status === ADAPTER_STATUS.CONNECTED) this.web3auth?.logout();
       }
     });
@@ -231,12 +232,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
     provider.on("chainChanged", (chainId: string) => {
       this.setChainID(parseInt(chainId, 16));
-    });
-    provider.on("disconnect", () => {
-      this.wsEmbedInstance.hideTorusButton();
-    });
-    provider.on("connect", () => {
-      if (this.walletInitOptions?.whiteLabel?.showWidgetButton) this.wsEmbedInstance.showTorusButton();
     });
   }
 
@@ -252,7 +247,6 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       if (this.wsEmbedInstance.isLoggedIn) {
         await this.wsEmbedInstance.logout();
       }
-      this.wsEmbedInstance.hideTorusButton();
     });
   }
 
