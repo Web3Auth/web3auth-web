@@ -4,14 +4,12 @@ import { Client, EIP1193Provider } from "viem";
 import { entryPoint06Address, SmartAccount } from "viem/account-abstraction";
 
 import { SMART_ACCOUNT } from "./constants";
-import { ISmartAccount } from "./types";
-
-type BiconomySmartAccountConfig = Pick<ToBiconomySmartAccountParameters, "entryPoint" | "ecdsaModuleAddress" | "factoryAddress">;
+import { BiconomySmartAccountConfig, ISmartAccount } from "./types";
 
 export class BiconomySmartAccount implements ISmartAccount {
   readonly name: string = SMART_ACCOUNT.BICONOMY;
 
-  private options: BiconomySmartAccountConfig;
+  public options: BiconomySmartAccountConfig;
 
   constructor(options?: BiconomySmartAccountConfig) {
     this.options = options;

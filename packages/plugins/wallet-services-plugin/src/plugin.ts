@@ -1,5 +1,5 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
-import type { EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import type { AccountAbstractionConfig, EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import {
@@ -21,7 +21,7 @@ import {
   WALLET_ADAPTERS,
   WalletServicesPluginError,
 } from "@web3auth/base";
-import WsEmbed, { AccountAbstractionConfig, CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
+import WsEmbed, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 
 type WsPluginEmbedParams = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
   /**
@@ -111,6 +111,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       const smartAccountType = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name;
       const paymasterConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.paymasterConfig;
       const bundlerConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config?.bundlerConfig;
+      const smartAccountConfig = (web3auth.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.options;
 
       // TODO: fix this type casting when we start using accountAbstractionController
       accountAbstractionConfig = {
@@ -118,6 +119,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
         smartAccountType: smartAccountType || undefined,
         paymasterConfig: paymasterConfig || undefined,
         bundlerConfig: bundlerConfig || undefined,
+        smartAccountConfig: smartAccountConfig || undefined,
       } as AccountAbstractionConfig;
     } else if (this.walletInitOptions?.accountAbstractionConfig && Object.keys(this.walletInitOptions.accountAbstractionConfig).length > 0) {
       // if wallet services plugin is initialized with accountAbstractionConfig we enable wallet service AA without AA provider
