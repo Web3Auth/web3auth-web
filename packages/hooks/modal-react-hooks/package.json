@@ -40,7 +40,7 @@
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "react": "^18.x"
+    "react": "^19.x"
   },
   "lint-staged": {
     "!(*d).ts": [
