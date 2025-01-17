@@ -704,48 +704,6 @@
         "sdks": ["auth_v1", "sign_v1", "sign_v2"]
       }
     },
-    "alpha": {
-      "app": {
-        "android": "io.stormbird.wallet",
-        "ios": "id1358230430"
-      },
-      "chains": [
-        "eip155:1",
-        "eip155:10",
-        "eip155:100",
-        "eip155:11297108099",
-        "eip155:11297108109",
-        "eip155:137",
-        "eip155:200",
-        "eip155:256",
-        "eip155:3",
-        "eip155:338",
-        "eip155:4",
-        "eip155:4002",
-        "eip155:42",
-        "eip155:42161",
-        "eip155:43113",
-        "eip155:43114",
-        "eip155:5",
-        "eip155:56",
-        "eip155:61",
-        "eip155:69",
-        "eip155:77",
-        "eip155:97",
-        "eip155:99"
-      ],
-      "imgExtension": "webp",
-      "injected": null,
-      "mobile": {
-        "native": "awallet://wc",
-        "universal": "https://aw.app/wc"
-      },
-      "name": "AlphaWallet",
-      "primaryColor": "#ffffff",
-      "walletConnect": {
-        "sdks": ["sign_v1", "sign_v2"]
-      }
-    },
     "alphawallet": {
       "app": {
         "android": "https://play.google.com/store/apps/details?id=io.stormbird.wallet",
@@ -784,8 +742,8 @@
       "imgExtension": "webp",
       "injected": null,
       "mobile": {
-        "native": "awallet://",
-        "universal": "https://aw.app"
+        "native": "awallet://wc",
+        "universal": "https://aw.app/wc"
       },
       "name": "AlphaWallet",
       "primaryColor": "#000000"
