@@ -33,26 +33,66 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@web3auth/auth-adapter": "^9.x",
-    "@web3auth/wallet-connect-v2-adapter": "^9.x"
+    "@coinbase/wallet-sdk": "^4.2.x"
   },
   "dependencies": {
+    "@ethereumjs/util": "^9.1.0",
+    "@solana/wallet-standard-features": "^1.2.0",
+    "@solana/web3.js": "^1.98.0",
+    "@toruslabs/base-controllers": "^7.0.1",
+    "@toruslabs/constants": "^14.2.0",
+    "@toruslabs/eccrypto": "^5.0.4",
+    "@toruslabs/http-helpers": "^7.0.0",
+    "@toruslabs/solana-embed": "^2.1.0",
+    "@toruslabs/torus-embed": "^5.0.0",
+    "@toruslabs/tweetnacl-js": "^1.0.4",
+    "@walletconnect/sign-client": "^2.17.3",
+    "@walletconnect/types": "^2.17.3",
+    "@walletconnect/utils": "^2.17.3",
+    "@wallet-standard/app": "^1.1.0",
+    "@wallet-standard/base": "^1.1.0",
+    "@wallet-standard/features": "^1.1.0",
     "@web3auth/auth": "^9.6.2",
-    "@web3auth/base": "^9.5.2",
-    "@web3auth/base-provider": "^9.5.2",
-    "deepmerge": "^4.3.1"
+    "@web3auth/ws-embed": "^3.4.4",
+    "assert": "^2.1.0",
+    "bignumber.js": "^9.1.2",
+    "bn.js": "^5.2.1",
+    "bs58": "^5.0.0",
+    "deepmerge": "^4.3.1",
+    "ethers": "^6.13.4",
+    "jsonschema": "^1.4.1",
+    "json-rpc-random-id": "^1.0.1",
+    "jwt-decode": "^4.0.0",
+    "loglevel": "^1.9.2",
+    "mipd": "^0.0.7",
+    "permissionless": "^0.2.23",
+    "ripple-keypairs": "^1.3.1",
+    "ts-custom-error": "^3.3.1",
+    "viem": "^2.22.5",
+    "xrpl": "^2.14.0"
   },
   "devDependencies": {
-    "@web3auth/account-abstraction-provider": "^9.5.2",
-    "@web3auth/auth-adapter": "^9.5.2",
-    "@web3auth/wallet-connect-v2-adapter": "^9.5.2"
+    "@toruslabs/ethereum-controllers": "^7.1.3",
+    "@types/json-rpc-random-id": "^1.0.3",
+    "@types/elliptic": "6.4.18",
+    "react": "^18.x",
+    "vue": "^3.x"
   },
-  "peerDependenciesMeta": {
-    "@web3auth/auth-adapter": {
-      "optional": true
+  "exports": {
+    ".": {
+      "import": "./dist/lib.esm/index.js",
+      "require": "./dist/lib.cjs/index.js",
+      "types": "./dist/types/index.d.ts"
     },
-    "@web3auth/wallet-connect-v2-adapter": {
-      "optional": true
+    "./base": {
+      "import": "./dist/lib.esm/base/index.js",
+      "require": "./dist/lib.cjs/base/index.js",
+      "types": "./dist/types/base/index.d.ts"
+    },
+    "./auth-adapter": {
+      "import": "./dist/lib.esm/adapters/auth-adapter/index.js",
+      "require": "./dist/lib.cjs/adapters/auth-adapter/index.js",
+      "types": "./dist/types/adapters/auth-adapter/index.d.ts"
     }
   },
   "lint-staged": {

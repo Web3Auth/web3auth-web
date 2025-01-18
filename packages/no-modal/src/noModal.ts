@@ -1,6 +1,8 @@
-import type { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
-import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@web3auth/auth-adapter";
+import deepmerge from "deepmerge";
+
+import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
+import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@/core/auth-adapter";
 import {
   ADAPTER_EVENTS,
   ADAPTER_NAMESPACES,
@@ -31,10 +33,10 @@ import {
   WalletLoginError,
   Web3AuthError,
   Web3AuthNoModalEvents,
-} from "@web3auth/base";
-import { CommonJRPCProvider } from "@web3auth/base-provider";
-import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import deepmerge from "deepmerge";
+} from "@/core/base";
+import { WalletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
+
+import { CommonJRPCProvider } from "./providers";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {

@@ -1,4 +1,5 @@
-import type { BaseAdapterConfig, ChainNamespaceType, IProvider, IWeb3Auth, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import type { BaseAdapterConfig, ChainNamespaceType, IProvider, IWeb3Auth, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/no-modal";
+
 export interface ModalConfig extends Omit<BaseAdapterConfig, "isInjected"> {
   loginMethods?: LoginMethodConfig;
 }

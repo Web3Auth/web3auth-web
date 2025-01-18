@@ -2,11 +2,12 @@
   "extends": "@toruslabs/config/tsconfig.default.json",
   "compilerOptions": {
     "paths": {
-      "@web3auth/*-adapter": ["./packages/adapters/*-adapter"],
-      "@web3auth/*-provider": ["./packages/providers/*-provider"],
-      "@web3auth/*": ["./packages/*"],
-      "@web3auth/*-plugin": ["./packages/plugins/*-plugin"],
-      "@web3auth/*-hooks": ["./packages/hooks/*-hooks"]
+      "@web3auth/modal": ["./packages/modal"],
+      "@web3auth/no-modal": ["./packages/no-modal"],
+      "@/core/base": ["./packages/no-modal/src/base"],
+      "@/core/*-adapter": ["./packages/no-modal/src/adapters/*-adapter"],
+      "@/core/*-plugin": ["./packages/no-modal/src/plugins/*-plugin"],
+      "@/core/*-provider": ["./packages/no-modal/src/providers/*-provider"],
     }
   }
 }

@@ -1,55 +1,83 @@
 {
+  "name": "@web3auth/modal",
+  "version": "9.5.2",
+  "description": "Multi chain wallet aggregator for web3Auth",
+  "keywords": [
+    "web3Auth/ui",
+    "web3Auth",
+    "multichainWallet",
+    "blockchain",
+    "ethereum",
+    "solana"
+  ],
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
+  "unpkg": "dist/modal.umd.min.js",
+  "jsdelivr": "dist/modal.umd.min.js",
+  "types": "dist/types/index.d.ts",
   "author": "Torus Labs",
-  "bugs": {
-    "url": "https://github.com/Web3Auth/Web3Auth/issues"
-  },
-  "dependencies": {
-    "@web3auth/auth-adapter": "^9.5.2",
-    "@web3auth/base": "^9.5.2",
-    "@web3auth/base-provider": "^9.5.2",
-    "@web3auth/no-modal": "^9.5.2",
-    "@web3auth/ui": "^9.5.2",
-    "deepmerge": "^4.3.1"
-  },
-  "devDependencies": {
-    "@svgr/webpack": "^8.1.0",
-    "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@web3auth/account-abstraction-provider": "^9.5.2",
-    "@web3auth/auth": "^9.6.2",
-    "@web3auth/wallet-connect-v2-adapter": "^9.5.2",
-    "css-loader": "^7.1.2",
-    "postcss-prefix-selector": "^2.1.0",
-    "style-loader": "^4.0.0",
-    "url-loader": "^4.1.1"
-  },
-  "engines": {
-    "node": ">=18.x",
-    "npm": ">=9.x"
+  "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/modal#readme",
+  "license": "ISC",
+  "scripts": {
+    "test": "mocha --config ../../.mocharc.json test/**.ts",
+    "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts",
+    "dev": "torus-scripts start",
+    "build": "torus-scripts build",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "prepack": "npm run build",
+    "pre-commit": "lint-staged --cwd .",
+    "serve:ui": "live-server public/"
   },
   "files": [
     "dist"
   ],
-  "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
-  "jsdelivr": "dist/modal.umd.min.js",
-  "keywords": [],
-  "license": "ISC",
+  "peerDependencies": {
+    "@babel/runtime": "^7.x",
+    "react": "^18.x",
+    "react-dom": "^18.x"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.26.3",
+    "@mertasan/tailwindcss-variables": "^2.7.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-url": "^8.0.2",
+    "@svgr/rollup": "^8.1.0",
+    "@svgr/webpack": "^8.1.0",
+    "@toruslabs/eslint-config-react": "^3.4.4",
+    "@toruslabs/isomorphic-style-loader": "^5.3.3",
+    "@toruslabs/vue-components": "^7.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "css-loader": "^7.1.2",
+    "live-server": "^1.2.2",
+    "postcss": "^8.4.49",
+    "postcss-loader": "^8.1.1",
+    "postcss-prefix-selector": "^2.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.17",
+    "url-loader": "^4.1.1"
+  },
+  "dependencies": {
+    "@toruslabs/http-helpers": "^7.0.0",
+    "@web3auth/auth": "^9.6.2",
+    "@web3auth/no-modal": "^9.5.2",
+    "bowser": "^2.11.0",
+    "classnames": "^2.5.1",
+    "copy-to-clipboard": "^3.3.3",
+    "deepmerge": "^4.3.1",
+    "i18next": "^23.16.8",
+    "react-i18next": "^15.2.0",
+    "react-qrcode-logo": "^3.0.0"
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",
       "prettier --write"
     ]
-  },
-  "main": "dist/lib.cjs/index.js",
-  "module": "dist/lib.esm/index.js",
-  "name": "@web3auth/modal",
-  "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@web3auth/wallet-connect-v2-adapter": "^9.x"
-  },
-  "peerDependenciesMeta": {
-    "@web3auth/wallet-connect-v2-adapter": {
-      "optional": true
-    }
   },
   "publishConfig": {
     "access": "public"
@@ -58,17 +86,12 @@
     "type": "git",
     "url": "git+https://github.com/Web3Auth/Web3Auth.git"
   },
-  "scripts": {
-    "build": "torus-scripts build",
-    "dev": "torus-scripts start",
-    "lint": "eslint --fix 'src/**/*.ts'",
-    "pre-commit": "lint-staged --cwd .",
-    "prepack": "npm run build",
-    "test": "mocha --config ../../.mocharc.json test/**.ts",
-    "test-debugger": "mocha --config ../../.mocharc.json --inspect-brk test/**.ts"
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
-  "types": "dist/types/index.d.ts",
-  "unpkg": "dist/modal.umd.min.js",
-  "version": "9.5.2",
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
+  },
   "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }

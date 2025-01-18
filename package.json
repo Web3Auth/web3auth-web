@@ -6,6 +6,9 @@
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
     "@babel/register": "^7.25.9",
+    "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@toruslabs/config": "^2.2.0",
     "@toruslabs/eslint-config-typescript": "^3.3.4",
     "@toruslabs/torus-scripts": "^6.1.6",
@@ -16,12 +19,14 @@
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "eslint": "^8.57.0",
+    "eslint-import-resolver-typescript": "^3.7.0",
     "husky": "^9.1.7",
     "lerna": "^8.1.9",
     "lint-staged": "^15.2.11",
     "mocha": "^10.8.2",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
+    "rollup-plugin-tsconfig-paths": "^1.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
@@ -73,15 +78,7 @@
     "test-debugger": "cross-env FORCE_COLOR=1 lerna run test-debugger --parallel"
   },
   "workspaces": [
-    "packages/adapter-factory",
-    "packages/adapters/*",
-    "packages/base",
-    "packages/composables/*",
-    "packages/hooks/*",
     "packages/modal",
-    "packages/no-modal",
-    "packages/plugins/*",
-    "packages/providers/*",
-    "packages/ui"
+    "packages/no-modal"
   ]
 }

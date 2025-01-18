@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src", "test"],
+  "include": ["src", "test", "css", "assets"],
   "compilerOptions": {
-    "strict": true,
-    "module": "esnext",
+    "resolveJsonModule": true,
     "jsx": "react-jsx"
   }
 }
