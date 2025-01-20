@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/default-solana-adapter",
-  "version": "9.5.2",
+  "version": "9.5.3",
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "license": "ISC",
   "sideEffects": false,
@@ -26,10 +26,10 @@
     "@wallet-standard/base": "^1.1.0",
     "@wallet-standard/features": "^1.1.0",
     "@web3auth/auth": "^9.6.4",
-    "@web3auth/base": "^9.5.2",
-    "@web3auth/base-solana-adapter": "^9.5.2",
-    "@web3auth/solana-provider": "^9.5.2",
-    "@web3auth/wallet-connect-v2-adapter": "^9.5.2",
+    "@web3auth/base": "^9.5.3",
+    "@web3auth/base-solana-adapter": "^9.5.3",
+    "@web3auth/solana-provider": "^9.5.3",
+    "@web3auth/wallet-connect-v2-adapter": "^9.5.3",
     "bn.js": "^5.2.1"
   },
   "files": [
