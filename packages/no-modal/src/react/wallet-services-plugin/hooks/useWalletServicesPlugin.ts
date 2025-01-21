@@ -3,8 +3,8 @@ import { useContext } from "react";
 
 import { WalletInitializationError } from "@/core/base";
 
-import { IWalletServicesContext } from "./interfaces";
-import { WalletServicesContext } from "./WalletServicesContext";
+import { IWalletServicesContext } from "../interfaces";
+import { WalletServicesContext } from "../WalletServicesContext";
 
 export const useWalletServicesPlugin = (): IWalletServicesContext => {
   const context = useContext(WalletServicesContext);

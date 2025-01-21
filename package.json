@@ -6,9 +6,7 @@
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
     "@babel/register": "^7.25.9",
-    "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-node-resolve": "^16.0.0",
-    "@rollup/plugin-typescript": "^12.1.2",
     "@toruslabs/config": "^2.2.0",
     "@toruslabs/eslint-config-typescript": "^3.3.4",
     "@toruslabs/torus-scripts": "^6.1.7",

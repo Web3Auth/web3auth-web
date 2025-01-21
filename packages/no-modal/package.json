@@ -76,7 +76,6 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "react": "^18.x",
-    "ttypescript": "^1.5.15",
     "vue": "^3.x"
   },
   "exports": {
@@ -85,15 +84,25 @@
       "require": "./dist/lib.cjs/index.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./base": {
-      "import": "./dist/lib.esm/base/index.js",
-      "require": "./dist/lib.cjs/base/index.js",
-      "types": "./dist/types/base/index.d.ts"
+    "./react": {
+      "import": "./dist/lib.esm/react/index.js",
+      "require": "./dist/lib.cjs/react/index.js",
+      "types": "./dist/types/react/index.d.ts"
     },
-    "./auth-adapter": {
-      "import": "./dist/lib.esm/adapters/auth-adapter/index.js",
-      "require": "./dist/lib.cjs/adapters/auth-adapter/index.js",
-      "types": "./dist/types/adapters/auth-adapter/index.d.ts"
+    "./vue": {
+      "import": "./dist/lib.esm/vue/index.js",
+      "require": "./dist/lib.cjs/vue/index.js",
+      "types": "./dist/types/vue/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*" : {
+      "react": [
+        "./dist/types/react/index.d.ts"
+      ],
+      "vue": [
+        "./dist/types/vue/index.d.ts"
+      ]
     }
   },
   "lint-staged": {

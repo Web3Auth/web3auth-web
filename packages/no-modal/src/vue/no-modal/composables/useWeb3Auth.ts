@@ -1,8 +1,9 @@
-import { WalletInitializationError, Web3AuthContextKey } from "@web3auth/no-modal";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { inject } from "vue";
 
-import { IWeb3AuthContext } from "./interfaces";
+import { WalletInitializationError, Web3AuthContextKey } from "@/core/base";
+
+import { IWeb3AuthContext } from "../interfaces";
 
 export const useWeb3Auth = () => {
   const context = inject<IWeb3AuthContext>(Web3AuthContextKey);

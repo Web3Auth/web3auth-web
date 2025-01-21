@@ -3,8 +3,8 @@ import { inject } from "vue";
 
 import { WalletServicesPluginError } from "@/core/base";
 
-import { WalletServicesContextKey } from "./context";
-import { IWalletServicesContext } from "./interfaces";
+import { WalletServicesContextKey } from "../context";
+import { IWalletServicesContext } from "../interfaces";
 
 export const useWalletServicesPlugin = (): IWalletServicesContext => {
   const context = inject<IWalletServicesContext>(WalletServicesContextKey);

@@ -73,6 +73,33 @@
     "react-i18next": "^15.2.0",
     "react-qrcode-logo": "^3.0.0"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/lib.esm/index.js",
+      "require": "./dist/lib.cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/lib.esm/react/index.js",
+      "require": "./dist/lib.cjs/react/index.js",
+      "types": "./dist/types/react/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/lib.esm/vue/index.js",
+      "require": "./dist/lib.cjs/vue/index.js",
+      "types": "./dist/types/vue/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*" : {
+      "react": [
+        "./dist/types/react/index.d.ts"
+      ],
+      "vue": [
+        "./dist/types/vue/index.d.ts"
+      ]
+    }
+  },
   "lint-staged": {
     "!(*d).ts": [
       "eslint --cache --fix",

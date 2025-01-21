@@ -3,8 +3,8 @@ import { useContext } from "react";
 
 import { WalletInitializationError } from "@/core/base";
 
-import { IWeb3AuthInnerContext } from "./interfaces";
-import { Web3AuthInnerContext } from "./Web3AuthInnerContext";
+import { IWeb3AuthInnerContext } from "../interfaces";
+import { Web3AuthInnerContext } from "../Web3AuthInnerContext";
 
 export const useWeb3Auth = (): IWeb3AuthInnerContext => {
   const context = useContext(Web3AuthInnerContext);

@@ -1,31 +1,9 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import json from "@rollup/plugin-json";
-import url from "@rollup/plugin-url";
-import svgr from "@svgr/rollup";
-import path from "path";
-import postcss from "rollup-plugin-postcss";
 import resolve from "@rollup/plugin-node-resolve";
 import tsconfigPaths from "rollup-plugin-tsconfig-paths";
 
 const appModuleFileExtensions = ["js", "ts", "json", "mjs", "jsx", "tsx"];
 
-export const externalDeps = ["vue"]
-
-export const baseConfig = {
-  output: [{ dir: path.resolve("./dist/"), format: "es", sourcemap: true }],
-  plugins: [
-    postcss({
-      config: {
-        path: path.resolve("./postcss.config.js"),
-      },
-      extensions: [".css"],
-      minimize: true,
-    }),
-    url(),
-    svgr(),
-    json(),
-  ],
-};
+export const externalDeps = ["react", "vue"]
 
 export const reactConfigOriginalEsm = {
   taskName: 'react.esm',
