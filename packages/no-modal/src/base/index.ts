@@ -5,6 +5,7 @@ export * from "./composables";
 export * from "./core/IWeb3Auth";
 export * from "./errors";
 export * from "./hooks";
+export * from "./interfaces";
 export * from "./loglevel";
 export * from "./plugin";
 export * from "./provider/IProvider";

@@ -10,7 +10,7 @@ import {
   UserAuthInfo,
   UserInfo,
   WEB3AUTH_NETWORK_TYPE,
-} from "../adapter/IAdapter";
+} from "../adapter";
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";

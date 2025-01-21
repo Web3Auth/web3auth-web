@@ -1,7 +1,7 @@
-import ArrowDark from "../../../assets/arrow-left-dark.svg";
-import ArrowLight from "../../../assets/arrow-left-light.svg";
-import XDark from "../../../assets/x-dark.svg";
-import XLight from "../../../assets/x-light.svg";
+import ArrowDark from "../assets/arrow-left-dark.svg";
+import ArrowLight from "../assets/arrow-left-light.svg";
+import XDark from "../assets/x-dark.svg";
+import XLight from "../assets/x-light.svg";
 
 interface IconProps {
   iconName: string;

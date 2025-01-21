@@ -1,85 +1,9 @@
 import { cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
-import type { WEB3AUTH_NETWORK_TYPE, WhiteLabelData } from "@web3auth/auth";
 
-import { WEB3AUTH_NETWORK } from "./adapter/IAdapter";
-import { ChainNamespaceType } from "./chain/IChainInterface";
-
-export interface WhitelistResponse {
-  urls: string[];
-  signed_urls: Record<string, string>;
-}
-
-export interface PROJECT_CONFIG_RESPONSE {
-  whitelabel?: WhiteLabelData;
-  sms_otp_enabled: boolean;
-  wallet_connect_enabled: boolean;
-  wallet_connect_project_id?: string;
-  whitelist?: WhitelistResponse;
-  key_export_enabled?: boolean;
-}
-
-export interface WalletRegistryItem {
-  name: string;
-  chains: string[];
-  walletConnect?: {
-    sdks: string[];
-  };
-  app?: {
-    browser?: string;
-    android?: string;
-    ios?: string;
-    chrome?: string;
-    firefox?: string;
-    edge?: string;
-  };
-  mobile?: {
-    native?: string;
-    universal?: string;
-    inAppBrowser?: string;
-  };
-  primaryColor?: string;
-  injected?: {
-    namespace: ChainNamespaceType;
-    injected_id: string;
-  }[];
-  imgExtension?: string;
-}
-
-export type WalletRegistry = { others: Record<string, WalletRegistryItem>; default: Record<string, WalletRegistryItem> };
-
-export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
-  let storageExists = false;
-  let storageLength = 0;
-  let storage: Storage;
-  try {
-    storage = window[type];
-    storageExists = true;
-    storageLength = storage.length;
-    const x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (err: unknown) {
-    const error = err as DOMException;
-    return !!(
-      error &&
-      // everything except Firefox
-      (error.code === 22 ||
-        // Firefox
-        error.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        error.name === "QuotaExceededError" ||
-        // Firefox
-        error.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      storageExists &&
-      storageLength !== 0
-    );
-  }
-}
+import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./adapter";
+import type { PROJECT_CONFIG_RESPONSE, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {
   return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
