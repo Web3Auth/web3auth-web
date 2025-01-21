@@ -11,7 +11,7 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@toruslabs/config": "^2.2.0",
     "@toruslabs/eslint-config-typescript": "^3.3.4",
-    "@toruslabs/torus-scripts": "^6.1.6",
+    "@toruslabs/torus-scripts": "^6.1.7",
     "@types/chai": "^5.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22",
@@ -26,12 +26,13 @@
     "mocha": "^10.8.2",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
-    "rollup-plugin-tsconfig-paths": "^1.5.2",
     "ts-node": "^10.9.2",
+    "ts-patch": "^3.3.0",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tslib": "^2.8.1",
-    "typescript": "~5.6.3"
+    "typescript": "~5.6.3",
+    "typescript-transform-paths": "^3.5.3"
   },
   "engines": {
     "node": ">=18.x",
@@ -78,7 +79,7 @@
     "test-debugger": "cross-env FORCE_COLOR=1 lerna run test-debugger --parallel"
   },
   "workspaces": [
-    "packages/modal",
-    "packages/no-modal"
+    "packages/no-modal",
+    "packages/modal"
   ]
 }

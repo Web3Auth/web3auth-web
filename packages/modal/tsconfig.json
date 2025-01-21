@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src", "test", "css", "assets"],
+  "include": ["src", "css", "assets"],
   "compilerOptions": {
-    "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    // "resolveJsonModule": true,
+    "jsx": "react-jsx",
   }
 }

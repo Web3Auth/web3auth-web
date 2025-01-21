@@ -1,4 +1,4 @@
-import "./css/web3auth.css";
+import "../../css/web3auth.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {

@@ -3,11 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@web3auth/modal": ["./packages/modal"],
-      "@web3auth/no-modal": ["./packages/no-modal"],
-      "@/core/base": ["./packages/no-modal/src/base"],
-      "@/core/*-adapter": ["./packages/no-modal/src/adapters/*-adapter"],
-      "@/core/*-plugin": ["./packages/no-modal/src/plugins/*-plugin"],
-      "@/core/*-provider": ["./packages/no-modal/src/providers/*-provider"],
+      "@web3auth/no-modal": ["./packages/no-modal"]
     }
   }
 }

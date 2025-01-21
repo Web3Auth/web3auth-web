@@ -1,5 +1,6 @@
 const path = require('path');
 const generateWebpackConfig = require("../../webpack.config");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 const config = generateWebpackConfig({
   alias: {
@@ -29,6 +30,16 @@ const config = generateWebpackConfig({
     '@/core/ethereum-mpc-provider': path.resolve(__dirname, 'src/providers/ethereum-mpc-provider'),
     '@/core/xrpl-provider': path.resolve(__dirname, 'src/providers/xrpl-provider')
   },
+  plugins: [
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        mode: "write-dts",
+        context: path.resolve(__dirname, '.'),
+        configFile: path.resolve(__dirname, 'tsconfig.build.json'),
+        typescriptPath: require.resolve("ts-patch/compiler"),
+      },
+    }),
+  ]
 });
 
 
