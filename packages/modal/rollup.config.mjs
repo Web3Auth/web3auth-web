@@ -3,13 +3,17 @@ import json from "@rollup/plugin-json";
 import url from "@rollup/plugin-url";
 import svgr from "@svgr/rollup";
 import path from "path";
+import fs from "fs";
 import postcss from "rollup-plugin-postcss";
-// import resolve from "@rollup/plugin-node-resolve";
-// import tsconfigPaths from "rollup-plugin-tsconfig-paths";
 
-// const appModuleFileExtensions = ["js", "ts", "json", "mjs", "jsx", "tsx"];
+export const readJSONFile = (fullPathUrl) => {
+  if (!fs.existsSync(fullPathUrl)) return {};
+  return JSON.parse(fs.readFileSync(fullPathUrl instanceof URL ? fullPathUrl.pathname : new URL(fullPathUrl, import.meta.url).pathname));
+};
 
-export const externalDeps = ["vue"]
+const pkg = readJSONFile(path.resolve("./package.json"));
+
+const allDeps = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {}), "vue"];
 
 export const baseConfig = {
   input: [
@@ -17,6 +21,7 @@ export const baseConfig = {
     "./src/react/index.ts",
     "./src/vue/index.ts",
   ],
+  external: [...allDeps, ...allDeps.map((x) => new RegExp(`^${x}/`)), /@babel\/runtime/],
   plugins: [
     postcss({
       config: {
@@ -30,72 +35,3 @@ export const baseConfig = {
     json(),
   ],
 };
-
-// export const reactConfigOriginalEsm = {
-//   taskName: 'react.esm',
-//   input: "./src/react/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.esm", format: "es", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
-
-// export const reactConfigOriginalCjs = {
-//   taskName: 'react.cjs',
-//   input: "./src/react/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.cjs", format: "cjs", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
-
-
-// export const vueOriginalEsm = {
-//   taskName: 'vue.esm',
-//   input: "./src/vue/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.esm", format: "es", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
-
-// export const vueOriginalCjs = {
-//   taskName: 'vue.cjs',
-//   input: "./src/vue/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.cjs", format: "cjs", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };

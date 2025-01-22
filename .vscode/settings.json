@@ -5,7 +5,11 @@
   },
   "eslint.workingDirectories": [
     {
-      "directory": "packages/*",
+      "directory": "packages/no-modal",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/modal",
       "changeProcessCWD": true
     },
     {
@@ -13,5 +17,5 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": ["JRPC","Solana"]
+  "cSpell.words": ["JRPC","Solana"],
 }

@@ -1,82 +1,20 @@
-// import resolve from "@rollup/plugin-node-resolve";
-// import tsconfigPaths from "rollup-plugin-tsconfig-paths";
+import fs from "fs";
+import path from "path";
 
-// const appModuleFileExtensions = ["js", "ts", "json", "mjs", "jsx", "tsx"];
+export const readJSONFile = (fullPathUrl) => {
+  if (!fs.existsSync(fullPathUrl)) return {};
+  return JSON.parse(fs.readFileSync(fullPathUrl instanceof URL ? fullPathUrl.pathname : new URL(fullPathUrl, import.meta.url).pathname));
+};
 
-export const externalDeps = ["react", "vue"]
+const pkg = readJSONFile(path.resolve("./package.json"));
 
-// export const reactConfigOriginalEsm = {
-//   taskName: 'react.esm',
-//   input: "./src/react/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.esm", format: "es", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
+const allDeps = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {}), "react", "vue"];
 
-// export const reactConfigOriginalCjs = {
-//   taskName: 'react.cjs',
-//   input: "./src/react/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.cjs", format: "cjs", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
-
-
-// export const vueOriginalEsm = {
-//   taskName: 'vue.esm',
-//   input: "./src/vue/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.esm", format: "es", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
-
-// export const vueOriginalCjs = {
-//   taskName: 'vue.cjs',
-//   input: "./src/vue/index.ts",
-//   output: {
-//     preserveModules: true, dir: "./dist/lib.cjs", format: "cjs", sourcemap: process.env.NODE_ENV === "development"
-//   },
-//   plugins: [
-//     tsconfigPaths(),
-//     // Allows node_modules resolution
-//     resolve({
-//       extensions: appModuleFileExtensions.map((x) => `.${x}`),
-//       modulesOnly: true,
-//       preferBuiltins: false,
-//     }),
-//   ]
-// };
 export const baseConfig = {
   input: [
     "./src/index.ts",
     "./src/react/index.ts",
     "./src/vue/index.ts",
   ],
+  external: [...allDeps, ...allDeps.map((x) => new RegExp(`^${x}/`)), /@babel\/runtime/],
 }

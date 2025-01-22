@@ -8,5 +8,6 @@ module.exports = {
     "import/resolver": {
       typescript: {},
     },
-  }
+  },
 };
+

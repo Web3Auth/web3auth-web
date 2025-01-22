@@ -10,8 +10,8 @@
     "ethereum",
     "solana"
   ],
-  "main": "dist/lib.cjs/index.js",
-  "module": "dist/lib.esm/index.js",
+  "main": "dist/lib.cjs/packages/modal/src/index.js",
+  "module": "dist/lib.esm/packages/modal/src/index.js",
   "unpkg": "dist/modal.umd.min.js",
   "jsdelivr": "dist/modal.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -75,18 +75,18 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/lib.esm/index.js",
-      "require": "./dist/lib.cjs/index.js",
+      "import": "./dist/lib.esm/packages/modal/src/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./react": {
-      "import": "./dist/lib.esm/react/index.js",
-      "require": "./dist/lib.cjs/react/index.js",
+      "import": "./dist/lib.esm/packages/modal/src/react/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/react/index.js",
       "types": "./dist/types/react/index.d.ts"
     },
     "./vue": {
-      "import": "./dist/lib.esm/vue/index.js",
-      "require": "./dist/lib.cjs/vue/index.js",
+      "import": "./dist/lib.esm/packages/modal/src/vue/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/vue/index.js",
       "types": "./dist/types/vue/index.d.ts"
     }
   },

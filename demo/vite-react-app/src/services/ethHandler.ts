@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IProvider, log } from "@web3auth/base";
-import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
+import { IProvider, log } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { BrowserProvider, parseEther } from "ethers";
 import { getV4TypedData } from "../config/config";
