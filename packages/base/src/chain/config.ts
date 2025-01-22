@@ -150,7 +150,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorerUrl: "https://explorer-testnet.soneium.org",
       ticker: "ETH",
       tickerName: "ETH",
-      logo: "https://cryptologos.cc/logos/soneium-logo.png",
+      logo: "https://iili.io/2i5xce2.png",
     };
   }
 
