@@ -1,3 +1,4 @@
+import "./global";
 import "./style.css";
 
 import { createApp } from "vue";
