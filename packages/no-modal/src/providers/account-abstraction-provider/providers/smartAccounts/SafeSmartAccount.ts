@@ -5,19 +5,12 @@ import { entryPoint07Address, SmartAccount } from "viem/account-abstraction";
 import { IProvider } from "@/core/base";
 
 import { SMART_ACCOUNT } from "./constants";
-import { ISmartAccount } from "./types";
-
-type SafeSmartAccountParameters = Parameters<typeof toSafeSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
-
-type SafeSmartAccountConfig = Omit<
-  SafeSmartAccountParameters,
-  "owners" | "client" | "address" | "nonceKey" | "saltNonce" | "validUntil" | "validAfter"
->;
+import { ISmartAccount, SafeSmartAccountConfig, SafeSmartAccountParameters } from "./types";
 
 export class SafeSmartAccount implements ISmartAccount {
   readonly name: string = SMART_ACCOUNT.SAFE;
 
-  private options: SafeSmartAccountConfig;
+  public options: SafeSmartAccountConfig;
 
   constructor(options?: SafeSmartAccountConfig) {
     this.options = options;

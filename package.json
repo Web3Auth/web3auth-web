@@ -20,15 +20,15 @@
     "eslint-import-resolver-typescript": "^3.7.0",
     "husky": "^9.1.7",
     "lerna": "^8.1.9",
-    "lint-staged": "^15.2.11",
-    "mocha": "^10.8.2",
+    "lint-staged": "^15.4.3",
+    "mocha": "^11.1.0",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
-    "typescript": "~5.6.3",
+    "typescript": "~5.7.3",
     "typescript-transform-paths": "^3.5.3"
   },
   "engines": {
@@ -53,8 +53,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^20.2.2",
-    "@rollup/rollup-linux-x64-gnu": "^4.28.1"
+    "@nx/nx-linux-x64-gnu": "^20.4.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.34.1"
   },
   "private": true,
   "repository": {

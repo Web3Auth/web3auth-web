@@ -4,7 +4,7 @@ import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } fro
 import { useWeb3Auth } from "@web3auth/modal-vue-composables";
 import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { useI18n } from "vue-i18n";
+import { useI18n } from "petite-vue-i18n";
 
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {

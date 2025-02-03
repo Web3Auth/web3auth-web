@@ -153,7 +153,19 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       blockExplorerUrl: "https://explorer-testnet.soneium.org",
       ticker: "ETH",
       tickerName: "ETH",
-      logo: "https://cryptologos.cc/logos/soneium-logo.png",
+      logo: "https://iili.io/2i5xce2.png",
+    };
+  }
+  if (chainId === 1868) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      chainId: "0x74c",
+      rpcTarget: "https://rpc.soneium.org",
+      displayName: "Soneium Mainnet",
+      blockExplorerUrl: "https://soneium.blockscout.com",
+      ticker: "ETH",
+      tickerName: "ETH",
+      logo: "https://iili.io/2i5xce2.png",
     };
   }
 
