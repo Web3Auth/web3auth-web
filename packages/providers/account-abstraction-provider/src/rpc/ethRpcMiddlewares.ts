@@ -59,7 +59,7 @@ export async function createAaMiddleware({
     if (!handlers.getPrivateKey) {
       throw rpcErrors.methodNotSupported();
     }
-    res.result = handlers.getPrivateKey(req);
+    res.result = await handlers.getPrivateKey(req);
   }
 
   async function sendTransaction(req: JRPCRequest<TransactionParams>, res: JRPCResponse<unknown>): Promise<void> {
@@ -161,12 +161,21 @@ export async function createAaMiddleware({
     res.result = await handlers.processPersonalMessage(msgParams, req);
   }
 
+  async function fetchPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!handlers.getPublicKey) {
+      throw rpcErrors.methodNotSupported();
+    }
+    res.result = await handlers.getPublicKey(req);
+  }
+
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
     eth_requestAccounts: createAsyncMiddleware(lookupAccounts),
     eth_private_key: createAsyncMiddleware(fetchPrivateKey),
     private_key: createAsyncMiddleware(fetchPrivateKey),
+    eth_public_key: createAsyncMiddleware(fetchPublicKey),
+    public_key: createAsyncMiddleware(fetchPublicKey),
     // tx signatures
     eth_sendTransaction: createAsyncMiddleware(sendTransaction),
     eth_signTransaction: createAsyncMiddleware(signTransaction),

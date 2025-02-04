@@ -170,14 +170,14 @@ export function createWalletMiddleware({
     if (!getPrivateKey) {
       throw rpcErrors.methodNotSupported();
     }
-    res.result = getPrivateKey(req);
+    res.result = await getPrivateKey(req);
   }
 
   async function fetchPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
     if (!getPublicKey) {
       throw rpcErrors.methodNotSupported();
     }
-    res.result = getPublicKey(req);
+    res.result = await getPublicKey(req);
   }
 
   return createScaffoldMiddleware({
