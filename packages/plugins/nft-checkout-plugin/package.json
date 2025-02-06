@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/nft-checkout-plugin",
-  "version": "9.5.3",
+  "version": "9.5.4",
   "description": "An NFT checkout service plugin that enables NFT purchases and transactions. Can be integrated with Web3Auth SDK for authentication or used as a standalone service for NFT payment processing.",
   "keywords": [
     "web3Auth/nft-checkout-plugin",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@toruslabs/base-controllers": "^7.1.1",
     "@web3auth/auth": "^9.6.4",
-    "@web3auth/base": "^9.5.3",
+    "@web3auth/base": "^9.5.4",
     "loglevel": "^1.9.2"
   },
   "peerDependencies": {
