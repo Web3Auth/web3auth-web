@@ -14,6 +14,27 @@
     font-family: "Inter";
     position: relative;
   }
+
+  .w3a-box-shadow:hover {
+    box-shadow: 0px 2px 8px 2px #E5E7EB;
+  }
+
+  .w3a-external-wallet-btn #external-wallet-count {
+    display: block;
+  }
+
+  .w3a-external-wallet-btn #external-wallet-arrow {
+    display: none;
+  }
+
+  .w3a-external-wallet-btn:hover > #external-wallet-count {
+    display: none;
+  }
+
+  .w3a-external-wallet-btn:hover > #external-wallet-arrow {
+    display: block;
+  }
+  
 }
 
 @layer utilities {
@@ -52,7 +73,17 @@
     @apply w3a--w-16 w3a--h-16 w3a--text-app-red-500 dark:w3a--text-app-red-400;
   }
 
-  .w3a--t-btn {
-    @apply w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white hover:w3a--bg-app-gray-300 dark:hover:w3a--bg-app-gray-400 disabled:w3a--bg-app-gray-300 disabled:w3a--text-app-gray-400 dark:disabled:w3a--bg-app-gray-700 dark:disabled:w3a--text-app-gray-600;
+  .w3a--btn {
+    @apply w3a--appearance-none w3a--text-app-gray-700 w3a--text-base w3a--font-normal w3a--w-full w3a--border w3a--border-app-gray-200 w3a--rounded-full w3a--px-5 w3a--py-3 w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2 hover:w3a--bg-app-gray-50 w3a-box-shadow hover:w3a--translate-y-[0.5px];
   }
+}
+
+.w3a--icon-animation {
+  animation: w3a--icon-move 1s ease-in-out infinite;
+}
+
+@keyframes w3a--icon-move {
+  0% { transform: translateX(0px); }
+  50% { transform: translateX(10px); }
+  100% { transform: translateX(0px); }
 }
