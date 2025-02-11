@@ -1,5 +1,5 @@
 import { WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
+import { CHAIN_NAMESPACES } from "@web3auth/modal";
 import { reactive } from "vue";
 
 import { defaultLoginMethod, FormData, initWhiteLabel } from "../config";
