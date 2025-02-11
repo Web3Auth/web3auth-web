@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 import {

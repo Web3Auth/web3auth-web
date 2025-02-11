@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createElement, type PropsWithChildren } from "react";
 
 import { Web3AuthProviderProps } from "./interfaces";

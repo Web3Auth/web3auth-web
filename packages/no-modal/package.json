@@ -33,7 +33,20 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@coinbase/wallet-sdk": "^4.2.x"
+    "@coinbase/wallet-sdk": "^4.2.x",
+    "react": "^18.x",
+    "vue": "^3.x"
+  },
+  "peerDependenciesMeta": {
+    "@coinbase/wallet-sdk": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
@@ -96,7 +109,7 @@
     }
   },
   "typesVersions": {
-    "*" : {
+    "*": {
       "react": [
         "./dist/types/react/index.d.ts"
       ],

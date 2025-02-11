@@ -1,5 +1,4 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";

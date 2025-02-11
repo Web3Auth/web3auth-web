@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { type Context, createElement, type PropsWithChildren } from "react";
 
 import { type IBaseWeb3AuthHookContext } from "@/core/base";

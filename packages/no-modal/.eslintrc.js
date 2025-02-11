@@ -6,8 +6,9 @@ module.exports = {
   extends: ["../../.eslintrc.js"],
   settings: {
     "import/resolver": {
-      typescript: {},
+      typescript: {
+        project: "./tsconfig.json",
+      },
     },
   },
 };
-

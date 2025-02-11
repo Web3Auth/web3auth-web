@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { inject } from "vue";
 
 import { WalletServicesPluginError } from "@/core/base";

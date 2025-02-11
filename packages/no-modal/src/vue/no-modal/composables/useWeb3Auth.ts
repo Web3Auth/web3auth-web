@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { inject } from "vue";
 
 import { WalletInitializationError, Web3AuthContextKey } from "@/core/base";

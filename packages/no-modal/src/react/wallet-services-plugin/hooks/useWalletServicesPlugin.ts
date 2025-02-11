@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { useContext } from "react";
 
 import { WalletInitializationError } from "@/core/base";

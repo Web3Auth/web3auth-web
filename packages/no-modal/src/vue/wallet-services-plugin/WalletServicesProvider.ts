@@ -1,5 +1,4 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineComponent, h, inject, provide, Ref, ref, watch } from "vue";
 
 import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError, Web3AuthContextKey } from "@/core/base";
