@@ -1,6 +1,5 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@web3auth/no-modal";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Ref, ShallowRef } from "vue";
 
 import type { ModalConfig } from "../interface";

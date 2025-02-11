@@ -10,7 +10,6 @@ import {
   WalletLoginError,
   Web3AuthContextKey,
 } from "@web3auth/no-modal";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 import { Web3Auth } from "../modalManager";

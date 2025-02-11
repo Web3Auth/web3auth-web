@@ -1,5 +1,4 @@
 import { WalletInitializationError, Web3AuthContextKey } from "@web3auth/no-modal";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { inject } from "vue";
 
 import { IWeb3AuthContext } from "../interfaces";
