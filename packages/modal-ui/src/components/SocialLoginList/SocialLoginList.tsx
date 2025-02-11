@@ -1,11 +1,12 @@
+import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { For, Show } from "solid-js";
 
 import ArrowLeft from "../../assets/arrow-left-light.svg";
+import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import DotLight from "../../assets/dots-light-horizontal.svg";
 import { SocialLoginsConfig } from "../../interfaces";
 import { rowType } from "../Body/Login";
 import { SocialLoginButton } from "../SocialLoginButton";
-
 export interface SocialLoginListProps {
   isDark: boolean;
   visibleRow: rowType[];
@@ -14,6 +15,24 @@ export interface SocialLoginListProps {
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
   handleExpandSocialLogins: () => void;
   otherRow?: rowType[];
+}
+
+function getProviderIcon(method: string, isDark: boolean, extension: string) {
+  const imageId =
+    method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+  const hoverId =
+    method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
+  return (
+    <>
+      <img
+        id="active-login-img"
+        src={`https://images.web3auth.io/${hoverId}${extension}`}
+        alt="active-login-img"
+        class="w3a--object-contain w3a--w-5 w3a--h-5"
+      />
+      <img id="login-img" src={`https://images.web3auth.io/${imageId}${extension}`} alt="login-img" class="w3a--object-contain w3a--w-5 w3a--h-5" />
+    </>
+  );
 }
 
 const SocialLoginList = (props: SocialLoginListProps) => {
@@ -65,11 +84,13 @@ const SocialLoginList = (props: SocialLoginListProps) => {
                       loginParams: row.loginParams,
                     })
                   }
-                  showIcon={true}
-                  showText={true}
-                  text={row.name}
-                  btnStyle="!w3a--items-start !w3a--justify-start"
-                />
+                >
+                  <div class="w3a--flex w3a--items-center w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group">
+                    {getProviderIcon(row.method, props.isDark, ".svg")}
+                    <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white w3a--ml-2">{row.name}</p>
+                    <img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
+                  </div>
+                </SocialLoginButton>
               )}
             </For>
           </div>

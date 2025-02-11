@@ -76,7 +76,7 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               onClick={onCloseHandler}
-              class="w3a--text-app-gray-200 dark:w3a--text-app-white"
+              class="w3a--text-app-gray-900 dark:w3a--text-app-white"
             >
               <path
                 fill-rule="evenodd"

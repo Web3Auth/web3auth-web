@@ -41,8 +41,8 @@ const WalletButton = (props: WalletButtonProps) => {
 
   return (
     <button
-      class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-4 w3a--rounded-xl w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white hover:w3a--border-app-gray-300 hover:w3a--shadow-md hover:w3a--translate-y-[0.5px]"
+      class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 
+      dark:w3a--bg-app-gray-700 hover:w3a--bg-app-gray-200 hover:text-app-gray-900 dark:hover:w3a--bg-app-gray-600"
       onClick={handleBtnClick}
       {...props}
     >
@@ -58,11 +58,11 @@ const WalletButton = (props: WalletButtonProps) => {
             extension={props.button.imgExtension}
           />
         </figure>
-        <p class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">{props.label}</p>
+        <p class="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{props.label}</p>
       </div>
       <Show when={props.button.hasInjectedWallet}>
         <span
-          class="w3a--inline-flex w3a--items-center w3a--rounded-lg w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
+          class="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
         dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"
         >
           {t("modal.external.installed")}

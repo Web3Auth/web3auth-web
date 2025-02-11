@@ -1,10 +1,13 @@
-import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
-import bowser from "bowser";
+import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
 import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
+import Ethereum from "../../assets/ethereum.svg";
+import Polygon from "../../assets/polygon.svg";
+import Solana from "../../assets/solana.svg";
+import View from "../../assets/view.svg";
 import { CONNECT_WALLET_PAGES } from "../../constants";
-import { browser, DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
+import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { Image } from "../Image";
@@ -20,6 +23,11 @@ export interface ConnectWalletProps {
   chainNamespace: ChainNamespaceType;
   walletRegistry?: WalletRegistry;
   appLogo?: string;
+  allExternalButtons: ExternalButton[];
+  totalExternalWallets: number;
+  customAdapterButtons: ExternalButton[];
+  adapterVisibilityMap: Record<string, boolean>;
+  deviceDetails: { platform: platform; browser: browser; os: os };
 }
 
 const ConnectWallet = (props: ConnectWalletProps) => {
@@ -32,6 +40,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   const [selectedButton, setSelectedButton] = createSignal<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = createSignal<string>("");
   const [isLoading, setIsLoading] = createSignal<boolean>(true);
+  const [selectedChain, setSelectedChain] = createSignal<"all" | "ethereum" | "polygon" | "solana">("all");
+  const [isInputFocused, setIsInputFocused] = createSignal(false);
 
   const handleBack = () => {
     log.debug("handleBack", selectedWallet(), currentPage());
@@ -52,123 +62,25 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     return supported;
   });
 
-  const deviceDetails = createMemo<{ platform: platform; os: os; browser: browser }>(() => {
-    const browserData = bowser.getParser(window.navigator.userAgent);
-    return {
-      platform: browserData.getPlatformType() as platform,
-      os: browserData.getOSName() as os,
-      browser: browserData.getBrowserName().toLowerCase() as browser,
-    };
-  });
-
-  const adapterVisibilityMap = createMemo(() => {
-    const canShowMap: Record<string, boolean> = {};
-
-    Object.keys(props.config).forEach((adapter) => {
-      const adapterConfig = props.config[adapter];
-
-      if (!adapterConfig.showOnModal) {
-        canShowMap[adapter] = false;
-        return;
-      }
-
-      if (deviceDetails().platform === "desktop" && adapterConfig.showOnDesktop) {
-        canShowMap[adapter] = true;
-        return;
-      }
-
-      if ((deviceDetails().platform === "mobile" || deviceDetails().platform === "tablet") && adapterConfig.showOnMobile) {
-        canShowMap[adapter] = true;
-        return;
-      }
-
-      canShowMap[adapter] = false;
-    });
-
-    log.debug("adapter visibility map", canShowMap);
-    return canShowMap;
-  });
-
-  const isWalletConnectAdapterIncluded = createMemo(() => Object.keys(props.config).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2));
-  const adapterVisibility = createMemo(() => adapterVisibilityMap());
-  const defaultButtonKeys = createMemo(() => new Set(Object.keys(props.walletRegistry.default)));
-
-  const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
-    // eslint-disable-next-line solid/reactivity
-    return Object.keys(wallets).reduce((acc, wallet) => {
-      if (adapterVisibility()[wallet] === false) return acc;
-
-      const walletRegistryItem: WalletRegistryItem = wallets[wallet];
-      let href = "";
-      if (deviceDetails().platform === bowser.PLATFORMS_MAP.mobile) {
-        const universalLink = walletRegistryItem?.mobile?.universal;
-        const deepLink = walletRegistryItem?.mobile?.native;
-        href = universalLink || deepLink;
-      }
-
-      const button: ExternalButton = {
-        name: wallet,
-        displayName: walletRegistryItem.name,
-        href,
-        hasInjectedWallet: props.config[wallet]?.isInjected || false,
-        hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
-        hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
-        walletRegistryItem,
-        imgExtension: walletRegistryItem.imgExtension || "svg",
-      };
-
-      if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
-
-      const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-      if (!chainNamespaces.has(props.chainNamespace) && !injectedChainNamespaces.has(props.chainNamespace)) return acc;
-
-      acc.push(button);
-      return acc;
-    }, [] as ExternalButton[]);
-  };
-
-  const customAdapterButtons = createMemo(() => {
-    // eslint-disable-next-line solid/reactivity
-    return Object.keys(props.config).reduce((acc, adapter) => {
-      if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !props.config[adapter].isInjected && adapterVisibilityMap()[adapter]) {
-        acc.push({
-          name: adapter,
-          displayName: props.config[adapter].label || adapter,
-          hasInjectedWallet: false,
-          hasWalletConnect: false,
-          hasInstallLinks: false,
-        });
-      }
-      return acc;
-    }, [] as ExternalButton[]);
-  });
-
-  const allButtons = createMemo(() => {
-    return [...generateWalletButtons(props.walletRegistry.default), ...generateWalletButtons(props.walletRegistry.others)];
-  });
-
   const filteredButtons = (searchValue: string) => {
-    return allButtons()
-      .concat(customAdapterButtons())
+    return props.allExternalButtons
+      .concat(props.customAdapterButtons)
       .filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
   };
 
+  const defaultButtonKeys = createMemo(() => new Set(Object.keys(props.walletRegistry.default)));
+
   const sortedButtons = createMemo(() => {
-    log.debug("sortedButtons", allButtons());
+    log.debug("sortedButtons", props.allExternalButtons);
     return [
-      ...allButtons().filter((button) => button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
-      ...customAdapterButtons(),
-      ...allButtons().filter((button) => !button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
+      ...props.allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
+      ...props.customAdapterButtons,
+      ...props.allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys().has(button.name)),
     ];
   });
 
-  const totalExternalWalletsLength = createMemo(() => {
-    return allButtons().length + customAdapterButtons().length;
-  });
-
   const visibleButtons = createMemo(() => {
-    const visibilityMap = adapterVisibilityMap();
+    const visibilityMap = props.adapterVisibilityMap;
     // eslint-disable-next-line solid/reactivity
     return Object.keys(props.config).reduce((acc, adapter) => {
       if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
@@ -198,7 +110,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   createEffect(() => {
     if (walletDiscoverySupported()) {
       setExternalButtons(sortedButtons());
-      setTotalExternalWallets(totalExternalWalletsLength());
+      setTotalExternalWallets(props.totalExternalWallets);
     } else {
       setExternalButtons(visibleButtons());
       setTotalExternalWallets(visibleButtons().length);
@@ -226,7 +138,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     }
   };
 
-  const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(props.appLogo) ? "" : props.appLogo));
+  // const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(props.appLogo) ? "" : props.appLogo));
 
   return (
     <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
@@ -253,10 +165,68 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       <Show
         when={selectedWallet()}
         fallback={
-          <div class="w3a--contents">
+          <div class="w3a--flex w3a--flex-col w3a--gap-y-2">
+            <Show
+              when={!isLoading()}
+              fallback={
+                <div class="w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2">
+                  <div class="w3a--w-[100px] w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
+                </div>
+              }
+            >
+              <div class="w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2">
+                <button
+                  class={cn(
+                    "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--h-12",
+                    {
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "all",
+                    }
+                  )}
+                  onClick={() => setSelectedChain("all")}
+                >
+                  All Chains
+                </button>
+                <button
+                  class={cn(
+                    "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
+                    {
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "ethereum",
+                    }
+                  )}
+                  onClick={() => setSelectedChain("ethereum")}
+                >
+                  <img src={Ethereum} alt="ethereum" />
+                </button>
+                <button
+                  class={cn(
+                    "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
+                    {
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "polygon",
+                    }
+                  )}
+                  onClick={() => setSelectedChain("polygon")}
+                >
+                  <img src={Polygon} alt="polygon" />
+                </button>
+                <button
+                  class={cn(
+                    "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
+                    {
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "solana",
+                    }
+                  )}
+                  onClick={() => setSelectedChain("solana")}
+                >
+                  <img src={Solana} alt="solana" />
+                </button>
+              </div>
+            </Show>
             <Show
               when={totalExternalWallets() > 15 && !isLoading()}
-              fallback={<div class="w3a--w-full w3a--h-[46px] w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
+              fallback={<div class="w3a--w-full w3a--h-[50px] w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
             >
               <input
                 type="text"
@@ -264,23 +234,20 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 onInput={handleWalletSearch}
                 onFocus={(e) => {
                   e.target.placeholder = "";
+                  setIsInputFocused(true);
                 }}
                 onBlur={(e) => {
                   e.target.placeholder = t("modal.external.search-wallet", { count: `${totalExternalWallets()}` });
+                  setIsInputFocused(false);
                 }}
                 placeholder={
                   isLoading() ? t("modal.external.search-wallet-loading") : t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })
                 }
                 disabled={isLoading()}
-                class="w3a--appearance-none w3a--px-4 w3a--py-2.5 w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white placeholder:w3a--text-app-gray-500 dark:placeholder:w3a--text-app-gray-400 placeholder:w3a--text-sm placeholder:w3a--font-normal w3a--rounded-full w3a--outline-none focus:w3a--outline-none active:w3a--outline-none"
+                class={cn("w3a--input", isInputFocused() && "!w3a--border-app-primary-600")}
               />
             </Show>
-            <ul
-              class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col", {
-                "w3a--h-[calc(100dvh_-_400px)]": headerLogo(),
-                "w3a--h-[calc(100dvh_-_460px)]": !headerLogo(),
-              })}
-            >
+            <ul class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_480px)]")}>
               <Show
                 when={externalButtons().length > 0}
                 fallback={
@@ -295,7 +262,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                     <div class="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
                       <For each={Array(6).fill(0)}>
                         {(_) => (
-                          <div class="w3a--w-full w3a--h-[54px] w3a--animate-pulse w3a--rounded-lg w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
+                          <div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
                         )}
                       </For>
                     </div>
@@ -308,7 +275,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                           label={button.displayName}
                           onClick={() => handleWalletClick(button)}
                           button={button}
-                          deviceDetails={deviceDetails()}
+                          deviceDetails={props.deviceDetails}
                           walletConnectUri={props.walletConnectUri}
                         />
                       )}
@@ -317,6 +284,21 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                 </Show>
               </Show>
             </ul>
+            <Show
+              when={totalExternalWallets() > 15 && !isLoading()}
+              fallback={<div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
+            >
+              <div class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700">
+                <img src={View} alt="view" height="24" width="24" />
+                <p class="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">More Wallets</p>
+                <span
+                  class="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
+        dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"
+                >
+                  {props.totalExternalWallets}
+                </span>
+              </div>
+            </Show>
           </div>
         }
       >
@@ -337,46 +319,48 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </div>
             }
           >
-            <div class="w3a--relative w3a--bg-app-gray-50 w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--flex w3a--items-center w3a--justify-center">
-              <QRCodeCanvas
-                value={props.walletConnectUri || ""}
-                level="low"
-                backgroundColor="transparent"
-                backgroundAlpha={0}
-                foregroundColor="#000000"
-                foregroundAlpha={1}
-                width={300}
-                height={300}
-                x={0}
-                y={0}
-                maskType={MaskType.FLOWER_IN_SQAURE}
-              />
-              <div class="w3a--absolute w3a--top-[43%] w3a--left-[43%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
-                <Image
-                  imageId={`login-${selectedButton().name}`}
-                  hoverImageId={`login-${selectedButton().name}`}
-                  fallbackImageId="wallet"
-                  height="20"
-                  width="20"
-                  isButton
-                  extension={selectedButton().imgExtension}
+            <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--items-center w3a--justify-center w3a--border w3a--border-app-gray-200 w3a--rounded-2xl w3a--p-4">
+              <div class="w3a--relative w3a--rounded-2xl w3a--h-[300px] w3a--w-[300px] w3a--flex w3a--items-center w3a--justify-center">
+                <QRCodeCanvas
+                  value={props.walletConnectUri || ""}
+                  level="low"
+                  backgroundColor="transparent"
+                  backgroundAlpha={0}
+                  foregroundColor="#000000"
+                  foregroundAlpha={1}
+                  width={300}
+                  height={300}
+                  x={0}
+                  y={0}
+                  maskType={MaskType.FLOWER_IN_SQAURE}
                 />
+                <div class="w3a--absolute w3a--top-[43%] w3a--left-[43%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
+                  <Image
+                    imageId={`login-${selectedButton().name}`}
+                    hoverImageId={`login-${selectedButton().name}`}
+                    fallbackImageId="wallet"
+                    height="20"
+                    width="20"
+                    isButton
+                    extension={selectedButton().imgExtension}
+                  />
+                </div>
               </div>
+              <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--font-normal">
+                {t("modal.external.walletconnect-copy")}
+              </p>
             </div>
           </Show>
 
-          <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--font-normal">
-            {t("modal.external.walletconnect-copy")}
-          </p>
           <div
-            class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--mt-auto w3a--border w3a--text-app-gray-900 w3a--border-app-gray-300 w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-700 dark:w3a--border-app-gray-600 dark:w3a--text-app-white w3a--rounded-xl w3a--p-3"
+            class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--text-app-gray-900 w3a--bg-app-gray-50 
+      dark:w3a--bg-app-gray-700 dark:w3a--text-app-white w3a--rounded-2xl w3a--px-4 w3a--py-2"
           >
             <p class="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">
               {t("modal.external.dont-have")} <span>{selectedButton()?.displayName}</span>?
             </p>
             <button
-              class="w3a--appearance-none w3a--border w3a--border-app-gray-900 w3a--text-xs w3a--text-app-gray-900 dark:w3a--text-app-white dark:w3a--border-app-white w3a--rounded-full w3a--px-2 w3a--py-2"
+              class="w3a--appearance-none w3a--border w3a--border-app-gray-400 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 dark:w3a--text-app-white dark:w3a--border-app-white w3a--rounded-full w3a--px-3 w3a--py-2 hover:w3a--shadow-2xl"
               onClick={() => {
                 setBodyState({
                   ...bodyState,

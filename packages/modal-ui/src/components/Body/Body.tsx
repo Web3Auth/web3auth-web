@@ -1,9 +1,10 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, WalletRegistry } from "@web3auth/base/src";
+import { ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import Bowser from "bowser";
 import { createContext, createMemo, Match, Show, Suspense, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import { PAGES } from "../../constants";
 import {
   browser,
@@ -12,6 +13,7 @@ import {
   mobileOs,
   MODAL_STATUS,
   ModalState,
+  os,
   platform,
   SocialLoginEventType,
   SocialLoginsConfig,
@@ -98,18 +100,21 @@ const Body = (props: BodyProps) => {
 
   const mobileInstallLinks = () => {
     const installConfig = bodyState.walletDetails.walletRegistryItem.app || {};
-    const installLinks = Object.keys(installConfig).reduce((acc, os) => {
-      if (!["android", "ios"].includes(os)) return acc;
-      const appId = installConfig[os as mobileOs];
+    const installLinks = Object.keys(installConfig).reduce((acc, osKey) => {
+      if (!["android", "ios"].includes(osKey)) return acc;
+      const appId = installConfig[osKey as mobileOs];
       if (!appId) return acc;
-      const appUrl = getMobileInstallLink(os as mobileOs, appId);
+      const appUrl = getMobileInstallLink(osKey as mobileOs, appId);
       if (!appUrl) return acc;
-      const logoLight = `${os}-light`;
-      const logoDark = `${os}-dark`;
+      const logoLight = `${osKey}-light`;
+      const logoDark = `${osKey}-dark`;
       acc.push(
         <li class="w3a--w-full">
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
-            <button type="button" class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--t-btn w3a--px-4 w3a--py-2 w3a--rounded-full">
+            <button
+              type="button"
+              class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50"
+            >
               <Image
                 imageId={logoLight}
                 darkImageId={logoDark}
@@ -119,7 +124,8 @@ const Body = (props: BodyProps) => {
                 width="28"
                 isButton
               />
-              <span class="w3a--text-sm w3a--font-medium">{t("modal.external.install-mobile-app", { os: getOsName(os as mobileOs) })}</span>
+              <span class="w3a--text-sm w3a--font-medium">{t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}</span>
+              <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
             </button>
           </a>
         </li>
@@ -141,7 +147,10 @@ const Body = (props: BodyProps) => {
     const installLink = browserExtensionUrl ? (
       <li>
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
-          <button type="button" class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full w3a--t-btn w3a--px-4 w3a--py-2 w3a--rounded-full">
+          <button
+            type="button"
+            class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50"
+          >
             <Image
               imageId={deviceDetails().browser}
               darkImageId={deviceDetails().browser}
@@ -154,12 +163,116 @@ const Body = (props: BodyProps) => {
             <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails().browser) })}
             </span>
+            <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
           </button>
         </a>
       </li>
     ) : null;
     return [installLink, ...mobileInstallLinks()];
   };
+
+  // External Wallets
+
+  const deviceDetailsWallets = createMemo<{ platform: platform; browser: browser; os: os }>(() => {
+    const browserData = Bowser.getParser(window.navigator.userAgent);
+    return {
+      platform: browserData.getPlatformType() as platform,
+      browser: browserData.getBrowserName().toLowerCase() as browser,
+      os: browserData.getOSName() as os,
+    };
+  });
+
+  const config = createMemo(() => props.modalState.externalWalletsConfig);
+
+  const adapterVisibilityMap = createMemo(() => {
+    const canShowMap: Record<string, boolean> = {};
+
+    Object.keys(config).forEach((adapter) => {
+      const adapterConfig = config()[adapter];
+
+      if (!adapterConfig.showOnModal) {
+        canShowMap[adapter] = false;
+        return;
+      }
+
+      if (deviceDetails().platform === "desktop" && adapterConfig.showOnDesktop) {
+        canShowMap[adapter] = true;
+        return;
+      }
+
+      if ((deviceDetails().platform === "mobile" || deviceDetails().platform === "tablet") && adapterConfig.showOnMobile) {
+        canShowMap[adapter] = true;
+        return;
+      }
+
+      canShowMap[adapter] = false;
+    });
+
+    log.debug("adapter visibility map", canShowMap);
+    return canShowMap;
+  });
+
+  const isWalletConnectAdapterIncluded = createMemo(() => Object.keys(config()).some((adapter) => adapter === WALLET_ADAPTERS.WALLET_CONNECT_V2));
+  const adapterVisibility = createMemo(() => adapterVisibilityMap());
+
+  const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
+    // eslint-disable-next-line solid/reactivity
+    return Object.keys(wallets).reduce((acc, wallet) => {
+      if (adapterVisibility()[wallet] === false) return acc;
+
+      const walletRegistryItem: WalletRegistryItem = wallets[wallet];
+      let href = "";
+      if (deviceDetails().platform === Bowser.PLATFORMS_MAP.mobile) {
+        const universalLink = walletRegistryItem?.mobile?.universal;
+        const deepLink = walletRegistryItem?.mobile?.native;
+        href = universalLink || deepLink;
+      }
+
+      const button: ExternalButton = {
+        name: wallet,
+        displayName: walletRegistryItem.name,
+        href,
+        hasInjectedWallet: config()[wallet]?.isInjected || false,
+        hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+        hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
+        walletRegistryItem,
+        imgExtension: walletRegistryItem.imgExtension || "svg",
+      };
+
+      if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
+
+      const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+      if (!chainNamespaces.has(props.chainNamespace) && !injectedChainNamespaces.has(props.chainNamespace)) return acc;
+
+      acc.push(button);
+      return acc;
+    }, [] as ExternalButton[]);
+  };
+
+  const customAdapterButtons = createMemo(() => {
+    // eslint-disable-next-line solid/reactivity
+    return Object.keys(config).reduce((acc, adapter) => {
+      if (![WALLET_ADAPTERS.WALLET_CONNECT_V2].includes(adapter) && !config()[adapter].isInjected && adapterVisibilityMap()[adapter]) {
+        acc.push({
+          name: adapter,
+          displayName: config()[adapter].label || adapter,
+          hasInjectedWallet: false,
+          hasWalletConnect: false,
+          hasInstallLinks: false,
+        });
+      }
+      return acc;
+    }, [] as ExternalButton[]);
+  });
+
+  const allButtons = createMemo(() => {
+    return [...generateWalletButtons(props.walletRegistry.default), ...generateWalletButtons(props.walletRegistry.others)];
+  });
+
+  const totalExternalWalletsLength = createMemo(() => {
+    return allButtons().length + customAdapterButtons().length;
+  });
 
   return (
     <BodyContext.Provider value={{ bodyState, setBodyState }}>
@@ -189,6 +302,7 @@ const Body = (props: BodyProps) => {
                     handleExternalWalletBtnClick={handleExternalWalletBtnClick}
                     isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
                     isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
+                    totalExternalWallets={totalExternalWalletsLength()}
                   />
                 </Match>
                 <Match
@@ -208,6 +322,11 @@ const Body = (props: BodyProps) => {
                     config={props.modalState.externalWalletsConfig}
                     walletRegistry={props.walletRegistry}
                     appLogo={props.appLogo}
+                    totalExternalWallets={totalExternalWalletsLength()}
+                    allExternalButtons={allButtons()}
+                    adapterVisibilityMap={adapterVisibility()}
+                    customAdapterButtons={customAdapterButtons()}
+                    deviceDetails={deviceDetailsWallets()}
                   />
                 </Match>
               </Switch>

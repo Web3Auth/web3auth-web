@@ -6,6 +6,6 @@ export const PAGES = {
 };
 
 export const CONNECT_WALLET_PAGES = {
-  CONNECT_WALLET: "Connect Wallet",
+  CONNECT_WALLET: "Connect Your Wallet",
   SELECTED_WALLET: "Selected Wallet",
 };

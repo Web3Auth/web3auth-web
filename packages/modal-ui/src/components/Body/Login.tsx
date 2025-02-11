@@ -25,6 +25,7 @@ export interface LoginProps {
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
+  totalExternalWallets: number;
 }
 
 export type rowType = {
@@ -56,6 +57,7 @@ const Login = (props: LoginProps) => {
   const [visibleRow, setVisibleRow] = createSignal<rowType[]>([]);
   const [otherRow, setOtherRow] = createSignal<rowType[]>([]);
   const [isPasswordlessCtaClicked, setIsPasswordlessCtaClicked] = createSignal(false);
+  const [isInputFocused, setIsInputFocused] = createSignal(false);
 
   const { isDark } = useContext(ThemedContext);
 
@@ -222,16 +224,18 @@ const Login = (props: LoginProps) => {
               </button>
             }
           >
-            <div class="w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2 w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-700 active:w3a--border-app-primary-600 focus:w3a--border-app-primary-600">
+            <div class={cn("w3a--input", isInputFocused() && "!w3a--border-app-primary-600")}>
               <input
                 onInput={handleInputChange}
                 value={fieldValue()}
                 placeholder={placeholder()}
                 onFocus={(e) => {
                   e.target.placeholder = "";
+                  setIsInputFocused(true);
                 }}
                 onBlur={(e) => {
                   e.target.placeholder = `${placeholder()}`;
+                  setIsInputFocused(false);
                 }}
                 type="text"
                 autofocus
@@ -262,7 +266,7 @@ const Login = (props: LoginProps) => {
               id="external-wallet-count"
               class="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
             >
-              350+
+              {props.totalExternalWallets - 1}+
             </div>
             <img id="external-wallet-arrow" class="w3a--icon-animation" src={ArrowRightLight} alt="arrow" />
           </button>
