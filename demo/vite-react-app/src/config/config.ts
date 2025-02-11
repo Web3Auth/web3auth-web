@@ -1,4 +1,4 @@
-import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
+import { SignTypedDataMessageV4 } from "@web3auth/modal";
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
   types: {

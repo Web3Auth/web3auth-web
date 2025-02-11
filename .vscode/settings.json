@@ -5,7 +5,11 @@
   },
   "eslint.workingDirectories": [
     {
-      "directory": "packages/*",
+      "directory": "packages/no-modal",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/modal",
       "changeProcessCWD": true
     },
     {

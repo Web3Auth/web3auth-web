@@ -1,28 +1,7 @@
 <script setup lang="ts">
-import {
-  AccountAbstractionProvider,
-  ISmartAccount,
-  KernelSmartAccount,
-  NexusSmartAccount,
-  // LightSmartAccount,
-  SafeSmartAccount,
-  TrustSmartAccount,
-  // SimpleSmartAccount,
-} from "@web3auth/account-abstraction-provider";
-import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
-import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
-import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/default-solana-adapter";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { type Web3AuthOptions } from "@web3auth/modal";
-import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
-import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
-import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
-import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+
+import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,TorusWalletAdapter,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
+import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import AppDashboard from "./components/AppDashboard.vue";
@@ -186,14 +165,12 @@ const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
     //   return new AuthAdapter();
     case "torus-evm":
       return [new TorusWalletAdapter()];
-    case "torus-solana":
-      return [new SolanaWalletAdapter()];
     case "wallet-connect-v2":
       return [new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } } })];
     case "injected-evm":
-      return getInjectedEvmAdapters({ options: options.value });
+      return getEvmInjectedAdapters({ options: options.value });
     case "injected-solana":
-      return getInjectedSolanaAdapters({ options: options.value });
+      return getSolanaInjectedAdapters({ options: options.value });
     default:
       return [];
   }

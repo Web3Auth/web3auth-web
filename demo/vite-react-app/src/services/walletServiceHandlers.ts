@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { log } from "@web3auth/base";
+import { log, WalletServicesPlugin } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { BrowserProvider, parseEther } from "ethers";
 
 import { getV4TypedData } from "../config/config";

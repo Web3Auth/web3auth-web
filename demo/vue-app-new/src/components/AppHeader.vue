@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from "@toruslabs/vue-components";
-import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 import { watch } from "vue";
 

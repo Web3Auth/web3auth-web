@@ -1,4 +1,4 @@
-import type { SafeEventEmitterProvider } from "@web3auth/base";
+import type { SafeEventEmitterProvider } from "@web3auth/no-modal";
 import Web3 from "web3";
 
 export default class EthereumRpc {

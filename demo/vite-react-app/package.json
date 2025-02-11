@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@web3auth/account-abstraction-provider": "file:../../packages/providers/account-abstraction-provider",
-    "@web3auth/auth-adapter": "file:../../packages/adapters/auth-adapter",
-    "@web3auth/base": "file:../../packages/base",
-    "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",
-    "@web3auth/wallet-services-plugin": "file:../../packages/plugins/wallet-services-plugin",
     "ethers": "^6.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

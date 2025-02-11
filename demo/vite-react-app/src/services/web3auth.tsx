@@ -1,13 +1,8 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
-import { Web3Auth } from "@web3auth/modal";
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, EthereumPrivateKeyProvider, IProvider, WalletServicesPlugin, WEB3AUTH_NETWORK_TYPE, Web3Auth, AccountAbstractionProvider, SafeSmartAccount, PLUGIN_EVENTS } from "@web3auth/modal";
 import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
-import { PLUGIN_EVENTS } from "@web3auth/base";
 import * as walletServiceHandler from "./walletServiceHandlers";
-import { AccountAbstractionProvider, SafeSmartAccount } from "@web3auth/account-abstraction-provider";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;

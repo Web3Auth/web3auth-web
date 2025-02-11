@@ -2,6 +2,12 @@
   "extends": "../../tsconfig.json",
   "include": ["src", "test"],
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@/core/base": ["./src/base"],
+      "@/core/*-adapter": ["./src/adapters/*-adapter"],
+      "@/core/*-plugin": ["./src/plugins/*-plugin"],
+      "@/core/*-provider": ["./src/providers/*-provider"]
+    }
   }
 }

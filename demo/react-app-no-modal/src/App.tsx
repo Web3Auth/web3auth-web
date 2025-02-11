@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/base";
-import { AuthAdapter, AuthLoginParams } from "@web3auth/auth-adapter";
+import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS, AuthAdapter, AuthLoginParams, EthereumPrivateKeyProvider } from "@web3auth/modal";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
@@ -29,7 +27,7 @@ function App() {
 
         const web3auth = new Web3AuthNoModal({
           clientId,
-          web3AuthNetwork: "sapphire_devnet",
+          web3AuthNetwork: "cyan",
           privateKeyProvider
         });
 

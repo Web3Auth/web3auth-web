@@ -1,3 +1,11 @@
 {
-  "include": ["src"]
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "declarationDir": "./dist/types",
+    "plugins": [
+      { "transform": "typescript-transform-paths", "afterDeclarations": true, }
+    ]
+  }
 }

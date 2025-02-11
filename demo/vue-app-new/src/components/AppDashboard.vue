@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
-import { useWeb3Auth } from "@web3auth/modal-vue-composables";
-import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";

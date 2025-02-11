@@ -1,1 +1,0 @@
-export { useWalletServicesPlugin } from "./useWalletServicesPlugin";

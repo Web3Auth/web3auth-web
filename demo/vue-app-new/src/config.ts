@@ -1,7 +1,5 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
-import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
-import { CONFIRMATION_STRATEGY, CONFIRMATION_STRATEGY_TYPE } from "@web3auth/wallet-services-plugin";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
 

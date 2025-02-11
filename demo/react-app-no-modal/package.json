@@ -3,14 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@web3auth/base": "file:../../packages/base",
     "@web3auth/no-modal": "file:../../packages/no-modal",
-    "@web3auth/auth-adapter": "file:../../packages/adapters/auth-adapter",
-    "@web3auth/torus-evm-adapter": "file:../../packages/adapters/torus-evm-adapter",
-    "@web3auth/coinbase-adapter": "file:../../packages/adapters/coinbase-adapter",
-    "@web3auth/metamask-adapter": "file:../../packages/adapters/metamask-adapter",
-    "@web3auth/phantom-adapter": "file:../../packages/adapters/phantom-adapter",
-    "@web3auth/ethereum-provider": "file:../../packages/providers/ethereum-provider",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "web-vitals": "^3.3.2",
@@ -24,11 +17,8 @@
   },
   "browserslist": {
     "production": [
-      "chrome >= 67",
-      "edge >= 79",
-      "firefox >= 68",
-      "opera >= 54",
-      "safari >= 14"
+      "supports bigint",
+      "not dead"
     ],
     "development": [
       "last 1 chrome version",
