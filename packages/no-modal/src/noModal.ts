@@ -61,10 +61,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.privateKeyProvider && !options.chainConfig) {
-      throw WalletInitializationError.invalidParams("Please provide chainConfig or privateKeyProvider");
+    if (!options.chainConfig) {
+      throw WalletInitializationError.invalidParams("Please provide chainConfig");
     }
-    options.chainConfig = options.chainConfig || options.privateKeyProvider.currentChainConfig;
     if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
       throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
     if (options.storageKey === "session") this.storage = "sessionStorage";
@@ -157,23 +156,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
 
         if (typeof keyExportEnabled === "boolean") {
-          this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
           // dont know if this is required or not.
           this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
         }
-
-        if (this.coreOptions.privateKeyProvider) {
-          if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
-            throw WalletInitializationError.incompatibleChainNameSpace(
-              "private key provider is not compatible with provided chainNamespace for auth adapter"
-            );
-          }
-          authAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
-        }
         authAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
-        if (!authAdapter.privateKeyProvider) {
-          throw WalletInitializationError.invalidParams("privateKeyProvider is required for auth adapter");
-        }
       } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
         const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;

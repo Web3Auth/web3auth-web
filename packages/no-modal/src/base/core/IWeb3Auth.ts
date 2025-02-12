@@ -67,11 +67,6 @@ export interface IWeb3AuthCoreOptions {
   uiConfig?: WhiteLabelData;
 
   /**
-   * Private key provider for your chain namespace
-   */
-  privateKeyProvider?: IBaseProvider<string>;
-
-  /**
    * Account abstraction provider for your chain namespace
    */
   accountAbstractionProvider?: IBaseProvider<IProvider>;

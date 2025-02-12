@@ -14,7 +14,6 @@ import {
   fetchWalletRegistry,
   getAuthDefaultOptions,
   getChainConfig,
-  IBaseProvider,
   IProvider,
   IWeb3AuthCoreOptions,
   log,
@@ -40,11 +39,6 @@ export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
-
-  /**
-   * Private key provider for your chain namespace
-   */
-  privateKeyProvider: IBaseProvider<string>;
 }
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
@@ -59,7 +53,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options = { ...options };
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
-    if (!this.coreOptions.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required");
   }
 
   public setModalConfig(modalConfig: AdaptersModalConfig): void {
@@ -157,14 +150,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // Adapters to be shown on modal should be pre-configured.
         if (adapterName === WALLET_ADAPTERS.AUTH) {
           const defaultOptions = getAuthDefaultOptions();
-          const { clientId, useCoreKitKey, chainConfig, web3AuthNetwork, sessionTime, privateKeyProvider } = this.coreOptions;
+          const { clientId, useCoreKitKey, chainConfig, web3AuthNetwork, sessionTime } = this.coreOptions;
           const finalChainConfig = {
             ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
             ...chainConfig,
           } as CustomChainConfig;
-          if (!privateKeyProvider) {
-            throw WalletInitializationError.invalidParams("privateKeyProvider is required");
-          }
           const finalAuthAdapterSettings: Partial<AuthOptions> = {
             ...defaultOptions.adapterSettings,
             clientId,
@@ -195,7 +185,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             adapterSettings: finalAuthAdapterSettings,
             sessionTime,
             web3AuthNetwork,
-            privateKeyProvider,
           });
           this.walletAdapters[adapterName] = authAdapter;
           return adapterName;
@@ -224,14 +213,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
         if (adapterName === WALLET_ADAPTERS.AUTH) {
           const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
-          if (this.coreOptions.privateKeyProvider) {
-            if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
-              throw WalletInitializationError.incompatibleChainNameSpace(
-                "private key provider is not compatible with provided chainNamespace for auth adapter"
-              );
-            }
-            authAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
-          }
           if (smsOtpEnabled !== undefined) {
             authAdapter.setAdapterSettings({
               loginConfig: {
@@ -251,9 +232,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             authAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });
           }
           authAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
-          if (!authAdapter.privateKeyProvider) {
-            throw WalletInitializationError.invalidParams("privateKeyProvider is required for auth adapter");
-          }
         } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
           const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
           const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
@@ -328,7 +306,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
     if (typeof keyExportEnabled === "boolean") {
-      this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
       // dont know if we need to do this.
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
     }
