@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,TorusWalletAdapter,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
+import { AccountAbstractionProvider, CHAIN_NAMESPACES, ChainNamespaceType, CoinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IAdapter, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TorusWalletAdapter, TrustSmartAccount, WALLET_ADAPTERS, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
@@ -42,32 +42,6 @@ const chainOptions = computed(() =>
     value: x.chainId,
   }))
 );
-
-// Populate the private key provider based on the chain selected
-const privateKeyProvider = computed((): IBaseProvider<string> => {
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
-
-  switch (formData.chainNamespace) {
-    case CHAIN_NAMESPACES.EIP155:
-      return new EthereumPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    case CHAIN_NAMESPACES.SOLANA:
-      return new SolanaPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    default:
-      return new CommonPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-  }
-});
 
 const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
 
@@ -121,7 +95,6 @@ const options = computed((): Web3AuthOptions => {
   } = formData;
   return {
     clientId: clientIds[formData.network],
-    privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
     uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
     accountAbstractionProvider: accountAbstractionProvider.value,

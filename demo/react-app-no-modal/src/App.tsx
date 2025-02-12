@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { AuthAdapter, AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/modal";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS, AuthAdapter, AuthLoginParams, EthereumPrivateKeyProvider } from "@web3auth/modal";
+import { useEffect, useState } from "react";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
 
@@ -23,12 +23,10 @@ function App() {
           logo: "https://images.toruswallet.io/eth.svg",
           chainNamespace: CHAIN_NAMESPACES.EIP155,
         }
-        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig } });
 
         const web3auth = new Web3AuthNoModal({
           clientId,
           web3AuthNetwork: "cyan",
-          privateKeyProvider
         });
 
         setWeb3auth(web3auth);

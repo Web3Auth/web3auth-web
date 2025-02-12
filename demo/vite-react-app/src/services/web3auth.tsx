@@ -1,8 +1,7 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, EthereumPrivateKeyProvider, IProvider, WalletServicesPlugin, WEB3AUTH_NETWORK_TYPE, Web3Auth, AccountAbstractionProvider, SafeSmartAccount, PLUGIN_EVENTS } from "@web3auth/modal";
-import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { AccountAbstractionProvider, ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, PLUGIN_EVENTS, SafeSmartAccount, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE } from "@web3auth/modal";
+import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
-import * as walletServiceHandler from "./walletServiceHandlers";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -116,7 +115,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
-        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         const accountAbstractionProvider = new AccountAbstractionProvider({
           config: {
             chainConfig: currentChainConfig,
@@ -136,7 +134,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           // get your client id from https://dashboard.web3auth.io
           clientId,
           web3AuthNetwork,
-          privateKeyProvider,
           accountAbstractionProvider,
           chainConfig: currentChainConfig,
           uiConfig: {
