@@ -1,8 +1,11 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { For, Show } from "solid-js";
 
-import ArrowLeft from "../../assets/arrow-left-light.svg";
+import ArrowLeftDark from "../../assets/arrow-left-dark.svg";
+import ArrowLeftLight from "../../assets/arrow-left-light.svg";
+import ArrowRightDark from "../../assets/chevron-right-dark.svg";
 import ArrowRightLight from "../../assets/chevron-right-light.svg";
+import DotDark from "../../assets/dots-dark-horizontal.svg";
 import DotLight from "../../assets/dots-light-horizontal.svg";
 import { SocialLoginsConfig } from "../../interfaces";
 import { rowType } from "../Body/Login";
@@ -61,7 +64,9 @@ const SocialLoginList = (props: SocialLoginListProps) => {
           </For>
           <Show when={props.canShowMore}>
             <SocialLoginButton isDark={props.isDark} showIcon={false} onClick={props.handleExpandSocialLogins}>
-              <img src={DotLight} alt="Logo" class="w3a--object-contain" />
+              <Show when={props.isDark} fallback={<img src={DotLight} alt="Logo" class="w3a--object-contain" />}>
+                <img src={DotDark} alt="Logo" class="w3a--object-contain" />
+              </Show>
             </SocialLoginButton>
           </Show>
         </div>
@@ -69,7 +74,9 @@ const SocialLoginList = (props: SocialLoginListProps) => {
       <Show when={props.otherRow?.length > 0}>
         <div class="w3a--flex w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4 w3a--w-full">
           <button type="button" class="w3a--appearance-none" onClick={() => props.handleExpandSocialLogins()}>
-            <img src={ArrowLeft} alt="arrow" />
+            <Show when={props.isDark} fallback={<img src={ArrowLeftLight} alt="arrow" />}>
+              <img src={ArrowLeftDark} alt="arrow" />
+            </Show>
           </button>
           <div class="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto">
             <For each={props.otherRow}>
@@ -84,12 +91,18 @@ const SocialLoginList = (props: SocialLoginListProps) => {
                       loginParams: row.loginParams,
                     })
                   }
+                  btnStyle="w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group"
                 >
-                  <div class="w3a--flex w3a--items-center w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group">
+                  <>
                     {getProviderIcon(row.method, props.isDark, ".svg")}
-                    <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white w3a--ml-2">{row.name}</p>
-                    <img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
-                  </div>
+                    <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
+                    <Show
+                      when={props.isDark}
+                      fallback={<img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />}
+                    >
+                      <img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightDark} alt="arrow" />
+                    </Show>
+                  </>
                 </SocialLoginButton>
               )}
             </For>

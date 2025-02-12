@@ -29,6 +29,10 @@ const config: Config = {
         xl: "1280px",
         "2xl": "1536px",
       },
+      boxShadow: {
+        dark: "0px 2px 8px 2px rgba(0, 0, 0, 0.25)",
+        light: "0px 2px 8px 2px #E5E7EB",
+      },
     },
     fontFamily: {
       header: ["Inter"],

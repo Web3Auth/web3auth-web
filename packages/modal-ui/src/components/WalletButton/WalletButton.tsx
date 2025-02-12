@@ -42,7 +42,7 @@ const WalletButton = (props: WalletButtonProps) => {
   return (
     <button
       class="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-700 hover:w3a--bg-app-gray-200 hover:text-app-gray-900 dark:hover:w3a--bg-app-gray-600"
+      dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 hover:text-app-gray-900 dark:hover:w3a--bg-app-gray-600"
       onClick={handleBtnClick}
       {...props}
     >

@@ -1,18 +1,20 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
-import { createEffect, createMemo, createSignal, mergeProps, Show, useContext } from "solid-js";
+import { createEffect, createMemo, createSignal, mergeProps, Show } from "solid-js";
 
+import ArrowRightDark from "../../assets/chevron-right-dark.svg";
 import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import LogoDark from "../../assets/dark-logo.svg";
 import LogoLight from "../../assets/light-logo.svg";
 import { capitalizeFirstLetter } from "../../config";
-import { ThemedContext } from "../../context/ThemeContext";
 import { SocialLoginsConfig } from "../../interfaces";
 import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { validatePhoneNumber } from "../../utils/modal";
+// import OtpInput from "../Otp/Otp";
 import SocialLoginList from "../SocialLoginList";
 
 export interface LoginProps {
+  isDark: boolean;
   appLogo?: string;
   appName?: string;
   showPasswordLessInput: boolean;
@@ -59,8 +61,6 @@ const Login = (props: LoginProps) => {
   const [isPasswordlessCtaClicked, setIsPasswordlessCtaClicked] = createSignal(false);
   const [isInputFocused, setIsInputFocused] = createSignal(false);
 
-  const { isDark } = useContext(ThemedContext);
-
   const handleExpand = () => {
     setExpand((prev) => !prev);
   };
@@ -88,7 +88,7 @@ const Login = (props: LoginProps) => {
         if (order > 0 && order < 4) {
           visibleRows.push({
             method,
-            isDark,
+            isDark: props.isDark,
             isPrimaryBtn,
             name,
             adapter: props.socialLoginsConfig.adapter,
@@ -98,18 +98,16 @@ const Login = (props: LoginProps) => {
           });
         }
 
-        if (order > 3) {
-          otherRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: props.socialLoginsConfig.adapter,
-            loginParams: { loginProvider: method, name, login_hint: "" },
-            order,
-            isMainOption,
-          });
-        }
+        otherRows.push({
+          method,
+          isDark: props.isDark,
+          isPrimaryBtn,
+          name,
+          adapter: props.socialLoginsConfig.adapter,
+          loginParams: { loginProvider: method, name, login_hint: "" },
+          order,
+          isMainOption,
+        });
       });
 
     setVisibleRow(visibleRows);
@@ -174,12 +172,6 @@ const Login = (props: LoginProps) => {
     if (mergedProps.handleExternalWalletBtnClick) mergedProps.handleExternalWalletBtnClick(true);
   };
 
-  // const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(mergedProps.appLogo) ? "" : mergedProps.appLogo));
-
-  // const subtitle = createMemo(() => {
-  //   return t("modal.header-subtitle-name", { appName: mergedProps.appName });
-  // });
-
   return (
     <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
@@ -195,7 +187,7 @@ const Login = (props: LoginProps) => {
         fallback={
           <SocialLoginList
             otherRow={otherRow()}
-            isDark={isDark}
+            isDark={props.isDark}
             visibleRow={visibleRow()}
             canShowMore={canShowMore()}
             handleSocialLoginClick={props.handleSocialLoginClick}
@@ -207,7 +199,7 @@ const Login = (props: LoginProps) => {
         <Show when={mergedProps.areSocialLoginsVisible}>
           <SocialLoginList
             otherRow={[]}
-            isDark={isDark}
+            isDark={props.isDark}
             visibleRow={visibleRow()}
             canShowMore={canShowMore()}
             handleSocialLoginClick={props.handleSocialLoginClick}
@@ -220,7 +212,7 @@ const Login = (props: LoginProps) => {
             when={isPasswordlessCtaClicked()}
             fallback={
               <button class={cn("w3a--btn !w3a--justify-between")} onClick={() => setIsPasswordlessCtaClicked(true)}>
-                <p>Continue with {title()}</p>
+                <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">Continue with {title()}</p>
               </button>
             }
           >
@@ -239,10 +231,10 @@ const Login = (props: LoginProps) => {
                 }}
                 type="text"
                 autofocus
-                class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none"
+                class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
               />
               <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
-                <img src={ArrowRightLight} alt="arrow" />
+                <img src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
               </button>
             </div>
             <Show when={!isValidInput() && isPasswordlessCtaClicked()}>
@@ -261,16 +253,17 @@ const Login = (props: LoginProps) => {
         </Show>
         <Show when={mergedProps.showExternalWalletButton}>
           <button class={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-            <p>{t("modal.external.connect")}</p>
+            <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
             <div
               id="external-wallet-count"
-              class="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
+              class="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 dark:w3a--bg-transparent dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--text-app-primary-500 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
             >
               {props.totalExternalWallets - 1}+
             </div>
-            <img id="external-wallet-arrow" class="w3a--icon-animation" src={ArrowRightLight} alt="arrow" />
+            <img id="external-wallet-arrow" class="w3a--icon-animation" src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
           </button>
         </Show>
+        {/* <OtpInput length={6} onComplete={() => {}} /> */}
       </Show>
     </div>
   );

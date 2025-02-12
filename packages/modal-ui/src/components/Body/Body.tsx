@@ -1,11 +1,13 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
 import { ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import Bowser from "bowser";
-import { createContext, createMemo, Match, Show, Suspense, Switch } from "solid-js";
+import { createMemo, Match, Show, Suspense, Switch, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import ArrowRightDark from "../../assets/chevron-right-dark.svg";
 import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import { PAGES } from "../../constants";
+import { ThemedContext } from "../../context/ThemeContext";
 import {
   browser,
   ExternalButton,
@@ -53,17 +55,19 @@ export interface BodyProps {
   handleBackClick: () => void;
 }
 
-interface BodyContextType {
-  bodyState: {
-    showWalletDetails: boolean;
-    walletDetails: ExternalButton;
-  };
-  setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
-}
+// interface BodyContextType {
+//   bodyState: {
+//     showWalletDetails: boolean;
+//     walletDetails: ExternalButton;
+//   };
+//   setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
+// }
 
-export const BodyContext = createContext<BodyContextType>({} as BodyContextType);
+// export const BodyContext = createContext<BodyContextType>({} as BodyContextType);
 
 const Body = (props: BodyProps) => {
+  const { isDark } = useContext(ThemedContext);
+
   const [bodyState, setBodyState] = createStore<{
     showWalletDetails: boolean;
     walletDetails: ExternalButton;
@@ -113,7 +117,7 @@ const Body = (props: BodyProps) => {
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
             <button
               type="button"
-              class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50"
+              class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800"
             >
               <Image
                 imageId={logoLight}
@@ -124,8 +128,10 @@ const Body = (props: BodyProps) => {
                 width="28"
                 isButton
               />
-              <span class="w3a--text-sm w3a--font-medium">{t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}</span>
-              <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
+              <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+                {t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}
+              </span>
+              <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={!isDark ? ArrowRightLight : ArrowRightDark} alt="arrow" />
             </button>
           </a>
         </li>
@@ -149,7 +155,7 @@ const Body = (props: BodyProps) => {
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <button
             type="button"
-            class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50"
+            class="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800"
           >
             <Image
               imageId={deviceDetails().browser}
@@ -163,7 +169,7 @@ const Body = (props: BodyProps) => {
             <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails().browser) })}
             </span>
-            <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />
+            <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={!isDark ? ArrowRightLight : ArrowRightDark} alt="arrow" />
           </button>
         </a>
       </li>
@@ -275,110 +281,110 @@ const Body = (props: BodyProps) => {
   });
 
   return (
-    <BodyContext.Provider value={{ bodyState, setBodyState }}>
-      <div class="w3a--h-auto w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
-        {/* Content */}
-        <Show
-          when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
-          fallback={
-            <Suspense>
-              <Switch>
-                <Match
-                  when={
-                    props.modalState.currentPage === PAGES.LOGIN &&
-                    props.showExternalWalletPage &&
-                    props.modalState.status === MODAL_STATUS.INITIALIZED
-                  }
-                >
-                  <Login
-                    {...props}
-                    showPasswordLessInput={props.showPasswordLessInput}
-                    showExternalWalletButton={props.showExternalWalletButton}
-                    handleSocialLoginClick={props.handleSocialLoginClick}
-                    socialLoginsConfig={props.socialLoginsConfig}
-                    areSocialLoginsVisible={props.areSocialLoginsVisible}
-                    isEmailPrimary={props.isEmailPrimary}
-                    isExternalPrimary={props.isExternalPrimary}
-                    handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-                    isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
-                    isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
-                    totalExternalWallets={totalExternalWalletsLength()}
-                  />
-                </Match>
-                <Match
-                  when={
-                    props.modalState.currentPage === PAGES.CONNECT_WALLET &&
-                    !props.showExternalWalletPage &&
-                    props.modalState.status === MODAL_STATUS.INITIALIZED
-                  }
-                >
-                  <ConnectWallet
-                    onBackClick={handleBackClick}
-                    modalStatus={props.modalState.status}
-                    showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
-                    handleExternalWalletClick={props.preHandleExternalWalletClick}
-                    chainNamespace={props.chainNamespace}
-                    walletConnectUri={props.modalState.walletConnectUri}
-                    config={props.modalState.externalWalletsConfig}
-                    walletRegistry={props.walletRegistry}
-                    appLogo={props.appLogo}
-                    totalExternalWallets={totalExternalWalletsLength()}
-                    allExternalButtons={allButtons()}
-                    adapterVisibilityMap={adapterVisibility()}
-                    customAdapterButtons={customAdapterButtons()}
-                    deviceDetails={deviceDetailsWallets()}
-                  />
-                </Match>
-              </Switch>
-            </Suspense>
-          }
-        >
-          <Loader
-            adapter={props.modalState.detailedLoaderAdapter}
-            adapterName={props.modalState.detailedLoaderAdapter}
-            modalStatus={props.modalState.status}
-            onClose={props.onCloseLoader}
-            appLogo={props.appLogo}
-          />
-        </Show>
+    <div class="w3a--h-auto w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
+      {/* Content */}
+      <Show
+        when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
+        fallback={
+          <Suspense>
+            <Switch>
+              <Match
+                when={
+                  props.modalState.currentPage === PAGES.LOGIN && props.showExternalWalletPage && props.modalState.status === MODAL_STATUS.INITIALIZED
+                }
+              >
+                <Login
+                  {...props}
+                  isDark={isDark}
+                  showPasswordLessInput={props.showPasswordLessInput}
+                  showExternalWalletButton={props.showExternalWalletButton}
+                  handleSocialLoginClick={props.handleSocialLoginClick}
+                  socialLoginsConfig={props.socialLoginsConfig}
+                  areSocialLoginsVisible={props.areSocialLoginsVisible}
+                  isEmailPrimary={props.isEmailPrimary}
+                  isExternalPrimary={props.isExternalPrimary}
+                  handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+                  isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
+                  isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
+                  totalExternalWallets={totalExternalWalletsLength()}
+                />
+              </Match>
+              <Match
+                when={
+                  props.modalState.currentPage === PAGES.CONNECT_WALLET &&
+                  !props.showExternalWalletPage &&
+                  props.modalState.status === MODAL_STATUS.INITIALIZED
+                }
+              >
+                <ConnectWallet
+                  isDark={isDark}
+                  onBackClick={handleBackClick}
+                  modalStatus={props.modalState.status}
+                  showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
+                  handleExternalWalletClick={props.preHandleExternalWalletClick}
+                  chainNamespace={props.chainNamespace}
+                  walletConnectUri={props.modalState.walletConnectUri}
+                  config={props.modalState.externalWalletsConfig}
+                  walletRegistry={props.walletRegistry}
+                  appLogo={props.appLogo}
+                  totalExternalWallets={totalExternalWalletsLength()}
+                  allExternalButtons={allButtons()}
+                  adapterVisibilityMap={adapterVisibility()}
+                  customAdapterButtons={customAdapterButtons()}
+                  deviceDetails={deviceDetailsWallets()}
+                  bodyState={bodyState}
+                  setBodyState={setBodyState}
+                />
+              </Match>
+            </Switch>
+          </Suspense>
+        }
+      >
+        <Loader
+          adapter={props.modalState.detailedLoaderAdapter}
+          adapterName={props.modalState.detailedLoaderAdapter}
+          modalStatus={props.modalState.status}
+          onClose={props.onCloseLoader}
+          appLogo={props.appLogo}
+        />
+      </Show>
 
-        {/* Footer */}
-        <Footer />
+      {/* Footer */}
+      <Footer />
 
-        {/* Wallet Details */}
-        <Show when={bodyState.showWalletDetails}>
-          <div
-            class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
-            onClick={() => setBodyState({ showWalletDetails: false })}
-          />
-          <div
-            class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col 
+      {/* Wallet Details */}
+      <Show when={bodyState.showWalletDetails}>
+        <div
+          class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
+          onClick={() => setBodyState({ showWalletDetails: false })}
+        />
+        <div
+          class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col 
             w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600"
-          >
-            <div
-              class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full w3a--cursor-pointer"
-              onClick={() => setBodyState({ showWalletDetails: false })}
-              aria-hidden="true"
-              role="button"
+        >
+          <div
+            class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full w3a--cursor-pointer"
+            onClick={() => setBodyState({ showWalletDetails: false })}
+            aria-hidden="true"
+            role="button"
+          />
+          <div class="w3a--flex w3a--justify-center w3a--my-4">
+            <Image
+              imageId={`login-${bodyState.walletDetails.name}`}
+              hoverImageId={`login-${bodyState.walletDetails.name}`}
+              fallbackImageId="wallet"
+              height="80"
+              width="80"
+              isButton
+              extension={bodyState.walletDetails.imgExtension}
             />
-            <div class="w3a--flex w3a--justify-center w3a--my-4">
-              <Image
-                imageId={`login-${bodyState.walletDetails.name}`}
-                hoverImageId={`login-${bodyState.walletDetails.name}`}
-                fallbackImageId="wallet"
-                height="80"
-                width="80"
-                isButton
-                extension={bodyState.walletDetails.imgExtension}
-              />
-            </div>
-            <ul class="w3a--flex w3a--flex-col w3a--gap-y-2">
-              {deviceDetails().platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
-            </ul>
           </div>
-        </Show>
-      </div>
-    </BodyContext.Provider>
+          <ul class="w3a--flex w3a--flex-col w3a--gap-y-2">
+            {deviceDetails().platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
+          </ul>
+        </div>
+      </Show>
+    </div>
   );
 };
 

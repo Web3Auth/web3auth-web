@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  scrollbar-color: #E5E7EB;
+}
+
 @layer base {
   body {
     padding: 0px !important;
@@ -13,10 +17,6 @@
   .w3a-parent-container {
     font-family: "Inter";
     position: relative;
-  }
-
-  .w3a-box-shadow:hover {
-    box-shadow: 0px 2px 8px 2px #E5E7EB;
   }
 
   .w3a-external-wallet-btn #external-wallet-count {
@@ -69,9 +69,6 @@
 }
 
 @layer utilities {
-  .w3a--modal-bg {
-    @apply w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main;
-  }
   .w3a--loader-logo-size {
     @apply w3a--h-10 w3a--w-10;
   }
@@ -105,13 +102,16 @@
   }
 
   .w3a--btn {
-    @apply w3a--appearance-none w3a--text-app-gray-700 w3a--text-base w3a--font-normal w3a--w-full w3a--border w3a--border-app-gray-200 w3a--rounded-full 
+    @apply w3a--appearance-none w3a--text-app-gray-700 w3a--text-base w3a--font-normal w3a--w-full 
+    w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500 w3a--rounded-full 
     w3a--px-5 w3a--py-3 w3a--flex w3a--items-center w3a--justify-center 
-    w3a--gap-x-2 hover:w3a--bg-app-gray-50 w3a-box-shadow hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50;
+    hover:w3a--shadow-light dark:hover:w3a--shadow-dark
+    w3a--gap-x-2 hover:w3a--bg-app-gray-50 dark:hover:w3a--bg-app-gray-800 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800;
   }
 
   .w3a--input {
-    @apply w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2 w3a--w-full w3a--px-5 w3a--py-3 w3a--rounded-full w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-700;
+    @apply w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2 w3a--w-full
+    w3a--px-5 w3a--py-3 w3a--rounded-full w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500;
   }
 }
 

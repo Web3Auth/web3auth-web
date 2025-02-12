@@ -1,19 +1,24 @@
 import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
-import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
-import Ethereum from "../../assets/ethereum.svg";
-import Polygon from "../../assets/polygon.svg";
-import Solana from "../../assets/solana.svg";
-import View from "../../assets/view.svg";
+import EthereumDark from "../../assets/ethereum-dark.svg";
+import EthereumLight from "../../assets/ethereum-light.svg";
+import PolygonDark from "../../assets/polygon-dark.svg";
+import PolygonLight from "../../assets/polygon-light.svg";
+import SolanaDark from "../../assets/solana-dark.svg";
+import SolanaLight from "../../assets/solana-light.svg";
+import ViewDark from "../../assets/view-dark.svg";
+import ViewLight from "../../assets/view-light.svg";
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { Image } from "../Image";
 import { WalletButton } from "../WalletButton";
-import { BodyContext } from "./Body";
+// import { BodyContext } from "./Body";
 export interface ConnectWalletProps {
+  isDark: boolean;
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { adapter: string }) => void;
   config: Record<string, BaseAdapterConfig>;
@@ -28,11 +33,15 @@ export interface ConnectWalletProps {
   customAdapterButtons: ExternalButton[];
   adapterVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
+  bodyState: {
+    showWalletDetails: boolean;
+    walletDetails: ExternalButton;
+  };
+  setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
 }
 
 const ConnectWallet = (props: ConnectWalletProps) => {
-  const { bodyState, setBodyState } = useContext(BodyContext);
-
+  // const { bodyState, setBodyState } = useContext(BodyContext);
   const [currentPage, setCurrentPage] = createSignal(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = createSignal(false);
   const [externalButtons, setExternalButtons] = createSignal<ExternalButton[]>([]);
@@ -130,8 +139,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
     } else {
-      setBodyState({
-        ...bodyState,
+      props.setBodyState({
+        ...props.bodyState,
         showWalletDetails: true,
         walletDetails: button,
       });
@@ -170,10 +179,10 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               when={!isLoading()}
               fallback={
                 <div class="w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2">
-                  <div class="w3a--w-[100px] w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
-                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
-                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
-                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 w3a--animate-pulse" />
+                  <div class="w3a--w-[100px] w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse" />
+                  <div class="w3a--w-12 w3a--h-12 w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse" />
                 </div>
               }
             >
@@ -182,7 +191,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   class={cn(
                     "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--h-12",
                     {
-                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "all",
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800": selectedChain() === "all",
                     }
                   )}
                   onClick={() => setSelectedChain("all")}
@@ -193,34 +202,34 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   class={cn(
                     "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
                     {
-                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "ethereum",
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800": selectedChain() === "ethereum",
                     }
                   )}
                   onClick={() => setSelectedChain("ethereum")}
                 >
-                  <img src={Ethereum} alt="ethereum" />
+                  <img src={props.isDark ? EthereumDark : EthereumLight} alt="ethereum" />
                 </button>
                 <button
                   class={cn(
                     "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
                     {
-                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "polygon",
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800": selectedChain() === "polygon",
                     }
                   )}
                   onClick={() => setSelectedChain("polygon")}
                 >
-                  <img src={Polygon} alt="polygon" />
+                  <img src={props.isDark ? PolygonDark : PolygonLight} alt="polygon" />
                 </button>
                 <button
                   class={cn(
                     "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--w-12 w3a--h-12",
                     {
-                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700": selectedChain() === "solana",
+                      "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800": selectedChain() === "solana",
                     }
                   )}
                   onClick={() => setSelectedChain("solana")}
                 >
-                  <img src={Solana} alt="solana" />
+                  <img src={props.isDark ? SolanaDark : SolanaLight} alt="solana" />
                 </button>
               </div>
             </Show>
@@ -244,7 +253,10 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   isLoading() ? t("modal.external.search-wallet-loading") : t("modal.external.search-wallet", { count: `${totalExternalWallets()}` })
                 }
                 disabled={isLoading()}
-                class={cn("w3a--input", isInputFocused() && "!w3a--border-app-primary-600")}
+                class={cn(
+                  "w3a--input w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white",
+                  isInputFocused() && "!w3a--border-app-primary-600"
+                )}
               />
             </Show>
             <ul class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_480px)]")}>
@@ -288,8 +300,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               when={totalExternalWallets() > 15 && !isLoading()}
               fallback={<div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
             >
-              <div class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700">
-                <img src={View} alt="view" height="24" width="24" />
+              <div class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 dark:hover:w3a--bg-app-gray-600">
+                <img src={props.isDark ? ViewDark : ViewLight} alt="view" height="24" width="24" />
                 <p class="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">More Wallets</p>
                 <span
                   class="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
@@ -319,14 +331,14 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </div>
             }
           >
-            <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--items-center w3a--justify-center w3a--border w3a--border-app-gray-200 w3a--rounded-2xl w3a--p-4">
+            <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--items-center w3a--justify-center w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-700 w3a--rounded-2xl w3a--p-4">
               <div class="w3a--relative w3a--rounded-2xl w3a--h-[300px] w3a--w-[300px] w3a--flex w3a--items-center w3a--justify-center">
                 <QRCodeCanvas
                   value={props.walletConnectUri || ""}
                   level="low"
                   backgroundColor="transparent"
                   backgroundAlpha={0}
-                  foregroundColor="#000000"
+                  foregroundColor={props.isDark ? "#ffffff" : "#000000"}
                   foregroundAlpha={1}
                   width={300}
                   height={300}
@@ -346,7 +358,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   />
                 </div>
               </div>
-              <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--font-normal">
+              <p class="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-300 w3a--font-normal">
                 {t("modal.external.walletconnect-copy")}
               </p>
             </div>
@@ -354,16 +366,16 @@ const ConnectWallet = (props: ConnectWalletProps) => {
 
           <div
             class="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--text-app-gray-900 w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-700 dark:w3a--text-app-white w3a--rounded-2xl w3a--px-4 w3a--py-2"
+      dark:w3a--bg-app-gray-800 dark:w3a--text-app-white w3a--rounded-2xl w3a--px-4 w3a--py-2"
           >
             <p class="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">
               {t("modal.external.dont-have")} <span>{selectedButton()?.displayName}</span>?
             </p>
             <button
-              class="w3a--appearance-none w3a--border w3a--border-app-gray-400 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 dark:w3a--text-app-white dark:w3a--border-app-white w3a--rounded-full w3a--px-3 w3a--py-2 hover:w3a--shadow-2xl"
+              class="w3a--appearance-none w3a--border w3a--border-app-gray-400 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 hover:w3a--bg-app-white dark:hover:w3a--bg-app-gray-700 dark:w3a--text-app-gray-300 dark:w3a--border-app-gray-300 w3a--rounded-full w3a--px-3 w3a--py-2 hover:w3a--shadow-2xl"
               onClick={() => {
-                setBodyState({
-                  ...bodyState,
+                props.setBodyState({
+                  ...props.bodyState,
                   showWalletDetails: true,
                   walletDetails: selectedButton(),
                 });
