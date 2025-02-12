@@ -61,36 +61,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
   public abstract get provider(): IProvider | null;
 
-  public setAdapterSettings(options: BaseAdapterSettings): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-    if (options?.sessionTime) {
-      this.sessionTime = options.sessionTime;
-    }
-    if (options?.clientId) {
-      this.clientId = options.clientId;
-    }
-    if (options?.web3AuthNetwork) {
-      this.web3AuthNetwork = options.web3AuthNetwork;
-    }
-    if (options?.useCoreKitKey !== undefined) {
-      this.useCoreKitKey = options.useCoreKitKey;
-    }
-    const customChainConfig = options.chainConfig;
-    if (customChainConfig) {
-      if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
-      this.currentChainNamespace = customChainConfig.chainNamespace;
-      // chainId is optional in this function.
-      // we go with mainnet chainId by default.
-      const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
-      // NOTE: It is being forced casted to CustomChainConfig to handle OTHER Chainnamespace
-      // where chainConfig is not required.
-      const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;
-
-      this.chainConfig = finalChainConfig;
-      this.addChainConfig(finalChainConfig);
-    }
-  }
-
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
     if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V2 && this.status === ADAPTER_STATUS.CONNECTING) return;
@@ -151,6 +121,36 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
     return this.knownChainConfigs[chainId] || null;
   }
 
+  protected setAdapterSettings(options: BaseAdapterSettings): void {
+    if (this.status === ADAPTER_STATUS.READY) return;
+    if (options?.sessionTime) {
+      this.sessionTime = options.sessionTime;
+    }
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    }
+    if (options?.web3AuthNetwork) {
+      this.web3AuthNetwork = options.web3AuthNetwork;
+    }
+    if (options?.useCoreKitKey !== undefined) {
+      this.useCoreKitKey = options.useCoreKitKey;
+    }
+    const customChainConfig = options.chainConfig;
+    if (customChainConfig) {
+      if (!customChainConfig.chainNamespace) throw WalletInitializationError.notReady("ChainNamespace is required while setting chainConfig");
+      this.currentChainNamespace = customChainConfig.chainNamespace;
+      // chainId is optional in this function.
+      // we go with mainnet chainId by default.
+      const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
+      // NOTE: It is being forced casted to CustomChainConfig to handle OTHER Chainnamespace
+      // where chainConfig is not required.
+      const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;
+
+      this.chainConfig = finalChainConfig;
+      this.addChainConfig(finalChainConfig);
+    }
+  }
+
   abstract init(options?: AdapterInitOptions): Promise<void>;
   abstract connect(params?: T): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
@@ -158,6 +158,5 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
   abstract authenticateUser(): Promise<UserAuthInfo>;
-  abstract addChain(chainConfig: CustomChainConfig): Promise<void>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

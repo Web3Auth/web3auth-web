@@ -134,8 +134,6 @@ const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
   switch (name) {
     case "coinbase":
       return [new CoinbaseAdapter()];
-    // case "auth":
-    //   return new AuthAdapter();
     case "torus-evm":
       return [new TorusWalletAdapter()];
     case "wallet-connect-v2":

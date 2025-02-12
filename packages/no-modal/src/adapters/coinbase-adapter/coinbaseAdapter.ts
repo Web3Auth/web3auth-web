@@ -13,6 +13,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  ConnectorFn,
   CustomChainConfig,
   IProvider,
   UserInfo,
@@ -176,5 +177,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const coinbaseAdapter = (params: CoinbaseAdapterOptions): ConnectorFn => {
+  return () => {
+    return new CoinbaseAdapter(params);
+  };
+};
 
 export { CoinbaseAdapter };

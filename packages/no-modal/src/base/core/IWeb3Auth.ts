@@ -4,6 +4,7 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS_TYPE,
   AdapterEvents,
+  ConnectorFn,
   IAdapter,
   IBaseProvider,
   IProvider,
@@ -75,6 +76,11 @@ export interface IWeb3AuthCoreOptions {
    * Whether to use AA with external wallet
    */
   useAAWithExternalWallet?: boolean;
+
+  /**
+   * Connectors to use
+   */
+  connectors?: ConnectorFn[];
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
@@ -86,7 +92,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
@@ -95,9 +100,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
   cachedAdapter: string | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
   getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
-  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.

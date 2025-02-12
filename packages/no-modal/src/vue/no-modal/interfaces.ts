@@ -1,16 +1,7 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type { Ref, ShallowRef } from "vue";
 
-import type {
-  ADAPTER_STATUS_TYPE,
-  CustomChainConfig,
-  IAdapter,
-  IPlugin,
-  IProvider,
-  IWeb3AuthCoreOptions,
-  UserAuthInfo,
-  WALLET_ADAPTER_TYPE,
-} from "@/core/base";
+import type { ADAPTER_STATUS_TYPE, IAdapter, IPlugin, IProvider, IWeb3AuthCoreOptions, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@/core/base";
 
 import { type Web3AuthNoModal } from "../../noModal";
 
@@ -38,11 +29,9 @@ interface IBaseWeb3AuthComposableContext {
   enableMFA(params?: LoginParams): Promise<void>;
   manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
-  addAndSwitchChain(chainConfig: CustomChainConfig): Promise<void>;
   addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
   authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 

@@ -1,16 +1,14 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
-import deepmerge from "deepmerge";
 
 import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
-import { type AuthAdapter, LOGIN_PROVIDER, type LoginConfig } from "@/core/auth-adapter";
+import { type AuthAdapter, authConnector } from "@/core/auth-adapter";
 import {
   ADAPTER_EVENTS,
-  ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
   CHAIN_NAMESPACES,
-  cloneDeep,
   CONNECTED_EVENT_DATA,
+  ConnectorFn,
   CustomChainConfig,
   fetchProjectConfig,
   getChainConfig,
@@ -34,7 +32,6 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@/core/base";
-import { WalletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
 
 import { CommonJRPCProvider } from "./providers";
 
@@ -48,7 +45,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public cachedAdapter: string | null = null;
 
-  public walletAdapters: Record<string, IAdapter<unknown>> = {};
+  protected connectorFns: ConnectorFn[] = [];
+
+  protected connectors: Record<string, IAdapter<unknown>> = {};
 
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
@@ -77,6 +76,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       },
     };
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
+    this.connectorFns = options.connectors || [];
   }
 
   get connected(): boolean {
@@ -109,79 +109,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    const initPromises = Object.keys(this.walletAdapters).map(async (adapterName) => {
-      this.subscribeToAdapterEvents(this.walletAdapters[adapterName]);
-      // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
-      // if no chainNamespace or chainId is being provided, it will connect with mainnet.
-      if (!this.walletAdapters[adapterName].chainConfigProxy) {
-        const providedChainConfig = this.coreOptions.chainConfig;
-        if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
-        this.walletAdapters[adapterName].setAdapterSettings({
-          chainConfig: providedChainConfig,
-          sessionTime: this.coreOptions.sessionTime,
-          clientId: this.coreOptions.clientId,
-          web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-          useCoreKitKey: this.coreOptions.useCoreKitKey,
-        });
-      } else {
-        this.walletAdapters[adapterName].setAdapterSettings({
-          sessionTime: this.coreOptions.sessionTime,
-          clientId: this.coreOptions.clientId,
-          web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-          useCoreKitKey: this.coreOptions.useCoreKitKey,
-        });
-      }
-      if (adapterName === WALLET_ADAPTERS.AUTH) {
-        const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
-
-        const { whitelabel } = projectConfig;
-        this.coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel || {}), this.coreOptions.uiConfig || {});
-        if (!this.coreOptions.uiConfig.mode) this.coreOptions.uiConfig.mode = "light";
-
-        const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
-        if (smsOtpEnabled !== undefined) {
-          authAdapter.setAdapterSettings({
-            loginConfig: {
-              [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-                showOnModal: smsOtpEnabled,
-                showOnDesktop: smsOtpEnabled,
-                showOnMobile: smsOtpEnabled,
-                showOnSocialBackupFactor: smsOtpEnabled,
-              } as LoginConfig[keyof LoginConfig],
-            },
-          });
-        }
-        if (whitelist) {
-          authAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
-        }
-
-        if (typeof keyExportEnabled === "boolean") {
-          // dont know if this is required or not.
-          this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
-        }
-        authAdapter.setAdapterSettings({ whiteLabel: this.coreOptions.uiConfig });
-      } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-        const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
-        const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-
-        if (walletConnectEnabled === false) {
-          throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
-        }
-        if (!walletConnectProjectId)
-          throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
-
-        walletConnectAdapter.setAdapterSettings({
-          adapterSettings: {
-            walletConnectInitOptions: {
-              projectId: walletConnectProjectId,
-            },
-          },
-        });
-      }
-
-      return this.walletAdapters[adapterName].init({ autoConnect: this.cachedAdapter === adapterName }).catch((e) => log.error(e, adapterName));
+    // Add embedded wallet to connectors by default
+    const config = { projectConfig, coreOptions: this.coreOptions };
+    this.connectorFns.push(authConnector(config));
+    const connectorPromises = this.connectorFns.map(async (connectorFn) => {
+      const connector = connectorFn(config);
+      if (this.connectors[connector.name]) return;
+      this.connectors[connector.name] = connector;
+      this.subscribeToAdapterEvents(connector);
+      return connector.init({ autoConnect: this.cachedAdapter === connector.name }).catch((e) => log.error(e, connector.name));
     });
-    await Promise.all(initPromises);
+    await Promise.all(connectorPromises);
     if (this.status === ADAPTER_STATUS.NOT_READY) {
       this.status = ADAPTER_STATUS.READY;
       this.emit(ADAPTER_EVENTS.READY);
@@ -189,33 +127,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null {
-    return this.walletAdapters[adapterName] || null;
-  }
-
-  public configureAdapter(adapter: IAdapter<unknown>): Web3AuthNoModal {
-    this.checkInitRequirements();
-    const providedChainConfig = this.coreOptions.chainConfig;
-
-    if (!providedChainConfig.chainNamespace) throw WalletInitializationError.invalidParams("Please provide chainNamespace in chainConfig");
-
-    const adapterAlreadyExists = this.walletAdapters[adapter.name];
-    if (adapterAlreadyExists) throw WalletInitializationError.duplicateAdapterError(`Wallet adapter for ${adapter.name} already exists`);
-    if (adapter.adapterNamespace !== ADAPTER_NAMESPACES.MULTICHAIN && adapter.adapterNamespace !== providedChainConfig.chainNamespace)
-      throw WalletInitializationError.incompatibleChainNameSpace(
-        `This wallet adapter belongs to ${adapter.adapterNamespace} which is incompatible with currently used namespace: ${providedChainConfig.chainNamespace}`
-      );
-
-    if (
-      adapter.adapterNamespace === ADAPTER_NAMESPACES.MULTICHAIN &&
-      adapter.currentChainNamespace &&
-      providedChainConfig.chainNamespace !== adapter.currentChainNamespace
-    ) {
-      // chainConfig checks are already validated in constructor so using typecast is safe here.
-      adapter.setAdapterSettings({ chainConfig: providedChainConfig as CustomChainConfig });
-    }
-
-    this.walletAdapters[adapter.name] = adapter;
-    return this;
+    return this.connectors[adapterName] || null;
   }
 
   public clearCache() {
@@ -224,21 +136,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.cachedAdapter = null;
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
-      return this.walletAdapters[this.connectedAdapterName].addChain(chainConfig);
-    if (this.commonJRPCProvider) {
-      return this.commonJRPCProvider.addChain(chainConfig);
-    }
-    throw WalletInitializationError.notReady(`No wallet is ready`);
-  }
-
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
-      return this.walletAdapters[this.connectedAdapterName].switchChain(params);
-    if (this.commonJRPCProvider) {
-      return this.commonJRPCProvider.switchChain(params);
-    }
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) return this.connectors[this.connectedAdapterName]?.switchChain(params);
+    if (this.commonJRPCProvider) return this.commonJRPCProvider.switchChain(params);
     throw WalletInitializationError.notReady(`No wallet is ready`);
   }
 
@@ -247,7 +147,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @param walletName - Key of the walletAdapter to use.
    */
   async connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null> {
-    if (!this.walletAdapters[walletName] || !this.commonJRPCProvider)
+    if (!this.connectors[walletName] || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet adapter for ${walletName} wallet, before connecting`);
     return new Promise((resolve, reject) => {
       this.once(ADAPTER_EVENTS.CONNECTED, (_) => {
@@ -256,38 +156,38 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(ADAPTER_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      this.walletAdapters[walletName].connect(loginParams);
+      this.connectors[walletName]?.connect(loginParams);
     });
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    await this.walletAdapters[this.connectedAdapterName].disconnect(options);
+    await this.connectors[this.connectedAdapterName]?.disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     log.debug("Getting user info", this.status, this.connectedAdapterName);
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].getUserInfo();
+    return this.connectors[this.connectedAdapterName]?.getUserInfo();
   }
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedAdapterName !== WALLET_ADAPTERS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this adapter.`);
-    return this.walletAdapters[this.connectedAdapterName].enableMFA(loginParams);
+    return this.connectors[this.connectedAdapterName]?.enableMFA(loginParams);
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedAdapterName !== WALLET_ADAPTERS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this adapter.`);
-    return this.walletAdapters[this.connectedAdapterName].manageMFA(loginParams);
+    return this.connectors[this.connectedAdapterName]?.manageMFA(loginParams);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (this.status !== ADAPTER_STATUS.CONNECTED || !this.connectedAdapterName) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.walletAdapters[this.connectedAdapterName].authenticateUser();
+    return this.connectors[this.connectedAdapterName]?.authenticateUser();
   }
 
   public addPlugin(plugin: IPlugin): IWeb3Auth {
@@ -403,7 +303,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           return;
         }
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
-        const { authInstance } = this.walletAdapters[this.connectedAdapterName] as AuthAdapter;
+        const { authInstance } = this.connectors[this.connectedAdapterName] as AuthAdapter;
         const { options, sessionId, sessionNamespace } = authInstance || {};
         await plugin.initWithWeb3Auth(this, options?.whiteLabel);
         await plugin.connect({ sessionId, sessionNamespace });

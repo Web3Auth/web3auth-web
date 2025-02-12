@@ -5,7 +5,6 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
-  CustomChainConfig,
   type IPlugin,
   IProvider,
   WALLET_ADAPTER_TYPE,
@@ -59,9 +58,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
 
     resetHookState();
-    const { web3AuthOptions, adapters = [], plugins = [] } = config;
+    const { web3AuthOptions, plugins = [] } = config;
     const web3Instance = new Web3AuthNoModal(web3AuthOptions);
-    if (adapters.length) adapters.map((adapter) => web3Instance.configureAdapter(adapter));
     if (plugins.length)
       plugins.forEach((plugin) => {
         web3Instance.addPlugin(plugin);
@@ -200,27 +198,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth]
   );
 
-  const addAndSwitchChain = useCallback(
-    async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      await web3Auth.addChain(chainConfig);
-      await web3Auth.switchChain({ chainId: chainConfig.chainId });
-    },
-    [web3Auth]
-  );
-
   const authenticateUser = useCallback(async () => {
     if (!web3Auth) throw WalletInitializationError.notReady();
     return web3Auth.authenticateUser();
   }, [web3Auth]);
-
-  const addChain = useCallback(
-    async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      return web3Auth.addChain(chainConfig);
-    },
-    [web3Auth]
-  );
 
   const switchChain = useCallback(
     (chainParams: { chainId: string }) => {
@@ -244,8 +225,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       enableMFA,
       manageMFA,
       logout,
-      addAndSwitchChain,
-      addChain,
       addPlugin,
       authenticateUser,
       switchChain,
@@ -267,8 +246,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     enableMFA,
     manageMFA,
     logout,
-    addAndSwitchChain,
-    addChain,
     addPlugin,
     authenticateUser,
     switchChain,

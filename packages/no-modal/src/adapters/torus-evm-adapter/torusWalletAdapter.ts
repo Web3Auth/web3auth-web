@@ -13,6 +13,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  ConnectorFn,
   CustomChainConfig,
   IProvider,
   log,
@@ -224,3 +225,9 @@ export class TorusWalletAdapter extends BaseEvmAdapter<never> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const torusAdapter = (params: TorusWalletOptions): ConnectorFn => {
+  return () => {
+    return new TorusWalletAdapter(params);
+  };
+};

@@ -1,5 +1,5 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, AuthOptions, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed, WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -16,10 +16,15 @@ import {
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  cloneDeep,
   CONNECTED_EVENT_DATA,
+  ConnectorFn,
   CustomChainConfig,
+  getChainConfig,
   IProvider,
+  IWeb3AuthCoreOptions,
   log,
+  PROJECT_CONFIG_RESPONSE,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -28,7 +33,7 @@ import {
 } from "@/core/base";
 
 import { getAuthDefaultOptions } from "./config";
-import type { AuthAdapterOptions, LoginSettings, PrivateKeyProvider } from "./interface";
+import type { AuthAdapterOptions, LoginConfig, LoginSettings, PrivateKeyProvider } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -119,7 +124,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       this.wsEmbedInstance = new WsEmbed({
         web3AuthClientId: this.authOptions.clientId || "",
         web3AuthNetwork: this.authOptions.network,
-        // modalZIndex: 10000, TODO: turn this into an optional parameter
+        // modalZIndex: 10000, TODO-v10: turn this into an optional parameter
       });
       await this.wsEmbedInstance.init({
         ...this.walletSettings,
@@ -128,10 +133,10 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
           ...this.authOptions.whiteLabel,
           ...this.walletSettings.whiteLabel,
         },
-        // TODO: add more options
+        // TODO-v10: add more options
       });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      // TODO: once WS supports solana, we can use it here
+      // TODO-v10: once WS supports solana, we can use it here
       const { SolanaPrivateKeyProvider } = await import("@/core/solana-provider");
       this.privateKeyProvider = new SolanaPrivateKeyProvider({
         config: { chainConfig: this.chainConfig },
@@ -261,13 +266,6 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     }
   }
 
-  // TODO: we will no longer need this
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    // this.privateKeyProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
-  }
-
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     // TODO: need to check switching to a different chain namespace
@@ -371,3 +369,64 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     }
   }
 }
+
+export const authConnector = (params: { projectConfig: PROJECT_CONFIG_RESPONSE; coreOptions: IWeb3AuthCoreOptions }): ConnectorFn => {
+  const { projectConfig, coreOptions } = params;
+  const { whitelabel } = projectConfig;
+  coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
+  if (!coreOptions.uiConfig.mode) coreOptions.uiConfig.mode = "light";
+
+  const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
+  let adapterSettings: AuthAdapterOptions["adapterSettings"] = {};
+  if (smsOtpEnabled !== undefined) {
+    adapterSettings = {
+      ...adapterSettings,
+      loginConfig: {
+        [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+          showOnModal: smsOtpEnabled,
+          showOnDesktop: smsOtpEnabled,
+          showOnMobile: smsOtpEnabled,
+          showOnSocialBackupFactor: smsOtpEnabled,
+        } as LoginConfig[keyof LoginConfig],
+      },
+    };
+  }
+  if (whitelist) {
+    adapterSettings = {
+      ...adapterSettings,
+      originData: whitelist.signed_urls,
+    };
+  }
+
+  // TODO-v10: handle modal ux mode from modal SDK
+  if (coreOptions.uiConfig?.uxMode) {
+    adapterSettings = {
+      ...adapterSettings,
+      uxMode: coreOptions.uiConfig.uxMode,
+    };
+  }
+
+  adapterSettings = {
+    ...adapterSettings,
+    whiteLabel: coreOptions.uiConfig,
+  };
+
+  // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
+  // if no chainNamespace or chainId is being provided, it will connect with mainnet.
+  const { chainConfig } = coreOptions;
+  const finalChainConfig = {
+    ...getChainConfig(chainConfig?.chainNamespace, chainConfig?.chainId),
+    ...coreOptions.chainConfig,
+  };
+  const options: AuthAdapterOptions = {
+    chainConfig: finalChainConfig,
+    sessionTime: coreOptions.sessionTime,
+    clientId: coreOptions.clientId,
+    web3AuthNetwork: coreOptions.web3AuthNetwork,
+    useCoreKitKey: coreOptions.useCoreKitKey,
+    adapterSettings,
+  };
+  return () => {
+    return new AuthAdapter(options);
+  };
+};

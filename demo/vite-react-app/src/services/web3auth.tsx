@@ -16,7 +16,6 @@ export interface IWeb3AuthContext {
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
   signTransaction: () => Promise<void>;
-  addChain: () => Promise<void>;
   switchChain: () => Promise<void>;
   showWalletConnectScanner: () => Promise<void>;
   showWalletUi: () => Promise<void>;
@@ -37,7 +36,6 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   getAccounts: async () => {},
   getBalance: async () => {},
   signTransaction: async () => {},
-  addChain: async () => {},
   switchChain: async () => {},
   showWalletConnectScanner: async () => {},
   showWalletUi: async () => {},
@@ -229,24 +227,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await web3Auth.manageMFA();
   };
 
-  const addChain = async () => {
-    if (!provider) {
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    const newChain: CustomChainConfig = {
-      rpcTarget: "https://rpc.ankr.com/polygon",
-      blockExplorerUrl: "https://polygonscan.com/",
-      chainId: "0x89",
-      displayName: "Polygon Mainnet",
-      ticker: "POL",
-      tickerName: "Polygon Ecosystem Token",
-      logo: "https://images.toruswallet.io/matic.svg",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-    };
-    await web3Auth?.addChain(newChain);
-    uiConsole("New Chain Added");
-  };
   const switchChain = async () => {
     const chainId = "0x89";
     if (!provider) {
@@ -342,7 +322,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getBalance,
     signMessage,
     signTransaction,
-    addChain,
     switchChain,
     showWalletConnectScanner,
     enableMFA,

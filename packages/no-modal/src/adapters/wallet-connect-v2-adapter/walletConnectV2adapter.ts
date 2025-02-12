@@ -19,10 +19,12 @@ import {
   ChainNamespaceType,
   checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
+  ConnectorFn,
   CustomChainConfig,
   getSavedToken,
   IProvider,
   log,
+  PROJECT_CONFIG_RESPONSE,
   saveToken,
   UserAuthInfo,
   UserInfo,
@@ -175,12 +177,6 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
     const { loginSettings } = adapterSettings;
     if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
-  }
-
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    await this.wcProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -401,5 +397,27 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     return signedMessage as string;
   }
 }
+
+export const walletConnectV2Connector = (params: { projectConfig: PROJECT_CONFIG_RESPONSE }): ConnectorFn => {
+  const { projectConfig } = params;
+
+  const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+
+  if (walletConnectEnabled === false) {
+    throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
+  }
+  if (!walletConnectProjectId)
+    throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
+
+  return () => {
+    return new WalletConnectV2Adapter({
+      adapterSettings: {
+        walletConnectInitOptions: {
+          projectId: walletConnectProjectId,
+        },
+      },
+    });
+  };
+};
 
 export { WalletConnectV2Adapter };
