@@ -59,13 +59,16 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
       })}
     >
       <div
-        class={cn("w3a--modal-bg w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[380px] w3a--duration-500", {
-          "w3a--translate-y-0 w3a--delay-100": isOpen(),
-          "w3a--translate-y-[100vh]": !isOpen(),
-          "w3a--p-4": mergedProps.padding,
-          "w3a--shadow-xl sm:w3a--shadow-lg": mergedProps.shadow,
-          "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": mergedProps.border,
-        })}
+        class={cn(
+          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[393px] w3a--h-[642px] w3a--flex w3a--flex-col w3a--duration-500",
+          {
+            "w3a--translate-y-0 w3a--delay-100": isOpen(),
+            "w3a--translate-y-[100vh]": !isOpen(),
+            "w3a--p-4": mergedProps.padding,
+            "w3a--shadow-xl sm:w3a--shadow-lg": mergedProps.shadow,
+            "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": mergedProps.border,
+          }
+        )}
       >
         {mergedProps.showCloseIcon && (
           <div class="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--cursor-pointer z-10">

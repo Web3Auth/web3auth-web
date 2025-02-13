@@ -15,7 +15,10 @@ export const baseConfig = {
       extensions: [".css"],
       minimize: true,
     }),
-    url(),
+    url({
+      include: ["**/*.svg"],
+      limit: 0, // Force file export instead of base64
+    }),
     svgr(),
     json(),
   ],

@@ -1,145 +1,56 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
-import { createEffect, createSignal, For, Show, useContext } from "solid-js";
+import { For, Show } from "solid-js";
 
-import { capitalizeFirstLetter } from "../../config";
-import { ThemedContext } from "../../context/ThemeContext";
+import ArrowLeftDark from "../../assets/arrow-left-dark.svg";
+import ArrowLeftLight from "../../assets/arrow-left-light.svg";
+import ArrowRightDark from "../../assets/chevron-right-dark.svg";
+import ArrowRightLight from "../../assets/chevron-right-light.svg";
+import DotDark from "../../assets/dots-dark-horizontal.svg";
+import DotLight from "../../assets/dots-light-horizontal.svg";
 import { SocialLoginsConfig } from "../../interfaces";
-import { t } from "../../localeImport";
-import { cn } from "../../utils/common";
+import { rowType } from "../Body/Login";
 import { SocialLoginButton } from "../SocialLoginButton";
-
 export interface SocialLoginListProps {
+  isDark: boolean;
+  visibleRow: rowType[];
+  canShowMore: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   handleSocialLoginClick: (params: { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  handleExpandSocialLogins: () => void;
+  otherRow?: rowType[];
 }
 
-export type rowType = {
-  method: string;
-  isDark: boolean;
-  isPrimaryBtn: boolean;
-  name: string;
-  adapter: SocialLoginsConfig["adapter"];
-  loginParams: { loginProvider: string; name: string; login_hint: string };
-  order: number;
-  isMainOption: boolean;
-};
-
-export const restrictedLoginMethods: string[] = [
-  LOGIN_PROVIDER.WEBAUTHN,
-  LOGIN_PROVIDER.JWT,
-  LOGIN_PROVIDER.SMS_PASSWORDLESS,
-  LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
-  LOGIN_PROVIDER.AUTHENTICATOR,
-  LOGIN_PROVIDER.PASSKEYS,
-];
+function getProviderIcon(method: string, isDark: boolean, extension: string) {
+  const imageId =
+    method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+  const hoverId =
+    method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
+  return (
+    <>
+      <img
+        id="active-login-img"
+        src={`https://images.web3auth.io/${hoverId}${extension}`}
+        alt="active-login-img"
+        class="w3a--object-contain w3a--w-5 w3a--h-5"
+      />
+      <img id="login-img" src={`https://images.web3auth.io/${imageId}${extension}`} alt="login-img" class="w3a--object-contain w3a--w-5 w3a--h-5" />
+    </>
+  );
+}
 
 const SocialLoginList = (props: SocialLoginListProps) => {
-  const [expand, setExpand] = createSignal(false);
-  const [canShowMore, setCanShowMore] = createSignal(false);
-  const [mainOption, setMainOption] = createSignal<rowType>(null);
-  const [visibleRow, setVisibleRow] = createSignal<rowType[]>([]);
-  const [otherRow, setOtherRow] = createSignal<rowType[]>([]);
-
-  const { isDark } = useContext(ThemedContext);
-
-  const handleExpand = () => {
-    setExpand((prev) => !prev);
-  };
-
-  createEffect(() => {
-    const maxOptions = Object.keys(props.socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
-      return props.socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
-    });
-
-    const visibleRows: rowType[] = [];
-    const otherRows: rowType[] = [];
-
-    Object.keys(props.socialLoginsConfig.loginMethods)
-      .filter((method) => {
-        return !props.socialLoginsConfig.loginMethods[method].showOnModal === false && !restrictedLoginMethods.includes(method);
-      })
-      .forEach((method, index) => {
-        const name = capitalizeFirstLetter(props.socialLoginsConfig.loginMethods[method].name || method);
-        const orderIndex = props.socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
-        const order = orderIndex || index;
-
-        const isMainOption = props.socialLoginsConfig.loginMethods[method].mainOption || order === 1;
-        const isPrimaryBtn = props.socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
-
-        if (isMainOption) {
-          setMainOption({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: props.socialLoginsConfig.adapter,
-            loginParams: { loginProvider: method, name, login_hint: "" },
-            order,
-            isMainOption,
-          });
-        }
-
-        if (order > 1 && order < 5) {
-          visibleRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: props.socialLoginsConfig.adapter,
-            loginParams: { loginProvider: method, name, login_hint: "" },
-            order,
-            isMainOption,
-          });
-        }
-
-        if (order > 4) {
-          otherRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: props.socialLoginsConfig.adapter,
-            loginParams: { loginProvider: method, name, login_hint: "" },
-            order,
-            isMainOption,
-          });
-        }
-      });
-
-    setVisibleRow(visibleRows);
-    setOtherRow(otherRows);
-    setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  });
-
   return (
-    <div class="w3a--flex w3a--flex-col w3a--w-full w3a--gap-y-2">
-      <Show when={mainOption()}>
-        <SocialLoginButton
-          method={mainOption().method}
-          isDark={isDark}
-          isPrimaryBtn={mainOption().isPrimaryBtn}
-          onClick={() =>
-            props.handleSocialLoginClick({
-              adapter: mainOption().adapter,
-              loginParams: mainOption().loginParams,
-            })
-          }
-          showText={true}
-          showIcon={true}
-          text={t("modal.social.continueCustom", { adapter: mainOption().name })}
-        />
-      </Show>
-
-      <Show when={visibleRow().length > 0}>
-        <div class="w3a--grid w3a--grid-cols-3 w3a--gap-x-2 w3a--gap-y-2">
-          <For each={visibleRow()}>
+    <>
+      <Show when={props.visibleRow.length > 0 && props.otherRow?.length === 0}>
+        <div class="w3a--grid w3a--grid-cols-4 w3a--gap-x-2 w3a--w-full">
+          <For each={props.visibleRow}>
             {(row) => (
               <>
                 <SocialLoginButton
                   showText={false}
                   method={row.method}
-                  isDark={isDark}
-                  isPrimaryBtn={row.isPrimaryBtn}
+                  isDark={props.isDark}
+                  isPrimaryBtn={false}
                   onClick={() =>
                     props.handleSocialLoginClick({
                       adapter: row.adapter,
@@ -151,51 +62,54 @@ const SocialLoginList = (props: SocialLoginListProps) => {
               </>
             )}
           </For>
+          <Show when={props.canShowMore}>
+            <SocialLoginButton isDark={props.isDark} showIcon={false} onClick={props.handleExpandSocialLogins}>
+              <Show when={props.isDark} fallback={<img src={DotLight} alt="Logo" class="w3a--object-contain" />}>
+                <img src={DotDark} alt="Logo" class="w3a--object-contain" />
+              </Show>
+            </SocialLoginButton>
+          </Show>
         </div>
       </Show>
-
-      {/* 224px */}
-      <Show when={otherRow().length > 0}>
-        <div
-          class={cn(
-            "w3a--grid w3a--grid-cols-3 w3a--gap-x-2 w3a--gap-y-2 w3a--overflow-hidden w3a--transition-all w3a--duration-700 w3a--ease-linear",
-            { "w3a--max-h-[192px]": expand(), "w3a--max-h-0": !expand() }
-          )}
-        >
-          <For each={otherRow()}>
-            {(row) => (
-              <>
+      <Show when={props.otherRow?.length > 0}>
+        <div class="w3a--flex w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4 w3a--w-full">
+          <button type="button" class="w3a--appearance-none" onClick={() => props.handleExpandSocialLogins()}>
+            <Show when={props.isDark} fallback={<img src={ArrowLeftLight} alt="arrow" />}>
+              <img src={ArrowLeftDark} alt="arrow" />
+            </Show>
+          </button>
+          <div class="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto">
+            <For each={props.otherRow}>
+              {(row) => (
                 <SocialLoginButton
-                  showText={false}
                   method={row.method}
-                  isDark={isDark}
-                  isPrimaryBtn={row.isPrimaryBtn}
+                  isDark={props.isDark}
+                  isPrimaryBtn={false}
                   onClick={() =>
                     props.handleSocialLoginClick({
                       adapter: row.adapter,
                       loginParams: row.loginParams,
                     })
                   }
-                  showIcon={true}
-                />
-              </>
-            )}
-          </For>
+                  btnStyle="w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group"
+                >
+                  <>
+                    {getProviderIcon(row.method, props.isDark, ".svg")}
+                    <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
+                    <Show
+                      when={props.isDark}
+                      fallback={<img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />}
+                    >
+                      <img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightDark} alt="arrow" />
+                    </Show>
+                  </>
+                </SocialLoginButton>
+              )}
+            </For>
+          </div>
         </div>
       </Show>
-
-      <p class="w3a--text-xs w3a--font-normal w3a--text-app-gray-500 w3a--text-start">{t("modal.social.policy")}</p>
-
-      <Show when={canShowMore()}>
-        <button
-          type="button"
-          class="w3a--text-xs w3a--font-normal w3a--text-app-primary-600 hover:w3a--text-app-primary-500 dark:w3a--text-app-primary-500 dark:hover:w3a--text-app-primary-600 w3a--text-right"
-          onClick={handleExpand}
-        >
-          {expand() ? t("modal.social.view-less") : t("modal.social.view-more")}
-        </button>
-      </Show>
-    </div>
+    </>
   );
 };
 

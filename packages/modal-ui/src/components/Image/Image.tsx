@@ -3,6 +3,7 @@ import { createMemo, mergeProps, Show, useContext } from "solid-js";
 import { ThemedContext } from "../../context/ThemeContext";
 
 export interface ImageProps {
+  id?: string;
   hoverImageId?: string;
   imageId: string;
   isButton?: boolean;
@@ -18,6 +19,7 @@ export interface ImageProps {
 export default function Image(props: ImageProps) {
   const mergedProps = mergeProps(
     {
+      id: "",
       isButton: false,
       height: "auto",
       width: "auto",
