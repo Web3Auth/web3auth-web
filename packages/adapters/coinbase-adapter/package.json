@@ -40,7 +40,7 @@
     "@web3auth/base-evm-adapter": "^9.5.4"
   },
   "devDependencies": {
-    "@coinbase/wallet-sdk": "^4.2.4"
+    "@coinbase/wallet-sdk": "^4.3.0"
   },
   "lint-staged": {
     "!(*d).ts": [

@@ -40,7 +40,7 @@ const isDisplay = (name: string): boolean => {
 
     case "walletServices":
       return (
-        formData.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+        (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
         formData.walletPlugin.enable &&
         web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
       );

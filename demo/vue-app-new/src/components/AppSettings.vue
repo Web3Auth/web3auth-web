@@ -52,7 +52,7 @@ const isDisabled = (name: string): boolean => {
       return !formData.whiteLabel.enable;
 
     case "walletServicePlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 && formData.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
 
     case "nftCheckoutPlugin":
       return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;

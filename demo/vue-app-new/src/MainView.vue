@@ -36,9 +36,9 @@ const formData = formDataStore;
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const walletPlugins = computed(() => {
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155) return [];
+  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 && formData.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return [];
   const plugins = [];
-  if (formData.nftCheckoutPlugin.enable) {
+  if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
     const nftCheckoutPlugin = new NFTCheckoutPlugin({
       clientId: NFT_CHECKOUT_CLIENT_ID,
     });
