@@ -43,7 +43,7 @@ const OtpInput = (props: OtpProps) => {
       error: false,
       success: false,
       disabled: false,
-      resendBtnText: "Resend OTP",
+      resendBtnText: "Resend Code",
       classes: {},
       helperText: "",
       onResendTimer: () => {},
@@ -116,12 +116,23 @@ const OtpInput = (props: OtpProps) => {
 
   const handlePaste = (e: ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData?.getData("text").slice(0, length);
+    const pastedData = e.clipboardData?.getData("text").slice(0, mergedProps.length);
+
     if (pastedData && /^\d+$/.test(pastedData)) {
-      const newOtpArray = pastedData.split("");
-      setOtpArray(newOtpArray);
-      inputRefs[newOtpArray.length === mergedProps.length ? mergedProps.length - 1 : newOtpArray.length]?.focus();
-      mergedProps.onComplete(newOtpArray.join(""));
+      // console.log("Paste event triggered", pastedData);
+
+      const newOtpArray = [...otpArray()]; // Preserve existing OTP array
+      pastedData.split("").forEach((char, index) => {
+        newOtpArray[index] = char; // Fill pasted values in order
+      });
+
+      setOtpArray(newOtpArray); // Update state with the new array
+      const nextFocusIndex = Math.min(pastedData.length, mergedProps.length - 1);
+      setTimeout(() => inputRefs[nextFocusIndex]?.focus(), 0); // Move focus after pasting
+
+      if (pastedData.length === mergedProps.length) {
+        mergedProps.onComplete?.(newOtpArray.join(""));
+      }
     }
   };
 
@@ -153,8 +164,8 @@ const OtpInput = (props: OtpProps) => {
   });
 
   return (
-    <div class={`flex flex-col items-center ${mergedProps.classes?.root || ""}`}>
-      <form class={`flex space-x-2 ${mergedProps.classes?.inputContainer || ""}`}>
+    <div class={`w3a--flex w3a--flex-col w3a--items-center ${mergedProps.classes?.root || ""}`}>
+      <form class={`w3a--flex w3a--space-x-2 ${mergedProps.classes?.inputContainer || ""}`}>
         <For each={otpArray()}>
           {(digit, index) => (
             <input
@@ -165,14 +176,14 @@ const OtpInput = (props: OtpProps) => {
               // autoComplete={mergedProps.autoComplete}
               placeholder={Array.isArray(mergedProps.placeholder) ? mergedProps.placeholder[index()] : mergedProps.placeholder}
               inputMode="numeric"
-              class={`w-12 h-[42px] rounded-full border text-center text-xl focus:outline-none active:outline-none 
-              focus:border-app-primary-600 dark:focus:border-app-primary-500 
-              border-app-gray-300 dark:border-app-gray-500 
-              bg-app-gray-50 dark:bg-app-gray-700 
-              text-app-gray-900 dark:text-app-white
-              ${mergedProps.success ? mergedProps.classes?.success || "border-app-green-400 dark:border-app-green-500" : ""}
-              ${mergedProps.error ? mergedProps.classes?.error || "border-app-red-600 dark:border-app-red-500" : ""}
-              ${mergedProps.disabled ? mergedProps.classes?.disabled || "cursor-not-allowed border-app-gray-200 bg-app-gray-200 dark:border-app-gray-700" : ""}
+              class={`w3a--w-12 w3a--h-[42px] w3a--rounded-full w3a--border w3a--text-center w3a--text-xl w3a--focus:outline-none w3a--active:outline-none 
+              w3a--focus:border-app-primary-600 dark:w3a--focus:border-app-primary-500 
+              w3a--border-app-gray-300 dark:w3a--border-app-gray-500 
+              w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 
+              w3a--text-app-gray-900 dark:w3a--text-app-white
+              ${mergedProps.success ? mergedProps.classes?.success || "w3a--border-app-green-400 dark:w3a--border-app-green-500" : ""}
+              ${mergedProps.error ? mergedProps.classes?.error || "w3a--border-app-red-600 dark:w3a--border-app-red-500" : ""}
+              ${mergedProps.disabled ? mergedProps.classes?.disabled || "w3a--cursor-not-allowed w3a--border-app-gray-200 w3a--bg-app-gray-200 dark:w3a--border-app-gray-700" : ""}
               ${mergedProps.classes?.input || ""}`}
               disabled={mergedProps.disabled}
               onInput={(e) => handleInputChange(e, index())}
@@ -184,20 +195,20 @@ const OtpInput = (props: OtpProps) => {
       </form>
       {mergedProps.helperText && (
         <p
-          class={`text-xs font-normal mt-2 ${mergedProps.error ? "text-app-red-500" : mergedProps.success ? "text-app-green-500" : "text-app-gray-500"} ${mergedProps.classes?.helperText || ""}`}
+          class={`w3a--text-xs w3a--font-normal w3a--mt-2 ${mergedProps.error ? "w3a--text-app-red-500" : mergedProps.success ? "w3a--text-app-green-500" : "w3a--text-app-gray-500"} ${mergedProps.classes?.helperText || ""}`}
         >
           {mergedProps.helperText}
         </p>
       )}
       {mergedProps.showCta && (
-        <div class={`flex items-center mt-3 ${mergedProps.classes?.ctaContainer || ""}`}>
+        <div class={`w3a--flex w3a--items-center w3a--mt-3 ${mergedProps.classes?.ctaContainer || ""}`}>
           {timer() > 0 && mergedProps.showTimer && !mergedProps.disabled ? (
-            <span class={`text-xs text-app-gray-500 dark:text-app-gray-400 ${mergedProps.classes?.timerText || ""}`}>
+            <span class={`w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400 ${mergedProps.classes?.timerText || ""}`}>
               Resend in {timer()} seconds
             </span>
           ) : (
             <button
-              class={`text-sm p-0 ${mergedProps.classes?.resendBtnText || ""}`}
+              class={`w3a--text-xs w3a--p-0 w3a--text-app-primary-600 dark:w3a--text-app-primary-500 ${mergedProps.classes?.resendBtnText || ""}`}
               onClick={handleResendClick}
               disabled={(timer() > 0 && mergedProps.showTimer) || mergedProps.disabled}
             >

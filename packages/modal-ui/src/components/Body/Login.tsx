@@ -1,16 +1,19 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
-import { createEffect, createMemo, createSignal, mergeProps, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, mergeProps, Show, Suspense, Switch } from "solid-js";
 
 import ArrowRightDark from "../../assets/chevron-right-dark.svg";
 import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import LogoDark from "../../assets/dark-logo.svg";
+import EmailLight from "../../assets/email-otp-light.svg";
 import LogoLight from "../../assets/light-logo.svg";
+import SMSLight from "../../assets/sms-otp-light.svg";
+import SuccessLight from "../../assets/success-light.svg";
 import { capitalizeFirstLetter } from "../../config";
 import { SocialLoginsConfig } from "../../interfaces";
 import { t } from "../../localeImport";
 import { cn } from "../../utils/common";
 import { validatePhoneNumber } from "../../utils/modal";
-// import OtpInput from "../Otp/Otp";
+import OtpInput from "../Otp/Otp";
 import SocialLoginList from "../SocialLoginList";
 
 export interface LoginProps {
@@ -60,6 +63,10 @@ const Login = (props: LoginProps) => {
   const [otherRow, setOtherRow] = createSignal<rowType[]>([]);
   const [isPasswordlessCtaClicked, setIsPasswordlessCtaClicked] = createSignal(false);
   const [isInputFocused, setIsInputFocused] = createSignal(false);
+  const [showOtpFlow, setShowOtpFlow] = createSignal(false);
+  const [otpLoading, setOtpLoading] = createSignal(true);
+  const [isMobileOtp, setIsMobileOtp] = createSignal(false);
+  const [otpSuccess, setOtpSuccess] = createSignal(false);
 
   const handleExpand = () => {
     setExpand((prev) => !prev);
@@ -117,7 +124,15 @@ const Login = (props: LoginProps) => {
 
   const handleFormSubmit = async (e: Event) => {
     e.preventDefault();
+
+    setShowOtpFlow(true);
+    setTimeout(() => {
+      setOtpLoading(false);
+      setIsMobileOtp(true);
+    }, 3000);
+
     const value = fieldValue();
+
     if (mergedProps.isEmailPasswordLessLoginVisible) {
       const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
@@ -145,7 +160,7 @@ const Login = (props: LoginProps) => {
 
   const handleInputChange = (e: { target: { value: string } }) => {
     setFieldValue(e.target.value);
-    if (isValidInput() === false) setIsValidInput(null);
+    if (isValidInput() === false) setIsValidInput(true);
   };
 
   const title = createMemo(() => {
@@ -172,100 +187,175 @@ const Login = (props: LoginProps) => {
     if (mergedProps.handleExternalWalletBtnClick) mergedProps.handleExternalWalletBtnClick(true);
   };
 
-  return (
-    <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
-      <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure class="w3a--w-[200px] w3a--h-12 mx-auto">
-          <img src={LogoDark} alt="Logo" class="w3a--object-contain w3a--hidden dark:w3a--block" />
-          <img src={LogoLight} alt="Logo" class="w3a--object-contain w3a--block dark:w3a--hidden" />
-        </figure>
-        <p class="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
-      </div>
+  const handleOtpComplete = (otp: string) => {
+    // eslint-disable-next-line no-console
+    console.log(otp);
+    setOtpSuccess(true);
+    setTimeout(() => {
+      setOtpSuccess(false);
+      setShowOtpFlow(false);
+    }, 1000);
+  };
 
-      <Show
-        when={!expand()}
-        fallback={
-          <SocialLoginList
-            otherRow={otherRow()}
-            isDark={props.isDark}
-            visibleRow={visibleRow()}
-            canShowMore={canShowMore()}
-            handleSocialLoginClick={props.handleSocialLoginClick}
-            socialLoginsConfig={props.socialLoginsConfig}
-            handleExpandSocialLogins={handleExpand}
-          />
-        }
-      >
-        <Show when={mergedProps.areSocialLoginsVisible}>
-          <SocialLoginList
-            otherRow={[]}
-            isDark={props.isDark}
-            visibleRow={visibleRow()}
-            canShowMore={canShowMore()}
-            handleSocialLoginClick={props.handleSocialLoginClick}
-            socialLoginsConfig={props.socialLoginsConfig}
-            handleExpandSocialLogins={handleExpand}
-          />
-        </Show>
-        <Show when={mergedProps.showPasswordLessInput}>
-          <Show
-            when={isPasswordlessCtaClicked()}
-            fallback={
-              <button class={cn("w3a--btn !w3a--justify-between")} onClick={() => setIsPasswordlessCtaClicked(true)}>
-                <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">Continue with {title()}</p>
-              </button>
-            }
-          >
-            <div class={cn("w3a--input", isInputFocused() && "!w3a--border-app-primary-600")}>
-              <input
-                onInput={handleInputChange}
-                value={fieldValue()}
-                placeholder={placeholder()}
-                onFocus={(e) => {
-                  e.target.placeholder = "";
-                  setIsInputFocused(true);
-                }}
-                onBlur={(e) => {
-                  e.target.placeholder = `${placeholder()}`;
-                  setIsInputFocused(false);
-                }}
-                type="text"
-                autofocus
-                class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
-              />
-              <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
-                <img src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
-              </button>
-            </div>
-            <Show when={!isValidInput() && isPasswordlessCtaClicked()}>
-              <p class="w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start -w3a--mt-2 w3a--w-full w3a--pl-6">
-                {invalidInputErrorMessage()}
-              </p>
-            </Show>
-          </Show>
-        </Show>
-        <Show when={mergedProps.showExternalWalletButton && mergedProps.showPasswordLessInput}>
-          <div class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full">
-            <div class="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-            <p class="w3a--text-xs w3a--font-normal w3a--text-app-gray-400 dark:w3a--text-app-gray-400 w3a--uppercase">or</p>
-            <div class="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-          </div>
-        </Show>
-        <Show when={mergedProps.showExternalWalletButton}>
-          <button class={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-            <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
-            <div
-              id="external-wallet-count"
-              class="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 dark:w3a--bg-transparent dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--text-app-primary-500 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
+  return (
+    <Suspense>
+      <Switch>
+        <Match when={showOtpFlow()}>
+          <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
+            <Show
+              when={!otpLoading()}
+              fallback={
+                <div class="w3a--flex w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1 w3a--gap-x-2">
+                  <div class="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-600 dark:w3a--bg-app-primary-500 w3a--animate-pulse" />
+                  <div class="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-500 dark:w3a--bg-app-primary-400 w3a--animate-pulse" />
+                  <div class="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-400 dark:w3a--bg-app-primary-300 w3a--animate-pulse" />
+                </div>
+              }
             >
-              {props.totalExternalWallets - 1}+
+              <Show
+                when={!otpSuccess()}
+                fallback={
+                  <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
+                    <img src={SuccessLight} alt="success" class="w3a--w-auto w3a--h-auto" />
+                    <p class="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white w3a--w-[80%] w3a--mx-auto w3a--text-center">
+                      You are connected to your account!
+                    </p>
+                  </div>
+                }
+              >
+                <div class="w3a--flex w3a--items-start w3a--justify-start w3a--mr-auto w3a--w-full">
+                  <button
+                    class="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center w3a--z-20"
+                    onClick={() => setShowOtpFlow(false)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" class="w3a--text-app-gray-900 dark:w3a--text-app-white">
+                      <path
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 0 1-1.414 0l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 1.414L5.414 9H17a1 1 0 1 1 0 2H5.414l4.293 4.293a1 1 0 0 1 0 1.414"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
+                  <img src={isMobileOtp() ? SMSLight : EmailLight} alt="otp" class="w3a--w-auto w3a--h-auto" />
+                  <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+                    <p class="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
+                      {isMobileOtp() ? "OTP verification" : "Email verification"}
+                    </p>
+                    <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
+                      <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
+                        {isMobileOtp() ? "Enter the OTP sent to" : "Please enter the 6-digit verification code "}
+                      </p>
+                      <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
+                        {isMobileOtp() ? "🇸🇬+91 ****0999" : "that was sent to your email ja****@email.com"}
+                      </p>
+                    </div>
+                  </div>
+                  <OtpInput length={6} onComplete={handleOtpComplete} />
+                </div>
+              </Show>
+            </Show>
+          </div>
+        </Match>
+        <Match when={!showOtpFlow()}>
+          <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
+            <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
+              <figure class="w3a--w-[200px] w3a--h-12 mx-auto">
+                <img src={LogoDark} alt="Logo" class="w3a--object-contain w3a--hidden dark:w3a--block" />
+                <img src={LogoLight} alt="Logo" class="w3a--object-contain w3a--block dark:w3a--hidden" />
+              </figure>
+              <p class="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
             </div>
-            <img id="external-wallet-arrow" class="w3a--icon-animation" src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
-          </button>
-        </Show>
-        {/* <OtpInput length={6} onComplete={() => {}} /> */}
-      </Show>
-    </div>
+
+            <Show
+              when={!expand()}
+              fallback={
+                <SocialLoginList
+                  otherRow={otherRow()}
+                  isDark={props.isDark}
+                  visibleRow={visibleRow()}
+                  canShowMore={canShowMore()}
+                  handleSocialLoginClick={props.handleSocialLoginClick}
+                  socialLoginsConfig={props.socialLoginsConfig}
+                  handleExpandSocialLogins={handleExpand}
+                />
+              }
+            >
+              <Show when={mergedProps.areSocialLoginsVisible}>
+                <SocialLoginList
+                  otherRow={[]}
+                  isDark={props.isDark}
+                  visibleRow={visibleRow()}
+                  canShowMore={canShowMore()}
+                  handleSocialLoginClick={props.handleSocialLoginClick}
+                  socialLoginsConfig={props.socialLoginsConfig}
+                  handleExpandSocialLogins={handleExpand}
+                />
+              </Show>
+              <Show when={mergedProps.showPasswordLessInput}>
+                <Show
+                  when={isPasswordlessCtaClicked()}
+                  fallback={
+                    <button class={cn("w3a--btn !w3a--justify-between")} onClick={() => setIsPasswordlessCtaClicked(true)}>
+                      <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">Continue with {title()}</p>
+                    </button>
+                  }
+                >
+                  <div class={cn("w3a--input", isInputFocused() && "!w3a--border-app-primary-600")}>
+                    <input
+                      onInput={handleInputChange}
+                      value={fieldValue()}
+                      placeholder={placeholder()}
+                      onFocus={(e) => {
+                        e.target.placeholder = "";
+                        setIsInputFocused(true);
+                      }}
+                      onBlur={(e) => {
+                        e.target.placeholder = `${placeholder()}`;
+                        setIsInputFocused(false);
+                      }}
+                      type="text"
+                      autofocus
+                      class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
+                    />
+                    <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
+                      <img src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
+                    </button>
+                  </div>
+                  <Show when={!isValidInput() && isPasswordlessCtaClicked()}>
+                    <p class="w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start -w3a--mt-2 w3a--w-full w3a--pl-6">
+                      {invalidInputErrorMessage()}
+                    </p>
+                  </Show>
+                </Show>
+              </Show>
+              <Show when={mergedProps.showExternalWalletButton && mergedProps.showPasswordLessInput}>
+                <div class="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full">
+                  <div class="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+                  <p class="w3a--text-xs w3a--font-normal w3a--text-app-gray-400 dark:w3a--text-app-gray-400 w3a--uppercase">or</p>
+                  <div class="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+                </div>
+              </Show>
+              <Show when={mergedProps.showExternalWalletButton}>
+                <button class={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+                  <p class="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
+                  <div
+                    id="external-wallet-count"
+                    class="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 dark:w3a--bg-transparent dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--text-app-primary-500 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
+                  >
+                    {props.totalExternalWallets - 1}+
+                  </div>
+                  <img id="external-wallet-arrow" class="w3a--icon-animation" src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
+                </button>
+              </Show>
+              {/* <OtpInput length={6} onComplete={() => {}} /> */}
+            </Show>
+          </div>
+        </Match>
+      </Switch>
+    </Suspense>
   );
 };
 

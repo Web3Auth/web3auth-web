@@ -135,6 +135,35 @@ const config: Config = {
         white: "var(--app-white)",
         black: "var(--app-black)",
       },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        fadeOut: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
+        scaleIn: {
+          "0%": { transform: "scale(0.75)" },
+          "100%": { transform: "scale(1)" },
+        },
+        scaleOut: {
+          "0%": { transform: "scale(1)" },
+          "100%": { transform: "scale(0.75)" },
+        },
+        spin: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+      },
+      animation: {
+        fadeIn: "fadeIn 0.3s ease-out forwards",
+        fadeOut: "fadeOut 0.3s ease-out forwards",
+        scaleIn: "scaleIn 0.3s ease-out forwards",
+        scaleOut: "scaleOut 0.3s ease-out forwards",
+        spin: "spin 1s linear infinite",
+      },
     },
     variables: {
       ".w3a-parent-container": {
