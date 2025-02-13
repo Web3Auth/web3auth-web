@@ -14,7 +14,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
-  CustomChainConfig,
   IProvider,
   log,
   UserInfo,
@@ -44,12 +43,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
 
   private injectedProvider: WalletStandardProvider | null = null;
 
-  constructor(
-    options: BaseAdapterSettings & {
-      name: string;
-      wallet: Wallet;
-    }
-  ) {
+  constructor(options: BaseAdapterSettings & { name: string; wallet: Wallet }) {
     super(options);
     this.name = options.name;
     // in VueJS, for some wallets e.g. Gate, Solflare, when connecting it throws error "attempted to get private field on non-instance"
@@ -72,11 +66,11 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
-
-    this.injectedProvider = new WalletStandardProvider({ config: { chainConfig: this.chainConfig } });
+    const currentChainConfig = this.getCurrentChainConfig?.();
+    this.injectedProvider = new WalletStandardProvider({ config: { chainConfig: currentChainConfig } });
     const providerHandler = new WalletStandardProviderHandler({
       wallet: this.wallet,
-      getCurrentChain: () => getSolanaChainByChainConfig(this.chainConfig),
+      getCurrentChain: () => getSolanaChainByChainConfig(currentChainConfig),
     });
     this.injectedProvider.setupProvider(providerHandler);
 
@@ -101,7 +95,8 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       this.status = ADAPTER_STATUS.CONNECTING;
       this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
 
-      const chainName = getSolanaChainByChainConfig(this.chainConfig);
+      const currentChainConfig = this.getCurrentChainConfig?.();
+      const chainName = getSolanaChainByChainConfig(currentChainConfig);
       if (!this.wallet.chains.find((chain) => chain === chainName))
         throw WalletLoginError.connectionError(`Chain ${chainName} not supported. Supported chains are ${this.wallet.chains.join(", ")}`);
 
@@ -111,11 +106,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_EVENTS.CONNECTED, {
-        adapter: this.name,
-        reconnected: this.rehydrated,
-        provider: this.provider,
-      } as CONNECTED_EVENT_DATA);
+      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: this.name, reconnected: this.rehydrated, provider: this.provider } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error: unknown) {
       // ready again to be connected
@@ -147,16 +138,9 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     return {};
   }
 
-  async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    this.injectedProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
-  }
-
   async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.injectedProvider?.switchChain(params);
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   async enableMFA(): Promise<void> {

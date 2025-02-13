@@ -15,7 +15,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
-  CustomChainConfig,
   IProvider,
   log,
   UserInfo,
@@ -54,21 +53,9 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   constructor(params: AuthAdapterOptions = {}) {
     super(params);
-    this.setAdapterSettings({
-      ...params.adapterSettings,
-      chainConfig: params.chainConfig,
-      clientId: params.clientId || "",
-      sessionTime: params.sessionTime,
-      web3AuthNetwork: params.web3AuthNetwork,
-      useCoreKitKey: params.useCoreKitKey,
-      privateKeyProvider: params.privateKeyProvider,
-    });
+    this.setAdapterSettings({ ...params.adapterSettings, privateKeyProvider: params.privateKeyProvider });
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.privateKeyProvider = params.privateKeyProvider || null;
-  }
-
-  get chainConfigProxy(): CustomChainConfig | null {
-    return this.chainConfig ? { ...this.chainConfig } : null;
   }
 
   get provider(): IProvider | null {
@@ -84,25 +71,23 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   async init(options: AdapterInitOptions): Promise<void> {
     super.checkInitializationRequirements();
-    if (!this.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
+    const coreOptions = this.getCoreOptions?.();
+    if (!coreOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = {
-      ...this.authOptions,
-      replaceUrlOnRedirect: isRedirectResult,
-      useCoreKitKey: this.useCoreKitKey,
-    };
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: coreOptions?.useCoreKitKey };
     this.authInstance = new Auth({
       ...this.authOptions,
-      clientId: this.clientId,
-      network: this.authOptions.network || this.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+      clientId: coreOptions?.clientId,
+      network: this.authOptions.network || coreOptions?.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     });
     log.debug("initializing auth adapter init");
 
     await this.authInstance.init();
 
-    if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    const currentChainConfig = this.getCurrentChainConfig?.();
+    if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
 
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.AUTH);
@@ -191,9 +176,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   async authenticateUser(): Promise<{ idToken: string }> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.getUserInfo();
-    return {
-      idToken: userInfo.idToken as string,
-    };
+    return { idToken: userInfo.idToken as string };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -213,31 +196,21 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       this.authOptions || {},
       adapterSettings || {},
     ]) as AuthAdapterOptions["adapterSettings"];
-    if (adapterSettings.web3AuthNetwork) {
-      this.authOptions.network = adapterSettings.web3AuthNetwork;
-    }
     if (adapterSettings.privateKeyProvider) {
       this.privateKeyProvider = adapterSettings.privateKeyProvider;
     }
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
-    this.privateKeyProvider?.addChain(chainConfig);
-    this.addChainConfig(chainConfig);
-  }
-
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.privateKeyProvider?.switchChain(params);
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
   }
 
   private _getFinalPrivKey() {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.useCoreKitKey) {
+    if (this.getCoreOptions?.().useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
@@ -253,7 +226,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.ed25519PrivKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.useCoreKitKey) {
+    if (this.getCoreOptions?.().useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
@@ -282,9 +255,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
         deepmerge.all([
           this.loginSettings,
           params,
-          {
-            extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-          },
+          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } },
         ]) as AuthLoginParams
       );
     }

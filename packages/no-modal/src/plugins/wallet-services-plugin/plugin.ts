@@ -76,16 +76,14 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
-    if (web3auth.coreOptions.chainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
+    const currentChainConfig = web3auth.getCurrentChainConfig();
+    if (currentChainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
     // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
-    const mergedWhitelabelSettings = {
-      ...whiteLabel,
-      ...(this.walletInitOptions.whiteLabel || {}),
-    };
+    const mergedWhitelabelSettings = { ...whiteLabel, ...(this.walletInitOptions.whiteLabel || {}) };
 
     const { logoDark, logoLight } = mergedWhitelabelSettings || {};
     if (!logoDark || !logoLight) throw WalletServicesPluginError.invalidParams("logoDark and logoLight are required in whiteLabel config");
@@ -93,7 +91,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.wsEmbedInstance.web3AuthClientId = this.web3auth.coreOptions.clientId;
     this.wsEmbedInstance.web3AuthNetwork = this.web3auth.coreOptions.web3AuthNetwork;
     this.subscribeToWeb3AuthEvents(web3auth);
-    const connectedChainConfig = web3auth.coreOptions.chainConfig as CustomChainConfig;
+    const connectedChainConfig = currentChainConfig;
     if (!connectedChainConfig.blockExplorerUrl) throw WalletServicesPluginError.invalidParams("blockExplorerUrl is required in chainConfig");
     if (!connectedChainConfig.displayName) throw WalletServicesPluginError.invalidParams("displayName is required in chainConfig");
     if (!connectedChainConfig.logo) throw WalletServicesPluginError.invalidParams("logo is required in chainConfig");
@@ -168,10 +166,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     }
 
     try {
-      await this.wsEmbedInstance.loginWithSessionId({
-        sessionId,
-        sessionNamespace,
-      });
+      await this.wsEmbedInstance.loginWithSessionId({ sessionId, sessionNamespace });
       this.subscribeToProviderEvents(this.provider);
       this.subscribeToWalletEvents();
       this.emit(PLUGIN_EVENTS.CONNECTED);
@@ -258,11 +253,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.provider.request<never, string>({ method: "eth_chainId" }),
       this.provider.request<never, CustomChainConfig>({ method: "eth_provider_config" }),
     ]);
-    return {
-      chainId: parseInt(chainId as string, 16),
-      accounts: accounts as string[],
-      chainConfig: chainConfig as CustomChainConfig,
-    };
+    return { chainId: parseInt(chainId as string, 16), accounts: accounts as string[], chainConfig: chainConfig as CustomChainConfig };
   }
 
   private async walletServicesSessionConfig(): Promise<{ chainId: number; accounts: string[] }> {
@@ -271,10 +262,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.wsEmbedInstance.provider.request<[], string[]>({ method: "eth_accounts" }),
       this.wsEmbedInstance.provider.request<[], string>({ method: "eth_chainId" }),
     ]);
-    return {
-      chainId: parseInt(chainId as string, 16),
-      accounts: accounts as string[],
-    };
+    return { chainId: parseInt(chainId as string, 16), accounts: accounts as string[] };
   }
 
   private async setSelectedAddress(address: string): Promise<void> {
@@ -305,11 +293,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
                 chainName: chainConfig.displayName,
                 rpcUrls: [chainConfig.rpcTarget],
                 blockExplorerUrls: [chainConfig.blockExplorerUrl],
-                nativeCurrency: {
-                  name: chainConfig.tickerName,
-                  symbol: chainConfig.ticker,
-                  decimals: chainConfig.decimals || 18,
-                },
+                nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
                 iconUrls: [chainConfig.logo],
               },
             ],
@@ -319,10 +303,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
             log.error("WalletServicesPlugin: Error adding chain");
           });
 
-        await this.wsEmbedInstance.provider?.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: chainConfig.chainId }],
-        });
+        await this.wsEmbedInstance.provider?.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainConfig.chainId }] });
       } catch (error) {
         // TODO: throw more specific error from the controller
         log.error("WalletServicesPlugin: Error switching chain");

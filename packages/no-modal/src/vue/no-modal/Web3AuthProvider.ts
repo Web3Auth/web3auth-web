@@ -3,7 +3,6 @@ import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "v
 import {
   ADAPTER_EVENTS,
   type ADAPTER_STATUS_TYPE,
-  type CustomChainConfig,
   type IPlugin,
   type IProvider,
   WALLET_ADAPTER_TYPE,
@@ -18,9 +17,7 @@ import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 
 export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
-  props: {
-    config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
-  },
+  props: { config: { type: Object as PropType<Web3AuthContextConfig>, required: true } },
   setup(props) {
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
     const provider = ref<IProvider | null>(null);
@@ -81,20 +78,9 @@ export const Web3AuthProvider = defineComponent({
       }
     };
 
-    const addAndSwitchChain = async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      await web3Auth.value.addChain(chainConfig);
-      await web3Auth.value.switchChain({ chainId: chainConfig.chainId });
-    };
-
     const authenticateUser = async () => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       return web3Auth.value.authenticateUser();
-    };
-
-    const addChain = async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      return web3Auth.value.addChain(chainConfig);
     };
 
     const switchChain = (chainParams: { chainId: string }) => {
@@ -227,8 +213,6 @@ export const Web3AuthProvider = defineComponent({
       enableMFA,
       manageMFA,
       logout,
-      addAndSwitchChain,
-      addChain,
       addPlugin,
       authenticateUser,
       switchChain,

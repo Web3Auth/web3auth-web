@@ -2,29 +2,11 @@ import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction 
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect } from "@wallet-standard/features";
 
-import {
-  BaseAdapter,
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  getChainConfig,
-  IAdapter,
-  IWeb3AuthCoreOptions,
-  normalizeWalletName,
-  WalletInitializationError,
-} from "@/core/base";
+import { BaseAdapter, IAdapter, IWeb3AuthCoreOptions, normalizeWalletName } from "@/core/base";
 
 import { WalletStandardAdapter } from "./walletStandardAdapter";
 
-export const getSolanaInjectedAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
-  const { options } = params;
-  const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
-  if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
-    throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
-  const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
-    ...(chainConfig || {}),
-  };
-
+export const getSolanaInjectedAdapters = (_params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
   // get installed wallets that support standard wallet
   const standardWalletAdapters = [] as BaseAdapter<void>[];
   const wallets = getWallets().get();
@@ -37,17 +19,7 @@ export const getSolanaInjectedAdapters = (params: { options: IWeb3AuthCoreOption
     );
     if (!hasRequiredFeatures) return;
 
-    standardWalletAdapters.push(
-      new WalletStandardAdapter({
-        name: normalizeWalletName(name),
-        wallet,
-        chainConfig: finalChainConfig,
-        clientId,
-        sessionTime,
-        web3AuthNetwork,
-        useCoreKitKey,
-      })
-    );
+    standardWalletAdapters.push(new WalletStandardAdapter({ name: normalizeWalletName(name), wallet }));
   });
   return standardWalletAdapters;
 };

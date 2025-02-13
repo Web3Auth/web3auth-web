@@ -72,18 +72,19 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
   async connect(): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    if (!this.chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+    const currentChainConfig = this.getCurrentChainConfig?.();
+    if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
     try {
       await this.injectedProvider.request({ method: "eth_requestAccounts" });
       // switch chain if not connected to the right chain
-      if (this.injectedProvider.chainId !== this.chainConfig.chainId) {
+      if (this.injectedProvider.chainId !== currentChainConfig.chainId) {
         try {
-          await this.switchChain(this.chainConfig, true);
+          await this.switchChain(currentChainConfig, true);
         } catch (error) {
-          await this.addChain(this.chainConfig, true);
-          await this.switchChain(this.chainConfig, true);
+          await this.addChain(currentChainConfig, true);
+          await this.switchChain(currentChainConfig, true);
         }
       }
       this.status = ADAPTER_STATUS.CONNECTED;
@@ -115,10 +116,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     await super.disconnectSession();
     if (typeof this.injectedProvider.removeAllListeners !== "undefined") this.injectedProvider.removeAllListeners();
     try {
-      await this.injectedProvider.request({
-        method: "wallet_revokePermissions",
-        params: [{ eth_accounts: {} }],
-      });
+      await this.injectedProvider.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
     } catch (error) {}
     if (options.cleanup) {
       this.status = ADAPTER_STATUS.NOT_READY;
@@ -135,9 +133,8 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
+  public async addChain(chainConfig: CustomChainConfig, _init = false): Promise<void> {
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    super.checkAddChainRequirements(chainConfig, init);
     await this.injectedProvider.request({
       method: "wallet_addEthereumChain",
       params: [
@@ -146,26 +143,17 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
           blockExplorerUrls: [chainConfig.blockExplorerUrl],
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
+          nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
           iconUrls: [chainConfig.logo],
         },
       ],
     });
-    this.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     super.checkSwitchChainRequirements(params, init);
-    await this.injectedProvider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: params.chainId }],
-    });
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) as CustomChainConfig });
+    await this.injectedProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
   }
 
   public async enableMFA(): Promise<void> {

@@ -26,9 +26,15 @@ export interface IWeb3AuthCoreOptions {
    * custom chain configuration for chainNamespace
    *
    * @defaultValue mainnet config of provided chainNamespace
+   * @deprecated use chainConfigs instead
    */
   chainConfig?: CustomChainConfig;
 
+  /**
+   * multiple chain configurations
+   * only chains provided will be used
+   */
+  chainConfigs?: CustomChainConfig[];
   /**
    * setting to true will enable logs
    *
@@ -87,11 +93,12 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   connectedAdapterName: string | null;
   status: ADAPTER_STATUS_TYPE;
   provider: IProvider | null;
+  getCurrentChainConfig(): CustomChainConfig;
+  getCoreOptions(): IWeb3AuthCoreOptions;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
@@ -112,9 +119,6 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   manageMFA<T>(params: T): Promise<void>;
 }
 
-export type Web3AuthNoModalEvents = AdapterEvents & {
-  [ADAPTER_EVENTS.READY]: () => void;
-  MODAL_VISIBILITY: (visibility: boolean) => void;
-};
+export type Web3AuthNoModalEvents = AdapterEvents & { [ADAPTER_EVENTS.READY]: () => void; MODAL_VISIBILITY: (visibility: boolean) => void };
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

@@ -1,4 +1,3 @@
-import { ChainNamespaceType } from "@toruslabs/base-controllers";
 import {
   AuthUserInfo,
   JRPCRequest,
@@ -14,6 +13,7 @@ import {
 } from "@web3auth/auth";
 
 import { AdapterNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
 import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { ADAPTER_CATEGORY, ADAPTER_EVENTS, ADAPTER_STATUS } from "./constants";
@@ -36,11 +36,8 @@ export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_S
 export type UserAuthInfo = { idToken: string };
 
 export interface BaseAdapterSettings {
-  clientId?: string;
-  sessionTime?: number;
-  chainConfig?: CustomChainConfig;
-  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
-  useCoreKitKey?: boolean;
+  getCoreOptions?: () => IWeb3AuthCoreOptions;
+  getCurrentChainConfig?: () => CustomChainConfig;
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {
@@ -63,20 +60,13 @@ export interface IBaseProvider<T> extends IProvider {
 
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
-  currentChainNamespace: ChainNamespaceType;
-  chainConfigProxy: CustomChainConfig | null;
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
-  sessionTime: number;
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
-  useCoreKitKey: boolean | undefined;
-  clientId: string;
   status: ADAPTER_STATUS_TYPE;
   provider: IProvider | null;
   adapterData?: unknown;
   connnected: boolean;
   isInjected?: boolean;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   init(options?: AdapterInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<IProvider | null>;
@@ -88,11 +78,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
-export type CONNECTED_EVENT_DATA = {
-  adapter: string;
-  provider: IProvider;
-  reconnected: boolean;
-};
+export type CONNECTED_EVENT_DATA = { adapter: string; provider: IProvider; reconnected: boolean };
 
 export interface IAdapterDataEvent {
   adapterName: string;
@@ -160,6 +146,4 @@ export type LoginMethodConfig = Record<
   }
 >;
 
-export type WalletConnectV2Data = {
-  uri: string;
-};
+export type WalletConnectV2Data = { uri: string };

@@ -9,11 +9,9 @@ import {
   BaseAdapterConfig,
   cloneDeep,
   CommonJRPCProvider,
-  CustomChainConfig,
   fetchProjectConfig,
   fetchWalletRegistry,
   getAuthDefaultOptions,
-  getChainConfig,
   IBaseProvider,
   IProvider,
   IWeb3AuthCoreOptions,
@@ -95,10 +93,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         log.error("Failed to fetch wallet registry", e);
       }
     }
+
+    const currentChainConfig = this.getCurrentChainConfig();
+
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
-      chainNamespace: this.options.chainConfig.chainNamespace,
+      chainNamespace: currentChainConfig.chainNamespace,
       walletRegistry,
     });
     this.subscribeToLoginModalEvents();
@@ -128,7 +129,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     await this.loginModal.initModal();
-    const providedChainConfig = this.options.chainConfig;
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
@@ -157,11 +157,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // Adapters to be shown on modal should be pre-configured.
         if (adapterName === WALLET_ADAPTERS.AUTH) {
           const defaultOptions = getAuthDefaultOptions();
-          const { clientId, useCoreKitKey, chainConfig, web3AuthNetwork, sessionTime, privateKeyProvider } = this.coreOptions;
-          const finalChainConfig = {
-            ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
-            ...chainConfig,
-          } as CustomChainConfig;
+          const { clientId, web3AuthNetwork, privateKeyProvider } = this.coreOptions;
           if (!privateKeyProvider) {
             throw WalletInitializationError.invalidParams("privateKeyProvider is required");
           }
@@ -189,13 +185,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           }
           const authAdapter = new AuthAdapter({
             ...defaultOptions,
-            clientId,
-            useCoreKitKey,
-            chainConfig: { ...finalChainConfig },
             adapterSettings: finalAuthAdapterSettings,
-            sessionTime,
-            web3AuthNetwork,
             privateKeyProvider,
+            getCurrentChainConfig: this.getCurrentChainConfig.bind(this),
+            getCoreOptions: this.getCoreOptions.bind(this),
           });
           this.walletAdapters[adapterName] = authAdapter;
           return adapterName;
@@ -206,21 +199,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // add client id to adapter, same web3auth client id can be used in adapter.
         // this id is being overridden if user is also passing client id in adapter's constructor.
         this.walletAdapters[adapterName].setAdapterSettings({
-          clientId: this.options.clientId,
-          sessionTime: this.options.sessionTime,
-          web3AuthNetwork: this.options.web3AuthNetwork,
-          useCoreKitKey: this.coreOptions.useCoreKitKey,
+          getCurrentChainConfig: this.getCurrentChainConfig.bind(this),
+          getCoreOptions: this.getCoreOptions.bind(this),
         });
-
-        // if adapter doesn't have any chainConfig then we will set the chainConfig based of passed chainNamespace
-        // and chainNamespace.
-        if (!adapter.chainConfigProxy) {
-          const chainConfig = {
-            ...getChainConfig(providedChainConfig.chainNamespace, this.coreOptions.chainConfig?.chainId),
-            ...this.coreOptions.chainConfig,
-          } as CustomChainConfig;
-          this.walletAdapters[adapterName].setAdapterSettings({ chainConfig });
-        }
 
         if (adapterName === WALLET_ADAPTERS.AUTH) {
           const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
@@ -262,10 +243,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             // override user specified config by hiding wallet connect
             this.modalConfig.adapters = {
               ...(this.modalConfig.adapters ?? {}),
-              [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
-                ...(this.modalConfig.adapters?.[WALLET_ADAPTERS.WALLET_CONNECT_V2] ?? {}),
-                showOnModal: false,
-              },
+              [WALLET_ADAPTERS.WALLET_CONNECT_V2]: { ...(this.modalConfig.adapters?.[WALLET_ADAPTERS.WALLET_CONNECT_V2] ?? {}), showOnModal: false },
             } as Record<string, ModalConfig>;
             this.modalConfig.adapters[WALLET_ADAPTERS.WALLET_CONNECT_V2].showOnModal = false;
           } else {
@@ -273,13 +251,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
 
             if (walletConnectProjectId) {
-              walletConnectAdapter.setAdapterSettings({
-                adapterSettings: {
-                  walletConnectInitOptions: {
-                    projectId: walletConnectProjectId,
-                  },
-                },
-              });
+              walletConnectAdapter.setAdapterSettings({ adapterSettings: { walletConnectInitOptions: { projectId: walletConnectProjectId } } });
             }
           }
         }
@@ -326,7 +298,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.getCurrentChainConfig() });
     if (typeof keyExportEnabled === "boolean") {
       this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
       // dont know if we need to do this.

@@ -23,7 +23,7 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
+const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
 
 const isDisplay = (name: string): boolean => {
   switch (name) {
@@ -153,23 +153,6 @@ const onSwitchChain = async () => {
   }
 };
 
-const onAddChain = async () => {
-  try {
-    await addAndSwitchChain({
-      chainId: "0xaa36a7",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://1rpc.io/sepolia	",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      displayName: "Sepolia",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    });
-    printToConsole("added chain");
-  } catch (error) {
-    printToConsole("add chain error", error);
-  }
-};
-
 const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
@@ -277,7 +260,6 @@ const onSignPersonalMsg = async () => {
         </Card>
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}
