@@ -125,11 +125,11 @@ const Login = (props: LoginProps) => {
   const handleFormSubmit = async (e: Event) => {
     e.preventDefault();
 
-    setShowOtpFlow(true);
-    setTimeout(() => {
-      setOtpLoading(false);
-      setIsMobileOtp(true);
-    }, 3000);
+    // setShowOtpFlow(true);
+    // setTimeout(() => {
+    //   setOtpLoading(false);
+    //   setIsMobileOtp(true);
+    // }, 3000);
 
     const value = fieldValue();
 
@@ -195,6 +195,8 @@ const Login = (props: LoginProps) => {
       setOtpSuccess(false);
       setShowOtpFlow(false);
     }, 1000);
+    setOtpLoading(false);
+    setIsMobileOtp(false);
   };
 
   return (
