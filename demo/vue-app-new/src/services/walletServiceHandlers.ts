@@ -7,7 +7,7 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getV4TypedData } from "../config";
-import { METHOD_TYPES as SOL_METHOD_TYPES } from "@toruslabs/solana-controllers";
+import { SOLANA_METHOD_TYPES as SOL_METHOD_TYPES } from "@web3auth/ws-embed";
 import { generateVersionedTransaction } from "@/utils/solana";
 import { generateSolTransferInstruction } from "@/utils/solana";
 
@@ -110,7 +110,6 @@ export const walletSignSolanaMessage = async (provider: WalletServicesPlugin["pr
       method: SOL_METHOD_TYPES.SIGN_MESSAGE,
       params: { data: msg.toString(), from: account },
     })) as string;
-    console.log(">>> herher signature", signature);
     nacl.sign.detached.verify(msg, bs58.decode(signature), new PublicKey(account).toBytes());
     uiConsole("Success", { signature });
   } catch (e) {

@@ -23,14 +23,11 @@ import { formDataStore } from "../store/form";
 import { computed, ref, watch } from "vue";
 import { useWalletServicesPlugin } from "@web3auth/wallet-services-plugin-vue-composables";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
-import { CHAIN_IDS, SUPPORTED_NETWORKS as SOLANA_SUPPORTED_NETWORKS } from "@toruslabs/solana-controllers";
+import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { Connection } from "@solana/web3.js";
 
 const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
-SOLANA_SUPPORTED_NETWORKS[CHAIN_IDS.SOLANA_MAINNET].rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC;
-SOLANA_SUPPORTED_NETWORKS[CHAIN_IDS.SOLANA_TESTNET].rpcTarget = import.meta.env.VITE_APP_SOLANA_TESTNET_RPC;
-SOLANA_SUPPORTED_NETWORKS[CHAIN_IDS.SOLANA_DEVNET].rpcTarget = import.meta.env.VITE_APP_SOLANA_DEVNET_RPC;
 
 const { t } = useI18n({ useScope: "global" });
 

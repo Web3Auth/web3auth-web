@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": "/src",
-        stream: "stream-browserify",
       },
     },
     define: {
@@ -28,9 +27,6 @@ export default defineConfig(({ mode }) => {
       "process.env.VITE_APP_SOLANA_MAINNET_RPC": JSON.stringify(VITE_APP_SOLANA_MAINNET_RPC),
       "process.env.VITE_APP_SOLANA_TESTNET_RPC": JSON.stringify(VITE_APP_SOLANA_TESTNET_RPC),
       "process.env.VITE_APP_SOLANA_DEVNET_RPC": JSON.stringify(VITE_APP_SOLANA_DEVNET_RPC),
-    },
-    optimizeDeps: {
-      include: ["stream-browserify"],
     },
   };
 });
