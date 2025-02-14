@@ -31,9 +31,9 @@ export enum DEFAULT_SOLANA_EVENTS {
 }
 
 export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
-  "0x1": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
-  "0x2": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
-  "0x3": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+  "0x65": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+  "0x66": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+  "0x67": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
 };
 
 /**
@@ -102,10 +102,7 @@ async function getSiteIcon(window: Window): Promise<string | null> {
  * Gets site metadata and returns it
  *
  */
-const getSiteMetadata = async () => ({
-  name: getSiteName(window),
-  icon: await getSiteIcon(window),
-});
+const getSiteMetadata = async () => ({ name: getSiteName(window), icon: await getSiteIcon(window) });
 
 export const getNamespacesFromChains = (chains: string[]) => {
   const supportedNamespaces: string[] = [];
@@ -159,22 +156,14 @@ export const getWalletConnectV2Settings = async (
   namespace: ChainNamespaceType,
   chainIds: string[],
   projectID: string
-): Promise<{
-  adapterSettings: IAdapterSettings;
-  loginSettings: EngineTypes.ConnectParams;
-}> => {
+): Promise<{ adapterSettings: IAdapterSettings; loginSettings: EngineTypes.ConnectParams }> => {
   if (namespace === CHAIN_NAMESPACES.EIP155 || namespace === CHAIN_NAMESPACES.SOLANA) {
     const appMetadata = await getSiteMetadata();
     const adapterSettings: IAdapterSettings = {
       walletConnectInitOptions: {
         projectId: projectID,
         relayUrl: "wss://relay.walletconnect.com",
-        metadata: {
-          name: appMetadata.name,
-          description: appMetadata.name,
-          url: window.location.origin,
-          icons: [appMetadata.icon || ""],
-        },
+        metadata: { name: appMetadata.name, description: appMetadata.name, url: window.location.origin, icons: [appMetadata.icon || ""] },
       },
     };
 
@@ -182,13 +171,8 @@ export const getWalletConnectV2Settings = async (
       return `${namespace}:${namespace === CHAIN_NAMESPACES.SOLANA ? SOLANA_CAIP_CHAIN_MAP[chainId] : parseInt(chainId, 16)}`;
     });
 
-    const loginSettings: EngineTypes.ConnectParams = {
-      optionalNamespaces: getRequiredNamespaces(chainNamespaces),
-    };
-    return {
-      adapterSettings,
-      loginSettings,
-    };
+    const loginSettings: EngineTypes.ConnectParams = { optionalNamespaces: getRequiredNamespaces(chainNamespaces) };
+    return { adapterSettings, loginSettings };
   }
   throw new Error(`Unsupported chain namespace: ${namespace}`);
 };

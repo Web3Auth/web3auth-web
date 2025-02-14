@@ -17,6 +17,7 @@ import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/defa
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { WalletServicesProvider } from "@web3auth/wallet-services-plugin-vue-composables";
 import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
@@ -34,28 +35,6 @@ import { formDataStore } from "./store/form";
 const formData = formDataStore;
 
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
-
-const walletPlugins = computed(() => {
-  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155) return [];
-  const plugins = [];
-  if (formData.nftCheckoutPlugin.enable) {
-    const nftCheckoutPlugin = new NFTCheckoutPlugin({
-      clientId: NFT_CHECKOUT_CLIENT_ID,
-    });
-    plugins.push(nftCheckoutPlugin);
-  }
-  if (formData.walletPlugin.enable) {
-    const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
-    const walletServicesPlugin = new WalletServicesPlugin({
-      walletInitOptions: {
-        whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
-        confirmationStrategy,
-      },
-    });
-    plugins.push(walletServicesPlugin);
-  }
-  return plugins;
-});
 
 const chainOptions = computed(() =>
   chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
@@ -137,9 +116,7 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
-  const {
-    whiteLabel: { config: whiteLabel, enable: enabledWhiteLabel },
-  } = formData;
+  const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
   return {
     clientId: clientIds[formData.network],
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
@@ -242,10 +219,42 @@ watch(
 );
 
 const configs = computed(() => {
+  const plugins = [];
+  if (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const nftCheckoutPlugin = new NFTCheckoutPlugin({
+        clientId: NFT_CHECKOUT_CLIENT_ID,
+      });
+      plugins.push(nftCheckoutPlugin);
+    }
+    if (formData.walletPlugin.enable) {
+      const { uiConfig } = options.value;
+      const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
+      const walletServicesPlugin = new WalletServicesPlugin({
+        walletInitOptions: {
+          whiteLabel: {
+            ...uiConfig,
+            showWidgetButton: true,
+            logoDark: logoDark || "https://images.web3auth.io/web3auth-logo-w-light.svg",
+            logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
+          },
+          confirmationStrategy,
+          walletUrls: {
+            production: {
+              url: "http://localhost:4050",
+              logLevel: "debug",
+            },
+          },
+        },
+      });
+      plugins.push(walletServicesPlugin);
+    }
+  }
+
   return {
     adapters: externalAdapters.value,
     web3AuthOptions: options.value,
-    plugins: walletPlugins.value,
+    plugins,
     modalConfig: modalParams.value,
     hideWalletDiscovery: !formData.showWalletDiscovery,
   };
@@ -254,10 +263,12 @@ const configs = computed(() => {
 
 <template>
   <Web3AuthProvider :config="configs">
-    <AppHeader />
-    <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-      <AppSettings />
-      <AppDashboard />
-    </main>
+    <WalletServicesProvider>
+      <AppHeader />
+      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+        <AppSettings />
+        <AppDashboard />
+      </main>
+    </WalletServicesProvider>
   </Web3AuthProvider>
 </template>

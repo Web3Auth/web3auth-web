@@ -21,13 +21,13 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^9.1.0",
-    "@toruslabs/base-controllers": "^7.1.1",
+    "@toruslabs/base-controllers": "^7.2.1",
     "@web3auth/auth": "^9.6.4",
     "@web3auth/base": "^9.5.4",
     "@web3auth/base-provider": "^9.5.4",
     "@web3auth/ethereum-provider": "^9.5.4",
-    "ethers": "^6.13.4",
-    "viem": "^2.22.5"
+    "ethers": "^6.13.5",
+    "viem": "^2.23.2"
   },
   "peerDependencies": {
     "@babel/runtime": "7.x"
