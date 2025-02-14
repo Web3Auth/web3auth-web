@@ -17,6 +17,7 @@ import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/defa
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { WalletServicesProvider } from "@web3auth/wallet-services-plugin-vue-composables";
 import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
@@ -262,10 +263,12 @@ const configs = computed(() => {
 
 <template>
   <Web3AuthProvider :config="configs">
-    <AppHeader />
-    <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-      <AppSettings />
-      <AppDashboard />
-    </main>
+    <WalletServicesProvider>
+      <AppHeader />
+      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+        <AppSettings />
+        <AppDashboard />
+      </main>
+    </WalletServicesProvider>
   </Web3AuthProvider>
 </template>
