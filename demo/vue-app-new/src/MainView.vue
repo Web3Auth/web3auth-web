@@ -239,12 +239,6 @@ const configs = computed(() => {
             logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
           },
           confirmationStrategy,
-          walletUrls: {
-            production: {
-              url: "http://localhost:4050",
-              logLevel: "debug",
-            },
-          },
         },
       });
       plugins.push(walletServicesPlugin);
