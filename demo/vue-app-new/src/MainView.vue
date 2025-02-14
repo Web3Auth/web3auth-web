@@ -234,8 +234,8 @@ const configs = computed(() => {
           whiteLabel: {
             ...uiConfig,
             showWidgetButton: true,
-            logoDark: logoDark || "logo",
-            logoLight: logoLight || "logo",
+            logoDark: logoDark || "https://images.web3auth.io/web3auth-logo-w-light.svg",
+            logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
           },
           confirmationStrategy,
           walletUrls: {
