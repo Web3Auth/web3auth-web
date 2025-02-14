@@ -87,11 +87,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = {
-      ...this.authOptions,
-      replaceUrlOnRedirect: isRedirectResult,
-      useCoreKitKey: this.useCoreKitKey,
-    };
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.useCoreKitKey };
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.clientId,
@@ -190,9 +186,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   async authenticateUser(): Promise<{ idToken: string }> {
     if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.getUserInfo();
-    return {
-      idToken: userInfo.idToken as string,
-    };
+    return { idToken: userInfo.idToken as string };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -271,19 +265,16 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
-      if (!this.loginSettings.curve) {
-        this.loginSettings.curve =
-          this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
-      }
+      // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
+      this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
+
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
       await this.authInstance.login(
         deepmerge.all([
           this.loginSettings,
           params,
-          {
-            extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint },
-          },
+          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } },
         ]) as AuthLoginParams
       );
     }
