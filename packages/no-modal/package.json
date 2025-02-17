@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "9.5.4",
+  "version": "9.6.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -56,8 +56,6 @@
     "@toruslabs/constants": "^14.2.0",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
-    "@toruslabs/solana-embed": "^2.1.0",
-    "@toruslabs/torus-embed": "^5.0.0",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@wallet-standard/app": "^1.1.0",
     "@wallet-standard/base": "^1.1.0",

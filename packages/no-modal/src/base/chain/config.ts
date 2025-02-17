@@ -174,11 +174,11 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
 
 export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.SOLANA;
-  if (chainId === 1) {
+  if (chainId === 101) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
-      chainId: "0x1",
+      chainId: "0x65",
       rpcTarget: "https://rpc.ankr.com/solana",
       displayName: "Solana Mainnet",
       blockExplorerUrl: "https://explorer.solana.com",
@@ -186,12 +186,11 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  }
-  if (chainId === 2) {
+  } else if (chainId === 102) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
-      chainId: "0x2",
+      chainId: "0x66",
       rpcTarget: "https://api.testnet.solana.com",
       displayName: "Solana Testnet",
       blockExplorerUrl: "https://explorer.solana.com?cluster=testnet",
@@ -199,12 +198,11 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  }
-  if (chainId === 3) {
+  } else if (chainId === 103) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
-      chainId: "0x3",
+      chainId: "0x67",
       rpcTarget: "https://api.devnet.solana.com",
       displayName: "Solana Devnet",
       blockExplorerUrl: "https://explorer.solana.com?cluster=devnet",

@@ -52,7 +52,7 @@ const isDisabled = (name: string): boolean => {
       return !formData.whiteLabel.enable;
 
     case "walletServicePlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 && formData.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
 
     case "nftCheckoutPlugin":
       return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
@@ -94,7 +94,7 @@ const onChainNamespaceChange = (value: string) => {
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === ADAPTER_STATUS.READY }]">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === ADAPTER_STATUS.READY }]">
           {{ status }}
         </Tag>
         &nbsp;
@@ -106,7 +106,12 @@ const onChainNamespaceChange = (value: string) => {
         <Tab variant="underline" :active="isActiveTab(0)" @click="onTabChange(0)">General</Tab>
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
-        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(3)" @click="onTabChange(3)">
+        <Tab
+          v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA"
+          variant="underline"
+          :active="isActiveTab(3)"
+          @click="onTabChange(3)"
+        >
           Wallet Plugin
         </Tab>
         <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
