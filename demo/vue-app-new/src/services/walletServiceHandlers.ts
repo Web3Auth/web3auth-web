@@ -2,8 +2,13 @@
 import { log, WalletServicesPlugin } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { BrowserProvider, parseEther } from "ethers";
-
+import nacl from "tweetnacl";
+import bs58 from "bs58";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { getV4TypedData } from "../config";
+import { SOLANA_METHOD_TYPES as SOL_METHOD_TYPES } from "@web3auth/ws-embed";
+import { generateVersionedTransaction } from "@/utils/solana";
+import { generateSolTransferInstruction } from "@/utils/solana";
 
 export const walletSignPersonalMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
   try {
@@ -91,5 +96,40 @@ export const walletSignTransaction = async (provider: WalletServicesPlugin["prov
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
+  }
+};
+
+export const walletSignSolanaMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
+  try {
+    const msg = Buffer.from("Test Signing Message ", "utf8");
+    const accounts = await provider.request({ method: SOL_METHOD_TYPES.GET_ACCOUNTS });
+    const account = accounts[0];
+
+    const signature = (await provider.request({
+      method: SOL_METHOD_TYPES.SIGN_MESSAGE,
+      params: { data: msg.toString(), from: account },
+    })) as string;
+    nacl.sign.detached.verify(msg, bs58.decode(signature), new PublicKey(account).toBytes());
+    uiConsole("Success", { signature });
+  } catch (e) {
+    uiConsole("Error signing message", (e as Error).message);
+  }
+};
+
+export const walletSignSolanaVersionedTransaction = async (provider: WalletServicesPlugin["provider"], connection: Connection, uiConsole: any) => {
+  uiConsole("Signing Versioned Transaction");
+  try {
+    const accounts = await provider.request({ method: SOL_METHOD_TYPES.GET_ACCOUNTS });
+    const account = accounts[0];
+
+    const instruction = await generateSolTransferInstruction(account, account, 0);
+    const transaction = await generateVersionedTransaction(connection, account, [instruction]);
+    const signature = (await provider.request({
+      method: SOL_METHOD_TYPES.SIGN_TRANSACTION,
+      params: { message: Buffer.from(transaction.serialize()).toString("base64") },
+    })) as string;
+    uiConsole("Success", { signature });
+  } catch (e) {
+    uiConsole("Error", (e as Error).message);
   }
 };

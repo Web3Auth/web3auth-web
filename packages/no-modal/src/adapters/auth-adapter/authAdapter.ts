@@ -245,10 +245,9 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     const keyAvailable = this._getFinalPrivKey();
     // if not logged in then login
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
-      if (!this.loginSettings.curve) {
-        this.loginSettings.curve =
-          this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA ? SUPPORTED_KEY_CURVES.ED25519 : SUPPORTED_KEY_CURVES.SECP256K1;
-      }
+      // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
+      this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
+
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
       await this.authInstance.login(

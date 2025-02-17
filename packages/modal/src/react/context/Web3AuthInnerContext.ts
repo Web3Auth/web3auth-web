@@ -176,8 +176,11 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
     const connectedListener = () => {
       setStatus(web3Auth.status);
-      setIsInitialized(true);
-      setIsConnected(true);
+      // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
+      if (web3Auth.status === ADAPTER_STATUS.CONNECTED) {
+        setIsInitialized(true);
+        setIsConnected(true);
+      }
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);

@@ -7,6 +7,8 @@ import { AccountAbstractionProvider } from "@/core/account-abstraction-provider"
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   EVM_PLUGINS,
@@ -48,7 +50,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   readonly SUPPORTED_ADAPTERS = [WALLET_ADAPTERS.AUTH, WALLET_ADAPTERS.SFA];
 
-  readonly pluginNamespace = PLUGIN_NAMESPACES.EIP155;
+  readonly pluginNamespace = PLUGIN_NAMESPACES.MULTICHAIN;
 
   public wsEmbedInstance: WsEmbed;
 
@@ -77,7 +79,8 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
     const currentChainConfig = web3auth.getCurrentChainConfig();
-    if (currentChainConfig.chainNamespace !== this.pluginNamespace) throw WalletServicesPluginError.unsupportedChainNamespace();
+    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig.chainNamespace))
+      throw WalletServicesPluginError.unsupportedChainNamespace();
     // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;

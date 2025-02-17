@@ -2,6 +2,7 @@ import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "v
 
 import {
   ADAPTER_EVENTS,
+  ADAPTER_STATUS,
   type ADAPTER_STATUS_TYPE,
   type IPlugin,
   type IProvider,
@@ -162,8 +163,11 @@ export const Web3AuthProvider = defineComponent({
         };
         const connectedListener = () => {
           status.value = web3Auth.value!.status;
-          isInitialized.value = true;
-          isConnected.value = true;
+          // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
+          if (web3Auth.value!.status === ADAPTER_STATUS.CONNECTED) {
+            isInitialized.value = true;
+            isConnected.value = true;
+          }
         };
         const disconnectedListener = () => {
           status.value = web3Auth.value!.status;
