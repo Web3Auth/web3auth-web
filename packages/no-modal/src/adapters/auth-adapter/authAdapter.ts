@@ -1,5 +1,5 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed, WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -10,21 +10,19 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapter,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   cloneDeep,
   CONNECTED_EVENT_DATA,
-  ConnectorFn,
   CustomChainConfig,
-  getChainConfig,
   IProvider,
-  IWeb3AuthCoreOptions,
   log,
-  PROJECT_CONFIG_RESPONSE,
   UserInfo,
   WALLET_ADAPTERS,
   WalletInitializationError,
@@ -361,63 +359,48 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params: { projectConfig: PROJECT_CONFIG_RESPONSE; coreOptions: IWeb3AuthCoreOptions }): ConnectorFn => {
-  const { projectConfig, coreOptions } = params;
-  const { whitelabel } = projectConfig;
-  coreOptions.uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
-  if (!coreOptions.uiConfig.mode) coreOptions.uiConfig.mode = "light";
+export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
+  return ({ projectConfig, options }: AdapterParams) => {
+    const adapterSettings: AuthAdapterOptions["adapterSettings"] = {
+      network: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+      clientId: "",
+      uxMode: params?.uxMode || UX_MODE.POPUP,
+    };
 
-  const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
-  let adapterSettings: AuthAdapterOptions["adapterSettings"] = {};
-  if (smsOtpEnabled !== undefined) {
-    adapterSettings = {
-      ...adapterSettings,
-      loginConfig: {
+    // sms otp config
+    const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
+    if (smsOtpEnabled !== undefined) {
+      adapterSettings.loginConfig = {
         [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
           showOnModal: smsOtpEnabled,
           showOnDesktop: smsOtpEnabled,
           showOnMobile: smsOtpEnabled,
           showOnSocialBackupFactor: smsOtpEnabled,
         } as LoginConfig[keyof LoginConfig],
-      },
-    };
-  }
-  if (whitelist) {
-    adapterSettings = {
-      ...adapterSettings,
-      originData: whitelist.signed_urls,
-    };
-  }
+      };
+    }
 
-  // TODO-v10: handle modal ux mode from modal SDK
-  if (coreOptions.uiConfig?.uxMode) {
-    adapterSettings = {
-      ...adapterSettings,
-      uxMode: coreOptions.uiConfig.uxMode,
+    // whitelist config
+    if (whitelist) {
+      adapterSettings.originData = whitelist.signed_urls;
+    }
+
+    // whitelabel config
+    const { whitelabel } = projectConfig;
+    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), options.uiConfig || {});
+    if (!uiConfig.mode) uiConfig.mode = "light";
+    adapterSettings.whiteLabel = uiConfig;
+
+    // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
+    // if no chainNamespace or chainId is being provided, it will connect with mainnet.
+    const adapterOptions: AuthAdapterOptions = {
+      chainConfig: options.chainConfig,
+      sessionTime: options.sessionTime,
+      clientId: options.clientId,
+      web3AuthNetwork: options.web3AuthNetwork,
+      useCoreKitKey: options.useCoreKitKey,
+      adapterSettings,
     };
-  }
-
-  adapterSettings = {
-    ...adapterSettings,
-    whiteLabel: coreOptions.uiConfig,
-  };
-
-  // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
-  // if no chainNamespace or chainId is being provided, it will connect with mainnet.
-  const { chainConfig } = coreOptions;
-  const finalChainConfig = {
-    ...getChainConfig(chainConfig?.chainNamespace, chainConfig?.chainId),
-    ...coreOptions.chainConfig,
-  };
-  const options: AuthAdapterOptions = {
-    chainConfig: finalChainConfig,
-    sessionTime: coreOptions.sessionTime,
-    clientId: coreOptions.clientId,
-    web3AuthNetwork: coreOptions.web3AuthNetwork,
-    useCoreKitKey: coreOptions.useCoreKitKey,
-    adapterSettings,
-  };
-  return () => {
-    return new AuthAdapter(options);
+    return new AuthAdapter(adapterOptions);
   };
 };

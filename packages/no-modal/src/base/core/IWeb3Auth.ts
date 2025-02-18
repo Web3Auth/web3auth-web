@@ -4,7 +4,7 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS_TYPE,
   AdapterEvents,
-  ConnectorFn,
+  AdapterFn,
   IAdapter,
   IBaseProvider,
   IProvider,
@@ -78,9 +78,15 @@ export interface IWeb3AuthCoreOptions {
   useAAWithExternalWallet?: boolean;
 
   /**
-   * Connectors to use
+   * Adapters to use
    */
-  connectors?: ConnectorFn[];
+  walletAdapters?: AdapterFn[];
+
+  /**
+   * Whether to enable multi injected provider discovery
+   * @defaultValue true
+   */
+  multiInjectedProviderDiscovery: boolean;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

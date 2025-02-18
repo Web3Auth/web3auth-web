@@ -8,8 +8,10 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -167,3 +169,18 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const walletStandardAdapter = (params: { name: string; wallet: Wallet }): AdapterFn => {
+  const { name, wallet } = params;
+  return ({ options }: AdapterParams) => {
+    return new WalletStandardAdapter({
+      name,
+      wallet,
+      chainConfig: options.chainConfig,
+      clientId: options.clientId,
+      sessionTime: options.sessionTime,
+      web3AuthNetwork: options.web3AuthNetwork,
+      useCoreKitKey: options.useCoreKitKey,
+    });
+  };
+};

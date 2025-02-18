@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, getEvmChainConfig, IProvider, Web3Auth, type Web3AuthOptions, log } from "@web3auth/modal";
+import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, getEvmChainConfig, IProvider, Web3Auth, type Web3AuthOptions, log, walletConnectV2Adapter, coinbaseAdapter } from "@web3auth/modal";
 import { onMounted, ref } from "vue";
 import { clientIds } from "./config";
 import Web3 from "web3";
@@ -10,6 +10,8 @@ const ethWeb3AuthOptions: Web3AuthOptions = {
   enableLogging: true,
   clientId: clientIds["mainnet"],
   web3AuthNetwork: "mainnet",
+  multiInjectedProviderDiscovery: true,
+  walletAdapters: [walletConnectV2Adapter(), coinbaseAdapter()]
 };
 const web3auth = new Web3Auth(ethWeb3AuthOptions);
 

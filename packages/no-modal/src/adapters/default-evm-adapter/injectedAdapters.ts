@@ -1,40 +1,21 @@
 import { createStore as createMipd } from "mipd";
 
-import {
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  getChainConfig,
-  IAdapter,
-  IProvider,
-  IWeb3AuthCoreOptions,
-  normalizeWalletName,
-  WalletInitializationError,
-} from "@/core/base";
+import { AdapterFn, AdapterParams, CHAIN_NAMESPACES, IProvider, normalizeWalletName, WalletInitializationError } from "@/core/base";
 
-import { InjectedEvmAdapter } from "./injectedEvmAdapter";
+import { injectedEvmAdapter } from "./injectedEvmAdapter";
 
-export const getEvmInjectedAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
-  const { options } = params;
-  const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
+export const getEvmInjectedAdapters = ({ options }: AdapterParams): AdapterFn[] => {
+  const { chainConfig } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
     throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
-  const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
-    ...(chainConfig || {}),
-  };
   // EIP-6963: multiple injected provider discovery
   const mipd = createMipd();
   // We assume that all extensions have emitted by here.
   // TODO: Ideally, we must use reactive listening. We will do that with v9
   const injectedProviders = mipd.getProviders().map((providerDetail) => {
-    return new InjectedEvmAdapter({
+    return injectedEvmAdapter({
       name: normalizeWalletName(providerDetail.info.name),
       provider: providerDetail.provider as IProvider,
-      chainConfig: finalChainConfig,
-      clientId,
-      sessionTime,
-      web3AuthNetwork,
-      useCoreKitKey,
     });
   });
 

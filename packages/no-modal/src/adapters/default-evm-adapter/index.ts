@@ -1,31 +1,17 @@
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, IAdapter, IWeb3AuthCoreOptions, WalletInitializationError } from "@/core/base";
-import { WalletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
+import { AdapterFn, AdapterParams, CHAIN_NAMESPACES, WalletInitializationError } from "@/core/base";
+import { walletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
 
 import { getEvmInjectedAdapters } from "./injectedAdapters";
 
-export const getEvmDefaultExternalAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
+export const getEvmDefaultExternalAdapters = (params: AdapterParams): AdapterFn[] => {
   const { options } = params;
-  const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
+  const { chainConfig } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
     throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
-  const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
-    ...(chainConfig || {}),
-  };
 
-  const wcv2Adapter = new WalletConnectV2Adapter({
-    chainConfig: finalChainConfig,
-    clientId,
-    sessionTime,
-    web3AuthNetwork,
-    useCoreKitKey,
-    adapterSettings: {
-      walletConnectInitOptions: {},
-    },
-  });
-  const injectedProviders = getEvmInjectedAdapters({ options });
+  const injectedProviders = getEvmInjectedAdapters(params);
 
-  return [...injectedProviders, wcv2Adapter];
+  return [...injectedProviders, walletConnectV2Adapter()];
 };
 
 export { getEvmInjectedAdapters };

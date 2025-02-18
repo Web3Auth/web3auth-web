@@ -87,7 +87,9 @@ export interface IAdapter<T> extends SafeEventEmitter {
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
-export type ConnectorFn = (config: { projectConfig?: PROJECT_CONFIG_RESPONSE; coreOptions?: IWeb3AuthCoreOptions }) => IAdapter<unknown>;
+export type AdapterParams = { projectConfig?: PROJECT_CONFIG_RESPONSE; options: IWeb3AuthCoreOptions };
+
+export type AdapterFn = (params: AdapterParams) => IAdapter<unknown>;
 
 export type CONNECTED_EVENT_DATA = {
   adapter: string;

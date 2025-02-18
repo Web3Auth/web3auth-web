@@ -12,19 +12,19 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
-  ConnectorFn,
   CustomChainConfig,
   getSavedToken,
   IProvider,
   log,
-  PROJECT_CONFIG_RESPONSE,
   saveToken,
   UserAuthInfo,
   UserInfo,
@@ -398,23 +398,30 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 }
 
-export const walletConnectV2Connector = (params: { projectConfig: PROJECT_CONFIG_RESPONSE }): ConnectorFn => {
-  const { projectConfig } = params;
+export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterFn => {
+  return ({ projectConfig, options }: AdapterParams) => {
+    let { projectId } = params || {};
 
-  const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+    if (projectConfig) {
+      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+      if (walletConnectEnabled === false) {
+        throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
+      }
+      if (!walletConnectProjectId)
+        throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
+      projectId = walletConnectProjectId;
+    } else if (!projectId) {
+      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 adapter");
+    }
 
-  if (walletConnectEnabled === false) {
-    throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
-  }
-  if (!walletConnectProjectId)
-    throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
-
-  return () => {
     return new WalletConnectV2Adapter({
+      chainConfig: options.chainConfig,
+      sessionTime: options.sessionTime,
+      clientId: options.clientId,
+      web3AuthNetwork: options.web3AuthNetwork,
+      useCoreKitKey: options.useCoreKitKey,
       adapterSettings: {
-        walletConnectInitOptions: {
-          projectId: walletConnectProjectId,
-        },
+        walletConnectInitOptions: { projectId },
       },
     });
   };

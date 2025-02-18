@@ -4,7 +4,6 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_NAMES,
   ADAPTER_STATUS,
-  authConnector,
   BaseAdapterConfig,
   cloneDeep,
   CommonJRPCProvider,
@@ -58,6 +57,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
 
+    // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
       projectConfig = await fetchProjectConfig(
@@ -75,6 +75,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
+    // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
     if (!params?.hideWalletDiscovery) {
       try {
@@ -83,6 +84,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         log.error("Failed to fetch wallet registry", e);
       }
     }
+
+    // initialize login modal
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
@@ -116,17 +119,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     await this.loginModal.initModal();
-    // merge default adapters with the custom configured adapters.
-    const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.connectors)])];
 
-    // Add embedded wallet to connectors by default
-    const config = { projectConfig, coreOptions: this.coreOptions };
-    this.connectorFns.push(authConnector(config));
-    this.connectorFns.map(async (connectorFn) => {
-      const connector = connectorFn(config);
-      if (this.connectors[connector.name]) return;
-      this.connectors[connector.name] = connector;
+    // load default adapters: auth, injected wallets
+    const adapterFns = await this.loadDefaultAdapters(projectConfig);
+    adapterFns.map(async (adapterFn) => {
+      const adapter = adapterFn({ projectConfig, options: this.coreOptions });
+      if (this.walletAdapters[adapter.name]) return;
+      this.walletAdapters[adapter.name] = adapter;
     });
+
+    // merge default adapters with the custom configured adapters.
+    const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
     const adapterConfigurationPromises = allAdapters.map(async (adapterName) => {
       // start with the default config of adapter.
@@ -144,7 +147,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
 
       // check if adapter is configured/added by user and exist in connectors map.
-      const adapter = this.connectors[adapterName];
+      const adapter = this.walletAdapters[adapterName];
       log.debug("adapter config", adapterName, this.modalConfig.adapters?.[adapterName].showOnModal, adapter);
 
       // if adapter is not custom configured then check if it is available in default adapters.
@@ -173,7 +176,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
 
     const adapterNames = await Promise.all(adapterConfigurationPromises);
-    const hasInAppWallets = Object.values(this.connectors).some((adapter) => {
+    const hasInAppWallets = Object.values(this.walletAdapters).some((adapter) => {
       if (adapter.type !== ADAPTER_CATEGORY.IN_APP) return false;
       if (this.modalConfig.adapters?.[adapter.name]?.showOnModal !== true) return false;
       if (!this.modalConfig.adapters?.[adapter.name]?.loginMethods) return true;
@@ -184,13 +187,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
       return false;
     });
-    log.debug(hasInAppWallets, this.connectors, adapterNames, "hasInAppWallets");
+    log.debug(hasInAppWallets, this.walletAdapters, adapterNames, "hasInAppWallets");
 
     // Now, initialize the adapters.
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
       try {
-        const connector = this.connectors[adapterName];
+        const connector = this.walletAdapters[adapterName];
         // only initialize a external adapter here if it is a cached adapter.
         if (this.cachedAdapter !== adapterName && connector.type === ADAPTER_CATEGORY.EXTERNAL) {
           return;
@@ -225,7 +228,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const hasExternalWallets = allAdapters.some((adapterName) => {
       // if wallet connect adapter is available but hideWalletDiscovery is true then don't consider it as external wallet
       if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
-      return this.connectors[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
+      return this.walletAdapters[adapterName]?.type === ADAPTER_CATEGORY.EXTERNAL && this.modalConfig.adapters?.[adapterName].showOnModal;
     });
 
     if (hasExternalWallets) {
@@ -265,8 +268,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
     // we do it like this because we don't want one slow adapter to delay the load of the entire external wallet section.
-    Object.keys(this.connectors).forEach(async (adapterName) => {
-      const adapter = this.connectors[adapterName];
+    Object.keys(this.walletAdapters).forEach(async (adapterName) => {
+      const adapter = this.walletAdapters[adapterName];
       if (adapter?.type === ADAPTER_CATEGORY.EXTERNAL) {
         log.debug("init external wallet", this.cachedAdapter, adapterName, adapter.status);
         this.subscribeToAdapterEvents(adapter);
@@ -296,7 +299,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private initializeInAppWallet(adapterName: string): void {
     log.info("adapterInitResults", adapterName);
-    if (this.connectors[adapterName].type === ADAPTER_CATEGORY.IN_APP) {
+    if (this.walletAdapters[adapterName].type === ADAPTER_CATEGORY.IN_APP) {
       this.loginModal.addSocialLogins(
         adapterName,
         getAdapterSocialLogins(adapterName, (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName]?.loginMethods),
@@ -331,7 +334,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const adapter = this.connectors[WALLET_ADAPTERS.WALLET_CONNECT_V2];
+      const adapter = this.walletAdapters[WALLET_ADAPTERS.WALLET_CONNECT_V2];
       if (adapter) {
         const walletConnectStatus = adapter?.status;
         log.debug("trying refreshing wc session", visibility, walletConnectStatus);

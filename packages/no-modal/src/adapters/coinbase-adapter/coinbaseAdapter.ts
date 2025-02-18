@@ -7,13 +7,14 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
-  ConnectorFn,
   CustomChainConfig,
   IProvider,
   UserInfo,
@@ -178,9 +179,16 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   }
 }
 
-export const coinbaseAdapter = (params: CoinbaseAdapterOptions): ConnectorFn => {
-  return () => {
-    return new CoinbaseAdapter(params);
+export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn => {
+  return ({ options }: AdapterParams) => {
+    return new CoinbaseAdapter({
+      chainConfig: options.chainConfig,
+      sessionTime: options.sessionTime,
+      clientId: options.clientId,
+      web3AuthNetwork: options.web3AuthNetwork,
+      useCoreKitKey: options.useCoreKitKey,
+      adapterSettings: params,
+    });
   };
 };
 

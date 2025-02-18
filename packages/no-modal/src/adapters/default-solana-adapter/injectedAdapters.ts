@@ -2,31 +2,17 @@ import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction 
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect } from "@wallet-standard/features";
 
-import {
-  BaseAdapter,
-  CHAIN_NAMESPACES,
-  CustomChainConfig,
-  getChainConfig,
-  IAdapter,
-  IWeb3AuthCoreOptions,
-  normalizeWalletName,
-  WalletInitializationError,
-} from "@/core/base";
+import { AdapterFn, AdapterParams, CHAIN_NAMESPACES, normalizeWalletName, WalletInitializationError } from "@/core/base";
 
-import { WalletStandardAdapter } from "./walletStandardAdapter";
+import { walletStandardAdapter } from "./walletStandardAdapter";
 
-export const getSolanaInjectedAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
-  const { options } = params;
-  const { clientId, chainConfig, sessionTime, web3AuthNetwork, useCoreKitKey } = options;
+export const getSolanaInjectedAdapters = ({ options }: AdapterParams): AdapterFn[] => {
+  const { chainConfig } = options;
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
     throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
-  const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
-    ...(chainConfig || {}),
-  };
 
   // get installed wallets that support standard wallet
-  const standardWalletAdapters = [] as BaseAdapter<void>[];
+  const standardWalletAdapters = [] as AdapterFn[];
   const wallets = getWallets().get();
   wallets.forEach((wallet) => {
     const { name, chains, features } = wallet;
@@ -38,14 +24,9 @@ export const getSolanaInjectedAdapters = (params: { options: IWeb3AuthCoreOption
     if (!hasRequiredFeatures) return;
 
     standardWalletAdapters.push(
-      new WalletStandardAdapter({
+      walletStandardAdapter({
         name: normalizeWalletName(name),
         wallet,
-        chainConfig: finalChainConfig,
-        clientId,
-        sessionTime,
-        web3AuthNetwork,
-        useCoreKitKey,
       })
     );
   });

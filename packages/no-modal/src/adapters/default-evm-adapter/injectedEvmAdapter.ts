@@ -5,8 +5,10 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -176,5 +178,20 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const injectedEvmAdapter = (params: { name: string; provider: IProvider }): AdapterFn => {
+  const { name, provider } = params;
+  return ({ options }: AdapterParams) => {
+    return new InjectedEvmAdapter({
+      name,
+      provider,
+      chainConfig: options.chainConfig,
+      clientId: options.clientId,
+      sessionTime: options.sessionTime,
+      web3AuthNetwork: options.web3AuthNetwork,
+      useCoreKitKey: options.useCoreKitKey,
+    });
+  };
+};
 
 export { InjectedEvmAdapter };
