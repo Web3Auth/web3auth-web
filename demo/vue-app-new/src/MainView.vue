@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
 import { AccountAbstractionProvider, AdapterFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_ADAPTERS, walletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
-import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
+import { SMART_ACCOUNT } from "@toruslabs/ethereum-controllers";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -27,6 +28,9 @@ const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_
 const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
   const { useAccountAbstractionProvider } = formData;
   if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
+
+  // only need to setup AA provider for external wallets, for embedded wallet, we'll use WS which already supports AA
+  if (!formData.useAAWithExternalWallet) return undefined;
 
   const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
   // setup aa provider
@@ -70,17 +74,55 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
+  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
 
-  let walletSettings: Web3AuthOptions["walletSettings"];
+  // Account Abstraction
+  const { useAccountAbstractionProvider } = formData;
+  let accountAbstractionConfig = undefined;
+  if (showAAProviderSettings.value && useAccountAbstractionProvider) {
+    let smartAccountType = ""
+    let smartAccountConfig = undefined;
+    switch (formData.smartAccountType) {
+      case "nexus":
+        smartAccountType = SMART_ACCOUNT.NEXUS;
+        break;
+      case "kernel":
+        smartAccountType = SMART_ACCOUNT.KERNEL;
+        break;
+      case "trust":
+        smartAccountType = SMART_ACCOUNT.TRUST;
+        break;
+      // case "light":
+      //   smartAccountInit = new LightSmartAccount();
+      //   break;
+      // case "simple":
+      //   smartAccountInit = new SimpleSmartAccount();
+      //   break;
+      case "safe":
+      default:
+        smartAccountType = SMART_ACCOUNT.SAFE;
+        break;
+    }
+    accountAbstractionConfig = {
+      smartAccountType,
+      paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
+      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
+      smartAccountConfig,
+    }
+  }
+
+  // Wallet Settings
+  let walletServicesSettings: Web3AuthOptions["walletServicesSettings"];
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
   if (formData.walletPlugin.enable) {
       const { confirmationStrategy } = formData.walletPlugin;
-      walletSettings = {
+      walletServicesSettings = {
           whiteLabel: {
             ...uiConfig,
             showWidgetButton: true,
           },
           confirmationStrategy,
+          accountAbstractionConfig,
       };
   }
 
@@ -97,9 +139,9 @@ const options = computed((): Web3AuthOptions => {
     // storageKey?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
-    chainConfig: chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!,
+    chainConfig,
     enableLogging: true,
-    walletSettings,
+    walletServicesSettings,
   };
 });
 

@@ -27,7 +27,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
-  WalletSettings,
+  WalletServicesSettings,
   Web3AuthError,
 } from "@/core/base";
 
@@ -58,7 +58,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  private walletSettings: WalletSettings = {};
+  private wsSettings: WalletServicesSettings = {};
 
   private wsEmbedInstance: WsEmbed | null = null;
 
@@ -73,7 +73,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       useCoreKitKey: params.useCoreKitKey,
     });
     this.loginSettings = params.loginSettings || { loginProvider: "" };
-    this.walletSettings = params.walletSettings || {};
+    this.wsSettings = params.walletServicesSettings || {};
   }
 
   get chainConfigProxy(): CustomChainConfig | null {
@@ -123,14 +123,14 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       this.wsEmbedInstance = new WsEmbed({
         web3AuthClientId: this.authOptions.clientId || "",
         web3AuthNetwork: this.authOptions.network,
-        modalZIndex: this.walletSettings.modalZIndex,
+        modalZIndex: this.wsSettings.modalZIndex,
       });
       await this.wsEmbedInstance.init({
-        ...this.walletSettings,
+        ...this.wsSettings,
         chainConfig: this.chainConfig as EthereumProviderConfig,
         whiteLabel: {
           ...this.authOptions.whiteLabel,
-          ...this.walletSettings.whiteLabel,
+          ...this.wsSettings.whiteLabel,
         },
         // TODO-v10: add accountAbstractionConfig
       });
@@ -390,10 +390,10 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     if (!uiConfig.mode) uiConfig.mode = "light";
     adapterSettings.whiteLabel = uiConfig;
 
-    // wallet settings
-    const finalWalletSettings = {
-      ...options.walletSettings,
-      enableLogging: options.walletSettings?.enableLogging || options.enableLogging,
+    // wallet services settings
+    const finalWalletServicesSettings = {
+      ...options.walletServicesSettings,
+      enableLogging: options.walletServicesSettings?.enableLogging || options.enableLogging,
     };
 
     // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
@@ -405,7 +405,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
       web3AuthNetwork: options.web3AuthNetwork,
       useCoreKitKey: options.useCoreKitKey,
       adapterSettings,
-      walletSettings: finalWalletSettings,
+      walletServicesSettings: finalWalletServicesSettings,
     };
     return new AuthAdapter(adapterOptions);
   };

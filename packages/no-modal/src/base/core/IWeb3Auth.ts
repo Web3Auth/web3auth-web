@@ -17,7 +17,7 @@ import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
-export interface WalletSettings extends WsEmbedParams {
+export interface WalletServicesSettings extends WsEmbedParams {
   modalZIndex?: number;
 }
 
@@ -94,9 +94,9 @@ export interface IWeb3AuthCoreOptions {
   multiInjectedProviderDiscovery?: boolean;
 
   /**
-   * Wallet settings
+   * Wallet services settings
    */
-  walletSettings?: WalletSettings;
+  walletServicesSettings?: WalletServicesSettings;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
