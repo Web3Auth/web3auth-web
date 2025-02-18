@@ -33,9 +33,13 @@ import {
   Web3AuthNoModalEvents,
 } from "@/core/base";
 
+import { walletConnectV2Adapter } from "./adapters";
 import { CommonJRPCProvider } from "./providers";
 
 const ADAPTER_CACHE_KEY = "Web3Auth-cachedAdapter";
+
+const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
+
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -45,7 +49,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public cachedAdapter: string | null = null;
 
-  protected walletAdapters: Record<string, IAdapter<unknown>> = {};
+  public cachedCurrentChainId: string | null = null;
+
+  public currentChainConfig: CustomChainConfig;
+
+  public walletAdapters: Record<string, IAdapter<unknown>> = {};
 
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
@@ -60,23 +68,44 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.chainConfig) {
-      throw WalletInitializationError.invalidParams("Please provide chainConfig");
+
+    const singleChainConfig = options.chainConfig; // use deprecated chainConfig as single chain config list if present
+    const chainConfigs: CustomChainConfig[] =
+      options.chainConfigs || singleChainConfig
+        ? [singleChainConfig] // use privateKeyProvider's currentChainConfig as single chain config list if present
+        : undefined;
+    if (!chainConfigs || chainConfigs.length === 0) {
+      throw WalletInitializationError.invalidParams("Please provide chainConfig or privateKeyProvider");
     }
-    if (!options.chainConfig?.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(options.chainConfig?.chainNamespace))
-      throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
+    // validate chain namespace of each chain config
+    for (const chainConfig of chainConfigs) {
+      if (!chainConfig.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
+        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
+    }
+
     if (options.storageKey === "session") this.storage = "sessionStorage";
     this.cachedAdapter = storageAvailable(this.storage) ? window[this.storage].getItem(ADAPTER_CACHE_KEY) : null;
 
     this.coreOptions = {
       ...options,
-      chainConfig: {
-        ...(getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId) || {}),
-        ...options.chainConfig,
-      },
+      chainConfigs: chainConfigs.map((chainConfig) => ({
+        ...(getChainConfig(chainConfig?.chainNamespace, chainConfig?.chainId) || {}),
+        ...chainConfig,
+      })),
     };
     this.multiInjectedProviderDiscovery = options.multiInjectedProviderDiscovery ?? true;
+
+    // handle cached current chain
+    this.cachedCurrentChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
+    // use corrected chainConfigs from coreOptions
+    const cachedChainConfig = this.cachedCurrentChainId
+      ? this.coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === this.cachedCurrentChainId)
+      : null;
+    this.currentChainConfig = cachedChainConfig || this.coreOptions.chainConfigs[0]; // use first chain in list as default chain config
+
+    // TODO: do we need this ?
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
+    this.getCurrentChainConfig = this.getCurrentChainConfig.bind(this);
   }
 
   get connected(): boolean {
@@ -94,8 +123,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     throw new Error("Not implemented");
   }
 
+  public getCoreOptions(): IWeb3AuthCoreOptions {
+    return this.coreOptions;
+  }
+
+  public getCurrentChainConfig(): CustomChainConfig {
+    return this.currentChainConfig;
+  }
+
   public async init(): Promise<void> {
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
@@ -109,10 +146,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    const adapterFns = await this.loadDefaultAdapters(projectConfig);
-    const config = { projectConfig, options: this.coreOptions };
+    const adapterFns = await this.loadDefaultAdapters();
     const adapterPromises = adapterFns.map(async (adapterFn) => {
-      const adapter = adapterFn(config);
+      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
       this.subscribeToAdapterEvents(adapter);
@@ -192,9 +228,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public addPlugin(plugin: IPlugin): IWeb3Auth {
     if (this.plugins[plugin.name]) throw WalletInitializationError.duplicateAdapterError(`Plugin ${plugin.name} already exist`);
-    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.coreOptions.chainConfig.chainNamespace)
+    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChainConfig.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.coreOptions.chainConfig.chainNamespace}`
+        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.currentChainConfig.chainNamespace}`
       );
 
     this.plugins[plugin.name] = plugin;
@@ -209,8 +245,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected async loadDefaultAdapters(projectConfig: PROJECT_CONFIG_RESPONSE): Promise<AdapterFn[]> {
-    const config = { projectConfig, options: this.coreOptions };
+  protected async loadDefaultAdapters(): Promise<AdapterFn[]> {
     const adapterFns = this.coreOptions.walletAdapters || [];
 
     // always add auth adapter
@@ -218,12 +253,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // add injected wallets if multi injected provider discovery is enabled
     if (this.multiInjectedProviderDiscovery) {
-      if (this.coreOptions.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const chainNamespaces = new Set(this.coreOptions.chainConfigs.map((chainConfig) => chainConfig.chainNamespace));
+      if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
         const { getSolanaInjectedAdapters } = await import("@/core/default-solana-adapter");
-        adapterFns.push(...getSolanaInjectedAdapters(config));
-      } else if (this.coreOptions.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        adapterFns.push(...getSolanaInjectedAdapters());
+      }
+      if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
         const { getEvmInjectedAdapters } = await import("@/core/default-evm-adapter");
-        adapterFns.push(...getEvmInjectedAdapters(config));
+        adapterFns.push(...getEvmInjectedAdapters());
+      }
+      if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
+        adapterFns.push(walletConnectV2Adapter());
       }
     }
     return adapterFns;

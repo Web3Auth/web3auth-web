@@ -7,7 +7,6 @@ import {
   BaseAdapterConfig,
   cloneDeep,
   CommonJRPCProvider,
-  CustomChainConfig,
   fetchProjectConfig,
   fetchWalletRegistry,
   IProvider,
@@ -86,10 +85,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // initialize login modal
+    const currentChainConfig = this.getCurrentChainConfig();
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
-      chainNamespace: this.options.chainConfig.chainNamespace,
+      chainNamespace: currentChainConfig.chainNamespace,
       walletRegistry,
     });
     this.subscribeToLoginModalEvents();
@@ -121,9 +121,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // load default adapters: auth, injected wallets
-    const adapterFns = await this.loadDefaultAdapters(projectConfig);
+    const adapterFns = await this.loadDefaultAdapters();
     adapterFns.map(async (adapterFn) => {
-      const adapter = adapterFn({ projectConfig, options: this.coreOptions });
+      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
     });
@@ -162,10 +162,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
             // override user specified config by hiding wallet connect
             this.modalConfig.adapters = {
               ...(this.modalConfig.adapters ?? {}),
-              [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
-                ...(this.modalConfig.adapters?.[WALLET_ADAPTERS.WALLET_CONNECT_V2] ?? {}),
-                showOnModal: false,
-              },
+              [WALLET_ADAPTERS.WALLET_CONNECT_V2]: { ...(this.modalConfig.adapters?.[WALLET_ADAPTERS.WALLET_CONNECT_V2] ?? {}), showOnModal: false },
             } as Record<string, ModalConfig>;
             this.modalConfig.adapters[WALLET_ADAPTERS.WALLET_CONNECT_V2].showOnModal = false;
           }
@@ -213,7 +210,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.coreOptions.chainConfig as CustomChainConfig });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.getCurrentChainConfig() });
     if (typeof keyExportEnabled === "boolean") {
       // dont know if we need to do this.
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);

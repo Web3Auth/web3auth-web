@@ -70,10 +70,9 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
   async init(options: AdapterInitOptions = {}): Promise<void> {
     await super.init(options);
     super.checkInitializationRequirements();
-    const coinbaseInstance = new CoinbaseWalletSDK({
-      ...this.coinbaseOptions,
-      appChainIds: [Number.parseInt(this.chainConfig.chainId, 16)],
-    });
+    const currentChainConfig = this.getCurrentChainConfig?.();
+
+    const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(currentChainConfig.chainId, 16)] });
     this.coinbaseProvider = coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
@@ -93,11 +92,13 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
+      const currentChainConfig = this.getCurrentChainConfig?.();
+
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const chainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
-      if (chainId !== (this.chainConfig as CustomChainConfig).chainId) {
-        await this.addChain(this.chainConfig as CustomChainConfig);
-        await this.switchChain(this.chainConfig as CustomChainConfig, true);
+      if (chainId !== currentChainConfig.chainId) {
+        await this.addChain(currentChainConfig);
+        await this.switchChain(currentChainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -139,8 +140,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     return {};
   }
 
-  public async addChain(chainConfig: CustomChainConfig, init = false): Promise<void> {
-    super.checkAddChainRequirements(chainConfig, init);
+  public async addChain(chainConfig: CustomChainConfig, _init = false): Promise<void> {
     await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [
@@ -149,25 +149,16 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
           chainName: chainConfig.displayName,
           rpcUrls: [chainConfig.rpcTarget],
           blockExplorerUrls: [chainConfig.blockExplorerUrl],
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
+          nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
           iconUrls: [chainConfig.logo],
         },
       ],
     });
-    super.addChainConfig(chainConfig);
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.coinbaseProvider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: params.chainId }],
-    });
-    this.setAdapterSettings({ chainConfig: this.getChainConfig(params.chainId) });
+    await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
   }
 
   public async enableMFA(): Promise<void> {
@@ -180,14 +171,11 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 }
 
 export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn => {
-  return ({ options }: AdapterParams) => {
+  return ({ options, getCurrentChainConfig }: AdapterParams) => {
     return new CoinbaseAdapter({
-      chainConfig: options.chainConfig,
-      sessionTime: options.sessionTime,
-      clientId: options.clientId,
-      web3AuthNetwork: options.web3AuthNetwork,
-      useCoreKitKey: options.useCoreKitKey,
       adapterSettings: params,
+      getCoreOptions: () => options,
+      getCurrentChainConfig,
     });
   };
 };

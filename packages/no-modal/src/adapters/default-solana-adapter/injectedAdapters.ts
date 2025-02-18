@@ -2,15 +2,11 @@ import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction 
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect } from "@wallet-standard/features";
 
-import { AdapterFn, AdapterParams, CHAIN_NAMESPACES, normalizeWalletName, WalletInitializationError } from "@/core/base";
+import { AdapterFn, normalizeWalletName } from "@/core/base";
 
 import { walletStandardAdapter } from "./walletStandardAdapter";
 
-export const getSolanaInjectedAdapters = ({ options }: AdapterParams): AdapterFn[] => {
-  const { chainConfig } = options;
-  if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
-    throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
-
+export const getSolanaInjectedAdapters = (): AdapterFn[] => {
   // get installed wallets that support standard wallet
   const standardWalletAdapters = [] as AdapterFn[];
   const wallets = getWallets().get();
@@ -23,12 +19,7 @@ export const getSolanaInjectedAdapters = ({ options }: AdapterParams): AdapterFn
     );
     if (!hasRequiredFeatures) return;
 
-    standardWalletAdapters.push(
-      walletStandardAdapter({
-        name: normalizeWalletName(name),
-        wallet,
-      })
-    );
+    standardWalletAdapters.push(walletStandardAdapter({ name: normalizeWalletName(name), wallet }));
   });
   return standardWalletAdapters;
 };

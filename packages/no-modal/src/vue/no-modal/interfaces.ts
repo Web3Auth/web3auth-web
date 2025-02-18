@@ -4,7 +4,6 @@ import type { Ref, ShallowRef } from "vue";
 import type { ADAPTER_STATUS_TYPE, AdapterFn, IPlugin, IProvider, IWeb3AuthCoreOptions, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@/core/base";
 
 import { type Web3AuthNoModal } from "../../noModal";
-
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;
   adapters?: AdapterFn[];

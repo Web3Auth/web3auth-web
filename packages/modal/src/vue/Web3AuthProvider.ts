@@ -17,9 +17,7 @@ import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 
 export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
-  props: {
-    config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
-  },
+  props: { config: { type: Object as PropType<Web3AuthContextConfig>, required: true } },
   setup(props) {
     const web3Auth = shallowRef<Web3Auth | null>(null);
     const provider = ref<IProvider | null>(null);

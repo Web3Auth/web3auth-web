@@ -1,4 +1,3 @@
-import { ChainNamespaceType } from "@toruslabs/base-controllers";
 import {
   AuthUserInfo,
   JRPCRequest,
@@ -38,11 +37,8 @@ export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_S
 export type UserAuthInfo = { idToken: string };
 
 export interface BaseAdapterSettings {
-  clientId?: string;
-  sessionTime?: number;
-  chainConfig?: CustomChainConfig;
-  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
-  useCoreKitKey?: boolean;
+  getCoreOptions?: () => IWeb3AuthCoreOptions;
+  getCurrentChainConfig?: () => CustomChainConfig;
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {
@@ -64,14 +60,8 @@ export interface IBaseProvider<T> extends IProvider {
 
 export interface IAdapter<T> extends SafeEventEmitter {
   adapterNamespace: AdapterNamespaceType;
-  currentChainNamespace: ChainNamespaceType;
-  chainConfigProxy: CustomChainConfig | null;
   type: ADAPTER_CATEGORY_TYPE;
   name: string;
-  sessionTime: number;
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
-  useCoreKitKey: boolean | undefined;
-  clientId: string;
   status: ADAPTER_STATUS_TYPE;
   provider: IProvider | null;
   adapterData?: unknown;
@@ -87,15 +77,15 @@ export interface IAdapter<T> extends SafeEventEmitter {
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
-export type AdapterParams = { projectConfig?: PROJECT_CONFIG_RESPONSE; options: IWeb3AuthCoreOptions };
+export type AdapterParams = {
+  projectConfig?: PROJECT_CONFIG_RESPONSE;
+  options: IWeb3AuthCoreOptions;
+  getCurrentChainConfig: () => CustomChainConfig;
+};
 
 export type AdapterFn = (params: AdapterParams) => IAdapter<unknown>;
 
-export type CONNECTED_EVENT_DATA = {
-  adapter: string;
-  provider: IProvider;
-  reconnected: boolean;
-};
+export type CONNECTED_EVENT_DATA = { adapter: string; provider: IProvider; reconnected: boolean };
 
 export interface IAdapterDataEvent {
   adapterName: string;
@@ -163,6 +153,4 @@ export type LoginMethodConfig = Record<
   }
 >;
 
-export type WalletConnectV2Data = {
-  uri: string;
-};
+export type WalletConnectV2Data = { uri: string };

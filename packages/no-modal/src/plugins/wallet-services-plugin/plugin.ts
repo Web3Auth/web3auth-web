@@ -48,7 +48,8 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_ADAPTERS.includes(web3auth.connectedAdapterName)) throw WalletServicesPluginError.notInitialized();
-    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(web3auth.coreOptions.chainConfig.chainNamespace))
+    const currentChainConfig = web3auth.getCurrentChainConfig();
+    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig.chainNamespace))
       throw WalletServicesPluginError.unsupportedChainNamespace();
     // Not connected yet to auth
     if (web3auth.provider) {

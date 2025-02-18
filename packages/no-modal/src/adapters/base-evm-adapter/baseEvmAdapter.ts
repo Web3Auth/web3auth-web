@@ -5,27 +5,28 @@ import {
   ADAPTER_STATUS,
   AdapterInitOptions,
   BaseAdapter,
-  CHAIN_NAMESPACES,
   checkIfTokenIsExpired,
   clearToken,
-  getChainConfig,
   getSavedToken,
   saveToken,
   UserAuthInfo,
+  WalletInitializationError,
   WalletLoginError,
 } from "@/core/base";
 
 export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
-  async init(_?: AdapterInitOptions): Promise<void> {
-    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, 1);
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async init(_?: AdapterInitOptions): Promise<void> {}
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
-    const { chainNamespace, chainId } = this.chainConfig;
-    const accounts = await this.provider.request<never, string[]>({
-      method: "eth_accounts",
-    });
+    const coreOptions = this.getCoreOptions?.();
+    if (!coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
+    const currentChainConfig = this.getCurrentChainConfig?.();
+    if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
+
+    const { chainNamespace, chainId } = currentChainConfig;
+    const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
       if (existingToken) {
@@ -48,33 +49,26 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
       const challenge = await signChallenge(payload, chainNamespace);
       const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
 
-      const signedMessage = await this.provider.request<[string, string], string>({
-        method: "personal_sign",
-        params: [hexChallenge, accounts[0]],
-      });
+      const signedMessage = await this.provider.request<[string, string], string>({ method: "personal_sign", params: [hexChallenge, accounts[0]] });
 
       const idToken = await verifySignedChallenge(
         chainNamespace,
         signedMessage as string,
         challenge,
         this.name,
-        this.sessionTime,
-        this.clientId,
-        this.web3AuthNetwork
+        coreOptions.sessionTime,
+        coreOptions.clientId,
+        coreOptions.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
-      return {
-        idToken,
-      };
+      return { idToken };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<never, string[]>({
-      method: "eth_accounts",
-    });
+    const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
     if (accounts && accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }

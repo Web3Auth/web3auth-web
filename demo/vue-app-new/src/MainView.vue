@@ -115,15 +115,15 @@ const options = computed((): Web3AuthOptions => {
   let walletServicesSettings: Web3AuthOptions["walletServicesSettings"];
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
   if (formData.walletPlugin.enable) {
-      const { confirmationStrategy } = formData.walletPlugin;
-      walletServicesSettings = {
-          whiteLabel: {
-            ...uiConfig,
-            showWidgetButton: true,
-          },
-          confirmationStrategy,
-          accountAbstractionConfig,
-      };
+    const { confirmationStrategy } = formData.walletPlugin;
+    walletServicesSettings = {
+      whiteLabel: {
+        ...uiConfig,
+        showWidgetButton: true,
+      },
+      confirmationStrategy,
+      accountAbstractionConfig,
+    };
   }
 
 
@@ -139,7 +139,8 @@ const options = computed((): Web3AuthOptions => {
     // storageKey?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
-    chainConfig,
+    // chainConfig,
+    chainConfigs: [chainConfig],
     enableLogging: true,
     walletServicesSettings,
   };
@@ -173,9 +174,9 @@ const getExternalAdapterByName = (name: string): AdapterFn[] => {
     case "wallet-connect-v2":
       return [walletConnectV2Adapter({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
     case "injected-evm":
-      return getEvmInjectedAdapters({ options: options.value });
+      return getEvmInjectedAdapters();
     case "injected-solana":
-      return getSolanaInjectedAdapters({ options: options.value });
+      return getSolanaInjectedAdapters();
     default:
       return [];
   }
