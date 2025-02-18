@@ -14,7 +14,6 @@ const Main = () => {
     signTransaction,
     web3Auth,
     showWalletUi,
-    addChain,
     switchChain,
     showWalletConnectScanner,
     enableMFA,
@@ -34,9 +33,6 @@ const Main = () => {
       </button>
       <button onClick={signMessage} className={styles.card}>
         Sign Message
-      </button>
-      <button onClick={addChain} className={styles.card}>
-        Add Chain
       </button>
       <button onClick={switchChain} className={styles.card}>
         Switch Chain

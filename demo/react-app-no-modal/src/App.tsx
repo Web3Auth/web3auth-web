@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS } from "@web3auth/modal";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_ADAPTERS, AuthAdapter, AuthLoginParams, EthereumPrivateKeyProvider } from "@web3auth/modal";
+import { useEffect, useState } from "react";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
 
@@ -23,18 +23,13 @@ function App() {
           logo: "https://images.toruswallet.io/eth.svg",
           chainNamespace: CHAIN_NAMESPACES.EIP155,
         }
-        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig } });
 
         const web3auth = new Web3AuthNoModal({
           clientId,
           web3AuthNetwork: "cyan",
-          privateKeyProvider
         });
 
         setWeb3auth(web3auth);
-
-        const authAdapter = new AuthAdapter();
-        web3auth.configureAdapter(authAdapter);
 
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
@@ -92,25 +87,6 @@ function App() {
     const rpc = new RPC(provider);
     const chainId = await rpc.getChainId();
     uiConsole(chainId);
-  };
-
-  const addChain = async () => {
-    if (!provider) {
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    const newChain = {
-      chainId: "0x5",
-      displayName: "Goerli",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      tickerName: "Goerli",
-      ticker: "ETH",
-      decimals: 18,
-      rpcTarget: "https://rpc.ankr.com/eth_goerli",
-      blockExplorer: "https://goerli.etherscan.io",
-    };
-    await web3auth?.addChain(newChain);
-    uiConsole("New Chain Added");
   };
 
   const switchChain = async () => {
@@ -195,11 +171,6 @@ function App() {
         <div>
           <button onClick={getChainId} className="card">
             Get Chain ID
-          </button>
-        </div>
-        <div>
-          <button onClick={addChain} className="card">
-            Add Chain
           </button>
         </div>
         <div>

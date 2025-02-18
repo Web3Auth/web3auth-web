@@ -2,13 +2,13 @@ import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction 
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect } from "@wallet-standard/features";
 
-import { BaseAdapter, IAdapter, IWeb3AuthCoreOptions, normalizeWalletName } from "@/core/base";
+import { AdapterFn, normalizeWalletName } from "@/core/base";
 
-import { WalletStandardAdapter } from "./walletStandardAdapter";
+import { walletStandardAdapter } from "./walletStandardAdapter";
 
-export const getSolanaInjectedAdapters = (_params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
+export const getSolanaInjectedAdapters = (): AdapterFn[] => {
   // get installed wallets that support standard wallet
-  const standardWalletAdapters = [] as BaseAdapter<void>[];
+  const standardWalletAdapters = [] as AdapterFn[];
   const wallets = getWallets().get();
   wallets.forEach((wallet) => {
     const { name, chains, features } = wallet;
@@ -19,7 +19,7 @@ export const getSolanaInjectedAdapters = (_params: { options: IWeb3AuthCoreOptio
     );
     if (!hasRequiredFeatures) return;
 
-    standardWalletAdapters.push(new WalletStandardAdapter({ name: normalizeWalletName(name), wallet }));
+    standardWalletAdapters.push(walletStandardAdapter({ name: normalizeWalletName(name), wallet }));
   });
   return standardWalletAdapters;
 };

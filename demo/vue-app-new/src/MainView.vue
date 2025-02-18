@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
-import { Web3AuthProvider } from "@web3auth/modal/vue";
+import { AccountAbstractionProvider, AdapterFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_ADAPTERS, walletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
+import { SMART_ACCOUNT } from "@toruslabs/ethereum-controllers";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -13,7 +14,7 @@ import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
 
-const externalAdapters = ref<IAdapter<unknown>[]>([]);
+const externalAdapters = ref<AdapterFn[]>([]);
 
 const chainOptions = computed(() =>
   chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
@@ -22,37 +23,14 @@ const chainOptions = computed(() =>
   }))
 );
 
-// Populate the private key provider based on the chain selected
-const privateKeyProvider = computed((): IBaseProvider<string> => {
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
-
-  switch (formData.chainNamespace) {
-    case CHAIN_NAMESPACES.EIP155:
-      return new EthereumPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    case CHAIN_NAMESPACES.SOLANA:
-      return new SolanaPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-    default:
-      return new CommonPrivateKeyProvider({
-        config: {
-          chainConfig,
-        },
-      });
-  }
-});
-
 const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
 
 const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
   const { useAccountAbstractionProvider } = formData;
   if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
+
+  // only need to setup AA provider for external wallets, for embedded wallet, we'll use WS which already supports AA
+  if (!formData.useAAWithExternalWallet) return undefined;
 
   const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
   // setup aa provider
@@ -85,8 +63,8 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
       bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
       paymasterConfig: formData.paymasterUrl
         ? {
-            url: formData.paymasterUrl,
-          }
+          url: formData.paymasterUrl,
+        }
         : undefined,
       smartAccountInit,
     },
@@ -96,11 +74,63 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
+  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+
+  // Account Abstraction
+  const { useAccountAbstractionProvider } = formData;
+  let accountAbstractionConfig = undefined;
+  if (showAAProviderSettings.value && useAccountAbstractionProvider) {
+    let smartAccountType = ""
+    let smartAccountConfig = undefined;
+    switch (formData.smartAccountType) {
+      case "nexus":
+        smartAccountType = SMART_ACCOUNT.NEXUS;
+        break;
+      case "kernel":
+        smartAccountType = SMART_ACCOUNT.KERNEL;
+        break;
+      case "trust":
+        smartAccountType = SMART_ACCOUNT.TRUST;
+        break;
+      // case "light":
+      //   smartAccountInit = new LightSmartAccount();
+      //   break;
+      // case "simple":
+      //   smartAccountInit = new SimpleSmartAccount();
+      //   break;
+      case "safe":
+      default:
+        smartAccountType = SMART_ACCOUNT.SAFE;
+        break;
+    }
+    accountAbstractionConfig = {
+      smartAccountType,
+      paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
+      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
+      smartAccountConfig,
+    }
+  }
+
+  // Wallet services settings
+  let walletServicesSettings: Web3AuthOptions["walletServicesSettings"];
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  if (formData.walletPlugin.enable) {
+    const { confirmationStrategy } = formData.walletPlugin;
+    walletServicesSettings = {
+      whiteLabel: {
+        ...uiConfig,
+        showWidgetButton: true,
+      },
+      confirmationStrategy,
+      accountAbstractionConfig,
+    };
+  }
+
+
   return {
     clientId: clientIds[formData.network],
-    privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
-    uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
+    uiConfig,
     accountAbstractionProvider: accountAbstractionProvider.value,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
@@ -109,7 +139,10 @@ const options = computed((): Web3AuthOptions => {
     // storageKey?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
+    // chainConfig,
+    chainConfigs: [chainConfig],
     enableLogging: true,
+    walletServicesSettings,
   };
 });
 
@@ -134,16 +167,16 @@ const modalParams = computed(() => {
   return modalConfig;
 });
 
-const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
+const getExternalAdapterByName = (name: string): AdapterFn[] => {
   switch (name) {
     case "coinbase":
-      return [new CoinbaseAdapter()];
+      return [coinbaseAdapter()];
     case "wallet-connect-v2":
-      return [new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } } })];
+      return [walletConnectV2Adapter({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
     case "injected-evm":
-      return getEvmInjectedAdapters({ options: options.value });
+      return getEvmInjectedAdapters();
     case "injected-solana":
-      return getSolanaInjectedAdapters({ options: options.value });
+      return getSolanaInjectedAdapters();
     default:
       return [];
   }
@@ -170,7 +203,7 @@ onBeforeMount(() => {
         formData.bundlerUrl = json.bundlerUrl;
         formData.paymasterUrl = json.paymasterUrl;
       }
-    } catch (error) {}
+    } catch (error) { }
   }
   if (!chainOptions.value.find((option) => option.value === formData.chain)) formData.chain = chainOptions.value[0]?.value;
 });
@@ -183,7 +216,7 @@ watch(formData, () => {
 watch(
   () => formData.adapters,
   async () => {
-    let adapters: IAdapter<unknown>[] = [];
+    let adapters: AdapterFn[] = [];
     for (let i = 0; i <= formData.adapters.length; i += 1) {
       adapters = adapters.concat(getExternalAdapterByName(formData.adapters[i]));
     }
@@ -191,7 +224,7 @@ watch(
   }
 );
 
-const configs = computed(() => {
+const configs = computed<Web3AuthContextConfig>(() => {
   const plugins = [];
   if (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
     if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
@@ -201,19 +234,7 @@ const configs = computed(() => {
       plugins.push(nftCheckoutPlugin);
     }
     if (formData.walletPlugin.enable) {
-      const { uiConfig } = options.value;
-      const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
-      const walletServicesPlugin = new WalletServicesPlugin({
-        walletInitOptions: {
-          whiteLabel: {
-            ...uiConfig,
-            showWidgetButton: true,
-            logoDark: logoDark || "https://images.web3auth.io/web3auth-logo-w-light.svg",
-            logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
-          },
-          confirmationStrategy,
-        },
-      });
+      const walletServicesPlugin = new WalletServicesPlugin();
       plugins.push(walletServicesPlugin);
     }
   }

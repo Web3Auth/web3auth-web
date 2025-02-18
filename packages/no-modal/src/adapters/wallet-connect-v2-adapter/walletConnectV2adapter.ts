@@ -12,8 +12,10 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapter,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -387,5 +389,31 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     return signedMessage as string;
   }
 }
+
+export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterFn => {
+  return ({ projectConfig, options, getCurrentChainConfig }: AdapterParams) => {
+    let { projectId } = params || {};
+
+    if (projectConfig) {
+      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+      if (walletConnectEnabled === false) {
+        throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
+      }
+      if (!walletConnectProjectId)
+        throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
+      projectId = walletConnectProjectId;
+    } else if (!projectId) {
+      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 adapter");
+    }
+
+    return new WalletConnectV2Adapter({
+      adapterSettings: {
+        walletConnectInitOptions: { projectId },
+      },
+      getCoreOptions: () => options,
+      getCurrentChainConfig,
+    });
+  };
+};
 
 export { WalletConnectV2Adapter };

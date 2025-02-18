@@ -5,8 +5,10 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -164,5 +166,17 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const injectedEvmAdapter = (params: { name: string; provider: IProvider }): AdapterFn => {
+  const { name, provider } = params;
+  return ({ options, getCurrentChainConfig }: AdapterParams) => {
+    return new InjectedEvmAdapter({
+      name,
+      provider,
+      getCoreOptions: () => options,
+      getCurrentChainConfig,
+    });
+  };
+};
 
 export { InjectedEvmAdapter };

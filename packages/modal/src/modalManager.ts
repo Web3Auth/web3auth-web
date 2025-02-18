@@ -4,25 +4,19 @@ import {
   ADAPTER_EVENTS,
   ADAPTER_NAMES,
   ADAPTER_STATUS,
-  AuthAdapter,
-  AuthOptions,
   BaseAdapterConfig,
   cloneDeep,
   CommonJRPCProvider,
   fetchProjectConfig,
   fetchWalletRegistry,
-  getAuthDefaultOptions,
-  IBaseProvider,
   IProvider,
   IWeb3AuthCoreOptions,
   log,
   LOGIN_PROVIDER,
-  LoginConfig,
   LoginMethodConfig,
   PROJECT_CONFIG_RESPONSE,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
-  WalletConnectV2Adapter,
   WalletInitializationError,
   WalletRegistry,
   Web3AuthNoModal,
@@ -38,11 +32,6 @@ export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
    * Config for configuring modal ui display properties
    */
   uiConfig?: Omit<UIConfig, "adapterListener">;
-
-  /**
-   * Private key provider for your chain namespace
-   */
-  privateKeyProvider: IBaseProvider<string>;
 }
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
@@ -57,7 +46,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options = { ...options };
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
-    if (!this.coreOptions.privateKeyProvider) throw WalletInitializationError.invalidParams("privateKeyProvider is required");
   }
 
   public setModalConfig(modalConfig: AdaptersModalConfig): void {
@@ -68,6 +56,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
 
+    // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
       projectConfig = await fetchProjectConfig(
@@ -85,6 +74,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
+    // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
     if (!params?.hideWalletDiscovery) {
       try {
@@ -94,8 +84,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     }
 
+    // initialize login modal
     const currentChainConfig = this.getCurrentChainConfig();
-
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
@@ -104,7 +94,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     this.subscribeToLoginModalEvents();
 
-    const { sms_otp_enabled: smsOtpEnabled, whitelist, key_export_enabled: keyExportEnabled } = projectConfig;
+    const { sms_otp_enabled: smsOtpEnabled, key_export_enabled: keyExportEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       const adapterConfig: Record<WALLET_ADAPTER_TYPE, ModalConfig> = {
         [WALLET_ADAPTERS.AUTH]: {
@@ -129,6 +119,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     await this.loginModal.initModal();
+
+    // load default adapters: auth, injected wallets
+    const adapterFns = await this.loadDefaultAdapters();
+    adapterFns.map(async (adapterFn) => {
+      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
+      if (this.walletAdapters[adapter.name]) return;
+      this.walletAdapters[adapter.name] = adapter;
+    });
+
     // merge default adapters with the custom configured adapters.
     const allAdapters = [...new Set([...Object.keys(this.modalConfig.adapters || {}), ...Object.keys(this.walletAdapters)])];
 
@@ -147,98 +146,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
       (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName] = adapterConfig as ModalConfig;
 
-      // check if adapter is configured/added by user and exist in walletAdapters map.
+      // check if adapter is configured/added by user and exist in connectors map.
       const adapter = this.walletAdapters[adapterName];
       log.debug("adapter config", adapterName, this.modalConfig.adapters?.[adapterName].showOnModal, adapter);
 
       // if adapter is not custom configured then check if it is available in default adapters.
       // and if adapter is not hidden by user
       if (!adapter && this.modalConfig.adapters?.[adapterName].showOnModal) {
-        // Adapters to be shown on modal should be pre-configured.
-        if (adapterName === WALLET_ADAPTERS.AUTH) {
-          const defaultOptions = getAuthDefaultOptions();
-          const { clientId, web3AuthNetwork, privateKeyProvider } = this.coreOptions;
-          if (!privateKeyProvider) {
-            throw WalletInitializationError.invalidParams("privateKeyProvider is required");
-          }
-          const finalAuthAdapterSettings: Partial<AuthOptions> = {
-            ...defaultOptions.adapterSettings,
-            clientId,
-            network: web3AuthNetwork,
-            whiteLabel: this.options.uiConfig,
-          };
-          if (smsOtpEnabled !== undefined) {
-            finalAuthAdapterSettings.loginConfig = {
-              [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-                showOnModal: smsOtpEnabled,
-                showOnDesktop: smsOtpEnabled,
-                showOnMobile: smsOtpEnabled,
-                showOnSocialBackupFactor: smsOtpEnabled,
-              } as LoginConfig[keyof LoginConfig],
-            };
-          }
-          if (whitelist) {
-            finalAuthAdapterSettings.originData = whitelist.signed_urls;
-          }
-          if (this.options.uiConfig.uxMode) {
-            finalAuthAdapterSettings.uxMode = this.options.uiConfig.uxMode;
-          }
-          const authAdapter = new AuthAdapter({
-            ...defaultOptions,
-            adapterSettings: finalAuthAdapterSettings,
-            privateKeyProvider,
-            getCurrentChainConfig: this.getCurrentChainConfig.bind(this),
-            getCoreOptions: this.getCoreOptions.bind(this),
-          });
-          this.walletAdapters[adapterName] = authAdapter;
-          return adapterName;
-        }
         throw WalletInitializationError.invalidParams(`Adapter ${adapterName} is not configured`);
       } else if (adapter?.type === ADAPTER_CATEGORY.IN_APP || adapter?.type === ADAPTER_CATEGORY.EXTERNAL || adapterName === this.cachedAdapter) {
         if (!this.modalConfig.adapters?.[adapterName].showOnModal) return;
-        // add client id to adapter, same web3auth client id can be used in adapter.
-        // this id is being overridden if user is also passing client id in adapter's constructor.
-        this.walletAdapters[adapterName].setAdapterSettings({
-          getCurrentChainConfig: this.getCurrentChainConfig.bind(this),
-          getCoreOptions: this.getCoreOptions.bind(this),
-        });
-
-        if (adapterName === WALLET_ADAPTERS.AUTH) {
-          const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
-          if (this.coreOptions.privateKeyProvider) {
-            if (currentChainConfig?.chainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
-              throw WalletInitializationError.incompatibleChainNameSpace(
-                "private key provider is not compatible with provided chainNamespace for auth adapter"
-              );
-            }
-            authAdapter.setAdapterSettings({ privateKeyProvider: this.coreOptions.privateKeyProvider });
-          }
-          if (smsOtpEnabled !== undefined) {
-            authAdapter.setAdapterSettings({
-              loginConfig: {
-                [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-                  showOnModal: smsOtpEnabled,
-                  showOnDesktop: smsOtpEnabled,
-                  showOnMobile: smsOtpEnabled,
-                  showOnSocialBackupFactor: smsOtpEnabled,
-                } as LoginConfig[keyof LoginConfig],
-              },
-            });
-          }
-          if (whitelist) {
-            authAdapter.setAdapterSettings({ originData: whitelist.signed_urls });
-          }
-          if (this.options.uiConfig?.uxMode) {
-            authAdapter.setAdapterSettings({ uxMode: this.options.uiConfig.uxMode });
-          }
-          authAdapter.setAdapterSettings({ whiteLabel: this.options.uiConfig });
-          if (!authAdapter.privateKeyProvider) {
-            throw WalletInitializationError.invalidParams("privateKeyProvider is required for auth adapter");
-          }
-        } else if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
-          const walletConnectAdapter = this.walletAdapters[adapterName] as WalletConnectV2Adapter;
-          const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-
+        if (adapterName === WALLET_ADAPTERS.WALLET_CONNECT_V2) {
+          const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
           if (walletConnectEnabled === false) {
             // override user specified config by hiding wallet connect
             this.modalConfig.adapters = {
@@ -246,13 +165,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
               [WALLET_ADAPTERS.WALLET_CONNECT_V2]: { ...(this.modalConfig.adapters?.[WALLET_ADAPTERS.WALLET_CONNECT_V2] ?? {}), showOnModal: false },
             } as Record<string, ModalConfig>;
             this.modalConfig.adapters[WALLET_ADAPTERS.WALLET_CONNECT_V2].showOnModal = false;
-          } else {
-            if (!walletConnectAdapter?.adapterOptions?.adapterSettings?.walletConnectInitOptions?.projectId && !walletConnectProjectId)
-              throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
-
-            if (walletConnectProjectId) {
-              walletConnectAdapter.setAdapterSettings({ adapterSettings: { walletConnectInitOptions: { projectId: walletConnectProjectId } } });
-            }
           }
         }
 
@@ -278,19 +190,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const initPromises = adapterNames.map(async (adapterName) => {
       if (!adapterName) return;
       try {
-        const adapter = this.walletAdapters[adapterName];
+        const connector = this.walletAdapters[adapterName];
         // only initialize a external adapter here if it is a cached adapter.
-        if (this.cachedAdapter !== adapterName && adapter.type === ADAPTER_CATEGORY.EXTERNAL) {
+        if (this.cachedAdapter !== adapterName && connector.type === ADAPTER_CATEGORY.EXTERNAL) {
           return;
         }
         // in-app wallets or cached wallet (being connected or already connected) are initialized first.
         // if adapter is configured then only initialize in app or cached adapter.
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
-        this.subscribeToAdapterEvents(adapter);
-        if (adapter.status === ADAPTER_STATUS.NOT_READY) await adapter.init({ autoConnect: this.cachedAdapter === adapterName });
+        this.subscribeToAdapterEvents(connector);
+        if (connector.status === ADAPTER_STATUS.NOT_READY) await connector.init({ autoConnect: this.cachedAdapter === adapterName });
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
-        if (adapter.type === ADAPTER_CATEGORY.IN_APP) {
+        if (connector.type === ADAPTER_CATEGORY.IN_APP) {
           this.initializeInAppWallet(adapterName);
         }
       } catch (error) {
@@ -300,7 +212,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.getCurrentChainConfig() });
     if (typeof keyExportEnabled === "boolean") {
-      this.coreOptions.privateKeyProvider.setKeyExportFlag(keyExportEnabled);
       // dont know if we need to do this.
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
     }
@@ -325,7 +236,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // currently all default in app and external wallets can be hidden or shown based on config.
     if (!hasInAppWallets && hasExternalWallets) {
       // if no in app wallet is available then initialize external wallets in modal
-      await this.initExternalWalletAdapters(false, { showExternalWalletsOnly: true });
+      await this.initExternalconnectors(false, { showExternalWalletsOnly: true });
     }
   }
 
@@ -350,7 +261,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
-  private async initExternalWalletAdapters(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
+  private async initExternalconnectors(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
     if (externalWalletsInitialized) return;
     const adaptersConfig: Record<string, BaseAdapterConfig> = {};
     // we do it like this because we don't want one slow adapter to delay the load of the entire external wallet section.
@@ -408,7 +319,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
-      await this.initExternalWalletAdapters(params.externalWalletsInitialized);
+      await this.initExternalconnectors(params.externalWalletsInitialized);
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       try {

@@ -1,15 +1,11 @@
-import { IAdapter, IWeb3AuthCoreOptions } from "@/core/base";
+import { AdapterFn } from "@/core/base";
 
-import { WalletConnectV2Adapter } from "../wallet-connect-v2-adapter";
+import { walletConnectV2Adapter } from "../wallet-connect-v2-adapter";
 import { getSolanaInjectedAdapters } from "./injectedAdapters";
 
-export const getSolanaDefaultExternalAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
-  const { options } = params;
-
-  const wcv2Adapter = new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: {} } });
-  const injectedProviders = getSolanaInjectedAdapters({ options });
-
-  return [...injectedProviders, wcv2Adapter];
+export const getSolanaDefaultExternalAdapters = (): AdapterFn[] => {
+  const injectedProviders = getSolanaInjectedAdapters();
+  return [...injectedProviders, walletConnectV2Adapter()];
 };
 
 export { getSolanaInjectedAdapters };

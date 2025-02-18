@@ -1,15 +1,12 @@
-import { IAdapter, IWeb3AuthCoreOptions } from "@/core/base";
-import { WalletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
+import { AdapterFn } from "@/core/base";
+import { walletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
 
 import { getEvmInjectedAdapters } from "./injectedAdapters";
 
-export const getEvmDefaultExternalAdapters = (params: { options: IWeb3AuthCoreOptions }): IAdapter<unknown>[] => {
-  const { options } = params;
+export const getEvmDefaultExternalAdapters = (): AdapterFn[] => {
+  const injectedProviders = getEvmInjectedAdapters();
 
-  const wcv2Adapter = new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: {} } });
-  const injectedProviders = getEvmInjectedAdapters({ options });
-
-  return [...injectedProviders, wcv2Adapter];
+  return [...injectedProviders, walletConnectV2Adapter()];
 };
 
 export { getEvmInjectedAdapters };

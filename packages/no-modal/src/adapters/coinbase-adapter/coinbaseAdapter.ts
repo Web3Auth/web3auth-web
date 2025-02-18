@@ -7,8 +7,10 @@ import {
   ADAPTER_NAMESPACES,
   ADAPTER_STATUS,
   ADAPTER_STATUS_TYPE,
+  AdapterFn,
   AdapterInitOptions,
   AdapterNamespaceType,
+  AdapterParams,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -167,5 +169,15 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     throw new Error("Method Not implemented");
   }
 }
+
+export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn => {
+  return ({ options, getCurrentChainConfig }: AdapterParams) => {
+    return new CoinbaseAdapter({
+      adapterSettings: params,
+      getCoreOptions: () => options,
+      getCurrentChainConfig,
+    });
+  };
+};
 
 export { CoinbaseAdapter };

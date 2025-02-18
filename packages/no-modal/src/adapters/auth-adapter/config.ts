@@ -10,6 +10,5 @@ export const getAuthDefaultOptions = (): AuthAdapterOptions => {
       uxMode: UX_MODE.POPUP,
     },
     loginSettings: {},
-    privateKeyProvider: undefined,
   };
 };

@@ -353,22 +353,6 @@ const onChainNamespaceChange = (value: string) => {
           :label-enabled="$t('app.walletPlugin.title')"
           class="mb-2"
         />
-        <TextField
-          v-model="formData.walletPlugin.logoLight"
-          :label="$t('app.walletPlugin.logoLight')"
-          :disabled="isDisabled('walletServicePlugin')"
-          :aria-label="$t('app.walletPlugin.logoLight')"
-          :placeholder="$t('app.walletPlugin.logoLight')"
-          class="sm:col-span-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoDark"
-          :disabled="isDisabled('walletServicePlugin')"
-          :label="$t('app.walletPlugin.logoDark')"
-          :aria-label="$t('app.walletPlugin.logoDark')"
-          :placeholder="$t('app.walletPlugin.logoDark')"
-          class="sm:col-span-2"
-        />
         <Select
           v-model="formData.walletPlugin.confirmationStrategy"
           data-testid="selectLoginProviders"

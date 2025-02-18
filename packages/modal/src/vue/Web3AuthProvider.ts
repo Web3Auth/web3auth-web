@@ -101,9 +101,8 @@ export const Web3AuthProvider = defineComponent({
         };
 
         resetHookState();
-        const { web3AuthOptions, adapters = [], plugins = [] } = newConfig;
+        const { web3AuthOptions, plugins = [] } = newConfig;
         const web3AuthInstance = new Web3Auth(web3AuthOptions);
-        if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
         if (plugins.length) {
           plugins.forEach((plugin) => {
             web3AuthInstance.addPlugin(plugin);

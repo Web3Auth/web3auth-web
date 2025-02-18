@@ -1,9 +1,11 @@
 import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
+import { WsEmbedParams } from "@web3auth/ws-embed";
 
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS_TYPE,
   AdapterEvents,
+  AdapterFn,
   IAdapter,
   IBaseProvider,
   IProvider,
@@ -14,6 +16,22 @@ import {
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
+
+export type WalletServicesSettings = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
+  /**
+   * Determines how to show confirmation screens
+   * @defaultValue default
+   *
+   * default & auto-approve
+   * - use auto-approve as default
+   * - if wallet connect request use modal
+   *
+   * modal
+   * - use modal always
+   */
+  confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
+  modalZIndex?: number;
+};
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -73,11 +91,6 @@ export interface IWeb3AuthCoreOptions {
   uiConfig?: WhiteLabelData;
 
   /**
-   * Private key provider for your chain namespace
-   */
-  privateKeyProvider?: IBaseProvider<string>;
-
-  /**
    * Account abstraction provider for your chain namespace
    */
   accountAbstractionProvider?: IBaseProvider<IProvider>;
@@ -86,6 +99,22 @@ export interface IWeb3AuthCoreOptions {
    * Whether to use AA with external wallet
    */
   useAAWithExternalWallet?: boolean;
+
+  /**
+   * Adapters to use
+   */
+  walletAdapters?: AdapterFn[];
+
+  /**
+   * Whether to enable multi injected provider discovery
+   * @defaultValue true
+   */
+  multiInjectedProviderDiscovery?: boolean;
+
+  /**
+   * Wallet services settings
+   */
+  walletServicesSettings?: WalletServicesSettings;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
@@ -97,6 +126,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getCoreOptions(): IWeb3AuthCoreOptions;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
+  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
   switchChain(params: { chainId: string }): Promise<void>;
@@ -107,9 +137,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
   cachedAdapter: string | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
   getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
-  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
   /**
    * Connect to a specific wallet adapter
    * @param walletName - Key of the walletAdapter to use.

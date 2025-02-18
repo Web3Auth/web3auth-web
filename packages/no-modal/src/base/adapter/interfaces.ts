@@ -15,6 +15,7 @@ import {
 import { AdapterNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
+import { PROJECT_CONFIG_RESPONSE } from "../interfaces";
 import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { ADAPTER_CATEGORY, ADAPTER_EVENTS, ADAPTER_STATUS } from "./constants";
 
@@ -52,7 +53,6 @@ export interface IBaseProvider<T> extends IProvider {
   provider: SafeEventEmitterProvider | null;
   currentChainConfig: CustomChainConfig;
   setupProvider(provider: T): Promise<void>;
-  addChain(chainConfig: CustomChainConfig): void;
   switchChain(params: { chainId: string }): Promise<void>;
   updateProviderEngineProxy(provider: SafeEventEmitterProvider): void;
   setKeyExportFlag(flag: boolean): void;
@@ -73,10 +73,17 @@ export interface IAdapter<T> extends SafeEventEmitter {
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
-  setAdapterSettings(adapterSettings: BaseAdapterSettings): void;
   switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
 }
+
+export type AdapterParams = {
+  projectConfig?: PROJECT_CONFIG_RESPONSE;
+  options: IWeb3AuthCoreOptions;
+  getCurrentChainConfig: () => CustomChainConfig;
+};
+
+export type AdapterFn = (params: AdapterParams) => IAdapter<unknown>;
 
 export type CONNECTED_EVENT_DATA = { adapter: string; provider: IProvider; reconnected: boolean };
 

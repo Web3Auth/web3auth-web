@@ -1,8 +1,7 @@
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, EthereumPrivateKeyProvider, IProvider, WalletServicesPlugin, WEB3AUTH_NETWORK_TYPE, Web3Auth, AccountAbstractionProvider, SafeSmartAccount, PLUGIN_EVENTS } from "@web3auth/modal";
-import { createContext, FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { AccountAbstractionProvider, ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, PLUGIN_EVENTS, SafeSmartAccount, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE } from "@web3auth/modal";
+import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
-import * as walletServiceHandler from "./walletServiceHandlers";
 
 export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
@@ -17,7 +16,6 @@ export interface IWeb3AuthContext {
   getAccounts: () => Promise<any>;
   getBalance: () => Promise<any>;
   signTransaction: () => Promise<void>;
-  addChain: () => Promise<void>;
   switchChain: () => Promise<void>;
   showWalletConnectScanner: () => Promise<void>;
   showWalletUi: () => Promise<void>;
@@ -38,7 +36,6 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   getAccounts: async () => {},
   getBalance: async () => {},
   signTransaction: async () => {},
-  addChain: async () => {},
   switchChain: async () => {},
   showWalletConnectScanner: async () => {},
   showWalletUi: async () => {},
@@ -116,7 +113,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
-        const privateKeyProvider = new EthereumPrivateKeyProvider({ config: { chainConfig: currentChainConfig } });
         const accountAbstractionProvider = new AccountAbstractionProvider({
           config: {
             chainConfig: currentChainConfig,
@@ -136,7 +132,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           // get your client id from https://dashboard.web3auth.io
           clientId,
           web3AuthNetwork,
-          privateKeyProvider,
           accountAbstractionProvider,
           chainConfig: currentChainConfig,
           uiConfig: {
@@ -160,13 +155,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         // Wallet Services Plugin
 
-        const walletServicesPlugin = new WalletServicesPlugin({
-          wsEmbedOpts: {},
-          walletInitOptions: {
-            whiteLabel: { showWidgetButton: true },
-            confirmationStrategy: "modal",
-          },
-        });
+        const walletServicesPlugin = new WalletServicesPlugin();
 
         subscribePluginEvents(walletServicesPlugin);
         setWalletServicesPlugin(walletServicesPlugin);
@@ -232,24 +221,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     await web3Auth.manageMFA();
   };
 
-  const addChain = async () => {
-    if (!provider) {
-      uiConsole("provider not initialized yet");
-      return;
-    }
-    const newChain: CustomChainConfig = {
-      rpcTarget: "https://rpc.ankr.com/polygon",
-      blockExplorerUrl: "https://polygonscan.com/",
-      chainId: "0x89",
-      displayName: "Polygon Mainnet",
-      ticker: "POL",
-      tickerName: "Polygon Ecosystem Token",
-      logo: "https://images.toruswallet.io/matic.svg",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-    };
-    await web3Auth?.addChain(newChain);
-    uiConsole("New Chain Added");
-  };
   const switchChain = async () => {
     const chainId = "0x89";
     if (!provider) {
@@ -345,7 +316,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     getBalance,
     signMessage,
     signTransaction,
-    addChain,
     switchChain,
     showWalletConnectScanner,
     enableMFA,

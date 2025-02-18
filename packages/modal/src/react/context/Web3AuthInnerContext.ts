@@ -116,9 +116,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
 
     resetHookState();
-    const { web3AuthOptions, adapters = [], plugins = [] } = config;
+    const { web3AuthOptions, plugins = [] } = config;
     const web3AuthInstance = new Web3Auth(web3AuthOptions);
-    if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
     if (plugins.length) {
       plugins.forEach((plugin) => {
         web3AuthInstance.addPlugin(plugin);
