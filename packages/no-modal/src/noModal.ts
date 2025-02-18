@@ -69,11 +69,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
 
-    const singleChainConfig = options.chainConfig; // use deprecated chainConfig as single chain config list if present
-    const chainConfigs: CustomChainConfig[] =
-      options.chainConfigs || singleChainConfig
-        ? [singleChainConfig] // use privateKeyProvider's currentChainConfig as single chain config list if present
-        : undefined;
+    const chainConfigs: CustomChainConfig[] = options.chainConfigs || [];
     if (!chainConfigs || chainConfigs.length === 0) {
       throw WalletInitializationError.invalidParams("Please provide chainConfig or privateKeyProvider");
     }

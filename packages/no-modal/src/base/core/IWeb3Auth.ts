@@ -40,13 +40,6 @@ export interface IWeb3AuthCoreOptions {
    * You can set any random string for this on localhost.
    */
   clientId: string;
-  /**
-   * custom chain configuration for chainNamespace
-   *
-   * @defaultValue mainnet config of provided chainNamespace
-   * @deprecated use chainConfigs instead
-   */
-  chainConfig?: CustomChainConfig;
 
   /**
    * multiple chain configurations
