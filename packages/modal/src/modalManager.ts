@@ -206,7 +206,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         if (adapterName === WALLET_ADAPTERS.AUTH) {
           const authAdapter = this.walletAdapters[adapterName] as AuthAdapter;
           if (this.coreOptions.privateKeyProvider) {
-            if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+            if (currentChainConfig?.chainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
               throw WalletInitializationError.incompatibleChainNameSpace(
                 "private key provider is not compatible with provided chainNamespace for auth adapter"
               );

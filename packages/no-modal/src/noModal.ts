@@ -188,7 +188,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
 
         if (this.coreOptions.privateKeyProvider) {
-          if (authAdapter.currentChainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
+          const currentChainConfig = this.getCurrentChainConfig?.();
+          if (currentChainConfig?.chainNamespace !== this.coreOptions.privateKeyProvider.currentChainConfig.chainNamespace) {
             throw WalletInitializationError.incompatibleChainNameSpace(
               "private key provider is not compatible with provided chainNamespace for auth adapter"
             );

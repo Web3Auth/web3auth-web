@@ -13,7 +13,6 @@ import {
   BaseAdapter,
   BaseAdapterSettings,
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   IProvider,
   log,
@@ -42,8 +41,6 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   public authInstance: Auth | null = null;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
-
-  public currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   public privateKeyProvider: PrivateKeyProvider | null = null;
 
@@ -258,9 +255,11 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
         ]) as AuthLoginParams
       );
     }
+
+    const currentChainConfig = this.getCurrentChainConfig?.();
     let finalPrivKey = this._getFinalPrivKey();
     if (finalPrivKey) {
-      if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      if (currentChainConfig?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
         finalPrivKey = this._getFinalEd25519PrivKey();
       }
 
