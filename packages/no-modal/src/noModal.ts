@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 
 import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
-import { type AuthAdapter, authAdapter } from "@/core/auth-adapter";
+import { authAdapter } from "@/core/auth-adapter";
 import {
   ADAPTER_EVENTS,
   ADAPTER_STATUS,
@@ -323,10 +323,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           return;
         }
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
-        const { authInstance } = this.walletAdapters[this.connectedAdapterName] as AuthAdapter;
-        const { options, sessionId, sessionNamespace } = authInstance || {};
-        await plugin.initWithWeb3Auth(this, options?.whiteLabel);
-        await plugin.connect({ sessionId, sessionNamespace });
+        await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig);
+        await plugin.connect();
       } catch (error: unknown) {
         // swallow error if connector adapter doesn't supports this plugin.
         if ((error as Web3AuthError).code === 5211) {

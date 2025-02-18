@@ -1,6 +1,6 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { type default as WsEmbed, WsEmbedParams } from "@web3auth/ws-embed";
+import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
@@ -27,6 +27,7 @@ import {
   WALLET_ADAPTERS,
   WalletInitializationError,
   WalletLoginError,
+  WalletSettings,
   Web3AuthError,
 } from "@/core/base";
 
@@ -57,7 +58,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  private walletSettings: WsEmbedParams = {};
+  private walletSettings: WalletSettings = {};
 
   private wsEmbedInstance: WsEmbed | null = null;
 
@@ -91,6 +92,10 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     return null;
   }
 
+  get wsEmbed(): WsEmbed {
+    return this.wsEmbedInstance;
+  }
+
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
@@ -113,12 +118,12 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
     if (!this.chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
 
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+    if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155 || this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { default: WsEmbed } = await import("@web3auth/ws-embed");
       this.wsEmbedInstance = new WsEmbed({
         web3AuthClientId: this.authOptions.clientId || "",
         web3AuthNetwork: this.authOptions.network,
-        // modalZIndex: 10000, TODO-v10: turn this into an optional parameter
+        modalZIndex: this.walletSettings.modalZIndex,
       });
       await this.wsEmbedInstance.init({
         ...this.walletSettings,
@@ -127,13 +132,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
           ...this.authOptions.whiteLabel,
           ...this.walletSettings.whiteLabel,
         },
-        // TODO-v10: add more options
-      });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      // TODO-v10: once WS supports solana, we can use it here
-      const { SolanaPrivateKeyProvider } = await import("@/core/solana-provider");
-      this.privateKeyProvider = new SolanaPrivateKeyProvider({
-        config: { chainConfig: this.chainConfig },
+        // TODO-v10: add accountAbstractionConfig
       });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.XRPL) {
       const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
@@ -391,6 +390,12 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     if (!uiConfig.mode) uiConfig.mode = "light";
     adapterSettings.whiteLabel = uiConfig;
 
+    // wallet settings
+    const finalWalletSettings = {
+      ...options.walletSettings,
+      enableLogging: options.walletSettings?.enableLogging || options.enableLogging,
+    };
+
     // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
     // if no chainNamespace or chainId is being provided, it will connect with mainnet.
     const adapterOptions: AuthAdapterOptions = {
@@ -400,6 +405,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
       web3AuthNetwork: options.web3AuthNetwork,
       useCoreKitKey: options.useCoreKitKey,
       adapterSettings,
+      walletSettings: finalWalletSettings,
     };
     return new AuthAdapter(adapterOptions);
   };

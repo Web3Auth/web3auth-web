@@ -1,4 +1,5 @@
 import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
+import { WsEmbedParams } from "@web3auth/ws-embed";
 
 import {
   ADAPTER_EVENTS,
@@ -15,6 +16,10 @@ import {
 import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
+
+export interface WalletSettings extends WsEmbedParams {
+  modalZIndex?: number;
+}
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -86,7 +91,12 @@ export interface IWeb3AuthCoreOptions {
    * Whether to enable multi injected provider discovery
    * @defaultValue true
    */
-  multiInjectedProviderDiscovery: boolean;
+  multiInjectedProviderDiscovery?: boolean;
+
+  /**
+   * Wallet settings
+   */
+  walletSettings?: WalletSettings;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
@@ -96,6 +106,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   provider: IProvider | null;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
+  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
   switchChain(params: { chainId: string }): Promise<void>;

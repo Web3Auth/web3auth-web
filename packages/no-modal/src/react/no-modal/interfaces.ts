@@ -1,10 +1,10 @@
-import type { IAdapter, IBaseWeb3AuthHookContext, IPlugin, IProvider, IWeb3AuthCoreOptions, WALLET_ADAPTER_TYPE } from "@/core/base";
+import type { AdapterFn, IBaseWeb3AuthHookContext, IPlugin, IProvider, IWeb3AuthCoreOptions, WALLET_ADAPTER_TYPE } from "@/core/base";
 
 import { Web3AuthNoModal } from "../../noModal";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;
-  adapters?: IAdapter<unknown>[];
+  adapters?: AdapterFn[];
   plugins?: IPlugin[];
 };
 
