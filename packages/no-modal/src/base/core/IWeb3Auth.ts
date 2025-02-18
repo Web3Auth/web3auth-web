@@ -17,9 +17,21 @@ import { CustomChainConfig } from "../chain/IChainInterface";
 import { type IPlugin } from "../plugin";
 import { WALLET_ADAPTER_TYPE } from "../wallet";
 
-export interface WalletServicesSettings extends WsEmbedParams {
+export type WalletServicesSettings = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
+  /**
+   * Determines how to show confirmation screens
+   * @defaultValue default
+   *
+   * default & auto-approve
+   * - use auto-approve as default
+   * - if wallet connect request use modal
+   *
+   * modal
+   * - use modal always
+   */
+  confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
   modalZIndex?: number;
-}
+};
 
 export interface IWeb3AuthCoreOptions {
   /**

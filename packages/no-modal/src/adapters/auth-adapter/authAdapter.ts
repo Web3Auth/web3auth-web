@@ -132,7 +132,6 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
           ...this.authOptions.whiteLabel,
           ...this.wsSettings.whiteLabel,
         },
-        // TODO-v10: add accountAbstractionConfig
       });
     } else if (this.currentChainNamespace === CHAIN_NAMESPACES.XRPL) {
       const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
@@ -391,9 +390,9 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     adapterSettings.whiteLabel = uiConfig;
 
     // wallet services settings
-    const finalWalletServicesSettings = {
+    const finalWsSettings = {
       ...options.walletServicesSettings,
-      enableLogging: options.walletServicesSettings?.enableLogging || options.enableLogging,
+      enableLogging: options.enableLogging,
     };
 
     // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
@@ -405,7 +404,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
       web3AuthNetwork: options.web3AuthNetwork,
       useCoreKitKey: options.useCoreKitKey,
       adapterSettings,
-      walletServicesSettings: finalWalletServicesSettings,
+      walletServicesSettings: finalWsSettings,
     };
     return new AuthAdapter(adapterOptions);
   };

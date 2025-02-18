@@ -111,7 +111,7 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  // Wallet Settings
+  // Wallet services settings
   let walletServicesSettings: Web3AuthOptions["walletServicesSettings"];
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
   if (formData.walletPlugin.enable) {
