@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
-import { AccountAbstractionProvider, CHAIN_NAMESPACES, ChainNamespaceType, CoinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IAdapter, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TorusWalletAdapter, TrustSmartAccount, WALLET_ADAPTERS, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
-import { Web3AuthProvider } from "@web3auth/modal/vue";
+import { AccountAbstractionProvider, AdapterFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_ADAPTERS, walletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { WalletServicesProvider } from "@web3auth/no-modal/vue";
+import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import AppDashboard from "./components/AppDashboard.vue";
@@ -12,7 +13,7 @@ import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
 
-const externalAdapters = ref<IAdapter<unknown>[]>([]);
+const externalAdapters = ref<AdapterFn[]>([]);
 
 const chainOptions = computed(() =>
   chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
@@ -69,10 +70,25 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
+
+  let walletSettings: Web3AuthOptions["walletSettings"];
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  if (formData.walletPlugin.enable) {
+      const { confirmationStrategy } = formData.walletPlugin;
+      walletSettings = {
+          whiteLabel: {
+            ...uiConfig,
+            showWidgetButton: true,
+          },
+          confirmationStrategy,
+      };
+  }
+
+
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
+    uiConfig,
     accountAbstractionProvider: accountAbstractionProvider.value,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
@@ -81,7 +97,9 @@ const options = computed((): Web3AuthOptions => {
     // storageKey?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
+    chainConfig: chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!,
     enableLogging: true,
+    walletSettings,
   };
 });
 
@@ -106,12 +124,12 @@ const modalParams = computed(() => {
   return modalConfig;
 });
 
-const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
+const getExternalAdapterByName = (name: string): AdapterFn[] => {
   switch (name) {
     case "coinbase":
-      return [new CoinbaseAdapter()];
+      return [coinbaseAdapter()];
     case "wallet-connect-v2":
-      return [new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } } })];
+      return [walletConnectV2Adapter({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
     case "injected-evm":
       return getEvmInjectedAdapters({ options: options.value });
     case "injected-solana":
@@ -155,7 +173,7 @@ watch(formData, () => {
 watch(
   () => formData.adapters,
   async () => {
-    let adapters: IAdapter<unknown>[] = [];
+    let adapters: AdapterFn[] = [];
     for (let i = 0; i <= formData.adapters.length; i += 1) {
       adapters = adapters.concat(getExternalAdapterByName(formData.adapters[i]));
     }
@@ -163,7 +181,7 @@ watch(
   }
 );
 
-const configs = computed(() => {
+const configs = computed<Web3AuthContextConfig>(() => {
   const plugins = [];
   if (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
     if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
@@ -173,19 +191,7 @@ const configs = computed(() => {
       plugins.push(nftCheckoutPlugin);
     }
     if (formData.walletPlugin.enable) {
-      const { uiConfig } = options.value;
-      const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
-      const walletServicesPlugin = new WalletServicesPlugin({
-        walletInitOptions: {
-          whiteLabel: {
-            ...uiConfig,
-            showWidgetButton: true,
-            logoDark: logoDark || "https://images.web3auth.io/web3auth-logo-w-light.svg",
-            logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
-          },
-          confirmationStrategy,
-        },
-      });
+      const walletServicesPlugin = new WalletServicesPlugin();
       plugins.push(walletServicesPlugin);
     }
   }

@@ -155,13 +155,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         // Wallet Services Plugin
 
-        const walletServicesPlugin = new WalletServicesPlugin({
-          wsEmbedOpts: {},
-          walletInitOptions: {
-            whiteLabel: { showWidgetButton: true },
-            confirmationStrategy: "modal",
-          },
-        });
+        const walletServicesPlugin = new WalletServicesPlugin();
 
         subscribePluginEvents(walletServicesPlugin);
         setWalletServicesPlugin(walletServicesPlugin);

@@ -19,8 +19,6 @@ export const formDataStore = reactive<FormData>({
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,
-    logoLight: "",
-    logoDark: "",
     confirmationStrategy: "default",
   },
   nftCheckoutPlugin: {

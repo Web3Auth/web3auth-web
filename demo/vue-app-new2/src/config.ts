@@ -181,8 +181,6 @@ export type FormData = {
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
-    logoDark: string;
-    logoLight: string;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
   };
   nftCheckoutPlugin: {

@@ -31,7 +31,7 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
+const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
 const { isPluginConnected, plugin } = useWalletServicesPlugin();
 const currentChainId = ref<string | undefined>(web3Auth.value?.coreOptions.chainConfig?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
