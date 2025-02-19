@@ -199,7 +199,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // if adapter is configured then only initialize in app or cached adapter.
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
         this.subscribeToAdapterEvents(connector);
-        if (connector.status === ADAPTER_STATUS.NOT_READY) await connector.init({ autoConnect: this.cachedAdapter === adapterName });
+        if (connector.status === ADAPTER_STATUS.NOT_READY)
+          await connector.init({ autoConnect: this.cachedAdapter === adapterName, chainId: this.currentChainConfig.chainId });
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
         if (connector.type === ADAPTER_CATEGORY.IN_APP) {
@@ -276,7 +277,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         }
         if (adapter.status === ADAPTER_STATUS.NOT_READY) {
           await adapter
-            .init({ autoConnect: this.cachedAdapter === adapterName })
+            .init({ autoConnect: this.cachedAdapter === adapterName, chainId: this.currentChainConfig.chainId })
             .then<undefined>(() => {
               const adapterModalConfig = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
               adaptersConfig[adapterName] = { ...adapterModalConfig, isInjected: adapter.isInjected };
@@ -340,7 +341,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
           // refreshing session for wallet connect whenever modal is opened.
           try {
-            adapter.connect();
+            adapter.connect({ chainId: this.currentChainConfig.chainId });
           } catch (error) {
             log.error(`Error while disconnecting to wallet connect in core`, error);
           }

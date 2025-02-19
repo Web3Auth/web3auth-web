@@ -1,11 +1,27 @@
-import { AdapterFn } from "@/core/base";
+import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction } from "@solana/wallet-standard-features";
+import { getWallets } from "@wallet-standard/app";
+import { StandardConnect } from "@wallet-standard/features";
 
-import { walletConnectV2Adapter } from "../wallet-connect-v2-adapter";
-import { getSolanaInjectedAdapters } from "./injectedAdapters";
+import { AdapterFn, normalizeWalletName } from "@/core/base";
 
-export const getSolanaDefaultExternalAdapters = (): AdapterFn[] => {
-  const injectedProviders = getSolanaInjectedAdapters();
-  return [...injectedProviders, walletConnectV2Adapter()];
+import { walletStandardAdapter } from "./walletStandardAdapter";
+
+export const getSolanaInjectedAdapters = (): AdapterFn[] => {
+  // get installed wallets that support standard wallet
+  const standardWalletAdapters = [] as AdapterFn[];
+  const wallets = getWallets().get();
+  wallets.forEach((wallet) => {
+    const { name, chains, features } = wallet;
+    const isSolana = chains.some((chain) => chain.startsWith("solana"));
+    if (!isSolana) return;
+    const hasRequiredFeatures = [StandardConnect, SolanaSignMessage, SolanaSignTransaction, SolanaSignAndSendTransaction].every((feature) =>
+      Object.keys(features).includes(feature)
+    );
+    if (!hasRequiredFeatures) return;
+
+    standardWalletAdapters.push(walletStandardAdapter({ name: normalizeWalletName(name), wallet }));
+  });
+  return standardWalletAdapters;
 };
 
-export { getSolanaInjectedAdapters };
+export { walletStandardAdapter };

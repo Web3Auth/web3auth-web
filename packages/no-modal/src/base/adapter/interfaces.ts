@@ -30,6 +30,10 @@ export interface AdapterInitOptions {
    * Whether to auto connect to the adapter based on redirect mode or saved adapters
    */
   autoConnect?: boolean;
+  /**
+   * The chainId to connect to
+   */
+  chainId: string;
 }
 
 export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
@@ -38,7 +42,6 @@ export type UserAuthInfo = { idToken: string };
 
 export interface BaseAdapterSettings {
   getCoreOptions?: () => IWeb3AuthCoreOptions;
-  getCurrentChainConfig?: () => CustomChainConfig;
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {

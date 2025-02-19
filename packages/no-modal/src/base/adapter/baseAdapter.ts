@@ -1,6 +1,6 @@
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { AdapterNamespaceType, CHAIN_NAMESPACES } from "../chain/IChainInterface";
+import { AdapterNamespaceType, CHAIN_NAMESPACES, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { WALLET_ADAPTERS } from "../wallet";
 import { ADAPTER_EVENTS, ADAPTER_STATUS } from "./constants";
@@ -22,8 +22,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   isInjected?: boolean;
 
   public getCoreOptions?: BaseAdapterSettings["getCoreOptions"];
-
-  public getCurrentChainConfig?: BaseAdapterSettings["getCurrentChainConfig"];
 
   protected rehydrated = false;
 
@@ -49,9 +47,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   public setAdapterSettings(options: BaseAdapterSettings): void {
     if (this.status === ADAPTER_STATUS.READY) return;
 
-    if (options.getCurrentChainConfig) {
-      this.getCurrentChainConfig = options.getCurrentChainConfig;
-    }
     if (options.getCoreOptions) {
       this.getCoreOptions = options.getCoreOptions;
     }
@@ -69,16 +64,15 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
       );
   }
 
-  checkInitializationRequirements(): void {
+  checkInitializationRequirements({ chainConfig }: { chainConfig?: CustomChainConfig }): void {
     const coreOptions = this.getCoreOptions?.();
-    const currentChainConfig = this.getCurrentChainConfig?.();
     if (!coreOptions?.clientId) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid clientId in constructor");
-    if (!currentChainConfig) throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
-    if (!currentChainConfig.rpcTarget && currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+    if (!chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
+    if (!chainConfig.rpcTarget && chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");
     }
 
-    if (!currentChainConfig.chainId && currentChainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+    if (!chainConfig.chainId && chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       throw WalletInitializationError.invalidParams("chainID is required in chainConfig");
     }
     if (this.status === ADAPTER_STATUS.NOT_READY) return;
@@ -100,7 +94,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   }
 
   abstract init(options?: AdapterInitOptions): Promise<void>;
-  abstract connect(params?: T): Promise<IProvider | null>;
+  abstract connect(params?: T & { chainId: string }): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;

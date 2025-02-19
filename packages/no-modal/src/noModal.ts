@@ -148,7 +148,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
       this.subscribeToAdapterEvents(adapter);
-      return adapter.init({ autoConnect: this.cachedAdapter === adapter.name }).catch((e) => log.error(e, adapter.name));
+      return adapter
+        .init({ autoConnect: this.cachedAdapter === adapter.name, chainId: this.currentChainConfig.chainId })
+        .catch((e) => log.error(e, adapter.name));
     });
     await Promise.all(adapterPromises);
     if (this.status === ADAPTER_STATUS.NOT_READY) {
@@ -188,7 +190,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(ADAPTER_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      this.walletAdapters[walletName]?.connect(loginParams);
+      const finalLoginParams = { ...loginParams, chainId: this.currentChainConfig.chainId };
+      this.walletAdapters[walletName]?.connect(finalLoginParams);
     });
   }
 
