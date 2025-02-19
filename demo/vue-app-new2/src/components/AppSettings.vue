@@ -94,7 +94,7 @@ const onChainNamespaceChange = (value: string) => {
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === ADAPTER_STATUS.READY }]">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === ADAPTER_STATUS.READY }]">
           {{ status }}
         </Tag>
         &nbsp;
@@ -347,22 +347,6 @@ const onChainNamespaceChange = (value: string) => {
           :label-disabled="$t('app.walletPlugin.title')"
           :label-enabled="$t('app.walletPlugin.title')"
           class="mb-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoLight"
-          :label="$t('app.walletPlugin.logoLight')"
-          :disabled="isDisabled('walletServicePlugin')"
-          :aria-label="$t('app.walletPlugin.logoLight')"
-          :placeholder="$t('app.walletPlugin.logoLight')"
-          class="sm:col-span-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoDark"
-          :disabled="isDisabled('walletServicePlugin')"
-          :label="$t('app.walletPlugin.logoDark')"
-          :aria-label="$t('app.walletPlugin.logoDark')"
-          :placeholder="$t('app.walletPlugin.logoDark')"
-          class="sm:col-span-2"
         />
         <Select
           v-model="formData.walletPlugin.confirmationStrategy"

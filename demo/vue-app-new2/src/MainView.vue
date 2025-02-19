@@ -6,7 +6,7 @@ import Web3 from "web3";
 
 const ethereumChainConfig = getEvmChainConfig(Number("0x13882"))!;
 const ethWeb3AuthOptions: Web3AuthOptions = {
-  chainConfig: ethereumChainConfig,
+  chainConfigs: [ethereumChainConfig],
   enableLogging: true,
   clientId: clientIds["mainnet"],
   web3AuthNetwork: "mainnet",
