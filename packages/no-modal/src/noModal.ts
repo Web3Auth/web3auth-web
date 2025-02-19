@@ -68,15 +68,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-
-    const chainConfigs: CustomChainConfig[] = options.chainConfigs || [];
-    if (!chainConfigs || chainConfigs.length === 0) {
-      throw WalletInitializationError.invalidParams("Please provide chainConfig or privateKeyProvider");
+    if (!options.chainConfigs || options.chainConfigs.length === 0) {
+      throw WalletInitializationError.invalidParams("Please provide chainConfigs");
     }
+
+    const { chainConfigs } = options;
     // validate chain namespace of each chain config
     for (const chainConfig of chainConfigs) {
       if (!chainConfig.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
-        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfig");
+        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfigs");
     }
 
     if (options.storageKey === "session") this.storage = "sessionStorage";
@@ -168,9 +168,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName)
-      return this.walletAdapters[this.connectedAdapterName]?.switchChain(params);
-    if (this.commonJRPCProvider) return this.commonJRPCProvider.switchChain(params);
+    if (this.status === ADAPTER_STATUS.CONNECTED && this.connectedAdapterName) {
+      await this.walletAdapters[this.connectedAdapterName].switchChain(params);
+      this.setCurrentChainConfig(params.chainId);
+      return;
+    }
+    if (this.commonJRPCProvider) {
+      await this.commonJRPCProvider.switchChain(params);
+      this.setCurrentChainConfig(params.chainId);
+      return;
+    }
     throw WalletInitializationError.notReady(`No wallet is ready`);
   }
 
@@ -350,6 +357,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!storageAvailable(this.storage)) return;
     window[this.storage].setItem(ADAPTER_CACHE_KEY, walletName);
     this.cachedAdapter = walletName;
+  }
+
+  private setCurrentChainConfig(chainId: string) {
+    if (chainId === this.currentChainConfig.chainId) return;
+    const newChainConfig = this.coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === chainId);
+    if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
+    this.currentChainConfig = newChainConfig;
+    this.cacheCurrentChain(chainId);
+  }
+
+  private cacheCurrentChain(chainId: string) {
+    if (!storageAvailable(this.storage)) return;
+    window[this.storage].setItem(CURRENT_CHAIN_CACHE_KEY, chainId);
+    this.cachedCurrentChainId = chainId;
   }
 
   private connectToPlugins(data: { adapter: WALLET_ADAPTER_TYPE }) {

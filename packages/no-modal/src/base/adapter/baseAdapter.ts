@@ -92,6 +92,10 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
   checkSwitchChainRequirements(_params: { chainId: string }, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    const coreOptions = this.getCoreOptions?.();
+    if (!coreOptions?.chainConfigs) throw WalletInitializationError.invalidParams("chainConfigs is required");
+    const newChainConfig = coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === _params.chainId);
+    if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
   }
 
   updateAdapterData(data: unknown): void {
