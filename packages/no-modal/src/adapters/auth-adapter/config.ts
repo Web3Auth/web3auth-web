@@ -1,10 +1,10 @@
 import { UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 
-import { AuthAdapterOptions } from "./interface";
+import { AuthConnectorOptions } from "./interface";
 
-export const getAuthDefaultOptions = (): AuthAdapterOptions => {
+export const getAuthDefaultOptions = (): AuthConnectorOptions => {
   return {
-    adapterSettings: {
+    connectorSettings: {
       network: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: "",
       uxMode: UX_MODE.POPUP,

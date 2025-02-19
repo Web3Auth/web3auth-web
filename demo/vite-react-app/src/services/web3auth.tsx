@@ -1,4 +1,4 @@
-import { AccountAbstractionProvider, ADAPTER_EVENTS, CHAIN_NAMESPACES, CustomChainConfig, IProvider, PLUGIN_EVENTS, SafeSmartAccount, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE } from "@web3auth/modal";
+import { AccountAbstractionProvider, CONNECTOR_EVENTS, IProvider, PLUGIN_EVENTS, SafeSmartAccount, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE } from "@web3auth/modal";
 import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
@@ -69,23 +69,23 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
-      // Can subscribe to all ADAPTER_EVENTS and LOGIN_MODAL_EVENTS
-      web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
+      // Can subscribe to all CONNECTOR_EVENTS and LOGIN_MODAL_EVENTS
+      web3auth.on(CONNECTOR_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in", data);
         setUser(data);
         setProvider(web3auth.provider);
       });
 
-      web3auth.on(ADAPTER_EVENTS.CONNECTING, () => {
+      web3auth.on(CONNECTOR_EVENTS.CONNECTING, () => {
         console.log("connecting");
       });
 
-      web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
+      web3auth.on(CONNECTOR_EVENTS.DISCONNECTED, () => {
         console.log("disconnected");
         setUser(null);
       });
 
-      web3auth.on(ADAPTER_EVENTS.ERRORED, (error) => {
+      web3auth.on(CONNECTOR_EVENTS.ERRORED, (error) => {
         console.error("some error or user has cancelled login request", error);
       });
     };
@@ -133,7 +133,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           clientId,
           web3AuthNetwork,
           accountAbstractionProvider,
-          chainConfig: currentChainConfig,
+          chainConfigs: [currentChainConfig],
           uiConfig: {
             uxMode: "redirect",
             appName: "W3A Heroes",

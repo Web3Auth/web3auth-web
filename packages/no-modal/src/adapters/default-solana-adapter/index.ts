@@ -2,13 +2,13 @@ import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction 
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect } from "@wallet-standard/features";
 
-import { AdapterFn, normalizeWalletName } from "@/core/base";
+import { ConnectorFn, normalizeWalletName } from "@/core/base";
 
-import { walletStandardAdapter } from "./walletStandardAdapter";
+import { walletStandardConnector } from "./walletStandardAdapter";
 
-export const getSolanaInjectedAdapters = (): AdapterFn[] => {
+export const getSolanaInjectedConnectors = (): ConnectorFn[] => {
   // get installed wallets that support standard wallet
-  const standardWalletAdapters = [] as AdapterFn[];
+  const standardWalletConnectors = [] as ConnectorFn[];
   const wallets = getWallets().get();
   wallets.forEach((wallet) => {
     const { name, chains, features } = wallet;
@@ -19,9 +19,9 @@ export const getSolanaInjectedAdapters = (): AdapterFn[] => {
     );
     if (!hasRequiredFeatures) return;
 
-    standardWalletAdapters.push(walletStandardAdapter({ name: normalizeWalletName(name), wallet }));
+    standardWalletConnectors.push(walletStandardConnector({ name: normalizeWalletName(name), wallet }));
   });
-  return standardWalletAdapters;
+  return standardWalletConnectors;
 };
 
-export { walletStandardAdapter };
+export { walletStandardConnector };

@@ -1,6 +1,6 @@
 import type { EngineTypes, SignClientTypes } from "@walletconnect/types";
 
-import { BaseAdapterSettings } from "@/core/base";
+import { BaseConnectorSettings } from "@/core/base";
 
 export interface OpenOptions {
   uri: string;
@@ -13,12 +13,12 @@ export interface IQRCodeModal {
   closeModal: () => void;
 }
 
-export interface IAdapterSettings {
+export interface IConnectorSettings {
   walletConnectInitOptions?: SignClientTypes.Options;
   qrcodeModal?: IQRCodeModal;
 }
 
-export interface WalletConnectV2AdapterOptions extends BaseAdapterSettings {
-  adapterSettings?: IAdapterSettings;
+export interface WalletConnectV2ConnectorOptions extends BaseConnectorSettings {
+  connectorSettings?: IConnectorSettings;
   loginSettings?: EngineTypes.ConnectParams;
 }

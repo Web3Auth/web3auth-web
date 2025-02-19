@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 
@@ -72,7 +72,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return (
         (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
         formData.walletPlugin.enable &&
-        web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
+        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
       );
 
     case "nftCheckoutServices":

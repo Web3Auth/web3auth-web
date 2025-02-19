@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ADAPTER_STATUS, CONNECTED_EVENT_DATA, getEvmChainConfig, IProvider, Web3Auth, type Web3AuthOptions, log, walletConnectV2Adapter, coinbaseAdapter } from "@web3auth/modal";
+import { CONNECTOR_STATUS, CONNECTED_EVENT_DATA, getEvmChainConfig, IProvider, Web3Auth, type Web3AuthOptions, log, walletConnectV2Adapter, coinbaseAdapter } from "@web3auth/modal";
 import { onMounted, ref } from "vue";
 import { clientIds } from "./config";
 import Web3 from "web3";
@@ -11,7 +11,7 @@ const ethWeb3AuthOptions: Web3AuthOptions = {
   clientId: clientIds["mainnet"],
   web3AuthNetwork: "mainnet",
   multiInjectedProviderDiscovery: true,
-  walletAdapters: [walletConnectV2Adapter(), coinbaseAdapter()]
+  connectors: [walletConnectV2Adapter(), coinbaseAdapter()]
 };
 const web3auth = new Web3Auth(ethWeb3AuthOptions);
 
@@ -23,7 +23,7 @@ const provider = ref<IProvider | null>(null);
 const loginButtonStatus = ref<string>("");
 const connected = ref<boolean>(false);
 
-web3auth.on(ADAPTER_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+web3auth.on(CONNECTOR_STATUS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
   provider.value = web3auth.provider;
   loginButtonStatus.value = "Logged in";
   connected.value = true;

@@ -1,18 +1,18 @@
 import {
-  ADAPTER_CATEGORY,
-  ADAPTER_CATEGORY_TYPE,
-  ADAPTER_EVENTS,
-  ADAPTER_NAMESPACES,
-  ADAPTER_STATUS,
-  ADAPTER_STATUS_TYPE,
-  AdapterFn,
-  AdapterInitOptions,
-  AdapterNamespaceType,
-  AdapterParams,
-  BaseAdapterSettings,
+  BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_CATEGORY,
+  CONNECTOR_CATEGORY_TYPE,
+  CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
+  ConnectorFn,
+  ConnectorInitOptions,
+  ConnectorNamespaceType,
+  ConnectorParams,
   CustomChainConfig,
   IProvider,
   log,
@@ -21,31 +21,31 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import { BaseEvmAdapter } from "../base-evm-adapter";
+import { BaseEvmConnector } from "../base-evm-adapter";
 
-class InjectedEvmAdapter extends BaseEvmAdapter<void> {
-  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.EIP155;
+class InjectedEvmConnector extends BaseEvmConnector<void> {
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
-  readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
+  readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
   readonly name: string;
 
   readonly isInjected = true;
 
-  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
+  public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
   private injectedProvider: IProvider | null = null;
 
-  constructor(options: BaseAdapterSettings & { name: string; provider: IProvider }) {
+  constructor(options: BaseConnectorSettings & { name: string; provider: IProvider }) {
     super(options);
     this.name = options.name;
     this.injectedProvider = options.provider;
   }
 
   get provider(): IProvider | null {
-    if (this.status !== ADAPTER_STATUS.NOT_READY && this.injectedProvider) {
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.injectedProvider) {
       return this.injectedProvider;
     }
     return null;
@@ -55,20 +55,20 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
-    this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_EVENTS.READY, this.name);
+    this.status = CONNECTOR_STATUS.READY;
+    this.emit(CONNECTOR_EVENTS.READY, this.name);
     try {
-      log.debug(`initializing ${this.name} injected adapter`);
+      log.debug(`initializing ${this.name} injected connector`);
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -78,8 +78,8 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
+    this.status = CONNECTOR_STATUS.CONNECTING;
+    this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: this.name });
     try {
       await this.injectedProvider.request({ method: "eth_requestAccounts" });
       // switch chain if not connected to the right chain
@@ -91,7 +91,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
           await this.switchChain(chainConfig, true);
         }
       }
-      this.status = ADAPTER_STATUS.CONNECTED;
+      this.status = CONNECTOR_STATUS.CONNECTED;
       const accountDisconnectHandler = (accounts: string[]) => {
         if (accounts.length === 0) {
           this.disconnect();
@@ -99,17 +99,17 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
         }
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
-      this.emit(ADAPTER_EVENTS.CONNECTED, {
-        adapter: this.name,
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connector: this.name,
         reconnected: this.rehydrated,
         provider: this.injectedProvider,
       } as CONNECTED_EVENT_DATA);
       return this.injectedProvider;
     } catch (error) {
       // ready again to be connected
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError(`Failed to login with ${this.name} injected wallet`);
     }
@@ -123,17 +123,17 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
       await this.injectedProvider.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
     } catch (error) {}
     if (options.cleanup) {
-      this.status = ADAPTER_STATUS.NOT_READY;
+      this.status = CONNECTOR_STATUS.NOT_READY;
       this.injectedProvider = null;
     } else {
       // ready to be connected again
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
     }
     await super.disconnect();
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
@@ -169,10 +169,10 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
   }
 }
 
-export const injectedEvmAdapter = (params: { name: string; provider: IProvider }): AdapterFn => {
+export const injectedEvmConnector = (params: { name: string; provider: IProvider }): ConnectorFn => {
   const { name, provider } = params;
-  return ({ coreOptions }: AdapterParams) => {
-    return new InjectedEvmAdapter({
+  return ({ coreOptions }: ConnectorParams) => {
+    return new InjectedEvmConnector({
       name,
       provider,
       coreOptions,
@@ -180,4 +180,4 @@ export const injectedEvmAdapter = (params: { name: string; provider: IProvider }
   };
 };
 
-export { InjectedEvmAdapter };
+export { InjectedEvmConnector };

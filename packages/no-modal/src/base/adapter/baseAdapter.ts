@@ -1,58 +1,58 @@
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { AdapterNamespaceType, CHAIN_NAMESPACES, CustomChainConfig } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
-import { WALLET_ADAPTERS } from "../wallet";
-import { ADAPTER_EVENTS, ADAPTER_STATUS } from "./constants";
+import { WALLET_CONNECTORS } from "../wallet";
+import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
-  ADAPTER_CATEGORY_TYPE,
-  ADAPTER_STATUS_TYPE,
-  AdapterEvents,
-  AdapterInitOptions,
-  BaseAdapterSettings,
-  IAdapter,
+  BaseConnectorSettings,
+  CONNECTOR_CATEGORY_TYPE,
+  CONNECTOR_STATUS_TYPE,
+  ConnectorEvents,
+  ConnectorInitOptions,
+  IConnector,
   IProvider,
   UserAuthInfo,
   UserInfo,
 } from "./interfaces";
 
-export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> implements IAdapter<T> {
-  public adapterData?: unknown = {};
+export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents> implements IConnector<T> {
+  public connectorData?: unknown = {};
 
   isInjected?: boolean;
 
-  public coreOptions: BaseAdapterSettings["coreOptions"];
+  public coreOptions: BaseConnectorSettings["coreOptions"];
 
   protected rehydrated = false;
 
-  public abstract adapterNamespace: AdapterNamespaceType;
+  public abstract connectorNamespace: ConnectorNamespaceType;
 
-  public abstract type: ADAPTER_CATEGORY_TYPE;
+  public abstract type: CONNECTOR_CATEGORY_TYPE;
 
   public abstract name: string;
 
-  public abstract status: ADAPTER_STATUS_TYPE;
+  public abstract status: CONNECTOR_STATUS_TYPE;
 
-  constructor(options: BaseAdapterSettings) {
+  constructor(options: BaseConnectorSettings) {
     super();
     this.coreOptions = options.coreOptions;
   }
 
   get connnected(): boolean {
-    return this.status === ADAPTER_STATUS.CONNECTED;
+    return this.status === CONNECTOR_STATUS.CONNECTED;
   }
 
   public abstract get provider(): IProvider | null;
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.
-    if (this.name === WALLET_ADAPTERS.WALLET_CONNECT_V2 && this.status === ADAPTER_STATUS.CONNECTING) return;
-    if (this.status === ADAPTER_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
+    if (this.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 && this.status === CONNECTOR_STATUS.CONNECTING) return;
+    if (this.status === CONNECTOR_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
 
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
-    if (this.status !== ADAPTER_STATUS.READY)
+    if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
+    if (this.status !== CONNECTOR_STATUS.READY)
       throw WalletLoginError.connectionError(
-        "Wallet adapter is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
+        "Wallet connector is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
       );
   }
 
@@ -66,25 +66,25 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
     if (!chainConfig.chainId && chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       throw WalletInitializationError.invalidParams("chainID is required in chainConfig");
     }
-    if (this.status === ADAPTER_STATUS.NOT_READY) return;
-    if (this.status === ADAPTER_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
-    if (this.status === ADAPTER_STATUS.READY) throw WalletInitializationError.notReady("Adapter is already initialized");
+    if (this.status === CONNECTOR_STATUS.NOT_READY) return;
+    if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
+    if (this.status === CONNECTOR_STATUS.READY) throw WalletInitializationError.notReady("Connector is already initialized");
   }
 
   checkDisconnectionRequirements(): void {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
   checkSwitchChainRequirements(_params: { chainId: string }, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
   }
 
-  updateAdapterData(data: unknown): void {
-    this.adapterData = data;
-    this.emit(ADAPTER_EVENTS.ADAPTER_DATA_UPDATED, { adapterName: this.name, data });
+  updateConnectorData(data: unknown): void {
+    this.connectorData = data;
+    this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, { connectorName: this.name, data });
   }
 
-  abstract init(options?: AdapterInitOptions): Promise<void>;
+  abstract init(options?: ConnectorInitOptions): Promise<void>;
   abstract connect(params?: T & { chainId: string }): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;

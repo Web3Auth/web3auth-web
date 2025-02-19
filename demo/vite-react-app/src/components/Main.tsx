@@ -1,4 +1,4 @@
-import { WALLET_ADAPTERS } from "@web3auth/modal";
+import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
@@ -43,7 +43,7 @@ const Main = () => {
       <button onClick={manageMFA} className={styles.card}>
         Manage MFA
       </button>
-      {web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH && (
+      {web3Auth?.connectedConnectorName === WALLET_CONNECTORS.AUTH && (
         <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
         </button>

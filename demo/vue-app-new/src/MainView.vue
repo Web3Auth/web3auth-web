@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { AccountAbstractionProvider, AdapterFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseAdapter, getEvmInjectedAdapters, getSolanaInjectedAdapters, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_ADAPTERS, walletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { AccountAbstractionProvider, ConnectorFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, getEvmInjectedConnectors, getSolanaInjectedConnectors, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -14,7 +14,7 @@ import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
 
-const externalAdapters = ref<AdapterFn[]>([]);
+const externalConnectors = ref<ConnectorFn[]>([]);
 
 const chainOptions = computed(() =>
   chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
@@ -159,7 +159,7 @@ const loginMethodsConfig = computed(() => {
 
 const modalParams = computed(() => {
   const modalConfig = {
-    [WALLET_ADAPTERS.AUTH]: {
+    [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
       loginMethods: loginMethodsConfig.value,
     },
@@ -167,16 +167,16 @@ const modalParams = computed(() => {
   return modalConfig;
 });
 
-const getExternalAdapterByName = (name: string): AdapterFn[] => {
+const getExternalAdapterByName = (name: string): ConnectorFn[] => {
   switch (name) {
     case "coinbase":
-      return [coinbaseAdapter()];
+      return [coinbaseConnector()];
     case "wallet-connect-v2":
-      return [walletConnectV2Adapter({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
+      return [walletConnectV2Connector({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
     case "injected-evm":
-      return getEvmInjectedAdapters();
+      return getEvmInjectedConnectors();
     case "injected-solana":
-      return getSolanaInjectedAdapters();
+      return getSolanaInjectedConnectors();
     default:
       return [];
   }
@@ -189,7 +189,7 @@ onBeforeMount(() => {
       if (storedValue) {
         // console.log("storedValue", storedValue);
         const json = JSON.parse(storedValue);
-        formData.adapters = json.adapters;
+        formData.connectors = json.connectors;
         formData.chain = json.chain;
         formData.chainNamespace = json.chainNamespace;
         formData.loginProviders = json.loginProviders;
@@ -214,13 +214,13 @@ watch(formData, () => {
 
 // Every time the form data changes, reinitialize the web3Auth object
 watch(
-  () => formData.adapters,
+  () => formData.connectors,
   async () => {
-    let adapters: AdapterFn[] = [];
-    for (let i = 0; i <= formData.adapters.length; i += 1) {
-      adapters = adapters.concat(getExternalAdapterByName(formData.adapters[i]));
+    let connectors: ConnectorFn[] = [];
+    for (let i = 0; i <= formData.connectors.length; i += 1) {
+      connectors = connectors.concat(getExternalAdapterByName(formData.connectors[i]));
     }
-    externalAdapters.value = adapters;
+    externalConnectors.value = connectors;
   }
 );
 
@@ -240,7 +240,7 @@ const configs = computed<Web3AuthContextConfig>(() => {
   }
 
   return {
-    adapters: externalAdapters.value,
+    connectors: externalConnectors.value,
     web3AuthOptions: options.value,
     plugins,
     modalConfig: modalParams.value,

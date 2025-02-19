@@ -1,8 +1,8 @@
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
-  type ADAPTER_STATUS_TYPE,
   type AuthUserInfo,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  type CONNECTOR_STATUS_TYPE,
   type IPlugin,
   type IProvider,
   type LoginParams,
@@ -29,7 +29,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [userInfo, setUserInfo] = useState<Partial<AuthUserInfo> | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [status, setStatus] = useState<ADAPTER_STATUS_TYPE | null>(null);
+  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
 
   const addPlugin = useCallback(
     (plugin: IPlugin) => {
@@ -176,7 +176,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const connectedListener = () => {
       setStatus(web3Auth.status);
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
-      if (web3Auth.status === ADAPTER_STATUS.CONNECTED) {
+      if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
         setIsConnected(true);
       }
@@ -189,27 +189,27 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
     };
     const errorListener = () => {
-      setStatus(ADAPTER_STATUS.ERRORED);
+      setStatus(CONNECTOR_STATUS.ERRORED);
     };
     if (web3Auth) {
       // web3Auth is initialized here.
       setStatus(web3Auth.status);
-      web3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-      web3Auth.on(ADAPTER_EVENTS.READY, readyListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
-      web3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-      web3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
-      web3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
+      web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+      web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+      web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
     }
 
     return () => {
       if (web3Auth) {
-        web3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-        web3Auth.off(ADAPTER_EVENTS.READY, readyListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
-        web3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-        web3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
-        web3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
+        web3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+        web3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
+        web3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+        web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+        web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+        web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
       }
     };
   }, [web3Auth]);

@@ -12,22 +12,22 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { AdapterNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
 import { PROJECT_CONFIG_RESPONSE } from "../interfaces";
 import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
-import { ADAPTER_CATEGORY, ADAPTER_EVENTS, ADAPTER_STATUS } from "./constants";
+import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
 export type UserInfo = AuthUserInfo;
 
 export { UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE };
 
-export type ADAPTER_CATEGORY_TYPE = (typeof ADAPTER_CATEGORY)[keyof typeof ADAPTER_CATEGORY];
+export type CONNECTOR_CATEGORY_TYPE = (typeof CONNECTOR_CATEGORY)[keyof typeof CONNECTOR_CATEGORY];
 
-export interface AdapterInitOptions {
+export interface ConnectorInitOptions {
   /**
-   * Whether to auto connect to the adapter based on redirect mode or saved adapters
+   * Whether to auto connect to the connector based on redirect mode or saved connectors
    */
   autoConnect?: boolean;
   /**
@@ -36,11 +36,11 @@ export interface AdapterInitOptions {
   chainId: string;
 }
 
-export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_STATUS];
+export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
 
 export type UserAuthInfo = { idToken: string };
 
-export interface BaseAdapterSettings {
+export interface BaseConnectorSettings {
   coreOptions: IWeb3AuthCoreOptions;
 }
 
@@ -61,16 +61,16 @@ export interface IBaseProvider<T> extends IProvider {
   setKeyExportFlag(flag: boolean): void;
 }
 
-export interface IAdapter<T> extends SafeEventEmitter {
-  adapterNamespace: AdapterNamespaceType;
-  type: ADAPTER_CATEGORY_TYPE;
+export interface IConnector<T> extends SafeEventEmitter {
+  connectorNamespace: ConnectorNamespaceType;
+  type: CONNECTOR_CATEGORY_TYPE;
   name: string;
-  status: ADAPTER_STATUS_TYPE;
+  status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
-  adapterData?: unknown;
+  connectorData?: unknown;
   connnected: boolean;
   isInjected?: boolean;
-  init(options?: AdapterInitOptions): Promise<void>;
+  init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params?: T): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
@@ -80,32 +80,32 @@ export interface IAdapter<T> extends SafeEventEmitter {
   authenticateUser(): Promise<UserAuthInfo>;
 }
 
-export type AdapterParams = {
+export type ConnectorParams = {
   projectConfig?: PROJECT_CONFIG_RESPONSE;
   coreOptions: IWeb3AuthCoreOptions;
 };
 
-export type AdapterFn = (params: AdapterParams) => IAdapter<unknown>;
+export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
-export type CONNECTED_EVENT_DATA = { adapter: string; provider: IProvider; reconnected: boolean };
+export type CONNECTED_EVENT_DATA = { connector: string; provider: IProvider; reconnected: boolean };
 
-export interface IAdapterDataEvent {
-  adapterName: string;
+export interface IConnectorDataEvent {
+  connectorName: string;
   data: unknown;
 }
 
-export type AdapterEvents = {
-  [ADAPTER_EVENTS.NOT_READY]: () => void;
-  [ADAPTER_EVENTS.READY]: (adapter: string) => void;
-  [ADAPTER_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
-  [ADAPTER_EVENTS.DISCONNECTED]: () => void;
-  [ADAPTER_EVENTS.CONNECTING]: (data: { adapter: string }) => void;
-  [ADAPTER_EVENTS.ERRORED]: (error: Web3AuthError) => void;
-  [ADAPTER_EVENTS.ADAPTER_DATA_UPDATED]: (data: IAdapterDataEvent) => void;
-  [ADAPTER_EVENTS.CACHE_CLEAR]: () => void;
+export type ConnectorEvents = {
+  [CONNECTOR_EVENTS.NOT_READY]: () => void;
+  [CONNECTOR_EVENTS.READY]: (connector: string) => void;
+  [CONNECTOR_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.DISCONNECTED]: () => void;
+  [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: string }) => void;
+  [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError) => void;
+  [CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED]: (data: IConnectorDataEvent) => void;
+  [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
 };
 
-export interface BaseAdapterConfig {
+export interface BaseConnectorConfig {
   label: string;
   isInjected?: boolean;
   showOnModal?: boolean;

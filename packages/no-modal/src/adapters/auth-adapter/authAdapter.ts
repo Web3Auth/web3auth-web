@@ -4,24 +4,24 @@ import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
-  ADAPTER_CATEGORY,
-  ADAPTER_CATEGORY_TYPE,
-  ADAPTER_EVENTS,
-  ADAPTER_NAMESPACES,
-  ADAPTER_STATUS,
-  ADAPTER_STATUS_TYPE,
-  AdapterFn,
-  AdapterInitOptions,
-  AdapterNamespaceType,
-  AdapterParams,
-  BaseAdapter,
+  BaseConnector,
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_CATEGORY,
+  CONNECTOR_CATEGORY_TYPE,
+  CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
+  ConnectorFn,
+  ConnectorInitOptions,
+  ConnectorNamespaceType,
+  ConnectorParams,
   IProvider,
   log,
   UserInfo,
-  WALLET_ADAPTERS,
+  WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
   WalletServicesSettings,
@@ -29,27 +29,27 @@ import {
 } from "@/core/base";
 
 import { getAuthDefaultOptions } from "./config";
-import type { AuthAdapterOptions, LoginConfig, LoginSettings, PrivateKeyProvider } from "./interface";
+import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
   login_hint?: string;
 };
 
-class AuthAdapter extends BaseAdapter<AuthLoginParams> {
-  readonly name: string = WALLET_ADAPTERS.AUTH;
+class AuthConnector extends BaseConnector<AuthLoginParams> {
+  readonly name: string = WALLET_CONNECTORS.AUTH;
 
-  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
-  readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.IN_APP;
+  readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.IN_APP;
 
   public authInstance: Auth | null = null;
 
-  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
+  public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
   public privateKeyProvider: PrivateKeyProvider | null = null;
 
-  private authOptions: AuthAdapterOptions["adapterSettings"];
+  private authOptions: AuthConnectorOptions["connectorSettings"];
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
@@ -57,24 +57,24 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
-  constructor(params: AuthAdapterOptions) {
+  constructor(params: AuthConnectorOptions) {
     super(params);
 
     // set auth options
     const defaultOptions = getAuthDefaultOptions();
-    log.info("setting adapter settings", params.adapterSettings);
+    log.info("setting connector settings", params.connectorSettings);
     this.authOptions = deepmerge.all([
-      defaultOptions.adapterSettings,
+      defaultOptions.connectorSettings,
       this.authOptions || {},
-      params.adapterSettings || {},
-    ]) as AuthAdapterOptions["adapterSettings"];
+      params.connectorSettings || {},
+    ]) as AuthConnectorOptions["connectorSettings"];
 
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
 
   get provider(): IProvider | null {
-    if (this.status !== ADAPTER_STATUS.NOT_READY) {
+    if (this.status !== CONNECTOR_STATUS.NOT_READY) {
       if (this.wsEmbedInstance?.provider) {
         return this.wsEmbedInstance.provider;
       }
@@ -90,7 +90,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: ConnectorInitOptions): Promise<void> {
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
 
     super.checkInitializationRequirements({ chainConfig });
@@ -105,7 +105,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       clientId: this.coreOptions.clientId,
       network: web3AuthNetwork,
     });
-    log.debug("initializing auth adapter init");
+    log.debug("initializing auth connector init");
 
     await this.authInstance.init();
 
@@ -143,35 +143,35 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
         });
       }
     }
-    this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.AUTH);
+    this.status = CONNECTOR_STATUS.READY;
+    this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
 
     try {
-      log.debug("initializing auth adapter");
+      log.debug("initializing auth connector");
       const { sessionId } = this.authInstance || {};
-      // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
+      // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       log.error("Failed to connect with cached auth provider", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
   async connect(params: Partial<AuthLoginParams> & { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    this.status = ADAPTER_STATUS.CONNECTING;
-    this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.AUTH });
+    this.status = CONNECTOR_STATUS.CONNECTING;
+    this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
     try {
       await this.connectWithProvider(params);
       return this.provider;
     } catch (error: unknown) {
       log.error("Failed to connect with auth provider", error);
       // ready again to be connected
-      this.status = ADAPTER_STATUS.READY;
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       if ((error as Error)?.message.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
       } else if (error instanceof Web3AuthError) {
@@ -182,7 +182,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 
   public async enableMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       await this.authInstance.enableMFA(params);
@@ -196,7 +196,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 
   public async manageMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       await this.authInstance.manageMFA(params);
@@ -210,31 +210,31 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     await this.authInstance.logout();
     if (options.cleanup) {
-      this.status = ADAPTER_STATUS.NOT_READY;
+      this.status = CONNECTOR_STATUS.NOT_READY;
       this.authInstance = null;
       if (this.privateKeyProvider) this.privateKeyProvider = null;
       if (this.wsEmbedInstance) this.wsEmbedInstance.logout();
     } else {
       // ready to be connected again
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
     }
 
     this.rehydrated = false;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
   async authenticateUser(): Promise<{ idToken: string }> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.getUserInfo();
     return { idToken: userInfo.idToken as string };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     const userInfo = this.authInstance.getUserInfo();
     return userInfo;
@@ -317,14 +317,14 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
-          this.status = ADAPTER_STATUS.CONNECTED;
-          this.emit(ADAPTER_EVENTS.CONNECTED, {
-            adapter: WALLET_ADAPTERS.AUTH,
+          this.status = CONNECTOR_STATUS.CONNECTED;
+          this.emit(CONNECTOR_EVENTS.CONNECTED, {
+            connector: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
             provider: this.provider,
           } as CONNECTED_EVENT_DATA);
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
-            if ((accounts as string[]).length === 0 && this.status === ADAPTER_STATUS.CONNECTED) this.disconnect({ cleanup: false });
+            if ((accounts as string[]).length === 0 && this.status === CONNECTOR_STATUS.CONNECTED) this.disconnect({ cleanup: false });
           });
         }
       }
@@ -333,9 +333,9 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       const finalPrivKey = this._getFinalPrivKey();
       if (finalPrivKey) {
         await this.privateKeyProvider.setupProvider(finalPrivKey);
-        this.status = ADAPTER_STATUS.CONNECTED;
-        this.emit(ADAPTER_EVENTS.CONNECTED, {
-          adapter: WALLET_ADAPTERS.AUTH,
+        this.status = CONNECTOR_STATUS.CONNECTED;
+        this.emit(CONNECTOR_EVENTS.CONNECTED, {
+          connector: WALLET_CONNECTORS.AUTH,
           reconnected: this.rehydrated,
           provider: this.provider,
         } as CONNECTED_EVENT_DATA);
@@ -344,9 +344,9 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 }
 
-export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
-  return ({ projectConfig, coreOptions }: AdapterParams) => {
-    const adapterSettings: AuthAdapterOptions["adapterSettings"] = {
+export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn => {
+  return ({ projectConfig, coreOptions }: ConnectorParams) => {
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
       network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: coreOptions.clientId,
       uxMode: params?.uxMode || UX_MODE.POPUP,
@@ -355,7 +355,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     // sms otp config
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
-      adapterSettings.loginConfig = {
+      connectorSettings.loginConfig = {
         [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
           showOnModal: smsOtpEnabled,
           showOnDesktop: smsOtpEnabled,
@@ -367,14 +367,14 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
 
     // whitelist config
     if (whitelist) {
-      adapterSettings.originData = whitelist.signed_urls;
+      connectorSettings.originData = whitelist.signed_urls;
     }
 
     // whitelabel config
     const { whitelabel } = projectConfig;
     const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
-    adapterSettings.whiteLabel = uiConfig;
+    connectorSettings.whiteLabel = uiConfig;
 
     // wallet services settings
     const finalWsSettings = {
@@ -382,13 +382,13 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
       enableLogging: coreOptions.enableLogging,
     };
 
-    const adapterOptions: AuthAdapterOptions = {
-      adapterSettings,
+    const connectorOptions: AuthConnectorOptions = {
+      connectorSettings,
       walletServicesSettings: finalWsSettings,
       coreOptions,
     };
-    return new AuthAdapter(adapterOptions);
+    return new AuthConnector(connectorOptions);
   };
 };
 
-export type AuthAdapterType = AuthAdapter;
+export type AuthConnectorType = AuthConnector;

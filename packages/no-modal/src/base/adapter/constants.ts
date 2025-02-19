@@ -1,4 +1,4 @@
-export const ADAPTER_STATUS = {
+export const CONNECTOR_STATUS = {
   NOT_READY: "not_ready",
   READY: "ready",
   CONNECTING: "connecting",
@@ -7,13 +7,13 @@ export const ADAPTER_STATUS = {
   ERRORED: "errored",
 } as const;
 
-export const ADAPTER_EVENTS = {
-  ...ADAPTER_STATUS,
-  ADAPTER_DATA_UPDATED: "adapter_data_updated",
+export const CONNECTOR_EVENTS = {
+  ...CONNECTOR_STATUS,
+  CONNECTOR_DATA_UPDATED: "connector_data_updated",
   CACHE_CLEAR: "cache_clear",
 } as const;
 
-export const ADAPTER_CATEGORY = {
+export const CONNECTOR_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",
 } as const;

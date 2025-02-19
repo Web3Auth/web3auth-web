@@ -6,21 +6,21 @@ import base58 from "bs58";
 import deepmerge from "deepmerge";
 
 import {
-  ADAPTER_CATEGORY,
-  ADAPTER_CATEGORY_TYPE,
-  ADAPTER_EVENTS,
-  ADAPTER_NAMESPACES,
-  ADAPTER_STATUS,
-  ADAPTER_STATUS_TYPE,
-  AdapterFn,
-  AdapterInitOptions,
-  AdapterNamespaceType,
-  AdapterParams,
-  BaseAdapter,
+  BaseConnector,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_CATEGORY,
+  CONNECTOR_CATEGORY_TYPE,
+  CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
+  ConnectorFn,
+  ConnectorInitOptions,
+  ConnectorNamespaceType,
+  ConnectorParams,
   CustomChainConfig,
   getSavedToken,
   IProvider,
@@ -28,7 +28,7 @@ import {
   saveToken,
   UserAuthInfo,
   UserInfo,
-  WALLET_ADAPTERS,
+  WALLET_CONNECTORS,
   WalletConnectV2Data,
   WalletInitializationError,
   WalletLoginError,
@@ -36,23 +36,23 @@ import {
 } from "@/core/base";
 
 import { getWalletConnectV2Settings } from "./config";
-import { WalletConnectV2AdapterOptions } from "./interface";
+import { WalletConnectV2ConnectorOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
-class WalletConnectV2Adapter extends BaseAdapter<void> {
-  readonly name: string = WALLET_ADAPTERS.WALLET_CONNECT_V2;
+class WalletConnectV2Connector extends BaseConnector<void> {
+  readonly name: string = WALLET_CONNECTORS.WALLET_CONNECT_V2;
 
-  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.OTHER;
 
-  readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
+  readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
-  adapterOptions: WalletConnectV2AdapterOptions;
+  connectorOptions: WalletConnectV2ConnectorOptions;
 
-  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
+  public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  public adapterData: WalletConnectV2Data = { uri: "" };
+  public connectorData: WalletConnectV2Data = { uri: "" };
 
   public connector: Client | null = null;
 
@@ -60,26 +60,26 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
   private wcProvider: WalletConnectV2Provider | null = null;
 
-  constructor(options: WalletConnectV2AdapterOptions) {
+  constructor(options: WalletConnectV2ConnectorOptions) {
     super(options);
-    this.adapterOptions = { ...options };
-    const { qrcodeModal, walletConnectInitOptions } = options?.adapterSettings || {};
+    this.connectorOptions = { ...options };
+    const { qrcodeModal, walletConnectInitOptions } = options?.connectorSettings || {};
 
-    this.adapterOptions = {
-      ...this.adapterOptions,
-      adapterSettings: this.adapterOptions?.adapterSettings ?? {},
-      loginSettings: this.adapterOptions?.loginSettings ?? {},
+    this.connectorOptions = {
+      ...this.connectorOptions,
+      connectorSettings: this.connectorOptions?.connectorSettings ?? {},
+      loginSettings: this.connectorOptions?.loginSettings ?? {},
     };
 
-    if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
+    if (qrcodeModal) this.connectorOptions.connectorSettings.qrcodeModal = qrcodeModal;
     if (walletConnectInitOptions)
-      this.adapterOptions.adapterSettings.walletConnectInitOptions = {
-        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions ?? {}),
+      this.connectorOptions.connectorSettings.walletConnectInitOptions = {
+        ...(this.connectorOptions.connectorSettings.walletConnectInitOptions ?? {}),
         ...walletConnectInitOptions,
       };
 
     const { loginSettings } = options;
-    if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
+    if (loginSettings) this.connectorOptions.loginSettings = { ...(this.connectorOptions.loginSettings || {}), ...loginSettings };
   }
 
   get connected(): boolean {
@@ -87,7 +87,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 
   get provider(): IProvider | null {
-    if (this.status !== ADAPTER_STATUS.NOT_READY && this.wcProvider) {
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.wcProvider) {
       return this.wcProvider;
     }
     return null;
@@ -97,13 +97,13 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: ConnectorInitOptions): Promise<void> {
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    const projectId = this.adapterOptions.adapterSettings?.walletConnectInitOptions?.projectId;
+    const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
     if (!projectId) {
-      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 adapter");
+      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 connector");
     }
 
     const wc2Settings = await getWalletConnectV2Settings(
@@ -111,18 +111,18 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
       [chainConfig.chainId as string],
       projectId
     );
-    if (!this.adapterOptions.loginSettings || Object.keys(this.adapterOptions.loginSettings).length === 0) {
-      this.adapterOptions.loginSettings = wc2Settings.loginSettings;
+    if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0) {
+      this.connectorOptions.loginSettings = wc2Settings.loginSettings;
     }
 
-    this.adapterOptions.adapterSettings = deepmerge(wc2Settings.adapterSettings || {}, this.adapterOptions.adapterSettings || {});
-    const { adapterSettings } = this.adapterOptions;
-    this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
+    this.connectorOptions.connectorSettings = deepmerge(wc2Settings.connectorSettings || {}, this.connectorOptions.connectorSettings || {});
+    const { connectorSettings } = this.connectorOptions;
+    this.connector = await Client.init(connectorSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({ config: { chainConfig }, connector: this.connector });
 
-    this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
-    this.status = ADAPTER_STATUS.READY;
-    log.debug("initializing wallet connect v2 adapter");
+    this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.WALLET_CONNECT_V2);
+    this.status = CONNECTOR_STATUS.READY;
+    log.debug("initializing wallet connect v2 connector");
     if (options.autoConnect) {
       await this.checkForPersistedSession();
 
@@ -132,11 +132,11 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
           await this.onConnectHandler({ chainConfig });
         } catch (error) {
           log.error("wallet auto connect", error);
-          this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+          this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
         }
       } else {
-        this.status = ADAPTER_STATUS.NOT_READY;
-        this.emit(ADAPTER_EVENTS.CACHE_CLEAR);
+        this.status = CONNECTOR_STATUS.NOT_READY;
+        this.emit(CONNECTOR_EVENTS.CACHE_CLEAR);
       }
     }
   }
@@ -145,7 +145,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
     try {
       // if already connected
@@ -154,16 +154,16 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
         return this.provider;
       }
 
-      if (this.status !== ADAPTER_STATUS.CONNECTING) {
+      if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         await this.createNewSession({ chainConfig });
       }
       return this.provider;
     } catch (error) {
-      log.error("Wallet connect v2 adapter error while connecting", error);
+      log.error("Wallet connect v2 connector error while connecting", error);
       // ready again to be connected
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
       this.rehydrated = true;
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
 
       const finalError =
         error instanceof Web3AuthError
@@ -193,18 +193,18 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     this.rehydrated = false;
     if (cleanup) {
       this.connector = null;
-      this.status = ADAPTER_STATUS.NOT_READY;
+      this.status = CONNECTOR_STATUS.NOT_READY;
       this.wcProvider = null;
     } else {
       // ready to connect again
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
     }
     this.activeSession = null;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -259,7 +259,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 
   private cleanupPendingPairings(): void {
-    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
     const inactivePairings = this.connector.pairing.getAll({ active: false });
 
     if (!isValidArray(inactivePairings)) return;
@@ -272,7 +272,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 
   private async checkForPersistedSession(): Promise<SessionTypes.Struct | null> {
-    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
     if (this.connector.session.length) {
       const lastKeyIndex = this.connector.session.keys.length - 1;
       this.activeSession = this.connector.session.get(this.connector.session.keys[lastKeyIndex]);
@@ -288,33 +288,33 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     chainConfig: CustomChainConfig;
   }): Promise<void> {
     try {
-      if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+      if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
-      if (!this.adapterOptions.loginSettings || Object.keys(this.adapterOptions.loginSettings).length === 0)
+      if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0)
         throw WalletInitializationError.notReady("login settings are not set yet");
 
-      this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2 });
+      this.status = CONNECTOR_STATUS.CONNECTING;
+      this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
       if (forceNewSession && this.activeSession?.topic) {
         await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
       }
 
-      const { uri, approval } = await this.connector.connect(this.adapterOptions.loginSettings);
+      const { uri, approval } = await this.connector.connect(this.connectorOptions.loginSettings);
 
-      const qrcodeModal = this.adapterOptions?.adapterSettings?.qrcodeModal;
+      const qrcodeModal = this.connectorOptions?.connectorSettings?.qrcodeModal;
       // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {
         if (qrcodeModal) {
           try {
             await qrcodeModal.openModal({ uri });
             log.debug("EVENT", "QR Code Modal closed");
-            this.status = ADAPTER_STATUS.READY;
-            this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.WALLET_CONNECT_V2);
+            this.status = CONNECTOR_STATUS.READY;
+            this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.WALLET_CONNECT_V2);
           } catch (error) {
             log.error("unable to open qr code modal");
           }
         } else {
-          this.updateAdapterData({ uri } as WalletConnectV2Data);
+          this.updateConnectorData({ uri } as WalletConnectV2Data);
         }
       }
 
@@ -330,27 +330,27 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
       }
     } catch (error: unknown) {
       if ((error as Error).message?.toLowerCase().includes("proposal expired")) {
-        // Retry if adapter status is still connecting
-        log.info("current adapter status: ", this.status);
-        if (this.status === ADAPTER_STATUS.CONNECTING) {
+        // Retry if connector status is still connecting
+        log.info("current connector status: ", this.status);
+        if (this.status === CONNECTOR_STATUS.CONNECTING) {
           log.info("retrying to create new wallet connect session since proposal expired");
           return this.createNewSession({ forceNewSession: true, chainConfig });
         }
-        if (this.status === ADAPTER_STATUS.READY) {
-          log.info("ignoring proposal expired error since some other adapter is connected");
+        if (this.status === CONNECTOR_STATUS.READY) {
+          log.info("ignoring proposal expired error since some other connector is connected");
           return;
         }
       }
       log.error("error while creating new wallet connect session", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       throw error;
     }
   }
 
   private async onConnectHandler({ chainConfig }: { chainConfig: CustomChainConfig }) {
-    if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapteconnectorr is not ready yet");
     this.subscribeEvents();
-    if (this.adapterOptions.adapterSettings?.qrcodeModal) {
+    if (this.connectorOptions.connectorSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({
         config: { chainConfig, skipLookupNetwork: true },
         connector: this.connector,
@@ -358,16 +358,16 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     }
     await this.wcProvider.setupProvider(this.connector);
     this.cleanupPendingPairings();
-    this.status = ADAPTER_STATUS.CONNECTED;
-    this.emit(ADAPTER_EVENTS.CONNECTED, {
-      adapter: WALLET_ADAPTERS.WALLET_CONNECT_V2,
+    this.status = CONNECTOR_STATUS.CONNECTED;
+    this.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
       provider: this.provider,
     } as CONNECTED_EVENT_DATA);
   }
 
   private subscribeEvents(): void {
-    if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
+    if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
     this.connector.events.on("session_update", ({ topic, params }) => {
       if (!this.connector) return;
@@ -395,8 +395,8 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 }
 
-export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterFn => {
-  return ({ projectConfig, coreOptions }: AdapterParams) => {
+export const walletConnectV2Connector = (params?: { projectId: string }): ConnectorFn => {
+  return ({ projectConfig, coreOptions }: ConnectorParams) => {
     let { projectId } = params || {};
 
     if (projectConfig) {
@@ -408,11 +408,11 @@ export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterF
         throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
       projectId = walletConnectProjectId;
     } else if (!projectId) {
-      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 adapter");
+      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 connector");
     }
 
-    return new WalletConnectV2Adapter({
-      adapterSettings: {
+    return new WalletConnectV2Connector({
+      connectorSettings: {
         walletConnectInitOptions: { projectId },
       },
       coreOptions,

@@ -1,12 +1,12 @@
 import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
 
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
-  AdapterInitOptions,
-  BaseAdapter,
+  BaseConnector,
   checkIfTokenIsExpired,
   clearToken,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  ConnectorInitOptions,
   getSavedToken,
   saveToken,
   UserAuthInfo,
@@ -14,12 +14,12 @@ import {
   WalletLoginError,
 } from "@/core/base";
 
-export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
+export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async init(_?: AdapterInitOptions): Promise<void> {}
+  async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
     const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
@@ -76,6 +76,6 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
 
   async disconnect(): Promise<void> {
     this.rehydrated = false;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 }

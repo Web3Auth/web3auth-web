@@ -2,12 +2,12 @@ import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controller
 import bs58 from "bs58";
 
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
-  AdapterInitOptions,
-  BaseAdapter,
+  BaseConnector,
   checkIfTokenIsExpired,
   clearToken,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  ConnectorInitOptions,
   getSavedToken,
   saveToken,
   UserAuthInfo,
@@ -15,12 +15,12 @@ import {
   WalletLoginError,
 } from "@/core/base";
 
-export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
+export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async init(_?: AdapterInitOptions): Promise<void> {}
+  async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
     const { chainId } = this.provider;
@@ -79,6 +79,6 @@ export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
 
   async disconnect(): Promise<void> {
     this.rehydrated = false;
-    this.emit(ADAPTER_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 }

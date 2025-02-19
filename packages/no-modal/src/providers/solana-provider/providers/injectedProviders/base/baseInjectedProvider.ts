@@ -13,7 +13,7 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
   }
 
   public async switchChain(_: { chainId: string }): Promise<void> {
-    throw WalletLoginError.unsupportedOperation("Chain switching is not supported by this adapter");
+    throw WalletLoginError.unsupportedOperation("Chain switching is not supported by this connector");
   }
 
   public async setupProvider(injectedProvider: P): Promise<void> {

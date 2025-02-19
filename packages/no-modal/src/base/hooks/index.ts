@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 
-import { ADAPTER_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
+import { CONNECTOR_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
@@ -14,7 +14,7 @@ export interface IBaseWeb3AuthHookContext {
   provider: IProvider | null;
   userInfo: Partial<AuthUserInfo> | null;
   isMFAEnabled: boolean;
-  status: ADAPTER_STATUS_TYPE | null;
+  status: CONNECTOR_STATUS_TYPE | null;
   enableMFA(params?: LoginParams): Promise<void>;
   manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;

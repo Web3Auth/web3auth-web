@@ -3,7 +3,7 @@ import { ErrorCodes, IWeb3AuthError, Web3AuthError } from "../errors";
 export class WalletServicesPluginError extends Web3AuthError {
   protected static messages: ErrorCodes = {
     5210: "Wallet Services Plugin is not initialized",
-    5211: "Web3Auth is connected to unsupported adapter. Wallet services connector plugin requires web3auth connected to auth adapter.",
+    5211: "Web3Auth is connected to unsupported connector. Wallet services connector plugin requires web3auth connected to auth connector.",
     5212: "Provider is required..",
     5213: "Web3Auth instance is required while initialization.",
     5214: "Web3Auth is not connected.",
@@ -31,7 +31,7 @@ export class WalletServicesPluginError extends Web3AuthError {
     return WalletServicesPluginError.fromCode(5210, extraMessage, cause);
   }
 
-  public static unsupportedAdapter(extraMessage = "", cause?: unknown): IWeb3AuthError {
+  public static unsupportedConnector(extraMessage = "", cause?: unknown): IWeb3AuthError {
     return WalletServicesPluginError.fromCode(5211, extraMessage, cause);
   }
 

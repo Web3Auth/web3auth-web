@@ -2,7 +2,7 @@ import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
 
 import { CHAIN_NAMESPACES, ChainNamespaceType } from "@/core/base";
 
-import { IAdapterSettings } from "./interface";
+import { IConnectorSettings } from "./interface";
 
 export enum DEFAULT_EIP155_METHODS {
   ETH_SEND_TRANSACTION = "eth_sendTransaction",
@@ -157,10 +157,10 @@ export const getWalletConnectV2Settings = async (
   namespace: ChainNamespaceType,
   chainIds: string[],
   projectID: string
-): Promise<{ adapterSettings: IAdapterSettings; loginSettings: EngineTypes.ConnectParams }> => {
+): Promise<{ connectorSettings: IConnectorSettings; loginSettings: EngineTypes.ConnectParams }> => {
   if (namespace === CHAIN_NAMESPACES.EIP155 || namespace === CHAIN_NAMESPACES.SOLANA) {
     const appMetadata = await getSiteMetadata();
-    const adapterSettings: IAdapterSettings = {
+    const connectorSettings: IConnectorSettings = {
       walletConnectInitOptions: {
         projectId: projectID,
         relayUrl: "wss://relay.walletconnect.com",
@@ -173,7 +173,7 @@ export const getWalletConnectV2Settings = async (
     });
 
     const loginSettings: EngineTypes.ConnectParams = { optionalNamespaces: getRequiredNamespaces(chainNamespaces) };
-    return { adapterSettings, loginSettings };
+    return { connectorSettings, loginSettings };
   }
   throw new Error(`Unsupported chain namespace: ${namespace}`);
 };

@@ -1,12 +1,12 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type { Ref, ShallowRef } from "vue";
 
-import type { ADAPTER_STATUS_TYPE, AdapterFn, IPlugin, IProvider, IWeb3AuthCoreOptions, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@/core/base";
+import type { CONNECTOR_STATUS_TYPE, ConnectorFn, IPlugin, IProvider, IWeb3AuthCoreOptions, UserAuthInfo, WALLET_CONNECTOR_TYPE } from "@/core/base";
 
 import { type Web3AuthNoModal } from "../../noModal";
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;
-  adapters?: AdapterFn[];
+  connectors?: ConnectorFn[];
   plugins?: IPlugin[];
 };
 
@@ -24,7 +24,7 @@ interface IBaseWeb3AuthComposableContext {
   isInitializing: Ref<boolean>;
   initError: Ref<Error | null>;
   isInitialized: Ref<boolean>;
-  status: Ref<ADAPTER_STATUS_TYPE | null>;
+  status: Ref<CONNECTOR_STATUS_TYPE | null>;
   enableMFA(params?: LoginParams): Promise<void>;
   manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
@@ -36,5 +36,5 @@ interface IBaseWeb3AuthComposableContext {
 
 export interface IWeb3AuthContext extends IBaseWeb3AuthComposableContext {
   web3Auth: ShallowRef<Web3AuthNoModal | null>;
-  connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
+  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
 }

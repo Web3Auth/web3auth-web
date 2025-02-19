@@ -2,20 +2,20 @@ import { Wallet } from "@wallet-standard/base";
 import { StandardConnect, StandardDisconnect } from "@wallet-standard/features";
 
 import {
-  ADAPTER_CATEGORY,
-  ADAPTER_CATEGORY_TYPE,
-  ADAPTER_EVENTS,
-  ADAPTER_NAMESPACES,
-  ADAPTER_STATUS,
-  ADAPTER_STATUS_TYPE,
-  AdapterFn,
-  AdapterInitOptions,
-  AdapterNamespaceType,
-  AdapterParams,
-  BaseAdapterSettings,
+  BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  CONNECTOR_CATEGORY,
+  CONNECTOR_CATEGORY_TYPE,
+  CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
+  ConnectorFn,
+  ConnectorInitOptions,
+  ConnectorNamespaceType,
+  ConnectorParams,
   IProvider,
   log,
   UserInfo,
@@ -24,28 +24,28 @@ import {
 } from "@/core/base";
 import { WalletStandardProvider } from "@/core/solana-provider";
 
-import { BaseSolanaAdapter } from "../base-solana-adapter";
+import { BaseSolanaConnector } from "../base-solana-adapter";
 import { getSolanaChainByChainConfig } from "./utils";
 import { WalletStandard, WalletStandardProviderHandler } from "./walletStandardHandler";
 
-export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
+export class WalletStandardConnector extends BaseSolanaConnector<void> {
   readonly name: string;
 
-  readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.SOLANA;
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.SOLANA;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.SOLANA;
 
-  readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
+  readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
   readonly isInjected = true;
 
-  public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
+  public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
   private wallet: WalletStandard | null = null;
 
   private injectedProvider: WalletStandardProvider | null = null;
 
-  constructor(options: BaseAdapterSettings & { name: string; wallet: Wallet }) {
+  constructor(options: BaseConnectorSettings & { name: string; wallet: Wallet }) {
     super(options);
     this.name = options.name;
     // in VueJS, for some wallets e.g. Gate, Solflare, when connecting it throws error "attempted to get private field on non-instance"
@@ -55,17 +55,17 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   }
 
   get provider(): IProvider {
-    if (this.status !== ADAPTER_STATUS.NOT_READY && this.injectedProvider) {
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.injectedProvider) {
       return this.injectedProvider;
     }
     return null;
   }
 
   get isWalletConnected(): boolean {
-    return !!(this.status === ADAPTER_STATUS.CONNECTED && this.wallet.accounts.length > 0);
+    return !!(this.status === CONNECTOR_STATUS.CONNECTED && this.wallet.accounts.length > 0);
   }
 
-  async init(options: AdapterInitOptions): Promise<void> {
+  async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
     const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
@@ -77,18 +77,18 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     });
     this.injectedProvider.setupProvider(providerHandler);
 
-    this.status = ADAPTER_STATUS.READY;
-    this.emit(ADAPTER_EVENTS.READY, this.name);
+    this.status = CONNECTOR_STATUS.READY;
+    this.emit(CONNECTOR_EVENTS.READY, this.name);
 
     try {
-      log.debug("initializing solana injected adapter");
+      log.debug("initializing solana injected connector");
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       log.error("Failed to connect with cached solana injected provider", error);
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
@@ -98,8 +98,8 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-      this.status = ADAPTER_STATUS.CONNECTING;
-      this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
+      this.status = CONNECTOR_STATUS.CONNECTING;
+      this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: this.name });
 
       const chainName = getSolanaChainByChainConfig(chainConfig);
       if (!this.wallet.chains.find((chain) => chain === chainName))
@@ -110,14 +110,14 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       }
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
-      this.status = ADAPTER_STATUS.CONNECTED;
-      this.emit(ADAPTER_EVENTS.CONNECTED, { adapter: this.name, reconnected: this.rehydrated, provider: this.provider } as CONNECTED_EVENT_DATA);
+      this.status = CONNECTOR_STATUS.CONNECTED;
+      this.emit(CONNECTOR_EVENTS.CONNECTED, { connector: this.name, reconnected: this.rehydrated, provider: this.provider } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error: unknown) {
       // ready again to be connected
-      this.status = ADAPTER_STATUS.READY;
+      this.status = CONNECTOR_STATUS.READY;
       this.rehydrated = false;
-      this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       throw error;
     }
   }
@@ -127,14 +127,14 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     try {
       await this.wallet.features[StandardDisconnect]?.disconnect();
       if (options.cleanup) {
-        this.status = ADAPTER_STATUS.NOT_READY;
+        this.status = CONNECTOR_STATUS.NOT_READY;
         this.injectedProvider = null;
       } else {
-        this.status = ADAPTER_STATUS.READY;
+        this.status = CONNECTOR_STATUS.READY;
       }
       await super.disconnect();
     } catch (error: unknown) {
-      this.emit(ADAPTER_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message) as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.disconnectionError((error as Error)?.message) as Web3AuthError);
     }
   }
 
@@ -157,10 +157,10 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   }
 }
 
-export const walletStandardAdapter = (params: { name: string; wallet: Wallet }): AdapterFn => {
+export const walletStandardConnector = (params: { name: string; wallet: Wallet }): ConnectorFn => {
   const { name, wallet } = params;
-  return ({ coreOptions }: AdapterParams) => {
-    return new WalletStandardAdapter({
+  return ({ coreOptions }: ConnectorParams) => {
+    return new WalletStandardConnector({
       name,
       wallet,
       coreOptions,

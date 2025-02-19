@@ -176,7 +176,7 @@ export type FormData = {
     config: WhiteLabelData;
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
-  adapters: string[];
+  connectors: string[];
   showWalletDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
