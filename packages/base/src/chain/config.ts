@@ -171,7 +171,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
 
 export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.SOLANA;
-  if (chainId === 101) {
+  // support both cross chain id and base solana chain id from 1
+  if (chainId === 101 || chainId === 1) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
@@ -183,7 +184,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  } else if (chainId === 102) {
+  } else if (chainId === 102 || chainId === 2) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
@@ -195,7 +196,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  } else if (chainId === 103) {
+  } else if (chainId === 103 || chainId === 3) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
