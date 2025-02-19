@@ -121,7 +121,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // load default adapters: auth, injected wallets
-    const adapterFns = await this.loadDefaultAdapters();
+    const adapterFns = await this.loadDefaultAdapters({ projectConfig });
     adapterFns.map(async (adapterFn) => {
       const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
       if (this.walletAdapters[adapter.name]) return;

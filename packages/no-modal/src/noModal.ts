@@ -142,7 +142,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    const adapterFns = await this.loadDefaultAdapters();
+    const adapterFns = await this.loadDefaultAdapters({ projectConfig });
     const adapterPromises = adapterFns.map(async (adapterFn) => {
       const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
       if (this.walletAdapters[adapter.name]) return;
@@ -244,7 +244,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected async loadDefaultAdapters(): Promise<AdapterFn[]> {
+  protected async loadDefaultAdapters({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<AdapterFn[]> {
     const adapterFns = this.coreOptions.walletAdapters || [];
 
     // always add auth adapter
@@ -261,7 +261,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const { getEvmInjectedAdapters } = await import("@/core/default-evm-adapter");
         adapterFns.push(...getEvmInjectedAdapters());
       }
-      if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
+
+      // add wallet connect v2 adapter if enabled
+      const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
+      if (walletConnectEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
         adapterFns.push(walletConnectV2Adapter());
       }
     }
