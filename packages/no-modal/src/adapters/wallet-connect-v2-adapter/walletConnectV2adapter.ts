@@ -420,5 +420,3 @@ export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterF
     });
   };
 };
-
-export { WalletConnectV2Adapter };

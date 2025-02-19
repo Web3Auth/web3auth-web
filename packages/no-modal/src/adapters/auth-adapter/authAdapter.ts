@@ -36,7 +36,7 @@ export type AuthLoginParams = LoginParams & {
   login_hint?: string;
 };
 
-export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
+class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   readonly name: string = WALLET_ADAPTERS.AUTH;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
@@ -383,8 +383,6 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
       enableLogging: coreOptions.enableLogging,
     };
 
-    // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
-    // if no chainNamespace or chainId is being provided, it will connect with mainnet.
     const adapterOptions: AuthAdapterOptions = {
       adapterSettings,
       walletServicesSettings: finalWsSettings,
@@ -393,3 +391,5 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     return new AuthAdapter(adapterOptions);
   };
 };
+
+export type AuthAdapterType = AuthAdapter;

@@ -174,5 +174,3 @@ export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn =>
     });
   };
 };
-
-export { CoinbaseAdapter };
