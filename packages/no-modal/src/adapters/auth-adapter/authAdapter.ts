@@ -57,7 +57,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
-  constructor(params: AuthAdapterOptions = {}) {
+  constructor(params: AuthAdapterOptions) {
     super(params);
 
     // set auth options
@@ -91,19 +91,18 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
-    const coreOptions = this.getCoreOptions?.();
-    const chainConfig = coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
 
     super.checkInitializationRequirements({ chainConfig });
-    if (!coreOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
+    if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: coreOptions?.useCoreKitKey };
-    const web3AuthNetwork = this.authOptions.network || coreOptions?.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
+    const web3AuthNetwork = this.authOptions.network || this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
-      clientId: coreOptions?.clientId,
+      clientId: this.coreOptions.clientId,
       network: web3AuthNetwork,
     });
     log.debug("initializing auth adapter init");
@@ -116,7 +115,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       case CHAIN_NAMESPACES.SOLANA: {
         const { default: WsEmbed } = await import("@web3auth/ws-embed");
         this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: coreOptions.clientId || "",
+          web3AuthClientId: this.coreOptions.clientId || "",
           web3AuthNetwork,
           modalZIndex: this.wsSettings.modalZIndex,
         });
@@ -247,7 +246,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     // TODO: handle when chainIds are the same
     // TODO: need to handle switching to a different chain namespace
 
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === currentChainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === currentChainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     const { chainNamespace } = chainConfig;
 
@@ -271,7 +270,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.getCoreOptions?.().useCoreKitKey) {
+    if (this.coreOptions.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
@@ -285,7 +284,7 @@ class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private async connectWithProvider(params: Partial<AuthLoginParams> & { chainId: string }): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === params.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === params.chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     const { chainNamespace } = chainConfig;
 
@@ -386,7 +385,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     const adapterOptions: AuthAdapterOptions = {
       adapterSettings,
       walletServicesSettings: finalWsSettings,
-      getCoreOptions: () => coreOptions,
+      coreOptions,
     };
     return new AuthAdapter(adapterOptions);
   };

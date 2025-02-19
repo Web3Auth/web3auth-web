@@ -48,7 +48,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
   readonly type: ADAPTER_CATEGORY_TYPE = ADAPTER_CATEGORY.EXTERNAL;
 
-  adapterOptions: WalletConnectV2AdapterOptions = {};
+  adapterOptions: WalletConnectV2AdapterOptions;
 
   public status: ADAPTER_STATUS_TYPE = ADAPTER_STATUS.NOT_READY;
 
@@ -60,7 +60,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
   private wcProvider: WalletConnectV2Provider | null = null;
 
-  constructor(options: WalletConnectV2AdapterOptions = {}) {
+  constructor(options: WalletConnectV2AdapterOptions) {
     super(options);
     this.adapterOptions = { ...options };
     const { qrcodeModal, walletConnectInitOptions } = options?.adapterSettings || {};
@@ -98,7 +98,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const projectId = this.adapterOptions.adapterSettings?.walletConnectInitOptions?.projectId;
@@ -143,7 +143,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     if (!this.connector) throw WalletInitializationError.notReady("Wallet adapter is not ready yet");
 
@@ -205,9 +205,8 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
-    const coreOptions = this.getCoreOptions?.();
     const { chainId } = this.provider;
-    const currentChainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === chainId);
+    const currentChainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     const { chainNamespace } = currentChainConfig;
@@ -241,9 +240,9 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
         signedMessage as string,
         challenge,
         this.name,
-        coreOptions?.sessionTime,
-        coreOptions?.clientId,
-        coreOptions?.web3AuthNetwork
+        this.coreOptions.sessionTime,
+        this.coreOptions.clientId,
+        this.coreOptions.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
       return { idToken };
@@ -416,7 +415,7 @@ export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterF
       adapterSettings: {
         walletConnectInitOptions: { projectId },
       },
-      getCoreOptions: () => coreOptions,
+      coreOptions,
     });
   };
 };

@@ -118,10 +118,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     throw new Error("Not implemented");
   }
 
-  public getCoreOptions(): IWeb3AuthCoreOptions {
-    return this.coreOptions;
-  }
-
   public async init(): Promise<void> {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
 

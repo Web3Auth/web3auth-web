@@ -57,7 +57,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
   async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, this.name);
@@ -75,7 +75,7 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     this.status = ADAPTER_STATUS.CONNECTING;
@@ -175,7 +175,7 @@ export const injectedEvmAdapter = (params: { name: string; provider: IProvider }
     return new InjectedEvmAdapter({
       name,
       provider,
-      getCoreOptions: () => coreOptions,
+      coreOptions,
     });
   };
 };

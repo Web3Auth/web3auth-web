@@ -21,7 +21,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
   isInjected?: boolean;
 
-  public getCoreOptions?: BaseAdapterSettings["getCoreOptions"];
+  public coreOptions: BaseAdapterSettings["coreOptions"];
 
   protected rehydrated = false;
 
@@ -33,11 +33,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
   public abstract status: ADAPTER_STATUS_TYPE;
 
-  constructor(options: BaseAdapterSettings = {}) {
+  constructor(options: BaseAdapterSettings) {
     super();
-    if (options.getCoreOptions) {
-      this.getCoreOptions = options.getCoreOptions;
-    }
+    this.coreOptions = options.coreOptions;
   }
 
   get connnected(): boolean {
@@ -59,8 +57,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   }
 
   checkInitializationRequirements({ chainConfig }: { chainConfig?: CustomChainConfig }): void {
-    const coreOptions = this.getCoreOptions?.();
-    if (!coreOptions?.clientId) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid clientId in constructor");
+    if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid clientId in constructor");
     if (!chainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
     if (!chainConfig.rpcTarget && chainConfig.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
       throw WalletInitializationError.invalidParams("rpcTarget is required in chainConfig");

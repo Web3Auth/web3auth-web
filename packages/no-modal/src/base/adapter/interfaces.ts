@@ -41,7 +41,7 @@ export type ADAPTER_STATUS_TYPE = (typeof ADAPTER_STATUS)[keyof typeof ADAPTER_S
 export type UserAuthInfo = { idToken: string };
 
 export interface BaseAdapterSettings {
-  getCoreOptions?: () => IWeb3AuthCoreOptions;
+  coreOptions: IWeb3AuthCoreOptions;
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {

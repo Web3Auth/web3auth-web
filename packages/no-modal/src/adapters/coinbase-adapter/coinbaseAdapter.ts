@@ -46,7 +46,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
 
-  constructor(adapterOptions: CoinbaseAdapterOptions = {}) {
+  constructor(adapterOptions: CoinbaseAdapterOptions) {
     super(adapterOptions);
     this.coinbaseOptions = { ...this.coinbaseOptions, ...adapterOptions.adapterSettings };
   }
@@ -64,7 +64,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(chainConfig.chainId, 16)] });
@@ -87,7 +87,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
-      const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
@@ -170,7 +170,7 @@ export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn =>
   return ({ coreOptions }: AdapterParams) => {
     return new CoinbaseAdapter({
       adapterSettings: params,
-      getCoreOptions: () => coreOptions,
+      coreOptions,
     });
   };
 };

@@ -10,5 +10,9 @@ export const getAuthDefaultOptions = (): AuthAdapterOptions => {
       uxMode: UX_MODE.POPUP,
     },
     loginSettings: {},
+    coreOptions: {
+      chainConfigs: [],
+      clientId: "",
+    },
   };
 };

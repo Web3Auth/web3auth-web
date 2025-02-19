@@ -67,7 +67,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
 
   async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     this.injectedProvider = new WalletStandardProvider({ config: { chainConfig } });
@@ -95,7 +95,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
   async connect({ chainId }: { chainId: string }): Promise<IProvider> {
     try {
       super.checkConnectionRequirements();
-      const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       this.status = ADAPTER_STATUS.CONNECTING;
@@ -163,7 +163,7 @@ export const walletStandardAdapter = (params: { name: string; wallet: Wallet }):
     return new WalletStandardAdapter({
       name,
       wallet,
-      getCoreOptions: () => coreOptions,
+      coreOptions,
     });
   };
 };
