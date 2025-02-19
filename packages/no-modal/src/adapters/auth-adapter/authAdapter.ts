@@ -289,9 +289,15 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private async connectWithProvider(params: Partial<AuthLoginParams> & { chainId: string }): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === params.chainId);
+    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+    const { chainNamespace } = chainConfig;
 
-    const keyAvailable = this.authInstance?.sessionId;
     // if not logged in then login
+    const keyAvailable =
+      chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA
+        ? this.authInstance?.sessionId
+        : this._getFinalPrivKey();
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
@@ -307,10 +313,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       );
     }
 
-    const chainConfig = this.getCoreOptions?.().chainConfigs.find((x) => x.chainId === params.chainId);
-    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-    const { chainNamespace } = chainConfig;
-
+    // setup WS embed if chainNamespace is EIP155 or SOLANA
     if (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
@@ -325,9 +328,13 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
             reconnected: this.rehydrated,
             provider: this.provider,
           } as CONNECTED_EVENT_DATA);
+          this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
+            if ((accounts as string[]).length === 0 && this.status === ADAPTER_STATUS.CONNECTED) this.disconnect({ cleanup: false });
+          });
         }
       }
     } else {
+      // setup private key provider if chainNamespace is other
       const finalPrivKey = this._getFinalPrivKey();
       if (finalPrivKey) {
         await this.privateKeyProvider.setupProvider(finalPrivKey);
