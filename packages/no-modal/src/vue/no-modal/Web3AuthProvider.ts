@@ -1,5 +1,6 @@
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
+import type { AuthUserInfo, LoginParams } from "@/core/auth-connector";
 import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -12,7 +13,6 @@ import {
   Web3AuthContextKey,
 } from "@/core/base";
 
-import type { AuthUserInfo, LoginParams } from "../../adapters/auth-adapter";
 import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 

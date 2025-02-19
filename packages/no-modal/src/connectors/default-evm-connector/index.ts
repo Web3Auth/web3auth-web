@@ -2,7 +2,7 @@ import { createStore as createMipd } from "mipd";
 
 import { ConnectorFn, IProvider, normalizeWalletName } from "@/core/base";
 
-import { injectedEvmConnector } from "./injectedEvmAdapter";
+import { injectedEvmConnector } from "./injectedEvmConnector";
 
 export const getEvmInjectedConnectors = (): ConnectorFn[] => {
   // EIP-6963: multiple injected provider discovery

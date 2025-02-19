@@ -24,7 +24,7 @@ import {
 } from "@/core/base";
 import { WalletStandardProvider } from "@/core/solana-provider";
 
-import { BaseSolanaConnector } from "../base-solana-adapter";
+import { BaseSolanaConnector } from "../base-solana-connector";
 import { getSolanaChainByChainConfig } from "./utils";
 import { WalletStandard, WalletStandardProviderHandler } from "./walletStandardHandler";
 

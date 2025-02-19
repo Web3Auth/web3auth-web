@@ -4,7 +4,7 @@ import { StandardConnect } from "@wallet-standard/features";
 
 import { ConnectorFn, normalizeWalletName } from "@/core/base";
 
-import { walletStandardConnector } from "./walletStandardAdapter";
+import { walletStandardConnector } from "./walletStandardConnector";
 
 export const getSolanaInjectedConnectors = (): ConnectorFn[] => {
   // get installed wallets that support standard wallet

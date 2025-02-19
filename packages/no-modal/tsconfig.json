@@ -5,7 +5,7 @@
     "strict": true,
     "paths": {
       "@/core/base": ["./src/base"],
-      "@/core/*-adapter": ["./src/adapters/*-adapter"],
+      "@/core/*-connector": ["./src/connectors/*-connector"],
       "@/core/*-plugin": ["./src/plugins/*-plugin"],
       "@/core/*-provider": ["./src/providers/*-provider"]
     }

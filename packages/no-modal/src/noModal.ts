@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 
 import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
-import { authConnector } from "@/core/auth-adapter";
+import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   CONNECTED_EVENT_DATA,
@@ -32,9 +32,7 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@/core/base";
-
-import { walletConnectV2Connector } from "./adapters";
-import { CommonJRPCProvider } from "./providers";
+import { CommonJRPCProvider } from "@/core/base-provider";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -260,17 +258,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.multiInjectedProviderDiscovery) {
       const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
-        const { getSolanaInjectedConnectors } = await import("@/core/default-solana-adapter");
+        const { getSolanaInjectedConnectors } = await import("@/core/default-solana-connector");
         connectorFns.push(...getSolanaInjectedConnectors());
       }
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-        const { getEvmInjectedConnectors } = await import("@/core/default-evm-adapter");
+        const { getEvmInjectedConnectors } = await import("@/core/default-evm-connector");
         connectorFns.push(...getEvmInjectedConnectors());
       }
 
       // add wallet connect v2 connector if enabled
       const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
       if (walletConnectEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
+        const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
         connectorFns.push(walletConnectV2Connector());
       }
     }

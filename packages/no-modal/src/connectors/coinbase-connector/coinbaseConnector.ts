@@ -1,3 +1,5 @@
+import { AppMetadata, CoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+
 import {
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -15,38 +17,43 @@ import {
   ConnectorParams,
   CustomChainConfig,
   IProvider,
-  log,
   UserInfo,
+  WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
 } from "@/core/base";
 
-import { BaseEvmConnector } from "../base-evm-adapter";
+import { BaseEvmConnector } from "../base-evm-connector";
 
-class InjectedEvmConnector extends BaseEvmConnector<void> {
+export type CoinbaseWalletSDKOptions = Partial<AppMetadata & Preference>;
+
+export interface CoinbaseConnectorOptions extends BaseConnectorSettings {
+  connectorSettings?: CoinbaseWalletSDKOptions;
+}
+
+class CoinbaseConnector extends BaseEvmConnector<void> {
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
-  readonly name: string;
-
-  readonly isInjected = true;
+  readonly name: string = WALLET_CONNECTORS.COINBASE;
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  private injectedProvider: IProvider | null = null;
+  private coinbaseProvider: ProviderInterface | null = null;
 
-  constructor(options: BaseConnectorSettings & { name: string; provider: IProvider }) {
-    super(options);
-    this.name = options.name;
-    this.injectedProvider = options.provider;
+  private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
+
+  constructor(connectorOptions: CoinbaseConnectorOptions) {
+    super(connectorOptions);
+    this.coinbaseOptions = { ...this.coinbaseOptions, ...connectorOptions.connectorSettings };
   }
 
   get provider(): IProvider | null {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.injectedProvider) {
-      return this.injectedProvider;
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.coinbaseProvider) {
+      return this.coinbaseProvider as unknown as IProvider;
     }
     return null;
   }
@@ -59,10 +66,12 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
     await super.init(options);
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
+
+    const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(chainConfig.chainId, 16)] });
+    this.coinbaseProvider = coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
     this.status = CONNECTOR_STATUS.READY;
-    this.emit(CONNECTOR_EVENTS.READY, this.name);
+    this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.COINBASE);
     try {
-      log.debug(`initializing ${this.name} injected connector`);
       if (options.autoConnect) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
@@ -74,57 +83,47 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
 
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
-    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-
+    if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Connector is not initialized");
     this.status = CONNECTOR_STATUS.CONNECTING;
-    this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: this.name });
+    this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.COINBASE });
     try {
-      await this.injectedProvider.request({ method: "eth_requestAccounts" });
-      // switch chain if not connected to the right chain
-      if (this.injectedProvider.chainId !== chainConfig.chainId) {
-        try {
-          await this.switchChain(chainConfig, true);
-        } catch (error) {
-          await this.addChain(chainConfig, true);
-          await this.switchChain(chainConfig, true);
-        }
+      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+      if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+      await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
+      const currentChainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
+      if (currentChainId !== chainConfig.chainId) {
+        await this.addChain(chainConfig);
+        await this.switchChain(chainConfig, true);
       }
       this.status = CONNECTOR_STATUS.CONNECTED;
-      const accountDisconnectHandler = (accounts: string[]) => {
-        if (accounts.length === 0) {
-          this.disconnect();
-          if (this.injectedProvider?.removeListener) this.injectedProvider.removeListener("accountsChanged", accountDisconnectHandler);
-        }
-      };
-      this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
+      if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
+      this.provider.once("disconnect", () => {
+        // ready to be connected again
+        this.disconnect();
+      });
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: this.name,
+        connector: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
-        provider: this.injectedProvider,
+        provider: this.provider,
       } as CONNECTED_EVENT_DATA);
-      return this.injectedProvider;
+      return this.provider;
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
       this.rehydrated = false;
       this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
-      throw WalletLoginError.connectionError(`Failed to login with ${this.name} injected wallet`);
+      throw WalletLoginError.connectionError("Failed to login with coinbase wallet", error);
     }
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     await super.disconnectSession();
-    if (typeof this.injectedProvider.removeAllListeners !== "undefined") this.injectedProvider.removeAllListeners();
-    try {
-      await this.injectedProvider.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
-    } catch (error) {}
+    this.provider?.removeAllListeners();
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
-      this.injectedProvider = null;
+      this.coinbaseProvider = null;
     } else {
       // ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
@@ -138,8 +137,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   }
 
   public async addChain(chainConfig: CustomChainConfig, _init = false): Promise<void> {
-    if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    await this.injectedProvider.request({
+    await this.coinbaseProvider.request({
       method: "wallet_addEthereumChain",
       params: [
         {
@@ -155,9 +153,8 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
-    if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     super.checkSwitchChainRequirements(params, init);
-    await this.injectedProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+    await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
   }
 
   public async enableMFA(): Promise<void> {
@@ -169,15 +166,11 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   }
 }
 
-export const injectedEvmConnector = (params: { name: string; provider: IProvider }): ConnectorFn => {
-  const { name, provider } = params;
+export const coinbaseConnector = (params?: CoinbaseWalletSDKOptions): ConnectorFn => {
   return ({ coreOptions }: ConnectorParams) => {
-    return new InjectedEvmConnector({
-      name,
-      provider,
+    return new CoinbaseConnector({
+      connectorSettings: params,
       coreOptions,
     });
   };
 };
-
-export { InjectedEvmConnector };

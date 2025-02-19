@@ -2,7 +2,7 @@ import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import WsEmbed from "@web3auth/ws-embed";
 
-import { type AuthConnectorType } from "@/core/auth-adapter";
+import { type AuthConnectorType } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,

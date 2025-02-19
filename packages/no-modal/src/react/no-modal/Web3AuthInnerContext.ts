@@ -1,6 +1,6 @@
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
-import type { AuthUserInfo, LoginParams } from "@/core/auth-adapter";
+import type { AuthUserInfo, LoginParams } from "@/core/auth-connector";
 import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
