@@ -4,8 +4,6 @@ import Bowser from "bowser";
 import { createMemo, Match, Show, Suspense, Switch, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import ArrowRightDark from "../../assets/chevron-right-dark.svg";
-import ArrowRightLight from "../../assets/chevron-right-light.svg";
 import { PAGES } from "../../constants";
 import { ThemedContext } from "../../context/ThemeContext";
 import {
@@ -22,7 +20,7 @@ import {
   StateEmitterEvents,
 } from "../../interfaces";
 import { t } from "../../localeImport";
-import { getBrowserExtensionUrl, getBrowserName, getMobileInstallLink, getOsName } from "../../utils/common";
+import { getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils/common";
 import Footer from "../Footer/Footer";
 import { Image } from "../Image";
 import { Loader } from "../Loader";
@@ -131,7 +129,12 @@ const Body = (props: BodyProps) => {
               <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
                 {t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}
               </span>
-              <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={!isDark ? ArrowRightLight : ArrowRightDark} alt="arrow" />
+              <img
+                id="device-link-arrow"
+                class="w3a--icon-animation w3a--ml-auto"
+                src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+                alt="arrow"
+              />
             </button>
           </a>
         </li>
@@ -169,7 +172,12 @@ const Body = (props: BodyProps) => {
             <span class="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails().browser) })}
             </span>
-            <img id="device-link-arrow" class="w3a--icon-animation w3a--ml-auto" src={!isDark ? ArrowRightLight : ArrowRightDark} alt="arrow" />
+            <img
+              id="device-link-arrow"
+              class="w3a--icon-animation w3a--ml-auto"
+              src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+              alt="arrow"
+            />
           </button>
         </a>
       </li>

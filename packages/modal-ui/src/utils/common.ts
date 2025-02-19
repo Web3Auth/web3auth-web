@@ -67,3 +67,7 @@ export const getOsName = (os: mobileOs) => {
 export const getBrowserName = (browserType: browser) => {
   return browserType.charAt(0).toUpperCase() + browserType.slice(1);
 };
+
+export const getIcons = (icon: string) => {
+  return `https://images.web3auth.io/login-modal/${icon}.svg`;
+};

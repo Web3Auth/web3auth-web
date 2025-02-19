@@ -1,6 +1,7 @@
+import { resolve } from "node:path";
+
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
-import { dirname, resolve } from "node:path";
 // import devtools from 'solid-devtools/vite';
 
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
     // devtools(),
     solidPlugin(),
   ],
+  assetsInclude: ["**/*.svg"],
   server: {
     port: 3000,
   },
@@ -29,7 +31,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/loginModal.tsx"),
       name: "Ui",
-      fileName: (format) => `ui.${format}.js`,
+      fileName: (format: unknown) => `ui.${format}.js`,
       formats: ["es", "umd", "cjs"],
     },
     rollupOptions: {

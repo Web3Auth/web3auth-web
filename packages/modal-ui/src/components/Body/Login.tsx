@@ -1,17 +1,10 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { createEffect, createMemo, createSignal, Match, mergeProps, Show, Suspense, Switch } from "solid-js";
 
-import ArrowRightDark from "../../assets/chevron-right-dark.svg";
-import ArrowRightLight from "../../assets/chevron-right-light.svg";
-import LogoDark from "../../assets/dark-logo.svg";
-import EmailLight from "../../assets/email-otp-light.svg";
-import LogoLight from "../../assets/light-logo.svg";
-import SMSLight from "../../assets/sms-otp-light.svg";
-import SuccessLight from "../../assets/success-light.svg";
 import { capitalizeFirstLetter } from "../../config";
 import { SocialLoginsConfig } from "../../interfaces";
 import { t } from "../../localeImport";
-import { cn } from "../../utils/common";
+import { cn, getIcons } from "../../utils/common";
 import { validatePhoneNumber } from "../../utils/modal";
 import OtpInput from "../Otp/Otp";
 import SocialLoginList from "../SocialLoginList";
@@ -218,7 +211,7 @@ const Login = (props: LoginProps) => {
                 when={!otpSuccess()}
                 fallback={
                   <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
-                    <img src={SuccessLight} alt="success" class="w3a--w-auto w3a--h-auto" />
+                    <img src={getIcons("success-light")} alt="success" class="w3a--w-auto w3a--h-auto" />
                     <p class="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white w3a--w-[80%] w3a--mx-auto w3a--text-center">
                       You are connected to your account!
                     </p>
@@ -241,7 +234,7 @@ const Login = (props: LoginProps) => {
                   </button>
                 </div>
                 <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
-                  <img src={isMobileOtp() ? SMSLight : EmailLight} alt="otp" class="w3a--w-auto w3a--h-auto" />
+                  <img src={getIcons(isMobileOtp() ? "sms-otp-light" : "email-otp-light")} alt="otp" class="w3a--w-auto w3a--h-auto" />
                   <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
                     <p class="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
                       {isMobileOtp() ? "OTP verification" : "Email verification"}
@@ -265,8 +258,7 @@ const Login = (props: LoginProps) => {
           <div class="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
             <div class="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
               <figure class="w3a--w-[200px] w3a--h-12 mx-auto">
-                <img src={LogoDark} alt="Logo" class="w3a--object-contain w3a--hidden dark:w3a--block" />
-                <img src={LogoLight} alt="Logo" class="w3a--object-contain w3a--block dark:w3a--hidden" />
+                <img src={getIcons(props.isDark ? "dark-logo" : "light-logo")} alt="Logo" class="w3a--object-contain" />
               </figure>
               <p class="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
             </div>
@@ -323,7 +315,7 @@ const Login = (props: LoginProps) => {
                       class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
                     />
                     <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
-                      <img src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
+                      <img src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
                     </button>
                   </div>
                   <Show when={!isValidInput() && isPasswordlessCtaClicked()}>
@@ -349,7 +341,12 @@ const Login = (props: LoginProps) => {
                   >
                     {props.totalExternalWallets - 1}+
                   </div>
-                  <img id="external-wallet-arrow" class="w3a--icon-animation" src={props.isDark ? ArrowRightDark : ArrowRightLight} alt="arrow" />
+                  <img
+                    id="external-wallet-arrow"
+                    class="w3a--icon-animation"
+                    src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
+                    alt="arrow"
+                  />
                 </button>
               </Show>
               {/* <OtpInput length={6} onComplete={() => {}} /> */}

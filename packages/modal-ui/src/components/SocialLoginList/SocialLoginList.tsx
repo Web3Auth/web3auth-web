@@ -1,13 +1,8 @@
 import { LOGIN_PROVIDER } from "@web3auth/auth";
 import { For, Show } from "solid-js";
 
-import ArrowLeftDark from "../../assets/arrow-left-dark.svg";
-import ArrowLeftLight from "../../assets/arrow-left-light.svg";
-import ArrowRightDark from "../../assets/chevron-right-dark.svg";
-import ArrowRightLight from "../../assets/chevron-right-light.svg";
-import DotDark from "../../assets/dots-dark-horizontal.svg";
-import DotLight from "../../assets/dots-light-horizontal.svg";
 import { SocialLoginsConfig } from "../../interfaces";
+import { getIcons } from "../../utils/common";
 import { rowType } from "../Body/Login";
 import { SocialLoginButton } from "../SocialLoginButton";
 export interface SocialLoginListProps {
@@ -64,9 +59,7 @@ const SocialLoginList = (props: SocialLoginListProps) => {
           </For>
           <Show when={props.canShowMore}>
             <SocialLoginButton isDark={props.isDark} showIcon={false} onClick={props.handleExpandSocialLogins}>
-              <Show when={props.isDark} fallback={<img src={DotLight} alt="Logo" class="w3a--object-contain" />}>
-                <img src={DotDark} alt="Logo" class="w3a--object-contain" />
-              </Show>
+              <img src={getIcons(props.isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" class="w3a--object-contain" />
             </SocialLoginButton>
           </Show>
         </div>
@@ -74,9 +67,7 @@ const SocialLoginList = (props: SocialLoginListProps) => {
       <Show when={props.otherRow?.length > 0}>
         <div class="w3a--flex w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4 w3a--w-full">
           <button type="button" class="w3a--appearance-none" onClick={() => props.handleExpandSocialLogins()}>
-            <Show when={props.isDark} fallback={<img src={ArrowLeftLight} alt="arrow" />}>
-              <img src={ArrowLeftDark} alt="arrow" />
-            </Show>
+            <img src={getIcons(props.isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" class="w3a--object-contain" />
           </button>
           <div class="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto">
             <For each={props.otherRow}>
@@ -96,12 +87,12 @@ const SocialLoginList = (props: SocialLoginListProps) => {
                   <>
                     {getProviderIcon(row.method, props.isDark, ".svg")}
                     <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
-                    <Show
-                      when={props.isDark}
-                      fallback={<img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightLight} alt="arrow" />}
-                    >
-                      <img id="login-arrow" class="w3a--icon-animation w3a--ml-auto" src={ArrowRightDark} alt="arrow" />
-                    </Show>
+                    <img
+                      id="login-arrow"
+                      class="w3a--icon-animation w3a--ml-auto"
+                      src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
+                      alt="arrow"
+                    />
                   </>
                 </SocialLoginButton>
               )}

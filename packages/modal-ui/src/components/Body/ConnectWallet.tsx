@@ -2,18 +2,10 @@ import { BaseAdapterConfig, ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegi
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { MaskType, QRCodeCanvas } from "solid-qr-code";
 
-import EthereumDark from "../../assets/ethereum-dark.svg";
-import EthereumLight from "../../assets/ethereum-light.svg";
-import PolygonDark from "../../assets/polygon-dark.svg";
-import PolygonLight from "../../assets/polygon-light.svg";
-import SolanaDark from "../../assets/solana-dark.svg";
-import SolanaLight from "../../assets/solana-light.svg";
-import ViewDark from "../../assets/view-dark.svg";
-import ViewLight from "../../assets/view-light.svg";
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { browser, ExternalButton, ModalStatusType, os, platform } from "../../interfaces";
 import { t } from "../../localeImport";
-import { cn } from "../../utils/common";
+import { cn, getIcons } from "../../utils/common";
 import { Image } from "../Image";
 import { WalletButton } from "../WalletButton";
 
@@ -207,7 +199,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("ethereum")}
                 >
-                  <img src={props.isDark ? EthereumDark : EthereumLight} alt="ethereum" />
+                  <img src={getIcons(props.isDark ? "ethereum-dark" : "ethereum-light")} alt="ethereum" />
                 </button>
                 <button
                   class={cn(
@@ -218,7 +210,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("polygon")}
                 >
-                  <img src={props.isDark ? PolygonDark : PolygonLight} alt="polygon" />
+                  <img src={getIcons(props.isDark ? "polygon-dark" : "polygon-light")} alt="polygon" />
                 </button>
                 <button
                   class={cn(
@@ -229,7 +221,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("solana")}
                 >
-                  <img src={props.isDark ? SolanaDark : SolanaLight} alt="solana" />
+                  <img src={getIcons(props.isDark ? "solana-dark" : "solana-light")} alt="solana" />
                 </button>
               </div>
             </Show>
@@ -301,7 +293,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               fallback={<div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
             >
               <div class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 dark:hover:w3a--bg-app-gray-600">
-                <img src={props.isDark ? ViewDark : ViewLight} alt="view" height="24" width="24" />
+                <img src={getIcons(props.isDark ? "view-dark" : "view-light")} alt="view" height="24" width="24" />
                 <p class="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">More Wallets</p>
                 <span
                   class="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
