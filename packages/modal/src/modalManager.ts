@@ -85,11 +85,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // initialize login modal
-    const currentChainConfig = this.getCurrentChainConfig();
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,
-      chainNamespace: currentChainConfig.chainNamespace,
+      chainNamespace: this.currentChainConfig.chainNamespace,
       walletRegistry,
     });
     this.subscribeToLoginModalEvents();
@@ -123,7 +122,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // load default adapters: auth, injected wallets
     const adapterFns = await this.loadDefaultAdapters({ projectConfig });
     adapterFns.map(async (adapterFn) => {
-      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
+      const adapter = adapterFn({ projectConfig, coreOptions: this.coreOptions });
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
     });
@@ -211,7 +210,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.getCurrentChainConfig() });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
     if (typeof keyExportEnabled === "boolean") {
       // dont know if we need to do this.
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);

@@ -82,8 +82,7 @@ export interface IAdapter<T> extends SafeEventEmitter {
 
 export type AdapterParams = {
   projectConfig?: PROJECT_CONFIG_RESPONSE;
-  options: IWeb3AuthCoreOptions;
-  getCurrentChainConfig: () => CustomChainConfig;
+  coreOptions: IWeb3AuthCoreOptions;
 };
 
 export type AdapterFn = (params: AdapterParams) => IAdapter<unknown>;

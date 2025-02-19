@@ -346,10 +346,10 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 }
 
 export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
-  return ({ projectConfig, options }: AdapterParams) => {
+  return ({ projectConfig, coreOptions }: AdapterParams) => {
     const adapterSettings: AuthAdapterOptions["adapterSettings"] = {
-      network: options.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-      clientId: options.clientId,
+      network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+      clientId: coreOptions.clientId,
       uxMode: params?.uxMode || UX_MODE.POPUP,
     };
 
@@ -373,14 +373,14 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
 
     // whitelabel config
     const { whitelabel } = projectConfig;
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), options.uiConfig || {});
+    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     adapterSettings.whiteLabel = uiConfig;
 
     // wallet services settings
     const finalWsSettings = {
-      ...options.walletServicesSettings,
-      enableLogging: options.enableLogging,
+      ...coreOptions.walletServicesSettings,
+      enableLogging: coreOptions.enableLogging,
     };
 
     // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
@@ -388,7 +388,7 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
     const adapterOptions: AuthAdapterOptions = {
       adapterSettings,
       walletServicesSettings: finalWsSettings,
-      getCoreOptions: () => options,
+      getCoreOptions: () => coreOptions,
     };
     return new AuthAdapter(adapterOptions);
   };

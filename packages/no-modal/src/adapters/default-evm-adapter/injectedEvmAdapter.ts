@@ -171,11 +171,11 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
 export const injectedEvmAdapter = (params: { name: string; provider: IProvider }): AdapterFn => {
   const { name, provider } = params;
-  return ({ options }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new InjectedEvmAdapter({
       name,
       provider,
-      getCoreOptions: () => options,
+      getCoreOptions: () => coreOptions,
     });
   };
 };

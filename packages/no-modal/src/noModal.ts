@@ -101,7 +101,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // TODO: do we need this ?
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
-    this.getCurrentChainConfig = this.getCurrentChainConfig.bind(this);
   }
 
   get connected(): boolean {
@@ -123,10 +122,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.coreOptions;
   }
 
-  public getCurrentChainConfig(): CustomChainConfig {
-    return this.currentChainConfig;
-  }
-
   public async init(): Promise<void> {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
 
@@ -144,7 +139,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     const adapterFns = await this.loadDefaultAdapters({ projectConfig });
     const adapterPromises = adapterFns.map(async (adapterFn) => {
-      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
+      const adapter = adapterFn({ projectConfig, coreOptions: this.coreOptions });
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
       this.subscribeToAdapterEvents(adapter);
@@ -238,6 +233,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.connectToPlugins({ adapter: this.connectedAdapterName });
     }
     return this;
+  }
+
+  public getCurrentChainConfig(): CustomChainConfig {
+    return this.currentChainConfig;
   }
 
   public getPlugin(name: string): IPlugin | null {

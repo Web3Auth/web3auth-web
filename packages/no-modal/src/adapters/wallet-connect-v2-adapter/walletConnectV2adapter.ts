@@ -397,7 +397,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
 }
 
 export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterFn => {
-  return ({ projectConfig, options }: AdapterParams) => {
+  return ({ projectConfig, coreOptions }: AdapterParams) => {
     let { projectId } = params || {};
 
     if (projectConfig) {
@@ -416,7 +416,7 @@ export const walletConnectV2Adapter = (params?: { projectId: string }): AdapterF
       adapterSettings: {
         walletConnectInitOptions: { projectId },
       },
-      getCoreOptions: () => options,
+      getCoreOptions: () => coreOptions,
     });
   };
 };

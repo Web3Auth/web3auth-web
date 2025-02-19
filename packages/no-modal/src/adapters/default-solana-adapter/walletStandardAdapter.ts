@@ -159,11 +159,11 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
 
 export const walletStandardAdapter = (params: { name: string; wallet: Wallet }): AdapterFn => {
   const { name, wallet } = params;
-  return ({ options }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new WalletStandardAdapter({
       name,
       wallet,
-      getCoreOptions: () => options,
+      getCoreOptions: () => coreOptions,
     });
   };
 };

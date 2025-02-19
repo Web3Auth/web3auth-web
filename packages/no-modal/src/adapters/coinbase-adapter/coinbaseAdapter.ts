@@ -167,10 +167,10 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 }
 
 export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn => {
-  return ({ options }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new CoinbaseAdapter({
       adapterSettings: params,
-      getCoreOptions: () => options,
+      getCoreOptions: () => coreOptions,
     });
   };
 };
