@@ -77,6 +77,9 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
 
   checkSwitchChainRequirements(_params: { chainId: string }, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (!this.coreOptions.chainConfigs) throw WalletInitializationError.invalidParams("chainConfigs is required");
+    const newChainConfig = this.coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === _params.chainId);
+    if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
   }
 
   updateConnectorData(data: unknown): void {
