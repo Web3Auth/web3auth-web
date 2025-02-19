@@ -35,7 +35,9 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
 
   constructor(options: BaseAdapterSettings = {}) {
     super();
-    this.setAdapterSettings(options);
+    if (options.getCoreOptions) {
+      this.getCoreOptions = options.getCoreOptions;
+    }
   }
 
   get connnected(): boolean {
@@ -43,14 +45,6 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
   }
 
   public abstract get provider(): IProvider | null;
-
-  public setAdapterSettings(options: BaseAdapterSettings): void {
-    if (this.status === ADAPTER_STATUS.READY) return;
-
-    if (options.getCoreOptions) {
-      this.getCoreOptions = options.getCoreOptions;
-    }
-  }
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing wallet connect session on calling connect again.

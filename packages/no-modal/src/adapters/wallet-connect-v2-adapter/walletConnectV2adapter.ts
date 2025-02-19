@@ -63,7 +63,23 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
   constructor(options: WalletConnectV2AdapterOptions = {}) {
     super(options);
     this.adapterOptions = { ...options };
-    this.setAdapterSettings(options);
+    const { qrcodeModal, walletConnectInitOptions } = options?.adapterSettings || {};
+
+    this.adapterOptions = {
+      ...this.adapterOptions,
+      adapterSettings: this.adapterOptions?.adapterSettings ?? {},
+      loginSettings: this.adapterOptions?.loginSettings ?? {},
+    };
+
+    if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
+    if (walletConnectInitOptions)
+      this.adapterOptions.adapterSettings.walletConnectInitOptions = {
+        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions ?? {}),
+        ...walletConnectInitOptions,
+      };
+
+    const { loginSettings } = options;
+    if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
   }
 
   get connected(): boolean {
@@ -155,28 +171,6 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
           : WalletLoginError.connectionError(`Failed to login with wallet connect: ${(error as Error)?.message || ""}`, error);
       throw finalError;
     }
-  }
-
-  // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<WalletConnectV2AdapterOptions>): void {
-    super.setAdapterSettings(adapterSettings);
-    const { qrcodeModal, walletConnectInitOptions } = adapterSettings?.adapterSettings || {};
-
-    this.adapterOptions = {
-      ...this.adapterOptions,
-      adapterSettings: this.adapterOptions?.adapterSettings ?? {},
-      loginSettings: this.adapterOptions?.loginSettings ?? {},
-    };
-
-    if (qrcodeModal) this.adapterOptions.adapterSettings.qrcodeModal = qrcodeModal;
-    if (walletConnectInitOptions)
-      this.adapterOptions.adapterSettings.walletConnectInitOptions = {
-        ...(this.adapterOptions.adapterSettings.walletConnectInitOptions ?? {}),
-        ...walletConnectInitOptions,
-      };
-
-    const { loginSettings } = adapterSettings;
-    if (loginSettings) this.adapterOptions.loginSettings = { ...(this.adapterOptions.loginSettings || {}), ...loginSettings };
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {

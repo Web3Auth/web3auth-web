@@ -48,7 +48,7 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   constructor(adapterOptions: CoinbaseAdapterOptions = {}) {
     super(adapterOptions);
-    this.setAdapterSettings(adapterOptions);
+    this.coinbaseOptions = { ...this.coinbaseOptions, ...adapterOptions.adapterSettings };
   }
 
   get provider(): IProvider | null {
@@ -60,11 +60,6 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
-  }
-
-  public setAdapterSettings(options: CoinbaseAdapterOptions): void {
-    super.setAdapterSettings(options);
-    this.coinbaseOptions = { ...this.coinbaseOptions, ...options.adapterSettings };
   }
 
   async init(options: AdapterInitOptions): Promise<void> {

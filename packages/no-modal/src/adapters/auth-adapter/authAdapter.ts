@@ -1,5 +1,5 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -15,7 +15,6 @@ import {
   AdapterNamespaceType,
   AdapterParams,
   BaseAdapter,
-  BaseAdapterSettings,
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
@@ -60,7 +59,16 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   constructor(params: AuthAdapterOptions = {}) {
     super(params);
-    this.setAdapterSettings({ ...params.adapterSettings });
+
+    // set auth options
+    const defaultOptions = getAuthDefaultOptions();
+    log.info("setting adapter settings", params.adapterSettings);
+    this.authOptions = deepmerge.all([
+      defaultOptions.adapterSettings,
+      this.authOptions || {},
+      params.adapterSettings || {},
+    ]) as AuthAdapterOptions["adapterSettings"];
+
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
@@ -231,18 +239,6 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     const userInfo = this.authInstance.getUserInfo();
     return userInfo;
-  }
-
-  // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<AuthOptions & BaseAdapterSettings>): void {
-    super.setAdapterSettings(adapterSettings);
-    const defaultOptions = getAuthDefaultOptions();
-    log.info("setting adapter settings", adapterSettings);
-    this.authOptions = deepmerge.all([
-      defaultOptions.adapterSettings,
-      this.authOptions || {},
-      adapterSettings || {},
-    ]) as AuthAdapterOptions["adapterSettings"];
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
