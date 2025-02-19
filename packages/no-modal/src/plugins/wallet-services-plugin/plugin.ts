@@ -2,7 +2,7 @@ import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import WsEmbed from "@web3auth/ws-embed";
 
-import { AuthAdapter } from "@/core/auth-adapter";
+import { type AuthAdapterType } from "@/core/auth-adapter";
 import {
   ADAPTER_STATUS,
   CHAIN_NAMESPACES,
@@ -51,6 +51,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     const currentChainConfig = web3auth.getCurrentChainConfig();
     if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig.chainNamespace))
       throw WalletServicesPluginError.unsupportedChainNamespace();
+
     // Not connected yet to auth
     if (web3auth.provider) {
       this.provider = web3auth.provider;
@@ -58,7 +59,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.web3auth = web3auth;
 
     // Auth adapter uses WS embed
-    const authInstance = web3auth.getAdapter(WALLET_ADAPTERS.AUTH) as AuthAdapter;
+    const authInstance = web3auth.getAdapter(WALLET_ADAPTERS.AUTH) as AuthAdapterType;
     if (!authInstance || !authInstance.wsEmbed) throw WalletServicesPluginError.web3AuthNotConnected();
     this.wsEmbedInstance = authInstance.wsEmbed;
 

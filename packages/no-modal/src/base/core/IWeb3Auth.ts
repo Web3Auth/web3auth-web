@@ -116,7 +116,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   status: ADAPTER_STATUS_TYPE;
   provider: IProvider | null;
   getCurrentChainConfig(): CustomChainConfig;
-  getCoreOptions(): IWeb3AuthCoreOptions;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;

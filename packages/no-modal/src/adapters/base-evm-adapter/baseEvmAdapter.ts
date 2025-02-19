@@ -20,12 +20,8 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== ADAPTER_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
-    const coreOptions = this.getCoreOptions?.();
-    if (!coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
-    const currentChainConfig = this.getCurrentChainConfig?.();
-    if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
+    if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
-    const { chainNamespace, chainId } = currentChainConfig;
     const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
@@ -36,6 +32,10 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         }
       }
 
+      const { chainId } = this.provider;
+      const currentChainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
+      const { chainNamespace } = currentChainConfig;
       const payload = {
         domain: window.location.origin,
         uri: window.location.href,
@@ -56,9 +56,9 @@ export abstract class BaseEvmAdapter<T> extends BaseAdapter<T> {
         signedMessage as string,
         challenge,
         this.name,
-        coreOptions.sessionTime,
-        coreOptions.clientId,
-        coreOptions.web3AuthNetwork
+        this.coreOptions.sessionTime,
+        this.coreOptions.clientId,
+        this.coreOptions.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
       return { idToken };

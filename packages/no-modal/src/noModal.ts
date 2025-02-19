@@ -101,7 +101,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // TODO: do we need this ?
     this.subscribeToAdapterEvents = this.subscribeToAdapterEvents.bind(this);
-    this.getCurrentChainConfig = this.getCurrentChainConfig.bind(this);
   }
 
   get connected(): boolean {
@@ -119,14 +118,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     throw new Error("Not implemented");
   }
 
-  public getCoreOptions(): IWeb3AuthCoreOptions {
-    return this.coreOptions;
-  }
-
-  public getCurrentChainConfig(): CustomChainConfig {
-    return this.currentChainConfig;
-  }
-
   public async init(): Promise<void> {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
 
@@ -142,13 +133,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    const adapterFns = await this.loadDefaultAdapters();
+    const adapterFns = await this.loadDefaultAdapters({ projectConfig });
     const adapterPromises = adapterFns.map(async (adapterFn) => {
-      const adapter = adapterFn({ projectConfig, options: this.coreOptions, getCurrentChainConfig: this.getCurrentChainConfig });
+      const adapter = adapterFn({ projectConfig, coreOptions: this.coreOptions });
       if (this.walletAdapters[adapter.name]) return;
       this.walletAdapters[adapter.name] = adapter;
       this.subscribeToAdapterEvents(adapter);
-      return adapter.init({ autoConnect: this.cachedAdapter === adapter.name }).catch((e) => log.error(e, adapter.name));
+      return adapter
+        .init({ autoConnect: this.cachedAdapter === adapter.name, chainId: this.currentChainConfig.chainId })
+        .catch((e) => log.error(e, adapter.name));
     });
     await Promise.all(adapterPromises);
     if (this.status === ADAPTER_STATUS.NOT_READY) {
@@ -195,7 +188,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(ADAPTER_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      this.walletAdapters[walletName]?.connect(loginParams);
+      const finalLoginParams = { ...loginParams, chainId: this.currentChainConfig.chainId };
+      this.walletAdapters[walletName]?.connect(finalLoginParams);
     });
   }
 
@@ -244,11 +238,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this;
   }
 
+  public getCurrentChainConfig(): CustomChainConfig {
+    return this.currentChainConfig;
+  }
+
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
   }
 
-  protected async loadDefaultAdapters(): Promise<AdapterFn[]> {
+  protected async loadDefaultAdapters({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<AdapterFn[]> {
     const adapterFns = this.coreOptions.walletAdapters || [];
 
     // always add auth adapter
@@ -265,7 +263,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const { getEvmInjectedAdapters } = await import("@/core/default-evm-adapter");
         adapterFns.push(...getEvmInjectedAdapters());
       }
-      if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
+
+      // add wallet connect v2 adapter if enabled
+      const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
+      if (walletConnectEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
         adapterFns.push(walletConnectV2Adapter());
       }
     }

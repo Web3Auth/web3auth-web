@@ -46,9 +46,9 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 
   private coinbaseOptions: CoinbaseWalletSDKOptions = { appName: "Web3Auth" };
 
-  constructor(adapterOptions: CoinbaseAdapterOptions = {}) {
+  constructor(adapterOptions: CoinbaseAdapterOptions) {
     super(adapterOptions);
-    this.setAdapterSettings(adapterOptions);
+    this.coinbaseOptions = { ...this.coinbaseOptions, ...adapterOptions.adapterSettings };
   }
 
   get provider(): IProvider | null {
@@ -62,43 +62,39 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  public setAdapterSettings(options: CoinbaseAdapterOptions): void {
-    super.setAdapterSettings(options);
-    this.coinbaseOptions = { ...this.coinbaseOptions, ...options.adapterSettings };
-  }
-
-  async init(options: AdapterInitOptions = {}): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    super.checkInitializationRequirements();
-    const currentChainConfig = this.getCurrentChainConfig?.();
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    super.checkInitializationRequirements({ chainConfig });
 
-    const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(currentChainConfig.chainId, 16)] });
+    const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(chainConfig.chainId, 16)] });
     this.coinbaseProvider = coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.COINBASE);
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        await this.connect();
+        await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
-  async connect(): Promise<IProvider | null> {
+  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Adapter is not initialized");
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: WALLET_ADAPTERS.COINBASE });
     try {
-      const currentChainConfig = this.getCurrentChainConfig?.();
+      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
-      const chainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
-      if (chainId !== currentChainConfig.chainId) {
-        await this.addChain(currentChainConfig);
-        await this.switchChain(currentChainConfig, true);
+      const currentChainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
+      if (currentChainId !== chainConfig.chainId) {
+        await this.addChain(chainConfig);
+        await this.switchChain(chainConfig, true);
       }
       this.status = ADAPTER_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -171,13 +167,10 @@ class CoinbaseAdapter extends BaseEvmAdapter<void> {
 }
 
 export const coinbaseAdapter = (params?: CoinbaseWalletSDKOptions): AdapterFn => {
-  return ({ options, getCurrentChainConfig }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new CoinbaseAdapter({
       adapterSettings: params,
-      getCoreOptions: () => options,
-      getCurrentChainConfig,
+      coreOptions,
     });
   };
 };
-
-export { CoinbaseAdapter };

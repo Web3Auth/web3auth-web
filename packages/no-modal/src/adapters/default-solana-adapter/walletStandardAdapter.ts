@@ -65,14 +65,15 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     return !!(this.status === ADAPTER_STATUS.CONNECTED && this.wallet.accounts.length > 0);
   }
 
-  async init(options: AdapterInitOptions = {}): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    super.checkInitializationRequirements();
-    const currentChainConfig = this.getCurrentChainConfig?.();
-    this.injectedProvider = new WalletStandardProvider({ config: { chainConfig: currentChainConfig } });
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    super.checkInitializationRequirements({ chainConfig });
+
+    this.injectedProvider = new WalletStandardProvider({ config: { chainConfig } });
     const providerHandler = new WalletStandardProviderHandler({
       wallet: this.wallet,
-      getCurrentChain: () => getSolanaChainByChainConfig(currentChainConfig),
+      getCurrentChain: () => getSolanaChainByChainConfig(chainConfig),
     });
     this.injectedProvider.setupProvider(providerHandler);
 
@@ -83,7 +84,7 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
       log.debug("initializing solana injected adapter");
       if (options.autoConnect) {
         this.rehydrated = true;
-        await this.connect();
+        await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       log.error("Failed to connect with cached solana injected provider", error);
@@ -91,14 +92,16 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
     }
   }
 
-  async connect(): Promise<IProvider> {
+  async connect({ chainId }: { chainId: string }): Promise<IProvider> {
     try {
       super.checkConnectionRequirements();
+      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
       this.status = ADAPTER_STATUS.CONNECTING;
       this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
 
-      const currentChainConfig = this.getCurrentChainConfig?.();
-      const chainName = getSolanaChainByChainConfig(currentChainConfig);
+      const chainName = getSolanaChainByChainConfig(chainConfig);
       if (!this.wallet.chains.find((chain) => chain === chainName))
         throw WalletLoginError.connectionError(`Chain ${chainName} not supported. Supported chains are ${this.wallet.chains.join(", ")}`);
 
@@ -156,12 +159,11 @@ export class WalletStandardAdapter extends BaseSolanaAdapter<void> {
 
 export const walletStandardAdapter = (params: { name: string; wallet: Wallet }): AdapterFn => {
   const { name, wallet } = params;
-  return ({ options, getCurrentChainConfig }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new WalletStandardAdapter({
       name,
       wallet,
-      getCoreOptions: () => options,
-      getCurrentChainConfig,
+      coreOptions,
     });
   };
 };

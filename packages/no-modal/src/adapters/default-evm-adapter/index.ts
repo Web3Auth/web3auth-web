@@ -1,12 +1,19 @@
-import { AdapterFn } from "@/core/base";
-import { walletConnectV2Adapter } from "@/core/wallet-connect-v2-adapter";
+import { createStore as createMipd } from "mipd";
 
-import { getEvmInjectedAdapters } from "./injectedAdapters";
+import { AdapterFn, IProvider, normalizeWalletName } from "@/core/base";
 
-export const getEvmDefaultExternalAdapters = (): AdapterFn[] => {
-  const injectedProviders = getEvmInjectedAdapters();
+import { injectedEvmAdapter } from "./injectedEvmAdapter";
 
-  return [...injectedProviders, walletConnectV2Adapter()];
+export const getEvmInjectedAdapters = (): AdapterFn[] => {
+  // EIP-6963: multiple injected provider discovery
+  const mipd = createMipd();
+  // We assume that all extensions have emitted by here.
+  // TODO: Ideally, we must use reactive listening. We will do that with v9
+  const injectedProviders = mipd.getProviders().map((providerDetail) => {
+    return injectedEvmAdapter({ name: normalizeWalletName(providerDetail.info.name), provider: providerDetail.provider as IProvider });
+  });
+
+  return injectedProviders;
 };
 
-export { getEvmInjectedAdapters };
+export { injectedEvmAdapter };

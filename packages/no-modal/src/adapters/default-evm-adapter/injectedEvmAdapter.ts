@@ -55,38 +55,40 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
     throw new Error("Not implemented");
   }
 
-  async init(options: AdapterInitOptions = {}): Promise<void> {
+  async init(options: AdapterInitOptions): Promise<void> {
     await super.init(options);
-    super.checkInitializationRequirements();
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    super.checkInitializationRequirements({ chainConfig });
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, this.name);
     try {
       log.debug(`initializing ${this.name} injected adapter`);
       if (options.autoConnect) {
         this.rehydrated = true;
-        await this.connect();
+        await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       this.emit(ADAPTER_EVENTS.ERRORED, error as Web3AuthError);
     }
   }
 
-  async connect(): Promise<IProvider | null> {
+  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    const currentChainConfig = this.getCurrentChainConfig?.();
-    if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { adapter: this.name });
     try {
       await this.injectedProvider.request({ method: "eth_requestAccounts" });
       // switch chain if not connected to the right chain
-      if (this.injectedProvider.chainId !== currentChainConfig.chainId) {
+      if (this.injectedProvider.chainId !== chainConfig.chainId) {
         try {
-          await this.switchChain(currentChainConfig, true);
+          await this.switchChain(chainConfig, true);
         } catch (error) {
-          await this.addChain(currentChainConfig, true);
-          await this.switchChain(currentChainConfig, true);
+          await this.addChain(chainConfig, true);
+          await this.switchChain(chainConfig, true);
         }
       }
       this.status = ADAPTER_STATUS.CONNECTED;
@@ -169,12 +171,11 @@ class InjectedEvmAdapter extends BaseEvmAdapter<void> {
 
 export const injectedEvmAdapter = (params: { name: string; provider: IProvider }): AdapterFn => {
   const { name, provider } = params;
-  return ({ options, getCurrentChainConfig }: AdapterParams) => {
+  return ({ coreOptions }: AdapterParams) => {
     return new InjectedEvmAdapter({
       name,
       provider,
-      getCoreOptions: () => options,
-      getCurrentChainConfig,
+      coreOptions,
     });
   };
 };

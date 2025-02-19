@@ -1,5 +1,5 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, AuthOptions, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -15,9 +15,7 @@ import {
   AdapterNamespaceType,
   AdapterParams,
   BaseAdapter,
-  BaseAdapterSettings,
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   IProvider,
@@ -38,7 +36,7 @@ export type AuthLoginParams = LoginParams & {
   login_hint?: string;
 };
 
-export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
+class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   readonly name: string = WALLET_ADAPTERS.AUTH;
 
   readonly adapterNamespace: AdapterNamespaceType = ADAPTER_NAMESPACES.MULTICHAIN;
@@ -59,25 +57,28 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
-  constructor(params: AuthAdapterOptions = {}) {
+  constructor(params: AuthAdapterOptions) {
     super(params);
-    this.setAdapterSettings({ ...params.adapterSettings });
+
+    // set auth options
+    const defaultOptions = getAuthDefaultOptions();
+    log.info("setting adapter settings", params.adapterSettings);
+    this.authOptions = deepmerge.all([
+      defaultOptions.adapterSettings,
+      this.authOptions || {},
+      params.adapterSettings || {},
+    ]) as AuthAdapterOptions["adapterSettings"];
+
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
 
-  get currentChainNamespace(): ChainNamespaceType {
-    return this.getCurrentChainConfig()?.chainNamespace || CHAIN_NAMESPACES.EIP155;
-  }
-
   get provider(): IProvider | null {
     if (this.status !== ADAPTER_STATUS.NOT_READY) {
-      if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155 || this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        if (this.wsEmbedInstance?.provider) {
-          return this.wsEmbedInstance.provider;
-        }
-      } else if (this.privateKeyProvider) return this.privateKeyProvider;
-    }
+      if (this.wsEmbedInstance?.provider) {
+        return this.wsEmbedInstance.provider;
+      }
+    } else if (this.privateKeyProvider) return this.privateKeyProvider;
     return null;
   }
 
@@ -90,51 +91,57 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
   }
 
   async init(options: AdapterInitOptions): Promise<void> {
-    super.checkInitializationRequirements();
-    const coreOptions = this.getCoreOptions?.();
-    if (!coreOptions?.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+
+    super.checkInitializationRequirements({ chainConfig });
+    if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: coreOptions?.useCoreKitKey };
-    const web3AuthNetwork = this.authOptions.network || coreOptions?.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
+    const web3AuthNetwork = this.authOptions.network || this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
-      clientId: coreOptions?.clientId,
+      clientId: this.coreOptions.clientId,
       network: web3AuthNetwork,
     });
     log.debug("initializing auth adapter init");
 
     await this.authInstance.init();
 
-    const currentChainConfig = this.getCurrentChainConfig?.();
-    if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before initialization");
-
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155 || this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const { default: WsEmbed } = await import("@web3auth/ws-embed");
-      this.wsEmbedInstance = new WsEmbed({
-        web3AuthClientId: coreOptions.clientId || "",
-        web3AuthNetwork,
-        modalZIndex: this.wsSettings.modalZIndex,
-      });
-      await this.wsEmbedInstance.init({
-        ...this.wsSettings,
-        chainConfig: currentChainConfig as EthereumProviderConfig,
-        whiteLabel: {
-          ...this.authOptions.whiteLabel,
-          ...this.wsSettings.whiteLabel,
-        },
-      });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.XRPL) {
-      const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
-      this.privateKeyProvider = new XrplPrivateKeyProvider({
-        config: { chainConfig: currentChainConfig },
-      });
-    } else {
-      const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
-      this.privateKeyProvider = new CommonPrivateKeyProvider({
-        config: { chainConfig: currentChainConfig },
-      });
+    // initialize ws embed or private key provider based on chain namespace
+    switch (chainConfig.chainNamespace) {
+      case CHAIN_NAMESPACES.EIP155:
+      case CHAIN_NAMESPACES.SOLANA: {
+        const { default: WsEmbed } = await import("@web3auth/ws-embed");
+        this.wsEmbedInstance = new WsEmbed({
+          web3AuthClientId: this.coreOptions.clientId || "",
+          web3AuthNetwork,
+          modalZIndex: this.wsSettings.modalZIndex,
+        });
+        await this.wsEmbedInstance.init({
+          ...this.wsSettings,
+          chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
+          whiteLabel: {
+            ...this.authOptions.whiteLabel,
+            ...this.wsSettings.whiteLabel,
+          },
+        });
+        break;
+      }
+      case CHAIN_NAMESPACES.XRPL: {
+        const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
+        this.privateKeyProvider = new XrplPrivateKeyProvider({
+          config: { chainConfig },
+        });
+        break;
+      }
+      default: {
+        const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
+        this.privateKeyProvider = new CommonPrivateKeyProvider({
+          config: { chainConfig },
+        });
+      }
     }
     this.status = ADAPTER_STATUS.READY;
     this.emit(ADAPTER_EVENTS.READY, WALLET_ADAPTERS.AUTH);
@@ -145,7 +152,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       // connect only if it is redirect result or if connect (adapter is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect();
+        await this.connect({ chainId: options.chainId });
       }
     } catch (error) {
       log.error("Failed to connect with cached auth provider", error);
@@ -153,7 +160,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     }
   }
 
-  async connect(params: AuthLoginParams = { loginProvider: "" }): Promise<IProvider | null> {
+  async connect(params: Partial<AuthLoginParams> & { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     this.status = ADAPTER_STATUS.CONNECTING;
     this.emit(ADAPTER_EVENTS.CONNECTING, { ...params, adapter: WALLET_ADAPTERS.AUTH });
@@ -233,27 +240,22 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     return userInfo;
   }
 
-  // should be called only before initialization.
-  setAdapterSettings(adapterSettings: Partial<AuthOptions & BaseAdapterSettings>): void {
-    super.setAdapterSettings(adapterSettings);
-    const defaultOptions = getAuthDefaultOptions();
-    log.info("setting adapter settings", adapterSettings);
-    this.authOptions = deepmerge.all([
-      defaultOptions.adapterSettings,
-      this.authOptions || {},
-      adapterSettings || {},
-    ]) as AuthAdapterOptions["adapterSettings"];
-  }
-
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
+    const currentChainId = this.provider.chainId;
+    // TODO: handle when chainIds are the same
     // TODO: need to handle switching to a different chain namespace
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155) {
+
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === currentChainId);
+    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+    const { chainNamespace } = chainConfig;
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
       await this.wsEmbedInstance.provider?.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: params.chainId }],
       });
-    } else if (this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const fullChainId = `${CHAIN_NAMESPACES.SOLANA}:${Number(params.chainId)}`;
       await this.wsEmbedInstance.provider?.request({
         method: "wallet_switchChain",
@@ -268,7 +270,7 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.privKey;
     // coreKitKey is available only for custom verifiers by default
-    if (this.getCoreOptions?.().useCoreKitKey) {
+    if (this.coreOptions.useCoreKitKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
       // when useCoreKitKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
@@ -280,11 +282,17 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
     return finalPrivKey;
   }
 
-  private async connectWithProvider(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+  private async connectWithProvider(params: Partial<AuthLoginParams> & { chainId: string }): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === params.chainId);
+    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+    const { chainNamespace } = chainConfig;
 
-    const keyAvailable = this.authInstance?.sessionId;
     // if not logged in then login
+    const keyAvailable =
+      chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA
+        ? this.authInstance?.sessionId
+        : this._getFinalPrivKey();
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
@@ -300,7 +308,8 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
       );
     }
 
-    if (this.currentChainNamespace === CHAIN_NAMESPACES.EIP155 || this.currentChainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    // setup WS embed if chainNamespace is EIP155 or SOLANA
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
         const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({
@@ -314,9 +323,13 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
             reconnected: this.rehydrated,
             provider: this.provider,
           } as CONNECTED_EVENT_DATA);
+          this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
+            if ((accounts as string[]).length === 0 && this.status === ADAPTER_STATUS.CONNECTED) this.disconnect({ cleanup: false });
+          });
         }
       }
     } else {
+      // setup private key provider if chainNamespace is other
       const finalPrivKey = this._getFinalPrivKey();
       if (finalPrivKey) {
         await this.privateKeyProvider.setupProvider(finalPrivKey);
@@ -332,10 +345,10 @@ export class AuthAdapter extends BaseAdapter<AuthLoginParams> {
 }
 
 export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
-  return ({ projectConfig, options, getCurrentChainConfig }: AdapterParams) => {
+  return ({ projectConfig, coreOptions }: AdapterParams) => {
     const adapterSettings: AuthAdapterOptions["adapterSettings"] = {
-      network: options.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-      clientId: options.clientId,
+      network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+      clientId: coreOptions.clientId,
       uxMode: params?.uxMode || UX_MODE.POPUP,
     };
 
@@ -359,24 +372,23 @@ export const authAdapter = (params?: { uxMode?: UX_MODE_TYPE }): AdapterFn => {
 
     // whitelabel config
     const { whitelabel } = projectConfig;
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), options.uiConfig || {});
+    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     adapterSettings.whiteLabel = uiConfig;
 
     // wallet services settings
     const finalWsSettings = {
-      ...options.walletServicesSettings,
-      enableLogging: options.enableLogging,
+      ...coreOptions.walletServicesSettings,
+      enableLogging: coreOptions.enableLogging,
     };
 
-    // TODO-v10: // if adapter doesn't have any chain config yet then set it based on provided namespace and chainId.
-    // if no chainNamespace or chainId is being provided, it will connect with mainnet.
     const adapterOptions: AuthAdapterOptions = {
       adapterSettings,
       walletServicesSettings: finalWsSettings,
-      getCoreOptions: () => options,
-      getCurrentChainConfig,
+      coreOptions,
     };
     return new AuthAdapter(adapterOptions);
   };
 };
+
+export type AuthAdapterType = AuthAdapter;
