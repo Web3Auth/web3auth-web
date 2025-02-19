@@ -140,7 +140,7 @@ const options = computed((): Web3AuthOptions => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     // chainConfig,
-    chainConfigs: [chainConfig],
+    chains: [chainConfig],
     enableLogging: true,
     walletServicesSettings,
   };

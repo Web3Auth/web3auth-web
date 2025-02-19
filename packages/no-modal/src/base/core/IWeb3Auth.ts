@@ -45,7 +45,7 @@ export interface IWeb3AuthCoreOptions {
    * multiple chain configurations
    * only chains provided will be used
    */
-  chainConfigs?: CustomChainConfig[];
+  chains?: CustomChainConfig[];
   /**
    * setting to true will enable logs
    *
@@ -115,7 +115,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   connectedConnectorName: string | null;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
-  getCurrentChainConfig(): CustomChainConfig;
+  getCurrentChain(): CustomChainConfig;
   init(): Promise<void>;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;

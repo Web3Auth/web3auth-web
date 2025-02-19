@@ -51,7 +51,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public cachedCurrentChainId: string | null = null;
 
-  public currentChainConfig: CustomChainConfig;
+  public currentChain: CustomChainConfig;
 
   protected connectors: Record<string, IConnector<unknown>> = {};
 
@@ -68,15 +68,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.chainConfigs || options.chainConfigs.length === 0) {
-      throw WalletInitializationError.invalidParams("Please provide chainConfigs");
+    if (!options.chains || options.chains.length === 0) {
+      throw WalletInitializationError.invalidParams("Please provide chains");
     }
 
-    const { chainConfigs } = options;
+    const { chains } = options;
     // validate chain namespace of each chain config
-    for (const chainConfig of chainConfigs) {
-      if (!chainConfig.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
-        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chainConfigs");
+    for (const chain of chains) {
+      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
+        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
     }
 
     if (options.storageKey === "session") this.storage = "sessionStorage";
@@ -84,20 +84,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.coreOptions = {
       ...options,
-      chainConfigs: chainConfigs.map((chainConfig) => ({
-        ...(getChainConfig(chainConfig?.chainNamespace, chainConfig?.chainId) || {}),
-        ...chainConfig,
+      chains: chains.map((chain) => ({
+        ...(getChainConfig(chain?.chainNamespace, chain?.chainId) || {}),
+        ...chain,
       })),
     };
     this.multiInjectedProviderDiscovery = options.multiInjectedProviderDiscovery ?? true;
 
     // handle cached current chain
     this.cachedCurrentChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
-    // use corrected chainConfigs from coreOptions
-    const cachedChainConfig = this.cachedCurrentChainId
-      ? this.coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === this.cachedCurrentChainId)
-      : null;
-    this.currentChainConfig = cachedChainConfig || this.coreOptions.chainConfigs[0]; // use first chain in list as default chain config
+    // use corrected chains from coreOptions
+    const cachedChain = this.cachedCurrentChainId ? this.coreOptions.chains.find((chain) => chain.chainId === this.cachedCurrentChainId) : null;
+    this.currentChain = cachedChain || this.coreOptions.chains[0]; // use first chain in list as default chain config
 
     // TODO: do we need this ?
     this.subscribeToConnectorEvents = this.subscribeToConnectorEvents.bind(this);
@@ -119,7 +117,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(): Promise<void> {
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChain });
 
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
@@ -141,7 +139,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.connectors[connector.name] = connector;
         this.subscribeToConnectorEvents(connector);
         return connector
-          .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChainConfig.chainId })
+          .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChain.chainId })
           .catch((e) => log.error(e, connector.name));
       })
     );
@@ -164,12 +162,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnectorName) {
       await this.connectors[this.connectedConnectorName].switchChain(params);
-      this.setCurrentChainConfig(params.chainId);
+      this.setCurrentChain(params.chainId);
       return;
     }
     if (this.commonJRPCProvider) {
       await this.commonJRPCProvider.switchChain(params);
-      this.setCurrentChainConfig(params.chainId);
+      this.setCurrentChain(params.chainId);
       return;
     }
     throw WalletInitializationError.notReady(`No wallet is ready`);
@@ -189,7 +187,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      const finalLoginParams = { ...loginParams, chainId: this.currentChainConfig.chainId };
+      const finalLoginParams = { ...loginParams, chainId: this.currentChain.chainId };
       this.connectors[connectorName]?.connect(finalLoginParams);
     });
   }
@@ -231,9 +229,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public addPlugin(plugin: IPlugin): IWeb3Auth {
     if (this.plugins[plugin.name]) throw WalletInitializationError.duplicateConnectorError(`Plugin ${plugin.name} already exist`);
-    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChainConfig.chainNamespace)
+    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace)
       throw WalletInitializationError.incompatibleChainNameSpace(
-        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.currentChainConfig.chainNamespace}`
+        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.currentChain.chainNamespace}`
       );
 
     this.plugins[plugin.name] = plugin;
@@ -244,8 +242,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this;
   }
 
-  public getCurrentChainConfig(): CustomChainConfig {
-    return this.currentChainConfig;
+  public getCurrentChain(): CustomChainConfig {
+    return this.currentChain;
   }
 
   public getPlugin(name: string): IPlugin | null {
@@ -260,7 +258,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // add injected wallets if multi injected provider discovery is enabled
     if (this.multiInjectedProviderDiscovery) {
-      const chainNamespaces = new Set(this.coreOptions.chainConfigs.map((chainConfig) => chainConfig.chainNamespace));
+      const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
         const { getSolanaInjectedConnectors } = await import("@/core/default-solana-adapter");
         connectorFns.push(...getSolanaInjectedConnectors());
@@ -366,11 +364,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.cachedConnector = walletName;
   }
 
-  private setCurrentChainConfig(chainId: string) {
-    if (chainId === this.currentChainConfig.chainId) return;
-    const newChainConfig = this.coreOptions.chainConfigs.find((chainConfig) => chainConfig.chainId === chainId);
-    if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
-    this.currentChainConfig = newChainConfig;
+  private setCurrentChain(chainId: string) {
+    if (chainId === this.currentChain.chainId) return;
+    const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
+    if (!newChain) throw WalletInitializationError.invalidParams("Invalid chainId");
+    this.currentChain = newChain;
     this.cacheCurrentChain(chainId);
   }
 

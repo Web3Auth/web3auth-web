@@ -133,7 +133,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           clientId,
           web3AuthNetwork,
           accountAbstractionProvider,
-          chainConfigs: [currentChainConfig],
+          chains: [currentChainConfig],
           uiConfig: {
             uxMode: "redirect",
             appName: "W3A Heroes",

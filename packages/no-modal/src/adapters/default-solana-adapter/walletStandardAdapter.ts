@@ -67,7 +67,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     this.injectedProvider = new WalletStandardProvider({ config: { chainConfig } });
@@ -95,7 +95,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   async connect({ chainId }: { chainId: string }): Promise<IProvider> {
     try {
       super.checkConnectionRequirements();
-      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       this.status = CONNECTOR_STATUS.CONNECTING;

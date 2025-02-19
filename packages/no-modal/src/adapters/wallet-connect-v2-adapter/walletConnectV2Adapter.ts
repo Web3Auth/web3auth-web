@@ -98,7 +98,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
@@ -143,7 +143,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
@@ -206,7 +206,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     const { chainId } = this.provider;
-    const currentChainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     const { chainNamespace } = currentChainConfig;

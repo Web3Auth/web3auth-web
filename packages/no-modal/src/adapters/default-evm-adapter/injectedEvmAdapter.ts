@@ -57,7 +57,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, this.name);
@@ -75,7 +75,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     this.status = CONNECTOR_STATUS.CONNECTING;

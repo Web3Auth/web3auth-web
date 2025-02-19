@@ -64,7 +64,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(chainConfig.chainId, 16)] });
@@ -87,7 +87,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.COINBASE });
     try {
-      const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });

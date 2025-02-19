@@ -91,7 +91,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
 
     super.checkInitializationRequirements({ chainConfig });
     if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
@@ -246,7 +246,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     // TODO: handle when chainIds are the same
     // TODO: need to handle switching to a different chain namespace
 
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === currentChainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === currentChainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     const { chainNamespace } = chainConfig;
 
@@ -284,7 +284,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private async connectWithProvider(params: Partial<AuthLoginParams> & { chainId: string }): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const chainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === params.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     const { chainNamespace } = chainConfig;
 

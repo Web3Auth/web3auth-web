@@ -33,7 +33,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       }
 
       const { chainId } = this.provider;
-      const currentChainConfig = this.coreOptions.chainConfigs.find((x) => x.chainId === chainId);
+      const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
       if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
       const { chainNamespace } = currentChainConfig;
       const payload = {

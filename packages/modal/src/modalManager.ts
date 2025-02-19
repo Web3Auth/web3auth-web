@@ -88,7 +88,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       connectorListener: this,
-      chainNamespace: this.currentChainConfig.chainNamespace,
+      chainNamespace: this.currentChain.chainNamespace,
       walletRegistry,
     });
     this.subscribeToLoginModalEvents();
@@ -206,7 +206,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // external wallets are initialized on INIT_EXTERNAL_WALLET event.
         this.subscribeToConnectorEvents(connector);
         if (connector.status === CONNECTOR_STATUS.NOT_READY)
-          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChainConfig.chainId });
+          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId });
         // note: not adding cachedWallet to modal if it is external wallet.
         // adding it later if no in-app wallets are available.
         if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
@@ -217,7 +217,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
 
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChainConfig });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChain });
     if (typeof keyExportEnabled === "boolean") {
       // dont know if we need to do this.
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
@@ -283,7 +283,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         }
         if (connector.status === CONNECTOR_STATUS.NOT_READY) {
           await connector
-            .init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChainConfig.chainId })
+            .init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId })
             .then<undefined>(() => {
               const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
               connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
@@ -350,7 +350,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
           // refreshing session for wallet connect whenever modal is opened.
           try {
-            connector.connect({ chainId: this.currentChainConfig.chainId });
+            connector.connect({ chainId: this.currentChain.chainId });
           } catch (error) {
             log.error(`Error while disconnecting to wallet connect in core`, error);
           }

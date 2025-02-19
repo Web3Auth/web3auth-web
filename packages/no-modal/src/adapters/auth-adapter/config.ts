@@ -11,7 +11,7 @@ export const getAuthDefaultOptions = (): AuthConnectorOptions => {
     },
     loginSettings: {},
     coreOptions: {
-      chainConfigs: [],
+      chains: [],
       clientId: "",
     },
   };
