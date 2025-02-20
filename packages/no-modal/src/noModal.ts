@@ -8,7 +8,6 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   CONNECTOR_STATUS_TYPE,
-  ConnectorFn,
   CustomChainConfig,
   fetchProjectConfig,
   getChainConfig,
@@ -115,8 +114,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(): Promise<void> {
+    // setup common JRPC provider
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChain });
 
+    // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
       projectConfig = await fetchProjectConfig(
@@ -129,18 +130,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    const connectorFns = await this.loadDefaultConnectors({ projectConfig });
+    // load and initialize connectors
+    const connectors = await this.loadDefaultConnectors({ projectConfig });
     await Promise.all(
-      connectorFns.map(async (connectorFn) => {
-        const connector = connectorFn({ projectConfig, coreOptions: this.coreOptions });
-        if (this.connectors[connector.name]) return;
-        this.connectors[connector.name] = connector;
+      connectors.map(async (connector) => {
         this.subscribeToConnectorEvents(connector);
-        return connector
+        await connector
           .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChain.chainId })
           .catch((e) => log.error(e, connector.name));
       })
     );
+
+    // emit connectorready event
     if (this.status === CONNECTOR_STATUS.NOT_READY) {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY);
@@ -248,7 +249,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected async loadDefaultConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<ConnectorFn[]> {
+  protected async loadDefaultConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<IConnector<unknown>[]> {
     const connectorFns = this.coreOptions.connectors || [];
 
     // always add auth connector
@@ -273,7 +274,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorFns.push(walletConnectV2Connector());
       }
     }
-    return connectorFns;
+
+    const connectors = connectorFns.map((connectorFn) => {
+      const connector = connectorFn({ projectConfig, coreOptions: this.coreOptions });
+      // skip if connector already exists
+      if (this.connectors[connector.name]) return null;
+      this.connectors[connector.name] = connector;
+      return connector;
+    });
+    return connectors.filter((connector) => connector !== null);
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {

@@ -80,13 +80,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
     }
 
-    // load default connectors: auth, injected wallets
-    const connectorFns = await this.loadDefaultConnectors({ projectConfig });
-    connectorFns.map(async (connectorFn) => {
-      const connector = connectorFn({ projectConfig, coreOptions: this.coreOptions });
-      if (this.connectors[connector.name]) return;
-      this.connectors[connector.name] = connector;
-    });
+    // load more connectors: auth, injected wallets
+    await this.loadDefaultConnectors({ projectConfig });
 
     // initialize connectors
     await this.initConnectors(projectConfig, params);
@@ -203,7 +198,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName] = connectorConfig as ModalConfig;
 
       // check if connector is configured/added by user and exist in connectors map.
-      const connector = this.connectors[connectorName];
+      const connector = this.getConnector(connectorName);
       log.debug("connector config", connectorName, this.modalConfig.connectors?.[connectorName].showOnModal, connector);
 
       // if connector is not custom configured then check if it is available in default connectors.
@@ -259,7 +254,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const hasExternalConnectors = connectorNames.some((connectorName) => {
       // if wallet connect connector is available but hideWalletDiscovery is true then don't consider it as external wallet
       if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
-      return this.connectors[connectorName]?.type === CONNECTOR_CATEGORY.EXTERNAL && this.modalConfig.connectors?.[connectorName].showOnModal;
+      return this.getConnector(connectorName)?.type === CONNECTOR_CATEGORY.EXTERNAL && this.modalConfig.connectors?.[connectorName].showOnModal;
     });
     return { hasInAppConnectors, hasExternalConnectors };
   }
@@ -269,7 +264,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       connectorNames.map(async (connectorName) => {
         if (!connectorName) return;
         try {
-          const connector = this.connectors[connectorName];
+          const connector = this.getConnector(connectorName);
           // only initialize a external connectors here if it is a cached connector.
           if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) {
             return;
@@ -310,7 +305,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const connectorsConfig: Record<string, BaseConnectorConfig> = {};
     // we do it like this because we don't want one slow connector to delay the load of the entire external wallet section.
     Object.keys(this.connectors).forEach(async (connectorName) => {
-      const connector = this.connectors[connectorName];
+      const connector = this.getConnector(connectorName);
       if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
         log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
         this.subscribeToConnectorEvents(connector);
@@ -359,7 +354,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const connector = this.connectors[WALLET_CONNECTORS.WALLET_CONNECT_V2];
+      const connector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
       if (connector) {
         const walletConnectStatus = connector?.status;
         log.debug("trying refreshing wc session", visibility, walletConnectStatus);
