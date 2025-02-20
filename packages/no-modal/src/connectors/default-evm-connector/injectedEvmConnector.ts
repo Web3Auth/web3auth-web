@@ -1,3 +1,5 @@
+import { type EIP6963ProviderDetail } from "mipd";
+
 import {
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -16,6 +18,7 @@ import {
   CustomChainConfig,
   IProvider,
   log,
+  normalizeWalletName,
   UserInfo,
   WalletLoginError,
   Web3AuthError,
@@ -169,12 +172,11 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   }
 }
 
-export const injectedEvmConnector = (params: { name: string; provider: IProvider }): ConnectorFn => {
-  const { name, provider } = params;
+export const injectedEvmConnector = (providerDetail: EIP6963ProviderDetail): ConnectorFn => {
   return ({ coreOptions }: ConnectorParams) => {
     return new InjectedEvmConnector({
-      name,
-      provider,
+      name: normalizeWalletName(providerDetail.info.name),
+      provider: providerDetail.provider as IProvider,
       coreOptions,
     });
   };

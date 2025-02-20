@@ -1,6 +1,6 @@
-import { createStore as createMipd } from "mipd";
+import { createStore as createMipd, EIP6963ProviderDetail } from "mipd";
 
-import { ConnectorFn, IProvider, normalizeWalletName } from "@/core/base";
+import { ConnectorFn } from "@/core/base";
 
 import { injectedEvmConnector } from "./injectedEvmConnector";
 
@@ -9,11 +9,7 @@ export const getEvmInjectedConnectors = (): ConnectorFn[] => {
   const mipd = createMipd();
   // We assume that all extensions have emitted by here.
   // TODO: Ideally, we must use reactive listening. We will do that with v9
-  const injectedProviders = mipd.getProviders().map((providerDetail) => {
-    return injectedEvmConnector({ name: normalizeWalletName(providerDetail.info.name), provider: providerDetail.provider as IProvider });
-  });
-
-  return injectedProviders;
+  return mipd.getProviders().map((providerDetail: EIP6963ProviderDetail) => injectedEvmConnector(providerDetail));
 };
 
-export { injectedEvmConnector };
+export { createMipd, injectedEvmConnector };

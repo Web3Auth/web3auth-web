@@ -1,4 +1,5 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import { createStore, StoreApi } from "zustand/vanilla";
 
 import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
 import { authConnector } from "@/core/auth-connector";
@@ -50,11 +51,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public currentChain: CustomChainConfig;
 
-  protected connectors: Record<string, IConnector<unknown>> = {};
-
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
   protected multiInjectedProviderDiscovery: boolean = true;
+
+  // protected connectors: Record<string, IConnector<unknown>> = {};
+
+  protected connectorStore: StoreApi<IConnector<unknown>[]> = createStore(() => [] as IConnector<unknown>[]);
 
   private plugins: Record<string, IPlugin> = {};
 
@@ -99,7 +102,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get connected(): boolean {
-    return Boolean(this.connectedConnectorName);
+    return Boolean(this.connectedConnector);
   }
 
   get provider(): IProvider | null {
@@ -107,6 +110,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       return this.commonJRPCProvider;
     }
     return null;
+  }
+
+  get connectors(): IConnector<unknown>[] {
+    return this.connectorStore.getState();
+  }
+
+  get connectedConnector(): IConnector<unknown> | null {
+    return this.connectors.find((connector) => connector.name === this.connectedConnectorName) || null;
   }
 
   set provider(_: IProvider | null) {
@@ -131,17 +142,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // load and initialize connectors
-    const connectors = await this.loadDefaultConnectors({ projectConfig });
-    await Promise.all(
-      connectors.map(async (connector) => {
-        this.subscribeToConnectorEvents(connector);
-        await connector
-          .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChain.chainId })
-          .catch((e) => log.error(e, connector.name));
-      })
-    );
+    const connectors = await this.loadConnectors({ projectConfig });
+    await Promise.all(connectors.map(this.setupConnector));
 
-    // emit connectorready event
+    // emit connector ready event
     if (this.status === CONNECTOR_STATUS.NOT_READY) {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY);
@@ -149,7 +153,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null {
-    return this.connectors[connectorName] || null;
+    return this.connectors.find((connector) => connector.name === connectorName) || null;
   }
 
   public clearCache() {
@@ -159,8 +163,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnectorName) {
-      await this.connectors[this.connectedConnectorName].switchChain(params);
+    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
+      await this.connectedConnector.switchChain(params);
       this.setCurrentChain(params.chainId);
       return;
     }
@@ -177,7 +181,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @param connectorName - Key of the wallet connector to use.
    */
   async connectTo<T>(connectorName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null> {
-    if (!this.connectors[connectorName] || !this.commonJRPCProvider)
+    if (!this.getConnector(connectorName) || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, (_) => {
@@ -187,43 +191,38 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         reject(err);
       });
       const finalLoginParams = { ...loginParams, chainId: this.currentChain.chainId };
-      this.connectors[connectorName]?.connect(finalLoginParams);
+      this.getConnector(connectorName)?.connect(finalLoginParams);
     });
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnectorName)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    await this.connectors[this.connectedConnectorName]?.disconnect(options);
+    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    await this.connectedConnector.disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    log.debug("Getting user info", this.status, this.connectedConnectorName);
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnectorName)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.connectors[this.connectedConnectorName]?.getUserInfo();
+    log.debug("Getting user info", this.status, this.connectedConnector?.name);
+    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.connectedConnector.getUserInfo();
   }
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnectorName)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedConnectorName !== WALLET_CONNECTORS.AUTH)
+    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
-    return this.connectors[this.connectedConnectorName]?.enableMFA(loginParams);
+    return this.connectedConnector.enableMFA(loginParams);
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnectorName)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedConnectorName !== WALLET_CONNECTORS.AUTH)
+    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
-    return this.connectors[this.connectedConnectorName]?.manageMFA(loginParams);
+    return this.connectedConnector.manageMFA(loginParams);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnectorName)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.connectors[this.connectedConnectorName]?.authenticateUser();
+    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    return this.connectedConnector.authenticateUser();
   }
 
   public addPlugin(plugin: IPlugin): IWeb3Auth {
@@ -234,9 +233,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       );
 
     this.plugins[plugin.name] = plugin;
-    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnectorName) {
+    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
       // web3auth is already connected. can initialize plugins
-      this.connectToPlugins({ connector: this.connectedConnectorName });
+      this.connectToPlugins({ connector: this.connectedConnector.name });
     }
     return this;
   }
@@ -249,22 +248,48 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected async loadDefaultConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<IConnector<unknown>[]> {
+  protected async setupConnector(connector: IConnector<unknown>): Promise<void> {
+    this.subscribeToConnectorEvents(connector);
+    await connector
+      .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChain.chainId })
+      .catch((e) => log.error(e, connector.name));
+  }
+
+  protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<IConnector<unknown>[]> {
     const connectorFns = this.coreOptions.connectors || [];
 
     // always add auth connector
     connectorFns.push(authConnector());
 
+    const config = { projectConfig, coreOptions: this.coreOptions };
+
     // add injected wallets if multi injected provider discovery is enabled
     if (this.multiInjectedProviderDiscovery) {
       const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
-        const { getSolanaInjectedConnectors } = await import("@/core/default-solana-connector");
-        connectorFns.push(...getSolanaInjectedConnectors());
+        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/default-solana-connector");
+        const solanaMipd = createSolanaMipd();
+        // subscribe to new injected connectors
+        solanaMipd.on("register", async (...wallets) => {
+          const newConnectors = wallets.filter(hasSolanaWalletStandardFeatures).map((wallet) => walletStandardConnector(wallet)(config));
+          this.setConnectors(newConnectors);
+        });
+        connectorFns.push(
+          ...solanaMipd
+            .get()
+            .filter((wallet) => hasSolanaWalletStandardFeatures(wallet))
+            .map(walletStandardConnector)
+        );
       }
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-        const { getEvmInjectedConnectors } = await import("@/core/default-evm-connector");
-        connectorFns.push(...getEvmInjectedConnectors());
+        const { createMipd, injectedEvmConnector } = await import("@/core/default-evm-connector");
+        const evmMipd = createMipd();
+        // subscribe to new injected connectors
+        evmMipd.subscribe((providerDetails) => {
+          const newConnectors = providerDetails.map((providerDetail) => injectedEvmConnector(providerDetail)(config));
+          this.setConnectors(newConnectors);
+        });
+        connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
 
       // add wallet connect v2 connector if enabled
@@ -275,14 +300,21 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     }
 
-    const connectors = connectorFns.map((connectorFn) => {
-      const connector = connectorFn({ projectConfig, coreOptions: this.coreOptions });
-      // skip if connector already exists
-      if (this.connectors[connector.name]) return null;
-      this.connectors[connector.name] = connector;
-      return connector;
-    });
-    return connectors.filter((connector) => connector !== null);
+    const connectors = connectorFns.map((connectorFn) => connectorFn({ projectConfig, coreOptions: this.coreOptions }));
+    this.setConnectors(connectors);
+    return connectors;
+  }
+
+  protected setConnectors(connectors: IConnector<unknown>[]): void {
+    const connectorSet = new Set(this.connectors.map((connector) => connector.name));
+    const newConnectors = connectors
+      .map((connector) => {
+        if (connectorSet.has(connector.name)) return null;
+        connectorSet.add(connector.name);
+        return connector;
+      })
+      .filter((connector) => connector !== null);
+    this.connectorStore.setState((state) => ({ ...state, ...newConnectors }), true);
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {

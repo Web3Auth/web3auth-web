@@ -80,7 +80,8 @@
     "ripple-keypairs": "^1.3.1",
     "ts-custom-error": "^3.3.1",
     "viem": "^2.22.5",
-    "xrpl": "^2.14.0"
+    "xrpl": "^2.14.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@toruslabs/ethereum-controllers": "^7.1.3",

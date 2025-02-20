@@ -18,6 +18,7 @@ import {
   ConnectorParams,
   IProvider,
   log,
+  normalizeWalletName,
   UserInfo,
   WalletLoginError,
   Web3AuthError,
@@ -157,11 +158,10 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 }
 
-export const walletStandardConnector = (params: { name: string; wallet: Wallet }): ConnectorFn => {
-  const { name, wallet } = params;
+export const walletStandardConnector = (wallet: Wallet): ConnectorFn => {
   return ({ coreOptions }: ConnectorParams) => {
     return new WalletStandardConnector({
-      name,
+      name: normalizeWalletName(wallet.name),
       wallet,
       coreOptions,
     });
