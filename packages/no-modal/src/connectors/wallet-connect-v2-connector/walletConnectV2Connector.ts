@@ -401,14 +401,7 @@ export const walletConnectV2Connector = (params?: { projectId: string }): Connec
 
     if (projectConfig) {
       const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-      if (walletConnectEnabled === false) {
-        throw WalletInitializationError.invalidParams("Please enable wallet connect v2 addon on dashboard");
-      }
-      if (!walletConnectProjectId)
-        throw WalletInitializationError.invalidParams("Invalid wallet connect project id. Please configure it on the dashboard");
-      projectId = walletConnectProjectId;
-    } else if (!projectId) {
-      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 connector");
+      if (walletConnectEnabled && walletConnectProjectId) projectId = walletConnectProjectId;
     }
 
     return new WalletConnectV2Connector({

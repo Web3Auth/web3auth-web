@@ -23,7 +23,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
-    const { chainId } = this.provider;
+    const chainId = await this.provider.request<never, string>({ method: "solana_chainId" });
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
     const { chainNamespace } = currentChainConfig;
