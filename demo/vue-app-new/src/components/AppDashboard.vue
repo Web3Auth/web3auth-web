@@ -190,7 +190,16 @@ const onGetBalance = async () => {
 const onSwitchChain = async () => {
   log.info("switching chain");
   try {
-    await switchChain({ chainId: "0x89" });
+    // await switchChain({ chainId: "0x89" });
+    await addAndSwitchChain({
+      chainId: "0xaa36a7",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      rpcTarget: "https://1rpc.io/sepolia	",
+      blockExplorerUrl: "https://sepolia.etherscan.io",
+      displayName: "Sepolia",
+      ticker: "ETH",
+      tickerName: "Ethereum",
+    });
     printToConsole("switchedChain");
   } catch (error) {
     printToConsole("switchedChain error", error);
@@ -315,6 +324,7 @@ const onSignPersonalMsg = async () => {
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}
           </Button>
