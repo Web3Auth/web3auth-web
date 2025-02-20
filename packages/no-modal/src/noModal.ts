@@ -1,5 +1,5 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
-import { createStore, StoreApi } from "zustand/vanilla";
+import { createStore } from "zustand/vanilla";
 
 import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
 import { authConnector } from "@/core/auth-connector";
@@ -55,9 +55,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected multiInjectedProviderDiscovery: boolean = true;
 
-  // protected connectors: Record<string, IConnector<unknown>> = {};
-
-  protected connectorStore: StoreApi<IConnector<unknown>[]> = createStore(() => [] as IConnector<unknown>[]);
+  protected connectorStore = createStore<{ connectors: IConnector<unknown>[]; setConnectors: (connectors: IConnector<unknown>[]) => void }>(
+    (set) => ({
+      connectors: [] as IConnector<unknown>[],
+      setConnectors: (connectors: IConnector<unknown>[]) => set({ connectors }),
+    })
+  );
 
   private plugins: Record<string, IPlugin> = {};
 
@@ -113,7 +116,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get connectors(): IConnector<unknown>[] {
-    return this.connectorStore.getState();
+    return this.connectorStore.getState().connectors;
   }
 
   get connectedConnector(): IConnector<unknown> | null {
@@ -141,15 +144,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    // load and initialize connectors
-    const connectors = await this.loadConnectors({ projectConfig });
-    await Promise.all(connectors.map(this.setupConnector));
+    // initialize connectors
+    this.connectorStore.subscribe(async () => {
+      await Promise.all(this.connectors.map(this.setupConnector));
 
-    // emit connector ready event
-    if (this.status === CONNECTOR_STATUS.NOT_READY) {
-      this.status = CONNECTOR_STATUS.READY;
-      this.emit(CONNECTOR_EVENTS.READY);
-    }
+      // emit connector ready event
+      if (this.status === CONNECTOR_STATUS.NOT_READY) {
+        this.status = CONNECTOR_STATUS.READY;
+        this.emit(CONNECTOR_EVENTS.READY);
+      }
+    });
+    await this.loadConnectors({ projectConfig });
   }
 
   public getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null {
@@ -255,12 +260,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       .catch((e) => log.error(e, connector.name));
   }
 
-  protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }): Promise<IConnector<unknown>[]> {
-    const connectorFns = this.coreOptions.connectors || [];
-
+  protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }) {
     // always add auth connector
-    connectorFns.push(authConnector());
-
+    const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = { projectConfig, coreOptions: this.coreOptions };
 
     // add injected wallets if multi injected provider discovery is enabled
@@ -293,16 +295,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       // add wallet connect v2 connector if enabled
-      const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
-      if (walletConnectEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
+      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+      if (
+        walletConnectEnabled &&
+        walletConnectProjectId &&
+        (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))
+      ) {
         const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
         connectorFns.push(walletConnectV2Connector());
       }
     }
 
-    const connectors = connectorFns.map((connectorFn) => connectorFn({ projectConfig, coreOptions: this.coreOptions }));
+    const connectors = connectorFns.map((connectorFn) => connectorFn(config));
     this.setConnectors(connectors);
-    return connectors;
   }
 
   protected setConnectors(connectors: IConnector<unknown>[]): void {
@@ -314,7 +319,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return connector;
       })
       .filter((connector) => connector !== null);
-    this.connectorStore.setState((state) => ({ ...state, ...newConnectors }), true);
+    this.connectorStore.getState().setConnectors(newConnectors);
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {

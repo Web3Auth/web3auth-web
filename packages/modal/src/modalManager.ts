@@ -80,17 +80,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
     }
 
-    // load more connectors: auth, injected wallets
-    await this.loadDefaultConnectors({ projectConfig });
-
     // initialize connectors
-    await this.initConnectors(projectConfig, params);
-
-    // emit ready event if connector is ready
-    if (this.status === CONNECTOR_STATUS.NOT_READY) {
-      this.status = CONNECTOR_STATUS.READY;
-      this.emit(CONNECTOR_EVENTS.READY);
-    }
+    this.connectorStore.subscribe(async () => {
+      await this.initConnectors(projectConfig, params);
+    });
+    await this.loadConnectors({ projectConfig });
   }
 
   public async connect(): Promise<IProvider | null> {
@@ -154,6 +148,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // if no in app wallet is available then initialize external wallets in modal
       await this.initExternalConnectors(false, { showExternalWalletsOnly: true });
     }
+
+    // emit ready event if connector is ready
+    if (this.status === CONNECTOR_STATUS.NOT_READY) {
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.READY);
+    }
   }
 
   private async filterConnectors(params: ModalConfigParams, projectConfig: PROJECT_CONFIG_RESPONSE): Promise<string[]> {
@@ -182,7 +182,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // merge default connectors with the custom configured connectors.
-    const allConnectorNames = [...new Set([...Object.keys(this.modalConfig.connectors || {}), ...Object.keys(this.connectors)])];
+    const allConnectorNames = [
+      ...new Set([...Object.keys(this.modalConfig.connectors || {}), ...this.connectors.map((connector) => connector.name)]),
+    ];
     const connectorConfigurationPromises = allConnectorNames.map(async (connectorName) => {
       // start with the default config of connector.
       let connectorConfig = this.modalConfig.connectors?.[connectorName] || {
@@ -238,7 +240,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     params: ModalConfigParams
   ): Promise<{ hasInAppConnectors: boolean; hasExternalConnectors: boolean }> {
     // currently all default in app and external wallets can be hidden or shown based on config.
-    const hasInAppConnectors = Object.values(this.connectors).some((connector) => {
+    const hasInAppConnectors = this.connectors.some((connector) => {
       if (connector.type !== CONNECTOR_CATEGORY.IN_APP) return false;
       if (this.modalConfig.connectors?.[connector.name]?.showOnModal !== true) return false;
       if (!this.modalConfig.connectors?.[connector.name]?.loginMethods) return true;
@@ -279,19 +281,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // adding it later if no in-app wallets are available.
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
             log.info("connectorInitResults", connectorName);
-            this.loginModal.addSocialLogins(
+            const loginMethods = getConnectorSocialLogins(
               connectorName,
-              getConnectorSocialLogins(
-                connectorName,
-                (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName]?.loginMethods
-              ),
-              this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS,
-              {
-                ...this.options.uiConfig,
-                loginGridCol: this.options.uiConfig?.loginGridCol || 3,
-                primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
-              }
+              (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName]?.loginMethods
             );
+            this.loginModal.addSocialLogins(connectorName, loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
+              ...this.options.uiConfig,
+              loginGridCol: this.options.uiConfig?.loginGridCol || 3,
+              primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
+            });
           }
         } catch (error) {
           log.error(error, "error while initializing connector ", connectorName);
@@ -304,8 +302,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (externalWalletsInitialized) return;
     const connectorsConfig: Record<string, BaseConnectorConfig> = {};
     // we do it like this because we don't want one slow connector to delay the load of the entire external wallet section.
-    Object.keys(this.connectors).forEach(async (connectorName) => {
-      const connector = this.getConnector(connectorName);
+    this.connectors.forEach(async (connector) => {
+      const connectorName = connector.name;
       if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
         log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
         this.subscribeToConnectorEvents(connector);
