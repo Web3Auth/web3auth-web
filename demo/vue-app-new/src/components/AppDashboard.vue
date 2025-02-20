@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 
@@ -31,9 +31,9 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
+const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
 const { isPluginConnected, plugin } = useWalletServicesPlugin();
-const currentChainId = ref<string | undefined>(web3Auth.value?.coreOptions.chainConfig?.chainId);
+const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
 const connection = computed(() => {
@@ -72,7 +72,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return (
         (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
         formData.walletPlugin.enable &&
-        web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
+        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
       );
 
     case "nftCheckoutServices":
@@ -195,23 +195,6 @@ const onSwitchChain = async () => {
   }
 };
 
-const onAddChain = async () => {
-  try {
-    await addAndSwitchChain({
-      chainId: "0xaa36a7",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://1rpc.io/sepolia	",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      displayName: "Sepolia",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    });
-    printToConsole("added chain");
-  } catch (error) {
-    printToConsole("add chain error", error);
-  }
-};
-
 const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
@@ -326,7 +309,6 @@ const onSignPersonalMsg = async () => {
         </Card>
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}

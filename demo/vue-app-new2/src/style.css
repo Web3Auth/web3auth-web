@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply h-dvh min-h-dvh w-full flex flex-col;
+}
+ #app {
+  @apply h-full w-full;
+ }

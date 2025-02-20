@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/modal";
+import { CONNECTOR_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
@@ -30,15 +30,10 @@ const adapterOptions = computed(() =>
   formData.chainNamespace === CHAIN_NAMESPACES.EIP155
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        // { name: "auth-adapter", value: "auth" },
-        { name: "torus-evm-adapter", value: "torus-evm" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-evm" },
       ]
     : [
-        { name: "torus-solana-adapter", value: "torus-solana" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-solana" },
       ]
 );
 
@@ -84,7 +79,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
 const onChainNamespaceChange = (value: string) => {
   log.info("onChainNamespaceChange", value);
   formData.chain = chainConfigs[value as ChainNamespaceType][0].chainId;
-  formData.adapters = [];
+  formData.connectors = [];
 };
 </script>
 
@@ -94,7 +89,7 @@ const onChainNamespaceChange = (value: string) => {
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === ADAPTER_STATUS.READY }]">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === CONNECTOR_STATUS.READY }]">
           {{ status }}
         </Tag>
         &nbsp;
@@ -148,7 +143,7 @@ const onChainNamespaceChange = (value: string) => {
           :options="chainOptions"
         />
         <Select
-          v-model="formData.adapters"
+          v-model="formData.connectors"
           data-testid="selectAdapters"
           :label="$t('app.adapters')"
           :aria-label="$t('app.adapters')"
@@ -164,6 +159,15 @@ const onChainNamespaceChange = (value: string) => {
           :size="'small'"
           :label-disabled="$t('app.showWalletDiscovery')"
           :label-enabled="$t('app.showWalletDiscovery')"
+          class="mb-2"
+        />
+        <Toggle
+          v-model="formData.multiInjectedProviderDiscovery"
+          data-testid="multiInjectedProviderDiscovery"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.multiInjectedProviderDiscovery')"
+          :label-enabled="$t('app.multiInjectedProviderDiscovery')"
           class="mb-2"
         />
       </Card>
@@ -352,22 +356,6 @@ const onChainNamespaceChange = (value: string) => {
           :label-disabled="$t('app.walletPlugin.title')"
           :label-enabled="$t('app.walletPlugin.title')"
           class="mb-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoLight"
-          :label="$t('app.walletPlugin.logoLight')"
-          :disabled="isDisabled('walletServicePlugin')"
-          :aria-label="$t('app.walletPlugin.logoLight')"
-          :placeholder="$t('app.walletPlugin.logoLight')"
-          class="sm:col-span-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoDark"
-          :disabled="isDisabled('walletServicePlugin')"
-          :label="$t('app.walletPlugin.logoDark')"
-          :aria-label="$t('app.walletPlugin.logoDark')"
-          :placeholder="$t('app.walletPlugin.logoDark')"
-          class="sm:col-span-2"
         />
         <Select
           v-model="formData.walletPlugin.confirmationStrategy"

@@ -19,6 +19,7 @@
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/auth": "^9.6.4",
     "@web3auth/modal": "file:../../packages/modal",
+    "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",
     "@web3auth/ws-embed": "^4.0.4",
     "bs58": "^6.0.0",

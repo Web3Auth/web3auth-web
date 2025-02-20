@@ -1,17 +1,17 @@
-import { CHAIN_NAMESPACES, EVM_ADAPTERS, SOLANA_ADAPTERS } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, EVM_CONNECTORS, SOLANA_CONNECTORS } from "@web3auth/no-modal";
 
-import { AdaptersModalConfig } from "./interface";
+import { ConnectorsModalConfig } from "./interface";
 
-export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
+export const defaultSolanaDappModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  adapters: {
-    [SOLANA_ADAPTERS.TORUS_SOLANA]: {
+  connectors: {
+    [SOLANA_CONNECTORS.TORUS_SOLANA]: {
       label: "Torus Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [SOLANA_ADAPTERS.AUTH]: {
+    [SOLANA_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
       showOnMobile: true,
@@ -20,22 +20,22 @@ export const defaultSolanaDappModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const defaultEvmDappModalConfig: AdaptersModalConfig = {
+export const defaultEvmDappModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  adapters: {
-    [EVM_ADAPTERS.TORUS_EVM]: {
+  connectors: {
+    [EVM_CONNECTORS.TORUS_EVM]: {
       label: "Torus Wallet",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [EVM_ADAPTERS.AUTH]: {
+    [EVM_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
       showOnMobile: true,
       showOnDesktop: true,
     },
-    [EVM_ADAPTERS.WALLET_CONNECT_V2]: {
+    [EVM_CONNECTORS.WALLET_CONNECT_V2]: {
       label: "Wallet Connect",
       showOnModal: true,
       showOnMobile: true,
@@ -44,10 +44,10 @@ export const defaultEvmDappModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
+export const defaultSolanaWalletModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  adapters: {
-    [SOLANA_ADAPTERS.AUTH]: {
+  connectors: {
+    [SOLANA_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
       showOnMobile: true,
@@ -56,10 +56,10 @@ export const defaultSolanaWalletModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
+export const defaultEvmWalletModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  adapters: {
-    [EVM_ADAPTERS.AUTH]: {
+  connectors: {
+    [EVM_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
       showOnMobile: true,
@@ -68,10 +68,10 @@ export const defaultEvmWalletModalConfig: AdaptersModalConfig = {
   },
 };
 
-export const defaultOtherModalConfig: AdaptersModalConfig = {
+export const defaultOtherModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.OTHER,
-  adapters: {
-    [EVM_ADAPTERS.AUTH]: {
+  connectors: {
+    [EVM_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
       showOnMobile: true,

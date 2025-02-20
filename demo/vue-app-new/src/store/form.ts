@@ -14,13 +14,12 @@ export const formDataStore = reactive<FormData>({
     config: initWhiteLabel,
   },
   loginProviders: [],
-  adapters: [],
+  connectors: [],
   showWalletDiscovery: true,
+  multiInjectedProviderDiscovery: true,
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,
-    logoLight: "",
-    logoDark: "",
     confirmationStrategy: "default",
   },
   nftCheckoutPlugin: {

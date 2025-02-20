@@ -16,10 +16,10 @@
       function showModal() {
         console.log("open");
         modal.open();
-        // testEventEmitter.emit("connecting", { adapter: "auth" })
+        // testEventEmitter.emit("connecting", { connector: "auth" })
         // testEventEmitter.emit("errored", { error: new Error("something went wrong") })
-        // testEventEmitter.emit("connected", { adapter: "wallet-connect-v1" })
-        // testEventEmitter.emit("disconnected", { adapter: "wallet-connect-v1" })
+        // testEventEmitter.emit("connected", { connector: "wallet-connect-v1" })
+        // testEventEmitter.emit("disconnected", { connector: "wallet-connect-v1" })
       }
       (async function init() {
         try {
@@ -64,7 +64,7 @@
             },
             { showExternalWalletsOnly: false }
           );
-          testEventEmitter.emit("adapter_data_updated", { adapterName: "wallet-connect-v1", data: { uri: "alslkslkalls" } });
+          testEventEmitter.emit("connector_data_updated", { connectorName: "wallet-connect-v1", data: { uri: "alslkslkalls" } });
           // showModal()
         } catch (error) {
           console.log("error in ui", error);

@@ -2,7 +2,7 @@ import { cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
 
-import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./adapter";
+import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
 import type { PROJECT_CONFIG_RESPONSE, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {

@@ -7,16 +7,14 @@ const config = generateWebpackConfig({
     // Base path
     '@/core/base': path.resolve(__dirname, 'src/base'),
       
-    // Adapter paths
-    '@/core/auth-adapter': path.resolve(__dirname, 'src/adapters/auth-adapter'),
-    '@/core/base-evm-adapter': path.resolve(__dirname, 'src/adapters/base-evm-adapter'),
-    '@/core/base-solana-adapter': path.resolve(__dirname, 'src/adapters/base-solana-adapter'),
-    '@/core/coinbase-adapter': path.resolve(__dirname, 'src/adapters/coinbase-adapter'),
-    '@/core/default-evm-adapter': path.resolve(__dirname, 'src/adapters/default-evm-adapter'),
-    '@/core/default-solana-adapter': path.resolve(__dirname, 'src/adapters/default-solana-adapter'),
-    '@/core/torus-evm-adapter': path.resolve(__dirname, 'src/adapters/torus-evm-adapter'),
-    '@/core/torus-solana-adapter': path.resolve(__dirname, 'src/adapters/torus-solana-adapter'),
-    '@/core/wallet-connect-v2-adapter': path.resolve(__dirname, 'src/adapters/wallet-connect-v2-adapter'),
+    // Connector paths
+    '@/core/auth-connector': path.resolve(__dirname, 'src/connectors/auth-connector'),
+    '@/core/base-evm-connector': path.resolve(__dirname, 'src/connectors/base-evm-connector'),
+    '@/core/base-solana-connector': path.resolve(__dirname, 'src/connectors/base-solana-connector'),
+    '@/core/coinbase-connector': path.resolve(__dirname, 'src/connectors/coinbase-connector'),
+    '@/core/default-evm-connector': path.resolve(__dirname, 'src/connectors/default-evm-connector'),
+    '@/core/default-solana-connector': path.resolve(__dirname, 'src/connectors/default-solana-connector'),
+    '@/core/wallet-connect-v2-connector': path.resolve(__dirname, 'src/connectors/wallet-connect-v2-connector'),
     
     // Plugin paths
     '@/core/nft-checkout-plugin': path.resolve(__dirname, 'src/plugins/nft-checkout-plugin'),
