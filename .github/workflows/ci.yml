@@ -43,7 +43,9 @@ jobs:
           npm install
           npm run build
         env:
-          VITE_SOLANA_MAINNET_RPC: ${{ secrets.VITE_SOLANA_MAINNET_RPC }}
+          VITE_APP_SOLANA_MAINNET_RPC: ${{ secrets.SOLANA_MAINNET_RPC }}
+          VITE_APP_SOLANA_TESTNET_RPC: ${{ secrets.SOLANA_TESTNET_RPC }}
+          VITE_APP_SOLANA_DEVNET_RPC: ${{ secrets.SOLANA_DEVNET_RPC }}
           VITE_APP_PIMLICO_API_KEY: ${{ secrets.PIMLICO_API_KEY }}
 
         # Copy the files from build folder to the S3 bucket

@@ -81,7 +81,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
+      rpcTarget: import.meta.env.VITE_APP_SOLANA_MAINNET_RPC,
       blockExplorerUrl: "https://explorer.solana.com",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x65",
