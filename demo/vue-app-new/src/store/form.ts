@@ -16,6 +16,7 @@ export const formDataStore = reactive<FormData>({
   loginProviders: [],
   connectors: [],
   showWalletDiscovery: true,
+  multiInjectedProviderDiscovery: true,
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,

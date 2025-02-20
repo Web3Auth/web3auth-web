@@ -189,6 +189,7 @@ export type FormData = {
   loginProviders: LOGIN_PROVIDER_TYPE[];
   connectors: string[];
   showWalletDiscovery: boolean;
+  multiInjectedProviderDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;

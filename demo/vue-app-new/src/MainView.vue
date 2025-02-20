@@ -142,6 +142,7 @@ const options = computed((): Web3AuthOptions => {
     // chainConfig,
     chains: [chainConfig],
     enableLogging: true,
+    multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesSettings,
   };
 });
@@ -194,6 +195,7 @@ onBeforeMount(() => {
         formData.chainNamespace = json.chainNamespace;
         formData.loginProviders = json.loginProviders;
         formData.showWalletDiscovery = json.showWalletDiscovery;
+        formData.multiInjectedProviderDiscovery = json.multiInjectedProviderDiscovery;
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
