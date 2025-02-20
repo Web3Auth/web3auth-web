@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 
-import { CONNECTOR_STATUS_TYPE, IProvider, UserAuthInfo } from "../adapter";
+import { CONNECTOR_STATUS_TYPE, IProvider, UserAuthInfo } from "../connector";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {

@@ -1,6 +1,7 @@
 import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
 
+import { CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS_TYPE,
@@ -12,8 +13,7 @@ import {
   UserAuthInfo,
   UserInfo,
   WEB3AUTH_NETWORK_TYPE,
-} from "../adapter";
-import { CustomChainConfig } from "../chain/IChainInterface";
+} from "../connector";
 import { type IPlugin } from "../plugin";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
