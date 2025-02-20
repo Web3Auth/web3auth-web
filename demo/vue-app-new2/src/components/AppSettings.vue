@@ -30,15 +30,11 @@ const adapterOptions = computed(() =>
   formData.chainNamespace === CHAIN_NAMESPACES.EIP155
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        // { name: "auth-adapter", value: "auth" },
-        { name: "torus-evm-adapter", value: "torus-evm" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-evm" },
       ]
     : [
         { name: "torus-solana-adapter", value: "torus-solana" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-solana" },
       ]
 );
 

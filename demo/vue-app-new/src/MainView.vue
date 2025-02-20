@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { AccountAbstractionProvider, ConnectorFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, getEvmInjectedConnectors, getSolanaInjectedConnectors, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { AccountAbstractionProvider, ConnectorFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -142,6 +142,7 @@ const options = computed((): Web3AuthOptions => {
     // chainConfig,
     chains: [chainConfig],
     enableLogging: true,
+    connectors: externalConnectors.value,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesSettings,
   };
@@ -174,10 +175,6 @@ const getExternalAdapterByName = (name: string): ConnectorFn[] => {
       return [coinbaseConnector()];
     case "wallet-connect-v2":
       return [walletConnectV2Connector({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
-    case "injected-evm":
-      return getEvmInjectedConnectors();
-    case "injected-solana":
-      return getSolanaInjectedConnectors();
     default:
       return [];
   }
@@ -242,7 +239,6 @@ const configs = computed<Web3AuthContextConfig>(() => {
   }
 
   return {
-    connectors: externalConnectors.value,
     web3AuthOptions: options.value,
     plugins,
     modalConfig: modalParams.value,

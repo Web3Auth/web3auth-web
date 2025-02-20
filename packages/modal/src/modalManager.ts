@@ -81,9 +81,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // initialize connectors
-    this.connectorStore.subscribe(async () => {
-      await this.initConnectors(projectConfig, params);
-    });
+    this.connectorStore.subscribe(() => this.initConnectors(projectConfig, params));
     await this.loadConnectors({ projectConfig });
   }
 
@@ -240,6 +238,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     params: ModalConfigParams
   ): Promise<{ hasInAppConnectors: boolean; hasExternalConnectors: boolean }> {
     // currently all default in app and external wallets can be hidden or shown based on config.
+    // check if in app connectors are available
     const hasInAppConnectors = this.connectors.some((connector) => {
       if (connector.type !== CONNECTOR_CATEGORY.IN_APP) return false;
       if (this.modalConfig.connectors?.[connector.name]?.showOnModal !== true) return false;
@@ -253,6 +252,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     log.debug(hasInAppConnectors, this.connectors, connectorNames, "hasInAppWallets");
 
+    // check if external connectors are available
     const hasExternalConnectors = connectorNames.some((connectorName) => {
       // if wallet connect connector is available but hideWalletDiscovery is true then don't consider it as external wallet
       if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
@@ -274,9 +274,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
           // external wallets are initialized on INIT_EXTERNAL_WALLET event.
-          this.subscribeToConnectorEvents(connector); // TODO: should we subscribe if connector is already initialized?
-          if (connector.status === CONNECTOR_STATUS.NOT_READY)
-            await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId });
+          if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
+          this.subscribeToConnectorEvents(connector);
+          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId });
           // note: not adding cachedWallet to modal if it is external wallet.
           // adding it later if no in-app wallets are available.
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
