@@ -53,8 +53,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
-  protected multiInjectedProviderDiscovery: boolean = true;
-
   protected connectorStore = createStore<{ connectors: IConnector<unknown>[]; setConnectors: (connectors: IConnector<unknown>[]) => void }>(
     (set) => ({
       connectors: [] as IConnector<unknown>[],
@@ -92,16 +90,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         ...chain,
       })),
     };
-    this.multiInjectedProviderDiscovery = options.multiInjectedProviderDiscovery ?? true;
 
     // handle cached current chain
     this.cachedCurrentChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
     // use corrected chains from coreOptions
     const cachedChain = this.cachedCurrentChainId ? this.coreOptions.chains.find((chain) => chain.chainId === this.cachedCurrentChainId) : null;
     this.currentChain = cachedChain || this.coreOptions.chains[0]; // use first chain in list as default chain config
-
-    // TODO: do we need this ?
-    this.subscribeToConnectorEvents = this.subscribeToConnectorEvents.bind(this);
   }
 
   get connected(): boolean {
@@ -265,9 +259,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = { projectConfig, coreOptions: this.coreOptions };
 
-    // add injected wallets if multi injected provider discovery is enabled
-    if (this.multiInjectedProviderDiscovery) {
+    // add injected connectors
+    const isMipdEnabled = this.coreOptions.multiInjectedProviderDiscovery ?? true;
+    if (isMipdEnabled) {
       const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
+      // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
         const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/default-solana-connector");
         const solanaMipd = createSolanaMipd();
@@ -283,6 +279,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
             .map(walletStandardConnector)
         );
       }
+      // EVM chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
         const { createMipd, injectedEvmConnector } = await import("@/core/default-evm-connector");
         const evmMipd = createMipd();
@@ -294,11 +291,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
 
-      // add wallet connect v2 connector if enabled
-      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
+      // add WalletConnectV2 connector if enabled
       if (
-        walletConnectEnabled &&
-        walletConnectProjectId &&
+        projectConfig.wallet_connect_enabled &&
+        projectConfig.wallet_connect_project_id &&
         (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))
       ) {
         const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
