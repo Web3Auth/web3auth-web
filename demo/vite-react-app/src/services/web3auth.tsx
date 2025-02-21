@@ -1,4 +1,4 @@
-import { AccountAbstractionProvider, CONNECTOR_EVENTS, IProvider, PLUGIN_EVENTS, SafeSmartAccount, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE } from "@web3auth/modal";
+import { CONNECTOR_EVENTS, IProvider, PLUGIN_EVENTS, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE, SMART_ACCOUNT } from "@web3auth/modal";
 import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
@@ -113,18 +113,6 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
-        const accountAbstractionProvider = new AccountAbstractionProvider({
-          config: {
-            chainConfig: currentChainConfig,
-            bundlerConfig: {
-              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
-            },
-            smartAccountInit: new SafeSmartAccount(),
-            paymasterConfig: {
-              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
-            },
-          },
-        });
         setIsLoading(true);
         const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
 
@@ -132,7 +120,15 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           // get your client id from https://dashboard.web3auth.io
           clientId,
           web3AuthNetwork,
-          accountAbstractionProvider,
+          accountAbstractionConfig: {
+            smartAccountType: SMART_ACCOUNT.SAFE,
+            bundlerConfig: {
+              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
+            },
+            paymasterConfig: {
+              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
+            },
+          },
           chains: [currentChainConfig],
           uiConfig: {
             uxMode: "redirect",

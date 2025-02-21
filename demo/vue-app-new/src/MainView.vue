@@ -1,11 +1,10 @@
 <script setup lang="ts">
 
-import { AccountAbstractionProvider, ConnectorFn, CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, IBaseProvider, IProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, NFTCheckoutPlugin, SafeSmartAccount, storageAvailable, TrustSmartAccount, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, ConnectorFn, NFTCheckoutPlugin, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { SMART_ACCOUNT } from "@toruslabs/ethereum-controllers";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -25,52 +24,6 @@ const chainOptions = computed(() =>
 
 const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
 
-const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undefined => {
-  const { useAccountAbstractionProvider } = formData;
-  if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
-
-  // only need to setup AA provider for external wallets, for embedded wallet, we'll use WS which already supports AA
-  if (!formData.useAAWithExternalWallet) return undefined;
-
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
-  // setup aa provider
-  let smartAccountInit: ISmartAccount;
-  switch (formData.smartAccountType) {
-    case "nexus":
-      smartAccountInit = new NexusSmartAccount();
-      break;
-    case "kernel":
-      smartAccountInit = new KernelSmartAccount();
-      break;
-    case "trust":
-      smartAccountInit = new TrustSmartAccount();
-      break;
-    // case "light":
-    //   smartAccountInit = new LightSmartAccount();
-    //   break;
-    // case "simple":
-    //   smartAccountInit = new SimpleSmartAccount();
-    //   break;
-    case "safe":
-    default:
-      smartAccountInit = new SafeSmartAccount();
-      break;
-  }
-
-  return new AccountAbstractionProvider({
-    config: {
-      chainConfig,
-      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
-      paymasterConfig: formData.paymasterUrl
-        ? {
-          url: formData.paymasterUrl,
-        }
-        : undefined,
-      smartAccountInit,
-    },
-  });
-});
-
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
@@ -78,51 +31,27 @@ const options = computed((): Web3AuthOptions => {
 
   // Account Abstraction
   const { useAccountAbstractionProvider } = formData;
-  let accountAbstractionConfig = undefined;
+  let accountAbstractionConfig: Web3AuthOptions["accountAbstractionConfig"];
   if (showAAProviderSettings.value && useAccountAbstractionProvider) {
-    let smartAccountType = ""
-    let smartAccountConfig = undefined;
-    switch (formData.smartAccountType) {
-      case "nexus":
-        smartAccountType = SMART_ACCOUNT.NEXUS;
-        break;
-      case "kernel":
-        smartAccountType = SMART_ACCOUNT.KERNEL;
-        break;
-      case "trust":
-        smartAccountType = SMART_ACCOUNT.TRUST;
-        break;
-      // case "light":
-      //   smartAccountInit = new LightSmartAccount();
-      //   break;
-      // case "simple":
-      //   smartAccountInit = new SimpleSmartAccount();
-      //   break;
-      case "safe":
-      default:
-        smartAccountType = SMART_ACCOUNT.SAFE;
-        break;
-    }
     accountAbstractionConfig = {
-      smartAccountType,
-      paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
+      smartAccountType: formData.smartAccountType as string,
+      smartAccountConfig: undefined,
       bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
-      smartAccountConfig,
+      paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
     }
   }
 
   // Wallet services settings
-  let walletServicesSettings: Web3AuthOptions["walletServicesSettings"];
+  let walletServicesConfig: Web3AuthOptions["walletServicesConfig"];
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
-    walletServicesSettings = {
+    walletServicesConfig = {
       whiteLabel: {
         ...uiConfig,
         showWidgetButton: true,
       },
       confirmationStrategy,
-      accountAbstractionConfig,
     };
   }
 
@@ -131,7 +60,7 @@ const options = computed((): Web3AuthOptions => {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
     uiConfig,
-    accountAbstractionProvider: accountAbstractionProvider.value,
+    accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // chainConfig?: CustomChainConfig;
@@ -144,7 +73,7 @@ const options = computed((): Web3AuthOptions => {
     enableLogging: true,
     connectors: externalConnectors.value,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
-    walletServicesSettings,
+    walletServicesConfig,
   };
 });
 

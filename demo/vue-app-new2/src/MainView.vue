@@ -11,7 +11,7 @@ const ethWeb3AuthOptions: Web3AuthOptions = {
   clientId: clientIds["mainnet"],
   web3AuthNetwork: "mainnet",
   multiInjectedProviderDiscovery: true,
-  connectors: [walletConnectV2Connector({ projectId: "d3c63f19f9582f8ba48e982057eb096b" }), coinbaseConnector()]
+  connectors: [walletConnectV2Connector({ projectId: "d3c63f19f9582f8ba48e982057eb096b" }), coinbaseConnector()],
 };
 const web3auth = new Web3Auth(ethWeb3AuthOptions);
 
