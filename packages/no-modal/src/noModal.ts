@@ -365,7 +365,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
       await Promise.all(
-        Object.values(this.plugins).map((plugin) => {
+        Object.values(this.plugins).map(async (plugin) => {
+          if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(connector.name)) return;
+          if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if connector doesn't supports this plugin.
             if (error.code === 5211) {
