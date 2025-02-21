@@ -24,12 +24,11 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
-  WalletServicesSettings,
   Web3AuthError,
 } from "@/core/base";
 
 import { getAuthDefaultOptions } from "./config";
-import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider } from "./interface";
+import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -386,9 +385,10 @@ export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn =
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
 
-    // wallet services settings
-    const finalWsSettings = {
-      ...coreOptions.walletServicesSettings,
+    // WS settings
+    const finalWsSettings: WalletServicesSettings = {
+      ...coreOptions.walletServicesConfig,
+      accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
     };
 

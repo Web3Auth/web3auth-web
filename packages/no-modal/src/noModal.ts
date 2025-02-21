@@ -1,7 +1,6 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import { createStore } from "zustand/vanilla";
 
-import type { AccountAbstractionProvider } from "@/core/account-abstraction-provider";
 import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
@@ -134,7 +133,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       projectConfig = await fetchProjectConfig(
         this.coreOptions.clientId,
         this.coreOptions.web3AuthNetwork,
-        (this.coreOptions.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name
+        this.coreOptions.accountAbstractionConfig?.smartAccountType
       );
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
@@ -341,13 +340,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { provider } = data;
 
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
-      // setup aa provider after connector is connected and private key provider is setup
+      // setup aa provider for external wallets on EVM chains, for in app wallet, it uses WS provider which already supports AA
+      const { accountAbstractionConfig } = this.coreOptions;
       if (
-        this.coreOptions.accountAbstractionProvider &&
-        (data.connector === WALLET_CONNECTORS.AUTH || (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet))
+        this.currentChain.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+        accountAbstractionConfig &&
+        data.connector !== WALLET_CONNECTORS.AUTH &&
+        this.coreOptions.useAAWithExternalWallet
       ) {
-        await this.coreOptions.accountAbstractionProvider.setupProvider(provider, this.currentChain.chainId); // Don't change this to finalProvider, this need eoaProvider
-        finalProvider = this.coreOptions.accountAbstractionProvider;
+        const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
+        const aaProvider = await accountAbstractionProvider({ accountAbstractionConfig, chainConfig: this.currentChain, provider });
+        finalProvider = aaProvider;
+        // TODO: when switching chains to Solana or other chains, we need to switch to the non-AA provider
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
@@ -371,7 +375,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
       await Promise.all(
-        Object.values(this.plugins).map((plugin) => {
+        Object.values(this.plugins).map(async (plugin) => {
+          if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(connector.name)) return;
+          if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if connector doesn't supports this plugin.
             if (error.code === 5211) {

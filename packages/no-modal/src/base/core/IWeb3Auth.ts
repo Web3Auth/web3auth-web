@@ -1,23 +1,26 @@
-import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
-import { WsEmbedParams } from "@web3auth/ws-embed";
+import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
+import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { CustomChainConfig } from "../chain/IChainInterface";
+import { type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTOR_EVENTS,
-  CONNECTOR_STATUS_TYPE,
+  type CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
-  ConnectorFn,
-  IBaseProvider,
-  IConnector,
-  IProvider,
-  UserAuthInfo,
-  UserInfo,
-  WEB3AUTH_NETWORK_TYPE,
+  type ConnectorFn,
+  type IConnector,
+  type IProvider,
+  type UserAuthInfo,
+  type UserInfo,
+  type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
 import { type IPlugin } from "../plugin";
-import { WALLET_CONNECTOR_TYPE } from "../wallet";
+import { type WALLET_CONNECTOR_TYPE } from "../wallet";
 
-export type WalletServicesSettings = Omit<WsEmbedParams, "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy"> & {
+export type WalletServicesConfig = Omit<
+  WsEmbedParams,
+  "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy" | "accountAbstractionConfig"
+> & {
   /**
    * Determines how to show confirmation screens
    * @defaultValue default
@@ -84,9 +87,9 @@ export interface IWeb3AuthCoreOptions {
   uiConfig?: WhiteLabelData;
 
   /**
-   * Account abstraction provider for your chain namespace
+   * Account abstraction config for your chain namespace
    */
-  accountAbstractionProvider?: IBaseProvider<IProvider>;
+  accountAbstractionConfig?: AccountAbstractionConfig;
 
   /**
    * Whether to use AA with external wallet
@@ -105,9 +108,9 @@ export interface IWeb3AuthCoreOptions {
   multiInjectedProviderDiscovery?: boolean;
 
   /**
-   * Wallet services settings
+   * Wallet services config
    */
-  walletServicesSettings?: WalletServicesSettings;
+  walletServicesConfig?: WalletServicesConfig;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

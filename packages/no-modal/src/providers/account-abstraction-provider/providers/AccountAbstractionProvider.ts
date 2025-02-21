@@ -1,25 +1,35 @@
+import {
+  type AccountAbstractionConfig,
+  type BiconomySmartAccountConfig,
+  type BundlerConfig,
+  type ISmartAccount,
+  type KernelSmartAccountConfig,
+  type NexusSmartAccountConfig,
+  type PaymasterConfig,
+  type SafeSmartAccountConfig,
+  SMART_ACCOUNT,
+  type TrustSmartAccountConfig,
+} from "@toruslabs/ethereum-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { Client, createPublicClient, defineChain, http } from "viem";
-import { BundlerClient, createBundlerClient, createPaymasterClient, PaymasterClient, SmartAccount } from "viem/account-abstraction";
+import { type Client, createPublicClient, defineChain, EIP1193Provider, http } from "viem";
+import { type BundlerClient, createBundlerClient, createPaymasterClient, type PaymasterClient, type SmartAccount } from "viem/account-abstraction";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, IProvider, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "@/core/base";
 
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../base-provider";
+import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../base-provider";
 import { createAaMiddleware, eoaProviderAsMiddleware } from "../rpc/ethRpcMiddlewares";
-import { ISmartAccount } from "./smartAccounts";
-import { BundlerConfig, PaymasterConfig } from "./types";
 import { getProviderHandlers } from "./utils";
 
-export interface AccountAbstractionProviderConfig extends BaseProviderConfig {
+interface AccountAbstractionProviderConfig extends BaseProviderConfig {
   smartAccountInit: ISmartAccount;
   bundlerConfig: BundlerConfig;
   paymasterConfig?: PaymasterConfig;
 }
-export interface AccountAbstractionProviderState extends BaseProviderState {
+interface AccountAbstractionProviderState extends BaseProviderState {
   eoaProvider?: IProvider;
 }
 
-export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
+class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
   private _smartAccount: SmartAccount | null;
@@ -102,7 +112,7 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
       transport: http(currentChain.rpcTarget),
     }) as Client;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
-      owner: eoaProvider,
+      owner: eoaProvider as EIP1193Provider,
       client: this._publicClient,
     });
 
@@ -160,3 +170,52 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
     return this.setupProvider(this.state.eoaProvider);
   }
 }
+
+export const accountAbstractionProvider = async ({
+  accountAbstractionConfig,
+  chainConfig,
+  provider,
+}: {
+  accountAbstractionConfig: AccountAbstractionConfig;
+  chainConfig: CustomChainConfig;
+  provider: IProvider;
+}) => {
+  let smartAccountInit: ISmartAccount;
+  const { smartAccountType, smartAccountConfig, bundlerConfig, paymasterConfig } = accountAbstractionConfig;
+  switch (smartAccountType) {
+    case SMART_ACCOUNT.BICONOMY: {
+      const { BiconomySmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new BiconomySmartAccount(smartAccountConfig as BiconomySmartAccountConfig);
+      break;
+    }
+    case SMART_ACCOUNT.KERNEL: {
+      const { KernelSmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new KernelSmartAccount(smartAccountConfig as KernelSmartAccountConfig);
+      break;
+    }
+    case SMART_ACCOUNT.NEXUS: {
+      const { NexusSmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new NexusSmartAccount(smartAccountConfig as NexusSmartAccountConfig);
+      break;
+    }
+    case SMART_ACCOUNT.SAFE: {
+      const { SafeSmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new SafeSmartAccount(smartAccountConfig as SafeSmartAccountConfig);
+      break;
+    }
+    case SMART_ACCOUNT.TRUST: {
+      const { TrustSmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new TrustSmartAccount(smartAccountConfig as TrustSmartAccountConfig);
+      break;
+    }
+    default:
+      throw new Error("Smart account type not supported");
+  }
+  return AccountAbstractionProvider.getProviderInstance({
+    eoaProvider: provider,
+    smartAccountInit,
+    chainConfig,
+    bundlerConfig,
+    paymasterConfig,
+  });
+};

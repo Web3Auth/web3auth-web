@@ -41,7 +41,7 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   private isInitialized = false;
 
   get proxyProvider(): SafeEventEmitterProvider | null {
-    return this.wsEmbedInstance.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
+    return this.wsEmbedInstance?.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData): Promise<void> {
@@ -101,32 +101,32 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
   async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     return this.wsEmbedInstance.showCheckout(showCheckoutParams);
   }
 
   async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
   }
 
   async showSwap(showSwapParams?: BaseEmbedControllerState["showSwap"]): Promise<void> {
-    if (!this.wsEmbedInstance.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
     return this.wsEmbedInstance.showSwap(showSwapParams);
   }
 
   async cleanup(): Promise<void> {
-    return this.wsEmbedInstance.cleanUp();
+    return this.wsEmbedInstance?.cleanUp();
   }
 
   async disconnect(): Promise<void> {
     // if web3auth is being used and connected to unsupported connector throw error
-    if (this.wsEmbedInstance.isLoggedIn) {
+    if (this.wsEmbedInstance?.isLoggedIn) {
       await this.wsEmbedInstance.logout();
       this.emit(PLUGIN_EVENTS.DISCONNECTED);
       this.status = PLUGIN_STATUS.DISCONNECTED;

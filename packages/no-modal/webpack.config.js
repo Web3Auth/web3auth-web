@@ -26,7 +26,8 @@ const config = generateWebpackConfig({
     '@/core/solana-provider': path.resolve(__dirname, 'src/providers/solana-provider'),
     '@/core/ethereum-provider': path.resolve(__dirname, 'src/providers/ethereum-provider'),
     '@/core/ethereum-mpc-provider': path.resolve(__dirname, 'src/providers/ethereum-mpc-provider'),
-    '@/core/xrpl-provider': path.resolve(__dirname, 'src/providers/xrpl-provider')
+    '@/core/xrpl-provider': path.resolve(__dirname, 'src/providers/xrpl-provider'),
+    '@/core/account-abstraction-provider': path.resolve(__dirname, 'src/providers/account-abstraction-provider'),
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin({
