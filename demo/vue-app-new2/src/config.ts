@@ -1,5 +1,14 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CustomChainConfig,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+  SignTypedDataMessageV4,
+  CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
+} from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -80,7 +89,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
+      rpcTarget: import.meta.env.VITE_APP_SOLANA_MAINNET_RPC,
       blockExplorerUrl: "https://explorer.solana.com",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x1",

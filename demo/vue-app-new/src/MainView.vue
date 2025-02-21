@@ -140,7 +140,7 @@ const options = computed((): Web3AuthOptions => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     // chainConfig,
-    chains: [chainConfig],
+    chains: [chainConfig, chainConfigs.eip155.find((x) => x.chainId === "0xaa36a7")!],
     enableLogging: true,
     connectors: externalConnectors.value,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,

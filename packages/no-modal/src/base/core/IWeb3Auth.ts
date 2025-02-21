@@ -42,8 +42,8 @@ export interface IWeb3AuthCoreOptions {
   clientId: string;
 
   /**
-   * multiple chain configurations
-   * only chains provided will be used
+   * multiple chain configurations,
+   * only provided chains will be used
    */
   chains?: CustomChainConfig[];
   /**

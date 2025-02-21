@@ -323,6 +323,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             reconnected: this.rehydrated,
             provider: this.provider,
           } as CONNECTED_EVENT_DATA);
+          // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
             if ((accounts as string[]).length === 0 && this.status === CONNECTOR_STATUS.CONNECTED) this.disconnect({ cleanup: false });
           });

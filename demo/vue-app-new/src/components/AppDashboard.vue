@@ -188,7 +188,7 @@ const onGetBalance = async () => {
 const onSwitchChain = async () => {
   log.info("switching chain");
   try {
-    await switchChain({ chainId: "0x89" });
+    await switchChain({ chainId: "0xaa36a7" });
     printToConsole("switchedChain");
   } catch (error) {
     printToConsole("switchedChain error", error);
@@ -291,6 +291,7 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}

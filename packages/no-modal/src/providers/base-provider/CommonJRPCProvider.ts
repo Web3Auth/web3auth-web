@@ -45,6 +45,13 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     await this.setupProvider();
   }
 
+  public updateChain(chainConfig: CustomChainConfig) {
+    this.update({
+      chainId: chainConfig.chainId,
+    });
+    this.configure({ chainConfig });
+  }
+
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

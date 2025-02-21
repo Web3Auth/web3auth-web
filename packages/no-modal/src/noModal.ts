@@ -162,11 +162,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
+    if (params.chainId === this.currentChain.chainId) return;
+    const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
+    if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
+
     if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
       await this.connectedConnector.switchChain(params);
+      // only update chain state in commonJRPCProvider instead of switchChain in provider inside commonJRPCProvider
+      this.commonJRPCProvider?.updateChain(newChainConfig);
       this.setCurrentChain(params.chainId);
       return;
     }
+
     if (this.commonJRPCProvider) {
       await this.commonJRPCProvider.switchChain(params);
       this.setCurrentChain(params.chainId);
