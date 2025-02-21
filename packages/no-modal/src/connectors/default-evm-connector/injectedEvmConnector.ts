@@ -173,11 +173,13 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
 }
 
 export const injectedEvmConnector = (providerDetail: EIP6963ProviderDetail): ConnectorFn => {
-  return ({ coreOptions }: ConnectorParams) => {
+  return ({ coreOptions, getCurrentChain, getChain }: ConnectorParams) => {
     return new InjectedEvmConnector({
       name: normalizeWalletName(providerDetail.info.name),
       provider: providerDetail.provider as IProvider,
       coreOptions,
+      getCurrentChain,
+      getChain,
     });
   };
 };

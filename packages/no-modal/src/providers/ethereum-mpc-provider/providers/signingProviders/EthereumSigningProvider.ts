@@ -1,10 +1,9 @@
 import { isHexString } from "@ethereumjs/util";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, IWeb3Auth, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 import {
-  AddEthereumChainParameter,
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
@@ -16,9 +15,12 @@ import { createEthAccountMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { IAccountHandlers } from "../../rpc/interfaces";
 import { getProviderHandlers } from "./signingUtils";
 
-export interface EthereumSigningProviderConfig extends BaseProviderConfig {
-  chainConfig: CustomChainConfig;
+interface ProviderParams {
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+  getPublic: () => Promise<Buffer>;
 }
+
+export interface EthereumSigningProviderConfig extends BaseProviderConfig {}
 
 export interface EthereumSigningProviderState extends BaseProviderState {
   signMethods?: {
@@ -37,7 +39,7 @@ export class EthereumSigningProvider extends BaseProvider<
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
   constructor({ config, state }: { config: EthereumSigningProviderConfig; state?: EthereumSigningProviderState }) {
-    super({ config: { chainConfig: { ...config.chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155 } }, state });
+    super({ config: { getChain: config.getChain, getCurrentChain: config.getCurrentChain }, state });
   }
 
   public static getProviderInstance = async (params: {
@@ -45,28 +47,31 @@ export class EthereumSigningProvider extends BaseProvider<
       sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
       getPublic: () => Promise<Buffer>;
     };
-    chainConfig: CustomChainConfig;
+    getCurrentChain: IWeb3Auth["getCurrentChain"];
+    getChain: IWeb3Auth["getChain"];
   }): Promise<EthereumSigningProvider> => {
-    const providerFactory = new EthereumSigningProvider({ config: { chainConfig: params.chainConfig } });
-    await providerFactory.setupProvider(params.signMethods);
+    const providerFactory = new EthereumSigningProvider({ config: { getChain: params.getChain, getCurrentChain: params.getCurrentChain } });
+    await providerFactory.setupProvider(params.signMethods, params.getCurrentChain().chainId);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.signMethods)
       throw providerErrors.custom({ message: "signMethods are not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.signMethods);
+    await this.setupProvider(this.state.signMethods, this.config.getCurrentChain().chainId);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
-  public async setupProvider({
-    sign,
-    getPublic,
-  }: {
-    sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
-    getPublic: () => Promise<Buffer>;
-  }): Promise<void> {
-    const { chainNamespace } = this.config.chainConfig;
+  public async setupProvider(
+    params: {
+      sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
+      getPublic: () => Promise<Buffer>;
+    },
+    chainId: string
+  ): Promise<void> {
+    const { sign, getPublic } = params;
+    const chain = this.config.getChain(chainId);
+    const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
@@ -81,7 +86,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
     // Not a partial anymore because of checks in ctor
-    const { networkMiddleware } = createEthJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
     engine.push(chainSwitchMiddleware);
     engine.push(this.getAccountMiddleware());
@@ -89,8 +94,10 @@ export class EthereumSigningProvider extends BaseProvider<
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
     await txFormatter.init();
-    await this.lookupNetwork();
+    await this.lookupNetwork(params, chainId);
     this.state.signMethods = { sign, getPublic };
+    this.emit("chainChanged", chainId);
+    this.emit("connect", { chainId });
   }
 
   public async updateAccount(params: {
@@ -107,7 +114,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const currentPubKey = (await currentSignMethods.getPublic()).toString("hex");
     const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
     if (currentPubKey !== updatePubKey) {
-      await this.setupProvider(params.signMethods);
+      await this.setupProvider(params.signMethods, this.config.getCurrentChain().chainId);
       const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
       this.emit("accountsChanged", accounts);
     }
@@ -115,20 +122,19 @@ export class EthereumSigningProvider extends BaseProvider<
 
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
-    const chainConfig = this.getChainConfig(params.chainId);
-    this.update({
-      chainId: "loading",
-    });
-    this.configure({ chainConfig });
     if (!this.state.signMethods) {
       throw providerErrors.custom({ message: "sign methods are undefined", code: 4902 });
     }
-    await this.setupProvider(this.state.signMethods);
+
+    if (params.chainId === this.config.getCurrentChain().chainId) {
+      return;
+    }
+
+    await this.setupProvider(this.state.signMethods, params.chainId);
   }
 
-  protected async lookupNetwork(): Promise<string> {
+  protected async lookupNetwork(_: ProviderParams, chainId: string): Promise<string> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
-    const { chainId } = this.config.chainConfig;
     if (!chainId) throw rpcErrors.invalidParams("chainId is required while lookupNetwork");
     const network = await this._providerEngineProxy.request<string[], string>({
       method: "net_version",
@@ -138,30 +144,11 @@ export class EthereumSigningProvider extends BaseProvider<
     const finalNetwork = isHexString(network) ? parseInt(network, 16) : parseInt(network, 10);
 
     if (parseInt(chainId, 16) !== finalNetwork) throw providerErrors.chainDisconnected(`Invalid network, net_version is: ${network}`);
-    if (this.state.chainId !== chainId) {
-      this.emit("chainChanged", chainId);
-      this.emit("connect", { chainId });
-    }
-    this.update({ chainId });
     return network;
   }
 
   private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IEthChainSwitchHandlers = {
-      addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
-        this.addChain({
-          chainNamespace: CHAIN_NAMESPACES.EIP155,
-          chainId,
-          ticker: nativeCurrency?.symbol || "ETH",
-          tickerName: nativeCurrency?.name || "Ether",
-          displayName: chainName,
-          rpcTarget: rpcUrls[0],
-          blockExplorerUrl: blockExplorerUrls?.[0] || "",
-          decimals: nativeCurrency?.decimals || 18,
-          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
-        });
-      },
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
         await this.switchChain({ chainId });

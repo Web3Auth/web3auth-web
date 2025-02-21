@@ -1,6 +1,6 @@
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CustomChainConfig, isHexStrict, WalletInitializationError } from "@/core/base";
+import { isHexStrict, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 
 import { ITorusWalletProvider } from "../../../interface";
@@ -23,37 +23,19 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     });
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    super.addChain(chainConfig);
-    await this.provider.request({
-      method: "addNewChainConfig",
-      params: [
-        {
-          chainId: chainConfig.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorerUrl],
-          iconUrls: [chainConfig.logo],
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
-        },
-      ],
-    });
-  }
-
-  public async setupProvider(injectedProvider: ITorusWalletProvider): Promise<void> {
+  public async setupProvider(injectedProvider: ITorusWalletProvider, chainId: string): Promise<void> {
     this.handleInjectedProviderUpdate(injectedProvider);
-    const { chainNamespace } = this.config.chainConfig;
+    const chain = this.config.getChain(chainId);
+    const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
-    await this.setupEngine(injectedProvider);
+    await this.setupEngine(injectedProvider, chainId);
+
+    this.emit("connect", { chainId });
+    this.emit("chainChanged", chainId);
   }
 
-  protected async lookupNetwork(): Promise<string> {
+  protected async lookupNetwork(_injectedProvider: ITorusWalletProvider, chainId: string): Promise<string> {
     if (!this.provider) throw providerErrors.custom({ message: "Torus solana provider is not initialized", code: 4902 });
-    const { chainId } = this.config.chainConfig;
 
     const connectedChainId = await this.provider.request<never, string>({
       method: "solana_chainId",
@@ -63,13 +45,10 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     if (chainId !== connectedHexChainId)
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
 
-    this.update({ chainId: connectedHexChainId });
-    this.emit("connect", { chainId: this.state.chainId });
-    this.emit("chainChanged", this.state.chainId);
-    return this.state.chainId;
+    return chainId;
   }
 
-  private async setupEngine(injectedProvider: ITorusWalletProvider): Promise<void> {
+  private async setupEngine(injectedProvider: ITorusWalletProvider, chainId: string): Promise<void> {
     const providerHandlers = getTorusHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const injectedProviderProxy = createInjectedProviderProxyMiddleware(injectedProvider);
@@ -78,7 +57,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     engine.push(injectedProviderProxy);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-    await this.lookupNetwork();
+    await this.lookupNetwork(injectedProvider, chainId);
   }
 
   private async handleInjectedProviderUpdate(injectedProvider: ITorusWalletProvider): Promise<void> {
@@ -88,10 +67,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     injectedProvider.on("chainChanged", async (chainId: string) => {
       const connectedHexChainId = isHexStrict(chainId) ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;
       // Check if chainId changed and trigger event
-      this.configure({
-        chainConfig: { ...this.config.chainConfig, chainId: connectedHexChainId },
-      });
-      await this.setupProvider(injectedProvider);
+      await this.setupProvider(injectedProvider, connectedHexChainId);
     });
   }
 }

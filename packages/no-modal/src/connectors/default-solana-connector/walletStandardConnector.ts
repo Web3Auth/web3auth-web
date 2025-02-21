@@ -46,9 +46,15 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 
   private injectedProvider: WalletStandardProvider | null = null;
 
+  private getCurrentChain: BaseConnectorSettings["getCurrentChain"];
+
+  private getChain: BaseConnectorSettings["getChain"];
+
   constructor(options: BaseConnectorSettings & { name: string; wallet: Wallet }) {
     super(options);
     this.name = options.name;
+    this.getCurrentChain = options.getCurrentChain;
+    this.getChain = options.getChain;
     // in VueJS, for some wallets e.g. Gate, Solflare, when connecting it throws error "attempted to get private field on non-instance"
     // it seems that Vue create a Proxy object for the wallet object which causes the issue
     // ref: https://stackoverflow.com/questions/64917686/vue-array-converted-to-proxy-object
@@ -71,12 +77,12 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    this.injectedProvider = new WalletStandardProvider({ config: { chainConfig } });
+    this.injectedProvider = new WalletStandardProvider({ config: { getCurrentChain: this.getCurrentChain, getChain: this.getChain } });
     const providerHandler = new WalletStandardProviderHandler({
       wallet: this.wallet,
       getCurrentChain: () => getSolanaChainByChainConfig(chainConfig),
     });
-    this.injectedProvider.setupProvider(providerHandler);
+    this.injectedProvider.setupProvider(providerHandler, options.chainId);
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, this.name);
@@ -159,11 +165,13 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 }
 
 export const walletStandardConnector = (wallet: Wallet): ConnectorFn => {
-  return ({ coreOptions }: ConnectorParams) => {
+  return ({ coreOptions, getCurrentChain, getChain }: ConnectorParams) => {
     return new WalletStandardConnector({
       name: normalizeWalletName(wallet.name),
       wallet,
       coreOptions,
+      getCurrentChain,
+      getChain,
     });
   };
 };

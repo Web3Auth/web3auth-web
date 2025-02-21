@@ -4,21 +4,7 @@ export interface IEthAccountHandlers {
   updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
 }
 
-export interface AddEthereumChainParameter {
-  chainId: string; // A 0x-prefixed hexadecimal string
-  chainName: string;
-  nativeCurrency: {
-    name: string;
-    symbol: string; // 2-6 characters long
-    decimals: 18;
-  };
-  rpcUrls: string[];
-  blockExplorerUrls?: string[];
-  iconUrls?: string[];
-}
-
 export interface IEthChainSwitchHandlers {
-  addChain: (params: AddEthereumChainParameter) => Promise<void>;
   switchChain: (params: { chainId: string }) => Promise<void>;
 }
 

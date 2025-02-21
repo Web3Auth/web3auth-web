@@ -129,6 +129,8 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
   cachedConnector: string | null;
+  getCurrentChain(): CustomChainConfig;
+  getChain(chainId: string): CustomChainConfig | undefined;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   /**
    * Connect to a specific wallet connector

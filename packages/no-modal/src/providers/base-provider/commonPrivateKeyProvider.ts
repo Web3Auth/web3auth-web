@@ -9,13 +9,11 @@ import {
   providerFromEngine,
 } from "@web3auth/auth";
 
-import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@/core/base";
+import { IBaseProvider, SafeEventEmitterProvider } from "@/core/base";
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
-export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: CustomChainConfig;
-}
+export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {}
 
 export interface CommonPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
@@ -37,15 +35,11 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<CommonPrivateKeyProvider> => {
-    const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
+  public static getProviderInstance = async (params: { privKey: string }): Promise<CommonPrivateKeyProvider> => {
+    const providerFactory = new CommonPrivateKeyProvider({ config: {} });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
   };
-
-  addChain(_: CustomChainConfig): void {
-    throw new Error("Method not implemented.");
-  }
 
   public async setupProvider(privKey: string): Promise<void> {
     const privKeyMiddleware = this.getPrivKeyMiddleware(privKey);

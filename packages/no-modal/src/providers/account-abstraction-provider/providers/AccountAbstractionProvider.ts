@@ -70,35 +70,36 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    const { chainNamespace } = this.config.chainConfig;
+    const currentChain = this.config.getCurrentChain();
+    const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const chain = defineChain({
-      id: Number.parseInt(this.config.chainConfig.chainId, 16), // id in number form
-      name: this.config.chainConfig.displayName,
+      id: Number.parseInt(currentChain.chainId, 16), // id in number form
+      name: currentChain.displayName,
       rpcUrls: {
         default: {
-          http: [this.config.chainConfig.rpcTarget],
-          webSocket: [this.config.chainConfig.wsTarget],
+          http: [currentChain.rpcTarget],
+          webSocket: [currentChain.wsTarget],
         },
       },
-      blockExplorers: this.config.chainConfig.blockExplorerUrl
+      blockExplorers: currentChain.blockExplorerUrl
         ? {
             default: {
               name: "explorer", // TODO: correct name if chain config has it
-              url: this.config.chainConfig.blockExplorerUrl,
+              url: currentChain.blockExplorerUrl,
             },
           }
         : undefined,
       nativeCurrency: {
-        name: this.config.chainConfig.tickerName,
-        symbol: this.config.chainConfig.ticker,
-        decimals: this.config.chainConfig.decimals || 18,
+        name: currentChain.tickerName,
+        symbol: currentChain.ticker,
+        decimals: currentChain.decimals || 18,
       },
     });
     // setup public client for viem smart account
     this._publicClient = createPublicClient({
       chain,
-      transport: http(this.config.chainConfig.rpcTarget),
+      transport: http(currentChain.rpcTarget),
     }) as Client;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
       owner: eoaProvider,
@@ -156,11 +157,6 @@ export class AccountAbstractionProvider extends BaseProvider<AccountAbstractionP
   }
 
   private async setupChainSwitchMiddleware() {
-    const chainConfig = await this.state.eoaProvider.request<never, CustomChainConfig>({ method: "eth_provider_config" });
-    this.update({ chainId: chainConfig.chainId });
-    this.configure({
-      chainConfig: { ...chainConfig, chainNamespace: CHAIN_NAMESPACES.EIP155, chainId: chainConfig.chainId, rpcTarget: chainConfig.rpcTarget },
-    });
     return this.setupProvider(this.state.eoaProvider);
   }
 }

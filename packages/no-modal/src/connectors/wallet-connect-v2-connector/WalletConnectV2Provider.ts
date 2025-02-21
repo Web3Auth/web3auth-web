@@ -2,22 +2,14 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, getChainConfig, log, WalletLoginError } from "@/core/base";
+import { CHAIN_NAMESPACES, log, WalletLoginError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
-import {
-  AddEthereumChainParameter,
-  createEthChainSwitchMiddleware,
-  createEthJsonRpcClient,
-  createEthMiddleware,
-  IEthChainSwitchHandlers,
-} from "@/core/ethereum-provider";
+import { createEthChainSwitchMiddleware, createEthJsonRpcClient, createEthMiddleware, IEthChainSwitchHandlers } from "@/core/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "@/core/solana-provider";
 
-import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
-export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {
-  chainConfig: CustomChainConfig;
-}
+export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {}
 
 export interface WalletConnectV2ProviderState extends BaseProviderState {
   accounts: string[];
@@ -28,18 +20,21 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
     super({
-      config: { chainConfig: config.chainConfig, skipLookupNetwork: !!config.skipLookupNetwork },
-      state: { ...(state || {}), chainId: "loading", accounts: [] },
+      config: { getCurrentChain: config.getCurrentChain, getChain: config.getChain, skipLookupNetwork: !!config.skipLookupNetwork },
+      state: { ...(state || {}), accounts: [] },
     });
     this.connector = connector || null;
   }
 
   public static getProviderInstance = async (params: {
     connector: ISignClient;
-    chainConfig: CustomChainConfig;
     skipLookupNetwork: boolean;
+    getCurrentChain: BaseProviderConfig["getCurrentChain"];
+    getChain: BaseProviderConfig["getChain"];
   }): Promise<WalletConnectV2Provider> => {
-    const providerFactory = new WalletConnectV2Provider({ config: { chainConfig: params.chainConfig, skipLookupNetwork: params.skipLookupNetwork } });
+    const providerFactory = new WalletConnectV2Provider({
+      config: { getCurrentChain: params.getCurrentChain, getChain: params.getChain, skipLookupNetwork: params.skipLookupNetwork },
+    });
     await providerFactory.setupProvider(params.connector);
     return providerFactory;
   };
@@ -53,68 +48,44 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public async setupProvider(connector: ISignClient): Promise<void> {
     this.onConnectorStateUpdate(connector);
-    await this.setupEngine(connector);
+    await this.setupEngine(connector, this.config.getCurrentChain().chainId);
   }
 
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    const currentChainConfig = this.getChainConfig(chainId);
+    const currentChainConfig = this.config.getChain(chainId);
 
-    const { chainId: currentChainId } = this.config.chainConfig;
+    const { chainId: currentChainId } = currentChainConfig;
     const currentNumChainId = parseInt(currentChainId, 16);
 
     await switchChain({ connector: this.connector, chainId: currentNumChainId, newChainId: chainId });
 
-    this.configure({ chainConfig: currentChainConfig });
-    await this.setupEngine(this.connector);
-    this.lookupNetwork(this.connector);
-  }
-
-  async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    const { chainId: currentChainId } = this.config.chainConfig;
-    const numChainId = parseInt(currentChainId, 16);
-
-    await addChain({
-      connector: this.connector,
-      chainId: numChainId,
-      chainConfig: {
-        chainId: chainConfig.chainId,
-        chainName: chainConfig.displayName,
-        nativeCurrency: {
-          name: chainConfig.tickerName,
-          symbol: chainConfig.ticker.toLocaleUpperCase(),
-          decimals: (chainConfig.decimals || 18) as AddEthereumChainParameter["nativeCurrency"]["decimals"],
-        },
-        rpcUrls: [chainConfig.rpcTarget],
-        blockExplorerUrls: [chainConfig.blockExplorerUrl],
-        iconUrls: [chainConfig.logo],
-      },
-    });
-
-    super.addChain(chainConfig);
+    await this.setupEngine(this.connector, chainId);
+    this.lookupNetwork(this.connector, chainId);
   }
 
   // no need to implement this method in wallet connect v2.
-  protected async lookupNetwork(_: ISignClient): Promise<string> {
-    const newChainId = this.config.chainConfig.chainId;
-    this.update({ chainId: newChainId });
-    this.emit("chainChanged", newChainId);
-    this.emit("connect", { chainId: newChainId });
-    return this.config.chainConfig.chainId;
+  protected async lookupNetwork(_: ISignClient, chainId: string): Promise<string> {
+    return chainId;
   }
 
-  private async setupEngine(connector: ISignClient): Promise<void> {
-    if (this.config.chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      return this.setupEthEngine(connector);
-    } else if (this.config.chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      return this.setupSolEngine(connector);
+  private async setupEngine(connector: ISignClient, chainId: string): Promise<void> {
+    const chain = this.config.getChain(chainId);
+    if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      await this.setupEthEngine(connector, chainId);
+    } else if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      await this.setupSolEngine(connector, chainId);
+    } else {
+      throw new Error(`Unsupported chainNamespace: ${chain.chainNamespace}`);
     }
-    throw new Error(`Unsupported chainNamespace: ${this.config.chainConfig.chainNamespace}`);
+
+    this.emit("chainChanged", chainId);
+    this.emit("connect", { chainId });
   }
 
-  private async setupEthEngine(connector: ISignClient): Promise<void> {
-    const { chainId } = this.config.chainConfig;
+  private async setupEthEngine(connector: ISignClient, chainId: string): Promise<void> {
+    const chain = this.config.getChain(chainId);
     const numChainId = parseInt(chainId, 16);
     const providerHandlers = getEthProviderHandlers({ connector, chainId: numChainId });
     const jrpcRes = await getAccounts(connector);
@@ -125,7 +96,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getEthChainSwitchMiddleware();
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createEthJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
     engine.push(chainSwitchMiddleware);
     engine.push(networkMiddleware);
@@ -133,8 +104,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.updateProviderEngineProxy(provider);
   }
 
-  private async setupSolEngine(connector: ISignClient): Promise<void> {
-    const { chainId } = this.config.chainConfig;
+  private async setupSolEngine(connector: ISignClient, chainId: string): Promise<void> {
+    const chain = this.config.getChain(chainId);
     const providerHandlers = getSolProviderHandlers({ connector, chainId });
     const jrpcRes = await getAccounts(connector);
 
@@ -143,7 +114,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     });
     const solMiddleware = createSolanaMiddleware(providerHandlers);
     const engine = new JRPCEngine();
-    const { networkMiddleware } = createSolJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+    const { networkMiddleware } = createSolJsonRpcClient(chain);
     engine.push(solMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
@@ -152,20 +123,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   private getEthChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
     const chainSwitchHandlers: IEthChainSwitchHandlers = {
-      addChain: async (params: AddEthereumChainParameter): Promise<void> => {
-        const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency, iconUrls } = params;
-        this.addChain({
-          chainNamespace: CHAIN_NAMESPACES.EIP155,
-          chainId,
-          ticker: nativeCurrency?.symbol || "ETH",
-          tickerName: nativeCurrency?.name || "Ether",
-          displayName: chainName,
-          rpcTarget: rpcUrls[0],
-          blockExplorerUrl: blockExplorerUrls?.[0] || "",
-          decimals: nativeCurrency?.decimals || 18,
-          logo: iconUrls?.[0] || "https://images.toruswallet.io/eth.svg",
-        });
-      },
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
         await this.switchChain({ chainId });
@@ -220,13 +177,10 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
 
         // Check if chainId changed and trigger event
-        if (connectedHexChainId && this.state.chainId !== connectedHexChainId) {
-          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId);
+        const currentChain = this.config.getCurrentChain();
+        if (connectedHexChainId && currentChain.chainId !== connectedHexChainId) {
           // Handle rpcUrl update
-          this.configure({
-            chainConfig: { ...maybeConfig, chainId: connectedHexChainId, chainNamespace: CHAIN_NAMESPACES.EIP155 },
-          });
-          await this.setupEngine(connector);
+          await this.setupEngine(connector, connectedHexChainId);
         }
       }
     });

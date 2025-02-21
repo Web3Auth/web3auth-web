@@ -8,7 +8,7 @@ import {
   rpcErrors,
 } from "@web3auth/auth";
 
-import { AddEthereumChainParameter, IEthAccountHandlers, IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
+import { IEthAccountHandlers, IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
 
 export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRPCMiddleware<unknown, unknown> {
@@ -40,17 +40,7 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
   return ethMiddleware;
 }
 
-export function createEthChainSwitchMiddleware({ addChain, switchChain }: IEthChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
-  async function addNewChain(req: JRPCRequest<AddEthereumChainParameter[]>, res: JRPCResponse<unknown>): Promise<void> {
-    const chainParams = req.params?.length ? req.params[0] : undefined;
-    if (!chainParams) throw rpcErrors.invalidParams("Missing chain params");
-    if (!chainParams.chainId) throw rpcErrors.invalidParams("Missing chainId in chainParams");
-    if (!chainParams.rpcUrls || chainParams.rpcUrls.length === 0) throw rpcErrors.invalidParams("Missing rpcUrls in chainParams");
-    if (!chainParams.nativeCurrency) throw rpcErrors.invalidParams("Missing nativeCurrency in chainParams");
-
-    res.result = await addChain(chainParams);
-  }
-
+export function createEthChainSwitchMiddleware({ switchChain }: IEthChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   async function updateChain(req: JRPCRequest<{ chainId: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
     const chainParams = req.params?.length ? req.params[0] : undefined;
     if (!chainParams) throw rpcErrors.invalidParams("Missing chainId");
@@ -58,7 +48,6 @@ export function createEthChainSwitchMiddleware({ addChain, switchChain }: IEthCh
   }
 
   return createScaffoldMiddleware({
-    wallet_addEthereumChain: createAsyncMiddleware(addNewChain) as JRPCMiddleware<unknown, unknown>,
     wallet_switchEthereumChain: createAsyncMiddleware(updateChain) as JRPCMiddleware<unknown, unknown>,
   });
 }

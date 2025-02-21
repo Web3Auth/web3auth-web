@@ -4,6 +4,7 @@ import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/au
 import {
   CustomChainConfig,
   IBaseProvider,
+  IWeb3Auth,
   Maybe,
   RequestArguments,
   SafeEventEmitterProvider,
@@ -13,13 +14,11 @@ import {
 
 import { BaseProviderEvents } from "./interfaces";
 
-export interface BaseProviderState extends BaseState {
-  chainId: string;
-}
+export interface BaseProviderState extends BaseState {}
 
 export interface BaseProviderConfig extends BaseConfig {
-  chainConfig: CustomChainConfig;
-  networks?: Record<string, CustomChainConfig>;
+  getCurrentChain?: IWeb3Auth["getCurrentChain"];
+  getChain?: IWeb3Auth["getChain"];
   skipLookupNetwork?: boolean;
   keyExportEnabled?: boolean;
 }
@@ -37,23 +36,20 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
-    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
-    if (!config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chainConfig");
-    if (!config.chainConfig.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chainConfig");
+    const currentChain = config.getCurrentChain();
+    if (!currentChain) throw WalletInitializationError.invalidProviderConfigError("Please provide chain");
+    if (!currentChain.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chain");
+    if (!currentChain.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chain");
     if (typeof config.keyExportEnabled === "boolean") this.keyExportFlagSetByCode = true;
-    this.defaultState = {
-      chainId: "loading",
-    } as S;
+    this.defaultState = {} as S;
     this.defaultConfig = {
-      chainConfig: config.chainConfig,
-      networks: { [config.chainConfig.chainId]: config.chainConfig },
       keyExportEnabled: typeof config.keyExportEnabled === "boolean" ? config.keyExportEnabled : true,
     } as C;
     super.initialize();
   }
 
-  get currentChainConfig(): CustomChainConfig {
-    return this.config.chainConfig;
+  get currentChain(): CustomChainConfig {
+    return this.config.getCurrentChain();
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -61,7 +57,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   get chainId(): string {
-    return this.state.chainId;
+    return this.currentChain.chainId;
   }
 
   set provider(_) {
@@ -109,20 +105,6 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       .catch((err) => callback(err, null));
   }
 
-  public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw rpcErrors.invalidParams("chainId is required");
-    if (!chainConfig.rpcTarget) throw rpcErrors.invalidParams("chainId is required");
-    this.configure({
-      networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
-    } as C);
-  }
-
-  public getChainConfig(chainId: string): CustomChainConfig | null {
-    const chainConfig = this.config.networks?.[chainId];
-    if (!chainConfig) throw rpcErrors.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
-    return chainConfig;
-  }
-
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,9 +126,9 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this._providerEngineProxy;
   }
 
-  abstract setupProvider(provider: P): Promise<void>;
+  abstract setupProvider(provider: P, chainId: string): Promise<void>;
 
   abstract switchChain(params: { chainId: string }): Promise<void>;
 
-  protected abstract lookupNetwork(provider?: P): Promise<string | void>;
+  protected abstract lookupNetwork(provider?: P, chainId?: string): Promise<string | void>;
 }

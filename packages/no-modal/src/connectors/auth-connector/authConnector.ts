@@ -57,11 +57,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
+  private getCurrentChain: AuthConnectorOptions["getCurrentChain"];
+
+  private getChain: AuthConnectorOptions["getChain"];
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
     // set auth options
-    const defaultOptions = getAuthDefaultOptions();
+    const defaultOptions = getAuthDefaultOptions({
+      getCurrentChain: params.getCurrentChain,
+      getChain: params.getChain,
+    });
     log.info("setting connector settings", params.connectorSettings);
     this.authOptions = deepmerge.all([
       defaultOptions.connectorSettings,
@@ -71,6 +78,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
+    this.getCurrentChain = params.getCurrentChain;
+    this.getChain = params.getChain;
   }
 
   get provider(): IProvider | null {
@@ -132,14 +141,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.XRPL: {
         const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
         this.privateKeyProvider = new XrplPrivateKeyProvider({
-          config: { chainConfig },
+          config: { getCurrentChain: this.getCurrentChain, getChain: this.getChain },
         });
         break;
       }
       default: {
         const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
         this.privateKeyProvider = new CommonPrivateKeyProvider({
-          config: { chainConfig },
+          config: {},
         });
       }
     }
@@ -333,7 +342,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // setup private key provider if chainNamespace is other
       const finalPrivKey = this._getFinalPrivKey();
       if (finalPrivKey) {
-        await this.privateKeyProvider.setupProvider(finalPrivKey);
+        await this.privateKeyProvider.setupProvider(finalPrivKey, params.chainId);
         this.status = CONNECTOR_STATUS.CONNECTED;
         this.emit(CONNECTOR_EVENTS.CONNECTED, {
           connector: WALLET_CONNECTORS.AUTH,
@@ -346,7 +355,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 }
 
 export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn => {
-  return ({ projectConfig, coreOptions }: ConnectorParams) => {
+  return ({ projectConfig, coreOptions, getCurrentChain, getChain }: ConnectorParams) => {
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
       network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: coreOptions.clientId,
@@ -387,6 +396,8 @@ export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn =
       connectorSettings,
       walletServicesSettings: finalWsSettings,
       coreOptions,
+      getCurrentChain,
+      getChain,
     };
     return new AuthConnector(connectorOptions);
   };

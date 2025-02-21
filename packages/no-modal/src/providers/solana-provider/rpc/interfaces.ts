@@ -2,21 +2,7 @@ import { JRPCRequest } from "@web3auth/auth";
 
 import { TransactionOrVersionedTransaction } from "../interface";
 
-export interface AddSolanaChainParameter {
-  chainId: string; // A 0x-prefixed hexadecimal string
-  chainName: string;
-  nativeCurrency: {
-    name: string;
-    symbol: string; // 2-6 characters long
-    decimals: 18;
-  };
-  rpcUrls: string[];
-  blockExplorerUrls?: string[];
-  iconUrls?: string[];
-}
-
 export interface ISolanaChainSwitchHandlers {
-  addNewChainConfig: (req: JRPCRequest<AddSolanaChainParameter>) => Promise<void>;
   switchSolanaChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
 }
 

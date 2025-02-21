@@ -4,7 +4,7 @@ import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import base58 from "bs58";
 
 import { WalletLoginError } from "@/core/base";
-import type { AddEthereumChainParameter, IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
+import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
 import type { ISolanaProviderHandlers, TransactionOrVersionedTransaction } from "@/core/solana-provider";
 
 import { SOLANA_CAIP_CHAIN_MAP } from "./config";
@@ -169,16 +169,4 @@ export async function switchChain({
   newChainId: string;
 }): Promise<void> {
   await sendJrpcRequest<string, { chainId: string }[]>(connector, `eip155:${chainId}`, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
-}
-
-export async function addChain({
-  connector,
-  chainId,
-  chainConfig,
-}: {
-  connector: ISignClient;
-  chainId: number;
-  chainConfig: AddEthereumChainParameter;
-}): Promise<void> {
-  await sendJrpcRequest<string, AddEthereumChainParameter[]>(connector, `eip155:${chainId}`, "wallet_addEthereumChain", [chainConfig]);
 }

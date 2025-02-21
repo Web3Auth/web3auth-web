@@ -123,7 +123,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public async init(): Promise<void> {
     // setup common JRPC provider
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({ chainConfig: this.currentChain });
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
+      getCurrentChain: this.getCurrentChain.bind(this),
+      getChain: this.getChain.bind(this),
+    });
 
     // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
@@ -168,8 +171,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
       await this.connectedConnector.switchChain(params);
-      // only update chain state in commonJRPCProvider instead of switchChain in provider inside commonJRPCProvider
-      this.commonJRPCProvider?.updateChain(newChainConfig);
       this.setCurrentChain(params.chainId);
       return;
     }
@@ -250,6 +251,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.currentChain;
   }
 
+  public getChain(chainId: string): CustomChainConfig | undefined {
+    return this.coreOptions.chains.find((chain) => chain.chainId === chainId);
+  }
+
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
   }
@@ -264,7 +269,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }) {
     // always add auth connector
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
-    const config = { projectConfig, coreOptions: this.coreOptions };
+    const config = {
+      projectConfig,
+      coreOptions: this.coreOptions,
+      getCurrentChain: this.getCurrentChain.bind(this),
+      getChain: this.getChain.bind(this),
+    };
 
     // add injected connectors
     const isMipdEnabled = this.coreOptions.multiInjectedProviderDiscovery ?? true;
@@ -336,7 +346,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.coreOptions.accountAbstractionProvider &&
         (data.connector === WALLET_CONNECTORS.AUTH || (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet))
       ) {
-        await this.coreOptions.accountAbstractionProvider.setupProvider(provider); // Don't change this to finalProvider
+        await this.coreOptions.accountAbstractionProvider.setupProvider(provider, this.currentChain.chainId); // Don't change this to finalProvider, this need eoaProvider
         finalProvider = this.coreOptions.accountAbstractionProvider;
       }
 

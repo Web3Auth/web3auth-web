@@ -1,6 +1,6 @@
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@web3auth/auth";
 
-import { CustomChainConfig, WalletLoginError } from "@/core/base";
+import { WalletLoginError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 
 import { ISolanaProviderHandlers } from "../../../rpc";
@@ -16,14 +16,15 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
     throw WalletLoginError.unsupportedOperation("Chain switching is not supported by this connector");
   }
 
-  public async setupProvider(injectedProvider: P): Promise<void> {
+  public async setupProvider(injectedProvider: P, chainId: string): Promise<void> {
     const engine = new JRPCEngine();
+    const chain = this.config.getChain(chainId);
 
     const providerHandlers = this.getProviderHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     engine.push(solanaMiddleware);
 
-    const configMiddleware = createConfigMiddleware(this.config.chainConfig as CustomChainConfig);
+    const configMiddleware = createConfigMiddleware(chain);
     engine.push(configMiddleware);
 
     const injectedProviderProxy = this.getInjectedProviderProxy(injectedProvider);
@@ -33,15 +34,11 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
 
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-    await this.lookupNetwork();
+    await this.lookupNetwork(injectedProvider, chainId);
   }
 
-  protected async lookupNetwork(): Promise<string> {
-    const { chainConfig } = this.config;
-    this.update({
-      chainId: chainConfig.chainId,
-    });
-    return chainConfig.chainId || "";
+  protected async lookupNetwork(_injectedProvider: P, chainId: string): Promise<string> {
+    return chainId || "";
   }
 
   protected getInjectedProviderProxy(_: P): JRPCMiddleware<unknown, unknown> {

@@ -59,7 +59,6 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 
   return new AccountAbstractionProvider({
     config: {
-      chainConfig,
       bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
       paymasterConfig: formData.paymasterUrl
         ? {
