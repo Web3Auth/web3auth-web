@@ -1,22 +1,23 @@
-import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
+import {
+  type AccountAbstractionConfig,
+  type BiconomySmartAccountConfig,
+  type BundlerConfig,
+  type ISmartAccount,
+  type KernelSmartAccountConfig,
+  type NexusSmartAccountConfig,
+  type PaymasterConfig,
+  type SafeSmartAccountConfig,
+  SMART_ACCOUNT,
+  type TrustSmartAccountConfig,
+} from "@toruslabs/ethereum-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { type Client, createPublicClient, defineChain, http } from "viem";
+import { type Client, createPublicClient, defineChain, EIP1193Provider, http } from "viem";
 import { type BundlerClient, createBundlerClient, createPaymasterClient, type PaymasterClient, type SmartAccount } from "viem/account-abstraction";
 
 import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "@/core/base";
 
 import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../base-provider";
 import { createAaMiddleware, eoaProviderAsMiddleware } from "../rpc/ethRpcMiddlewares";
-import {
-  BiconomySmartAccountConfig,
-  ISmartAccount,
-  KernelSmartAccountConfig,
-  NexusSmartAccountConfig,
-  SafeSmartAccountConfig,
-  TrustSmartAccountConfig,
-} from "./smartAccounts";
-import { SMART_ACCOUNT } from "./smartAccounts/constants";
-import { type BundlerConfig, type PaymasterConfig } from "./types";
 import { getProviderHandlers } from "./utils";
 
 interface AccountAbstractionProviderConfig extends BaseProviderConfig {
@@ -110,7 +111,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       transport: http(this.config.chainConfig.rpcTarget),
     }) as Client;
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
-      owner: eoaProvider,
+      owner: eoaProvider as EIP1193Provider,
       client: this._publicClient,
     });
 
@@ -187,42 +188,32 @@ export const accountAbstractionProvider = async ({
   const { smartAccountType, smartAccountConfig, bundlerConfig, paymasterConfig } = accountAbstractionConfig;
   switch (smartAccountType) {
     case SMART_ACCOUNT.BICONOMY: {
-      const { BiconomySmartAccount } = await import("@/core/account-abstraction-provider");
+      const { BiconomySmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new BiconomySmartAccount(smartAccountConfig as BiconomySmartAccountConfig);
       break;
     }
     case SMART_ACCOUNT.KERNEL: {
-      const { KernelSmartAccount } = await import("@/core/account-abstraction-provider");
+      const { KernelSmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new KernelSmartAccount(smartAccountConfig as KernelSmartAccountConfig);
       break;
     }
     case SMART_ACCOUNT.NEXUS: {
-      const { NexusSmartAccount } = await import("@/core/account-abstraction-provider");
+      const { NexusSmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new NexusSmartAccount(smartAccountConfig as NexusSmartAccountConfig);
       break;
     }
     case SMART_ACCOUNT.SAFE: {
-      const { SafeSmartAccount } = await import("@/core/account-abstraction-provider");
+      const { SafeSmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new SafeSmartAccount(smartAccountConfig as SafeSmartAccountConfig);
       break;
     }
     case SMART_ACCOUNT.TRUST: {
-      const { TrustSmartAccount } = await import("@/core/account-abstraction-provider");
+      const { TrustSmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new TrustSmartAccount(smartAccountConfig as TrustSmartAccountConfig);
       break;
     }
-    // case SMART_ACCOUNT.LIGHT: {
-    //   const { LightSmartAccount } = await import("@/core/account-abstraction-provider");
-    //   smartAccountInit = new LightSmartAccount();
-    //   break;
-    // }
-    // case SMART_ACCOUNT.SIMPLE: {
-    //   const { SimpleSmartAccount } = await import("@/core/account-abstraction-provider");
-    //   smartAccountInit = new SimpleSmartAccount();
-    //   break;
-    // }
     default:
-      throw new Error("Invalid smart account type");
+      throw new Error("Smart account type not supported");
   }
   return AccountAbstractionProvider.getProviderInstance({
     eoaProvider: provider,
