@@ -12,6 +12,8 @@ import { SmartAccount } from "viem/account-abstraction";
 
 import { IBaseSmartAccount, IProvider } from "@/core/base";
 
+import { SMART_ACCOUNT } from "./constants";
+
 export type BiconomySmartAccountConfig = Pick<ToBiconomySmartAccountParameters, "entryPoint" | "ecdsaModuleAddress" | "factoryAddress">;
 
 export type KernelSmartAccountParameters = Parameters<typeof toEcdsaKernelSmartAccount>[0]; // use type of function so we don't need to pass in generic to parameter type
@@ -48,3 +50,5 @@ export interface ISmartAccount extends IBaseSmartAccount {
     | SimpleSmartAccountConfig;
   getSmartAccount(params: { owner: IProvider; client: Client }): Promise<SmartAccount>;
 }
+
+export type SmartAccountType = (typeof SMART_ACCOUNT)[keyof typeof SMART_ACCOUNT];

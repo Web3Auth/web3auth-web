@@ -5,6 +5,7 @@ export * from "./SafeSmartAccount";
 export * from "./TrustSmartAccount";
 // export * from "./LightSmartAccount";
 // export * from "./SimpleSmartAccount";
+export * from "./constants";
 export * from "./types";
 // TODO: enable trust smart account once permissionless fixes the issue with 0.6 accounts
 // https://github.com/pimlicolabs/permissionless.js/issues/287

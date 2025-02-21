@@ -1,6 +1,5 @@
 import {
-  AccountAbstractionProvider,
-  BaseConnectorConfig,
+  type BaseConnectorConfig,
   cloneDeep,
   CommonJRPCProvider,
   CONNECTOR_CATEGORY,
@@ -9,23 +8,31 @@ import {
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
-  IProvider,
-  IWeb3AuthCoreOptions,
+  type IProvider,
+  type IWeb3AuthCoreOptions,
   log,
   LOGIN_PROVIDER,
-  LoginMethodConfig,
-  PROJECT_CONFIG_RESPONSE,
-  WALLET_CONNECTOR_TYPE,
+  type LoginMethodConfig,
+  type PROJECT_CONFIG_RESPONSE,
+  type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
-  WalletRegistry,
+  type WalletRegistry,
   Web3AuthNoModal,
 } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 
 import { defaultOtherModalConfig, walletRegistryUrl } from "./config";
-import { ConnectorsModalConfig, IWeb3AuthModal, ModalConfig, ModalConfigParams } from "./interface";
-import { AUTH_PROVIDERS, capitalizeFirstLetter, getConnectorSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, UIConfig } from "./ui";
+import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig, type ModalConfigParams } from "./interface";
+import {
+  AUTH_PROVIDERS,
+  capitalizeFirstLetter,
+  getConnectorSocialLogins,
+  getUserLanguage,
+  LOGIN_MODAL_EVENTS,
+  LoginModal,
+  type UIConfig,
+} from "./ui";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -113,7 +120,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       projectConfig = await fetchProjectConfig(
         this.options.clientId,
         this.options.web3AuthNetwork,
-        (this.options.accountAbstractionProvider as AccountAbstractionProvider)?.config.smartAccountInit.name
+        this.options.accountAbstractionConfig?.smartAccountType
       );
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
