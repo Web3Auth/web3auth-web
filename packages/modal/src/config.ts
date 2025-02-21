@@ -5,12 +5,6 @@ import { ConnectorsModalConfig } from "./interface";
 export const defaultSolanaDappModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
   connectors: {
-    [SOLANA_CONNECTORS.TORUS_SOLANA]: {
-      label: "Torus Wallet",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
     [SOLANA_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
@@ -23,12 +17,6 @@ export const defaultSolanaDappModalConfig: ConnectorsModalConfig = {
 export const defaultEvmDappModalConfig: ConnectorsModalConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   connectors: {
-    [EVM_CONNECTORS.TORUS_EVM]: {
-      label: "Torus Wallet",
-      showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
-    },
     [EVM_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,

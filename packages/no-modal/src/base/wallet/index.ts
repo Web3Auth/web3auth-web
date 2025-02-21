@@ -5,12 +5,10 @@ export const MULTI_CHAIN_CONNECTORS = {
 };
 
 export const SOLANA_CONNECTORS = {
-  TORUS_SOLANA: "torus-solana",
   ...MULTI_CHAIN_CONNECTORS,
 };
 
 export const EVM_CONNECTORS = {
-  TORUS_EVM: "torus-evm",
   COINBASE: "coinbase",
   ...MULTI_CHAIN_CONNECTORS,
 };
@@ -28,7 +26,5 @@ export const CONNECTOR_NAMES = {
   [MULTI_CHAIN_CONNECTORS.AUTH]: "Auth",
   [MULTI_CHAIN_CONNECTORS.WALLET_CONNECT_V2]: "Wallet Connect v2",
   [MULTI_CHAIN_CONNECTORS.SFA]: "SFA",
-  [SOLANA_CONNECTORS.TORUS_SOLANA]: "Torus",
-  [EVM_CONNECTORS.TORUS_EVM]: "Torus",
   [EVM_CONNECTORS.COINBASE]: "Coinbase Smart Wallet",
 };
