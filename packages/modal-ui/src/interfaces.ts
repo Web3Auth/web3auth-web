@@ -12,6 +12,17 @@ import {
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
   /**
+   * Whether to use the modal or embed widget
+   *
+   * @defaultValue `modal`
+   */
+  widget?: "modal" | "embed";
+  /**
+   * ID of the element to embed the widget into
+   */
+  targetId?: string;
+
+  /**
    * order of how login methods are shown
    *
    * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`

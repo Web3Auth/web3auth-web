@@ -63,6 +63,7 @@ const Login = (props: LoginProps) => {
 
   const handleExpand = () => {
     setExpand((prev) => !prev);
+    setIsPasswordlessCtaClicked(false);
   };
 
   createEffect(() => {
@@ -102,7 +103,7 @@ const Login = (props: LoginProps) => {
           method,
           isDark: props.isDark,
           isPrimaryBtn,
-          name,
+          name: name === "Twitter" ? "X" : name,
           adapter: props.socialLoginsConfig.adapter,
           loginParams: { loginProvider: method, name, login_hint: "" },
           order,

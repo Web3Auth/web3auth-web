@@ -35,7 +35,7 @@ import {
 import { changeLocale } from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
 
-function createWrapper(parentZIndex: string) {
+function createWrapperForModal(parentZIndex: string) {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
   const parent = document.createElement("section");
@@ -44,6 +44,15 @@ function createWrapper(parentZIndex: string) {
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
   document.body.appendChild(parent);
+}
+
+function createWrapperForEmbed(targetId: string) {
+  const targetElement = document.getElementById(targetId);
+  if (!targetElement) {
+    log.error(`Element with ID ${targetId} not found`);
+    return;
+  }
+  targetElement.innerHTML = `<div id="w3a-parent-container" class="w3a-parent-container"></div>`;
 }
 
 export class LoginModal extends SafeEventEmitter {
@@ -55,7 +64,7 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps) {
+  constructor(uiConfig: LoginModalProps & { widget?: "modal" | "embed"; targetId?: string }) {
     super();
     this.uiConfig = uiConfig;
 
@@ -68,6 +77,12 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+    if (!uiConfig.widget) this.uiConfig.widget = "embed";
+    if (!uiConfig.targetId) this.uiConfig.targetId = "w3a-parent-test-container";
+
+    if (uiConfig.widget === "embed" && !uiConfig.targetId) {
+      throw new Error("targetId is required for embed widget");
+    }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.chainNamespace = uiConfig.chainNamespace;
@@ -94,9 +109,14 @@ export class LoginModal extends SafeEventEmitter {
         return resolve();
       });
 
-      createWrapper(this.uiConfig.modalZIndex);
+      if (this.uiConfig.widget === "modal") {
+        createWrapperForModal(this.uiConfig.modalZIndex);
+      } else {
+        createWrapperForEmbed(this.uiConfig.targetId);
+      }
 
       const root = document.getElementById("w3a-parent-container");
+
       if (darkState.isDark) {
         root?.classList.add("w3a--dark");
       } else {
@@ -120,6 +140,7 @@ export class LoginModal extends SafeEventEmitter {
               appName={this.uiConfig.appName}
               chainNamespace={this.chainNamespace}
               walletRegistry={this.walletRegistry}
+              widget={this.uiConfig.widget}
             />
           </ThemedContext.Provider>
         ),

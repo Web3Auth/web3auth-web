@@ -1,12 +1,13 @@
 import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
 import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WALLET_ADAPTERS, WalletRegistry } from "@web3auth/base/src";
 import deepmerge from "deepmerge";
-import { createEffect, createMemo, createSignal, on } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, on, Suspense, Switch } from "solid-js";
 
 import { PAGES } from "../../constants";
 import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../../interfaces";
 import { Body } from "../Body";
 import { Modal } from "../Modal";
+import { Widget } from "../Widget";
 
 export interface LoginModalProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
@@ -18,6 +19,7 @@ export interface LoginModalProps {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
+  widget?: "modal" | "embed";
 }
 
 const LoginModal = (props: LoginModalProps) => {
@@ -176,27 +178,56 @@ const LoginModal = (props: LoginModalProps) => {
   );
 
   return (
-    <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>
-      <Body
-        {...props}
-        showPasswordLessInput={showPasswordLessInput()}
-        showExternalWalletButton={showExternalWalletButton()}
-        handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-        socialLoginsConfig={modalState().socialLoginsConfig}
-        areSocialLoginsVisible={areSocialLoginsVisible()}
-        isEmailPrimary={isEmailPrimary()}
-        isExternalPrimary={isExternalPrimary()}
-        showExternalWalletPage={showExternalWalletPage()}
-        handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-        modalState={modalState()}
-        preHandleExternalWalletClick={preHandleExternalWalletClick}
-        setModalState={setModalState}
-        onCloseLoader={onCloseLoader}
-        isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible()}
-        isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible()}
-        handleBackClick={handleBackClick}
-      />
-    </Modal>
+    <Suspense>
+      <Switch>
+        <Match when={props.widget === "modal"}>
+          <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>
+            <Body
+              {...props}
+              showPasswordLessInput={showPasswordLessInput()}
+              showExternalWalletButton={showExternalWalletButton()}
+              handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+              socialLoginsConfig={modalState().socialLoginsConfig}
+              areSocialLoginsVisible={areSocialLoginsVisible()}
+              isEmailPrimary={isEmailPrimary()}
+              isExternalPrimary={isExternalPrimary()}
+              showExternalWalletPage={showExternalWalletPage()}
+              handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+              modalState={modalState()}
+              preHandleExternalWalletClick={preHandleExternalWalletClick}
+              setModalState={setModalState}
+              onCloseLoader={onCloseLoader}
+              isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible()}
+              isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible()}
+              handleBackClick={handleBackClick}
+            />
+          </Modal>
+        </Match>
+        <Match when={props.widget === "embed"}>
+          <Widget padding={false}>
+            <Body
+              {...props}
+              showPasswordLessInput={showPasswordLessInput()}
+              showExternalWalletButton={showExternalWalletButton()}
+              handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+              socialLoginsConfig={modalState().socialLoginsConfig}
+              areSocialLoginsVisible={areSocialLoginsVisible()}
+              isEmailPrimary={isEmailPrimary()}
+              isExternalPrimary={isExternalPrimary()}
+              showExternalWalletPage={showExternalWalletPage()}
+              handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+              modalState={modalState()}
+              preHandleExternalWalletClick={preHandleExternalWalletClick}
+              setModalState={setModalState}
+              onCloseLoader={onCloseLoader}
+              isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible()}
+              isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible()}
+              handleBackClick={handleBackClick}
+            />
+          </Widget>
+        </Match>
+      </Switch>
+    </Suspense>
   );
 };
 
