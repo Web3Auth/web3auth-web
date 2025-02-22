@@ -160,6 +160,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public clearCache() {
     if (!storageAvailable(this.storage)) return;
     window[this.storage].removeItem(CONNECTOR_CACHE_KEY);
+    window[this.storage].removeItem(CURRENT_CHAIN_CACHE_KEY);
     this.cachedConnector = null;
   }
 
