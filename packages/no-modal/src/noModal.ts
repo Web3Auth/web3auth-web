@@ -349,7 +349,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.coreOptions.useAAWithExternalWallet
       ) {
         const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
-        const aaProvider = await accountAbstractionProvider({ accountAbstractionConfig, chainConfig: this.currentChain, provider });
+        const aaProvider = await accountAbstractionProvider({
+          accountAbstractionConfig,
+          provider,
+          getCurrentChain: this.getCurrentChain.bind(this),
+          getChain: this.getChain.bind(this),
+        });
         finalProvider = aaProvider;
         // TODO: when switching chains to Solana or other chains, we need to switch to the non-AA provider
       }

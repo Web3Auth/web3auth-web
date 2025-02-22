@@ -60,13 +60,9 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     return this._publicClient;
   }
 
-  public static getProviderInstance = async (params: {
-    eoaProvider: IProvider;
-    smartAccountInit: ISmartAccount;
-    chainConfig: CustomChainConfig;
-    bundlerConfig: BundlerConfig;
-    paymasterConfig?: PaymasterConfig;
-  }): Promise<AccountAbstractionProvider> => {
+  public static getProviderInstance = async (
+    params: AccountAbstractionProviderConfig & { eoaProvider: IProvider }
+  ): Promise<AccountAbstractionProvider> => {
     const providerFactory = new AccountAbstractionProvider({ config: params });
     await providerFactory.setupProvider(params.eoaProvider);
     providerFactory.update({ eoaProvider: params.eoaProvider });
@@ -173,11 +169,13 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
 
 export const accountAbstractionProvider = async ({
   accountAbstractionConfig,
-  chainConfig,
+  getCurrentChain,
+  getChain,
   provider,
 }: {
   accountAbstractionConfig: AccountAbstractionConfig;
-  chainConfig: CustomChainConfig;
+  getCurrentChain: () => CustomChainConfig;
+  getChain: (chainId: string) => CustomChainConfig | undefined;
   provider: IProvider;
 }) => {
   let smartAccountInit: ISmartAccount;
@@ -214,7 +212,8 @@ export const accountAbstractionProvider = async ({
   return AccountAbstractionProvider.getProviderInstance({
     eoaProvider: provider,
     smartAccountInit,
-    chainConfig,
+    getCurrentChain,
+    getChain,
     bundlerConfig,
     paymasterConfig,
   });
