@@ -250,13 +250,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    const currentChainId = this.provider.chainId;
     // TODO: handle when chainIds are the same
     // TODO: need to handle switching to a different chain namespace
 
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === currentChainId);
-    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-    const { chainNamespace } = chainConfig;
+    const newChain = this.getChain(params.chainId);
+    if (!newChain) throw WalletLoginError.connectionError("Chain config is not available");
+    const { chainNamespace } = newChain;
 
     if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
       await this.wsEmbedInstance.provider?.request({
