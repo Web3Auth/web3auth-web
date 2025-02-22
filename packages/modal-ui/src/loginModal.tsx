@@ -18,7 +18,7 @@ import {
 } from "@web3auth/base";
 import { render } from "solid-js/web";
 
-import { LoginModal as Modal } from "./components/LoginModal";
+import { Widget } from "./components/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
@@ -130,7 +130,7 @@ export class LoginModal extends SafeEventEmitter {
       render(
         () => (
           <ThemedContext.Provider value={darkState}>
-            <Modal
+            <Widget
               closeModal={this.closeModal}
               stateListener={this.stateEmitter}
               handleShowExternalWallets={this.handleShowExternalWallets}
