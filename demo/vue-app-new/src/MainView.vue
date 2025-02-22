@@ -8,26 +8,33 @@ import { computed, onBeforeMount, ref, watch } from "vue";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
+import { allChains, chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
 
 const externalConnectors = ref<ConnectorFn[]>([]);
 
-const chainOptions = computed(() =>
-  chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
-    name: `${x.chainId} ${x.tickerName}`,
-    value: x.chainId,
-  }))
-);
+const chainOptions = computed(() => {
+  const allChains: { name: string; value: string; }[] = [];
+  formData.chainNamespaces.forEach((namespace: ChainNamespaceType) => {
+    const chainsForNamespace = chainConfigs[namespace].map((x) => ({
+      name: `${x.chainId} ${x.tickerName}`,
+      value: x.chainId,
+    }));
+    allChains.push(...chainsForNamespace);
+  });
+  return allChains;
+});
 
-const showAAProviderSettings = computed(() => formData.chainNamespace === CHAIN_NAMESPACES.EIP155);
+const showAAProviderSettings = computed(() => formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155));
 
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+  // TODO: AA config need multi chain support
+  const evmChains = chainConfigs[CHAIN_NAMESPACES.EIP155].filter((x) => formData.chains.includes(x.chainId));
+  const firstEvmChain = evmChains[0];
 
   // Account Abstraction
   const { useAccountAbstractionProvider } = formData;
@@ -36,7 +43,7 @@ const options = computed((): Web3AuthOptions => {
     accountAbstractionConfig = {
       smartAccountType: formData.smartAccountType as string,
       smartAccountConfig: undefined,
-      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(chainConfig.chainId) },
+      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(firstEvmChain.chainId) },
       paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
     }
   }
@@ -55,7 +62,7 @@ const options = computed((): Web3AuthOptions => {
     };
   }
 
-
+  const chains = formData.chains.map((chainId) => allChains.find((x) => x.chainId === chainId)!);
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
@@ -69,7 +76,7 @@ const options = computed((): Web3AuthOptions => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     // chainConfig,
-    chains: [chainConfig, chainConfigs.eip155.find((x) => x.chainId === "0xaa36a7")!],
+    chains,
     enableLogging: true,
     connectors: externalConnectors.value,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
@@ -117,8 +124,8 @@ onBeforeMount(() => {
         // console.log("storedValue", storedValue);
         const json = JSON.parse(storedValue);
         formData.connectors = json.connectors;
-        formData.chain = json.chain;
-        formData.chainNamespace = json.chainNamespace;
+        formData.chains = json.chains;
+        formData.chainNamespaces = json.chainNamespaces;
         formData.loginProviders = json.loginProviders;
         formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.multiInjectedProviderDiscovery = json.multiInjectedProviderDiscovery;
@@ -133,7 +140,7 @@ onBeforeMount(() => {
       }
     } catch (error) { }
   }
-  if (!chainOptions.value.find((option) => option.value === formData.chain)) formData.chain = chainOptions.value[0]?.value;
+  if (!chainOptions.value.find((option) => option.value === formData.chains[0])) formData.chains = [chainOptions.value[0]?.value];
 });
 
 watch(formData, () => {
@@ -154,8 +161,8 @@ watch(
 
 const configs = computed<Web3AuthContextConfig>(() => {
   const plugins = [];
-  if (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-    if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+  if (formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)) {
+    if (formData.nftCheckoutPlugin.enable && formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)) {
       const nftCheckoutPlugin = new NFTCheckoutPlugin({
         clientId: NFT_CHECKOUT_CLIENT_ID,
       });

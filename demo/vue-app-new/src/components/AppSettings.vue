@@ -18,16 +18,20 @@ import { formDataStore } from "../store/form";
 const formData = formDataStore;
 
 const { status, isConnected, isInitialized, connect } = useWeb3Auth();
-
-const chainOptions = computed(() =>
-  chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
-    name: `${x.chainId} ${x.tickerName}`,
-    value: x.chainId,
-  }))
-);
+const chainOptions = computed(() => {
+  const allChains: { name: string; value: string; }[] = [];
+  formData.chainNamespaces.forEach((namespace: ChainNamespaceType) => {
+    const chainsForNamespace = chainConfigs[namespace].map((x) => ({
+      name: `${x.chainId} ${x.tickerName}`,
+      value: x.chainId,
+    }));
+    allChains.push(...chainsForNamespace);
+  });
+  return allChains;
+});
 
 const adapterOptions = computed(() =>
-  formData.chainNamespace === CHAIN_NAMESPACES.EIP155
+  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
@@ -47,10 +51,10 @@ const isDisabled = (name: string): boolean => {
       return !formData.whiteLabel.enable;
 
     case "walletServicePlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 && formData.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) && !formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA);
 
     case "nftCheckoutPlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155);
 
     case "btnConnect":
       return !isInitialized.value;
@@ -62,7 +66,7 @@ const isDisabled = (name: string): boolean => {
       return !formData.useAccountAbstractionProvider;
 
     case "accountAbstraction":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155);
 
     default: {
       return false;
@@ -76,9 +80,11 @@ const onTabChange = (index: number) => {
 };
 const isActiveTab = (index: number) => activeTab.value === index;
 
-const onChainNamespaceChange = (value: string) => {
+const onChainNamespaceChange = (value: string[]) => {
   log.info("onChainNamespaceChange", value);
-  formData.chain = chainConfigs[value as ChainNamespaceType][0].chainId;
+  formData.chains = value.map((namespace) => 
+    chainConfigs[namespace as ChainNamespaceType][0].chainId
+  );
   formData.connectors = [];
 };
 </script>
@@ -102,17 +108,17 @@ const onChainNamespaceChange = (value: string) => {
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
         <Tab
-          v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA"
+          v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)"
           variant="underline"
           :active="isActiveTab(3)"
           @click="onTabChange(3)"
         >
           Wallet Plugin
         </Tab>
-        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
+        <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
           NFT Checkout Plugin
         </Tab>
-        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
+        <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
           Account Abstraction Provider
         </Tab>
       </Tabs>
@@ -126,20 +132,22 @@ const onChainNamespaceChange = (value: string) => {
           :options="networkOptions"
         />
         <Select
-          v-model="formData.chainNamespace"
+          v-model="formData.chainNamespaces"
           data-testid="selectChainNamespace"
           :label="$t('app.chainNamespace')"
           :aria-label="$t('app.chainNamespace')"
           :placeholder="$t('app.chainNamespace')"
           :options="chainNamespaceOptions"
+          :multiple="true"
           @update:model-value="onChainNamespaceChange"
         />
         <Select
-          v-model="formData.chain"
+          v-model="formData.chains"
           data-testid="selectChain"
           :label="$t('app.chain')"
           :aria-label="$t('app.chain')"
           :placeholder="$t('app.chain')"
+          :multiple="true"
           :options="chainOptions"
         />
         <Select

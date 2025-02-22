@@ -104,6 +104,8 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.OTHER]: [],
 };
 
+export const allChains = Object.values(chainConfigs).flat();
+
 export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
   [WEB3AUTH_NETWORK.MAINNET]: "BJRZ6qdDTbj6Vd5YXvV994TYCqY42-PxldCetmvGTUdoq6pkCqdpuC1DIehz76zuYdaq1RJkXGHuDraHRhCQHvA",
   [WEB3AUTH_NETWORK.TESTNET]: "BHr_dKcxC0ecKn_2dZQmQeNdjPgWykMkcodEHkVvPMo71qzOV6SgtoN8KCvFdLN7bf34JOm89vWQMLFmSfIo84A",
@@ -181,8 +183,8 @@ export const getDefaultBundlerUrl = (chainId: string): string => {
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
-  chainNamespace: ChainNamespaceType;
-  chain: string;
+  chainNamespaces: ChainNamespaceType[];
+  chains: string[];
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
