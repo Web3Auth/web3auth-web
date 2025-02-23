@@ -107,6 +107,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError) => void;
   [CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED]: (data: IConnectorDataEvent) => void;
   [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
+  [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
 };
 
 export interface BaseConnectorConfig {

@@ -1,5 +1,4 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
-import { createStore } from "zustand/vanilla";
 
 import { authConnector } from "@/core/auth-connector";
 import {
@@ -50,14 +49,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public currentChain: CustomChainConfig;
 
-  protected commonJRPCProvider: CommonJRPCProvider | null = null;
+  protected connectors: IConnector<unknown>[] = [];
 
-  protected connectorStore = createStore<{ connectors: IConnector<unknown>[]; setConnectors: (connectors: IConnector<unknown>[]) => void }>(
-    (set) => ({
-      connectors: [] as IConnector<unknown>[],
-      setConnectors: (connectors: IConnector<unknown>[]) => set({ connectors }),
-    })
-  );
+  protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
   private plugins: Record<string, IPlugin> = {};
 
@@ -108,10 +102,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return null;
   }
 
-  get connectors(): IConnector<unknown>[] {
-    return this.connectorStore.getState().connectors;
-  }
-
   get connectedConnector(): IConnector<unknown> | null {
     return this.connectors.find((connector) => connector.name === this.connectedConnectorName) || null;
   }
@@ -141,7 +131,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // initialize connectors
-    this.connectorStore.subscribe(async () => {
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async () => {
       await Promise.all(this.connectors.map(this.setupConnector));
 
       // emit connector ready event
@@ -332,7 +322,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return connector;
       })
       .filter((connector) => connector !== null);
-    this.connectorStore.getState().setConnectors(newConnectors);
+    this.connectors = [...this.connectors, ...newConnectors];
+    this.emit(CONNECTOR_EVENTS.CONNECTORS_UPDATED, { connectors: this.connectors });
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
