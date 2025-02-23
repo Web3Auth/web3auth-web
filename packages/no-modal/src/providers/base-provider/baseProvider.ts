@@ -4,7 +4,6 @@ import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/au
 import {
   CustomChainConfig,
   IBaseProvider,
-  IWeb3Auth,
   Maybe,
   RequestArguments,
   SafeEventEmitterProvider,
@@ -14,11 +13,13 @@ import {
 
 import { BaseProviderEvents } from "./interfaces";
 
-export interface BaseProviderState extends BaseState {}
+export interface BaseProviderState extends BaseState {
+  chainId: string;
+}
 
 export interface BaseProviderConfig extends BaseConfig {
-  getCurrentChain?: IWeb3Auth["getCurrentChain"];
-  getChain?: IWeb3Auth["getChain"];
+  chain: CustomChainConfig;
+  chains: CustomChainConfig[];
   skipLookupNetwork?: boolean;
   keyExportEnabled?: boolean;
 }
@@ -36,20 +37,24 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
-    const currentChain = config.getCurrentChain();
-    if (!currentChain) throw WalletInitializationError.invalidProviderConfigError("Please provide chain");
-    if (!currentChain.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chain");
-    if (!currentChain.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chain");
+    const { chain } = config;
+    if (!chain) throw WalletInitializationError.invalidProviderConfigError("Please provide chain");
+    if (!chain.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chain");
+    if (!chain.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chain");
     if (typeof config.keyExportEnabled === "boolean") this.keyExportFlagSetByCode = true;
-    this.defaultState = {} as S;
+    this.defaultState = {
+      chainId: "loading",
+    } as S;
     this.defaultConfig = {
+      chain: config.chain,
+      chains: config.chains,
       keyExportEnabled: typeof config.keyExportEnabled === "boolean" ? config.keyExportEnabled : true,
     } as C;
     super.initialize();
   }
 
   get currentChain(): CustomChainConfig {
-    return this.config.getCurrentChain();
+    return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
   }
 
   get provider(): SafeEventEmitterProvider | null {
@@ -57,7 +62,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   get chainId(): string {
-    return this.currentChain.chainId;
+    return this.state.chainId;
   }
 
   set provider(_) {
@@ -124,6 +129,10 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
     return this._providerEngineProxy;
+  }
+
+  protected getChain(chainId: string): CustomChainConfig {
+    return this.config.chains.find((chain) => chain.chainId === chainId);
   }
 
   abstract setupProvider(provider: P, chainId: string): Promise<void>;

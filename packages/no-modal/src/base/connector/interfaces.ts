@@ -13,7 +13,7 @@ import {
 } from "@web3auth/auth";
 
 import { ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { IWeb3Auth, IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
+import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
 import { PROJECT_CONFIG_RESPONSE } from "../interfaces";
 import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
@@ -42,8 +42,6 @@ export type UserAuthInfo = { idToken: string };
 
 export interface BaseConnectorSettings {
   coreOptions: IWeb3AuthCoreOptions;
-  getCurrentChain: IWeb3Auth["getCurrentChain"];
-  getChain: IWeb3Auth["getChain"];
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {
@@ -85,8 +83,6 @@ export interface IConnector<T> extends SafeEventEmitter {
 export type ConnectorParams = {
   projectConfig?: PROJECT_CONFIG_RESPONSE;
   coreOptions: IWeb3AuthCoreOptions;
-  getCurrentChain: IWeb3Auth["getCurrentChain"];
-  getChain: IWeb3Auth["getChain"];
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;

@@ -1,7 +1,7 @@
 import { isHexString } from "@ethereumjs/util";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 
 import { createEthAccountMiddleware, createEthChainSwitchMiddleware, createEthMiddleware } from "../../rpc/ethRpcMiddlewares";
@@ -25,25 +25,25 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
   public static getProviderInstance = async (params: {
     privKey: string;
-    getChain: BaseProviderConfig["getChain"];
-    getCurrentChain: BaseProviderConfig["getCurrentChain"];
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
   }): Promise<EthereumPrivateKeyProvider> => {
-    const providerFactory = new EthereumPrivateKeyProvider({ config: { getChain: params.getChain, getCurrentChain: params.getCurrentChain } });
-    await providerFactory.setupProvider(params.privKey, params.getCurrentChain().chainId);
+    const providerFactory = new EthereumPrivateKeyProvider({ config: { chain: params.chain, chains: params.chains } });
+    await providerFactory.setupProvider(params.privKey, params.chain.chainId);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
       throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.privateKey, this.config.getCurrentChain().chainId);
+    await this.setupProvider(this.state.privateKey, this.chainId);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
   public async setupProvider(privKey: string, chainId: string): Promise<void> {
-    const currentChain = this.config.getChain(chainId);
-    if (!currentChain) throw providerErrors.custom({ message: "Chain not found", code: 4902 });
-    const { chainNamespace } = currentChain;
+    const chain = this.getChain(chainId);
+    if (!chain) throw providerErrors.custom({ message: "Chain not found", code: 4902 });
+    const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const txFormatter = new TransactionFormatter({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
@@ -58,7 +58,7 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
     // Not a partial anymore because of checks in ctor
-    const { networkMiddleware } = createEthJsonRpcClient(currentChain);
+    const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
     engine.push(chainSwitchMiddleware);
     engine.push(this.getAccountMiddleware());
@@ -70,13 +70,15 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
 
     this.emit("chainChanged", chainId);
     this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const existingKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     if (existingKey !== params.privateKey) {
-      await this.setupProvider(params.privateKey, this.config.getCurrentChain().chainId);
+      await this.setupProvider(params.privateKey, this.chainId);
       const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
       this.emit("accountsChanged", accounts);
     }
@@ -86,7 +88,11 @@ export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig,
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
 
     const newChainId = params.chainId;
-    if (this.config.getCurrentChain().chainId === newChainId) return;
+    if (this.chainId === newChainId) return;
+
+    this.update({
+      chainId: "loading",
+    });
 
     const privKey = await this._providerEngineProxy.request<never, string>({ method: "eth_private_key" });
     await this.setupProvider(privKey, params.chainId);

@@ -2,7 +2,7 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, log, WalletLoginError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 import { createEthChainSwitchMiddleware, createEthJsonRpcClient, createEthMiddleware, IEthChainSwitchHandlers } from "@/core/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "@/core/solana-provider";
@@ -20,8 +20,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
     super({
-      config: { getCurrentChain: config.getCurrentChain, getChain: config.getChain, skipLookupNetwork: !!config.skipLookupNetwork },
-      state: { ...(state || {}), accounts: [] },
+      config: { chain: config.chain, chains: config.chains, skipLookupNetwork: !!config.skipLookupNetwork },
+      state: { ...(state || {}), chainId: "loading", accounts: [] },
     });
     this.connector = connector || null;
   }
@@ -29,11 +29,11 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   public static getProviderInstance = async (params: {
     connector: ISignClient;
     skipLookupNetwork: boolean;
-    getCurrentChain: BaseProviderConfig["getCurrentChain"];
-    getChain: BaseProviderConfig["getChain"];
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
   }): Promise<WalletConnectV2Provider> => {
     const providerFactory = new WalletConnectV2Provider({
-      config: { getCurrentChain: params.getCurrentChain, getChain: params.getChain, skipLookupNetwork: params.skipLookupNetwork },
+      config: { chain: params.chain, chains: params.chains, skipLookupNetwork: params.skipLookupNetwork },
     });
     await providerFactory.setupProvider(params.connector);
     return providerFactory;
@@ -48,13 +48,13 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public async setupProvider(connector: ISignClient): Promise<void> {
     this.onConnectorStateUpdate(connector);
-    await this.setupEngine(connector, this.config.getCurrentChain().chainId);
+    await this.setupEngine(connector, this.config.chain.chainId);
   }
 
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    const currentChainConfig = this.config.getChain(chainId);
+    const currentChainConfig = this.getChain(chainId);
 
     const { chainId: currentChainId } = currentChainConfig;
     const currentNumChainId = parseInt(currentChainId, 16);
@@ -63,6 +63,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
     await this.setupEngine(this.connector, chainId);
     this.lookupNetwork(this.connector, chainId);
+
+    this.update({ chainId });
   }
 
   // no need to implement this method in wallet connect v2.
@@ -71,7 +73,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   private async setupEngine(connector: ISignClient, chainId: string): Promise<void> {
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       await this.setupEthEngine(connector, chainId);
     } else if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
@@ -85,7 +87,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   private async setupEthEngine(connector: ISignClient, chainId: string): Promise<void> {
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const numChainId = parseInt(chainId, 16);
     const providerHandlers = getEthProviderHandlers({ connector, chainId: numChainId });
     const jrpcRes = await getAccounts(connector);
@@ -105,7 +107,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   }
 
   private async setupSolEngine(connector: ISignClient, chainId: string): Promise<void> {
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const providerHandlers = getSolProviderHandlers({ connector, chainId });
     const jrpcRes = await getAccounts(connector);
 
@@ -177,7 +179,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
 
         // Check if chainId changed and trigger event
-        const currentChain = this.config.getCurrentChain();
+        const { currentChain } = this;
         if (connectedHexChainId && currentChain.chainId !== connectedHexChainId) {
           // Handle rpcUrl update
           await this.setupEngine(connector, connectedHexChainId);

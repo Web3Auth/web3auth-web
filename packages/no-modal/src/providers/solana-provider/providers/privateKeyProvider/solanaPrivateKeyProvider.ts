@@ -1,6 +1,6 @@
 import { getED25519Key, JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 
 import { ISolanaChainSwitchHandlers } from "../../rpc";
@@ -26,18 +26,18 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
 
   public static getProviderInstance = async (params: {
     privKey: string;
-    getCurrentChain: BaseProviderConfig["getCurrentChain"];
-    getChain: BaseProviderConfig["getChain"];
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
   }): Promise<SolanaPrivateKeyProvider> => {
-    const providerFactory = new SolanaPrivateKeyProvider({ config: { getCurrentChain: params.getCurrentChain, getChain: params.getChain } });
-    await providerFactory.setupProvider(params.privKey, params.getCurrentChain().chainId);
+    const providerFactory = new SolanaPrivateKeyProvider({ config: { chain: params.chain, chains: params.chains } });
+    await providerFactory.setupProvider(params.privKey, params.chain.chainId);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
       throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.privateKey, this.config.getCurrentChain().chainId);
+    await this.setupProvider(this.state.privateKey, this.chainId);
     return this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
   }
 
@@ -46,7 +46,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   }
 
   public async setupProvider(privKey: string, chainId: string): Promise<void> {
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const providerHandlers = await getProviderHandlers({
@@ -72,13 +72,15 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
 
     this.emit("chainChanged", chainId);
     this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   public async updateAccount(params: { privateKey: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const existingKey = await this._providerEngineProxy.request<never, string>({ method: "solanaPrivateKey" });
     if (existingKey !== params.privateKey) {
-      await this.setupProvider(params.privateKey, this.config.getCurrentChain().chainId);
+      await this.setupProvider(params.privateKey, this.chainId);
       const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "requestAccounts" });
       this.emit("accountsChanged", accounts);
     }
@@ -87,7 +89,11 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     const newChainId = params.chainId;
-    if (this.config.getCurrentChain().chainId === newChainId) return;
+    if (this.chainId === newChainId) return;
+
+    this.update({
+      chainId: "loading",
+    });
 
     const privKey = await this._providerEngineProxy.request<never, string>({ method: "solanaPrivateKey" });
 
@@ -100,7 +106,7 @@ export class SolanaPrivateKeyProvider extends BaseProvider<BaseProviderConfig, S
       method: "getHealth",
       params: [],
     });
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     if (health !== "ok") throw WalletInitializationError.rpcConnectionError(`Failed to lookup network for following rpc target: ${chain.rpcTarget}`);
   }
 

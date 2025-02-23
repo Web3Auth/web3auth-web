@@ -167,12 +167,10 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
 }
 
 export const coinbaseConnector = (params?: CoinbaseWalletSDKOptions): ConnectorFn => {
-  return ({ coreOptions, getCurrentChain, getChain }: ConnectorParams) => {
+  return ({ coreOptions }: ConnectorParams) => {
     return new CoinbaseConnector({
       connectorSettings: params,
       coreOptions,
-      getCurrentChain,
-      getChain,
     });
   };
 };

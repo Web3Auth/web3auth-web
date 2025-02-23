@@ -25,7 +25,7 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
 
   public async setupProvider(injectedProvider: ITorusWalletProvider, chainId: string): Promise<void> {
     this.handleInjectedProviderUpdate(injectedProvider);
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     await this.setupEngine(injectedProvider, chainId);
@@ -44,6 +44,8 @@ export class TorusInjectedProvider extends BaseProvider<BaseProviderConfig, Base
     const connectedHexChainId = isHexStrict(connectedChainId.toString()) ? connectedChainId : `0x${parseInt(connectedChainId, 10).toString(16)}`;
     if (chainId !== connectedHexChainId)
       throw WalletInitializationError.rpcConnectionError(`Invalid network, net_version is: ${connectedHexChainId}, expected: ${chainId}`);
+
+    this.update({ chainId: connectedHexChainId });
 
     return chainId;
   }

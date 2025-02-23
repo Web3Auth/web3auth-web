@@ -76,7 +76,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    const currentChain = this.config.getCurrentChain();
+    const { currentChain } = this;
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const chain = defineChain({
@@ -169,13 +169,13 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
 
 export const accountAbstractionProvider = async ({
   accountAbstractionConfig,
-  getCurrentChain,
-  getChain,
+  chain,
+  chains,
   provider,
 }: {
   accountAbstractionConfig: AccountAbstractionConfig;
-  getCurrentChain: () => CustomChainConfig;
-  getChain: (chainId: string) => CustomChainConfig | undefined;
+  chain: CustomChainConfig;
+  chains: CustomChainConfig[];
   provider: IProvider;
 }) => {
   let smartAccountInit: ISmartAccount;
@@ -212,8 +212,8 @@ export const accountAbstractionProvider = async ({
   return AccountAbstractionProvider.getProviderInstance({
     eoaProvider: provider,
     smartAccountInit,
-    getCurrentChain,
-    getChain,
+    chain,
+    chains,
     bundlerConfig,
     paymasterConfig,
   });

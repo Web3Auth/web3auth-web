@@ -1,7 +1,7 @@
 import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 import type { PingResponse } from "xrpl";
 
-import { CHAIN_NAMESPACES, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 
 import { createXrplJsonRpcClient } from "../../rpc/JrpcClient";
@@ -22,23 +22,23 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
 
   public static getProviderInstance = async (params: {
     privKey: string;
-    getCurrentChain: BaseProviderConfig["getCurrentChain"];
-    getChain: BaseProviderConfig["getChain"];
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
   }): Promise<XrplPrivateKeyProvider> => {
-    const providerFactory = new XrplPrivateKeyProvider({ config: { getCurrentChain: params.getCurrentChain, getChain: params.getChain } });
-    await providerFactory.setupProvider(params.privKey, params.getCurrentChain().chainId);
+    const providerFactory = new XrplPrivateKeyProvider({ config: { chain: params.chain, chains: params.chains } });
+    await providerFactory.setupProvider(params.privKey, params.chain.chainId);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.privateKey)
       throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.privateKey, this.config.getCurrentChain().chainId);
+    await this.setupProvider(this.state.privateKey, this.chainId);
     return this._providerEngineProxy.request({ method: RPC_METHODS.GET_ACCOUNTS });
   }
 
   public async setupProvider(privKey: string, chainId: string): Promise<void> {
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const { wsTarget, chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     if (!wsTarget) {
@@ -63,11 +63,17 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
 
     this.emit("chainChanged", chainId);
     this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
-    if (this.config.getCurrentChain().chainId === params.chainId) return;
+    if (this.chainId === params.chainId) return;
+
+    this.update({
+      chainId: "loading",
+    });
 
     const { privateKey } = await this._providerEngineProxy.request<never, KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
     await this.setupProvider(privateKey, params.chainId);
@@ -83,7 +89,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     });
 
     if (pingResponse?.status !== "success") {
-      const chain = this.config.getChain(chainId);
+      const chain = this.getChain(chainId);
       throw WalletInitializationError.rpcConnectionError(`Failed to ping network for following rpc target: ${chain.rpcTarget}`);
     }
   }

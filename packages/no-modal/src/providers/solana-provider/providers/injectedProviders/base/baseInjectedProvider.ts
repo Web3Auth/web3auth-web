@@ -18,7 +18,7 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
 
   public async setupProvider(injectedProvider: P, chainId: string): Promise<void> {
     const engine = new JRPCEngine();
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
 
     const providerHandlers = this.getProviderHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
@@ -38,6 +38,9 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
   }
 
   protected async lookupNetwork(_injectedProvider: P, chainId: string): Promise<string> {
+    this.update({
+      chainId,
+    });
     return chainId || "";
   }
 

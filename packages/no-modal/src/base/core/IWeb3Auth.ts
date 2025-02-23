@@ -134,6 +134,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   cachedConnector: string | null;
   getCurrentChain(): CustomChainConfig;
   getChain(chainId: string): CustomChainConfig | undefined;
+  getChains(): CustomChainConfig[];
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   /**
    * Connect to a specific wallet connector

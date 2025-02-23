@@ -7,7 +7,6 @@ import deepmerge from "deepmerge";
 
 import {
   BaseConnector,
-  BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   checkIfTokenIsExpired,
@@ -61,14 +60,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   private wcProvider: WalletConnectV2Provider | null = null;
 
-  private getCurrentChain: BaseConnectorSettings["getCurrentChain"];
-
-  private getChain: BaseConnectorSettings["getChain"];
-
   constructor(options: WalletConnectV2ConnectorOptions) {
     super(options);
-    this.getCurrentChain = options.getCurrentChain;
-    this.getChain = options.getChain;
     this.connectorOptions = { ...options };
     const { qrcodeModal, walletConnectInitOptions } = options?.connectorSettings || {};
 
@@ -105,7 +98,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.getChain(options.chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
@@ -126,7 +119,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     const { connectorSettings } = this.connectorOptions;
     this.connector = await Client.init(connectorSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
-      config: { getChain: this.getChain, getCurrentChain: this.getCurrentChain },
+      config: { chain: chainConfig, chains: this.coreOptions.chains },
       connector: this.connector,
     });
 
@@ -139,7 +132,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (this.connected) {
         this.rehydrated = true;
         try {
-          await this.onConnectHandler();
+          await this.onConnectHandler({ chain: chainConfig });
         } catch (error) {
           log.error("wallet auto connect", error);
           this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
@@ -153,14 +146,14 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
-    const chainConfig = this.getChain(chainId);
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
     try {
       // if already connected
       if (this.connected) {
-        await this.onConnectHandler();
+        await this.onConnectHandler({ chain: chainConfig });
         return this.provider;
       }
 
@@ -334,7 +327,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const session = await approval();
       this.activeSession = session;
       // Handle the returned session (e.g. update UI to "connected" state).
-      await this.onConnectHandler();
+      await this.onConnectHandler({ chain: chainConfig });
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
@@ -357,12 +350,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  private async onConnectHandler() {
+  private async onConnectHandler({ chain }: { chain: CustomChainConfig }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapteconnectorr is not ready yet");
     this.subscribeEvents();
     if (this.connectorOptions.connectorSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({
-        config: { getChain: this.getChain, getCurrentChain: this.getCurrentChain, skipLookupNetwork: true },
+        config: { chain, chains: this.coreOptions.chains, skipLookupNetwork: true },
         connector: this.connector,
       });
     }
@@ -406,7 +399,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 }
 
 export const walletConnectV2Connector = (params?: { projectId: string }): ConnectorFn => {
-  return ({ projectConfig, coreOptions, getCurrentChain, getChain }: ConnectorParams) => {
+  return ({ projectConfig, coreOptions }: ConnectorParams) => {
     let { projectId } = params || {};
 
     if (projectConfig) {
@@ -419,8 +412,6 @@ export const walletConnectV2Connector = (params?: { projectId: string }): Connec
         walletConnectInitOptions: { projectId },
       },
       coreOptions,
-      getCurrentChain,
-      getChain,
     });
   };
 };

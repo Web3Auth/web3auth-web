@@ -81,8 +81,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // setup common JRPC provider
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      getCurrentChain: this.getCurrentChain.bind(this),
-      getChain: this.getChain.bind(this),
+      chain: this.currentChain,
+      chains: this.coreOptions.chains,
     });
     const { key_export_enabled: keyExportEnabled } = projectConfig;
     if (typeof keyExportEnabled === "boolean") {

@@ -123,8 +123,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public async init(): Promise<void> {
     // setup common JRPC provider
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      getCurrentChain: this.getCurrentChain.bind(this),
-      getChain: this.getChain.bind(this),
+      chain: this.getCurrentChain(),
+      chains: this.getChains(),
     });
 
     // get project config
@@ -255,6 +255,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.coreOptions.chains.find((chain) => chain.chainId === chainId);
   }
 
+  public getChains(): CustomChainConfig[] {
+    return this.coreOptions.chains;
+  }
+
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
   }
@@ -272,8 +276,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const config = {
       projectConfig,
       coreOptions: this.coreOptions,
-      getCurrentChain: this.getCurrentChain.bind(this),
-      getChain: this.getChain.bind(this),
     };
 
     // add injected connectors
@@ -353,8 +355,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
           provider,
-          getCurrentChain: this.getCurrentChain.bind(this),
-          getChain: this.getChain.bind(this),
+          chain: this.getCurrentChain(),
+          chains: this.getChains(),
         });
         finalProvider = aaProvider;
         // TODO: when switching chains to Solana or other chains, we need to switch to the non-AA provider

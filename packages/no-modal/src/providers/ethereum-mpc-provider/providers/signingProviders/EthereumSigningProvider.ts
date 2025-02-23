@@ -1,7 +1,7 @@
 import { isHexString } from "@ethereumjs/util";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, IWeb3Auth, WalletInitializationError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 import {
   createEthChainSwitchMiddleware,
@@ -39,7 +39,16 @@ export class EthereumSigningProvider extends BaseProvider<
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
   constructor({ config, state }: { config: EthereumSigningProviderConfig; state?: EthereumSigningProviderState }) {
-    super({ config: { getChain: config.getChain, getCurrentChain: config.getCurrentChain }, state });
+    super({
+      config: {
+        chain: {
+          ...config.chain,
+          chainNamespace: CHAIN_NAMESPACES.EIP155, // TODO: is this needed ?
+        },
+        chains: config.chains,
+      },
+      state,
+    });
   }
 
   public static getProviderInstance = async (params: {
@@ -47,18 +56,18 @@ export class EthereumSigningProvider extends BaseProvider<
       sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
       getPublic: () => Promise<Buffer>;
     };
-    getCurrentChain: IWeb3Auth["getCurrentChain"];
-    getChain: IWeb3Auth["getChain"];
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
   }): Promise<EthereumSigningProvider> => {
-    const providerFactory = new EthereumSigningProvider({ config: { getChain: params.getChain, getCurrentChain: params.getCurrentChain } });
-    await providerFactory.setupProvider(params.signMethods, params.getCurrentChain().chainId);
+    const providerFactory = new EthereumSigningProvider({ config: { chain: params.chain, chains: params.chains } });
+    await providerFactory.setupProvider(params.signMethods, params.chain.chainId);
     return providerFactory;
   };
 
   public async enable(): Promise<string[]> {
     if (!this.state.signMethods)
       throw providerErrors.custom({ message: "signMethods are not found in state, plz pass it in constructor state param", code: 4902 });
-    await this.setupProvider(this.state.signMethods, this.config.getCurrentChain().chainId);
+    await this.setupProvider(this.state.signMethods, this.chainId);
     return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
@@ -70,7 +79,7 @@ export class EthereumSigningProvider extends BaseProvider<
     chainId: string
   ): Promise<void> {
     const { sign, getPublic } = params;
-    const chain = this.config.getChain(chainId);
+    const chain = this.getChain(chainId);
     const { chainNamespace } = chain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const txFormatter = new TransactionFormatter({
@@ -96,8 +105,11 @@ export class EthereumSigningProvider extends BaseProvider<
     await txFormatter.init();
     await this.lookupNetwork(params, chainId);
     this.state.signMethods = { sign, getPublic };
+
     this.emit("chainChanged", chainId);
     this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   public async updateAccount(params: {
@@ -114,7 +126,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const currentPubKey = (await currentSignMethods.getPublic()).toString("hex");
     const updatePubKey = (await params.signMethods.getPublic()).toString("hex");
     if (currentPubKey !== updatePubKey) {
-      await this.setupProvider(params.signMethods, this.config.getCurrentChain().chainId);
+      await this.setupProvider(params.signMethods, this.chainId);
       const accounts = await this._providerEngineProxy.request<never, string[]>({ method: "eth_accounts" });
       this.emit("accountsChanged", accounts);
     }
@@ -126,9 +138,13 @@ export class EthereumSigningProvider extends BaseProvider<
       throw providerErrors.custom({ message: "sign methods are undefined", code: 4902 });
     }
 
-    if (params.chainId === this.config.getCurrentChain().chainId) {
+    if (params.chainId === this.chainId) {
       return;
     }
+
+    this.update({
+      chainId: "loading",
+    });
 
     await this.setupProvider(this.state.signMethods, params.chainId);
   }
