@@ -141,6 +141,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     });
     await this.loadConnectors({ projectConfig });
+    await this.initPlugins();
   }
 
   public getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null {
@@ -222,21 +223,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.connectedConnector.authenticateUser();
   }
 
-  public addPlugin(plugin: IPlugin): IWeb3Auth {
-    if (this.plugins[plugin.name]) throw WalletInitializationError.duplicateConnectorError(`Plugin ${plugin.name} already exist`);
-    if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace)
-      throw WalletInitializationError.incompatibleChainNameSpace(
-        `This plugin belongs to ${plugin.pluginNamespace} namespace which is incompatible with currently used namespace: ${this.currentChain.chainNamespace}`
-      );
-
-    this.plugins[plugin.name] = plugin;
-    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
-      // web3auth is already connected. can initialize plugins
-      this.connectToPlugins({ connector: this.connectedConnector.name });
-    }
-    return this;
-  }
-
   public getCurrentChain(): CustomChainConfig {
     return this.currentChain;
   }
@@ -311,6 +297,23 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     const connectors = connectorFns.map((connectorFn) => connectorFn(config));
     this.setConnectors(connectors);
+  }
+
+  protected async initPlugins(): Promise<void> {
+    const pluginFns = this.coreOptions.plugins || [];
+    for (const pluginFn of pluginFns) {
+      const plugin = pluginFn();
+      if (this.plugins[plugin.name]) continue;
+      // TODO: handle when switching chains to different namespace
+      // don't initialize plugin if it's not compatible with the current chain
+      if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace) continue;
+
+      this.plugins[plugin.name] = plugin;
+      if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
+        // web3auth is already connected. can initialize plugins
+        this.connectToPlugins({ connector: this.connectedConnector.name });
+      }
+    }
   }
 
   protected setConnectors(connectors: IConnector<unknown>[]): void {

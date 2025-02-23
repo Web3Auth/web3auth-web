@@ -5,7 +5,6 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   CONNECTOR_STATUS_TYPE,
-  type IPlugin,
   IProvider,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
@@ -32,14 +31,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
 
-  const addPlugin = useCallback(
-    (plugin: IPlugin) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      return web3Auth.addPlugin(plugin);
-    },
-    [web3Auth]
-  );
-
   const getPlugin = useCallback(
     (name: string) => {
       if (!web3Auth) throw WalletInitializationError.notReady();
@@ -58,12 +49,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
 
     resetHookState();
-    const { web3AuthOptions, plugins = [] } = config;
+    const { web3AuthOptions } = config;
     const web3Instance = new Web3AuthNoModal(web3AuthOptions);
-    if (plugins.length)
-      plugins.forEach((plugin) => {
-        web3Instance.addPlugin(plugin);
-      });
     setWeb3Auth(web3Instance);
   }, [config]);
 
@@ -228,7 +215,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       enableMFA,
       manageMFA,
       logout,
-      addPlugin,
       authenticateUser,
       switchChain,
       isInitializing,
@@ -249,7 +235,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     enableMFA,
     manageMFA,
     logout,
-    addPlugin,
     authenticateUser,
     switchChain,
     isConnecting,

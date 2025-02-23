@@ -10,11 +10,17 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
+  PluginFn,
 } from "@/core/base";
 
 import { NFTCheckoutEmbed } from "./embed";
 
-export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
+export interface NFTCheckoutPluginParams {
+  modalZIndex?: number;
+  clientId: string;
+}
+
+class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.NFT_CHECKOUT;
 
   status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
@@ -31,7 +37,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   private receiverAddress: string | null = null;
 
-  constructor(params: { modalZIndex?: number; clientId: string }) {
+  constructor(params: NFTCheckoutPluginParams) {
     super();
     this.nftCheckoutEmbedInstance = new NFTCheckoutEmbed(params);
   }
@@ -87,3 +93,11 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
     return Promise.resolve();
   }
 }
+
+export type NFTCheckoutPluginType = NFTCheckoutPlugin;
+
+export const nftCheckoutPlugin = (params: NFTCheckoutPluginParams): PluginFn => {
+  return () => {
+    return new NFTCheckoutPlugin(params);
+  };
+};

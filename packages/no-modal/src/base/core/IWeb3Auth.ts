@@ -14,7 +14,7 @@ import {
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
-import { type IPlugin } from "../plugin";
+import { type IPlugin, PluginFn } from "../plugin";
 import { type WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export type WalletServicesConfig = Omit<
@@ -102,6 +102,11 @@ export interface IWeb3AuthCoreOptions {
   connectors?: ConnectorFn[];
 
   /**
+   * Plugins to use
+   */
+  plugins?: PluginFn[];
+
+  /**
    * Whether to enable multi injected provider discovery
    * @defaultValue true
    */
@@ -118,15 +123,14 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   connectedConnectorName: string | null;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
-  getCurrentChain(): CustomChainConfig;
   init(): Promise<void>;
-  logout(options?: { cleanup: boolean }): Promise<void>;
+  getCurrentChain(): CustomChainConfig;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
+  getPlugin(pluginName: string): IPlugin | null;
+  logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
   switchChain(params: { chainId: string }): Promise<void>;
-  addPlugin(plugin: IPlugin): void;
-  getPlugin(pluginName: string): IPlugin | null;
 }
 
 export interface IWeb3Auth extends IWeb3AuthCore {

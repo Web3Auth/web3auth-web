@@ -1,4 +1,4 @@
-import { CONNECTOR_EVENTS, IProvider, PLUGIN_EVENTS, WalletServicesPlugin, Web3Auth, WEB3AUTH_NETWORK_TYPE, SMART_ACCOUNT } from "@web3auth/modal";
+import { CONNECTOR_EVENTS, IProvider, PLUGIN_EVENTS, WalletServicesPluginType, Web3Auth, WEB3AUTH_NETWORK_TYPE, SMART_ACCOUNT, walletServicesPlugin, EVM_PLUGINS } from "@web3auth/modal";
 import { createContext, FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
 import { CHAIN_CONFIG, CHAIN_CONFIG_TYPE } from "../config/chainConfig";
 import * as ethHandler from "./ethHandler";
@@ -63,7 +63,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [waasProvider, setWaasProvider] = useState<IProvider | null>(null);
-  const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
+  const [wsPlugin, setWsPlugin] = useState<WalletServicesPluginType | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -90,7 +90,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       });
     };
 
-    const subscribePluginEvents = (plugin: WalletServicesPlugin) => {
+    const subscribePluginEvents = (plugin: WalletServicesPluginType) => {
       // Can subscribe to all PLUGIN_EVENTS and LOGIN_MODAL_EVENTS
       plugin.on(PLUGIN_EVENTS.CONNECTED, (data: unknown) => {
         console.log("Yeah!, you are successfully logged in to plugin");
@@ -147,19 +147,18 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             primaryButton: "socialLogin",
           },
           enableLogging: true,
+          plugins: [walletServicesPlugin()],
         });
 
-        // Wallet Services Plugin
-
-        const walletServicesPlugin = new WalletServicesPlugin();
-
-        subscribePluginEvents(walletServicesPlugin);
-        setWalletServicesPlugin(walletServicesPlugin);
-        web3AuthInstance.addPlugin(walletServicesPlugin);
+        setWsPlugin(wsPlugin);
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
-        await web3AuthInstance.initModal();
+        await web3AuthInstance.init();
+
+        const plugin = web3AuthInstance.getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+        setWsPlugin(plugin);
+        subscribePluginEvents(plugin);
       } catch (error) {
         console.error(error);
       } finally {
@@ -265,7 +264,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   };
 
   const showWalletConnectScanner = async () => {
-    if (!walletServicesPlugin) {
+    if (!wsPlugin) {
       console.log("walletServicesPlugin not initialized yet");
       uiConsole("walletServicesPlugin not initialized yet");
       return;
@@ -275,11 +274,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3Auth not initialized yet");
       return;
     }
-    await walletServicesPlugin.showWalletConnectScanner();
+    await wsPlugin.showWalletConnectScanner();
   };
 
   const showWalletUi = async () => {
-    if (!walletServicesPlugin) {
+    if (!wsPlugin) {
       console.log("walletServicesPlugin not initialized yet");
       uiConsole("walletServicesPlugin not initialized yet");
       return;
@@ -289,7 +288,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       uiConsole("web3Auth not initialized yet");
       return;
     }
-    await walletServicesPlugin.showWalletUi();
+    await wsPlugin.showWalletUi();
   };
 
   const uiConsole = (...args: unknown[]): void => {

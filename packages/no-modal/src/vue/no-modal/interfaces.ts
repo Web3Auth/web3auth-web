@@ -1,13 +1,22 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
 import type { Ref, ShallowRef } from "vue";
 
-import type { CONNECTOR_STATUS_TYPE, ConnectorFn, IPlugin, IProvider, IWeb3AuthCoreOptions, UserAuthInfo, WALLET_CONNECTOR_TYPE } from "@/core/base";
+import type {
+  CONNECTOR_STATUS_TYPE,
+  ConnectorFn,
+  IPlugin,
+  IProvider,
+  IWeb3AuthCoreOptions,
+  PluginFn,
+  UserAuthInfo,
+  WALLET_CONNECTOR_TYPE,
+} from "@/core/base";
 
 import { type Web3AuthNoModal } from "../../noModal";
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;
   connectors?: ConnectorFn[];
-  plugins?: IPlugin[];
+  plugins?: PluginFn[];
 };
 
 export interface Web3AuthProviderProps {
@@ -28,7 +37,6 @@ interface IBaseWeb3AuthComposableContext {
   enableMFA(params?: LoginParams): Promise<void>;
   manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
-  addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
   authenticateUser(): Promise<UserAuthInfo>;
   switchChain(params: { chainId: string }): Promise<void>;

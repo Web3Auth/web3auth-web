@@ -1,7 +1,7 @@
 import type { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import type { Ref } from "vue";
 
-import type { WalletServicesPlugin } from "@/core/wallet-services-plugin";
+import type { WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 export interface IBaseWalletServicesComposableContext {
   isPluginConnected: Ref<boolean>;
@@ -12,5 +12,5 @@ export interface IBaseWalletServicesComposableContext {
 }
 
 export interface IWalletServicesContext extends IBaseWalletServicesComposableContext {
-  plugin: Ref<WalletServicesPlugin | null>;
+  plugin: Ref<WalletServicesPluginType | null>;
 }

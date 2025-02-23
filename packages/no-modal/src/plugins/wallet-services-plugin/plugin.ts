@@ -16,6 +16,7 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
+  PluginFn,
   SafeEventEmitterProvider,
   WALLET_CONNECTORS,
   WalletServicesPluginError,
@@ -23,7 +24,7 @@ import {
 
 export { BUTTON_POSITION, type BUTTON_POSITION_TYPE, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/ws-embed";
 
-export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
+class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
@@ -135,3 +136,11 @@ export class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     }
   }
 }
+
+export type WalletServicesPluginType = WalletServicesPlugin;
+
+export const walletServicesPlugin = (): PluginFn => {
+  return () => {
+    return new WalletServicesPlugin();
+  };
+};
