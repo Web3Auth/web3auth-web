@@ -49,3 +49,5 @@ export interface IPlugin extends SafeEventEmitter {
   disconnect(): Promise<void>;
   cleanup(): Promise<void>;
 }
+
+export type PluginFn = () => IPlugin;

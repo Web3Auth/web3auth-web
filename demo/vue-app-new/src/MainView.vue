@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, ConnectorFn, NFTCheckoutPlugin, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, WalletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, ConnectorFn, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -63,6 +63,18 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const chains = formData.chains.map((chainId) => allChains.find((x) => x.chainId === chainId)!);
+  // Plugins
+  const plugins: PluginFn[] = [];
+  if (formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)) {
+    if (formData.nftCheckoutPlugin.enable && formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)) {
+      plugins.push(nftCheckoutPlugin({ clientId: NFT_CHECKOUT_CLIENT_ID }));
+    }
+    if (formData.walletPlugin.enable) {
+      plugins.push(walletServicesPlugin());
+    }
+  }
+
+
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
@@ -79,6 +91,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     enableLogging: true,
     connectors: externalConnectors.value,
+    plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
   };
@@ -160,23 +173,8 @@ watch(
 );
 
 const configs = computed<Web3AuthContextConfig>(() => {
-  const plugins = [];
-  if (formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)) {
-    if (formData.nftCheckoutPlugin.enable && formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)) {
-      const nftCheckoutPlugin = new NFTCheckoutPlugin({
-        clientId: NFT_CHECKOUT_CLIENT_ID,
-      });
-      plugins.push(nftCheckoutPlugin);
-    }
-    if (formData.walletPlugin.enable) {
-      const walletServicesPlugin = new WalletServicesPlugin();
-      plugins.push(walletServicesPlugin);
-    }
-  }
-
   return {
     web3AuthOptions: options.value,
-    plugins,
     modalConfig: modalParams.value,
     hideWalletDiscovery: !formData.showWalletDiscovery,
   };

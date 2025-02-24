@@ -11,6 +11,7 @@ export const CONNECTOR_EVENTS = {
   ...CONNECTOR_STATUS,
   CONNECTOR_DATA_UPDATED: "connector_data_updated",
   CACHE_CLEAR: "cache_clear",
+  CONNECTORS_UPDATED: "connectors_updated",
 } as const;
 
 export const CONNECTOR_CATEGORY = {

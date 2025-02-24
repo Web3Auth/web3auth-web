@@ -3,7 +3,6 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
-  type IPlugin,
   type IProvider,
   LoginParams,
   WalletInitializationError,
@@ -32,11 +31,6 @@ export const Web3AuthProvider = defineComponent({
     const isConnecting = ref(false);
     const connectError = ref<Error | null>(null);
     const isConnected = ref(false);
-
-    const addPlugin = (plugin: IPlugin) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      return web3Auth.value.addPlugin(plugin);
-    };
 
     const getPlugin = (name: string) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
@@ -101,14 +95,8 @@ export const Web3AuthProvider = defineComponent({
         };
 
         resetHookState();
-        const { web3AuthOptions, plugins = [] } = newConfig;
+        const { web3AuthOptions } = newConfig;
         const web3AuthInstance = new Web3Auth(web3AuthOptions);
-        if (plugins.length) {
-          plugins.forEach((plugin) => {
-            web3AuthInstance.addPlugin(plugin);
-          });
-        }
-
         web3Auth.value = web3AuthInstance;
       },
       { immediate: true }
@@ -223,7 +211,6 @@ export const Web3AuthProvider = defineComponent({
       enableMFA,
       manageMFA,
       logout,
-      addPlugin,
       authenticateUser,
       switchChain,
       isInitializing,

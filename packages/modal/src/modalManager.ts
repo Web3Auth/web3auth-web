@@ -91,8 +91,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // initialize connectors
-    this.connectorStore.subscribe(() => this.initConnectors(projectConfig, params));
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, () => this.initConnectors(projectConfig, params));
     await this.loadConnectors({ projectConfig });
+
+    // initialize plugins
+    await this.initPlugins();
   }
 
   public async connect(): Promise<IProvider | null> {
