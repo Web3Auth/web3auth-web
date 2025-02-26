@@ -26,10 +26,10 @@ const Embed: Component<EmbedProps> = (props: EmbedProps) => {
   return (
     <div
       class={cn(
-        "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[393px] w3a--h-[642px] w3a--flex w3a--flex-col w3a--duration-500",
+        "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[393px] w3a--flex w3a--flex-col w3a--duration-500",
         {
-          "w3a--opacity-100 w3a--delay-100": isOpen(),
-          "w3a--opacity-0": !isOpen(),
+          "w3a--opacity-100 w3a--delay-100 w3a--max-h-[800px]": isOpen(),
+          "w3a--opacity-0 w3a--max-h-0": !isOpen(),
           "w3a--p-4": mergedProps.padding,
           "w3a--shadow-xl sm:w3a--shadow-lg": mergedProps.shadow,
           "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": mergedProps.border,

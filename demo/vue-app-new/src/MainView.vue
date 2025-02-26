@@ -259,6 +259,6 @@ const configs = computed(() => {
       <AppSettings />
       <AppDashboard />
     </main>
-    <div id="w3a-parent-test-container" class="flex flex-col items-center justify-center"></div>
+    <div id="w3a-parent-test-container" class="flex flex-col items-center justify-center mt-10"></div>
   </Web3AuthProvider>
 </template>

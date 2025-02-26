@@ -43,6 +43,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   const [isLoading, setIsLoading] = createSignal<boolean>(true);
   const [selectedChain, setSelectedChain] = createSignal<"all" | "ethereum" | "polygon" | "solana">("all");
   const [isInputFocused, setIsInputFocused] = createSignal(false);
+  const [initialWalletCount, setInitialWalletCount] = createSignal<number>(0);
 
   const handleBack = () => {
     log.debug("handleBack", selectedWallet(), currentPage());
@@ -111,9 +112,12 @@ const ConnectWallet = (props: ConnectWalletProps) => {
   createEffect(() => {
     if (walletDiscoverySupported()) {
       setExternalButtons(sortedButtons());
+      log.debug("sortedButtons", sortedButtons().length);
+      setInitialWalletCount(sortedButtons().length);
       setTotalExternalWallets(props.totalExternalWallets);
     } else {
       setExternalButtons(visibleButtons());
+      log.debug("visibleButtons", visibleButtons().length);
       setTotalExternalWallets(visibleButtons().length);
     }
     setTimeout(() => {
@@ -139,7 +143,15 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     }
   };
 
-  // const headerLogo = createMemo(() => ([DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(props.appLogo) ? "" : props.appLogo));
+  const handleMoreWallets = () => {
+    // setIsLoading(true);
+    log.debug("handleMoreWallets", initialWalletCount(), props.allExternalButtons, props.customAdapterButtons);
+    setInitialWalletCount((prev) => prev + 10);
+    const allButtons = [...props.allExternalButtons, ...props.customAdapterButtons];
+    const buttons = allButtons.slice(initialWalletCount(), initialWalletCount() + 10);
+    log.debug("buttons", buttons);
+    setExternalButtons((prev) => [...prev, ...buttons]);
+  };
 
   return (
     <div class="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
@@ -289,19 +301,27 @@ const ConnectWallet = (props: ConnectWalletProps) => {
               </Show>
             </ul>
             <Show
-              when={totalExternalWallets() > 15 && !isLoading()}
-              fallback={<div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />}
+              when={totalExternalWallets() > 15 && !isLoading() && initialWalletCount() < totalExternalWallets()}
+              fallback={
+                <Show when={initialWalletCount() < totalExternalWallets()}>
+                  <div class="w3a--w-full w3a--h-12 w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />
+                </Show>
+              }
             >
-              <div class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 dark:hover:w3a--bg-app-gray-600">
+              <button
+                type="button"
+                class="w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 dark:hover:w3a--bg-app-gray-600"
+                onClick={handleMoreWallets}
+              >
                 <img src={getIcons(props.isDark ? "view-dark" : "view-light")} alt="view" height="24" width="24" />
                 <p class="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">More Wallets</p>
                 <span
                   class="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
         dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"
                 >
-                  {props.totalExternalWallets}
+                  {props.totalExternalWallets - initialWalletCount()}
                 </span>
-              </div>
+              </button>
             </Show>
           </div>
         }

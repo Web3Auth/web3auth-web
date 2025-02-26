@@ -3,10 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  scrollbar-color: #E5E7EB;
-}
-
 @layer base {
   body {
     padding: 0px !important;
@@ -17,6 +13,23 @@
   .w3a-parent-container {
     font-family: "Inter";
     position: relative;
+  }
+
+  .w3a-parent-container > * {
+    scrollbar-color: #E5E7EB !important;
+  }
+
+  .w3a-modal-container {
+    overflow: hidden;
+    transition-property: max-height;
+    transition-duration: .15s;
+    transition-timing-function: ease-out;
+    position: relative;
+  }
+
+  .w3a-modal-container-height {
+    max-height: 800px;
+    height: 100vh;
   }
 
   .w3a-external-wallet-btn #external-wallet-count {
@@ -131,15 +144,15 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #E5E7EB; 
+  background: #E5E7EB !important; 
 }
  
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #E5E7EB; 
+  background: #E5E7EB !important; 
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #E5E7EB; 
+  background: #E5E7EB !important; 
 }

@@ -313,11 +313,13 @@ const Login = (props: LoginProps) => {
                       }}
                       type="text"
                       autofocus
-                      class="w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
+                      class="w-full w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
                     />
-                    <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
-                      <img src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
-                    </button>
+                    <Show when={fieldValue() && isValidInput() && isInputFocused()}>
+                      <button class="w3a--appearance-none w3a--icon-animation" onClick={handleFormSubmit}>
+                        <img src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
+                      </button>
+                    </Show>
                   </div>
                   <Show when={!isValidInput() && isPasswordlessCtaClicked()}>
                     <p class="w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start -w3a--mt-2 w3a--w-full w3a--pl-6">
