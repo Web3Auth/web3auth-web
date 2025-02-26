@@ -317,35 +317,33 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (externalWalletsInitialized) return;
     const connectorsConfig: Record<string, BaseConnectorConfig> = {};
     // we do it like this because we don't want one slow connector to delay the load of the entire external wallet section.
-    await Promise.all(
-      this.connectors.map(async (connector) => {
-        const connectorName = connector.name;
-        if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
-          log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
-          this.subscribeToConnectorEvents(connector);
-          // we are not initializing cached connector here as it is already being initialized in initModal before.
-          if (this.cachedConnector === connectorName) {
-            return;
-          }
-          if (connector.status === CONNECTOR_STATUS.NOT_READY) {
-            await connector
-              .init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId })
-              .then<undefined>(() => {
-                const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-                connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
-                this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
-                return undefined;
-              })
-              .catch((error: unknown) => log.error(error, "error while initializing connector", connectorName));
-          } else if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
-            // we use connecting status for wallet connect
-            const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-            connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
-            this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
-          }
+    this.connectors.forEach(async (connector) => {
+      const connectorName = connector.name;
+      if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
+        log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
+        this.subscribeToConnectorEvents(connector);
+        // we are not initializing cached connector here as it is already being initialized in initModal before.
+        if (this.cachedConnector === connectorName) {
+          return;
         }
-      })
-    );
+        if (connector.status === CONNECTOR_STATUS.NOT_READY) {
+          await connector
+            .init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId })
+            .then<undefined>(() => {
+              const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
+              connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
+              this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+              return undefined;
+            })
+            .catch((error: unknown) => log.error(error, "error while initializing connector", connectorName));
+        } else if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
+          // we use connecting status for wallet connect
+          const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
+          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
+          this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+        }
+      }
+    });
   }
 
   private subscribeToLoginModalEvents(): void {
@@ -358,7 +356,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
       await this.initExternalConnectors(params.externalWalletsInitialized);
-      this.setupWalletConnect({ isModalActive: true });
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       try {
@@ -370,33 +367,29 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      this.setupWalletConnect({ isModalActive: visibility });
-    });
-  }
+      const connector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
+      if (connector) {
+        const walletConnectStatus = connector?.status;
+        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+        if (visibility && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
+          log.debug("refreshing wc session");
 
-  private setupWalletConnect({ isModalActive }: { isModalActive: boolean }) {
-    const connector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
-    if (connector) {
-      const walletConnectStatus = connector?.status;
-      log.debug("trying refreshing wc session", isModalActive, walletConnectStatus);
-      if (isModalActive && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
-        log.debug("refreshing wc session");
-
-        // refreshing session for wallet connect whenever modal is opened.
-        try {
-          connector.connect({ chainId: this.currentChain.chainId });
-        } catch (error) {
-          log.error(`Error while disconnecting to wallet connect in core`, error);
+          // refreshing session for wallet connect whenever modal is opened.
+          try {
+            connector.connect({ chainId: this.currentChain.chainId });
+          } catch (error) {
+            log.error(`Error while disconnecting to wallet connect in core`, error);
+          }
+        }
+        if (
+          !visibility &&
+          this.status === CONNECTOR_STATUS.CONNECTED &&
+          (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
+        ) {
+          log.debug("this stops wc connector from trying to reconnect once proposal expires");
+          connector.status = CONNECTOR_STATUS.READY;
         }
       }
-      if (
-        !isModalActive &&
-        this.status === CONNECTOR_STATUS.CONNECTED &&
-        (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
-      ) {
-        log.debug("this stops wc connector from trying to reconnect once proposal expires");
-        connector.status = CONNECTOR_STATUS.READY;
-      }
-    }
+    });
   }
 }
