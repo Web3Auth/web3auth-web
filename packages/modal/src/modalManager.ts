@@ -1,39 +1,43 @@
+import type { AccountAbstractionProvider } from "@web3auth/account-abstraction-provider";
+import { AuthAdapter, AuthOptions, getAuthDefaultOptions, LOGIN_PROVIDER, LoginConfig } from "@web3auth/auth-adapter";
 import {
-  AccountAbstractionProvider,
   ADAPTER_CATEGORY,
   ADAPTER_EVENTS,
   ADAPTER_NAMES,
   ADAPTER_STATUS,
-  AuthAdapter,
-  AuthOptions,
   BaseAdapterConfig,
   cloneDeep,
-  CommonJRPCProvider,
   CustomChainConfig,
   fetchProjectConfig,
   fetchWalletRegistry,
-  getAuthDefaultOptions,
   getChainConfig,
   IBaseProvider,
   IProvider,
   IWeb3AuthCoreOptions,
   log,
-  LOGIN_PROVIDER,
-  LoginConfig,
   LoginMethodConfig,
   PROJECT_CONFIG_RESPONSE,
   WALLET_ADAPTER_TYPE,
   WALLET_ADAPTERS,
-  WalletConnectV2Adapter,
   WalletInitializationError,
   WalletRegistry,
-  Web3AuthNoModal,
-} from "@web3auth/no-modal";
+} from "@web3auth/base";
+import { CommonJRPCProvider } from "@web3auth/base-provider";
+import {
+  AUTH_PROVIDERS,
+  capitalizeFirstLetter,
+  getAdapterSocialLogins,
+  getUserLanguage,
+  LOGIN_MODAL_EVENTS,
+  LoginModal,
+  UIConfig,
+} from "@web3auth/modal-ui";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
+import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
 import deepmerge from "deepmerge";
 
 import { defaultOtherModalConfig, walletRegistryUrl } from "./config";
 import { AdaptersModalConfig, IWeb3AuthModal, ModalConfig, ModalConfigParams } from "./interface";
-import { AUTH_PROVIDERS, capitalizeFirstLetter, getAdapterSocialLogins, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, UIConfig } from "./ui";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -297,7 +301,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         adapter.name,
         (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapter.name]?.loginMethods
       );
-      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
+      if (Object.values(mergedLoginMethods).some((method) => (method as LoginMethodConfig[keyof LoginMethodConfig]).showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppWallets, this.walletAdapters, adapterNames, "hasInAppWallets");
@@ -394,13 +398,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         if (adapter.status === ADAPTER_STATUS.NOT_READY) {
           await adapter
             .init({ autoConnect: this.cachedAdapter === adapterName })
-            .then<undefined>(() => {
+            .then(() => {
               const adapterModalConfig = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];
               adaptersConfig[adapterName] = { ...adapterModalConfig, isInjected: adapter.isInjected };
-              this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
-              return undefined;
+              return this.loginModal.addWalletLogins(adaptersConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
             })
-            .catch((error: unknown) => log.error(error, "error while initializing adapter", adapterName));
+            .catch((error) => log.error(error, "error while initializing adapter", adapterName));
         } else if (adapter.status === ADAPTER_STATUS.READY || adapter.status === ADAPTER_STATUS.CONNECTING) {
           // we use connecting status for wallet connect
           const adapterModalConfig = (this.modalConfig.adapters as Record<WALLET_ADAPTER_TYPE, ModalConfig>)[adapterName];

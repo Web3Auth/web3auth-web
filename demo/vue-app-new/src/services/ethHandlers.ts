@@ -1,4 +1,5 @@
-import { IProvider, log } from "@web3auth/modal";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { IProvider, log } from "@web3auth/base";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { BrowserProvider, parseEther, Transaction } from "ethers";
 

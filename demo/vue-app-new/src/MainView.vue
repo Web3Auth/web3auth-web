@@ -1,7 +1,28 @@
 <script setup lang="ts">
-
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
-import { Web3AuthProvider } from "@web3auth/modal/vue";
+import {
+  AccountAbstractionProvider,
+  ISmartAccount,
+  KernelSmartAccount,
+  NexusSmartAccount,
+  // LightSmartAccount,
+  SafeSmartAccount,
+  TrustSmartAccount,
+  // SimpleSmartAccount,
+} from "@web3auth/account-abstraction-provider";
+import { CHAIN_NAMESPACES, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS } from "@web3auth/base";
+import { CommonPrivateKeyProvider } from "@web3auth/base-provider";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
+import { getInjectedAdapters as getInjectedEvmAdapters } from "@web3auth/default-evm-adapter";
+import { getInjectedAdapters as getInjectedSolanaAdapters } from "@web3auth/default-solana-adapter";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { type Web3AuthOptions } from "@web3auth/modal";
+import { Web3AuthProvider } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
+import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
+import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
+import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
+import { WalletConnectV2Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import AppDashboard from "./components/AppDashboard.vue";
@@ -13,6 +34,28 @@ import { formDataStore } from "./store/form";
 const formData = formDataStore;
 
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
+
+const walletPlugins = computed(() => {
+  if (formData.chainNamespace !== CHAIN_NAMESPACES.EIP155) return [];
+  const plugins = [];
+  if (formData.nftCheckoutPlugin.enable) {
+    const nftCheckoutPlugin = new NFTCheckoutPlugin({
+      clientId: NFT_CHECKOUT_CLIENT_ID,
+    });
+    plugins.push(nftCheckoutPlugin);
+  }
+  if (formData.walletPlugin.enable) {
+    const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
+    const walletServicesPlugin = new WalletServicesPlugin({
+      walletInitOptions: {
+        whiteLabel: { showWidgetButton: true, logoDark: logoDark || "logo", logoLight: logoLight || "logo" },
+        confirmationStrategy,
+      },
+    });
+    plugins.push(walletServicesPlugin);
+  }
+  return plugins;
+});
 
 const chainOptions = computed(() =>
   chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
@@ -94,7 +137,9 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
-  const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
+  const {
+    whiteLabel: { config: whiteLabel, enable: enabledWhiteLabel },
+  } = formData;
   return {
     clientId: clientIds[formData.network],
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
@@ -137,12 +182,18 @@ const getExternalAdapterByName = (name: string): IAdapter<unknown>[] => {
   switch (name) {
     case "coinbase":
       return [new CoinbaseAdapter()];
+    // case "auth":
+    //   return new AuthAdapter();
+    case "torus-evm":
+      return [new TorusWalletAdapter()];
+    case "torus-solana":
+      return [new SolanaWalletAdapter()];
     case "wallet-connect-v2":
       return [new WalletConnectV2Adapter({ adapterSettings: { walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } } })];
     case "injected-evm":
-      return getEvmInjectedAdapters({ options: options.value });
+      return getInjectedEvmAdapters({ options: options.value });
     case "injected-solana":
-      return getSolanaInjectedAdapters({ options: options.value });
+      return getInjectedSolanaAdapters({ options: options.value });
     default:
       return [];
   }
@@ -191,36 +242,10 @@ watch(
 );
 
 const configs = computed(() => {
-  const plugins = [];
-  if (formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-    if (formData.nftCheckoutPlugin.enable && formData.chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const nftCheckoutPlugin = new NFTCheckoutPlugin({
-        clientId: NFT_CHECKOUT_CLIENT_ID,
-      });
-      plugins.push(nftCheckoutPlugin);
-    }
-    if (formData.walletPlugin.enable) {
-      const { uiConfig } = options.value;
-      const { logoDark, logoLight, confirmationStrategy } = formData.walletPlugin;
-      const walletServicesPlugin = new WalletServicesPlugin({
-        walletInitOptions: {
-          whiteLabel: {
-            ...uiConfig,
-            showWidgetButton: true,
-            logoDark: logoDark || "https://images.web3auth.io/web3auth-logo-w-light.svg",
-            logoLight: logoLight || "https://images.web3auth.io/web3auth-logo-w.svg",
-          },
-          confirmationStrategy,
-        },
-      });
-      plugins.push(walletServicesPlugin);
-    }
-  }
-
   return {
     adapters: externalAdapters.value,
     web3AuthOptions: options.value,
-    plugins,
+    plugins: walletPlugins.value,
     modalConfig: modalParams.value,
     hideWalletDiscovery: !formData.showWalletDiscovery,
   };
@@ -229,12 +254,11 @@ const configs = computed(() => {
 
 <template>
   <Web3AuthProvider :config="configs">
-    <WalletServicesProvider>
-      <AppHeader />
-      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-        <AppSettings />
-        <AppDashboard />
-      </main>
-    </WalletServicesProvider>
+    <AppHeader />
+    <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+      <AppSettings />
+      <AppDashboard />
+    </main>
+    <div id="w3a-parent-test-container" class="flex flex-col items-center justify-center mt-10"></div>
   </Web3AuthProvider>
 </template>

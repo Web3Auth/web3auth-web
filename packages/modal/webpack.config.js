@@ -35,7 +35,6 @@ const ssrModule = {
     },
   ],
 };
-
 const config = generateWebpackConfig({
   currentPath,
   pkg,

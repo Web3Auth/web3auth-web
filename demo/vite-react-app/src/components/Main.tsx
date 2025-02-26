@@ -1,4 +1,4 @@
-import { WALLET_ADAPTERS } from "@web3auth/modal";
+import { WALLET_ADAPTERS } from "@web3auth/base";
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 

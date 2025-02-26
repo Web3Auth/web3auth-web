@@ -1,5 +1,7 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE } from "@web3auth/base";
+import { SignTypedDataMessageV4 } from "@web3auth/ethereum-provider";
+import { CONFIRMATION_STRATEGY, CONFIRMATION_STRATEGY_TYPE } from "@web3auth/wallet-services-plugin";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -74,20 +76,18 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
       rpcTarget: "https://api.devnet.solana.com",
       blockExplorerUrl: "https://solscan.io",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-      chainId: "0x67",
+      chainId: "0x3",
       ticker: "SOL",
-      tickerName: "Solana",
-      displayName: "Solana Devnet",
+      tickerName: "Solana Devnet",
     },
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
       rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
       blockExplorerUrl: "https://explorer.solana.com",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-      chainId: "0x65",
+      chainId: "0x1",
       ticker: "SOL",
-      tickerName: "Solana",
-      displayName: "Solana Mainnet",
+      tickerName: "Solana Mainnet",
     },
   ],
   [CHAIN_NAMESPACES.CASPER]: [],

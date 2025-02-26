@@ -5,11 +5,7 @@
   },
   "eslint.workingDirectories": [
     {
-      "directory": "packages/no-modal",
-      "changeProcessCWD": true
-    },
-    {
-      "directory": "packages/modal",
+      "directory": "packages/*",
       "changeProcessCWD": true
     },
     {
@@ -17,9 +13,5 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": [
-    "fallbacker",
-    "JRPC",
-    "Solana"
-  ]
+  "cSpell.words": ["bowser", "clsx", "dont", "JRPC", "PASSWORDLESS", "Ronin", "Solana", "SQAURE", "WEBAUTHN"]
 }

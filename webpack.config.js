@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
-function generateWebpackConfig({ alias, module = {}, ssrModule = null, pkgBaseConfig = {}, plugins = [] }) {
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+function generateWebpackConfig({ alias, module = {}, ssrModule = null, pkgBaseConfig = {} }) {
   const baseConfig = {
     ...pkgBaseConfig,
     resolve: {
@@ -21,7 +21,6 @@ function generateWebpackConfig({ alias, module = {}, ssrModule = null, pkgBaseCo
 
   config.cjsConfig = {
     module: ssrModule || module,
-    plugins,
   };
 
   return config;

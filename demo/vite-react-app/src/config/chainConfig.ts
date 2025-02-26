@@ -1,4 +1,4 @@
-import { CustomChainConfig, CHAIN_NAMESPACES } from "@web3auth/modal";
+import { CustomChainConfig, CHAIN_NAMESPACES } from "@web3auth/base";
 
 export const CHAIN_CONFIG = {
   mainnet: {

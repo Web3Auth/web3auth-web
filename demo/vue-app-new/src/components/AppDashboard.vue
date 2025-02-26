@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
-import { useWeb3Auth } from "@web3auth/modal/vue";
-import { useI18n } from "petite-vue-i18n";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS } from "@web3auth/base";
+import { useWeb3Auth } from "@web3auth/modal-vue-composables";
+import { NFTCheckoutPlugin } from "@web3auth/nft-checkout-plugin";
+import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
+import { useI18n } from "vue-i18n";
 
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {
@@ -16,67 +18,35 @@ import {
   signTypedMessage,
 } from "../services/ethHandlers";
 import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
-import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
+import { walletSendEth, walletSignPersonalMessage, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
-import { computed, ref, watch } from "vue";
-import { useWalletServicesPlugin } from "@web3auth/no-modal/vue";
-import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
-import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
-import { ProviderConfig } from "@toruslabs/base-controllers";
-import { Connection } from "@solana/web3.js";
-
-const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
 
 const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
 const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
-const { isPluginConnected, plugin } = useWalletServicesPlugin();
-const currentChainId = ref<string | undefined>(web3Auth.value?.coreOptions.chainConfig?.chainId);
-const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
-const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
-const connection = computed(() => {
-  return currentChainConfig?.value ? new Connection(currentChainConfig?.value.rpcTarget) : null;
-});
 
-const chainChangedListener = (chainId: string) => {
-  currentChainId.value = chainId;
-}
-
-watch(isPluginConnected, (newIsConnected, _, onCleanup) => {
-  if (!newIsConnected || !plugin.value) return;
-  
-  const walletPlugin = plugin.value;
-  walletPlugin?.wsEmbedInstance?.provider?.on("chainChanged", chainChangedListener)
-  onCleanup(() => {
-    walletPlugin?.wsEmbedInstance?.provider?.off("chainChanged", chainChangedListener)
-  })
-}, {
-  immediate: true
-})
-
-const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletServices" | "nftCheckoutServices"): boolean => {
-  const chainNamespace = currentChainNamespace.value;
+const isDisplay = (name: string): boolean => {
   switch (name) {
     case "dashboard":
       return isConnected.value;
 
     case "ethServices":
-      return chainNamespace === CHAIN_NAMESPACES.EIP155;
+      return formData.chainNamespace === CHAIN_NAMESPACES.EIP155;
 
     case "solServices":
-      return chainNamespace === CHAIN_NAMESPACES.SOLANA;
+      return formData.chainNamespace === CHAIN_NAMESPACES.SOLANA;
 
     case "walletServices":
       return (
-        (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
+        formData.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
         formData.walletPlugin.enable &&
         web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
       );
 
     case "nftCheckoutServices":
-      return chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable;
+      return formData.chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable;
 
     default: {
       return false;
@@ -138,16 +108,6 @@ const onWalletSignTypedData_v4 = async () => {
 const onWalletSendEth = async () => {
   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
-};
-
-const onWalletSignSolanaMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
-};
-
-const onWalletSignSolanaVersionedTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
-  await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
 };
 
 // NFT Checkout
@@ -276,20 +236,13 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="showCheckout">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
-          <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
+          <Button block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignTypedData_v4">
+          <Button block size="xs" pill class="mb-2" @click="onWalletSignTypedData_v4">
             {{ t("app.buttons.btnSignTypedData_v4") }}
           </Button>
-          <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
-
-          <Button v-if="isDisplay('solServices')" block size="xs" pill class="mb-2" @click="onWalletSignSolanaMessage">
-            {{ t("app.buttons.btnSignMessage") }}
-          </Button>
-          <Button v-if="isDisplay('solServices')" block size="xs" pill class="mb-2" @click="onWalletSignSolanaVersionedTransaction">
-            {{ t("app.buttons.btnSignTransaction") }}
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onWalletSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
         </Card>
         <Card v-if="isDisplay('nftCheckoutServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">NFT Checkout Service</div>
