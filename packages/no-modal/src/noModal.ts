@@ -36,6 +36,69 @@ const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
 const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
 
+// Utility to check if code is running in a browser environment
+const isBrowser = (): boolean => {
+  return typeof window !== "undefined" && typeof document !== "undefined";
+};
+
+// Cookie utilities
+const getCookie = (name: string): string | null => {
+  if (!isBrowser()) return null;
+  const cookies = document.cookie.split(";");
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    if (cookie.startsWith(`${name}=`)) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return null;
+};
+
+const setCookie = (name: string, value: string, days = 30): void => {
+  if (!isBrowser()) return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = `; expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Strict`;
+};
+
+const removeCookie = (name: string): void => {
+  if (!isBrowser()) return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
+};
+
+// Safe storage access function
+const getStorageItem = (storageType: "localStorage" | "sessionStorage" | "cookie", key: string): string | null => {
+  if (storageType === "cookie") {
+    return getCookie(key);
+  }
+
+  if (!isBrowser() || !storageAvailable(storageType)) return null;
+  return window[storageType].getItem(key);
+};
+
+// Safe storage set function
+const setStorageItem = (storageType: "localStorage" | "sessionStorage" | "cookie", key: string, value: string): void => {
+  if (storageType === "cookie") {
+    setCookie(key, value);
+    return;
+  }
+
+  if (!isBrowser() || !storageAvailable(storageType)) return;
+  window[storageType].setItem(key, value);
+};
+
+// Safe storage remove function
+const removeStorageItem = (storageType: "localStorage" | "sessionStorage" | "cookie", key: string): void => {
+  if (storageType === "cookie") {
+    removeCookie(key);
+    return;
+  }
+
+  if (!isBrowser() || !storageAvailable(storageType)) return;
+  window[storageType].removeItem(key);
+};
+
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -55,7 +118,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private plugins: Record<string, IPlugin> = {};
 
-  private storage: "sessionStorage" | "localStorage" = "localStorage";
+  private storage: "sessionStorage" | "localStorage" | "cookie" = "localStorage";
 
   constructor(options: IWeb3AuthCoreOptions) {
     super();
@@ -74,7 +137,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     if (options.storageKey === "session") this.storage = "sessionStorage";
-    this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
+    if (options.storageKey === "cookie") this.storage = "cookie";
+
+    this.cachedConnector = getStorageItem(this.storage, CONNECTOR_CACHE_KEY);
 
     this.coreOptions = {
       ...options,
@@ -85,7 +150,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
 
     // handle cached current chain
-    this.cachedCurrentChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
+    this.cachedCurrentChainId = getStorageItem(this.storage, CURRENT_CHAIN_CACHE_KEY);
     // use corrected chains from coreOptions
     const cachedChain = this.cachedCurrentChainId ? this.coreOptions.chains.find((chain) => chain.chainId === this.cachedCurrentChainId) : null;
     this.currentChain = cachedChain || this.coreOptions.chains[0]; // use first chain in list as default chain config
@@ -149,9 +214,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public clearCache() {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].removeItem(CONNECTOR_CACHE_KEY);
-    window[this.storage].removeItem(CURRENT_CHAIN_CACHE_KEY);
+    removeStorageItem(this.storage, CONNECTOR_CACHE_KEY);
+    removeStorageItem(this.storage, CURRENT_CHAIN_CACHE_KEY);
     this.cachedConnector = null;
   }
 
@@ -256,7 +320,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // add injected connectors
     const isMipdEnabled = this.coreOptions.multiInjectedProviderDiscovery ?? true;
-    if (isMipdEnabled) {
+    if (isMipdEnabled && isBrowser()) {
       const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
@@ -368,11 +432,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
       // get back to ready state for rehydrating.
       this.status = CONNECTOR_STATUS.READY;
-      if (storageAvailable(this.storage)) {
-        const cachedConnector = window[this.storage].getItem(CONNECTOR_CACHE_KEY);
-        if (this.connectedConnectorName === cachedConnector) {
-          this.clearCache();
-        }
+      const cachedConnector = getStorageItem(this.storage, CONNECTOR_CACHE_KEY);
+      if (this.connectedConnectorName === cachedConnector) {
+        this.clearCache();
       }
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
@@ -412,9 +474,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.CACHE_CLEAR, (data) => {
       log.debug("connector cache clear", data);
-      if (storageAvailable(this.storage)) {
-        this.clearCache();
-      }
+      this.clearCache();
     });
   }
 
@@ -425,8 +485,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private cacheWallet(walletName: string) {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].setItem(CONNECTOR_CACHE_KEY, walletName);
+    setStorageItem(this.storage, CONNECTOR_CACHE_KEY, walletName);
     this.cachedConnector = walletName;
   }
 
@@ -439,8 +498,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private cacheCurrentChain(chainId: string) {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].setItem(CURRENT_CHAIN_CACHE_KEY, chainId);
+    setStorageItem(this.storage, CURRENT_CHAIN_CACHE_KEY, chainId);
     this.cachedCurrentChainId = chainId;
   }
 

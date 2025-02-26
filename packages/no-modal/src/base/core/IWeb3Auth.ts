@@ -60,7 +60,7 @@ export interface IWeb3AuthCoreOptions {
    *
    * @defaultValue "local"
    */
-  storageKey?: "session" | "local";
+  storageKey?: "session" | "local" | "cookie";
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
