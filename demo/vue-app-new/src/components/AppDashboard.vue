@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
+import { type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 
@@ -32,7 +33,6 @@ const { t } = useI18n({ useScope: "global" });
 const formData = formDataStore;
 
 const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
-const { isPluginConnected, plugin } = useWalletServicesPlugin();
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
@@ -44,13 +44,12 @@ const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
 }
 
-watch(isPluginConnected, (newIsConnected, _, onCleanup) => {
-  if (!newIsConnected || !plugin.value) return;
+watch(isConnected, (newIsConnected, _, onCleanup) => {
+  if (!newIsConnected || ! provider.value) return;
   
-  const walletPlugin = plugin.value;
-  walletPlugin?.wsEmbedInstance?.provider?.on("chainChanged", chainChangedListener)
+  provider.value.on("chainChanged", chainChangedListener)
   onCleanup(() => {
-    walletPlugin?.wsEmbedInstance?.provider?.off("chainChanged", chainChangedListener)
+    provider.value?.off("chainChanged", chainChangedListener)
   })
 }, {
   immediate: true
@@ -116,47 +115,47 @@ const printToConsole = (...args: unknown[]) => {
 
 // Wallet Services
 const showWalletUI = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletUi();
 };
 const showCheckout = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showCheckout();
 };
 const showWalletConnectScanner = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletConnectScanner();
 };
 const onWalletSignPersonalMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSignTypedData_v4 = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSendEth = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 
 const onWalletSignSolanaMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
 };
 
 const onWalletSignSolanaVersionedTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
 };
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
 };
 const showFreeMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
 };
 

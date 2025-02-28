@@ -1,4 +1,3 @@
-import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 
 import { CustomChainConfig, SafeEventEmitterProvider } from "@/core/base";
@@ -48,15 +47,6 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     });
 
     await this.setupProvider(newChainId);
-  }
-
-  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
-    }
   }
 
   protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
