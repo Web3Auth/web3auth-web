@@ -1,5 +1,14 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CustomChainConfig,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+  SignTypedDataMessageV4,
+  CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
+} from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -81,7 +90,7 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
     },
     {
       chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: import.meta.env.VITE_SOLANA_MAINNET_RPC,
+      rpcTarget: import.meta.env.VITE_APP_SOLANA_MAINNET_RPC,
       blockExplorerUrl: "https://explorer.solana.com",
       logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
       chainId: "0x65",
@@ -94,6 +103,8 @@ export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.XRPL]: [],
   [CHAIN_NAMESPACES.OTHER]: [],
 };
+
+export const allChains = Object.values(chainConfigs).flat();
 
 export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
   [WEB3AUTH_NETWORK.MAINNET]: "BJRZ6qdDTbj6Vd5YXvV994TYCqY42-PxldCetmvGTUdoq6pkCqdpuC1DIehz76zuYdaq1RJkXGHuDraHRhCQHvA",
@@ -153,9 +164,10 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel" | "nexus" | "trust";
+export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
+  { name: "Biconomy", value: "biconomy" },
   { name: "Safe", value: "safe" },
   { name: "Nexus", value: "nexus" },
   { name: "Kernel", value: "kernel" },
@@ -171,20 +183,19 @@ export const getDefaultBundlerUrl = (chainId: string): string => {
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
-  chainNamespace: ChainNamespaceType;
-  chain: string;
+  chainNamespaces: ChainNamespaceType[];
+  chains: string[];
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
-  adapters: string[];
+  connectors: string[];
   showWalletDiscovery: boolean;
+  multiInjectedProviderDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
-    logoDark: string;
-    logoLight: string;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
   };
   nftCheckoutPlugin: {

@@ -1,33 +1,29 @@
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
+import type { AuthUserInfo, LoginParams } from "@/core/auth-connector";
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS,
-  type ADAPTER_STATUS_TYPE,
-  type CustomChainConfig,
-  type IPlugin,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  type CONNECTOR_STATUS_TYPE,
   type IProvider,
-  WALLET_ADAPTER_TYPE,
+  WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthContextKey,
 } from "@/core/base";
 
-import type { AuthUserInfo, LoginParams } from "../../adapters/auth-adapter";
 import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthContext, Web3AuthContextConfig } from "./interfaces";
 
 export const Web3AuthProvider = defineComponent({
   name: "Web3AuthProvider",
-  props: {
-    config: { type: Object as PropType<Web3AuthContextConfig>, required: true },
-  },
+  props: { config: { type: Object as PropType<Web3AuthContextConfig>, required: true } },
   setup(props) {
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
     const provider = ref<IProvider | null>(null);
     const userInfo = ref<Partial<AuthUserInfo> | null>(null);
     const isMFAEnabled = ref(false);
-    const status = ref<ADAPTER_STATUS_TYPE | null>(null);
+    const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
 
     const isInitializing = ref(false);
     const initError = ref<Error | null>(null);
@@ -36,11 +32,6 @@ export const Web3AuthProvider = defineComponent({
     const isConnecting = ref(false);
     const connectError = ref<Error | null>(null);
     const isConnected = ref(false);
-
-    const addPlugin = (plugin: IPlugin) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      return web3Auth.value.addPlugin(plugin);
-    };
 
     const getPlugin = (name: string) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
@@ -68,7 +59,7 @@ export const Web3AuthProvider = defineComponent({
       await web3Auth.value.logout(logoutParams);
     };
 
-    const connectTo = async <T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T) => {
+    const connectTo = async <T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       try {
         connectError.value = null;
@@ -82,20 +73,9 @@ export const Web3AuthProvider = defineComponent({
       }
     };
 
-    const addAndSwitchChain = async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      await web3Auth.value.addChain(chainConfig);
-      await web3Auth.value.switchChain({ chainId: chainConfig.chainId });
-    };
-
     const authenticateUser = async () => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       return web3Auth.value.authenticateUser();
-    };
-
-    const addChain = async (chainConfig: CustomChainConfig) => {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
-      return web3Auth.value.addChain(chainConfig);
     };
 
     const switchChain = (chainParams: { chainId: string }) => {
@@ -115,15 +95,8 @@ export const Web3AuthProvider = defineComponent({
         };
 
         resetHookState();
-        const { web3AuthOptions, adapters = [], plugins = [] } = newConfig;
+        const { web3AuthOptions } = newConfig;
         const web3AuthInstance = new Web3AuthNoModal(web3AuthOptions);
-        if (adapters.length) adapters.map((adapter) => web3AuthInstance.configureAdapter(adapter));
-        if (plugins.length) {
-          plugins.forEach((plugin) => {
-            web3AuthInstance.addPlugin(plugin);
-          });
-        }
-
         web3Auth.value = web3AuthInstance;
       },
       { immediate: true }
@@ -178,7 +151,7 @@ export const Web3AuthProvider = defineComponent({
         const connectedListener = () => {
           status.value = web3Auth.value!.status;
           // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
-          if (web3Auth.value!.status === ADAPTER_STATUS.CONNECTED) {
+          if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
             isInitialized.value = true;
             isConnected.value = true;
           }
@@ -191,28 +164,28 @@ export const Web3AuthProvider = defineComponent({
           status.value = web3Auth.value!.status;
         };
         const errorListener = () => {
-          status.value = ADAPTER_EVENTS.ERRORED;
+          status.value = CONNECTOR_EVENTS.ERRORED;
         };
 
         // unregister previous listeners
         if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
-          prevWeb3Auth.off(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-          prevWeb3Auth.off(ADAPTER_EVENTS.READY, readyListener);
-          prevWeb3Auth.off(ADAPTER_EVENTS.CONNECTED, connectedListener);
-          prevWeb3Auth.off(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-          prevWeb3Auth.off(ADAPTER_EVENTS.CONNECTING, connectingListener);
-          prevWeb3Auth.off(ADAPTER_EVENTS.ERRORED, errorListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
         }
 
         if (newWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
           status.value = newWeb3Auth.status;
           // web3Auth is initialized here.
-          newWeb3Auth.on(ADAPTER_EVENTS.NOT_READY, notReadyListener);
-          newWeb3Auth.on(ADAPTER_EVENTS.READY, readyListener);
-          newWeb3Auth.on(ADAPTER_EVENTS.CONNECTED, connectedListener);
-          newWeb3Auth.on(ADAPTER_EVENTS.DISCONNECTED, disconnectedListener);
-          newWeb3Auth.on(ADAPTER_EVENTS.CONNECTING, connectingListener);
-          newWeb3Auth.on(ADAPTER_EVENTS.ERRORED, errorListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
         }
       },
       { immediate: true }
@@ -231,9 +204,6 @@ export const Web3AuthProvider = defineComponent({
       enableMFA,
       manageMFA,
       logout,
-      addAndSwitchChain,
-      addChain,
-      addPlugin,
       authenticateUser,
       switchChain,
       isInitializing,

@@ -1,3 +1,5 @@
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+
 import { IProvider, RequestArguments } from "@/core/base";
 
 import { ISolanaWallet, TransactionOrVersionedTransaction } from "./interface";
@@ -11,16 +13,16 @@ export class SolanaWallet implements ISolanaWallet {
 
   public async requestAccounts(): Promise<string[]> {
     const accounts = await this.provider.request<never, string[]>({
-      method: "requestAccounts",
+      method: SOLANA_METHOD_TYPES.SOLANA_REQUEST_ACCOUNTS,
     });
     return accounts;
   }
 
   public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }> {
-    const { signature } = await this.provider.request<{ message: T }, { signature: string }>({
-      method: "signAndSendTransaction",
+    const { signature } = await this.provider.request<{ message: string }, { signature: string }>({
+      method: SOLANA_METHOD_TYPES.SEND_TRANSACTION,
       params: {
-        message: transaction,
+        message: Buffer.from(transaction.serialize()).toString("base64"),
       },
     });
     return { signature };
@@ -28,9 +30,9 @@ export class SolanaWallet implements ISolanaWallet {
 
   public async signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T> {
     const signedTransaction = await this.provider.request({
-      method: "signTransaction",
+      method: SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
       params: {
-        message: transaction,
+        message: Buffer.from(transaction.serialize()).toString("base64"),
       },
     });
     return signedTransaction as T;
@@ -38,19 +40,19 @@ export class SolanaWallet implements ISolanaWallet {
 
   public async signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]> {
     const signedTransactions = await this.provider.request({
-      method: "signAllTransactions",
+      method: SOLANA_METHOD_TYPES.SIGN_ALL_TRANSACTIONS,
       params: {
-        message: transactions,
+        message: transactions.map((tx) => Buffer.from(tx.serialize()).toString("base64")),
       },
     });
     return signedTransactions as T[];
   }
 
   public async signMessage(data: Uint8Array): Promise<Uint8Array> {
-    const response = await this.provider.request<{ message: Uint8Array }, Uint8Array>({
-      method: "signMessage",
+    const response = await this.provider.request<{ data: string }, Uint8Array>({
+      method: SOLANA_METHOD_TYPES.SIGN_MESSAGE,
       params: {
-        message: data,
+        data: data.toString(),
       },
     });
     return response as Uint8Array;

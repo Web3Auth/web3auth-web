@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { log, WalletServicesPlugin } from "@web3auth/modal";
+import { log, type WalletServicesPluginType } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { BrowserProvider, parseEther } from "ethers";
 
 import { getV4TypedData } from "../config/config";
 
-export const walletSignPersonalMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
+export const walletSignPersonalMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -31,7 +31,7 @@ export const walletSignPersonalMessage = async (provider: WalletServicesPlugin["
   }
 };
 
-export const walletSignTypedMessage = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
+export const walletSignTypedMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -55,7 +55,7 @@ export const walletSignTypedMessage = async (provider: WalletServicesPlugin["pro
   }
 };
 
-export const walletSendEth = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
+export const walletSendEth = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -73,7 +73,7 @@ export const walletSendEth = async (provider: WalletServicesPlugin["provider"], 
   }
 };
 
-export const walletSignTransaction = async (provider: WalletServicesPlugin["provider"], uiConsole: any) => {
+export const walletSignTransaction = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const accounts = await provider.request({ method: "eth_accounts" });

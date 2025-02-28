@@ -1,7 +1,7 @@
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
 
 import { TransactionOrVersionedTransaction } from "../interface";
-import { AddSolanaChainParameter, ISolanaChainSwitchHandlers, ISolanaProviderHandlers } from "./interfaces";
+import { ISolanaChainSwitchHandlers, ISolanaProviderHandlers } from "./interfaces";
 
 export function createGetAccountsMiddleware({
   getAccounts,
@@ -104,12 +104,8 @@ export function createSolanaMiddleware(providerHandlers: ISolanaProviderHandlers
   ]);
 }
 
-export function createSolanaChainSwitchMiddleware({
-  addNewChainConfig,
-  switchSolanaChain,
-}: ISolanaChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
+export function createSolanaChainSwitchMiddleware({ switchSolanaChain }: ISolanaChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   return mergeMiddleware([
-    createGenericJRPCMiddleware<AddSolanaChainParameter, void>("addSolanaChain", addNewChainConfig) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<{ chainId: string }, void>("switchSolanaChain", switchSolanaChain) as JRPCMiddleware<unknown, unknown>,
   ]);
 }

@@ -1,14 +1,14 @@
-import type { IAdapter, IBaseWeb3AuthHookContext, IPlugin, IProvider, WALLET_ADAPTER_TYPE } from "@web3auth/no-modal";
+import type { ConnectorFn, IBaseWeb3AuthHookContext, IProvider, PluginFn, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 
 import { type ModalConfig } from "../interface";
 import type { Web3Auth, Web3AuthOptions } from "../modalManager";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
-  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  modalConfig?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
   hideWalletDiscovery?: boolean;
-  adapters?: IAdapter<unknown>[];
-  plugins?: IPlugin[];
+  connectors?: ConnectorFn[];
+  plugins?: PluginFn[];
 };
 
 export interface Web3AuthProviderProps {

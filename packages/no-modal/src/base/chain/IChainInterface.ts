@@ -8,7 +8,7 @@ export const CHAIN_NAMESPACES = {
 // eip155 for all evm chains
 export type ChainNamespaceType = (typeof CHAIN_NAMESPACES)[keyof typeof CHAIN_NAMESPACES];
 
-export const ADAPTER_NAMESPACES = {
+export const CONNECTOR_NAMESPACES = {
   EIP155: "eip155",
   SOLANA: "solana",
   CASPER: "casper",
@@ -16,7 +16,7 @@ export const ADAPTER_NAMESPACES = {
   MULTICHAIN: "multichain",
 } as const;
 // eip155 for all evm chains
-export type AdapterNamespaceType = (typeof ADAPTER_NAMESPACES)[keyof typeof ADAPTER_NAMESPACES];
+export type ConnectorNamespaceType = (typeof CONNECTOR_NAMESPACES)[keyof typeof CONNECTOR_NAMESPACES];
 
 export type CustomChainConfig = {
   chainNamespace: ChainNamespaceType;

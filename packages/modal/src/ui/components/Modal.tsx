@@ -1,5 +1,5 @@
 import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
-import { ADAPTER_NAMES, ChainNamespaceType, cloneDeep, log, WalletRegistry } from "@web3auth/no-modal";
+import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WalletRegistry } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,12 +44,12 @@ export default function Modal(props: ModalProps) {
     socialLoginsConfig: {
       loginMethods: {},
       loginMethodsOrder: [],
-      adapter: "",
+      connector: "",
       uiConfig: {},
     },
     externalWalletsConfig: {},
-    detailedLoaderAdapter: "",
-    detailedLoaderAdapterName: "",
+    detailedLoaderConnector: "",
+    detailedLoaderConnectorName: "",
     showExternalWalletsOnly: false,
   });
   const [t] = useTranslation(undefined, { i18n });
@@ -119,9 +119,9 @@ export default function Modal(props: ModalProps) {
 
   const preHandleExternalWalletClick = useCallback(
     (params: ExternalWalletEventType) => {
-      const { adapter } = params;
+      const { connector } = params;
       setModalState((prevState) => {
-        return { ...prevState, detailedLoaderAdapter: adapter, detailedLoaderAdapterName: ADAPTER_NAMES[adapter] };
+        return { ...prevState, detailedLoaderConnector: connector, detailedLoaderConnectorName: CONNECTOR_NAMES[connector] };
       });
       handleExternalWalletClick(params);
     },
@@ -131,7 +131,7 @@ export default function Modal(props: ModalProps) {
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderAdapter: loginParams.loginProvider, detailedLoaderAdapterName: loginParams.name };
+      return { ...prevState, detailedLoaderConnector: loginParams.loginProvider, detailedLoaderConnectorName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -201,14 +201,14 @@ export default function Modal(props: ModalProps) {
             <>
               <Header onClose={closeModal} appLogo={appLogo} appName={appName} />
               <div className="w3a-modal__content w3ajs-content">
-                {/* {modalState.detailedLoaderAdapter ? ( */}
+                {/* {modalState.detailedLoaderConnector ? ( */}
                 <AdapterLoader
                   onClose={onCloseLoader}
                   appLogo={appLogo}
                   modalStatus={modalState.status}
                   message={t(modalState.postLoadingMessage)}
-                  adapter={modalState.detailedLoaderAdapter}
-                  adapterName={modalState.detailedLoaderAdapterName}
+                  connector={modalState.detailedLoaderConnector}
+                  connectorName={modalState.detailedLoaderConnectorName}
                 />
                 {/* ) : ( */}
                 {/* <Loader onClose={onCloseLoader} modalStatus={modalState.status} message={t(modalState.postLoadingMessage)} /> */}
@@ -233,7 +233,7 @@ export default function Modal(props: ModalProps) {
                       <SocialLoginPasswordless
                         isEmailVisible={isEmailPasswordlessLoginVisible}
                         isSmsVisible={isSmsPasswordlessLoginVisible}
-                        adapter={modalState.socialLoginsConfig?.adapter}
+                        connector={modalState.socialLoginsConfig?.connector}
                         handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
                         isPrimaryBtn={isEmailPrimary}
                       />

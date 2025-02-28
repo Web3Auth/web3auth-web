@@ -1,16 +1,16 @@
-import type { BaseAdapterConfig, ChainNamespaceType, IProvider, IWeb3Auth, LoginMethodConfig, WALLET_ADAPTER_TYPE } from "@web3auth/no-modal";
+import type { BaseConnectorConfig, ChainNamespaceType, IProvider, IWeb3Auth, LoginMethodConfig, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 
-export interface ModalConfig extends Omit<BaseAdapterConfig, "isInjected"> {
+export interface ModalConfig extends Omit<BaseConnectorConfig, "isInjected"> {
   loginMethods?: LoginMethodConfig;
 }
 
-export interface AdaptersModalConfig {
+export interface ConnectorsModalConfig {
   chainNamespace: ChainNamespaceType;
-  adapters?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  connectors?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
 }
 
 export interface ModalConfigParams {
-  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  modalConfig?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
   hideWalletDiscovery?: boolean;
 }
 

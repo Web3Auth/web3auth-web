@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_ADAPTERS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
+import { type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 
@@ -19,7 +20,6 @@ import { signAllTransactions, signAndSendTransaction, signMessage, signTransacti
 import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { computed, ref, watch } from "vue";
-import { useWalletServicesPlugin } from "@web3auth/no-modal/vue";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 import { ProviderConfig } from "@toruslabs/base-controllers";
@@ -31,9 +31,8 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const { userInfo, isConnected, provider, switchChain, addAndSwitchChain, web3Auth } = useWeb3Auth();
-const { isPluginConnected, plugin } = useWalletServicesPlugin();
-const currentChainId = ref<string | undefined>(web3Auth.value?.coreOptions.chainConfig?.chainId);
+const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
+const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
 const connection = computed(() => {
@@ -44,13 +43,12 @@ const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
 }
 
-watch(isPluginConnected, (newIsConnected, _, onCleanup) => {
-  if (!newIsConnected || !plugin.value) return;
+watch(isConnected, (newIsConnected, _, onCleanup) => {
+  if (!newIsConnected || ! provider.value) return;
   
-  const walletPlugin = plugin.value;
-  walletPlugin?.wsEmbedInstance?.provider?.on("chainChanged", chainChangedListener)
+  provider.value.on("chainChanged", chainChangedListener)
   onCleanup(() => {
-    walletPlugin?.wsEmbedInstance?.provider?.off("chainChanged", chainChangedListener)
+    provider.value?.off("chainChanged", chainChangedListener)
   })
 }, {
   immediate: true
@@ -72,7 +70,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return (
         (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
         formData.walletPlugin.enable &&
-        web3Auth.value?.connectedAdapterName === WALLET_ADAPTERS.AUTH
+        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
       );
 
     case "nftCheckoutServices":
@@ -116,47 +114,47 @@ const printToConsole = (...args: unknown[]) => {
 
 // Wallet Services
 const showWalletUI = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletUi();
 };
 const showCheckout = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showCheckout();
 };
 const showWalletConnectScanner = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletConnectScanner();
 };
 const onWalletSignPersonalMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSignTypedData_v4 = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSendEth = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 
 const onWalletSignSolanaMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
 };
 
 const onWalletSignSolanaVersionedTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
 };
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
 };
 const showFreeMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
 };
 
@@ -188,27 +186,10 @@ const onGetBalance = async () => {
 const onSwitchChain = async () => {
   log.info("switching chain");
   try {
-    await switchChain({ chainId: "0x89" });
+    await switchChain({ chainId: "0xaa36a7" });
     printToConsole("switchedChain");
   } catch (error) {
     printToConsole("switchedChain error", error);
-  }
-};
-
-const onAddChain = async () => {
-  try {
-    await addAndSwitchChain({
-      chainId: "0xaa36a7",
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://1rpc.io/sepolia	",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      displayName: "Sepolia",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    });
-    printToConsole("added chain");
-  } catch (error) {
-    printToConsole("add chain error", error);
   }
 };
 
@@ -308,6 +289,7 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
@@ -326,7 +308,6 @@ const onSignPersonalMsg = async () => {
         </Card>
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onAddChain">{{ t("app.buttons.btnAddChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}

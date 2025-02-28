@@ -1,4 +1,3 @@
-import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 
 import { CustomChainConfig, SafeEventEmitterProvider } from "@/core/base";
@@ -15,43 +14,39 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     super({ config, state });
   }
 
-  public static getProviderInstance = async (params: { chainConfig: CustomChainConfig }): Promise<CommonJRPCProvider> => {
-    const providerFactory = new CommonJRPCProvider({ config: { chainConfig: params.chainConfig } });
-    await providerFactory.setupProvider();
+  public static getProviderInstance = async (params: { chain: CustomChainConfig; chains: CustomChainConfig[] }): Promise<CommonJRPCProvider> => {
+    const providerFactory = new CommonJRPCProvider({ config: { chain: params.chain, chains: params.chains } });
+    const { chainId } = params.chain;
+    await providerFactory.setupProvider(chainId);
     return providerFactory;
   };
 
-  public async setupProvider(): Promise<void> {
-    const { networkMiddleware } = createJsonRpcClient(this.config.chainConfig as CustomChainConfig);
+  public async setupProvider(chainId: string): Promise<void> {
+    const chain = this.getChain(chainId);
+    if (!chain) throw providerErrors.custom({ message: "Chain not found", code: 4902 });
+    const { networkMiddleware } = createJsonRpcClient(chain);
     const engine = new JRPCEngine();
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-    const newChainId = this.config.chainConfig.chainId;
-    if (this.state.chainId !== newChainId) {
-      this.emit("chainChanged", newChainId);
-      this.emit("connect", { chainId: newChainId });
-    }
-    this.update({ chainId: this.config.chainConfig.chainId });
+
+    this.emit("chainChanged", chainId);
+    this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
-    const chainConfig = this.getChainConfig(params.chainId);
+
+    const newChainId = params.chainId;
+    if (this.chainId === newChainId) return;
+
     this.update({
       chainId: "loading",
     });
-    this.configure({ chainConfig });
-    await this.setupProvider();
-  }
 
-  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
-    }
+    await this.setupProvider(newChainId);
   }
 
   protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
