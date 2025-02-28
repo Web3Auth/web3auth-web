@@ -1,4 +1,3 @@
-import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,

@@ -20,7 +20,6 @@ import { signAllTransactions, signAndSendTransaction, signMessage, signTransacti
 import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { computed, ref, watch } from "vue";
-import { useWalletServicesPlugin } from "@web3auth/no-modal/vue";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 import { ProviderConfig } from "@toruslabs/base-controllers";
