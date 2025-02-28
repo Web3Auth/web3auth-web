@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters } from "@web3auth/modal";
+import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
