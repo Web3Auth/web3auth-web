@@ -9,10 +9,10 @@ export type TransactionOrVersionedTransaction = Transaction | VersionedTransacti
 
 export interface ISolanaWallet {
   publicKey?: { toBytes(): Uint8Array };
-  signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }>;
-  signTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
-  signAllTransactions?<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
-  signMessage(message: Uint8Array, display?: string): Promise<Uint8Array>;
+  signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string>;
+  signTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string>;
+  signAllTransactions?<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<string[]>;
+  signMessage(message: string, pubKey: string): Promise<string>;
   request<T, U>(args: RequestArguments<T>): Promise<U>;
 }
 
