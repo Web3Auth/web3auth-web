@@ -45,9 +45,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public cachedConnector: string | null = null;
 
-  public cachedCurrentChainId: string | null = null;
-
-  public currentChain: CustomChainConfig;
+  protected currentChainId: string;
 
   protected connectors: IConnector<unknown>[] = [];
 
@@ -84,11 +82,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       })),
     };
 
-    // handle cached current chain
-    this.cachedCurrentChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
-    // use corrected chains from coreOptions
-    const cachedChain = this.cachedCurrentChainId ? this.coreOptions.chains.find((chain) => chain.chainId === this.cachedCurrentChainId) : null;
-    this.currentChain = cachedChain || this.coreOptions.chains[0]; // use first chain in list as default chain config
+    // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
+    const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
+    const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.chains[0].chainId;
+  }
+
+  get currentChain(): CustomChainConfig {
+    return this.coreOptions.chains.find((chain) => chain.chainId === this.currentChainId);
   }
 
   get connected(): boolean {
@@ -111,12 +112,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(): Promise<void> {
-    // setup common JRPC provider
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      chain: this.getCurrentChain(),
-      chains: this.getChains(),
-    });
-
     // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
@@ -129,6 +124,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
+
+    // setup common JRPC provider
+    await this.setupCommonJRPCProvider(projectConfig);
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors }) => {
@@ -223,20 +221,24 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.connectedConnector.authenticateUser();
   }
 
-  public getCurrentChain(): CustomChainConfig {
-    return this.currentChain;
-  }
-
-  public getChain(chainId: string): CustomChainConfig | undefined {
-    return this.coreOptions.chains.find((chain) => chain.chainId === chainId);
-  }
-
-  public getChains(): CustomChainConfig[] {
-    return this.coreOptions.chains;
-  }
-
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
+  }
+
+  protected async setupCommonJRPCProvider(projectConfig: PROJECT_CONFIG_RESPONSE) {
+    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
+      chain: this.currentChain,
+      chains: this.coreOptions.chains,
+    });
+
+    // sync chainId
+    this.commonJRPCProvider.on("chainChanged", (chainId) => this.setCurrentChain(chainId));
+
+    const { key_export_enabled: keyExportEnabled } = projectConfig;
+    if (typeof keyExportEnabled === "boolean") {
+      // dont know if we need to do this.
+      this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
+    }
   }
 
   protected async setupConnector(connector: IConnector<unknown>): Promise<void> {
@@ -351,8 +353,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
           provider,
-          chain: this.getCurrentChain(),
-          chains: this.getChains(),
+          chain: this.currentChain,
+          chains: this.coreOptions.chains,
         });
         finalProvider = aaProvider;
         // TODO: when switching chains to Solana or other chains, we need to switch to the non-AA provider
@@ -433,17 +435,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private setCurrentChain(chainId: string) {
-    if (chainId === this.currentChain.chainId) return;
+    if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
-    if (!newChain) throw WalletInitializationError.invalidParams("Invalid chainId");
-    this.currentChain = newChain;
+    if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
+    this.currentChainId = chainId;
     this.cacheCurrentChain(chainId);
   }
 
   private cacheCurrentChain(chainId: string) {
     if (!storageAvailable(this.storage)) return;
     window[this.storage].setItem(CURRENT_CHAIN_CACHE_KEY, chainId);
-    this.cachedCurrentChainId = chainId;
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {

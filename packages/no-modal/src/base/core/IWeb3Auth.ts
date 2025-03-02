@@ -121,10 +121,10 @@ export interface IWeb3AuthCoreOptions {
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: string | null;
+  currentChain: CustomChainConfig;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;
-  getCurrentChain(): CustomChainConfig;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
@@ -136,9 +136,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
   cachedConnector: string | null;
-  getCurrentChain(): CustomChainConfig;
-  getChain(chainId: string): CustomChainConfig | undefined;
-  getChains(): CustomChainConfig[];
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   /**
    * Connect to a specific wallet connector

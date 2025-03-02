@@ -1,7 +1,6 @@
 import {
   type BaseConnectorConfig,
   cloneDeep,
-  CommonJRPCProvider,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMES,
@@ -81,15 +80,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // setup common JRPC provider
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      chain: this.currentChain,
-      chains: this.coreOptions.chains,
-    });
-    const { key_export_enabled: keyExportEnabled } = projectConfig;
-    if (typeof keyExportEnabled === "boolean") {
-      // dont know if we need to do this.
-      this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
-    }
+    await this.setupCommonJRPCProvider(projectConfig);
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors }) => this.initConnectors({ connectors, projectConfig, modalConfig: params }));
