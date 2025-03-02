@@ -1,7 +1,7 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
+import { CONNECTOR_STATUS, EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
 import { type WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 import { IWalletServicesContext } from "./interfaces";
@@ -25,6 +25,8 @@ export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext
     if (isConnected) {
       const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
       if (!walletServicesPlugin) setWalletServicesPlugin(plugin);
+      // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
+      if (walletServicesPlugin?.status === CONNECTOR_STATUS.CONNECTED) setIsPluginConnected(true);
     }
   }, [isConnected, getPlugin, walletServicesPlugin]);
 

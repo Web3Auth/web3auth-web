@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { defineComponent, h, inject, provide, Ref, ref, watch } from "vue";
 
-import { EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError, Web3AuthContextKey } from "@/core/base";
+import { CONNECTOR_STATUS, EVM_PLUGINS, IPlugin, PLUGIN_EVENTS, WalletServicesPluginError, Web3AuthContextKey } from "@/core/base";
 import { type WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 import { WalletServicesContextKey } from "./context";
@@ -35,6 +35,8 @@ export const WalletServicesProvider = defineComponent({
       if (newIsConnected) {
         const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
         if (!walletServicesPlugin.value) walletServicesPlugin.value = plugin;
+        // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
+        if (walletServicesPlugin.value?.status === CONNECTOR_STATUS.CONNECTED) isPluginConnected.value = true;
       }
     });
 
