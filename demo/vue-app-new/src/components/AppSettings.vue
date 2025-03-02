@@ -134,9 +134,9 @@ const onChainNamespaceChange = (value: string[]) => {
         <Select
           v-model="formData.chainNamespaces"
           data-testid="selectChainNamespace"
-          :label="$t('app.chainNamespace')"
-          :aria-label="$t('app.chainNamespace')"
-          :placeholder="$t('app.chainNamespace')"
+          :label="$t('app.chainNamespaces')"
+          :aria-label="$t('app.chainNamespaces')"
+          :placeholder="$t('app.chainNamespaces')"
           :options="chainNamespaceOptions"
           :multiple="true"
           @update:model-value="onChainNamespaceChange"
@@ -144,9 +144,9 @@ const onChainNamespaceChange = (value: string[]) => {
         <Select
           v-model="formData.chains"
           data-testid="selectChain"
-          :label="$t('app.chain')"
-          :aria-label="$t('app.chain')"
-          :placeholder="$t('app.chain')"
+          :label="$t('app.chains')"
+          :aria-label="$t('app.chains')"
+          :placeholder="$t('app.chains')"
           :multiple="true"
           :options="chainOptions"
         />

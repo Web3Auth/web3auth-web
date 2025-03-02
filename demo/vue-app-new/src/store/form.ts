@@ -8,7 +8,7 @@ export const formDataStore = reactive<FormData>({
   // authMode: "",
   network: WEB3AUTH_NETWORK.TESTNET,
   chainNamespaces: [CHAIN_NAMESPACES.EIP155],
-  chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0].chainId],
+  chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0].chainId, chainConfigs[CHAIN_NAMESPACES.EIP155][1].chainId],
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,

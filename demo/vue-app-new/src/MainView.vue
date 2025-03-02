@@ -49,20 +49,22 @@ const options = computed((): Web3AuthOptions => {
   }
 
   // Wallet services settings
-  let walletServicesConfig: Web3AuthOptions["walletServicesConfig"];
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
+      // walletUrls: {
+      //   production: {
+      //     url: "http://localhost:4050",
+      //   }
+      // }
+    };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
-      whiteLabel: {
-        ...uiConfig,
-        showWidgetButton: true,
-      },
+      ...walletServicesConfig,
+      whiteLabel: { showWidgetButton: true },
       confirmationStrategy,
     };
   }
 
-  const chains = formData.chains.map((chainId) => allChains.find((x) => x.chainId === chainId)!);
   // Plugins
   const plugins: PluginFn[] = [];
   if (formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)) {
@@ -74,6 +76,8 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  const chains = formData.chains.map((chainId) => allChains.find((x) => x.chainId === chainId)!);
 
   return {
     clientId: clientIds[formData.network],
@@ -82,12 +86,10 @@ const options = computed((): Web3AuthOptions => {
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
-    // chainConfig?: CustomChainConfig;
     // enableLogging?: boolean;
     // storageKey?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
-    // chainConfig,
     chains,
     enableLogging: true,
     connectors: externalConnectors.value,
@@ -187,7 +189,7 @@ const configs = computed<Web3AuthContextConfig>(() => {
       <AppHeader />
       <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
         <AppSettings />
-        <AppDashboard />
+        <AppDashboard :chains="options.chains || []" />
       </main>
     </WalletServicesProvider>
   </Web3AuthProvider>

@@ -58,7 +58,7 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
     const ethProvider = new BrowserProvider(provider);
     const req = ethProvider.getRpcRequest({ method: "chainId" });
     const res = await provider.request(req!);
-    console.log(">>>> in herher", res);
+    log.info("res", res);
     const { chainId } = provider;
     uiConsole("chainId", chainId.toString());
     return chainId.toString();
