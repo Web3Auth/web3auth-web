@@ -126,14 +126,12 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async disconnect(): Promise<void> {
-    // if web3auth is being used and connected to unsupported connector throw error
+    if (this.status !== PLUGIN_STATUS.CONNECTED) throw WalletServicesPluginError.invalidSession("Wallet Services plugin is not connected");
     if (this.wsEmbedInstance?.isLoggedIn) {
       await this.wsEmbedInstance.logout();
-      this.emit(PLUGIN_EVENTS.DISCONNECTED);
-      this.status = PLUGIN_STATUS.DISCONNECTED;
-    } else {
-      throw WalletServicesPluginError.invalidSession("Wallet Services plugin is not connected");
     }
+    this.emit(PLUGIN_EVENTS.DISCONNECTED);
+    this.status = PLUGIN_STATUS.DISCONNECTED;
   }
 }
 

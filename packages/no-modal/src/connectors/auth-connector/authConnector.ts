@@ -215,11 +215,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     await this.authInstance.logout();
+    if (this.wsEmbedInstance) await this.wsEmbedInstance.logout();
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.authInstance = null;
+      if (this.wsEmbedInstance) this.wsEmbedInstance = null;
       if (this.privateKeyProvider) this.privateKeyProvider = null;
-      if (this.wsEmbedInstance) this.wsEmbedInstance.logout();
     } else {
       // ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
