@@ -131,8 +131,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async () => {
-      await Promise.all(this.connectors.map(this.setupConnector));
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors }) => {
+      await Promise.all(connectors.map(this.setupConnector));
 
       // emit connector ready event
       if (this.status === CONNECTOR_STATUS.NOT_READY) {
@@ -327,8 +327,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return connector;
       })
       .filter((connector) => connector !== null);
-    this.connectors = [...this.connectors, ...newConnectors];
-    this.emit(CONNECTOR_EVENTS.CONNECTORS_UPDATED, { connectors: this.connectors });
+    if (newConnectors.length > 0) {
+      this.connectors = [...this.connectors, ...newConnectors];
+      this.emit(CONNECTOR_EVENTS.CONNECTORS_UPDATED, { connectors: this.connectors });
+    }
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
