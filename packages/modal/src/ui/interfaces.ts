@@ -12,6 +12,17 @@ import {
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
   /**
+   * Whether to use the modal or embed widget
+   *
+   * @defaultValue `modal`
+   */
+  widget?: "modal" | "embed";
+  /**
+   * ID of the element to embed the widget into
+   */
+  targetId?: string;
+
+  /**
    * order of how login methods are shown
    *
    * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
@@ -41,7 +52,7 @@ export interface UIConfig extends WhiteLabelData {
   /**
    * Decides which button will be the focus of the modal
    * For `socialLogin` the social icon will be colored
-   * For other options like `emailLogin` and `externalLogin` the respective buttons will be converted into a primary button
+   * For other options like `emailLogin` and `externalLogin` the respective buttons will be coverted into a primary button
    *
    * @defaultValue `socialLogin`
    */
@@ -96,6 +107,7 @@ export interface ModalState {
   detailedLoaderAdapter: string;
   detailedLoaderAdapterName: string;
   showExternalWalletsOnly: boolean;
+  currentPage: string;
 }
 
 export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
@@ -121,3 +133,18 @@ export type ExternalButton = {
   walletRegistryItem?: WalletRegistryItem;
   imgExtension?: string;
 };
+
+export type os = "iOS" | "Android";
+export type platform = "mobile" | "desktop" | "tablet";
+export type browser = "chrome" | "firefox" | "edge" | "safari" | "brave";
+export type mobileOs = "ios" | "android";
+
+export interface WalletAppConfig {
+  browser?: string;
+  android?: string;
+  ios?: string;
+  chrome?: string;
+  firefox?: string;
+  edge?: string;
+  brave?: string;
+}
