@@ -42,6 +42,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
 
   constructor({ config, state }: { config: AccountAbstractionProviderConfig; state?: AccountAbstractionProviderState }) {
     super({ config, state });
+    this.update({ chainId: config.chain.chainId });
   }
 
   get smartAccount(): SmartAccount | null {
@@ -63,10 +64,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   public static getProviderInstance = async (
     params: AccountAbstractionProviderConfig & { eoaProvider: IProvider }
   ): Promise<AccountAbstractionProvider> => {
-    const providerFactory = new AccountAbstractionProvider({ config: params });
-    await providerFactory.setupProvider(params.eoaProvider);
-    providerFactory.update({ eoaProvider: params.eoaProvider });
-    return providerFactory;
+    const providerInstance = new AccountAbstractionProvider({ config: params });
+    await providerInstance.setupProvider(params.eoaProvider);
+    providerInstance.update({ eoaProvider: params.eoaProvider });
+    return providerInstance;
   };
 
   public async enable(): Promise<string[]> {
@@ -145,8 +146,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     engine.push(eoaMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-    eoaProvider.once("chainChanged", () => {
+    eoaProvider.once("chainChanged", (chainId) => {
+      this.update({ chainId });
       this.setupChainSwitchMiddleware();
+      this.emit("chainChanged", chainId);
     });
   }
 
