@@ -1,11 +1,21 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CustomChainConfig,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+  SignTypedDataMessageV4,
+  CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
+} from "@web3auth/no-modal";
 
 import { FormConfigSettings } from "./interfaces";
+import { SelectOption } from "@toruslabs/vue-components/dist/common/Select";
 
-export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
+export const networkOptions: SelectOption[] = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
-export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
+export const chainNamespaceOptions: SelectOption[] = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
 export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
   [CHAIN_NAMESPACES.EIP155]: [

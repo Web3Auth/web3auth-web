@@ -3,6 +3,7 @@
   "include": ["src"],
   "compilerOptions": {
     "resolveJsonModule": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
   }
 }

@@ -1,6 +1,6 @@
-import "./css/web3auth.css";
+import "./css/index.css";
 
-import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
+import { applyWhiteLabelTheme, SafeEventEmitter } from "@web3auth/auth";
 import {
   ADAPTER_EVENTS,
   BaseAdapterConfig,
@@ -16,9 +16,9 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
-import { createRoot } from "react-dom/client";
+import { render } from "solid-js/web";
 
-import Modal from "./components/Modal";
+import { Widget } from "./components/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
@@ -32,23 +32,28 @@ import {
   StateEmitterEvents,
   UIConfig,
 } from "./interfaces";
-import i18n from "./localeImport";
-import { getUserLanguage } from "./utils";
+import { changeLocale } from "./localeImport";
+import { getUserLanguage } from "./utils/modal";
 
-function createWrapper(parentZIndex: string): HTMLElement {
+function createWrapperForModal(parentZIndex: string) {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
-
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
   parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
-  const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-container");
-  parent.appendChild(wrapper);
   document.body.appendChild(parent);
-  return wrapper;
+  log.info("createWrapperForModal", parent);
+}
+
+function createWrapperForEmbed(targetId: string) {
+  const targetElement = document.getElementById(targetId);
+  if (!targetElement) {
+    log.error(`Element with ID ${targetId} not found`);
+    return;
+  }
+  targetElement.innerHTML = `<div id="w3a-parent-container" class="w3a-parent-container"></div>`;
 }
 
 export class LoginModal extends SafeEventEmitter {
@@ -60,9 +65,11 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps) {
+  constructor(uiConfig: LoginModalProps & { widget?: "modal" | "embed"; targetId?: string }) {
     super();
     this.uiConfig = uiConfig;
+
+    log.info("uiConfig", uiConfig);
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
     if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
@@ -73,6 +80,12 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+    if (!uiConfig.widget) this.uiConfig.widget = "modal";
+    if (!uiConfig.targetId) this.uiConfig.targetId = "w3a-parent-test-container";
+
+    if (uiConfig.widget === "embed" && !uiConfig.targetId) {
+      throw new Error("targetId is required for embed widget");
+    }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.chainNamespace = uiConfig.chainNamespace;
@@ -85,103 +98,11 @@ export class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
+    log.info("initModal");
     const darkState = { isDark: this.isDark };
 
-    const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
-
     // Load new language resource
-
-    if (useLang === LANGUAGES.de) {
-      import("./i18n/german.json")
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.ja) {
-      import(`./i18n/japanese.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.ko) {
-      import(`./i18n/korean.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.zh) {
-      import(`./i18n/mandarin.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.es) {
-      import(`./i18n/spanish.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.fr) {
-      import(`./i18n/french.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.pt) {
-      import(`./i18n/portuguese.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.nl) {
-      import(`./i18n/dutch.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.tr) {
-      import(`./i18n/turkish.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    } else if (useLang === LANGUAGES.en) {
-      import(`./i18n/english.json`)
-        .then((messages) => {
-          i18n.addResourceBundle(useLang as string, "translation", messages.default);
-          return i18n.changeLanguage(useLang);
-        })
-        .catch((error) => {
-          log.error(error);
-        });
-    }
+    changeLocale(this.uiConfig.defaultLanguage || "en");
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
@@ -191,28 +112,45 @@ export class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      const container = createWrapper(this.uiConfig.modalZIndex);
-      if (darkState.isDark) {
-        container.classList.add("w3a--dark");
+
+      if (this.uiConfig.widget === "modal") {
+        log.info("createWrapperForModal");
+        createWrapperForModal(this.uiConfig.modalZIndex);
       } else {
-        container.classList.remove("w3a--dark");
+        log.info("createWrapperForEmbed");
+        createWrapperForEmbed(this.uiConfig.targetId);
       }
 
-      const root = createRoot(container);
-      root.render(
-        <ThemedContext.Provider value={darkState}>
-          <Modal
-            closeModal={this.closeModal}
-            stateListener={this.stateEmitter}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
-            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            chainNamespace={this.chainNamespace}
-            walletRegistry={this.walletRegistry}
-          />
-        </ThemedContext.Provider>
+      const root = document.getElementById("w3a-parent-container");
+
+      if (darkState.isDark) {
+        root?.classList.add("w3a--dark");
+      } else {
+        root?.classList.remove("w3a--dark");
+      }
+
+      if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
+        throw new Error("Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?");
+      }
+
+      render(
+        () => (
+          <ThemedContext.Provider value={darkState}>
+            <Widget
+              closeModal={this.closeModal}
+              stateListener={this.stateEmitter}
+              handleShowExternalWallets={this.handleShowExternalWallets}
+              handleExternalWalletClick={this.handleExternalWalletClick}
+              handleSocialLoginClick={this.handleSocialLoginClick}
+              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+              appName={this.uiConfig.appName}
+              chainNamespace={this.chainNamespace}
+              walletRegistry={this.walletRegistry}
+              widget={this.uiConfig.widget}
+            />
+          </ThemedContext.Provider>
+        ),
+        root!
       );
 
       if (this.uiConfig?.theme) {
@@ -236,7 +174,6 @@ export class LoginModal extends SafeEventEmitter {
         uiConfig,
       },
     });
-    log.info("addSocialLogins", adapter, loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (externalWalletsConfig: Record<string, BaseAdapterConfig>, options: { showExternalWalletsOnly: boolean }): void => {

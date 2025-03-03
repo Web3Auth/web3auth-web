@@ -21,6 +21,7 @@
     "external.installed": "Yüklendi",
     "external.no-wallets-found": "Cüzdan bulunamadı",
     "external.search-wallet": "{{count}} cüzdan ara...",
+    "external.search-wallet-loading": "Yükleniyor...",
     "external.title": "Harici Cüzdan",
     "external.walletconnect-connect": "Bağla",
     "external.walletconnect-copy": "WalletConnect destekli bir cüzdanla tarayın veya panonuza kopyalamak için QR kodunu tıklayın.",

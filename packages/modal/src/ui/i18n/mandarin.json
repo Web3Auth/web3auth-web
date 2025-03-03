@@ -21,6 +21,7 @@
     "external.installed": "已安装",
     "external.no-wallets-found": "没有找到钱包",
     "external.search-wallet": "搜索{{count}}个钱包...",
+    "external.search-wallet-loading": "加载中...",
     "external.title": "外部钱包",
     "external.walletconnect-connect": "连接",
     "external.walletconnect-copy": "使用支持 WalletConnect 的钱包进行扫描或单击二维码以复制到剪贴板。",

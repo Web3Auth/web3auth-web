@@ -1,6 +1,30 @@
 <script setup lang="ts">
-
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters, } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  WalletConnectV2Adapter,
+  WalletServicesPlugin,
+  type Web3AuthOptions,
+  EthereumPrivateKeyProvider,
+  NFTCheckoutPlugin,
+  SolanaPrivateKeyProvider,
+  CommonPrivateKeyProvider,
+  CoinbaseAdapter,
+  ChainNamespaceType,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  storageAvailable,
+  WALLET_ADAPTERS,
+  AccountAbstractionProvider,
+  ISmartAccount,
+  KernelSmartAccount,
+  NexusSmartAccount,
+  SafeSmartAccount,
+  TrustSmartAccount,
+  getEvmInjectedAdapters,
+  getSolanaInjectedAdapters,
+} from "@web3auth/modal";
+import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
@@ -235,6 +259,7 @@ const configs = computed(() => {
         <AppSettings />
         <AppDashboard />
       </main>
+      <div id="w3a-parent-test-container" class="flex flex-col items-center justify-center mt-10"></div>
     </WalletServicesProvider>
   </Web3AuthProvider>
 </template>
