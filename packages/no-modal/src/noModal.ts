@@ -5,6 +5,7 @@ import {
   CHAIN_NAMESPACES,
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   CONNECTOR_STATUS_TYPE,
   CustomChainConfig,
@@ -186,8 +187,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      const finalLoginParams = { ...loginParams, chainId: this.currentChain.chainId };
-      this.getConnector(connectorName)?.connect(finalLoginParams);
+      const connector = this.getConnector(connectorName);
+      const initialChain = this.getInitialChainIdForConnector(connector);
+      const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
+      connector.connect(finalLoginParams);
+      this.setCurrentChain(initialChain.chainId);
     });
   }
 
@@ -243,9 +247,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected async setupConnector(connector: IConnector<unknown>): Promise<void> {
     this.subscribeToConnectorEvents(connector);
-    await connector
-      .init({ autoConnect: this.cachedConnector === connector.name, chainId: this.currentChain.chainId })
-      .catch((e) => log.error(e, connector.name));
+    try {
+      const initialChain = this.getInitialChainIdForConnector(connector);
+      await connector.init({ autoConnect: this.cachedConnector === connector.name, chainId: initialChain.chainId });
+    } catch (e) {
+      log.error(e, connector.name);
+    }
   }
 
   protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }) {
@@ -426,6 +433,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.status === CONNECTOR_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
     if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === CONNECTOR_STATUS.READY) throw WalletInitializationError.notReady("Connector is already initialized");
+  }
+
+  /**
+   * Gets the initial chain configuration for a connector
+   * @throws WalletInitializationError If no chain is found for the connector's namespace
+   */
+  protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
+    let initialChain = this.currentChain;
+    if (initialChain.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
+      initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
+      if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
+    }
+    return initialChain;
   }
 
   private cacheWallet(walletName: string) {

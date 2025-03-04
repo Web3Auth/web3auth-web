@@ -49,7 +49,7 @@ const chainChangedListener = (chainId: string) => {
 
 watch(isConnected, (newIsConnected, _, onCleanup) => {
   if (!newIsConnected || ! provider.value) return;
-  
+  currentChainId.value = web3Auth.value?.currentChain.chainId;
   provider.value.on("chainChanged", chainChangedListener)
   onCleanup(() => {
     provider.value?.off("chainChanged", chainChangedListener)

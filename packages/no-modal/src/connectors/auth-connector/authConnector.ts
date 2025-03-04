@@ -118,6 +118,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           web3AuthNetwork,
           modalZIndex: this.wsSettings.modalZIndex,
         });
+        // TODO: once support multiple chains, only pass chains of solana and EVM
         await this.wsEmbedInstance.init({
           ...this.wsSettings,
           chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
@@ -131,7 +132,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.XRPL: {
         const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
         this.privateKeyProvider = new XrplPrivateKeyProvider({
-          config: { chain: chainConfig, chains: this.coreOptions.chains },
+          config: { chain: chainConfig, chains: this.coreOptions.chains.filter((x) => x.chainNamespace === CHAIN_NAMESPACES.XRPL) },
         });
         break;
       }
