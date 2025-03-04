@@ -215,6 +215,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    this.status = CONNECTOR_STATUS.DISCONNECTING;
     await this.authInstance.logout();
     if (this.wsEmbedInstance) await this.wsEmbedInstance.logout();
     if (options.cleanup) {
