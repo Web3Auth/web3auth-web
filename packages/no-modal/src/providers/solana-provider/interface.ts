@@ -3,8 +3,6 @@ import BN from "bn.js";
 
 import { RequestArguments } from "@/core/base";
 
-import { InjectedProvider } from "./providers";
-
 export type TransactionOrVersionedTransaction = Transaction | VersionedTransaction;
 
 export interface ISolanaWallet {
@@ -22,13 +20,6 @@ export interface IBaseWalletProvider {
   signTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
   signAllTransactions?<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
   signAndSendTransaction?<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<{ signature: string }>;
-}
-
-export interface ITorusWalletProvider extends InjectedProvider {
-  sendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string>;
-  signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<T>;
-  signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<T[]>;
-  signMessage(data: Uint8Array): Promise<Uint8Array>;
 }
 
 export interface IWalletStandardProviderHandler extends IBaseWalletProvider {}
