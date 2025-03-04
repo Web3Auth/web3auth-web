@@ -25,20 +25,37 @@ export interface WalletConnectV2ProviderState extends BaseProviderState {
 export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, WalletConnectV2ProviderState, ISignClient> {
   private connector: ISignClient | null = null;
 
-  constructor({ config, state, connector }: { config: WalletConnectV2ProviderConfig; state?: BaseProviderState; connector?: ISignClient }) {
+  private clientId: string;
+
+  constructor({
+    clientId,
+    config,
+    state,
+    connector,
+  }: {
+    config: WalletConnectV2ProviderConfig;
+    clientId: string;
+    state?: BaseProviderState;
+    connector?: ISignClient;
+  }) {
     super({
       config: { chainConfig: config.chainConfig, skipLookupNetwork: !!config.skipLookupNetwork },
       state: { ...(state || {}), chainId: "loading", accounts: [] },
     });
     this.connector = connector || null;
+    this.clientId = clientId;
   }
 
   public static getProviderInstance = async (params: {
+    clientId: string;
     connector: ISignClient;
     chainConfig: CustomChainConfig;
     skipLookupNetwork: boolean;
   }): Promise<WalletConnectV2Provider> => {
-    const providerFactory = new WalletConnectV2Provider({ config: { chainConfig: params.chainConfig, skipLookupNetwork: params.skipLookupNetwork } });
+    const providerFactory = new WalletConnectV2Provider({
+      clientId: params.clientId,
+      config: { chainConfig: params.chainConfig, skipLookupNetwork: params.skipLookupNetwork },
+    });
     await providerFactory.setupProvider(params.connector);
     return providerFactory;
   };
@@ -220,7 +237,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
         // Check if chainId changed and trigger event
         if (connectedHexChainId && this.state.chainId !== connectedHexChainId) {
-          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId);
+          const maybeConfig = getChainConfig(CHAIN_NAMESPACES.EIP155, connectedHexChainId, this.clientId);
           // Handle rpcUrl update
           this.configure({
             chainConfig: { ...maybeConfig, chainId: connectedHexChainId, chainNamespace: CHAIN_NAMESPACES.EIP155 },

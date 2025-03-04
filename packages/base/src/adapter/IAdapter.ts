@@ -192,7 +192,7 @@ export abstract class BaseAdapter<T> extends SafeEventEmitter<AdapterEvents> imp
       this.currentChainNamespace = customChainConfig.chainNamespace;
       // chainId is optional in this function.
       // we go with mainnet chainId by default.
-      const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId);
+      const defaultChainConfig = getChainConfig(customChainConfig.chainNamespace, customChainConfig.chainId, this.clientId);
       // NOTE: It is being forced casted to CustomChainConfig to handle OTHER Chainnamespace
       // where chainConfig is not required.
       const finalChainConfig = { ...(defaultChainConfig || {}), ...customChainConfig } as CustomChainConfig;

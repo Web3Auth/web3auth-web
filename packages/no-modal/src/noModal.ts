@@ -71,7 +71,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.coreOptions = {
       ...options,
       chainConfig: {
-        ...(getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId) || {}),
+        ...(getChainConfig(options.chainConfig?.chainNamespace, options.chainConfig?.chainId, this.coreOptions.clientId) || {}),
         ...options.chainConfig,
       },
     };
