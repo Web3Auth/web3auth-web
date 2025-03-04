@@ -18,7 +18,7 @@ interface ExternalWalletsProps {
   walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
 }
 
@@ -33,7 +33,7 @@ function formatIOSMobile(params: { uri: string; link?: string }) {
   return "";
 }
 
-export default function ExternalWallet(props: ExternalWalletsProps) {
+export default function ExternalWallets(props: ExternalWalletsProps) {
   const {
     hideExternalWallets,
     handleExternalWalletClick,
@@ -42,7 +42,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     walletConnectUri,
     showBackButton,
     modalStatus,
-    chainNamespace,
+    chainNamespaces,
     walletRegistry,
   } = props;
   const [externalButtons, setExternalButtons] = useState<ExternalButton[]>([]);
@@ -129,9 +129,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
           // const isBrowserExtensionAvailable = walletRegistryItem.app?.chrome || walletRegistryItem.app?.firefox || walletRegistryItem.app?.edge;
           if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
 
-          const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+          const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
           const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-          if (!chainNamespaces.has(chainNamespace) && !injectedChainNamespaces.has(chainNamespace)) return acc;
+          const isNamespaceSupported = chainNamespaces.some((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+          if (!isNamespaceSupported) return acc;
 
           acc.push(button);
           return acc;
@@ -196,7 +197,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       setExternalButtons(buttons);
       setTotalExternalWallets(buttons.length);
     }
-  }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespace, walletDiscoverySupported]);
+  }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespaces, walletDiscoverySupported]);
 
   const handleWalletClick = (button: ExternalButton) => {
     // if has injected wallet, connect to injected wallet

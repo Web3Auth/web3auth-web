@@ -56,7 +56,7 @@ export interface UIConfig extends WhiteLabelData {
 }
 
 export interface LoginModalProps extends UIConfig {
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
 }
 
