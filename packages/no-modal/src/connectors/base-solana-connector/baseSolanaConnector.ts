@@ -1,5 +1,5 @@
 import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
-import bs58 from "bs58";
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   BaseConnector,
@@ -49,14 +49,13 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace);
-      const encodedMessage = new TextEncoder().encode(challenge);
-      const signedMessage = await this.provider.request<{ message: Uint8Array; display: string }, Uint8Array>({
-        method: "signMessage",
-        params: { message: encodedMessage, display: "utf8" },
+      const signedMessage = await this.provider.request<{ data: string; display: string }, string>({
+        method: SOLANA_METHOD_TYPES.SIGN_MESSAGE,
+        params: { data: challenge, display: "utf8" },
       });
       const idToken = await verifySignedChallenge(
         chainNamespace,
-        bs58.encode(signedMessage as Uint8Array),
+        signedMessage,
         challenge,
         this.name,
         this.coreOptions.sessionTime,
@@ -71,7 +70,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<never, string[]>({ method: "getAccounts" });
+    const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }

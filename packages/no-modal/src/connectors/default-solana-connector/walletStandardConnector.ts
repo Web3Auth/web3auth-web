@@ -23,11 +23,9 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "@/core/base";
-import { WalletStandardProvider } from "@/core/solana-provider";
+import { getSolanaChainByChainConfig, type WalletStandard, WalletStandardProvider } from "@/core/solana-provider";
 
 import { BaseSolanaConnector } from "../base-solana-connector";
-import { getSolanaChainByChainConfig } from "./utils";
-import { WalletStandard, WalletStandardProviderHandler } from "./walletStandardHandler";
 
 export class WalletStandardConnector extends BaseSolanaConnector<void> {
   readonly name: string;
@@ -72,11 +70,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     super.checkInitializationRequirements({ chainConfig });
 
     this.injectedProvider = new WalletStandardProvider({ config: { chain: chainConfig, chains: this.coreOptions.chains } });
-    const providerHandler = new WalletStandardProviderHandler({
-      wallet: this.wallet,
-      getCurrentChain: () => getSolanaChainByChainConfig(chainConfig),
-    });
-    this.injectedProvider.setupProvider(providerHandler, options.chainId);
+    this.injectedProvider.setupProvider(this.wallet, options.chainId);
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, this.name);

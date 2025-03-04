@@ -2,7 +2,7 @@ import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controller
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
-import base58 from "bs58";
+import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
@@ -214,7 +214,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     const { chainNamespace } = currentChainConfig;
     const accounts = await this.provider.request<never, string[]>({
-      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "eth_accounts" : "getAccounts",
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? EVM_METHOD_TYPES.GET_ACCOUNTS : SOLANA_METHOD_TYPES.GET_ACCOUNTS,
     });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
@@ -389,12 +389,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   private async _getSignedMessage(challenge: string, accounts: string[], chainNamespace: ChainNamespaceType): Promise<string> {
-    const signedMessage = await this.provider.request<string[] | { message: Uint8Array }, string | Uint8Array>({
-      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? "personal_sign" : "signMessage",
-      params: chainNamespace === CHAIN_NAMESPACES.EIP155 ? [challenge, accounts[0]] : { message: Buffer.from(challenge) },
+    const signedMessage = await this.provider.request<string[] | { data: string }, string>({
+      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? EVM_METHOD_TYPES.PERSONAL_SIGN : SOLANA_METHOD_TYPES.SIGN_MESSAGE,
+      params: chainNamespace === CHAIN_NAMESPACES.EIP155 ? [challenge, accounts[0]] : { data: challenge },
     });
-    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) return base58.encode(signedMessage as Uint8Array);
-    return signedMessage as string;
+    return signedMessage;
   }
 }
 

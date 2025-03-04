@@ -1,7 +1,7 @@
 import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 import bs58 from "bs58";
 
-import { IBaseWalletProvider, TransactionOrVersionedTransaction } from "../../../interface";
+import { IBaseWalletProvider } from "../../../interface";
 import { ISolanaProviderHandlers } from "../../../rpc";
 
 export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): ISolanaProviderHandlers => {
@@ -19,24 +19,24 @@ export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): 
     getSecretKey: async () => {
       throw rpcErrors.methodNotSupported();
     },
-    signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
       const transaction = await injectedProvider.signTransaction(req.params.message);
       return transaction;
     },
-    signMessage: async (req: JRPCRequest<{ message: Uint8Array; display?: string }>): Promise<Uint8Array> => {
-      const sigData = await injectedProvider.signMessage(req.params.message, req.params.display as "utf8" | "hex");
-      return sigData.signature;
+    signMessage: async (req: JRPCRequest<{ data: string; from: string; display?: string }>): Promise<string> => {
+      const sigData = await injectedProvider.signMessage(req.params.data, req.params.from, req.params.display as "utf8" | "hex");
+      return sigData;
     },
-    signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<string[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw rpcErrors.invalidParams("message");
       }
       const transaction = await injectedProvider.signAllTransactions(req.params.message);
       return transaction;
     },
-    signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
       const txRes = await injectedProvider.signAndSendTransaction(req.params.message);
-      return { signature: txRes.signature };
+      return txRes;
     },
   };
   return providerHandlers;

@@ -84,6 +84,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
     this.emit("chainChanged", chainId);
     this.emit("connect", { chainId });
+
+    this.update({ chainId });
   }
 
   private async setupEthEngine(connector: ISignClient, chainId: string): Promise<void> {
