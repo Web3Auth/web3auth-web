@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/ui",
-  "version": "9.6.0",
+  "version": "9.7.0",
   "description": "Ui modal for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -64,7 +64,7 @@
   "dependencies": {
     "@toruslabs/http-helpers": "^7.0.0",
     "@web3auth/auth": "^9.6.4",
-    "@web3auth/base": "^9.6.0",
+    "@web3auth/base": "^9.7.0",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
