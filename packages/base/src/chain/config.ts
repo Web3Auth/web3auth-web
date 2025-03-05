@@ -1,8 +1,7 @@
 import { WalletInitializationError } from "../errors";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
 
-// TODO update the url here.
-const RPC_URL = "https://localhost:3060/api/v1";
+const INFURA_PROXY_URL = "https://api.web3auth.io/infura-service/v1";
 
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
@@ -17,12 +16,13 @@ const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
 
 export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.EIP155;
+  const infuraRpcTarget = `${INFURA_PROXY_URL}/${chainId}/${web3AuthClientId}`;
   if (chainId === 1) {
     return {
       logo: "https://images.toruswallet.io/eth.svg",
       chainNamespace,
       chainId: "0x1",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Ethereum Mainnet",
       blockExplorerUrl: "https://etherscan.io/",
       ticker: "ETH",
@@ -38,7 +38,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       chainId: "0xa",
       displayName: "Optimism",
       logo: "optimism.svg",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
     };
@@ -51,7 +51,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       chainId: "0x2105",
       displayName: "Base",
       logo: "base.svg",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
     };
@@ -64,7 +64,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       chainId: "0xa4b1",
       displayName: "Arbitrum One",
       logo: "arbitrum.svg",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
     };
@@ -76,7 +76,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       blockExplorerUrl: "https://lineascan.build",
       chainId: "0xe708",
       logo: "https://images.toruswallet.io/eth.svg",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
     };
@@ -86,7 +86,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       logo: "https://images.toruswallet.io/eth.svg",
       chainNamespace,
       chainId: "0xaa36a7",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Sepolia Testnet",
       blockExplorerUrl: "https://sepolia.etherscan.io/",
       ticker: "ETH",
@@ -99,7 +99,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       logo: "https://images.toruswallet.io/polygon.svg",
       chainNamespace,
       chainId: "0x89",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Polygon Mainnet",
       blockExplorerUrl: "https://polygonscan.com",
       ticker: "POL",
@@ -111,7 +111,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       logo: "https://images.toruswallet.io/polygon.svg",
       chainNamespace,
       chainId: "0x13882",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Polygon Amoy Testnet",
       blockExplorerUrl: "https://www.oklink.com/amoy",
       ticker: "POL",
@@ -124,7 +124,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       logo: "https://images.toruswallet.io/bnb.png",
       chainNamespace,
       chainId: "0x38",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Binance SmartChain Mainnet",
       blockExplorerUrl: "https://bscscan.com",
       ticker: "BNB",
@@ -137,7 +137,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       logo: "https://images.toruswallet.io/bnb.png",
       chainNamespace,
       chainId: "0x61",
-      rpcTarget: `${RPC_URL}/${chainId}/${web3AuthClientId}`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Binance SmartChain Testnet",
       blockExplorerUrl: "https://testnet.bscscan.com",
       ticker: "BNB",
