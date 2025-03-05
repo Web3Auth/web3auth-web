@@ -20,7 +20,7 @@ export const getInjectedAdapters = (params: { options: IWeb3AuthCoreOptions }): 
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
     throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
   const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
+    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId, clientId) as CustomChainConfig),
     ...(chainConfig || {}),
   };
 
