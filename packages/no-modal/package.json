@@ -83,6 +83,7 @@
     "xrpl": "^2.14.0"
   },
   "devDependencies": {
+    "@coinbase/wallet-sdk": "^4.2.x",
     "@toruslabs/ethereum-controllers": "^7.1.3",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
