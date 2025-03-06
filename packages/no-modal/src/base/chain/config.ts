@@ -1,6 +1,8 @@
 import { WalletInitializationError } from "../errors";
 import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig } from "./IChainInterface";
 
+const INFURA_PROXY_URL = "https://api.web3auth.io/infura-service/v1";
+
 const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;
@@ -14,14 +16,15 @@ const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   throw WalletInitializationError.invalidParams(`Chain namespace ${chainNamespace} is not supported`);
 };
 
-export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => {
+export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.EIP155;
+  const infuraRpcTarget = `${INFURA_PROXY_URL}/${chainId}/${web3AuthClientId}`;
   if (chainId === 1) {
     return {
       logo: "https://images.toruswallet.io/eth.svg",
       chainNamespace,
       chainId: "0x1",
-      rpcTarget: `https://rpc.ankr.com/eth`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Ethereum Mainnet",
       blockExplorerUrl: "https://etherscan.io/",
       ticker: "ETH",
@@ -29,17 +32,55 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       decimals: 18,
     };
   }
-  if (chainId === 5) {
+  if (chainId === 10) {
     return {
-      logo: "https://images.toruswallet.io/eth.svg",
-      chainNamespace,
-      chainId: "0x5",
-      rpcTarget: `https://rpc.ankr.com/eth_goerli`,
-      displayName: "Goerli Testnet",
-      blockExplorerUrl: "https://goerli.etherscan.io/",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      decimals: 18,
+      blockExplorerUrl: "https://optimistic.etherscan.io",
+      chainId: "0xa",
+      displayName: "Optimism",
+      logo: "optimism.svg",
+      rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
+    };
+  }
+  if (chainId === 8453) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
       decimals: 18,
+      blockExplorerUrl: "https://basescan.org",
+      chainId: "0x2105",
+      displayName: "Base",
+      logo: "base.svg",
+      rpcTarget: infuraRpcTarget,
+      ticker: "ETH",
+      tickerName: "Ethereum",
+    };
+  }
+  if (chainId === 42161) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      decimals: 18,
+      blockExplorerUrl: "https://arbiscan.io",
+      chainId: "0xa4b1",
+      displayName: "Arbitrum One",
+      logo: "arbitrum.svg",
+      rpcTarget: infuraRpcTarget,
+      ticker: "ETH",
+      tickerName: "Ethereum",
+    };
+  }
+  if (chainId === 59144) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      decimals: 18,
+      blockExplorerUrl: "https://lineascan.build",
+      chainId: "0xe708",
+      logo: "https://images.toruswallet.io/eth.svg",
+      rpcTarget: infuraRpcTarget,
+      ticker: "ETH",
+      tickerName: "Ethereum",
     };
   }
   if (chainId === 11155111) {
@@ -47,7 +88,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       logo: "https://images.toruswallet.io/eth.svg",
       chainNamespace,
       chainId: "0xaa36a7",
-      rpcTarget: `https://rpc.ankr.com/eth_sepolia`,
+      rpcTarget: infuraRpcTarget,
       displayName: "Sepolia Testnet",
       blockExplorerUrl: "https://sepolia.etherscan.io/",
       ticker: "ETH",
@@ -60,7 +101,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       logo: "https://images.toruswallet.io/polygon.svg",
       chainNamespace,
       chainId: "0x89",
-      rpcTarget: "https://rpc.ankr.com/polygon",
+      rpcTarget: infuraRpcTarget,
       displayName: "Polygon Mainnet",
       blockExplorerUrl: "https://polygonscan.com",
       ticker: "POL",
@@ -72,7 +113,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       logo: "https://images.toruswallet.io/polygon.svg",
       chainNamespace,
       chainId: "0x13882",
-      rpcTarget: "https://rpc.ankr.com/polygon_amoy",
+      rpcTarget: infuraRpcTarget,
       displayName: "Polygon Amoy Testnet",
       blockExplorerUrl: "https://www.oklink.com/amoy",
       ticker: "POL",
@@ -85,7 +126,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       logo: "https://images.toruswallet.io/bnb.png",
       chainNamespace,
       chainId: "0x38",
-      rpcTarget: "https://rpc.ankr.com/bsc",
+      rpcTarget: infuraRpcTarget,
       displayName: "Binance SmartChain Mainnet",
       blockExplorerUrl: "https://bscscan.com",
       ticker: "BNB",
@@ -98,7 +139,7 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
       logo: "https://images.toruswallet.io/bnb.png",
       chainNamespace,
       chainId: "0x61",
-      rpcTarget: "https://rpc.ankr.com/bsc_testnet_chapel",
+      rpcTarget: infuraRpcTarget,
       displayName: "Binance SmartChain Testnet",
       blockExplorerUrl: "https://testnet.bscscan.com",
       ticker: "BNB",
@@ -174,7 +215,8 @@ export const getEvmChainConfig = (chainId: number): CustomChainConfig | null => 
 
 export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.SOLANA;
-  if (chainId === 101) {
+  // support both cross chain id and base solana chain id from 1
+  if (chainId === 101 || chainId === 1) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
@@ -186,7 +228,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  } else if (chainId === 102) {
+  } else if (chainId === 102 || chainId === 2) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
@@ -198,7 +240,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       tickerName: "Solana",
       decimals: 9,
     };
-  } else if (chainId === 103) {
+  } else if (chainId === 103 || chainId === 3) {
     return {
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
@@ -265,14 +307,17 @@ export const getXrplChainConfig = (chainId: number): CustomChainConfig | null =>
   return null;
 };
 
-export const getChainConfig = (chainNamespace: ChainNamespaceType, chainId?: number | string): CustomChainConfig | null => {
+export const getChainConfig = (
+  chainNamespace: ChainNamespaceType,
+  chainId?: number | string,
+  web3AuthClientId?: string
+): CustomChainConfig | null => {
   if (chainNamespace === CHAIN_NAMESPACES.OTHER) return null;
 
   const finalChainId = chainId ? (typeof chainId === "number" ? chainId : parseInt(chainId, 16)) : getDefaultNetworkId(chainNamespace);
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
-    return getEvmChainConfig(finalChainId);
-  }
-  if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    return getEvmChainConfig(finalChainId, web3AuthClientId);
+  } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
     return getSolanaChainConfig(finalChainId);
   }
   if (chainNamespace === CHAIN_NAMESPACES.XRPL) {

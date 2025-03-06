@@ -101,6 +101,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     const { adapterSettings } = this.adapterOptions;
     this.connector = await Client.init(adapterSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
+      clientId: this.clientId,
       config: { chainConfig: this.chainConfig as CustomChainConfig },
       connector: this.connector,
     });
@@ -356,6 +357,7 @@ class WalletConnectV2Adapter extends BaseAdapter<void> {
     this.subscribeEvents();
     if (this.adapterOptions.adapterSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({
+        clientId: this.clientId,
         config: {
           chainConfig: this.chainConfig as CustomChainConfig,
           skipLookupNetwork: true,

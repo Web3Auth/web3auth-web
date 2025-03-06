@@ -18,7 +18,7 @@ import {
 
 export abstract class BaseSolanaAdapter<T> extends BaseAdapter<T> {
   async init(_?: AdapterInitOptions): Promise<void> {
-    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, 1);
+    if (!this.chainConfig) this.chainConfig = getChainConfig(CHAIN_NAMESPACES.SOLANA, 1, this.clientId);
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
