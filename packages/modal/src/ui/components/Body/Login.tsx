@@ -24,6 +24,7 @@ export interface LoginProps {
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
+  handleSocialLoginHeight: () => void;
 }
 
 export type rowType = {
@@ -64,6 +65,7 @@ const Login = (props: LoginProps) => {
   const handleExpand = () => {
     setExpand((prev) => !prev);
     setIsPasswordlessCtaClicked(false);
+    props.handleSocialLoginHeight();
   };
 
   createEffect(() => {

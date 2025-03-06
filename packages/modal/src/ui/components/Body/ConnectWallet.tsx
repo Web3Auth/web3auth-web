@@ -30,6 +30,7 @@ export interface ConnectWalletProps {
     walletDetails: ExternalButton;
   };
   setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
+  handleWalletDetailsHeight: () => void;
 }
 
 const ConnectWallet = (props: ConnectWalletProps) => {
@@ -55,6 +56,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     if (selectedWallet()) {
       setCurrentPage(CONNECT_WALLET_PAGES.CONNECT_WALLET);
       setSelectedWallet(false);
+      props.handleWalletDetailsHeight();
     }
   };
 
@@ -141,6 +143,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         walletDetails: button,
       });
     }
+
+    props.handleWalletDetailsHeight();
   };
 
   const handleMoreWallets = () => {

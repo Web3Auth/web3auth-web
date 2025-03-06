@@ -144,21 +144,13 @@
   }
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #e5e7eb !important;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #e5e7eb !important;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #e5e7eb !important;
+.w3a--modal-curtain {
+  position: absolute;
+  background-color: transparent;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition: opacity 50ms ease-in;
+  z-index: 1;
 }
