@@ -9,7 +9,7 @@ export const getSolanaDefaultExternalAdapters = (params: { options: IWeb3AuthCor
   if (!Object.values(CHAIN_NAMESPACES).includes(chainConfig.chainNamespace))
     throw WalletInitializationError.invalidParams(`Invalid chainNamespace: ${chainConfig.chainNamespace}`);
   const finalChainConfig = {
-    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId) as CustomChainConfig),
+    ...(getChainConfig(chainConfig.chainNamespace, chainConfig?.chainId, clientId) as CustomChainConfig),
     ...(chainConfig || {}),
   };
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, WalletConnectV2Adapter, getChainConfig, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters } from "@web3auth/modal";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -15,16 +15,20 @@ const formData = formDataStore;
 
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
-const chainOptions = computed(() =>
-  chainConfigs[formData.chainNamespace as ChainNamespaceType].map((x) => ({
-    name: `${x.chainId} ${x.tickerName}`,
-    value: x.chainId,
-  }))
-);
+const getChainById = (chainId: string) => {
+  const chain = getChainConfig(formData.chainNamespace, chainId, clientIds[formData.network]);
+  if (!chain) {
+    throw new Error(`Chain config not found for chainId: ${chainId}`);
+  }
+  if (formData.chainNamespace === CHAIN_NAMESPACES.SOLANA && chainId === "0x65") {
+    chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC || chain.rpcTarget;
+  }
+  return chain;
+};
 
 // Populate the private key provider based on the chain selected
 const privateKeyProvider = computed((): IBaseProvider<string> => {
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+  const chainConfig = getChainById(formData.chain)!;
 
   switch (formData.chainNamespace) {
     case CHAIN_NAMESPACES.EIP155:
@@ -54,7 +58,7 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
   const { useAccountAbstractionProvider } = formData;
   if (!showAAProviderSettings.value || !useAccountAbstractionProvider) return undefined;
 
-  const chainConfig = chainConfigs[formData.chainNamespace as ChainNamespaceType].find((x) => x.chainId === formData.chain)!;
+  const chainConfig = getChainById(formData.chain)!;
   // setup aa provider
   let smartAccountInit: ISmartAccount;
   switch (formData.smartAccountType) {
@@ -172,7 +176,7 @@ onBeforeMount(() => {
       }
     } catch (error) {}
   }
-  if (!chainOptions.value.find((option) => option.value === formData.chain)) formData.chain = chainOptions.value[0]?.value;
+  if (!chainConfigs[formData.chainNamespace].find((chainId) => chainId === formData.chain)) formData.chain = chainConfigs[formData.chainNamespace][0];
 });
 
 watch(formData, () => {
