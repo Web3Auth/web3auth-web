@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "9.6.0",
+  "version": "10.0.0-alpha.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -65,7 +65,7 @@
     "@walletconnect/types": "^2.17.3",
     "@walletconnect/utils": "^2.17.3",
     "@web3auth/auth": "^9.6.4",
-    "@web3auth/ws-embed": "4.0.4",
+    "@web3auth/ws-embed": "^4.0.4",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
@@ -84,6 +84,7 @@
     "xrpl": "^2.14.0"
   },
   "devDependencies": {
+    "@coinbase/wallet-sdk": "^4.2.x",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "react": "^18.x",

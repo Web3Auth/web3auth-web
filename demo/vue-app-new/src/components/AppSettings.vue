@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CONNECTOR_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log } from "@web3auth/modal";
+import { CONNECTOR_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log , getChainConfig} from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
 import {
   chainConfigs,
   chainNamespaceOptions,
+  clientIds,
   confirmationStrategyOptions,
   languageOptions,
   loginProviderOptions,
@@ -21,10 +22,16 @@ const { status, isConnected, isInitialized, connect } = useWeb3Auth();
 const chainOptions = computed(() => {
   const allChains: { name: string; value: string; }[] = [];
   formData.chainNamespaces.forEach((namespace: ChainNamespaceType) => {
-    const chainsForNamespace = chainConfigs[namespace].map((x) => ({
-      name: `${x.chainId} ${x.tickerName}`,
-      value: x.chainId,
-    }));
+    const chainsForNamespace = chainConfigs[namespace].map((chainId) => {
+      const chainConfig = getChainConfig(namespace, chainId, clientIds[formData.network]);
+      if (!chainConfig) {
+        throw new Error(`Chain config not found for chainId: ${chainId}`);
+      }
+      return {
+        name: `${chainId} ${chainConfig.displayName}`,
+        value: chainId,
+      };
+    });
     allChains.push(...chainsForNamespace);
   });
   return allChains;
@@ -82,9 +89,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
 
 const onChainNamespaceChange = (value: string[]) => {
   log.info("onChainNamespaceChange", value);
-  formData.chains = value.map((namespace) => 
-    chainConfigs[namespace as ChainNamespaceType][0].chainId
-  );
+  formData.chains = value.map((namespace) => chainConfigs[namespace as ChainNamespaceType][0]);
   formData.connectors = [];
 };
 </script>
