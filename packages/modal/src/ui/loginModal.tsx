@@ -275,9 +275,10 @@ export class LoginModal extends SafeEventEmitter {
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
-    const { connector } = params;
+    const { connector, chainNamespace } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       connector,
+      loginParams: { chainNamespace },
     });
   };
 

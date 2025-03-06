@@ -105,7 +105,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get connectedConnector(): IConnector<unknown> | null {
-    return this.connectors.find((connector) => connector.name === this.connectedConnectorName) || null;
+    return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
   }
 
   set provider(_: IProvider | null) {
@@ -143,8 +143,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.initPlugins();
   }
 
-  public getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null {
-    return this.connectors.find((connector) => connector.name === connectorName) || null;
+  // we need to take into account the chainNamespace as for external connectors, same connector name can be used for multiple chain namespaces
+  public getConnector(connectorName: WALLET_CONNECTOR_TYPE, chainNamespace?: string): IConnector<unknown> | null {
+    return (
+      this.connectors.find((connector) => {
+        if (connector.name !== connectorName) return false;
+        if (chainNamespace) {
+          if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) return true;
+          return connector.connectorNamespace === chainNamespace;
+        }
+        return true;
+      }) || null
+    );
   }
 
   public clearCache() {
@@ -178,8 +188,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @param connectorName - Key of the wallet connector to use.
    */
   async connectTo<T>(connectorName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null> {
-    if (!this.getConnector(connectorName) || !this.commonJRPCProvider)
+    const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: string })?.chainNamespace);
+    if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
+
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, (_) => {
         resolve(this.provider);
@@ -187,7 +199,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
         reject(err);
       });
-      const connector = this.getConnector(connectorName);
       const initialChain = this.getInitialChainIdForConnector(connector);
       const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
       connector.connect(finalLoginParams);
@@ -328,11 +339,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected setConnectors(connectors: IConnector<unknown>[]): void {
-    const connectorSet = new Set(this.connectors.map((connector) => connector.name));
+    const getConnectorKey = (connector: IConnector<unknown>) => `${connector.connectorNamespace}-${connector.name}`;
+    const connectorSet = new Set(this.connectors.map(getConnectorKey));
     const newConnectors = connectors
       .map((connector) => {
-        if (connectorSet.has(connector.name)) return null;
-        connectorSet.add(connector.name);
+        const key = getConnectorKey(connector);
+        if (connectorSet.has(key)) return null;
+        connectorSet.add(key);
         return connector;
       })
       .filter((connector) => connector !== null);
