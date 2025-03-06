@@ -1,19 +1,40 @@
-import { SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
+import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
+import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
+import { type WsEmbedParams } from "@web3auth/ws-embed";
 
+import { type CustomChainConfig } from "../chain/IChainInterface";
 import {
-  ADAPTER_EVENTS,
-  ADAPTER_STATUS_TYPE,
-  AdapterEvents,
-  IAdapter,
-  IBaseProvider,
-  IProvider,
-  UserAuthInfo,
-  UserInfo,
-  WEB3AUTH_NETWORK_TYPE,
-} from "../adapter";
-import { CustomChainConfig } from "../chain/IChainInterface";
-import { type IPlugin } from "../plugin";
-import { WALLET_ADAPTER_TYPE } from "../wallet";
+  CONNECTOR_EVENTS,
+  type CONNECTOR_STATUS_TYPE,
+  ConnectorEvents,
+  type ConnectorFn,
+  type IConnector,
+  type IProvider,
+  type UserAuthInfo,
+  type UserInfo,
+  type WEB3AUTH_NETWORK_TYPE,
+} from "../connector";
+import { type IPlugin, PluginFn } from "../plugin";
+import { type WALLET_CONNECTOR_TYPE } from "../wallet";
+
+export type WalletServicesConfig = Omit<
+  WsEmbedParams,
+  "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy" | "accountAbstractionConfig"
+> & {
+  /**
+   * Determines how to show confirmation screens
+   * @defaultValue default
+   *
+   * default & auto-approve
+   * - use auto-approve as default
+   * - if wallet connect request use modal
+   *
+   * modal
+   * - use modal always
+   */
+  confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
+  modalZIndex?: number;
+};
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -22,13 +43,12 @@ export interface IWeb3AuthCoreOptions {
    * You can set any random string for this on localhost.
    */
   clientId: string;
-  /**
-   * custom chain configuration for chainNamespace
-   *
-   * @defaultValue mainnet config of provided chainNamespace
-   */
-  chainConfig?: CustomChainConfig;
 
+  /**
+   * multiple chain configurations,
+   * only provided chains will be used
+   */
+  chains?: CustomChainConfig[];
   /**
    * setting to true will enable logs
    *
@@ -67,54 +87,65 @@ export interface IWeb3AuthCoreOptions {
   uiConfig?: WhiteLabelData;
 
   /**
-   * Private key provider for your chain namespace
+   * Account abstraction config for your chain namespace
    */
-  privateKeyProvider?: IBaseProvider<string>;
-
-  /**
-   * Account abstraction provider for your chain namespace
-   */
-  accountAbstractionProvider?: IBaseProvider<IProvider>;
+  accountAbstractionConfig?: AccountAbstractionConfig;
 
   /**
    * Whether to use AA with external wallet
    */
   useAAWithExternalWallet?: boolean;
+
+  /**
+   * Connectors to use
+   */
+  connectors?: ConnectorFn[];
+
+  /**
+   * Plugins to use
+   */
+  plugins?: PluginFn[];
+
+  /**
+   * Whether to enable multi injected provider discovery
+   * @defaultValue true
+   */
+  multiInjectedProviderDiscovery?: boolean;
+
+  /**
+   * Wallet services config
+   */
+  walletServicesConfig?: WalletServicesConfig;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connectedAdapterName: string | null;
-  status: ADAPTER_STATUS_TYPE;
+  connectedConnectorName: string | null;
+  currentChain: CustomChainConfig;
+  status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;
+  getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
+  getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
-  addPlugin(plugin: IPlugin): void;
-  getPlugin(pluginName: string): IPlugin | null;
 }
 
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
-  cachedAdapter: string | null;
-  walletAdapters: Record<string, IAdapter<unknown>>;
-  getAdapter(adapterName: WALLET_ADAPTER_TYPE): IAdapter<unknown> | null;
-  configureAdapter(adapter: IAdapter<unknown>): IWeb3Auth;
+  cachedConnector: string | null;
+  getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   /**
-   * Connect to a specific wallet adapter
-   * @param walletName - Key of the walletAdapter to use.
+   * Connect to a specific wallet connector
+   * @param walletName - Key of the wallet connector to use.
    */
-  connectTo<T>(walletName: WALLET_ADAPTER_TYPE, loginParams?: T): Promise<IProvider | null>;
+  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
 }
 
-export type Web3AuthNoModalEvents = AdapterEvents & {
-  [ADAPTER_EVENTS.READY]: () => void;
-  MODAL_VISIBILITY: (visibility: boolean) => void;
-};
+export type Web3AuthNoModalEvents = ConnectorEvents & { [CONNECTOR_EVENTS.READY]: () => void; MODAL_VISIBILITY: (visibility: boolean) => void };
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

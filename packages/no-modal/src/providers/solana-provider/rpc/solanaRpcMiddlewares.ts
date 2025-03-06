@@ -1,7 +1,7 @@
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { TransactionOrVersionedTransaction } from "../interface";
-import { AddSolanaChainParameter, ISolanaChainSwitchHandlers, ISolanaProviderHandlers } from "./interfaces";
+import { ISolanaChainSwitchHandlers, ISolanaProviderHandlers } from "./interfaces";
 
 export function createGetAccountsMiddleware({
   getAccounts,
@@ -10,7 +10,7 @@ export function createGetAccountsMiddleware({
 }): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware(async (request, response, next) => {
     const { method } = request;
-    if (method !== "getAccounts") return next();
+    if (method !== SOLANA_METHOD_TYPES.GET_ACCOUNTS) return next();
 
     if (!getAccounts) throw new Error("WalletMiddleware - opts.getAccounts not provided");
     // This calls from the prefs controller
@@ -43,7 +43,7 @@ export function createRequestAccountsMiddleware({
 }): JRPCMiddleware<unknown, unknown> {
   return createAsyncMiddleware(async (request, response, next) => {
     const { method } = request;
-    if (method !== "requestAccounts") return next();
+    if (method !== SOLANA_METHOD_TYPES.SOLANA_REQUEST_ACCOUNTS) return next();
 
     if (!requestAccounts) throw new Error("WalletMiddleware - opts.requestAccounts not provided");
     // This calls the UI login function
@@ -83,19 +83,22 @@ export function createSolanaMiddleware(providerHandlers: ISolanaProviderHandlers
   return mergeMiddleware([
     createRequestAccountsMiddleware({ requestAccounts }),
     createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction }, TransactionOrVersionedTransaction>(
-      "signTransaction",
-      signTransaction
-    ) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction }, { signature: string }>(
-      "signAndSendTransaction",
-      signAndSendTransaction
-    ) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<{ message: TransactionOrVersionedTransaction[] }, TransactionOrVersionedTransaction[]>(
-      "signAllTransactions",
-      signAllTransactions
-    ) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<{ message: Uint8Array }, Uint8Array>("signMessage", signMessage) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<{ message: string }, string>(SOLANA_METHOD_TYPES.SIGN_TRANSACTION, signTransaction) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
+    createGenericJRPCMiddleware<{ message: string }, string>(SOLANA_METHOD_TYPES.SEND_TRANSACTION, signAndSendTransaction) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
+    createGenericJRPCMiddleware<{ message: string[] }, string[]>(SOLANA_METHOD_TYPES.SIGN_ALL_TRANSACTIONS, signAllTransactions) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
+    createGenericJRPCMiddleware<{ data: string; from: string }, string>(SOLANA_METHOD_TYPES.SIGN_MESSAGE, signMessage) as JRPCMiddleware<
+      unknown,
+      unknown
+    >,
     createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("private_key", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("public_key", getPublicKey) as JRPCMiddleware<unknown, unknown>,
@@ -104,12 +107,8 @@ export function createSolanaMiddleware(providerHandlers: ISolanaProviderHandlers
   ]);
 }
 
-export function createSolanaChainSwitchMiddleware({
-  addNewChainConfig,
-  switchSolanaChain,
-}: ISolanaChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
+export function createSolanaChainSwitchMiddleware({ switchSolanaChain }: ISolanaChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   return mergeMiddleware([
-    createGenericJRPCMiddleware<AddSolanaChainParameter, void>("addSolanaChain", addNewChainConfig) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<{ chainId: string }, void>("switchSolanaChain", switchSolanaChain) as JRPCMiddleware<unknown, unknown>,
   ]);
 }

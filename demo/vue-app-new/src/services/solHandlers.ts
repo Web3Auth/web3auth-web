@@ -32,13 +32,14 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
     return [];
   }
 };
+
 export const getBalance = async (provider: IProvider, uiConsole: any): Promise<void> => {
   try {
     const conn = await getConnection(provider);
     const solanaWallet = new SolanaWallet(provider);
     const accounts = await solanaWallet.requestAccounts();
     const balance = await conn.getBalance(new PublicKey(accounts[0]));
-    uiConsole("balance", balance);
+    uiConsole("balance", { balance });
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);
@@ -65,7 +66,7 @@ export const signAndSendTransaction = async (provider: IProvider, uiConsole: any
     }).add(transactionInstruction);
 
     const signature = await solWeb3.signAndSendTransaction(transaction as unknown as TransactionOrVersionedTransaction);
-    uiConsole("signature", signature);
+    uiConsole("signature", { signature });
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);
@@ -79,37 +80,37 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
     const pubKey = await solWeb3.requestAccounts();
     log.info("pubKey", pubKey);
 
-    const block = await conn.getLatestBlockhash("finalized");
     const transactionInstruction = SystemProgram.transfer({
       fromPubkey: new PublicKey(pubKey[0]),
       toPubkey: new PublicKey(pubKey[0]),
       lamports: 0 * LAMPORTS_PER_SOL,
     });
 
+    const block = await conn.getLatestBlockhash("finalized");
     const transaction = new Transaction({
       blockhash: block.blockhash,
       lastValidBlockHeight: block.lastValidBlockHeight,
       feePayer: new PublicKey(pubKey[0]),
     }).add(transactionInstruction);
 
-    const signedTx = await solWeb3.signTransaction(transaction as unknown as TransactionOrVersionedTransaction);
-    log.info("signedTx", signedTx);
-    uiConsole("signature", signedTx);
-    return { signature: signedTx };
+    const signature = await solWeb3.signTransaction(transaction);
+    log.info("signedTx", signature);
+    uiConsole("signature", { signature });
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);
-    return undefined;
   }
 };
 
 export const signMessage = async (provider: IProvider, uiConsole: any) => {
   try {
     const solWeb3 = new SolanaWallet(provider);
-    const msg = Buffer.from("Test Signing Message ", "utf8");
-    const res = await solWeb3.signMessage(new Uint8Array(msg));
-    const parsedResult = base58.encode(res);
-    uiConsole("solana signed message", parsedResult);
+    const pubKey = await solWeb3.requestAccounts();
+    log.info("pubKey", pubKey);
+
+    const msg = "Test Signing Message";
+    const signature = await solWeb3.signMessage(msg, pubKey[0]);
+    uiConsole("solana signed message", { signature });
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);
@@ -121,16 +122,16 @@ export const signAllTransactions = async (provider: IProvider, uiConsole: any) =
     const conn = await getConnection(provider);
     const solWeb3 = new SolanaWallet(provider);
     const publicKeys = await solWeb3.requestAccounts();
-    const { blockhash } = await conn.getRecentBlockhash("finalized");
+    const { blockhash } = await conn.getLatestBlockhash("finalized");
     log.info("blockhash", blockhash);
 
-    const signedTx = await solWeb3.signAllTransactions([
+    const signedTransactions = await solWeb3.signAllTransactions([
       getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
       getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
       getNewTx(publicKeys, blockhash) as unknown as TransactionOrVersionedTransaction,
     ]);
-    log.info("signedTx", signedTx);
-    uiConsole("signature", signedTx);
+    log.info("signedTransactions", signedTransactions);
+    uiConsole("signed transactions", { signedTransactions });
   } catch (error) {
     log.error("Error", error);
     uiConsole("error", error);

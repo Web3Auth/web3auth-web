@@ -5,10 +5,11 @@
     "btnLogout": "Logout",
     "documentation": "Documentation",
     "network": "Network",
-    "chain": "Chain",
+    "chains": "Chains",
     "loginProviders": "Login provider",
     "adapters": "Adapters",
     "showWalletDiscovery": "Show Wallet Discovery",
+    "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
     "walletPlugin": {
@@ -52,7 +53,7 @@
     "adapter": {
       "sessionTime": "Session Time"
     },
-    "chainNamespace": "Chain namespace",
+    "chainNamespaces": "Chain namespaces",
     "w3aStatus": "Web3Auth status ::::: {status}",
     "isConnected": "Is connected ::::: {isConnected}",
     "isInitialized": "Is initialized ::::: {isInitialized}",
@@ -66,6 +67,7 @@
       "btnGetConnectedChainId": "Get Connected Chain ID",
       "btnAddChain": "Add Chain",
       "btnSwitchChain": "Switch Chain",
+      "btnSwitchChainNamespace": "Switch Chain Namespace",
       "btnSignAndSendTransaction": "Sign and Send Transaction",
       "btnSignTransaction": "Sign Transaction",
       "btnSignMessage": "Sign Message",

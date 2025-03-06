@@ -2,7 +2,7 @@ import { type SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES } from "../chain/IChainInterface";
 import { type IWeb3AuthCore } from "../core/IWeb3Auth";
-import { WALLET_ADAPTER_TYPE } from "../wallet";
+import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export const PLUGIN_NAMESPACES = {
   ...CHAIN_NAMESPACES,
@@ -39,18 +39,15 @@ export const WALLET_PLUGINS = {
   ...SOLANA_PLUGINS,
 } as const;
 
-export interface PluginConnectParams {
-  sessionId: string;
-  sessionNamespace?: string;
-}
-
 export interface IPlugin extends SafeEventEmitter {
   name: string;
   status: PLUGIN_STATUS_TYPE;
-  SUPPORTED_ADAPTERS: WALLET_ADAPTER_TYPE[];
+  SUPPORTED_CONNECTORS: WALLET_CONNECTOR_TYPE[];
   pluginNamespace: PluginNamespace;
   initWithWeb3Auth(web3auth: IWeb3AuthCore, whiteLabel?: WhiteLabelData): Promise<void>;
-  connect(params?: PluginConnectParams): Promise<void>;
+  connect(): Promise<void>;
   disconnect(): Promise<void>;
   cleanup(): Promise<void>;
 }
+
+export type PluginFn = () => IPlugin;

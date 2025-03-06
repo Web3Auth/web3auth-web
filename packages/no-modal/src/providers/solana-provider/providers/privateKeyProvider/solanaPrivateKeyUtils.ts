@@ -5,7 +5,6 @@ import bs58 from "bs58";
 
 import { SafeEventEmitterProvider, WalletInitializationError } from "@/core/base";
 
-import { TransactionOrVersionedTransaction } from "../../interface";
 import { ISolanaProviderHandlers } from "../../rpc";
 
 export async function getProviderHandlers({
@@ -36,62 +35,55 @@ export async function getProviderHandlers({
     },
     getSecretKey: async () => bs58.encode(keyPair.secretKey),
 
-    signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
+    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
       if (!req.params?.message) {
         throw rpcErrors.invalidParams("message");
       }
-      const transaction = req.params.message;
-      if ((transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction) {
-        (transaction as VersionedTransaction).sign([keyPair]);
-      } else {
-        transaction.partialSign(keyPair);
+      const serializedTransaction = req.params.message;
+      const transaction = VersionedTransaction.deserialize(Buffer.from(serializedTransaction, "base64"));
+      transaction.sign([keyPair]);
+      return bs58.encode(transaction.signatures[0]);
+    },
+    signMessage: async (req: JRPCRequest<{ data: string }>): Promise<string> => {
+      if (!req.params?.data) {
+        throw rpcErrors.invalidParams("data");
       }
-      return transaction;
+      const signedMsg = sign.detached(Buffer.from(req.params.data, "utf-8"), keyPair.secretKey);
+      return bs58.encode(signedMsg);
     },
 
-    signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
-      if (!req.params?.message) {
-        throw rpcErrors.invalidParams("message");
-      }
-      const signedMsg = sign.detached(req.params.message, keyPair.secretKey);
-      return signedMsg;
-    },
-
-    signAndSendTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<{ signature: string }> => {
+    signAndSendTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
       if (!req.params?.message) {
         throw rpcErrors.invalidParams("message");
       }
       const _providerEngineProxy = getProviderEngineProxy();
       if (!_providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
 
-      const transaction = req.params.message;
-      if ((transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction) {
-        (transaction as VersionedTransaction).sign([keyPair]);
-      } else {
-        transaction.partialSign(keyPair);
-      }
+      const serializedTransaction = req.params.message;
+      const transaction = VersionedTransaction.deserialize(Buffer.from(serializedTransaction, "base64"));
+      transaction.sign([keyPair]);
+
       const sig = await _providerEngineProxy.request<[string, { encoding: string; preflightCommitment: string }], string>({
         method: "sendTransaction",
         params: [Buffer.from(transaction.serialize()).toString("base64"), { encoding: "base64", preflightCommitment: "confirmed" }],
       });
-      return { signature: sig };
+      return sig;
     },
 
-    signAllTransactions: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction[] }>): Promise<TransactionOrVersionedTransaction[]> => {
+    signAllTransactions: async (req: JRPCRequest<{ message: string[] }>): Promise<string[]> => {
       if (!req.params?.message || !req.params?.message.length) {
         throw rpcErrors.invalidParams("message");
       }
 
       const txns = req.params?.message;
+      const res = [];
       for (const tx of txns || []) {
-        const transaction = tx;
-        if ((transaction as VersionedTransaction).version !== undefined || transaction instanceof VersionedTransaction) {
-          (transaction as VersionedTransaction).sign([keyPair]);
-        } else {
-          transaction.partialSign(keyPair);
-        }
+        const serializedTransaction = tx;
+        const transaction = VersionedTransaction.deserialize(Buffer.from(serializedTransaction, "base64"));
+        transaction.sign([keyPair]);
+        res.push(Buffer.from(transaction.serialize()).toString("base64"));
       }
-      return txns;
+      return res;
     },
   };
 
