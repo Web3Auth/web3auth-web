@@ -1,7 +1,7 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
 import { ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/base/src";
 import Bowser from "bowser";
-import { createMemo, Match, Show, Suspense, Switch, useContext } from "solid-js";
+import { createMemo, createSignal, Match, Show, Suspense, Switch, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { PAGES } from "../../constants";
@@ -53,16 +53,6 @@ export interface BodyProps {
   handleBackClick: () => void;
 }
 
-// interface BodyContextType {
-//   bodyState: {
-//     showWalletDetails: boolean;
-//     walletDetails: ExternalButton;
-//   };
-//   setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
-// }
-
-// export const BodyContext = createContext<BodyContextType>({} as BodyContextType);
-
 const Body = (props: BodyProps) => {
   const { isDark } = useContext(ThemedContext);
 
@@ -73,6 +63,9 @@ const Body = (props: BodyProps) => {
     showWalletDetails: false,
     walletDetails: null,
   });
+
+  const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = createSignal(false);
+  const [isWalletDetailsExpanded, setIsWalletDetailsExpanded] = createSignal(false);
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
     props.setModalState({
@@ -288,110 +281,148 @@ const Body = (props: BodyProps) => {
     return allButtons().length + customAdapterButtons().length;
   });
 
+  const handleSocialLoginHeight = () => {
+    setIsSocialLoginsExpanded((prev) => !prev);
+  };
+
+  const handleWalletDetailsHeight = () => {
+    setIsWalletDetailsExpanded((prev) => !prev);
+  };
+
+  const containerMaxHeight = createMemo(() => {
+    if (isWalletDetailsExpanded()) {
+      return "588px";
+    }
+    if (props.modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded()) {
+      return "642px";
+    }
+    return "539px";
+  });
+
   return (
-    <div class="w3a--h-auto w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
-      {/* Content */}
-      <Show
-        when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
-        fallback={
-          <Suspense>
-            <Switch>
-              <Match
-                when={
-                  props.modalState.currentPage === PAGES.LOGIN && props.showExternalWalletPage && props.modalState.status === MODAL_STATUS.INITIALIZED
-                }
-              >
-                <Login
-                  {...props}
-                  isDark={isDark}
-                  showPasswordLessInput={props.showPasswordLessInput}
-                  showExternalWalletButton={props.showExternalWalletButton}
-                  handleSocialLoginClick={props.handleSocialLoginClick}
-                  socialLoginsConfig={props.socialLoginsConfig}
-                  areSocialLoginsVisible={props.areSocialLoginsVisible}
-                  isEmailPrimary={props.isEmailPrimary}
-                  isExternalPrimary={props.isExternalPrimary}
-                  handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-                  isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
-                  isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
-                  totalExternalWallets={totalExternalWalletsLength()}
-                />
-              </Match>
-              <Match
-                when={
-                  props.modalState.currentPage === PAGES.CONNECT_WALLET &&
-                  !props.showExternalWalletPage &&
-                  props.modalState.status === MODAL_STATUS.INITIALIZED
-                }
-              >
-                <ConnectWallet
-                  isDark={isDark}
-                  onBackClick={handleBackClick}
-                  modalStatus={props.modalState.status}
-                  showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
-                  handleExternalWalletClick={props.preHandleExternalWalletClick}
-                  chainNamespace={props.chainNamespace}
-                  walletConnectUri={props.modalState.walletConnectUri}
-                  config={props.modalState.externalWalletsConfig}
-                  walletRegistry={props.walletRegistry}
-                  appLogo={props.appLogo}
-                  totalExternalWallets={totalExternalWalletsLength()}
-                  allExternalButtons={allButtons()}
-                  adapterVisibilityMap={adapterVisibility()}
-                  customAdapterButtons={customAdapterButtons()}
-                  deviceDetails={deviceDetailsWallets()}
-                  bodyState={bodyState}
-                  setBodyState={setBodyState}
-                />
-              </Match>
-            </Switch>
-          </Suspense>
-        }
+    <div class="w3a--flex w3a--flex-col">
+      <div
+        class="h-screen w3a--transition-all w3a--overflow-hidden w3a--duration-[400ms] w3a--ease-in-out w3a--relative"
+        style={{
+          "max-height": containerMaxHeight(),
+        }}
       >
-        <Loader
-          adapter={props.modalState.detailedLoaderAdapter}
-          adapterName={props.modalState.detailedLoaderAdapter}
-          modalStatus={props.modalState.status}
-          onClose={props.onCloseLoader}
-          appLogo={props.appLogo}
-        />
-      </Show>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Wallet Details */}
-      <Show when={bodyState.showWalletDetails}>
-        <div
-          class="w3a--absolute w3a--h-full w3a--w-full w3a--top-0 w3a--left-0 w3a--bottom-sheet-bg w3a--rounded-3xl"
-          onClick={() => setBodyState({ showWalletDetails: false })}
-        />
-        <div
-          class="w3a--absolute w3a--bottom w3a--left-0 w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--p-4 w3a--bottom-sheet-width w3a--flex w3a--flex-col 
-            w3a--gap-y-2 w3a--shadow-sm w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-600"
-        >
-          <div
-            class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full w3a--cursor-pointer"
-            onClick={() => setBodyState({ showWalletDetails: false })}
-            aria-hidden="true"
-            role="button"
-          />
-          <div class="w3a--flex w3a--justify-center w3a--my-4">
-            <Image
-              imageId={`login-${bodyState.walletDetails.name}`}
-              hoverImageId={`login-${bodyState.walletDetails.name}`}
-              fallbackImageId="wallet"
-              height="80"
-              width="80"
-              isButton
-              extension={bodyState.walletDetails.imgExtension}
+        <div class="w3a--modal-curtain" />
+        <div class="w3a--h-full w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
+          {/* Content */}
+          <Show
+            when={props.modalState.status !== MODAL_STATUS.INITIALIZED}
+            fallback={
+              <Suspense>
+                <Switch>
+                  <Match
+                    when={
+                      props.modalState.currentPage === PAGES.LOGIN &&
+                      props.showExternalWalletPage &&
+                      props.modalState.status === MODAL_STATUS.INITIALIZED
+                    }
+                  >
+                    <Login
+                      {...props}
+                      isDark={isDark}
+                      showPasswordLessInput={props.showPasswordLessInput}
+                      showExternalWalletButton={props.showExternalWalletButton}
+                      handleSocialLoginClick={props.handleSocialLoginClick}
+                      socialLoginsConfig={props.socialLoginsConfig}
+                      areSocialLoginsVisible={props.areSocialLoginsVisible}
+                      isEmailPrimary={props.isEmailPrimary}
+                      isExternalPrimary={props.isExternalPrimary}
+                      handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+                      isEmailPasswordLessLoginVisible={props.isEmailPasswordLessLoginVisible}
+                      isSmsPasswordLessLoginVisible={props.isSmsPasswordLessLoginVisible}
+                      totalExternalWallets={totalExternalWalletsLength()}
+                      handleSocialLoginHeight={handleSocialLoginHeight}
+                    />
+                  </Match>
+                  <Match
+                    when={
+                      props.modalState.currentPage === PAGES.CONNECT_WALLET &&
+                      !props.showExternalWalletPage &&
+                      props.modalState.status === MODAL_STATUS.INITIALIZED
+                    }
+                  >
+                    <ConnectWallet
+                      isDark={isDark}
+                      onBackClick={handleBackClick}
+                      modalStatus={props.modalState.status}
+                      showBackButton={props.areSocialLoginsVisible || props.showPasswordLessInput}
+                      handleExternalWalletClick={props.preHandleExternalWalletClick}
+                      chainNamespace={props.chainNamespace}
+                      walletConnectUri={props.modalState.walletConnectUri}
+                      config={props.modalState.externalWalletsConfig}
+                      walletRegistry={props.walletRegistry}
+                      appLogo={props.appLogo}
+                      totalExternalWallets={totalExternalWalletsLength()}
+                      allExternalButtons={allButtons()}
+                      adapterVisibilityMap={adapterVisibility()}
+                      customAdapterButtons={customAdapterButtons()}
+                      deviceDetails={deviceDetailsWallets()}
+                      bodyState={bodyState}
+                      setBodyState={setBodyState}
+                      handleWalletDetailsHeight={handleWalletDetailsHeight}
+                    />
+                  </Match>
+                </Switch>
+              </Suspense>
+            }
+          >
+            <Loader
+              adapter={props.modalState.detailedLoaderAdapter}
+              adapterName={props.modalState.detailedLoaderAdapter}
+              modalStatus={props.modalState.status}
+              onClose={props.onCloseLoader}
+              appLogo={props.appLogo}
             />
-          </div>
-          <ul class="w3a--flex w3a--flex-col w3a--gap-y-2">
-            {deviceDetails().platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
-          </ul>
+          </Show>
+
+          {/* Footer */}
+          <Footer />
+
+          {/* Wallet Details */}
+          <Show when={bodyState.showWalletDetails}>
+            {/* Backdrop */}
+            <div
+              class="w3a--fixed w3a--top-0 w3a--left-0 w3a--w-full w3a--h-full w3a--bottom-sheet-bg w3a--transition-opacity w3a--duration-300"
+              onClick={() => setBodyState({ showWalletDetails: false })}
+            />
+            {/* Bottom Sheet */}
+            <div
+              class={`w3a--fixed w3a--left-0 w3a--bottom-0 w3a--w-full w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main 
+      w3a--rounded-t-3xl w3a--p-4 w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-lg w3a--border w3a--border-app-gray-100 
+      dark:w3a--border-app-gray-600 w3a--transition-transform w3a--duration-500 w3a--ease-out
+      ${bodyState.showWalletDetails ? "w3a--translate-y-0 w3a--delay-700" : "w3a--translate-y-full"}`}
+            >
+              {/* Drag Handle */}
+              <div
+                class="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full 
+        w3a--cursor-pointer"
+                onClick={() => setBodyState({ showWalletDetails: false })}
+                aria-hidden="true"
+                role="button"
+              />
+              <div class="w3a--flex w3a--justify-center w3a--my-4">
+                <Image
+                  imageId={`login-${bodyState.walletDetails.name}`}
+                  hoverImageId={`login-${bodyState.walletDetails.name}`}
+                  fallbackImageId="wallet"
+                  height="80"
+                  width="80"
+                  isButton
+                  extension={bodyState.walletDetails.imgExtension}
+                />
+              </div>
+              <ul class="w3a--flex w3a--flex-col w3a--gap-y-2">
+                {deviceDetails().platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
+              </ul>
+            </div>
+          </Show>
         </div>
-      </Show>
+      </div>
     </div>
   );
 };

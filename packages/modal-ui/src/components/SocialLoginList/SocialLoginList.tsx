@@ -69,32 +69,34 @@ const SocialLoginList = (props: SocialLoginListProps) => {
           <button type="button" class="w3a--appearance-none" onClick={() => props.handleExpandSocialLogins()}>
             <img src={getIcons(props.isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" class="w3a--object-contain" />
           </button>
-          <div class="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto">
+          <div class="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto px-1">
             <For each={props.otherRow}>
               {(row) => (
-                <SocialLoginButton
-                  method={row.method}
-                  isDark={props.isDark}
-                  isPrimaryBtn={false}
-                  onClick={() =>
-                    props.handleSocialLoginClick({
-                      adapter: row.adapter,
-                      loginParams: row.loginParams,
-                    })
-                  }
-                  btnStyle="w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group"
-                >
-                  <>
-                    {getProviderIcon(row.method, props.isDark, ".svg")}
-                    <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
-                    <img
-                      id="login-arrow"
-                      class="w3a--icon-animation w3a--ml-auto"
-                      src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
-                      alt="arrow"
-                    />
-                  </>
-                </SocialLoginButton>
+                <div class="w3a--w-full w3a--h-[50px]">
+                  <SocialLoginButton
+                    method={row.method}
+                    isDark={props.isDark}
+                    isPrimaryBtn={false}
+                    onClick={() =>
+                      props.handleSocialLoginClick({
+                        adapter: row.adapter,
+                        loginParams: row.loginParams,
+                      })
+                    }
+                    btnStyle="w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group"
+                  >
+                    <>
+                      {getProviderIcon(row.method, props.isDark, ".svg")}
+                      <p class="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
+                      <img
+                        id="login-arrow"
+                        class="w3a--icon-animation w3a--ml-auto"
+                        src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
+                        alt="arrow"
+                      />
+                    </>
+                  </SocialLoginButton>
+                </div>
               )}
             </For>
           </div>

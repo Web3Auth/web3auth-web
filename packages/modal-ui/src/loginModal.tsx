@@ -77,7 +77,7 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
-    if (!uiConfig.widget) this.uiConfig.widget = "embed";
+    if (!uiConfig.widget) this.uiConfig.widget = "modal";
     if (!uiConfig.targetId) this.uiConfig.targetId = "w3a-parent-test-container";
 
     if (uiConfig.widget === "embed" && !uiConfig.targetId) {

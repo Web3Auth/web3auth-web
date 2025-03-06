@@ -30,6 +30,7 @@ export interface ConnectWalletProps {
     walletDetails: ExternalButton;
   };
   setBodyState: (state: { showWalletDetails: boolean; walletDetails: ExternalButton }) => void;
+  handleWalletDetailsHeight: () => void;
 }
 
 const ConnectWallet = (props: ConnectWalletProps) => {
@@ -55,6 +56,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     if (selectedWallet()) {
       setCurrentPage(CONNECT_WALLET_PAGES.CONNECT_WALLET);
       setSelectedWallet(false);
+      props.handleWalletDetailsHeight();
     }
   };
 
@@ -141,6 +143,8 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         walletDetails: button,
       });
     }
+
+    props.handleWalletDetailsHeight();
   };
 
   const handleMoreWallets = () => {
@@ -211,7 +215,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("ethereum")}
                 >
-                  <img src={getIcons(props.isDark ? "ethereum-dark" : "ethereum-light")} alt="ethereum" />
+                  <img src={getIcons(props.isDark ? "ethereum-dark" : "ethereum-light")} alt="ethereum" class="w3a--w-5 w3a--h-5" />
                 </button>
                 <button
                   class={cn(
@@ -222,7 +226,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("polygon")}
                 >
-                  <img src={getIcons(props.isDark ? "polygon-dark" : "polygon-light")} alt="polygon" />
+                  <img src={getIcons(props.isDark ? "polygon-dark" : "polygon-light")} alt="polygon" class="w3a--w-5 w3a--h-5" />
                 </button>
                 <button
                   class={cn(
@@ -233,7 +237,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
                   )}
                   onClick={() => setSelectedChain("solana")}
                 >
-                  <img src={getIcons(props.isDark ? "solana-dark" : "solana-light")} alt="solana" />
+                  <img src={getIcons(props.isDark ? "solana-dark" : "solana-light")} alt="solana" class="w3a--w-5 w3a--h-5" />
                 </button>
               </div>
             </Show>
