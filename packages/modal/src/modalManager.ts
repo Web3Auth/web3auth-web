@@ -95,6 +95,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         log.error("Failed to fetch wallet registry", e);
       }
     }
+    log.info("walletRegistry", walletRegistry);
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       adapterListener: this,

@@ -1,6 +1,30 @@
 <script setup lang="ts">
-
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, getChainConfig, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  WalletConnectV2Adapter,
+  getChainConfig,
+  WalletServicesPlugin,
+  type Web3AuthOptions,
+  EthereumPrivateKeyProvider,
+  NFTCheckoutPlugin,
+  SolanaPrivateKeyProvider,
+  CommonPrivateKeyProvider,
+  CoinbaseAdapter,
+  ChainNamespaceType,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  storageAvailable,
+  WALLET_ADAPTERS,
+  AccountAbstractionProvider,
+  ISmartAccount,
+  KernelSmartAccount,
+  NexusSmartAccount,
+  SafeSmartAccount,
+  TrustSmartAccount,
+  getEvmInjectedAdapters,
+  getSolanaInjectedAdapters,
+} from "@web3auth/modal";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -16,7 +40,7 @@ const formData = formDataStore;
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const getChainById = (chainId: string) => {
-  const chain = getChainConfig(formData.chainNamespace, chainId, clientIds[formData.network]);
+  const chain = getChainConfig(formData.chainNamespace, chainId);
   if (!chain) {
     throw new Error(`Chain config not found for chainId: ${chainId}`);
   }
@@ -240,6 +264,7 @@ const configs = computed(() => {
         <AppSettings />
         <AppDashboard />
       </main>
+      <div id="w3a-parent-test-container" class="flex flex-col items-center justify-center mt-10"></div>
     </WalletServicesProvider>
   </Web3AuthProvider>
 </template>
