@@ -9,6 +9,13 @@ import {
   Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
 
+export enum WIDGET_TYPE {
+  MODAL = "modal",
+  EMBED = "embed",
+}
+
+export type WidgetType = (typeof WIDGET_TYPE)[keyof typeof WIDGET_TYPE];
+
 // capture whitelabel only once
 export interface UIConfig extends WhiteLabelData {
   /**
@@ -16,7 +23,7 @@ export interface UIConfig extends WhiteLabelData {
    *
    * @defaultValue `modal`
    */
-  widget?: "modal" | "embed";
+  widget?: WidgetType;
   /**
    * ID of the element to embed the widget into
    */

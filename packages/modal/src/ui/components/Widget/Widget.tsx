@@ -4,7 +4,15 @@ import deepmerge from "deepmerge";
 import { createEffect, createMemo, createSignal, Match, on, Suspense, Switch } from "solid-js";
 
 import { PAGES } from "../../constants";
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, StateEmitterEvents } from "../../interfaces";
+import {
+  ExternalWalletEventType,
+  MODAL_STATUS,
+  ModalState,
+  SocialLoginEventType,
+  StateEmitterEvents,
+  WIDGET_TYPE,
+  WidgetType,
+} from "../../interfaces";
 import { Body } from "../Body";
 import { Embed } from "../Embed";
 import { Modal } from "../Modal";
@@ -19,7 +27,7 @@ export interface WidgetProps {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  widget?: "modal" | "embed";
+  widget?: WidgetType;
 }
 
 const Widget = (props: WidgetProps) => {
@@ -180,7 +188,7 @@ const Widget = (props: WidgetProps) => {
   return (
     <Suspense>
       <Switch>
-        <Match when={props.widget === "modal"}>
+        <Match when={props.widget === WIDGET_TYPE.MODAL}>
           <Modal open={modalState().modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon()} onClose={closeModal}>
             <Body
               {...props}
@@ -203,7 +211,7 @@ const Widget = (props: WidgetProps) => {
             />
           </Modal>
         </Match>
-        <Match when={props.widget === "embed"}>
+        <Match when={props.widget === WIDGET_TYPE.EMBED}>
           <Embed padding={false}>
             <Body
               {...props}

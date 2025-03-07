@@ -1,5 +1,5 @@
 import { type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, log, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/no-modal";
+import { ChainNamespaceType, WALLET_ADAPTERS, WalletRegistry, WalletRegistryItem } from "@web3auth/no-modal";
 import Bowser from "bowser";
 import { createMemo, createSignal, Match, Show, Suspense, Switch, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -214,8 +214,6 @@ const Body = (props: BodyProps) => {
 
       canShowMap[adapter] = false;
     });
-
-    log.debug("adapter visibility map", canShowMap);
     return canShowMap;
   });
 

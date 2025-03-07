@@ -31,6 +31,8 @@ import {
   SocialLoginEventType,
   StateEmitterEvents,
   UIConfig,
+  WIDGET_TYPE,
+  WidgetType,
 } from "./interfaces";
 import { changeLocale } from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
@@ -44,7 +46,6 @@ function createWrapperForModal(parentZIndex: string) {
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
   document.body.appendChild(parent);
-  log.info("createWrapperForModal", parent);
 }
 
 function createWrapperForEmbed(targetId: string) {
@@ -65,11 +66,9 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps & { widget?: "modal" | "embed"; targetId?: string }) {
+  constructor(uiConfig: LoginModalProps & { widget?: WidgetType; targetId?: string }) {
     super();
     this.uiConfig = uiConfig;
-
-    log.info("uiConfig", uiConfig);
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
     if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
@@ -80,10 +79,10 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
-    if (!uiConfig.widget) this.uiConfig.widget = "modal";
+    if (!uiConfig.widget) this.uiConfig.widget = WIDGET_TYPE.MODAL;
     if (!uiConfig.targetId) this.uiConfig.targetId = "w3a-parent-test-container";
 
-    if (uiConfig.widget === "embed" && !uiConfig.targetId) {
+    if (uiConfig.widget === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       throw new Error("targetId is required for embed widget");
     }
 
@@ -98,7 +97,6 @@ export class LoginModal extends SafeEventEmitter {
   }
 
   initModal = async (): Promise<void> => {
-    log.info("initModal");
     const darkState = { isDark: this.isDark };
 
     // Load new language resource
@@ -106,18 +104,15 @@ export class LoginModal extends SafeEventEmitter {
 
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
-        log.info("rendered");
         this.setState({
           status: MODAL_STATUS.INITIALIZED,
         });
         return resolve();
       });
 
-      if (this.uiConfig.widget === "modal") {
-        log.info("createWrapperForModal");
+      if (this.uiConfig.widget === WIDGET_TYPE.MODAL) {
         createWrapperForModal(this.uiConfig.modalZIndex);
       } else {
-        log.info("createWrapperForEmbed");
         createWrapperForEmbed(this.uiConfig.targetId);
       }
 
@@ -211,7 +206,6 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
-    log.info("external wallet clicked", params);
     const { adapter } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
@@ -219,7 +213,6 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
-    log.info("social login clicked", params);
     const { adapter, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       adapter,
@@ -247,17 +240,14 @@ export class LoginModal extends SafeEventEmitter {
 
   private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
     listener.on(ADAPTER_EVENTS.CONNECTING, (data) => {
-      log.info("connecting with adapter", data);
       // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
       // connections without any user interaction.
       if (data?.adapter !== WALLET_ADAPTERS.WALLET_CONNECT_V2) {
         // const provider = data?.loginProvider || "";
-
         this.setState({ status: MODAL_STATUS.CONNECTING });
       }
     });
     listener.on(ADAPTER_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
-      log.debug("connected with adapter", data);
       // only show success if not being reconnected again.
       if (!data.reconnected) {
         this.setState({
