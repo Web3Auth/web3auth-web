@@ -132,7 +132,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async () => {
-      await Promise.all(this.connectors.map(this.setupConnector));
+      await Promise.all(this.connectors.map(this.setupConnector.bind(this)));
 
       // emit connector ready event
       if (this.status === CONNECTOR_STATUS.NOT_READY) {

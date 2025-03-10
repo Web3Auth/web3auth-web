@@ -1,4 +1,5 @@
 import {
+  AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
   CommonJRPCProvider,
@@ -349,9 +350,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   private subscribeToLoginModalEvents(): void {
-    this.loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: unknown }) => {
+    this.loginModal.on(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE }) => {
       try {
-        await this.connectTo<unknown>(params.connector, params.loginParams);
+        await this.connectTo<unknown>(params.connector);
+      } catch (error) {
+        log.error(`Error while connecting to connector: ${params.connector}`, error);
+      }
+    });
+
+    this.loginModal.on(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }) => {
+      try {
+        await this.connectTo<AuthLoginParams>(params.connector, params.loginParams);
       } catch (error) {
         log.error(`Error while connecting to connector: ${params.connector}`, error);
       }

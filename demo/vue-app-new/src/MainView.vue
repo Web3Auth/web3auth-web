@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, ConnectorFn, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, coinbaseConnector, ConnectorFn, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions, authConnector, UX_MODE } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -50,7 +50,7 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"];
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : {};
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
@@ -78,7 +78,7 @@ const options = computed((): Web3AuthOptions => {
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig,
+    uiConfig: { ...uiConfig, uxMode: UX_MODE.REDIRECT },
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options

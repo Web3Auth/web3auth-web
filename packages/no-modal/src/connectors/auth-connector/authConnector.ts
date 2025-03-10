@@ -1,4 +1,6 @@
+import { Auth0ClientOptions, createHandler, CreateHandlerParams, LOGIN_TYPE, PopupHandler, randomId } from "@toruslabs/customauth";
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
@@ -103,8 +105,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
       network: web3AuthNetwork,
+      sdkMode: "iframe",
     });
-    log.debug("initializing auth connector init");
+    log.debug("initializing auth connector init", this.authOptions);
 
     await this.authInstance.init();
 
@@ -298,19 +301,19 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA
         ? this.authInstance?.sessionId
         : this._getFinalPrivKey();
+
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
 
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
-      await this.authInstance.login(
-        deepmerge.all([
-          this.loginSettings,
-          params,
-          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } },
-        ]) as AuthLoginParams
-      );
+
+      if (params.extraLoginOptions?.id_token) {
+        await this.connectWithJwtLogin(params);
+      } else {
+        await this.connectWithSocialLogin(params);
+      }
     }
 
     // setup WS embed if chainNamespace is EIP155 or SOLANA
@@ -348,20 +351,123 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       }
     }
   }
+
+  private async connectWithSocialLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
+    const loginConfig = this.authInstance.getDappLoginConfig();
+    if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
+    const providerConfig = loginConfig[params.loginProvider];
+
+    const jwtParams = {
+      ...providerConfig.jwtParameters,
+      ...(params.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    } as Auth0ClientOptions;
+
+    const nonce = randomId();
+
+    // post a message to the auth provider to indicate that login has been initiated.
+    const loginParams = cloneDeep(params);
+    loginParams.extraLoginOptions = {
+      ...(loginParams.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    };
+    delete loginParams.chainId;
+
+    const popupParams: CreateHandlerParams = {
+      typeOfLogin: params.loginProvider as LOGIN_TYPE,
+      verifier: providerConfig.verifier,
+      clientId: providerConfig.clientId,
+      redirect_uri: `${this.authInstance.baseUrl}/auth`,
+      jwtParams,
+      customState: {
+        nonce,
+        dapp_redirect_url: params.redirectUrl || this.authOptions.redirectUrl || "http://localhost:8080",
+        appState: params.appState,
+        uxMode: this.authOptions.uxMode,
+        whiteLabel: JSON.stringify(this.authOptions.whiteLabel),
+        loginParams: JSON.stringify(loginParams),
+      },
+      web3AuthClientId: this.authOptions.clientId,
+      web3AuthNetwork: this.authOptions.network,
+    };
+
+    log.debug("popupParams", popupParams);
+
+    const loginHandler = createHandler(popupParams);
+    const verifierWindow = new PopupHandler({
+      url: loginHandler.finalURL,
+      timeout: 0,
+    });
+
+    if (this.authOptions.uxMode === UX_MODE.REDIRECT) return verifierWindow.redirect(this.authOptions.replaceUrlOnRedirect);
+
+    let isClosedWindow = false;
+
+    verifierWindow.open().catch((error: unknown) => {
+      log.error("Error during login with social", error);
+      this.authInstance.postLoginCancelledMessage(nonce);
+    });
+
+    // this is to close the popup when the login is finished.
+    const securePubSub = new SecurePubSub();
+    securePubSub
+      .subscribe(`web3auth-login-${nonce}`)
+      .then((data: string) => {
+        const parsedData = JSON.parse(data || "{}");
+        if (parsedData?.message === "login_finished") {
+          isClosedWindow = true;
+          securePubSub.cleanup();
+          verifierWindow.close();
+        }
+        return true;
+      })
+      .catch((error: unknown) => {
+        // swallow the error, dont need to throw.
+        log.error("Error during login with social", error);
+      });
+
+    verifierWindow.once("close", () => {
+      if (!isClosedWindow) {
+        this.authInstance.postLoginCancelledMessage(nonce);
+        throw new Error("user closed popup");
+      }
+    });
+
+    return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams, nonce);
+  }
+
+  private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
+    const loginConfig = this.authInstance.getDappLoginConfig();
+    if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
+
+    log.debug("loginConfig inside jwt login", params);
+
+    const loginParams = cloneDeep(params);
+    loginParams.extraLoginOptions = {
+      ...(loginParams.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    };
+    delete loginParams.chainId;
+
+    return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
 }
 
-export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn => {
+export const authConnector = (params?: { uxMode?: UX_MODE_TYPE; loginConfig?: LoginConfig }): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
+      buildEnv: "development",
+      loginConfig: params?.loginConfig,
       network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: coreOptions.clientId,
-      uxMode: params?.uxMode || UX_MODE.POPUP,
+      uxMode: params?.uxMode || UX_MODE.REDIRECT,
     };
 
     // sms otp config
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       connectorSettings.loginConfig = {
+        ...(connectorSettings.loginConfig || {}),
         [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
           showOnModal: smsOtpEnabled,
           showOnDesktop: smsOtpEnabled,
