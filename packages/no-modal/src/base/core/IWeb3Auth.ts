@@ -1,5 +1,5 @@
 import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
+import { SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type CustomChainConfig } from "../chain/IChainInterface";
@@ -35,6 +35,13 @@ export type WalletServicesConfig = Omit<
   confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
   modalZIndex?: number;
 };
+
+export interface UIConfig extends WhiteLabelData {
+  /**
+   * UX Mode for the auth connector
+   */
+  uxMode?: UX_MODE_TYPE;
+}
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -84,7 +91,7 @@ export interface IWeb3AuthCoreOptions {
   /**
    * WhiteLabel options for web3auth
    */
-  uiConfig?: WhiteLabelData;
+  uiConfig?: UIConfig;
 
   /**
    * Account abstraction config for your chain namespace

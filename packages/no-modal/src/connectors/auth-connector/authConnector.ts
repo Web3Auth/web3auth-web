@@ -364,12 +364,8 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
       };
     }
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
-    // TODO: uxMode config
-    // if (this.options.uiConfig.uxMode) {
-    //   finalAuthAdapterSettings.uxMode = this.options.uiConfig.uxMode;
-    // }
-    const { whitelabel } = projectConfig;
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
+    if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
+    const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
