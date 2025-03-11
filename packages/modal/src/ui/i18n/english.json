@@ -21,6 +21,7 @@
     "external.installed": "Installed",
     "external.no-wallets-found": "No wallets found",
     "external.search-wallet": "Search through {{count}} wallets...",
+    "external.search-wallet-loading": "Loading...",
     "external.title": "External Wallet",
     "external.walletconnect-connect": "Connect",
     "external.walletconnect-copy": "Scan with a WalletConnect-supported wallet or click the QR code to copy to your clipboard.",

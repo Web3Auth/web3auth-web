@@ -28,4 +28,6 @@ export const formDataStore = reactive<FormData>({
   },
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
+  widget: "modal",
+  targetId: "w3a-parent-test-container",
 });

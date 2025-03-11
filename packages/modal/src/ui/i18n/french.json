@@ -19,6 +19,7 @@
     "external.installed": "Installé",
     "external.no-wallets-found": "Aucun portefeuille trouvé",
     "external.search-wallet": "Rechercher parmi {{count}} portefeuilles...",
+    "external.search-wallet-loading": "Chargement...",
     "external.title": "Portefeuille externe",
     "external.walletconnect-connect": "Se connecter",
     "external.walletconnect-copy": "Scannez avec un portefeuille pris en charge par WalletConnect ou cliquez sur le code QR pour le copier dans votre presse-papiers.",

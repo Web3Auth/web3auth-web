@@ -1,6 +1,7 @@
 const prefix = ".w3a-parent-container";
 
 module.exports = {
+  purge: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   plugins: {
     tailwindcss: {},
     "postcss-prefix-selector": {

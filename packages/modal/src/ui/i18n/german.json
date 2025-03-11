@@ -21,6 +21,7 @@
     "external.installed": "Installiert",
     "external.no-wallets-found": "Keine Wallets gefunden",
     "external.search-wallet": "Suche durch {{count}} Geldbörsen...",
+    "external.search-wallet-loading": "Laden...",
     "external.title": "Externe Geldbörse",
     "external.walletconnect-connect": "Verbinden",
     "external.walletconnect-copy": "Scannen Sie mit einem von WalletConnect unterstützten Wallet oder klicken Sie auf den QR-Code, um ihn in Ihre Zwischenablage zu kopieren.",

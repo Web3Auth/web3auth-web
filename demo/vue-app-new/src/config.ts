@@ -1,11 +1,20 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+  SignTypedDataMessageV4,
+  CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
+} from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
+import { SelectOption } from "@toruslabs/vue-components/dist/common/Select";
 
-export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
+export const networkOptions: SelectOption[] = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
-export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
+export const chainNamespaceOptions: SelectOption[] = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
 export const chainConfigs: Record<ChainNamespaceType, string[]> = {
   [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x61", "0x13882"],
@@ -115,6 +124,8 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   bundlerUrl?: string;
   paymasterUrl?: string;
+  widget?: "embed" | "modal";
+  targetId?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({

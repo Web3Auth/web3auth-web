@@ -1,6 +1,30 @@
 <script setup lang="ts">
-
-import { CHAIN_NAMESPACES, WalletConnectV2Adapter, getChainConfig, WalletServicesPlugin, type Web3AuthOptions,EthereumPrivateKeyProvider,NFTCheckoutPlugin,SolanaPrivateKeyProvider,CommonPrivateKeyProvider,CoinbaseAdapter, ChainNamespaceType, IAdapter, IBaseProvider, IProvider, storageAvailable, WALLET_ADAPTERS, AccountAbstractionProvider, ISmartAccount, KernelSmartAccount, NexusSmartAccount, SafeSmartAccount, TrustSmartAccount, getEvmInjectedAdapters, getSolanaInjectedAdapters } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  WalletConnectV2Adapter,
+  getChainConfig,
+  WalletServicesPlugin,
+  type Web3AuthOptions,
+  EthereumPrivateKeyProvider,
+  NFTCheckoutPlugin,
+  SolanaPrivateKeyProvider,
+  CommonPrivateKeyProvider,
+  CoinbaseAdapter,
+  ChainNamespaceType,
+  IAdapter,
+  IBaseProvider,
+  IProvider,
+  storageAvailable,
+  WALLET_ADAPTERS,
+  AccountAbstractionProvider,
+  ISmartAccount,
+  KernelSmartAccount,
+  NexusSmartAccount,
+  SafeSmartAccount,
+  TrustSmartAccount,
+  getEvmInjectedAdapters,
+  getSolanaInjectedAdapters,
+} from "@web3auth/modal";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -10,13 +34,14 @@ import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
 import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { formDataStore } from "./store/form";
+import { WidgetType } from "@web3auth/modal/dist/types/ui";
 
 const formData = formDataStore;
 
 const externalAdapters = ref<IAdapter<unknown>[]>([]);
 
 const getChainById = (chainId: string) => {
-  const chain = getChainConfig(formData.chainNamespace, chainId, clientIds[formData.network]);
+  const chain = getChainConfig(formData.chainNamespace, chainId);
   if (!chain) {
     throw new Error(`Chain config not found for chainId: ${chainId}`);
   }
@@ -100,11 +125,12 @@ const accountAbstractionProvider = computed((): IBaseProvider<IProvider> | undef
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
+  const { widget, targetId } = formData;
   return {
     clientId: clientIds[formData.network],
     privateKeyProvider: privateKeyProvider.value as IBaseProvider<string>,
     web3AuthNetwork: formData.network,
-    uiConfig: enabledWhiteLabel ? { ...whiteLabel } : undefined,
+    uiConfig: enabledWhiteLabel ? { ...whiteLabel, widget: widget as WidgetType, targetId } : { widget: widget as WidgetType, targetId },
     accountAbstractionProvider: accountAbstractionProvider.value,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
@@ -173,6 +199,8 @@ onBeforeMount(() => {
         formData.smartAccountType = json.smartAccountType;
         formData.bundlerUrl = json.bundlerUrl;
         formData.paymasterUrl = json.paymasterUrl;
+        formData.widget = json.widget;
+        formData.targetId = json.targetId;
       }
     } catch (error) {}
   }
@@ -236,10 +264,12 @@ const configs = computed(() => {
   <Web3AuthProvider :config="configs">
     <WalletServicesProvider>
       <AppHeader />
-      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-        <AppSettings />
-        <AppDashboard />
-      </main>
+      <div class="flex flex-col items-center justify-center">
+        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+          <AppSettings />
+          <AppDashboard />
+        </main>
+      </div>
     </WalletServicesProvider>
   </Web3AuthProvider>
 </template>
