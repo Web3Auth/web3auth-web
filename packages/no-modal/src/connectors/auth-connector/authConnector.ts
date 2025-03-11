@@ -351,7 +351,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
-    let connectorSettings: AuthConnectorOptions["connectorSettings"] = {
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
       network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       clientId: coreOptions.clientId,
       uxMode: UX_MODE.POPUP,
@@ -376,7 +376,7 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
     const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
-    connectorSettings = deepmerge.all([params.connectorSettings, connectorSettings]) as AuthConnectorOptions["connectorSettings"];
+    const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
     const finalWsSettings: WalletServicesSettings = {
@@ -390,7 +390,7 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
     };
 
     return new AuthConnector({
-      connectorSettings,
+      connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
