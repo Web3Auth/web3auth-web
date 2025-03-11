@@ -24,6 +24,7 @@ export interface UIConfig extends WhiteLabelData {
    * @defaultValue `modal`
    */
   widget?: WidgetType;
+
   /**
    * ID of the element to embed the widget into
    */
@@ -65,6 +66,9 @@ export interface UIConfig extends WhiteLabelData {
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
+  /**
+   * SafeEventEmitter for the auth adapter
+   */
   adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 
   /**

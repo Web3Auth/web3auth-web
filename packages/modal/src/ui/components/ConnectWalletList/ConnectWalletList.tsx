@@ -24,7 +24,7 @@ const ConnectWalletList = (props: ConnectWalletListProps) => {
 
   return (
     <>
-      <ul class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_480px)]")}>
+      <ul class={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[calc(100dvh_-_420px)]")}>
         <Show
           when={props.externalButtons.length > 0}
           fallback={

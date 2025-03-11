@@ -60,7 +60,7 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
     >
       <div
         class={cn(
-          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[96%] sm:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
+          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[356px] [@media(min-width:375px)]:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
           {
             "w3a--translate-y-0 w3a--delay-100": isOpen(),
             "w3a--translate-y-[100vh]": !isOpen(),

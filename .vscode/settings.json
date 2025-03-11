@@ -17,9 +17,5 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": [
-    "fallbacker",
-    "JRPC",
-    "Solana"
-  ]
+  "cSpell.words": ["fallbacker", "JRPC", "Solana", "whitelabel"]
 }

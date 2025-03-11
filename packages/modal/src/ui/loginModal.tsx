@@ -32,7 +32,6 @@ import {
   StateEmitterEvents,
   UIConfig,
   WIDGET_TYPE,
-  WidgetType,
 } from "./interfaces";
 import { changeLocale } from "./localeImport";
 import { getUserLanguage } from "./utils/modal";
@@ -66,7 +65,7 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps & { widget?: WidgetType; targetId?: string }) {
+  constructor(uiConfig: LoginModalProps) {
     super();
     this.uiConfig = uiConfig;
 
@@ -80,9 +79,9 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widget) this.uiConfig.widget = WIDGET_TYPE.MODAL;
-    if (!uiConfig.targetId) this.uiConfig.targetId = "w3a-parent-test-container";
 
     if (uiConfig.widget === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
+      log.error("targetId is required for embed widget");
       throw new Error("targetId is required for embed widget");
     }
 

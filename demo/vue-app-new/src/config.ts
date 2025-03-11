@@ -124,6 +124,8 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   bundlerUrl?: string;
   paymasterUrl?: string;
+  widget?: "embed" | "modal";
+  targetId?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({

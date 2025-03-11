@@ -77,6 +77,11 @@
       "btnSignPersonalMsg": "Sign Personal Message",
       "btnShowFreeMintNFTCheckout": "Show Free Mint NFT",
       "btnShowPaidMintNFTCheckout": "Show Paid Mint NFT"
+    },
+    "widget": {
+      "title": "Widget",
+      "embed": "Embed",
+      "modal": "Modal"
     }
   }
 }

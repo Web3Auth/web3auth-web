@@ -10,9 +10,9 @@ export const CONNECT_WALLET_PAGES = {
   SELECTED_WALLET: "Selected Wallet",
 };
 
-export const CHAIN_LIST = [
-  { id: "all", name: "All Chains" },
-  { id: "ethereum", name: "Ethereum", icon: "ethereum" },
-  { id: "polygon", name: "Polygon", icon: "polygon" },
-  { id: "solana", name: "Solana", icon: "solana" },
+export const CHAIN_LIST: { id: string; name: string; icon?: string }[] = [
+  // { id: "all", name: "All Chains" },
+  // { id: "ethereum", name: "Ethereum", icon: "ethereum" },
+  // { id: "polygon", name: "Polygon", icon: "polygon" },
+  // { id: "solana", name: "Solana", icon: "solana" },
 ];

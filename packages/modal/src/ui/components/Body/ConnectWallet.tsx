@@ -103,6 +103,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
     } else {
       setExternalButtons(sortedButtons());
     }
+    setInitialWalletCount(sortedButtons().length);
   };
 
   createEffect(() => {
@@ -128,6 +129,7 @@ const ConnectWallet = (props: ConnectWalletProps) => {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
+      props.handleWalletDetailsHeight();
     } else {
       props.setBodyState({
         ...props.bodyState,
@@ -135,8 +137,6 @@ const ConnectWallet = (props: ConnectWalletProps) => {
         walletDetails: button,
       });
     }
-
-    props.handleWalletDetailsHeight();
   };
 
   const handleMoreWallets = () => {
