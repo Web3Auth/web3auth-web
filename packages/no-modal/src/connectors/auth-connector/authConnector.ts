@@ -89,7 +89,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
-    const web3AuthNetwork = this.authOptions.network || this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
+    const web3AuthNetwork = this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
@@ -105,7 +105,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.SOLANA: {
         const { default: WsEmbed } = await import("@web3auth/ws-embed");
         this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: this.coreOptions.clientId || "",
+          web3AuthClientId: this.coreOptions.clientId,
           web3AuthNetwork,
           modalZIndex: this.wsSettings.modalZIndex,
         });
@@ -351,11 +351,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
-    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
-      network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-      clientId: coreOptions.clientId,
-      uxMode: UX_MODE.POPUP,
-    };
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = { uxMode: UX_MODE.POPUP };
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       connectorSettings.loginConfig = {
