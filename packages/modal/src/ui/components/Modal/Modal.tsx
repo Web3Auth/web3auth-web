@@ -36,8 +36,6 @@ const Modal: Component<ModalProps> = (props: ModalProps) => {
   }, false);
 
   const onCloseHandler = () => {
-    // eslint-disable-next-line no-console
-    console.log("onCloseHandler");
     if (mergedProps.onClose) mergedProps.onClose();
   };
 

@@ -31,6 +31,8 @@ export interface WidgetProps {
 }
 
 const Widget = (props: WidgetProps) => {
+  const visible = createMemo(() => props.widget === WIDGET_TYPE.EMBED);
+
   const [modalState, setModalState] = createSignal<ModalState>({
     externalWalletsVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
@@ -51,6 +53,10 @@ const Widget = (props: WidgetProps) => {
     detailedLoaderAdapterName: "",
     showExternalWalletsOnly: false,
     currentPage: PAGES.LOGIN,
+  });
+
+  createEffect(() => {
+    setModalState((prev) => ({ ...prev, modalVisibility: visible() }));
   });
 
   createEffect(
@@ -212,7 +218,7 @@ const Widget = (props: WidgetProps) => {
           </Modal>
         </Match>
         <Match when={props.widget === WIDGET_TYPE.EMBED}>
-          <Embed padding={false}>
+          <Embed open={modalState().modalVisibility} padding={false} onClose={closeModal}>
             <Body
               {...props}
               showPasswordLessInput={showPasswordLessInput()}

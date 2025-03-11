@@ -96,9 +96,11 @@ const onChainNamespaceChange = (value: string) => {
 </script>
 
 <template>
-  <div class="flex !flex-col sm:!flex-row items-center justify-center gap-6">
+  <div class="flex !flex-col sm:!flex-row items-center justify-center gap-6 p-10">
     <div v-if="isDisplay('form')">
-      <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
+      <Card
+        class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0 !w-full [@media(min-width:900px)]:!min-w-[500px] [@media(min-width:1200px)]:!min-w-[800px] [@media(min-width:1500px)]:!w-[800px]"
+      >
         <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
         <div class="my-4 font-extrabold leading-tight text-center flex items-center justify-center gap-2">
           <Select
@@ -456,6 +458,7 @@ const onChainNamespaceChange = (value: string) => {
         </Card>
         <div class="flex justify-center mt-5">
           <Button
+            v-if="formData.widget === 'modal'"
             :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
             data-testid="loginButton"
             type="button"
@@ -480,7 +483,7 @@ const onChainNamespaceChange = (value: string) => {
     <div
       v-if="formData.widget === 'embed'"
       id="w3a-parent-test-container"
-      class="flex flex-col items-center justify-center mt-10 xs:mt-0 !w-full [@media(min-width:375px)]:!max-w-[500px] p-10"
+      class="flex flex-col items-center justify-center mt-10 xs:mt-0 !w-full [@media(min-width:375px)]:!max-w-[500px]"
     ></div>
   </div>
 </template>
