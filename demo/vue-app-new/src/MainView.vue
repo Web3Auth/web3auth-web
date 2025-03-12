@@ -38,12 +38,12 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
-      // walletUrls: {
-      //   production: {
-      //     url: "http://localhost:4050",
-      //   }
-      // }
-    };
+    // walletUrls: {
+    //   production: {
+    //     url: "http://localhost:4050",
+    //   }
+    // }
+  };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
@@ -125,7 +125,7 @@ const getExternalAdapterByName = (name: string): ConnectorFn[] => {
     case "coinbase":
       return [coinbaseConnector()];
     case "wallet-connect-v2":
-      return [walletConnectV2Connector({ projectId: "d3c63f19f9582f8ba48e982057eb096b" })];
+      return [walletConnectV2Connector({ walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } })];
     default:
       return [];
   }

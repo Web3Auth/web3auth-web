@@ -5,14 +5,12 @@ import { type BaseConnectorSettings, type IBaseProvider } from "@/core/base";
 
 export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 
-type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick<Type, Key>>;
-
 export type PrivateKeyProvider = IBaseProvider<string>;
 
 export type WalletServicesSettings = WsEmbedParams & { modalZIndex?: number };
 
 export interface AuthConnectorOptions extends BaseConnectorSettings {
-  connectorSettings?: MakeOptional<AuthOptions, "clientId" | "network">;
+  connectorSettings?: Omit<AuthOptions, "clientId" | "network">;
   loginSettings?: LoginSettings;
   walletServicesSettings?: WalletServicesSettings;
 }

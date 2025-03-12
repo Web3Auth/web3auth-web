@@ -1,8 +1,9 @@
-import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
+import type { SafeEventEmitter } from "@web3auth/auth";
 import {
   BaseConnectorConfig,
   ChainNamespaceType,
   LoginMethodConfig,
+  UIConfig as CoreUIConfig,
   WALLET_CONNECTOR_TYPE,
   WalletRegistry,
   WalletRegistryItem,
@@ -10,7 +11,7 @@ import {
 } from "@web3auth/no-modal";
 
 // capture whitelabel only once
-export interface UIConfig extends WhiteLabelData {
+export interface UIConfig extends CoreUIConfig {
   /**
    * order of how login methods are shown
    *
@@ -48,11 +49,6 @@ export interface UIConfig extends WhiteLabelData {
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
-
-  /**
-   * UX Mode for the auth connector
-   */
-  uxMode?: UX_MODE_TYPE;
 }
 
 export interface LoginModalProps extends UIConfig {

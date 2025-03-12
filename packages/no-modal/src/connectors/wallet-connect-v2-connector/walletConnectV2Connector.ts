@@ -36,7 +36,7 @@ import {
 } from "@/core/base";
 
 import { getWalletConnectV2Settings } from "./config";
-import { WalletConnectV2ConnectorOptions } from "./interface";
+import { IConnectorSettings, WalletConnectV2ConnectorOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
 class WalletConnectV2Connector extends BaseConnector<void> {
@@ -397,19 +397,23 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 }
 
-export const walletConnectV2Connector = (params?: { projectId: string }): ConnectorFn => {
+export const walletConnectV2Connector = (params?: IConnectorSettings): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
-    let { projectId } = params || {};
+    let { projectId } = params?.walletConnectInitOptions || {};
 
+    // use project config if projectId is not set
     if (projectConfig) {
       const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-      if (walletConnectEnabled && walletConnectProjectId) projectId = walletConnectProjectId;
+      if (walletConnectEnabled && walletConnectProjectId && !projectId) projectId = walletConnectProjectId;
     }
 
+    const connectorSettings = {
+      ...params,
+      walletConnectInitOptions: { ...params?.walletConnectInitOptions, projectId },
+    };
+
     return new WalletConnectV2Connector({
-      connectorSettings: {
-        walletConnectInitOptions: { projectId },
-      },
+      connectorSettings,
       coreOptions,
     });
   };

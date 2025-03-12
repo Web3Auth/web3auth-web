@@ -1,5 +1,5 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -27,7 +27,6 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import { getAuthDefaultOptions } from "./config";
 import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
@@ -59,15 +58,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   constructor(params: AuthConnectorOptions) {
     super(params);
 
-    // set auth options
-    const defaultOptions = getAuthDefaultOptions();
-    log.info("setting connector settings", params.connectorSettings);
-    this.authOptions = deepmerge.all([
-      defaultOptions.connectorSettings,
-      this.authOptions || {},
-      params.connectorSettings || {},
-    ]) as AuthConnectorOptions["connectorSettings"];
-
+    this.authOptions = params.connectorSettings;
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
@@ -98,7 +89,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
-    const web3AuthNetwork = this.authOptions.network || this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
+    const web3AuthNetwork = this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
@@ -114,7 +105,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.SOLANA: {
         const { default: WsEmbed } = await import("@web3auth/ws-embed");
         this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: this.coreOptions.clientId || "",
+          web3AuthClientId: this.coreOptions.clientId,
           web3AuthNetwork,
           modalZIndex: this.wsSettings.modalZIndex,
         });
@@ -357,15 +348,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn => {
+export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
-    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
-      network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-      clientId: coreOptions.clientId,
-      uxMode: params?.uxMode || UX_MODE.POPUP,
-    };
-
-    // sms otp config
+    // Connector settings
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = { uxMode: UX_MODE.POPUP };
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       connectorSettings.loginConfig = {
@@ -377,17 +363,12 @@ export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn =
         } as LoginConfig[keyof LoginConfig],
       };
     }
-
-    // whitelist config
-    if (whitelist) {
-      connectorSettings.originData = whitelist.signed_urls;
-    }
-
-    // whitelabel config
-    const { whitelabel } = projectConfig;
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
+    if (whitelist) connectorSettings.originData = whitelist.signed_urls;
+    if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
+    const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
+    const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
     const finalWsSettings: WalletServicesSettings = {
@@ -400,12 +381,12 @@ export const authConnector = (params?: { uxMode?: UX_MODE_TYPE }): ConnectorFn =
       enableLogging: coreOptions.enableLogging,
     };
 
-    const connectorOptions: AuthConnectorOptions = {
-      connectorSettings,
+    return new AuthConnector({
+      connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
+      loginSettings: params?.loginSettings,
       coreOptions,
-    };
-    return new AuthConnector(connectorOptions);
+    });
   };
 };
 
