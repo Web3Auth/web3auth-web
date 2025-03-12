@@ -178,7 +178,13 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.wcProvider?.switchChain({ chainId: params.chainId });
+    if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet Connect provider is not ready yet");
+    try {
+      await this.wcProvider.switchChain({ chainId: params.chainId });
+    } catch (error) {
+      await this.wcProvider.addChain(params.chainId);
+      await this.wcProvider.switchChain({ chainId: params.chainId });
+    }
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
