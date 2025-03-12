@@ -222,15 +222,4 @@ export const accountAbstractionProvider = async ({
   });
 };
 
-export {
-  type AccountAbstractionConfig,
-  type BiconomySmartAccountConfig,
-  type BundlerConfig,
-  type ISmartAccount,
-  type KernelSmartAccountConfig,
-  type NexusSmartAccountConfig,
-  type PaymasterConfig,
-  type SafeSmartAccountConfig,
-  SMART_ACCOUNT,
-  type TrustSmartAccountConfig,
-};
+export { type AccountAbstractionConfig, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };
