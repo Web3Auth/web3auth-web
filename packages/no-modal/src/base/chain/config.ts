@@ -15,7 +15,7 @@ const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
   }
   throw WalletInitializationError.invalidParams(`Chain namespace ${chainNamespace} is not supported`);
 };
-
+// TODO: remove this function and get this from dashboard instead
 export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""): CustomChainConfig | null => {
   const chainNamespace = CHAIN_NAMESPACES.EIP155;
   const infuraRpcTarget = `${INFURA_PROXY_URL}/${chainId}/${web3AuthClientId}`;

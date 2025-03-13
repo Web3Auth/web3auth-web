@@ -1,5 +1,3 @@
-export * from "./LightSmartAccount";
-export * from "./SimpleSmartAccount";
 export {
   BiconomySmartAccount,
   type BiconomySmartAccountConfig,

@@ -99,44 +99,43 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     await this.authInstance.init();
 
-    // initialize ws embed or private key provider based on chain namespace
-    switch (chainConfig.chainNamespace) {
-      case CHAIN_NAMESPACES.EIP155:
-      case CHAIN_NAMESPACES.SOLANA: {
-        const { default: WsEmbed } = await import("@web3auth/ws-embed");
-        this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: this.coreOptions.clientId,
-          web3AuthNetwork,
-          modalZIndex: this.wsSettings.modalZIndex,
-        });
-        // TODO: once support multiple chains, only pass chains of solana and EVM
-        await this.wsEmbedInstance.init({
-          ...this.wsSettings,
-          chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
-          whiteLabel: {
-            ...this.authOptions.whiteLabel,
-            ...this.wsSettings.whiteLabel,
-          },
-        });
-        break;
-      }
-      case CHAIN_NAMESPACES.XRPL: {
-        const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
-        this.privateKeyProvider = new XrplPrivateKeyProvider({
-          config: { chain: chainConfig, chains: this.coreOptions.chains.filter((x) => x.chainNamespace === CHAIN_NAMESPACES.XRPL) },
-        });
-        break;
-      }
-      default: {
-        const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
-        this.privateKeyProvider = new CommonPrivateKeyProvider({
-          config: {
-            chain: chainConfig,
-            chains: this.coreOptions.chains,
-          },
-        });
+    // Use this for xrpl, mpc cases
+    if (this.coreOptions.privateKeyProvider) {
+      this.privateKeyProvider = this.coreOptions.privateKeyProvider;
+    } else {
+      // initialize ws embed or private key provider based on chain namespace
+      switch (chainConfig.chainNamespace) {
+        case CHAIN_NAMESPACES.EIP155:
+        case CHAIN_NAMESPACES.SOLANA: {
+          const { default: WsEmbed } = await import("@web3auth/ws-embed");
+          this.wsEmbedInstance = new WsEmbed({
+            web3AuthClientId: this.coreOptions.clientId,
+            web3AuthNetwork,
+            modalZIndex: this.wsSettings.modalZIndex,
+          });
+          // TODO: once support multiple chains, only pass chains of solana and EVM
+          await this.wsEmbedInstance.init({
+            ...this.wsSettings,
+            chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
+            whiteLabel: {
+              ...this.authOptions.whiteLabel,
+              ...this.wsSettings.whiteLabel,
+            },
+          });
+          break;
+        }
+        default: {
+          const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
+          this.privateKeyProvider = new CommonPrivateKeyProvider({
+            config: {
+              chain: chainConfig,
+              chains: this.coreOptions.chains,
+            },
+          });
+        }
       }
     }
+
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
 

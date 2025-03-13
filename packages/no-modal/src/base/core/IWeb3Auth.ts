@@ -8,6 +8,7 @@ import {
   type CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
   type ConnectorFn,
+  type IBaseProvider,
   type IConnector,
   type IProvider,
   type UserAuthInfo,
@@ -43,6 +44,7 @@ export interface UIConfig extends WhiteLabelData {
   uxMode?: UX_MODE_TYPE;
 }
 
+// TODO: let people pass in privateKeyProvider for xrpl, mpc cases
 export interface IWeb3AuthCoreOptions {
   /**
    * Client id for web3auth.
@@ -67,18 +69,19 @@ export interface IWeb3AuthCoreOptions {
    *
    * @defaultValue "local"
    */
+  // TODO: rename this to match customauth, sfa
   storageKey?: "session" | "local";
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
-   * @defaultValue 86400
+   * @defaultValue 7 * 86400
    *
-   * Note: max value can be 7 days (86400 * 7) and min can be  1 day (86400)
+   * Note: max value can be 30 days (86400 * 30) and min can be  1 sec (1)
    */
   sessionTime?: number;
   /**
    * Web3Auth Network to use for the session & the issued idToken
-   * @defaultValue mainnet
+   * @defaultValue sapphire_mainnet
    */
   web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
 
@@ -123,6 +126,11 @@ export interface IWeb3AuthCoreOptions {
    * Wallet services config
    */
   walletServicesConfig?: WalletServicesConfig;
+
+  /**
+   * Private key provider for xrpl, mpc cases
+   */
+  privateKeyProvider?: IBaseProvider<string>;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

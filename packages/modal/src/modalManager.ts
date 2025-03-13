@@ -171,6 +171,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // update auth connector config
     const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
+      // TODO: use the new login config method
       const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
         [WALLET_CONNECTORS.AUTH]: {
           label: WALLET_CONNECTORS.AUTH,

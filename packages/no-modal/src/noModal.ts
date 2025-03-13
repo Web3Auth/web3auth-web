@@ -61,6 +61,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
+    // TODO: This is fine. we get chains from project config. we can throw in init instead
     if (!options.chains || options.chains.length === 0) {
       throw WalletInitializationError.invalidParams("Please provide chains");
     }
@@ -73,6 +74,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     if (options.storageKey === "session") this.storage = "sessionStorage";
+
+    // TODO: this won't work with next.js. Move it to init
     this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
 
     this.coreOptions = {
@@ -86,6 +89,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
     const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
     const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    // TODO: get current chainId from user input. no need for them to input chains
     this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.chains[0].chainId;
   }
 
@@ -131,6 +135,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors }) => {
+      // TODO: do we really need to setup all connectors each time? we can reuse existing already setup connectors
       await Promise.all(connectors.map(this.setupConnector));
 
       // emit connector ready event
@@ -240,7 +245,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     const { key_export_enabled: keyExportEnabled } = projectConfig;
     if (typeof keyExportEnabled === "boolean") {
-      // dont know if we need to do this.
+      // TODO: dont know if we need to do this. we need to set this in wallet services plugin
       this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
     }
   }
@@ -320,6 +325,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace) continue;
 
       this.plugins[plugin.name] = plugin;
+      // TODO: this is not possible anymore because we removed addPlugin now
       if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
         // web3auth is already connected. can initialize plugins
         this.connectToPlugins({ connector: this.connectedConnector.name });
@@ -440,6 +446,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @throws WalletInitializationError If no chain is found for the connector's namespace
    */
   protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
+    // TODO: combine this logic with chainId input from web3auth options
     let initialChain = this.currentChain;
     if (initialChain.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
@@ -450,6 +457,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private cacheWallet(walletName: string) {
     if (!storageAvailable(this.storage)) return;
+    // TODO: use the key from user + this
     window[this.storage].setItem(CONNECTOR_CACHE_KEY, walletName);
     this.cachedConnector = walletName;
   }

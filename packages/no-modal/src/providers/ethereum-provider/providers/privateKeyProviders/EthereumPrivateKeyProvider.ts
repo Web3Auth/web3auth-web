@@ -15,7 +15,7 @@ export interface EthereumPrivKeyProviderConfig extends BaseProviderConfig {}
 export interface EthereumPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
 }
-
+// TODO: remove unnecessary classes here
 export class EthereumPrivateKeyProvider extends BaseProvider<BaseProviderConfig, EthereumPrivKeyProviderState, string> {
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
