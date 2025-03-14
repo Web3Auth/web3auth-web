@@ -63,7 +63,6 @@ export function getProviderHandlers({
         // should not use maxFeePerGas/maxPriorityFeePerGas from transaction params since that's fee for transaction not user operation and let bundler handle it instead
       };
 
-      // @ts-expect-error viem types are too deep
       const userOpHash = await bundlerClient.sendUserOperation(userOperationParams);
 
       const txReceipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash });
