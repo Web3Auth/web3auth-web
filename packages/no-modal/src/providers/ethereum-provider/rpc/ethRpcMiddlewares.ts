@@ -8,7 +8,7 @@ import {
   rpcErrors,
 } from "@web3auth/auth";
 
-import { IEthAccountHandlers, IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
+import { IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
 
 export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRPCMiddleware<unknown, unknown> {
@@ -51,18 +51,3 @@ export function createEthChainSwitchMiddleware({ switchChain }: IEthChainSwitchH
     wallet_switchEthereumChain: createAsyncMiddleware(updateChain) as JRPCMiddleware<unknown, unknown>,
   });
 }
-
-// #region account middlewares
-export function createEthAccountMiddleware({ updatePrivatekey }: IEthAccountHandlers): JRPCMiddleware<unknown, unknown> {
-  async function updateAccount(req: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
-    const accountParams = req.params?.length ? req.params[0] : undefined;
-    if (!accountParams?.privateKey) throw rpcErrors.invalidParams("Missing privateKey");
-    res.result = await updatePrivatekey(accountParams);
-  }
-
-  return createScaffoldMiddleware({
-    wallet_updateAccount: createAsyncMiddleware(updateAccount) as JRPCMiddleware<unknown, unknown>,
-  });
-}
-
-// #endregion account middlewares
