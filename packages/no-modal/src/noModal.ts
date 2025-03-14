@@ -313,17 +313,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const pluginFns = this.coreOptions.plugins || [];
     for (const pluginFn of pluginFns) {
       const plugin = pluginFn();
-      if (this.plugins[plugin.name]) continue;
-      // TODO: handle when switching chains to different namespace
-      // don't initialize plugin if it's not compatible with the current chain
-      if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace) continue;
-
-      this.plugins[plugin.name] = plugin;
-      // TODO: this is not possible anymore because we removed addPlugin now
-      if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
-        // web3auth is already connected. can initialize plugins
-        this.connectToPlugins({ connector: this.connectedConnector.name });
-      }
+      if (!this.plugins[plugin.name]) this.plugins[plugin.name] = plugin;
     }
   }
 
@@ -472,10 +462,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
     Object.values(this.plugins).map(async (plugin) => {
       try {
-        if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(data.connector)) {
-          return;
-        }
+        // skip if it's not compatible with the connector
+        if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
+        // skip if it's not compatible with the current chain
+        if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace) return;
+        // skip if it's already connected
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
+
         await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig);
         await plugin.connect();
       } catch (error: unknown) {
