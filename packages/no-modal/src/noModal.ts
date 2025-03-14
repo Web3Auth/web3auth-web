@@ -73,7 +73,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
     }
 
-    if (options.storageKey === "session") this.storage = "sessionStorage";
+    if (options.storageType === "session") this.storage = "sessionStorage";
 
     this.coreOptions = {
       ...options,

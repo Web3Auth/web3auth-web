@@ -44,7 +44,6 @@ export interface UIConfig extends WhiteLabelData {
   uxMode?: UX_MODE_TYPE;
 }
 
-// TODO: let people pass in privateKeyProvider for xrpl, mpc cases
 export interface IWeb3AuthCoreOptions {
   /**
    * Client id for web3auth.
@@ -76,8 +75,7 @@ export interface IWeb3AuthCoreOptions {
    *
    * @defaultValue "local"
    */
-  // TODO: rename this to match customauth, sfa
-  storageKey?: "session" | "local";
+  storageType?: "session" | "local";
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.

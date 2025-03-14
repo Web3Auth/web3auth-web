@@ -87,7 +87,7 @@ const options = computed((): Web3AuthOptions => {
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // enableLogging?: boolean;
-    // storageKey?: "session" | "local";
+    // storageType?: "session" | "local";
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     chains,
