@@ -1,4 +1,3 @@
-import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,
@@ -51,15 +50,6 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     engine.push(privKeyMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-  }
-
-  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
-    }
   }
 
   public async switchChain(_: { chainId: string }): Promise<void> {

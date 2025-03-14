@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION } from "@web3auth/auth";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +31,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       if (isEmailValid) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+          loginParams: { loginProvider: AUTH_CONNECTION.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
         });
       }
     }
@@ -41,7 +41,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       if (result) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+          loginParams: { loginProvider: AUTH_CONNECTION.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
         });
       }
     }

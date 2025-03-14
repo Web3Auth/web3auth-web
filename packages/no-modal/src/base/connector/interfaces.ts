@@ -72,7 +72,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   isInjected?: boolean;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params?: T): Promise<IProvider | null>;
+  connect(params: T & { chainId: string }): Promise<IProvider | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;

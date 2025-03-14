@@ -1,7 +1,7 @@
-import { Auth0ClientOptions, createHandler, CreateHandlerParams, LOGIN_TYPE, PopupHandler, randomId } from "@toruslabs/customauth";
+import { AUTH_CONNECTION_TYPE, Auth0ClientOptions, createHandler, CreateHandlerParams, PopupHandler, randomId } from "@toruslabs/customauth";
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
-import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { Auth, AUTH_CONNECTION, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -29,8 +29,7 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import { getAuthDefaultOptions } from "./config";
-import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -61,15 +60,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   constructor(params: AuthConnectorOptions) {
     super(params);
 
-    // set auth options
-    const defaultOptions = getAuthDefaultOptions();
-    log.info("setting connector settings", params.connectorSettings);
-    this.authOptions = deepmerge.all([
-      defaultOptions.connectorSettings,
-      this.authOptions || {},
-      params.connectorSettings || {},
-    ]) as AuthConnectorOptions["connectorSettings"];
-
+    this.authOptions = params.connectorSettings;
     this.loginSettings = params.loginSettings || { loginProvider: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
@@ -78,8 +69,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (this.status !== CONNECTOR_STATUS.NOT_READY) {
       if (this.wsEmbedInstance?.provider) {
         return this.wsEmbedInstance.provider;
-      }
-    } else if (this.privateKeyProvider) return this.privateKeyProvider;
+      } else if (this.privateKeyProvider) return this.privateKeyProvider;
+    }
     return null;
   }
 
@@ -100,11 +91,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
-    const web3AuthNetwork = this.authOptions.network || this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
-      network: web3AuthNetwork,
+      network: this.coreOptions.web3AuthNetwork,
       sdkMode: "iframe",
     });
     log.debug("initializing auth connector init", this.authOptions);
@@ -117,10 +107,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.SOLANA: {
         const { default: WsEmbed } = await import("@web3auth/ws-embed");
         this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: this.coreOptions.clientId || "",
-          web3AuthNetwork,
+          web3AuthClientId: this.coreOptions.clientId,
+          web3AuthNetwork: this.coreOptions.web3AuthNetwork,
           modalZIndex: this.wsSettings.modalZIndex,
         });
+        // TODO: once support multiple chains, only pass chains of solana and EVM
         await this.wsEmbedInstance.init({
           ...this.wsSettings,
           chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
@@ -134,7 +125,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       case CHAIN_NAMESPACES.XRPL: {
         const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
         this.privateKeyProvider = new XrplPrivateKeyProvider({
-          config: { chain: chainConfig, chains: this.coreOptions.chains },
+          config: { chain: chainConfig, chains: this.coreOptions.chains.filter((x) => x.chainNamespace === CHAIN_NAMESPACES.XRPL) },
         });
         break;
       }
@@ -217,12 +208,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    this.status = CONNECTOR_STATUS.DISCONNECTING;
     await this.authInstance.logout();
+    if (this.wsEmbedInstance) await this.wsEmbedInstance.logout();
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.authInstance = null;
+      if (this.wsEmbedInstance) this.wsEmbedInstance = null;
       if (this.privateKeyProvider) this.privateKeyProvider = null;
-      if (this.wsEmbedInstance) this.wsEmbedInstance.logout();
     } else {
       // ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
@@ -245,27 +238,31 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return userInfo;
   }
 
+  // we don't support switching between different namespaces, except for solana and evm
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    // TODO: handle when chainIds are the same
-    // TODO: need to handle switching to a different chain namespace
+    // get chains and namespaces
+    const { chainId: newChainId } = params;
+    const { chainId: currentChainId } = this.provider;
+    const { chainNamespace: currentNamespace } = this.getChain(currentChainId);
+    const { chainNamespace: newNamespace } = this.getChain(newChainId);
 
-    const newChain = this.getChain(params.chainId);
-    if (!newChain) throw WalletLoginError.connectionError("Chain config is not available");
-    const { chainNamespace } = newChain;
+    // skip if chainId is the same
+    if (currentChainId === newChainId) return;
 
-    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: params.chainId }],
-      });
-    } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      const fullChainId = `${CHAIN_NAMESPACES.SOLANA}:${Number(params.chainId)}`;
+    if (currentNamespace === CHAIN_NAMESPACES.SOLANA || currentNamespace === CHAIN_NAMESPACES.EIP155) {
+      // can only switch to solana or evm
+      if (newNamespace !== CHAIN_NAMESPACES.SOLANA && newNamespace !== CHAIN_NAMESPACES.EIP155)
+        throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
+
+      const fullChainId = `${newNamespace}:${Number(params.chainId)}`;
       await this.wsEmbedInstance.provider?.request({
         method: "wallet_switchChain",
         params: { chainId: fullChainId },
       });
     } else {
+      // cannot switch to other namespaces
+      if (currentNamespace !== newNamespace) throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
       await this.privateKeyProvider?.switchChain(params);
     }
   }
@@ -353,7 +350,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private async connectWithSocialLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
-    const loginConfig = this.authInstance.getDappLoginConfig();
+    const loginConfig = this.authInstance.getDappAuthConnectionConfig();
     if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
     const providerConfig = loginConfig[params.loginProvider];
 
@@ -374,21 +371,22 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     const popupParams: CreateHandlerParams = {
-      typeOfLogin: params.loginProvider as LOGIN_TYPE,
-      verifier: providerConfig.verifier,
+      authConnection: params.loginProvider as AUTH_CONNECTION_TYPE,
+      authConnectionId: providerConfig.authConnectionId,
       clientId: providerConfig.clientId,
+      groupedAuthConnectionId: providerConfig.groupedAuthConnectionId,
       redirect_uri: `${this.authInstance.baseUrl}/auth`,
       jwtParams,
       customState: {
         nonce,
-        dapp_redirect_url: params.redirectUrl || this.authOptions.redirectUrl || "http://localhost:8080",
+        dapp_redirect_url: this.authOptions.redirectUrl,
         appState: params.appState,
         uxMode: this.authOptions.uxMode,
         whiteLabel: JSON.stringify(this.authOptions.whiteLabel),
         loginParams: JSON.stringify(loginParams),
       },
-      web3AuthClientId: this.authOptions.clientId,
-      web3AuthNetwork: this.authOptions.network,
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
     };
 
     log.debug("popupParams", popupParams);
@@ -437,7 +435,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
-    const loginConfig = this.authInstance.getDappLoginConfig();
+    const loginConfig = this.authInstance.getDappAuthConnectionConfig();
     if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
 
     log.debug("loginConfig inside jwt login", params);
@@ -453,54 +451,42 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params?: { uxMode?: UX_MODE_TYPE; loginConfig?: LoginConfig }): ConnectorFn => {
+export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
-    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {
-      buildEnv: "development",
-      loginConfig: params?.loginConfig,
-      network: coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-      clientId: coreOptions.clientId,
-      uxMode: params?.uxMode || UX_MODE.REDIRECT,
-    };
-
-    // sms otp config
+    // Connector settings
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = { uxMode: UX_MODE.POPUP };
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
-      connectorSettings.loginConfig = {
-        ...(connectorSettings.loginConfig || {}),
-        [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-          showOnModal: smsOtpEnabled,
-          showOnDesktop: smsOtpEnabled,
-          showOnMobile: smsOtpEnabled,
+      connectorSettings.authConnectionConfig = {
+        [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
           showOnSocialBackupFactor: smsOtpEnabled,
-        } as LoginConfig[keyof LoginConfig],
+        } as AuthConnectionConfig[keyof AuthConnectionConfig],
       };
     }
-
-    // whitelist config
-    if (whitelist) {
-      connectorSettings.originData = whitelist.signed_urls;
-    }
-
-    // whitelabel config
-    const { whitelabel } = projectConfig;
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
+    if (whitelist) connectorSettings.originData = whitelist.signed_urls;
+    if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
+    const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
+    const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
+      whiteLabel: {
+        ...uiConfig,
+        ...coreOptions.walletServicesConfig?.whiteLabel,
+      },
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
     };
 
-    const connectorOptions: AuthConnectorOptions = {
-      connectorSettings,
+    return new AuthConnector({
+      connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
+      loginSettings: params?.loginSettings,
       coreOptions,
-    };
-    return new AuthConnector(connectorOptions);
+    });
   };
 };
 

@@ -49,7 +49,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
-    const currentChainConfig = web3auth.getCurrentChain();
+    const currentChainConfig = web3auth.currentChain;
     if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig.chainNamespace))
       throw WalletServicesPluginError.unsupportedChainNamespace();
 
@@ -126,14 +126,12 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   }
 
   async disconnect(): Promise<void> {
-    // if web3auth is being used and connected to unsupported connector throw error
+    if (this.status !== PLUGIN_STATUS.CONNECTED) throw WalletServicesPluginError.invalidSession("Wallet Services plugin is not connected");
     if (this.wsEmbedInstance?.isLoggedIn) {
       await this.wsEmbedInstance.logout();
-      this.emit(PLUGIN_EVENTS.DISCONNECTED);
-      this.status = PLUGIN_STATUS.DISCONNECTED;
-    } else {
-      throw WalletServicesPluginError.invalidSession("Wallet Services plugin is not connected");
     }
+    this.emit(PLUGIN_EVENTS.DISCONNECTED);
+    this.status = PLUGIN_STATUS.DISCONNECTED;
   }
 }
 

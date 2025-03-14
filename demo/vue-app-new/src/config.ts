@@ -1,13 +1,12 @@
-import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { LANGUAGE_TYPE, LANGUAGES, AUTH_CONNECTION, AUTH_CONNECTION_TYPE, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CustomChainConfig,
+  CONFIRMATION_STRATEGY,
+  SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
-  SignTypedDataMessageV4,
-  CONFIRMATION_STRATEGY,
-  type CONFIRMATION_STRATEGY_TYPE,
+  type CONFIRMATION_STRATEGY_TYPE
 } from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
@@ -16,95 +15,13 @@ export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name
 
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
-export const chainConfigs: Record<ChainNamespaceType, CustomChainConfig[]> = {
-  [CHAIN_NAMESPACES.EIP155]: [
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc.ankr.com/eth",
-      blockExplorerUrl: "https://etherscan.io",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-      chainId: "0x1",
-      ticker: "ETH",
-      tickerName: "Ethereum",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-      blockExplorerUrl: "https://sepolia.etherscan.io",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-      chainId: "0xaa36a7",
-      ticker: "ETH",
-      tickerName: "Sepolia Testnet",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://mainnet.base.org",
-      blockExplorerUrl: "https://base.blockscout.com",
-      chainId: "0x2105",
-      displayName: "Base Mainnet",
-      ticker: "ETH",
-      tickerName: "Base Ethereum",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://sepolia.base.org",
-      blockExplorerUrl: "https://sepolia-explorer.base.org",
-      chainId: "0x14A34",
-      displayName: "Base Sepolia",
-      ticker: "ETH",
-      tickerName: "Base Sepolia Testnet",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      rpcTarget: "https://data-seed-prebsc-2-s3.binance.org:8545",
-      blockExplorerUrl: "https://testnet.bscscan.com",
-      logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png",
-      chainId: "0x61",
-      displayName: "Binance SmartChain Testnet",
-      ticker: "BNB",
-      tickerName: "BNB",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.EIP155,
-      chainId: "0x13882",
-      rpcTarget: "https://rpc.ankr.com/polygon_amoy",
-      displayName: "Polygon Amoy Testnet",
-      blockExplorerUrl: "https://amoy.polygonscan.com/",
-      ticker: "POL",
-      tickerName: "Polygon Ecosystem Token",
-    },
-  ],
-  [CHAIN_NAMESPACES.SOLANA]: [
-    // Ref: https://namespaces.chainagnostic.org/solana/caip10
-    {
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: "https://api.devnet.solana.com",
-      blockExplorerUrl: "https://solscan.io",
-      logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-      chainId: "0x67",
-      ticker: "SOL",
-      tickerName: "Solana",
-      displayName: "Solana Devnet",
-    },
-    {
-      chainNamespace: CHAIN_NAMESPACES.SOLANA,
-      rpcTarget: import.meta.env.VITE_APP_SOLANA_MAINNET_RPC,
-      blockExplorerUrl: "https://explorer.solana.com",
-      logo: "https://cryptologos.cc/logos/solana-sol-logo.png",
-      chainId: "0x65",
-      ticker: "SOL",
-      tickerName: "Solana",
-      displayName: "Solana Mainnet",
-    },
-  ],
+export const chainConfigs: Record<ChainNamespaceType, string[]> = {
+  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x61", "0x13882"],
+  [CHAIN_NAMESPACES.SOLANA]: ["0x67", "0x65"],
   [CHAIN_NAMESPACES.CASPER]: [],
   [CHAIN_NAMESPACES.XRPL]: [],
   [CHAIN_NAMESPACES.OTHER]: [],
 };
-
-export const allChains = Object.values(chainConfigs).flat();
 
 export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
   [WEB3AUTH_NETWORK.MAINNET]: "BJRZ6qdDTbj6Vd5YXvV994TYCqY42-PxldCetmvGTUdoq6pkCqdpuC1DIehz76zuYdaq1RJkXGHuDraHRhCQHvA",
@@ -129,8 +46,8 @@ export const initWhiteLabel: WhiteLabelData = {
   },
 };
 
-export const loginProviderOptions = Object.values(LOGIN_PROVIDER)
-  .filter((x) => x !== "jwt" && x !== "webauthn")
+export const loginProviderOptions = Object.values(AUTH_CONNECTION)
+  .filter((x) => x !== "custom")
   .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
@@ -146,7 +63,7 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Turkish", value: LANGUAGES.tr },
 ];
 
-export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
+export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
   (acc, curr) => ({
     ...acc,
     [curr.value]: {
@@ -161,7 +78,7 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
       showOnMobile: false,
     },
   }),
-  {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
+  {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
 );
 
 export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust";
@@ -189,11 +106,11 @@ export type FormData = {
     enable: boolean;
     config: WhiteLabelData;
   };
-  loginProviders: LOGIN_PROVIDER_TYPE[];
+  loginProviders: AUTH_CONNECTION_TYPE[];
   connectors: string[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
-  loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
+  loginMethods: Record<AUTH_CONNECTION_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;

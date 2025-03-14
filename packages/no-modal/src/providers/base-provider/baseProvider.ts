@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/auth";
+import { JRPCRequest, JRPCResponse, ProviderEvents, rpcErrors, SendCallBack } from "@web3auth/auth";
 
 import {
   CustomChainConfig,
@@ -24,12 +24,16 @@ export interface BaseProviderConfig extends BaseConfig {
   keyExportEnabled?: boolean;
 }
 
+export interface CommonProviderEvents extends ProviderEvents {
+  chainChanged: (chainId: string) => void;
+}
+
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
   extends BaseController<C, S, BaseProviderEvents<S>>
   implements IBaseProvider<P>
 {
   // should be Assigned in setupProvider
-  public _providerEngineProxy: SafeEventEmitterProvider | null = null;
+  public _providerEngineProxy: SafeEventEmitterProvider<CommonProviderEvents> | null = null;
 
   // set to true when the keyExportEnabled flag is set by code.
   // This is to prevent the flag from being overridden by the dashboard config.
@@ -57,7 +61,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): SafeEventEmitterProvider<CommonProviderEvents> | null {
     return this._providerEngineProxy;
   }
 
@@ -117,6 +121,8 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
+
+    this.handleChangeChangedProvider();
   }
 
   public setKeyExportFlag(flag: boolean): void {
@@ -133,6 +139,13 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   protected getChain(chainId: string): CustomChainConfig {
     return this.config.chains.find((chain) => chain.chainId === chainId);
+  }
+
+  private handleChangeChangedProvider() {
+    this.provider.on("chainChanged", (chainId: string) => {
+      this.update({ chainId } as Partial<S>);
+      this.emit("chainChanged", chainId);
+    });
   }
 
   abstract setupProvider(provider: P, chainId: string): Promise<void>;

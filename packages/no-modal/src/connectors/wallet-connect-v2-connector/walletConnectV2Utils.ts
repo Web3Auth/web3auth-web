@@ -1,11 +1,13 @@
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
+import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import base58 from "bs58";
+import { AddEthereumChainParameter } from "viem";
 
 import { WalletLoginError } from "@/core/base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
-import type { ISolanaProviderHandlers, TransactionOrVersionedTransaction } from "@/core/solana-provider";
+import type { ISolanaProviderHandlers } from "@/core/solana-provider";
 
 import { SOLANA_CAIP_CHAIN_MAP } from "./config";
 
@@ -82,7 +84,9 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
       return getAccounts(connector);
     },
     processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_sendTransaction", [txParams]);
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_TRANSACTION, [
+        txParams,
+      ]);
       return methodRes;
     },
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
@@ -90,15 +94,21 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
       return methodRes;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, "eth_sign", [msgParams.from, msgParams.data]);
+      const methodRes = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_SIGN, [
+        msgParams.from,
+        msgParams.data,
+      ]);
       return methodRes;
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, "personal_sign", [msgParams.data, msgParams.from]);
+      const methodRes = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.PERSONAL_SIGN, [
+        msgParams.data,
+        msgParams.from,
+      ]);
       return methodRes;
     },
     processTypedMessageV4: async (msgParams: TypedMessageParams): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, `eip155:${chainId}`, "eth_signTypedData_v4", [
+      const methodRes = await sendJrpcRequest<string, unknown[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_SIGN_TYPED_DATA_V4, [
         msgParams.from,
         msgParams.data,
       ]);
@@ -130,31 +140,27 @@ export function getSolProviderHandlers({ connector, chainId }: { connector: ISig
     signAndSendTransaction: async (_: JRPCRequest<unknown>) => {
       throw rpcErrors.methodNotSupported();
     },
-    signMessage: async (req: JRPCRequest<{ message: Uint8Array }>): Promise<Uint8Array> => {
+    signMessage: async (req: JRPCRequest<{ data: string }>): Promise<string> => {
       const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(
         connector,
         `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
-        "solana_signMessage",
-        {
-          message: base58.encode(req.params.message),
-        }
+        SOLANA_METHOD_TYPES.SIGN_MESSAGE,
+        { message: base58.encode(Buffer.from(req.params.data, "utf-8")) }
       );
-      return base58.decode(methodRes.signature);
+      return methodRes.signature;
     },
-    signTransaction: async (req: JRPCRequest<{ message: TransactionOrVersionedTransaction }>): Promise<TransactionOrVersionedTransaction> => {
-      const [{ PublicKey }, accounts] = await Promise.all([import("@solana/web3.js"), getAccounts(connector)]);
+    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
+      const accounts = await getAccounts(connector);
       if (accounts.length === 0) {
         throw providerErrors.disconnected();
       }
       const methodRes = await sendJrpcRequest<{ signature: string }, { transaction: string }>(
         connector,
         `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
-        "solana_signTransaction",
-        { transaction: req.params.message.serialize({ requireAllSignatures: false }).toString("base64") }
+        SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
+        { transaction: req.params.message }
       );
-      const finalTransaction = req.params.message;
-      finalTransaction.addSignature(new PublicKey(accounts[0]), Buffer.from(base58.decode(methodRes.signature)));
-      return finalTransaction;
+      return methodRes.signature;
     },
   };
 }
@@ -169,4 +175,16 @@ export async function switchChain({
   newChainId: string;
 }): Promise<void> {
   await sendJrpcRequest<string, { chainId: string }[]>(connector, `eip155:${chainId}`, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
+}
+
+export async function addChain({
+  connector,
+  chainId,
+  chainConfig,
+}: {
+  connector: ISignClient;
+  chainId: number;
+  chainConfig: AddEthereumChainParameter;
+}): Promise<void> {
+  await sendJrpcRequest<string, AddEthereumChainParameter[]>(connector, `eip155:${chainId}`, "wallet_addEthereumChain", [chainConfig]);
 }

@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION } from "@web3auth/auth";
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,9 +19,9 @@ interface SocialLoginProps {
 
 function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
   const imageId =
-    method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+    method === AUTH_CONNECTION.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
   const hoverId =
-    method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
+    method === AUTH_CONNECTION.APPLE || method === AUTH_CONNECTION.GITHUB || method === AUTH_CONNECTION.TWITTER ? imageId : `login-${method}-active`;
 
   if (isPrimaryBtn) {
     return <Image width="20" imageId={hoverId} hoverImageId={hoverId} isButton />;
@@ -64,12 +64,10 @@ export default function SocialLogins(props: SocialLoginProps) {
   const loginMethodsCount = Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
   const restrictedLoginMethods: string[] = [
-    LOGIN_PROVIDER.WEBAUTHN,
-    LOGIN_PROVIDER.JWT,
-    LOGIN_PROVIDER.SMS_PASSWORDLESS,
-    LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
-    LOGIN_PROVIDER.AUTHENTICATOR,
-    LOGIN_PROVIDER.PASSKEYS,
+    AUTH_CONNECTION.CUSTOM,
+    AUTH_CONNECTION.SMS_PASSWORDLESS,
+    AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+    AUTH_CONNECTION.PASSKEYS,
   ];
 
   return (

@@ -1,5 +1,5 @@
 import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
+import { SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type CustomChainConfig } from "../chain/IChainInterface";
@@ -35,6 +35,13 @@ export type WalletServicesConfig = Omit<
   confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
   modalZIndex?: number;
 };
+
+export interface UIConfig extends WhiteLabelData {
+  /**
+   * UX Mode for the auth connector
+   */
+  uxMode?: UX_MODE_TYPE;
+}
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -84,7 +91,7 @@ export interface IWeb3AuthCoreOptions {
   /**
    * WhiteLabel options for web3auth
    */
-  uiConfig?: WhiteLabelData;
+  uiConfig?: UIConfig;
 
   /**
    * Account abstraction config for your chain namespace
@@ -121,10 +128,10 @@ export interface IWeb3AuthCoreOptions {
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: string | null;
+  currentChain: CustomChainConfig;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;
-  getCurrentChain(): CustomChainConfig;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
@@ -136,9 +143,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 export interface IWeb3Auth extends IWeb3AuthCore {
   connected: boolean;
   cachedConnector: string | null;
-  getCurrentChain(): CustomChainConfig;
-  getChain(chainId: string): CustomChainConfig | undefined;
-  getChains(): CustomChainConfig[];
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   /**
    * Connect to a specific wallet connector

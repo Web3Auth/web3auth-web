@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS, NFTCheckoutPlugin, WalletServicesPlugin } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
+import { CustomChainConfig, type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
+import { Connection } from "@solana/web3.js";
+import { ProviderConfig } from "@toruslabs/base-controllers";
+import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
+import { computed, ref, watch } from "vue";
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {
   getAccounts,
@@ -11,19 +16,14 @@ import {
   getChainId,
   sendEth,
   signEthMessage,
-  signPersonalMessage,
   signTransaction as signEthTransaction,
+  signPersonalMessage,
   signTypedMessage,
 } from "../services/ethHandlers";
-import { signAllTransactions, signAndSendTransaction, signMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
+import { getBalance as getSolBalance, signAllTransactions, signAndSendTransaction, signMessage as signSolMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
 import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
-import { computed, ref, watch } from "vue";
-import { useWalletServicesPlugin } from "@web3auth/no-modal/vue";
-import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
-import { ProviderConfig } from "@toruslabs/base-controllers";
-import { Connection } from "@solana/web3.js";
 
 const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
 
@@ -31,8 +31,11 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
+const props = defineProps<{
+  chains: CustomChainConfig[];
+}>();
+
 const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
-const { isPluginConnected, plugin } = useWalletServicesPlugin();
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
@@ -44,13 +47,12 @@ const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
 }
 
-watch(isPluginConnected, (newIsConnected, _, onCleanup) => {
-  if (!newIsConnected || !plugin.value) return;
-  
-  const walletPlugin = plugin.value;
-  walletPlugin?.wsEmbedInstance?.provider?.on("chainChanged", chainChangedListener)
+watch(isConnected, (newIsConnected, _, onCleanup) => {
+  if (!newIsConnected || ! provider.value) return;
+  currentChainId.value = web3Auth.value?.currentChain.chainId;
+  provider.value.on("chainChanged", chainChangedListener)
   onCleanup(() => {
-    walletPlugin?.wsEmbedInstance?.provider?.off("chainChanged", chainChangedListener)
+    provider.value?.off("chainChanged", chainChangedListener)
   })
 }, {
   immediate: true
@@ -116,47 +118,47 @@ const printToConsole = (...args: unknown[]) => {
 
 // Wallet Services
 const showWalletUI = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletUi();
 };
 const showCheckout = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showCheckout();
 };
 const showWalletConnectScanner = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletPlugin.showWalletConnectScanner();
 };
 const onWalletSignPersonalMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSignTypedData_v4 = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 const onWalletSendEth = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
 };
 
 const onWalletSignSolanaMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
 };
 
 const onWalletSignSolanaVersionedTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
   await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
 };
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
 };
 const showFreeMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPlugin;
+  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
   nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
 };
 
@@ -185,34 +187,86 @@ const onGetBalance = async () => {
   await getBalance(provider.value as IProvider, printToConsole);
 };
 
-const onSwitchChain = async () => {
-  log.info("switching chain");
-  try {
-    await switchChain({ chainId: "0xaa36a7" });
-    printToConsole("switchedChain");
-  } catch (error) {
-    printToConsole("switchedChain error", error);
-  }
-};
-
-const onSignAndSendTransaction = async () => {
-  await signAndSendTransaction(provider.value as IProvider, printToConsole);
-};
-
 const onSignEthTransaction = async () => {
   await signEthTransaction(provider.value as IProvider, printToConsole);
+};
+
+const onSignTypedData_v4 = async () => {
+  await signTypedMessage(provider.value as IProvider, printToConsole);
+};
+
+const onSignPersonalMsg = async () => {
+  await signPersonalMessage(provider.value as IProvider, printToConsole);
+};
+
+// Solana
+const onSignAndSendTransaction = async () => {
+  await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
 
 const onSignSolTransaction = async () => {
   await signSolTransaction(provider.value as IProvider, printToConsole);
 };
 
-const onSignMessage = async () => {
-  await signMessage(provider.value as IProvider, printToConsole);
+const onSignSolMessage = async () => {
+  await signSolMessage(provider.value as IProvider, printToConsole);
+};
+
+const onGetSolBalance = async () => {
+  await getSolBalance(provider.value as IProvider, printToConsole);
 };
 
 const onSignAllTransactions = async () => {
   await signAllTransactions(provider.value as IProvider, printToConsole);
+};
+
+// Common
+const canSwitchChain = computed(() => {
+  const currentNamespace = currentChainNamespace.value;
+  const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== currentChainId.value);
+  return Boolean(newChain);
+});
+
+const canSwitchChainNamespace = computed(() => {
+  const currentNamespace = currentChainNamespace.value;
+  if (currentNamespace !== CHAIN_NAMESPACES.EIP155 && currentNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
+
+  const newNamespace = currentNamespace === CHAIN_NAMESPACES.EIP155 ? CHAIN_NAMESPACES.SOLANA : CHAIN_NAMESPACES.EIP155;
+  const newChain = props.chains.find((x) => x.chainNamespace === newNamespace);
+  return Boolean(newChain);
+});
+
+const onSwitchChain = async () => {
+  log.info("switching chain");
+  try {
+    const { chainId } = provider.value as IProvider;
+    if (chainId !== currentChainId.value) throw new Error("chainId does not match current chainId");
+
+    const currentNamespace = currentChainNamespace.value;
+    const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== chainId);
+    if (!newChain) throw new Error(`Please configure at least 2 chains for ${currentNamespace} in the config`);
+    await switchChain({ chainId: newChain.chainId });
+    printToConsole("switchedChain", { chainId: newChain.chainId });
+  } catch (error) {
+    printToConsole("switchedChain error", error);
+  }
+};
+
+const onSwitchChainNamespace = async () => {
+  log.info("switching chain namespace");
+  try {
+    const chainNamespace = currentChainNamespace.value;
+    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 && chainNamespace !== CHAIN_NAMESPACES.SOLANA) throw new Error("switching to differnt chainNamespaces is not supported for current chainNamespace");
+    const newChainNamespace = chainNamespace === CHAIN_NAMESPACES.EIP155 ? CHAIN_NAMESPACES.SOLANA : CHAIN_NAMESPACES.EIP155;
+    const supportedChains = props.chains || [];
+    const newChain = supportedChains.find((chain) => chain.chainNamespace === newChainNamespace);
+
+    if (!newChain) throw new Error(`chain namespace ${newChainNamespace} not supported, please configure this chain namespace in the config`);
+    await switchChain({ chainId: newChain.chainId });
+    printToConsole("switchedChainNamespace", { chainId: newChain.chainId, chainNamespace: newChainNamespace });
+  } catch (error) {
+    printToConsole("switchedChainNamespace error", error);
+  }
 };
 
 const authenticateUser = async () => {
@@ -223,14 +277,6 @@ const authenticateUser = async () => {
     log.error("authenticateUser error", error);
     printToConsole("authenticateUser error", error);
   }
-};
-
-const onSignTypedData_v4 = async () => {
-  await signTypedMessage(provider.value as IProvider, printToConsole);
-};
-
-const onSignPersonalMsg = async () => {
-  await signPersonalMessage(provider.value as IProvider, printToConsole);
 };
 </script>
 
@@ -248,6 +294,7 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
         </div>
+        <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
           <Button block size="xs" pill class="mb-2" @click="showWalletUI">
@@ -259,7 +306,7 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="showCheckout">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
-          <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
+          <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
           <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignTypedData_v4">
@@ -272,8 +319,10 @@ const onSignPersonalMsg = async () => {
           </Button>
           <Button v-if="isDisplay('solServices')" block size="xs" pill class="mb-2" @click="onWalletSignSolanaVersionedTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
-          </Button>
+          </Button> -->
         </Card>
+
+        <!-- NFT Checkout -->
         <Card v-if="isDisplay('nftCheckoutServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">NFT Checkout Service</div>
           <Button block size="xs" pill class="mb-2" @click="showFreeMintNFTCheckout">
@@ -283,6 +332,8 @@ const onSignPersonalMsg = async () => {
             {{ $t("app.buttons.btnShowPaidMintNFTCheckout") }}
           </Button>
         </Card>
+
+        <!-- EVM -->
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
@@ -291,7 +342,8 @@ const onSignPersonalMsg = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">{{ t("app.buttons.btnSwitchChainNamespace") }} to Solana</Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
@@ -308,16 +360,20 @@ const onSignPersonalMsg = async () => {
           </Button>
           <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
         </Card>
+
+        <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">{{ t("app.buttons.btnSwitchChainNamespace") }} to EVM</Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>

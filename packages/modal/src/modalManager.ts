@@ -1,18 +1,18 @@
 import {
+  AUTH_CONNECTION,
   AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
-  CommonJRPCProvider,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMES,
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
+  IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
   log,
-  LOGIN_PROVIDER,
   type LoginMethodConfig,
   type PROJECT_CONFIG_RESPONSE,
   type WALLET_CONNECTOR_TYPE,
@@ -81,18 +81,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // setup common JRPC provider
-    this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      chain: this.currentChain,
-      chains: this.coreOptions.chains,
-    });
-    const { key_export_enabled: keyExportEnabled } = projectConfig;
-    if (typeof keyExportEnabled === "boolean") {
-      // dont know if we need to do this.
-      this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
-    }
+    await this.setupCommonJRPCProvider(projectConfig);
 
     // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, () => this.initConnectors(projectConfig, params));
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors }) => this.initConnectors({ connectors, projectConfig, modalConfig: params }));
     await this.loadConnectors({ projectConfig });
 
     // initialize plugins
@@ -146,19 +138,27 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return { projectConfig, walletRegistry };
   }
 
-  private async initConnectors(projectConfig: PROJECT_CONFIG_RESPONSE, params: ModalConfigParams) {
+  private async initConnectors({
+    connectors,
+    projectConfig,
+    modalConfig,
+  }: {
+    connectors: IConnector<unknown>[];
+    projectConfig: PROJECT_CONFIG_RESPONSE;
+    modalConfig: ModalConfigParams;
+  }) {
     // filter connectors based on config
-    const filteredConnectorNames = await this.filterConnectors(params, projectConfig);
+    const filteredConnectorNames = await this.filterConnectors(modalConfig, projectConfig);
 
     // initialize connectors based on availability
-    const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames, params);
+    const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames, modalConfig);
     if (hasInAppConnectors) {
-      await this.initInAppAndCachedConnectors(filteredConnectorNames);
+      await this.initInAppAndCachedConnectors(connectors, filteredConnectorNames);
       // show connect button if external wallets are available
       if (hasExternalConnectors) this.loginModal.initExternalWalletContainer();
     } else if (hasExternalConnectors) {
       // if no in app wallet is available then initialize external wallets in modal
-      await this.initExternalConnectors(false, { showExternalWalletsOnly: true });
+      await this.initExternalConnectors(connectors, false, { showExternalWalletsOnly: true });
     }
 
     // emit ready event if connector is ready
@@ -176,8 +176,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         [WALLET_CONNECTORS.AUTH]: {
           label: WALLET_CONNECTORS.AUTH,
           loginMethods: {
-            [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
+            [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
+              name: AUTH_CONNECTION.SMS_PASSWORDLESS,
               showOnModal: smsOtpEnabled,
               showOnDesktop: smsOtpEnabled,
               showOnMobile: smsOtpEnabled,
@@ -186,7 +186,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
       if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
         throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
       }
@@ -249,7 +249,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private async checkConnectorAvailability(
     connectorNames: string[],
-    params: ModalConfigParams
+    modalConfig: ModalConfigParams
   ): Promise<{ hasInAppConnectors: boolean; hasExternalConnectors: boolean }> {
     // currently all default in app and external wallets can be hidden or shown based on config.
     // check if in app connectors are available
@@ -269,18 +269,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // check if external connectors are available
     const hasExternalConnectors = connectorNames.some((connectorName) => {
       // if wallet connect connector is available but hideWalletDiscovery is true then don't consider it as external wallet
-      if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 && params?.hideWalletDiscovery) return false;
+      if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 && modalConfig?.hideWalletDiscovery) return false;
       return this.getConnector(connectorName)?.type === CONNECTOR_CATEGORY.EXTERNAL && this.modalConfig.connectors?.[connectorName].showOnModal;
     });
     return { hasInAppConnectors, hasExternalConnectors };
   }
 
-  private async initInAppAndCachedConnectors(connectorNames: string[]) {
+  private async initInAppAndCachedConnectors(connectors: IConnector<unknown>[], connectorNames: string[]) {
     await Promise.all(
       connectorNames.map(async (connectorName) => {
-        if (!connectorName) return;
+        const connector = connectors.find((x) => x.name === connectorName);
+        if (!connector) return;
         try {
-          const connector = this.getConnector(connectorName);
           // skip if connector is already initialized
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
@@ -291,7 +291,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // if connector is configured then only initialize in app or cached connector.
           // external wallets are initialized on INIT_EXTERNAL_WALLET event.
           this.subscribeToConnectorEvents(connector);
-          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId });
+          const initialChain = this.getInitialChainIdForConnector(connector);
+          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
 
           // note: not adding cachedWallet to modal if it is external wallet.
           // adding it later if no in-app wallets are available.
@@ -314,39 +315,41 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     );
   }
 
-  private async initExternalConnectors(externalWalletsInitialized: boolean, options?: { showExternalWalletsOnly: boolean }): Promise<void> {
+  private async initExternalConnectors(
+    connectors: IConnector<unknown>[],
+    externalWalletsInitialized: boolean,
+    options?: { showExternalWalletsOnly: boolean }
+  ): Promise<void> {
     if (externalWalletsInitialized) return;
     const connectorsConfig: Record<string, BaseConnectorConfig> = {};
     // we do it like this because we don't want one slow connector to delay the load of the entire external wallet section.
-    await Promise.all(
-      this.connectors.map(async (connector) => {
-        const connectorName = connector.name;
-        if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
-          log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
-          this.subscribeToConnectorEvents(connector);
-          // we are not initializing cached connector here as it is already being initialized in initModal before.
-          if (this.cachedConnector === connectorName) {
-            return;
-          }
-          if (connector.status === CONNECTOR_STATUS.NOT_READY) {
-            await connector
-              .init({ autoConnect: this.cachedConnector === connectorName, chainId: this.currentChain.chainId })
-              .then<undefined>(() => {
-                const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-                connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
-                this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
-                return undefined;
-              })
-              .catch((error: unknown) => log.error(error, "error while initializing connector", connectorName));
-          } else if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
-            // we use connecting status for wallet connect
+    connectors.forEach(async (connector) => {
+      const connectorName = connector.name;
+      if (connector?.type === CONNECTOR_CATEGORY.EXTERNAL) {
+        log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
+        this.subscribeToConnectorEvents(connector);
+        // we are not initializing cached connector here as it is already being initialized in initModal before.
+        if (this.cachedConnector === connectorName) {
+          return;
+        }
+        if (connector.status === CONNECTOR_STATUS.NOT_READY) {
+          try {
+            const initialChain = this.getInitialChainIdForConnector(connector);
+            await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
             const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
             connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
             this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
+          } catch (error) {
+            log.error(error, "error while initializing connector", connectorName);
           }
+        } else if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
+          // we use connecting status for wallet connect
+          const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
+          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
+          this.loginModal.addWalletLogins(connectorsConfig, { showExternalWalletsOnly: !!options?.showExternalWalletsOnly });
         }
-      })
-    );
+      }
+    });
   }
 
   private subscribeToLoginModalEvents(): void {
@@ -366,8 +369,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
-      await this.initExternalConnectors(params.externalWalletsInitialized);
-      this.setupWalletConnect({ isModalActive: true });
+      await this.initExternalConnectors(this.connectors, params.externalWalletsInitialized);
     });
     this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
       try {
@@ -379,33 +381,30 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
       log.debug("is login modal visible", visibility);
       this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      this.setupWalletConnect({ isModalActive: visibility });
-    });
-  }
+      const wcConnector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
+      if (wcConnector) {
+        const walletConnectStatus = wcConnector?.status;
+        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+        if (visibility && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
+          log.debug("refreshing wc session");
 
-  private setupWalletConnect({ isModalActive }: { isModalActive: boolean }) {
-    const connector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
-    if (connector) {
-      const walletConnectStatus = connector?.status;
-      log.debug("trying refreshing wc session", isModalActive, walletConnectStatus);
-      if (isModalActive && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
-        log.debug("refreshing wc session");
-
-        // refreshing session for wallet connect whenever modal is opened.
-        try {
-          connector.connect({ chainId: this.currentChain.chainId });
-        } catch (error) {
-          log.error(`Error while disconnecting to wallet connect in core`, error);
+          // refreshing session for wallet connect whenever modal is opened.
+          try {
+            const initialChain = this.getInitialChainIdForConnector(wcConnector);
+            wcConnector.connect({ chainId: initialChain.chainId });
+          } catch (error) {
+            log.error(`Error while disconnecting to wallet connect in core`, error);
+          }
+        }
+        if (
+          !visibility &&
+          this.status === CONNECTOR_STATUS.CONNECTED &&
+          (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
+        ) {
+          log.debug("this stops wc connector from trying to reconnect once proposal expires");
+          wcConnector.status = CONNECTOR_STATUS.READY;
         }
       }
-      if (
-        !isModalActive &&
-        this.status === CONNECTOR_STATUS.CONNECTED &&
-        (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
-      ) {
-        log.debug("this stops wc connector from trying to reconnect once proposal expires");
-        connector.status = CONNECTOR_STATUS.READY;
-      }
-    }
+    });
   }
 }

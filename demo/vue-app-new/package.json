@@ -43,6 +43,9 @@
     "vite": "^6.0.11",
     "vue-tsc": "^2.2.0"
   },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.25.0"
+  },
   "lint-staged": {
     "!(*d).{js,ts}": [
       "eslint --cache --fix",

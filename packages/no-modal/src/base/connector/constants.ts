@@ -3,6 +3,7 @@ export const CONNECTOR_STATUS = {
   READY: "ready",
   CONNECTING: "connecting",
   CONNECTED: "connected",
+  DISCONNECTING: "disconnecting",
   DISCONNECTED: "disconnected",
   ERRORED: "errored",
 } as const;
