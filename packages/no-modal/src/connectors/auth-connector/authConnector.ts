@@ -380,6 +380,13 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
       enableLogging: coreOptions.enableLogging,
     };
 
+    // Private key provider
+    if (coreOptions.privateKeyProvider) {
+      if (typeof projectConfig.key_export_enabled === "boolean") {
+        coreOptions.privateKeyProvider.setKeyExportFlag(projectConfig.key_export_enabled);
+      }
+    }
+
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
