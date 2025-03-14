@@ -274,7 +274,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
-        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/default-solana-connector");
+        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/injected-solana-connector");
         const solanaMipd = createSolanaMipd();
         // subscribe to new injected connectors
         solanaMipd.on("register", async (...wallets) => {
@@ -290,7 +290,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // EVM chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-        const { createMipd, injectedEvmConnector } = await import("@/core/default-evm-connector");
+        const { createMipd, injectedEvmConnector } = await import("@/core/injected-evm-connector");
         const evmMipd = createMipd();
         // subscribe to new injected connectors
         evmMipd.subscribe((providerDetails) => {
