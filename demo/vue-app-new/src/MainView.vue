@@ -91,6 +91,7 @@ const options = computed((): Web3AuthOptions => {
     // sessionTime?: number;
     // useCoreKitKey?: boolean;
     chains,
+    defaultChainId: chains[0].chainId,
     enableLogging: true,
     connectors: externalConnectors.value,
     plugins,

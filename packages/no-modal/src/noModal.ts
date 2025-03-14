@@ -75,9 +75,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     if (options.storageKey === "session") this.storage = "sessionStorage";
 
-    // TODO: this won't work with next.js. Move it to init
-    this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
-
     this.coreOptions = {
       ...options,
       chains: chains.map((chain) => ({
@@ -85,12 +82,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         ...chain,
       })),
     };
-
-    // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
-    const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
-    const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
-    // TODO: get current chainId from user input. no need for them to input chains
-    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.chains[0].chainId;
   }
 
   get currentChain(): CustomChainConfig {
@@ -117,6 +108,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(): Promise<void> {
+    this.initCachedConnectorAndChainId();
+
     // get project config
     let projectConfig: PROJECT_CONFIG_RESPONSE;
     try {
@@ -134,9 +127,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.setupCommonJRPCProvider();
 
     // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors }) => {
-      // TODO: do we really need to setup all connectors each time? we can reuse existing already setup connectors
-      await Promise.all(connectors.map(this.setupConnector));
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors: newConnectors }) => {
+      await Promise.all(newConnectors.map(this.setupConnector));
 
       // emit connector ready event
       if (this.status === CONNECTOR_STATUS.NOT_READY) {
@@ -234,6 +226,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
+  protected initCachedConnectorAndChainId() {
+    this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
+    // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
+    const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
+    const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId;
+  }
+
   protected async setupCommonJRPCProvider() {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
       chain: this.currentChain,
@@ -328,7 +328,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       .filter((connector) => connector !== null);
     if (newConnectors.length > 0) {
       this.connectors = [...this.connectors, ...newConnectors];
-      this.emit(CONNECTOR_EVENTS.CONNECTORS_UPDATED, { connectors: this.connectors });
+      // only emit new connectors
+      this.emit(CONNECTOR_EVENTS.CONNECTORS_UPDATED, { connectors: newConnectors });
     }
   }
 
