@@ -82,6 +82,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         ...chain,
       })),
     };
+
+    this.currentChainId = options.defaultChainId;
   }
 
   get currentChain(): CustomChainConfig {

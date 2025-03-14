@@ -37,6 +37,10 @@ const chainOptions = computed(() => {
   return allChains;
 });
 
+const defaultChainOptions = computed(() => {
+  return formData.chains.map((chain) => ({ name: chain, value: chain }));
+});
+
 const adapterOptions = computed(() =>
   formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
     ? [
@@ -90,6 +94,7 @@ const isActiveTab = (index: number) => activeTab.value === index;
 const onChainNamespaceChange = (value: string[]) => {
   log.info("onChainNamespaceChange", value);
   formData.chains = value.map((namespace) => chainConfigs[namespace as ChainNamespaceType][0]);
+  formData.defaultChainId = formData.chains[0];
   formData.connectors = [];
 };
 </script>
@@ -154,6 +159,14 @@ const onChainNamespaceChange = (value: string[]) => {
           :placeholder="$t('app.chains')"
           :multiple="true"
           :options="chainOptions"
+        />
+        <Select
+          v-model="formData.defaultChainId"
+          data-testid="selectDefaultChainId"
+          :label="$t('app.defaultChainId')"
+          :aria-label="$t('app.defaultChainId')"
+          :placeholder="$t('app.defaultChainId')"
+          :options="defaultChainOptions"
         />
         <Select
           v-model="formData.connectors"
