@@ -370,6 +370,7 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
     const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
+    const isKeyExportEnabled = typeof projectConfig.key_export_enabled === "boolean" ? projectConfig.key_export_enabled : true;
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel: {
@@ -378,14 +379,11 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
       },
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
+      // enableKeyExport: keyExportEnabled, TODO: add this to ws embed and implement in WS
     };
 
-    // Private key provider
-    if (coreOptions.privateKeyProvider) {
-      if (typeof projectConfig.key_export_enabled === "boolean") {
-        coreOptions.privateKeyProvider.setKeyExportFlag(projectConfig.key_export_enabled);
-      }
-    }
+    // Core options
+    if (coreOptions.privateKeyProvider) coreOptions.privateKeyProvider.setKeyExportFlag(isKeyExportEnabled);
 
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,

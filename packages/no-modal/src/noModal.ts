@@ -131,7 +131,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // setup common JRPC provider
-    await this.setupCommonJRPCProvider(projectConfig);
+    await this.setupCommonJRPCProvider();
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors }) => {
@@ -234,7 +234,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected async setupCommonJRPCProvider(projectConfig: PROJECT_CONFIG_RESPONSE) {
+  protected async setupCommonJRPCProvider() {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
       chain: this.currentChain,
       chains: this.coreOptions.chains,
@@ -242,12 +242,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // sync chainId
     this.commonJRPCProvider.on("chainChanged", (chainId) => this.setCurrentChain(chainId));
-
-    const { key_export_enabled: keyExportEnabled } = projectConfig;
-    if (typeof keyExportEnabled === "boolean") {
-      // TODO: dont know if we need to do this. we need to set this in wallet services plugin
-      this.commonJRPCProvider.setKeyExportFlag(keyExportEnabled);
-    }
   }
 
   protected async setupConnector(connector: IConnector<unknown>): Promise<void> {

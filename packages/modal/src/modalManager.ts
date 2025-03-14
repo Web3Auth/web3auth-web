@@ -80,7 +80,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // setup common JRPC provider
-    await this.setupCommonJRPCProvider(projectConfig);
+    await this.setupCommonJRPCProvider();
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors }) => this.initConnectors({ connectors, projectConfig, modalConfig: params }));
