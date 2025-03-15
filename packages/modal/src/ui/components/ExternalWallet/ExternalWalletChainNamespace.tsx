@@ -32,7 +32,6 @@ export default function ExternalWalletChainNamespace(props: ExternalWalletChainN
   return (
     <div>
       {/* Header */}
-      {/* TODO: add translations for this component */}
       <ExternalWalletHeader title={`${t("modal.external.select-chain")}`} goBack={goBack} closeModal={closeModal} />
 
       {/* Wallet image */}
@@ -49,7 +48,6 @@ export default function ExternalWalletChainNamespace(props: ExternalWalletChainN
       </div>
 
       {/* Description */}
-      {/* TODO: This {button.displayName} wallet supports multiple chains. Select which chain you&apos;d like to connect to */}
       <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 w3a--my-6">
         {t("modal.external.select-chain-description", { wallet: button.displayName })}
       </p>

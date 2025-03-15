@@ -21,6 +21,8 @@
     "external.installed": "Geïnstalleerd",
     "external.no-wallets-found": "Geen portefeuilles gevonden",
     "external.search-wallet": "Zoeken door {{count}} portemonnees...",
+    "external.select-chain": "Ketting selecteren",
+    "external.select-chain-description": "Deze {{wallet}} portemonnee ondersteunt meerdere ketens. Selecteer welke ketting u wilt verbinden",
     "external.title": "Externe portemonnee",
     "external.walletconnect-connect": "Verbinden",
     "external.walletconnect-copy": "Scan met een WalletConnect-ondersteunde portemonnee of klik op de QR-code om naar uw klembord te kopiëren.",
