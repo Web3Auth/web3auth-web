@@ -3,6 +3,7 @@ import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth"
 import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
+  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMESPACES,
@@ -144,7 +145,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   // we need to take into account the chainNamespace as for external connectors, same connector name can be used for multiple chain namespaces
-  public getConnector(connectorName: WALLET_CONNECTOR_TYPE, chainNamespace?: string): IConnector<unknown> | null {
+  public getConnector(connectorName: WALLET_CONNECTOR_TYPE, chainNamespace?: ChainNamespaceType): IConnector<unknown> | null {
     return (
       this.connectors.find((connector) => {
         if (connector.name !== connectorName) return false;
@@ -188,7 +189,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @param connectorName - Key of the wallet connector to use.
    */
   async connectTo<T>(connectorName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null> {
-    const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: string })?.chainNamespace);
+    const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
 
