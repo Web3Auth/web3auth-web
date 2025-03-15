@@ -266,8 +266,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // add injected connectors
     const isMipdEnabled = this.coreOptions.multiInjectedProviderDiscovery ?? true;
+    const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
     if (isMipdEnabled) {
-      const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
         const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/injected-solana-connector");
@@ -295,16 +295,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         });
         connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
+    }
 
-      // add WalletConnectV2 connector if enabled
-      if (
-        projectConfig.wallet_connect_enabled &&
-        projectConfig.wallet_connect_project_id &&
-        (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))
-      ) {
-        const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
-        connectorFns.push(walletConnectV2Connector());
-      }
+    // add WalletConnectV2 connector if enabled
+    if (
+      projectConfig.wallet_connect_enabled &&
+      projectConfig.wallet_connect_project_id &&
+      (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))
+    ) {
+      const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
+      connectorFns.push(walletConnectV2Connector());
     }
 
     const connectors = connectorFns.map((connectorFn) => connectorFn(config));
@@ -433,7 +433,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @throws WalletInitializationError If no chain is found for the connector's namespace
    */
   protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
-    // TODO: combine this logic with chainId input from web3auth options
     let initialChain = this.currentChain;
     if (initialChain.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
