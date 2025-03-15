@@ -7,17 +7,26 @@ export interface WhitelistResponse {
   signed_urls: Record<string, string>;
 }
 
+export interface ExternalWalletsConfig {
+  enabled: boolean;
+  wallets: Record<string, { enabled: boolean }>;
+}
+
 // TODO: finalize the project config
 export interface ProjectConfig {
   // Legacy
   whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;
+  /** @deprecated If external_wallets.enabled is true, WC will be enabled automatically */
   wallet_connect_enabled: boolean;
+  /** @deprecated always use Web3Auth WalletConnect project ID */
   wallet_connect_project_id?: string;
   whitelist?: WhitelistResponse;
   key_export_enabled?: boolean;
   // Chains
   chains?: CustomChainConfig[];
+  // External wallets
+  external_wallets?: ExternalWalletsConfig;
 }
 
 export interface WalletRegistryItem {

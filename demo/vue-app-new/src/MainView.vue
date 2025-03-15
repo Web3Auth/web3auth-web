@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -125,8 +125,6 @@ const getExternalAdapterByName = (name: string): ConnectorFn[] => {
   switch (name) {
     case "coinbase":
       return [coinbaseConnector()];
-    case "wallet-connect-v2":
-      return [walletConnectV2Connector({ walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" } })];
     default:
       return [];
   }

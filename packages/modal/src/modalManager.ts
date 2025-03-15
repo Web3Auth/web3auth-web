@@ -125,6 +125,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
+      // TODO: we're using mock project config to test, remove this before production
+      // projectConfig = {
+      //   ...projectConfig,
+      //   external_wallets: {
+      //     enabled: false,
+      //     wallets: {
+      //       metamask: { enabled: true },
+      //       phantom: { enabled: false },
+      //     },
+      //   },
+      // };
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
@@ -132,9 +143,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    if (!params?.hideWalletDiscovery) {
+    const isExternalWalletEnabled = projectConfig.external_wallets?.enabled ?? true;
+    // TODO: should we remove params?.hideWalletDiscovery, and only rely on projectConfig.external_wallets.enabled?
+    if (!params?.hideWalletDiscovery && isExternalWalletEnabled) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
+
+        // remove wallets that are disabled in project config from wallet registry
+        Object.entries(projectConfig.external_wallets?.wallets || {}).forEach(([wallet, { enabled }]) => {
+          if (!enabled) {
+            delete walletRegistry.default[wallet];
+            delete walletRegistry.others[wallet];
+          }
+        });
       } catch (e) {
         log.error("Failed to fetch wallet registry", e);
       }
@@ -198,6 +219,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       params.modalConfig = deepmerge(connectorConfig, cloneDeep(params.modalConfig));
     }
 
+    // external wallets config
+    const isExternalWalletEnabled = projectConfig.external_wallets?.enabled ?? true;
+    const disabledExternalWallets = Object.fromEntries(
+      Object.entries(projectConfig.external_wallets?.wallets || {}).filter(([_, { enabled }]) => !enabled)
+    );
+
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [
       ...new Set([...Object.keys(this.modalConfig.connectors || {}), ...this.connectors.map((connector) => connector.name)]),
@@ -214,39 +241,26 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (params?.modalConfig?.[connectorName]) {
         connectorConfig = { ...connectorConfig, ...params.modalConfig[connectorName] };
       }
-      (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName] = connectorConfig as ModalConfig;
 
       // check if connector is configured/added by user and exist in connectors map.
       const connector = this.getConnector(connectorName);
-      log.debug("connector config", connectorName, this.modalConfig.connectors?.[connectorName].showOnModal, connector);
+      log.debug("connector config", connectorName, connectorConfig.showOnModal, connector);
 
       // if connector is not custom configured then check if it is available in default connectors.
       // and if connector is not hidden by user
-      if (!connector && this.modalConfig.connectors?.[connectorName].showOnModal) {
-        throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
-      } else if (
-        connector?.type === CONNECTOR_CATEGORY.IN_APP ||
-        connector?.type === CONNECTOR_CATEGORY.EXTERNAL ||
-        connectorName === this.cachedConnector
-      ) {
-        if (!this.modalConfig.connectors?.[connectorName].showOnModal) return;
-        if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-          const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
-          if (walletConnectEnabled === false) {
-            // override user specified config by hiding wallet connect
-            this.modalConfig.connectors = {
-              ...(this.modalConfig.connectors ?? {}),
-              [WALLET_CONNECTORS.WALLET_CONNECT_V2]: {
-                ...(this.modalConfig.connectors?.[WALLET_CONNECTORS.WALLET_CONNECT_V2] ?? {}),
-                showOnModal: false,
-              },
-            } as Record<string, ModalConfig>;
-            this.modalConfig.connectors[WALLET_CONNECTORS.WALLET_CONNECT_V2].showOnModal = false;
-          }
-        }
-
-        return connectorName;
+      if (!connector) {
+        if (connectorConfig.showOnModal) throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
+        return;
       }
+      // skip connector if it is hidden by user
+      if (!connectorConfig.showOnModal) return;
+
+      // skip connector if it is external and external wallets are disabled or it is disabled in project config
+      const isExternalWallet = connector.type === CONNECTOR_CATEGORY.EXTERNAL || connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2;
+      if (isExternalWallet && (!isExternalWalletEnabled || disabledExternalWallets[connectorName])) return;
+
+      this.modalConfig.connectors[connectorName] = connectorConfig;
+      return connectorName;
     });
     const connectorNames = await Promise.all(connectorConfigurationPromises);
     return connectorNames.filter((name) => name !== undefined);
