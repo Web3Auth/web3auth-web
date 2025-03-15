@@ -1,20 +1,23 @@
 import { WhiteLabelData } from "@web3auth/auth";
 
-import { ChainNamespaceType } from "./chain/IChainInterface";
+import { ChainNamespaceType, CustomChainConfig } from "./chain/IChainInterface";
 
 export interface WhitelistResponse {
   urls: string[];
   signed_urls: Record<string, string>;
 }
 
-// TODO: add more data from dashboard including chains
-export interface PROJECT_CONFIG_RESPONSE {
+// TODO: finalize the project config
+export interface ProjectConfig {
+  // Legacy
   whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;
   wallet_connect_enabled: boolean;
   wallet_connect_project_id?: string;
   whitelist?: WhitelistResponse;
   key_export_enabled?: boolean;
+  // Chains
+  chains?: CustomChainConfig[];
 }
 
 export interface WalletRegistryItem {

@@ -81,6 +81,7 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       rpcTarget: infuraRpcTarget,
       ticker: "ETH",
       tickerName: "Ethereum",
+      displayName: "Linea",
     };
   }
   if (chainId === 11155111) {

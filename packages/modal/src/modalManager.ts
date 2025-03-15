@@ -13,7 +13,7 @@ import {
   log,
   LOGIN_PROVIDER,
   type LoginMethodConfig,
-  type PROJECT_CONFIG_RESPONSE,
+  type ProjectConfig,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -62,12 +62,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
-    super.initCachedConnectorAndChainId();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig(params);
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+
+    // chains config
+    super.mergeChainsConfig(projectConfig.chains);
+    super.initCachedConnectorAndChainId();
 
     // init login modal
     this.loginModal = new LoginModal({
@@ -115,7 +118,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private async getProjectAndWalletConfig(params?: ModalConfigParams) {
     // get project config
-    let projectConfig: PROJECT_CONFIG_RESPONSE;
+    let projectConfig: ProjectConfig;
     try {
       projectConfig = await fetchProjectConfig(
         this.options.clientId,
@@ -145,7 +148,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     modalConfig,
   }: {
     connectors: IConnector<unknown>[];
-    projectConfig: PROJECT_CONFIG_RESPONSE;
+    projectConfig: ProjectConfig;
     modalConfig: ModalConfigParams;
   }) {
     // filter connectors based on config
@@ -169,7 +172,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  private async filterConnectors(params: ModalConfigParams, projectConfig: PROJECT_CONFIG_RESPONSE): Promise<string[]> {
+  private async filterConnectors(params: ModalConfigParams, projectConfig: ProjectConfig): Promise<string[]> {
     // update auth connector config
     const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {

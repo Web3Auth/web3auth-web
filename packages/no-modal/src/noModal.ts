@@ -10,7 +10,6 @@ import {
   CONNECTOR_STATUS_TYPE,
   CustomChainConfig,
   fetchProjectConfig,
-  getChainConfig,
   IBaseProvider,
   IConnector,
   IPlugin,
@@ -20,7 +19,7 @@ import {
   log,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
-  PROJECT_CONFIG_RESPONSE,
+  ProjectConfig,
   storageAvailable,
   UserAuthInfo,
   UserInfo,
@@ -61,28 +60,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    // TODO: This is fine. we get chains from project config. we can throw in init instead
-    if (!options.chains || options.chains.length === 0) {
-      throw WalletInitializationError.invalidParams("Please provide chains");
-    }
-
-    const { chains } = options;
-    // validate chain namespace of each chain config
-    for (const chain of chains) {
-      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
-        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
-    }
 
     if (options.storageType === "session") this.storage = "sessionStorage";
-
-    this.coreOptions = {
-      ...options,
-      chains: chains.map((chain) => ({
-        ...(getChainConfig(chain?.chainNamespace, chain?.chainId, options.clientId) || {}),
-        ...chain,
-      })),
-    };
-
+    this.coreOptions = options;
     this.currentChainId = options.defaultChainId;
   }
 
@@ -110,10 +90,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(): Promise<void> {
-    this.initCachedConnectorAndChainId();
-
     // get project config
-    let projectConfig: PROJECT_CONFIG_RESPONSE;
+    let projectConfig: ProjectConfig;
     try {
       projectConfig = await fetchProjectConfig(
         this.coreOptions.clientId,
@@ -124,6 +102,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
+
+    this.mergeChainsConfig(projectConfig.chains);
+
+    this.initCachedConnectorAndChainId();
 
     // setup common JRPC provider
     await this.setupCommonJRPCProvider();
@@ -228,6 +210,27 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
+  protected mergeChainsConfig(projectConfigChains?: CustomChainConfig[]) {
+    // merge chains from project config with core options, core options chains will override project config chains
+    const allChains = [...(projectConfigChains || []), ...(this.coreOptions.chains || [])];
+    const chainMap = new Map<string, CustomChainConfig>();
+    for (const chain of allChains) {
+      const existingChain = chainMap.get(chain.chainId);
+      if (!existingChain) chainMap.set(chain.chainId, chain);
+      else {
+        chainMap.set(chain.chainId, { ...existingChain, ...chain });
+      }
+    }
+    this.coreOptions.chains = Array.from(chainMap.values());
+
+    // validate chains and namespaces
+    if (!this.coreOptions.chains?.length) throw WalletInitializationError.invalidParams("Please provide chains");
+    for (const chain of this.coreOptions.chains) {
+      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
+        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
+    }
+  }
+
   protected initCachedConnectorAndChainId() {
     this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
     // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
@@ -256,7 +259,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  protected async loadConnectors({ projectConfig }: { projectConfig: PROJECT_CONFIG_RESPONSE }) {
+  protected async loadConnectors({ projectConfig }: { projectConfig: ProjectConfig }) {
     // always add auth connector
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = {
