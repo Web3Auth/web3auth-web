@@ -128,8 +128,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
+      //   chains: [getChainConfig("eip155", "0x1", this.options.clientId), getChainConfig("solana", "0x1", this.options.clientId)],
       //   external_wallets: {
-      //     enabled: false,
+      //     enabled: true,
       //     wallets: {
       //       metamask: { enabled: true },
       //       phantom: { enabled: false },

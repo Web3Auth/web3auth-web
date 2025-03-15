@@ -66,8 +66,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.currentChainId = options.defaultChainId;
   }
 
-  get currentChain(): CustomChainConfig {
-    return this.coreOptions.chains.find((chain) => chain.chainId === this.currentChainId);
+  get currentChain(): CustomChainConfig | undefined {
+    return this.coreOptions.chains?.find((chain) => chain.chainId === this.currentChainId);
   }
 
   get connected(): boolean {
@@ -136,7 +136,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {
-    if (params.chainId === this.currentChain.chainId) return;
+    if (params.chainId === this.currentChain?.chainId) return;
     const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
@@ -349,7 +349,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // setup aa provider for external wallets on EVM chains, for in app wallet, it uses WS provider which already supports AA
       const { accountAbstractionConfig } = this.coreOptions;
       if (
-        this.currentChain.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
         accountAbstractionConfig &&
         data.connector !== WALLET_CONNECTORS.AUTH &&
         this.coreOptions.useAAWithExternalWallet
@@ -440,7 +440,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
     // TODO: combine this logic with chainId input from web3auth options
     let initialChain = this.currentChain;
-    if (initialChain.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
+    if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
       if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
     }
@@ -473,7 +473,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         // skip if it's not compatible with the connector
         if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
         // skip if it's not compatible with the current chain
-        if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain.chainNamespace) return;
+        if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain?.chainNamespace) return;
         // skip if it's already connected
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
 
