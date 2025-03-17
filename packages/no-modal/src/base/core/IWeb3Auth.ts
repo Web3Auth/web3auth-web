@@ -75,6 +75,7 @@ export interface IWeb3AuthCoreOptions {
    *
    * @defaultValue "local"
    */
+  // TODO: rename this to match customauth, sfa
   storageType?: "session" | "local";
 
   /**

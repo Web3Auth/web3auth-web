@@ -124,6 +124,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           });
           break;
         }
+        case CHAIN_NAMESPACES.XRPL:
+          throw WalletLoginError.connectionError("Private key provider is required for XRPL");
         default: {
           const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
           this.privateKeyProvider = new CommonPrivateKeyProvider({
@@ -347,10 +349,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
+export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
-    const connectorSettings: AuthConnectorOptions["connectorSettings"] = { uxMode: UX_MODE.POPUP };
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
     const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       connectorSettings.loginConfig = {
@@ -367,7 +369,11 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
     const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
-    const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
+    const finalConnectorSettings = deepmerge.all([
+      { uxMode: UX_MODE.POPUP }, // default settings
+      params?.connectorSettings || {},
+      connectorSettings,
+    ]) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
     const isKeyExportEnabled = typeof projectConfig.key_export_enabled === "boolean" ? projectConfig.key_export_enabled : true;
