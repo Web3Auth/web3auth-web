@@ -121,7 +121,8 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       // re-emit events from provider
       this._providerEngineProxy.eventNames().forEach((event) => {
         provider.on(event as keyof ProviderEvents, (...args) => {
-          this.emit(event as keyof BaseProviderEvents<S>, ...(args as never));
+          // eslint-disable-next-line
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
         });
       });
     } else {
