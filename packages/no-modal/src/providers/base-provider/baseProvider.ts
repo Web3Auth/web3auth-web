@@ -118,8 +118,13 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
+      // re-emit events from provider
+      this._providerEngineProxy.eventNames().forEach((event) => {
+        provider.on(event as keyof ProviderEvents, (...args) => {
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as never));
+        });
+      });
     } else {
-      // TODO: need to test if provider.on("chainChanged") & other events are re-emitted by commonjrpc provider
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
 
@@ -146,7 +151,6 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     // This is only added because we don't have ethereum and solana private key providers anymore
     this.provider.on("chainChanged", (chainId: string) => {
       this.update({ chainId } as Partial<S>);
-      this.emit("chainChanged", chainId);
     });
   }
 
