@@ -1,7 +1,18 @@
-import { AUTH_CONNECTION_TYPE, Auth0ClientOptions, createHandler, CreateHandlerParams, PopupHandler, randomId } from "@toruslabs/customauth";
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
-import { Auth, AUTH_CONNECTION, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE } from "@web3auth/auth";
+import {
+  Auth,
+  AUTH_CONNECTION,
+  AUTH_CONNECTION_TYPE,
+  Auth0ClientOptions,
+  createHandler,
+  CreateHandlerParams,
+  LoginParams,
+  PopupHandler,
+  randomId,
+  SUPPORTED_KEY_CURVES,
+  UX_MODE,
+} from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -168,7 +179,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
-      if ((error as Error)?.message.includes("user closed popup")) {
+      if ((error as Error)?.message?.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
       } else if (error instanceof Web3AuthError) {
         throw error;
@@ -306,10 +317,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       if (!params.loginProvider && !this.loginSettings.loginProvider)
         throw WalletInitializationError.invalidParams("loginProvider is required for login");
 
+      const loginParams = deepmerge(this.loginSettings, params) as Partial<AuthLoginParams> & { chainId: string };
+
       if (params.extraLoginOptions?.id_token) {
-        await this.connectWithJwtLogin(params);
+        await this.connectWithJwtLogin(loginParams);
       } else {
-        await this.connectWithSocialLogin(params);
+        await this.connectWithSocialLogin(loginParams);
       }
     }
 
@@ -389,8 +402,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
     };
 
-    log.debug("popupParams", popupParams);
-
     const loginHandler = createHandler(popupParams);
     const verifierWindow = new PopupHandler({
       url: loginHandler.finalURL,
@@ -401,44 +412,48 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     let isClosedWindow = false;
 
-    verifierWindow.open().catch((error: unknown) => {
-      log.error("Error during login with social", error);
-      this.authInstance.postLoginCancelledMessage(nonce);
-    });
-
-    // this is to close the popup when the login is finished.
-    const securePubSub = new SecurePubSub();
-    securePubSub
-      .subscribe(`web3auth-login-${nonce}`)
-      .then((data: string) => {
-        const parsedData = JSON.parse(data || "{}");
-        if (parsedData?.message === "login_finished") {
-          isClosedWindow = true;
-          securePubSub.cleanup();
-          verifierWindow.close();
-        }
-        return true;
-      })
-      .catch((error: unknown) => {
-        // swallow the error, dont need to throw.
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      verifierWindow.open().catch((error: unknown) => {
         log.error("Error during login with social", error);
+        this.authInstance.postLoginCancelledMessage(nonce);
+        reject(error);
       });
 
-    verifierWindow.once("close", () => {
-      if (!isClosedWindow) {
-        this.authInstance.postLoginCancelledMessage(nonce);
-        throw new Error("user closed popup");
-      }
-    });
+      // this is to close the popup when the login is finished.
+      const securePubSub = new SecurePubSub();
+      securePubSub
+        .subscribe(`web3auth-login-${nonce}`)
+        .then((data: string) => {
+          const parsedData = JSON.parse(data || "{}");
+          if (parsedData?.message === "login_finished") {
+            isClosedWindow = true;
+            securePubSub.cleanup();
+            verifierWindow.close();
+          }
+          return true;
+        })
+        .catch((error: unknown) => {
+          // swallow the error, dont need to throw.
+          log.error("Error during login with social", error);
+        });
 
-    return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams, nonce);
+      verifierWindow.once("close", () => {
+        if (!isClosedWindow) {
+          securePubSub.cleanup();
+          this.authInstance.postLoginCancelledMessage(nonce);
+          reject(WalletLoginError.popupClosed());
+        }
+      });
+
+      const result = await this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams, nonce).catch(reject);
+      resolve(result);
+    });
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
     const loginConfig = this.authInstance.getDappAuthConnectionConfig();
     if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
-
-    log.debug("loginConfig inside jwt login", params);
 
     const loginParams = cloneDeep(params);
     loginParams.extraLoginOptions = {
@@ -469,7 +484,6 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
-
     // WS settings
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,

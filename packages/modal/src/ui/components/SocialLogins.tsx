@@ -68,6 +68,7 @@ export default function SocialLogins(props: SocialLoginProps) {
     AUTH_CONNECTION.SMS_PASSWORDLESS,
     AUTH_CONNECTION.EMAIL_PASSWORDLESS,
     AUTH_CONNECTION.PASSKEYS,
+    AUTH_CONNECTION.TELEGRAM,
   ];
 
   return (

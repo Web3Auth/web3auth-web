@@ -54,7 +54,6 @@
     "@solana/web3.js": "^1.98.0",
     "@toruslabs/base-controllers": "^7.2.1",
     "@toruslabs/constants": "^14.2.0",
-    "@toruslabs/customauth": "../../../CustomAuth",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/ethereum-controllers": "^7.2.1",
     "@toruslabs/http-helpers": "^7.0.0",
