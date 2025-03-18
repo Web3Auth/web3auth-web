@@ -59,10 +59,9 @@ export interface IWeb3AuthCoreOptions {
   chains?: CustomChainConfig[];
 
   /**
-   * TODO: should we make this mandatory? Is it possible to configure it from Dashboard?
    * default chain Id to use
    */
-  defaultChainId: string;
+  defaultChainId?: string;
 
   /**
    * setting to true will enable logs

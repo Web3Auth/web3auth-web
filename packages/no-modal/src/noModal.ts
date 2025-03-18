@@ -83,7 +83,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       })),
     };
 
-    this.currentChainId = options.defaultChainId;
+    this.currentChainId = options.defaultChainId || chains[0].chainId;
   }
 
   get currentChain(): CustomChainConfig {
@@ -230,10 +230,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected initCachedConnectorAndChainId() {
     this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
-    // init chainId using cached chainId if it exists and is valid, otherwise use the first chain
+    // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
     const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
-    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId;
+    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
   }
 
   protected async setupCommonJRPCProvider() {
