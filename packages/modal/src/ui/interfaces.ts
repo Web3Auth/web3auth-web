@@ -1,16 +1,17 @@
-import type { SafeEventEmitter, UX_MODE_TYPE, WhiteLabelData } from "@web3auth/auth";
+import type { SafeEventEmitter } from "@web3auth/auth";
 import {
-  BaseAdapterConfig,
+  BaseConnectorConfig,
   ChainNamespaceType,
   LoginMethodConfig,
-  WALLET_ADAPTER_TYPE,
+  UIConfig as CoreUIConfig,
+  WALLET_CONNECTOR_TYPE,
   WalletRegistry,
   WalletRegistryItem,
   Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
 
 // capture whitelabel only once
-export interface UIConfig extends WhiteLabelData {
+export interface UIConfig extends CoreUIConfig {
   /**
    * order of how login methods are shown
    *
@@ -47,12 +48,7 @@ export interface UIConfig extends WhiteLabelData {
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
-  adapterListener: SafeEventEmitter<Web3AuthNoModalEvents>;
-
-  /**
-   * UX Mode for the auth adapter
-   */
-  uxMode?: UX_MODE_TYPE;
+  connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
 export interface LoginModalProps extends UIConfig {
@@ -70,8 +66,8 @@ export const LOGIN_MODAL_EVENTS = {
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
-  adapter: WALLET_ADAPTER_TYPE;
-  uiConfig: Omit<UIConfig, "adapterListener">;
+  connector: WALLET_CONNECTOR_TYPE;
+  uiConfig: Omit<UIConfig, "connectorListener">;
 };
 
 export const MODAL_STATUS = {
@@ -92,14 +88,14 @@ export interface ModalState {
   postLoadingMessage: string;
   walletConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;
-  externalWalletsConfig: Record<string, BaseAdapterConfig>;
-  detailedLoaderAdapter: string;
-  detailedLoaderAdapterName: string;
+  externalWalletsConfig: Record<string, BaseConnectorConfig>;
+  detailedLoaderConnector: string;
+  detailedLoaderConnectorName: string;
   showExternalWalletsOnly: boolean;
 }
 
-export type SocialLoginEventType = { adapter: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
-export type ExternalWalletEventType = { adapter: string };
+export type SocialLoginEventType = { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
+export type ExternalWalletEventType = { connector: string };
 
 export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode

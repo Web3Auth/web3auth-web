@@ -1,5 +1,13 @@
 import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, ChainNamespaceType, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE, SignTypedDataMessageV4, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CONFIRMATION_STRATEGY,
+  SignTypedDataMessageV4,
+  WEB3AUTH_NETWORK,
+  WEB3AUTH_NETWORK_TYPE,
+  type CONFIRMATION_STRATEGY_TYPE
+} from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
 
@@ -73,9 +81,10 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
   {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "safe" | "kernel" | "nexus" | "trust";
+export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
+  { name: "Biconomy", value: "biconomy" },
   { name: "Safe", value: "safe" },
   { name: "Nexus", value: "nexus" },
   { name: "Kernel", value: "kernel" },
@@ -91,20 +100,20 @@ export const getDefaultBundlerUrl = (chainId: string): string => {
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
-  chainNamespace: ChainNamespaceType;
-  chain: string;
+  chainNamespaces: ChainNamespaceType[];
+  chains: string[];
+  defaultChainId: string;
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
   };
   loginProviders: LOGIN_PROVIDER_TYPE[];
-  adapters: string[];
+  connectors: string[];
   showWalletDiscovery: boolean;
+  multiInjectedProviderDiscovery: boolean;
   loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
-    logoDark: string;
-    logoLight: string;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
   };
   nftCheckoutPlugin: {

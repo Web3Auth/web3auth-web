@@ -1,8 +1,8 @@
 import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { Context, createContext, createElement, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
-import { type WalletServicesPlugin } from "@/core/wallet-services-plugin";
+import { CONNECTOR_STATUS, EVM_PLUGINS, IBaseWeb3AuthHookContext, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
+import { type WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 import { IWalletServicesContext } from "./interfaces";
 
@@ -10,21 +10,23 @@ export const WalletServicesContext = createContext<IWalletServicesContext>(null)
 
 export function WalletServicesContextProvider<T extends IBaseWeb3AuthHookContext>({ children, context }: PropsWithChildren<{ context: Context<T> }>) {
   const [isPluginConnected, setIsPluginConnected] = useState<boolean>(false);
-  const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin>(null);
+  const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPluginType>(null);
   const web3AuthContext = useContext(context);
   const { getPlugin, isInitialized, isConnected } = web3AuthContext;
 
   useEffect(() => {
     if (isInitialized) {
-      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
       setWalletServicesPlugin(plugin);
     }
   }, [isInitialized, getPlugin]);
 
   useEffect(() => {
     if (isConnected) {
-      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPlugin;
+      const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
       if (!walletServicesPlugin) setWalletServicesPlugin(plugin);
+      // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
+      if (walletServicesPlugin?.status === CONNECTOR_STATUS.CONNECTED) setIsPluginConnected(true);
     }
   }, [isConnected, getPlugin, walletServicesPlugin]);
 

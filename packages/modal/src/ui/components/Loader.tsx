@@ -1,4 +1,4 @@
-import { ADAPTER_STATUS, log } from "@web3auth/no-modal";
+import { CONNECTOR_STATUS, log } from "@web3auth/no-modal";
 import { useEffect } from "react";
 
 import { MODAL_STATUS, ModalStatusType } from "../interfaces";
@@ -38,15 +38,15 @@ export default function Loader(props: LoaderProps) {
           )}
 
           <div className="w3ajs-modal-loader__label w3a-spinner-label">{label}</div>
-          {modalStatus === ADAPTER_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
-          {modalStatus === ADAPTER_STATUS.ERRORED && (
+          {modalStatus === CONNECTOR_STATUS.CONNECTED && <div className="w3ajs-modal-loader__message w3a-spinner-message">{message}</div>}
+          {modalStatus === CONNECTOR_STATUS.ERRORED && (
             <div className="w3ajs-modal-loader__message w3a-spinner-message w3a-spinner-message--error">{message}</div>
           )}
         </div>
 
         {/* <Footer /> */}
       </div>
-      {(modalStatus === ADAPTER_STATUS.CONNECTED || modalStatus === ADAPTER_STATUS.ERRORED) && (
+      {(modalStatus === CONNECTOR_STATUS.CONNECTED || modalStatus === CONNECTOR_STATUS.ERRORED) && (
         <button type="button" className="w3a-header__button w3ajs-loader-close-btn" onClick={onClose}>
           {closeIcon}
         </button>

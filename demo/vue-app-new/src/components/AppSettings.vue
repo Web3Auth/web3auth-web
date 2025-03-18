@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log , getChainConfig} from "@web3auth/modal";
+import { CONNECTOR_STATUS, CHAIN_NAMESPACES, ChainNamespaceType, log , getChainConfig} from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 
@@ -19,33 +19,36 @@ import { formDataStore } from "../store/form";
 const formData = formDataStore;
 
 const { status, isConnected, isInitialized, connect } = useWeb3Auth();
+const chainOptions = computed(() => {
+  const allChains: { name: string; value: string; }[] = [];
+  formData.chainNamespaces.forEach((namespace: ChainNamespaceType) => {
+    const chainsForNamespace = chainConfigs[namespace].map((chainId) => {
+      const chainConfig = getChainConfig(namespace, chainId, clientIds[formData.network]);
+      if (!chainConfig) {
+        throw new Error(`Chain config not found for chainId: ${chainId}`);
+      }
+      return {
+        name: `${chainId} ${chainConfig.displayName}`,
+        value: chainId,
+      };
+    });
+    allChains.push(...chainsForNamespace);
+  });
+  return allChains;
+});
 
-const chainOptions = computed(() =>
-  chainConfigs[formData.chainNamespace].map((chainId) => {
-    const chainConfig = getChainConfig(formData.chainNamespace, chainId, clientIds[formData.network]);
-    if (!chainConfig) {
-      throw new Error(`Chain config not found for chainId: ${chainId}`);
-    }
-    return {
-      name: `${chainId} ${chainConfig.displayName}`,
-      value: chainId,
-    };
-  })
-);
+const defaultChainOptions = computed(() => {
+  return formData.chains.map((chain) => ({ name: chain, value: chain }));
+});
 
 const adapterOptions = computed(() =>
-  formData.chainNamespace === CHAIN_NAMESPACES.EIP155
+  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        // { name: "auth-adapter", value: "auth" },
-        { name: "torus-evm-adapter", value: "torus-evm" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-evm" },
       ]
     : [
-        { name: "torus-solana-adapter", value: "torus-solana" },
         { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-        { name: "injected-adapters", value: "injected-solana" },
       ]
 );
 
@@ -59,10 +62,10 @@ const isDisabled = (name: string): boolean => {
       return !formData.whiteLabel.enable;
 
     case "walletServicePlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155 && formData.chainNamespace !== CHAIN_NAMESPACES.SOLANA;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) && !formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA);
 
     case "nftCheckoutPlugin":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155);
 
     case "btnConnect":
       return !isInitialized.value;
@@ -74,7 +77,7 @@ const isDisabled = (name: string): boolean => {
       return !formData.useAccountAbstractionProvider;
 
     case "accountAbstraction":
-      return formData.chainNamespace !== CHAIN_NAMESPACES.EIP155;
+      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155);
 
     default: {
       return false;
@@ -88,10 +91,11 @@ const onTabChange = (index: number) => {
 };
 const isActiveTab = (index: number) => activeTab.value === index;
 
-const onChainNamespaceChange = (value: string) => {
+const onChainNamespaceChange = (value: string[]) => {
   log.info("onChainNamespaceChange", value);
-  formData.chain = chainConfigs[value as ChainNamespaceType][0];
-  formData.adapters = [];
+  formData.chains = value.map((namespace) => chainConfigs[namespace as ChainNamespaceType][0]);
+  formData.defaultChainId = formData.chains[0];
+  formData.connectors = [];
 };
 </script>
 
@@ -101,7 +105,7 @@ const onChainNamespaceChange = (value: string) => {
     <Card class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0">
       <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
       <div class="my-4 font-extrabold leading-tight text-center">
-        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === ADAPTER_STATUS.READY }]">
+        <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === CONNECTOR_STATUS.READY }]">
           {{ status }}
         </Tag>
         &nbsp;
@@ -114,17 +118,17 @@ const onChainNamespaceChange = (value: string) => {
         <Tab variant="underline" :active="isActiveTab(1)" @click="onTabChange(1)">WhiteLabel</Tab>
         <Tab variant="underline" :active="isActiveTab(2)" @click="onTabChange(2)">Login Provider</Tab>
         <Tab
-          v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155 || formData.chainNamespace === CHAIN_NAMESPACES.SOLANA"
+          v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)"
           variant="underline"
           :active="isActiveTab(3)"
           @click="onTabChange(3)"
         >
           Wallet Plugin
         </Tab>
-        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
+        <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
           NFT Checkout Plugin
         </Tab>
-        <Tab v-if="formData.chainNamespace === CHAIN_NAMESPACES.EIP155" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
+        <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
           Account Abstraction Provider
         </Tab>
       </Tabs>
@@ -138,24 +142,34 @@ const onChainNamespaceChange = (value: string) => {
           :options="networkOptions"
         />
         <Select
-          v-model="formData.chainNamespace"
+          v-model="formData.chainNamespaces"
           data-testid="selectChainNamespace"
-          :label="$t('app.chainNamespace')"
-          :aria-label="$t('app.chainNamespace')"
-          :placeholder="$t('app.chainNamespace')"
+          :label="$t('app.chainNamespaces')"
+          :aria-label="$t('app.chainNamespaces')"
+          :placeholder="$t('app.chainNamespaces')"
           :options="chainNamespaceOptions"
+          :multiple="true"
           @update:model-value="onChainNamespaceChange"
         />
         <Select
-          v-model="formData.chain"
+          v-model="formData.chains"
           data-testid="selectChain"
-          :label="$t('app.chain')"
-          :aria-label="$t('app.chain')"
-          :placeholder="$t('app.chain')"
+          :label="$t('app.chains')"
+          :aria-label="$t('app.chains')"
+          :placeholder="$t('app.chains')"
+          :multiple="true"
           :options="chainOptions"
         />
         <Select
-          v-model="formData.adapters"
+          v-model="formData.defaultChainId"
+          data-testid="selectDefaultChainId"
+          :label="$t('app.defaultChainId')"
+          :aria-label="$t('app.defaultChainId')"
+          :placeholder="$t('app.defaultChainId')"
+          :options="defaultChainOptions"
+        />
+        <Select
+          v-model="formData.connectors"
           data-testid="selectAdapters"
           :label="$t('app.adapters')"
           :aria-label="$t('app.adapters')"
@@ -171,6 +185,15 @@ const onChainNamespaceChange = (value: string) => {
           :size="'small'"
           :label-disabled="$t('app.showWalletDiscovery')"
           :label-enabled="$t('app.showWalletDiscovery')"
+          class="mb-2"
+        />
+        <Toggle
+          v-model="formData.multiInjectedProviderDiscovery"
+          data-testid="multiInjectedProviderDiscovery"
+          :show-label="true"
+          :size="'small'"
+          :label-disabled="$t('app.multiInjectedProviderDiscovery')"
+          :label-enabled="$t('app.multiInjectedProviderDiscovery')"
           class="mb-2"
         />
       </Card>
@@ -359,22 +382,6 @@ const onChainNamespaceChange = (value: string) => {
           :label-disabled="$t('app.walletPlugin.title')"
           :label-enabled="$t('app.walletPlugin.title')"
           class="mb-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoLight"
-          :label="$t('app.walletPlugin.logoLight')"
-          :disabled="isDisabled('walletServicePlugin')"
-          :aria-label="$t('app.walletPlugin.logoLight')"
-          :placeholder="$t('app.walletPlugin.logoLight')"
-          class="sm:col-span-2"
-        />
-        <TextField
-          v-model="formData.walletPlugin.logoDark"
-          :disabled="isDisabled('walletServicePlugin')"
-          :label="$t('app.walletPlugin.logoDark')"
-          :aria-label="$t('app.walletPlugin.logoDark')"
-          :placeholder="$t('app.walletPlugin.logoDark')"
-          class="sm:col-span-2"
         />
         <Select
           v-model="formData.walletPlugin.confirmationStrategy"

@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, rpcErrors, SendCallBack } from "@web3auth/auth";
+import { JRPCRequest, JRPCResponse, ProviderEvents, rpcErrors, SendCallBack } from "@web3auth/auth";
 
 import {
   CustomChainConfig,
@@ -18,10 +18,14 @@ export interface BaseProviderState extends BaseState {
 }
 
 export interface BaseProviderConfig extends BaseConfig {
-  chainConfig: CustomChainConfig;
-  networks?: Record<string, CustomChainConfig>;
+  chain: CustomChainConfig;
+  chains: CustomChainConfig[];
   skipLookupNetwork?: boolean;
   keyExportEnabled?: boolean;
+}
+
+export interface CommonProviderEvents extends ProviderEvents {
+  chainChanged: (chainId: string) => void;
 }
 
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
@@ -29,7 +33,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   implements IBaseProvider<P>
 {
   // should be Assigned in setupProvider
-  public _providerEngineProxy: SafeEventEmitterProvider | null = null;
+  public _providerEngineProxy: SafeEventEmitterProvider<CommonProviderEvents> | null = null;
 
   // set to true when the keyExportEnabled flag is set by code.
   // This is to prevent the flag from being overridden by the dashboard config.
@@ -37,26 +41,27 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   constructor({ config, state }: { config: C; state?: S }) {
     super({ config, state });
-    if (!config.chainConfig) throw WalletInitializationError.invalidProviderConfigError("Please provide chainConfig");
-    if (!config.chainConfig.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chainConfig");
-    if (!config.chainConfig.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chainConfig");
+    const { chain } = config;
+    if (!chain) throw WalletInitializationError.invalidProviderConfigError("Please provide chain");
+    if (!chain.chainId) throw WalletInitializationError.invalidProviderConfigError("Please provide chainId inside chain");
+    if (!chain.rpcTarget) throw WalletInitializationError.invalidProviderConfigError("Please provide rpcTarget inside chain");
     if (typeof config.keyExportEnabled === "boolean") this.keyExportFlagSetByCode = true;
     this.defaultState = {
       chainId: "loading",
     } as S;
     this.defaultConfig = {
-      chainConfig: config.chainConfig,
-      networks: { [config.chainConfig.chainId]: config.chainConfig },
+      chain: config.chain,
+      chains: config.chains,
       keyExportEnabled: typeof config.keyExportEnabled === "boolean" ? config.keyExportEnabled : true,
     } as C;
     super.initialize();
   }
 
-  get currentChainConfig(): CustomChainConfig {
-    return this.config.chainConfig;
+  get currentChain(): CustomChainConfig {
+    return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
   }
 
-  get provider(): SafeEventEmitterProvider | null {
+  get provider(): SafeEventEmitterProvider<CommonProviderEvents> | null {
     return this._providerEngineProxy;
   }
 
@@ -109,24 +114,18 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       .catch((err) => callback(err, null));
   }
 
-  public addChain(chainConfig: CustomChainConfig): void {
-    if (!chainConfig.chainId) throw rpcErrors.invalidParams("chainId is required");
-    if (!chainConfig.rpcTarget) throw rpcErrors.invalidParams("chainId is required");
-    this.configure({
-      networks: { ...this.config.networks, [chainConfig.chainId]: chainConfig },
-    } as C);
-  }
-
-  public getChainConfig(chainId: string): CustomChainConfig | null {
-    const chainConfig = this.config.networks?.[chainId];
-    if (!chainConfig) throw rpcErrors.invalidRequest(`Chain ${chainId} is not supported, please add chainConfig for it`);
-    return chainConfig;
-  }
-
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
+      // re-emit events from provider
+      this._providerEngineProxy.eventNames().forEach((event) => {
+        provider.on(event as keyof ProviderEvents, (...args) => {
+          // eslint-disable-next-line
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
+        });
+      });
+      this.handleChainChangedProvider();
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
@@ -144,9 +143,20 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this._providerEngineProxy;
   }
 
-  abstract setupProvider(provider: P): Promise<void>;
+  protected getChain(chainId: string): CustomChainConfig {
+    return this.config.chains.find((chain) => chain.chainId === chainId);
+  }
+
+  private handleChainChangedProvider() {
+    // This is only added because we don't have ethereum and solana private key providers anymore
+    this.provider.on("chainChanged", (chainId: string) => {
+      this.update({ chainId } as Partial<S>);
+    });
+  }
+
+  abstract setupProvider(provider: P, chainId: string): Promise<void>;
 
   abstract switchChain(params: { chainId: string }): Promise<void>;
 
-  protected abstract lookupNetwork(provider?: P): Promise<string | void>;
+  protected abstract lookupNetwork(provider?: P, chainId?: string): Promise<string | void>;
 }

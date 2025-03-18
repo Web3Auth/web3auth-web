@@ -55,6 +55,10 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
 };
 export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
   try {
+    const ethProvider = new BrowserProvider(provider);
+    const req = ethProvider.getRpcRequest({ method: "chainId" });
+    const res = await provider.request(req!);
+    log.info("res", res);
     const { chainId } = provider;
     uiConsole("chainId", chainId.toString());
     return chainId.toString();

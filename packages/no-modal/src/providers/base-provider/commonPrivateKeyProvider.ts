@@ -1,4 +1,3 @@
-import { createEventEmitterProxy } from "@toruslabs/base-controllers";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,
@@ -13,9 +12,7 @@ import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@/co
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
-export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {
-  chainConfig: CustomChainConfig;
-}
+export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {}
 
 export interface CommonPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
@@ -37,15 +34,15 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     throw new Error("Method not implemented.");
   }
 
-  public static getProviderInstance = async (params: { privKey: string; chainConfig: CustomChainConfig }): Promise<CommonPrivateKeyProvider> => {
-    const providerFactory = new CommonPrivateKeyProvider({ config: { chainConfig: params.chainConfig } });
+  public static getProviderInstance = async (params: {
+    privKey: string;
+    chain: CustomChainConfig;
+    chains: CustomChainConfig[];
+  }): Promise<CommonPrivateKeyProvider> => {
+    const providerFactory = new CommonPrivateKeyProvider({ config: { chain: params.chain, chains: params.chains } });
     await providerFactory.setupProvider(params.privKey);
     return providerFactory;
   };
-
-  addChain(_: CustomChainConfig): void {
-    throw new Error("Method not implemented.");
-  }
 
   public async setupProvider(privKey: string): Promise<void> {
     const privKeyMiddleware = this.getPrivKeyMiddleware(privKey);
@@ -53,15 +50,6 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     engine.push(privKeyMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
-  }
-
-  public updateProviderEngineProxy(provider: SafeEventEmitterProvider) {
-    if (this._providerEngineProxy) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this._providerEngineProxy as any).setTarget(provider);
-    } else {
-      this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
-    }
   }
 
   public async switchChain(_: { chainId: string }): Promise<void> {

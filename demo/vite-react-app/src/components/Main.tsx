@@ -1,4 +1,4 @@
-import { WALLET_ADAPTERS } from "@web3auth/modal";
+import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
@@ -14,7 +14,6 @@ const Main = () => {
     signTransaction,
     web3Auth,
     showWalletUi,
-    addChain,
     switchChain,
     showWalletConnectScanner,
     enableMFA,
@@ -35,9 +34,6 @@ const Main = () => {
       <button onClick={signMessage} className={styles.card}>
         Sign Message
       </button>
-      <button onClick={addChain} className={styles.card}>
-        Add Chain
-      </button>
       <button onClick={switchChain} className={styles.card}>
         Switch Chain
       </button>
@@ -47,7 +43,7 @@ const Main = () => {
       <button onClick={manageMFA} className={styles.card}>
         Manage MFA
       </button>
-      {web3Auth?.connectedAdapterName === WALLET_ADAPTERS.AUTH && (
+      {web3Auth?.connectedConnectorName === WALLET_CONNECTORS.AUTH && (
         <button onClick={signTransaction} className={styles.card}>
           Sign Transaction
         </button>

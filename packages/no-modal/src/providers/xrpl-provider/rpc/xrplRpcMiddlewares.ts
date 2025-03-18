@@ -2,8 +2,6 @@ import { randomId } from "@toruslabs/base-controllers";
 import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
 import type { SubmitResponse, Transaction } from "xrpl";
 
-import { CustomChainConfig } from "@/core/base";
-
 export const RPC_METHODS = {
   GET_ACCOUNTS: "xrpl_getAccounts",
   GET_KEY_PAIR: "xrpl_getKeyPair",
@@ -85,15 +83,11 @@ export function createXRPLMiddleware(providerHandlers: IXrplProviderHandlers): J
   ]);
 }
 
-export type AddXRPLChainParameter = CustomChainConfig & Pick<CustomChainConfig, "wsTarget">;
-
 export interface IXrplChainSwitchHandlers {
-  addChainConfig: (req: JRPCRequest<AddXRPLChainParameter>) => Promise<void>;
   switchChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
 }
-export function creatXrplChainSwitchMiddleware({ addChainConfig, switchChain }: IXrplChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
+export function creatXrplChainSwitchMiddleware({ switchChain }: IXrplChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
   return mergeMiddleware([
-    createGenericJRPCMiddleware<AddXRPLChainParameter, void>(RPC_METHODS.ADD_CHAIN, addChainConfig) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<{ chainId: string }, void>(RPC_METHODS.SWITCH_CHAIN, switchChain) as JRPCMiddleware<unknown, unknown>,
   ]);
 }

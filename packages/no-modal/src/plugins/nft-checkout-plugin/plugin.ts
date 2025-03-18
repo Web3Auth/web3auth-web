@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 
 import {
-  ADAPTER_STATUS,
+  CONNECTOR_STATUS,
   EVM_PLUGINS,
   IPlugin,
   IWeb3AuthCore,
@@ -10,16 +10,22 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
+  PluginFn,
 } from "@/core/base";
 
 import { NFTCheckoutEmbed } from "./embed";
 
-export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
+export interface NFTCheckoutPluginParams {
+  modalZIndex?: number;
+  clientId: string;
+}
+
+class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.NFT_CHECKOUT;
 
   status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  SUPPORTED_ADAPTERS = ["all"];
+  SUPPORTED_CONNECTORS = ["all"];
 
   pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 
@@ -31,7 +37,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   private receiverAddress: string | null = null;
 
-  constructor(params: { modalZIndex?: number; clientId: string }) {
+  constructor(params: NFTCheckoutPluginParams) {
     super();
     this.nftCheckoutEmbedInstance = new NFTCheckoutEmbed(params);
   }
@@ -55,7 +61,7 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    if (this.web3auth.status !== ADAPTER_STATUS.CONNECTED) throw NFTCheckoutPluginError.web3AuthNotConnected();
+    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) throw NFTCheckoutPluginError.web3AuthNotConnected();
     if (!this.web3auth.provider) throw NFTCheckoutPluginError.providerRequired();
 
     const accounts = await this.web3auth.provider.request<never, string[]>({
@@ -87,3 +93,11 @@ export class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
     return Promise.resolve();
   }
 }
+
+export type NFTCheckoutPluginType = NFTCheckoutPlugin;
+
+export const nftCheckoutPlugin = (params: NFTCheckoutPluginParams): PluginFn => {
+  return () => {
+    return new NFTCheckoutPlugin(params);
+  };
+};

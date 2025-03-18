@@ -1,5 +1,5 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
-import type { ADAPTER_STATUS_TYPE, CustomChainConfig, IAdapter, IPlugin, IProvider, UserAuthInfo, WALLET_ADAPTER_TYPE } from "@web3auth/no-modal";
+import type { CONNECTOR_STATUS_TYPE, ConnectorFn, IPlugin, IProvider, PluginFn, UserAuthInfo, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { Ref, ShallowRef } from "vue";
 
 import type { ModalConfig } from "../interface";
@@ -7,10 +7,10 @@ import type { Web3Auth, Web3AuthOptions } from "../modalManager";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
-  modalConfig?: Record<WALLET_ADAPTER_TYPE, ModalConfig>;
+  modalConfig?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
   hideWalletDiscovery?: boolean;
-  adapters?: IAdapter<unknown>[];
-  plugins?: IPlugin[];
+  connectors?: ConnectorFn[];
+  plugins?: PluginFn[];
 };
 
 export interface Web3AuthProviderProps {
@@ -27,15 +27,12 @@ interface IBaseWeb3AuthComposableContext {
   isInitializing: Ref<boolean>;
   initError: Ref<Error | null>;
   isInitialized: Ref<boolean>;
-  status: Ref<ADAPTER_STATUS_TYPE | null>;
+  status: Ref<CONNECTOR_STATUS_TYPE | null>;
   enableMFA(params?: LoginParams): Promise<void>;
   manageMFA(params?: LoginParams): Promise<void>;
   logout(params?: { cleanup: boolean }): Promise<void>;
-  addAndSwitchChain(chainConfig: CustomChainConfig): Promise<void>;
-  addPlugin(plugin: IPlugin): void;
   getPlugin(pluginName: string): IPlugin | null;
   authenticateUser(): Promise<UserAuthInfo>;
-  addChain(chainConfig: CustomChainConfig): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 
