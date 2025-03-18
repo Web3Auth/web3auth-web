@@ -31,6 +31,14 @@ export enum DEFAULT_SOLANA_EVENTS {
   SOL_ACCOUNTS_CHANGED = "accountsChanged",
 }
 
+export enum EIP1193_EVENTS {
+  ACCOUNTS_CHANGED = "accountsChanged",
+  CHAIN_CHANGED = "chainChanged",
+  CONNECT = "connect",
+  DISCONNECT = "disconnect",
+  MESSAGE = "message",
+}
+
 export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
   "0x65": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
   "0x66": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
