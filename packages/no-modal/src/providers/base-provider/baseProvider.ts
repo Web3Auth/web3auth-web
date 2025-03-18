@@ -125,11 +125,10 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
           this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
         });
       });
+      this.handleChainChangedProvider();
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
-
-    this.handleChainChangedProvider();
   }
 
   public setKeyExportFlag(flag: boolean): void {
