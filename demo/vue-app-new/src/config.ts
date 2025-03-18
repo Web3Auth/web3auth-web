@@ -102,6 +102,7 @@ export type FormData = {
   network: WEB3AUTH_NETWORK_TYPE;
   chainNamespaces: ChainNamespaceType[];
   chains: string[];
+  defaultChainId: string;
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;

@@ -62,7 +62,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
-
+    super.initCachedConnectorAndChainId();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig(params);
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
@@ -80,10 +80,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await this.loginModal.initModal();
 
     // setup common JRPC provider
-    await this.setupCommonJRPCProvider(projectConfig);
+    await this.setupCommonJRPCProvider();
 
     // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors }) => this.initConnectors({ connectors, projectConfig, modalConfig: params }));
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) =>
+      this.initConnectors({ connectors: newConnectors, projectConfig, modalConfig: params })
+    );
     await this.loadConnectors({ projectConfig });
 
     // initialize plugins
@@ -171,6 +173,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // update auth connector config
     const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
+      // TODO: use the new login config method
       const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
         [WALLET_CONNECTORS.AUTH]: {
           label: WALLET_CONNECTORS.AUTH,

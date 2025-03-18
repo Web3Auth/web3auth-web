@@ -3,8 +3,6 @@ import { getWallets, type WalletsEventNames } from "@wallet-standard/app";
 import { type Wallet } from "@wallet-standard/base";
 import { StandardConnect } from "@wallet-standard/features";
 
-import { ConnectorFn } from "@/core/base";
-
 import { walletStandardConnector } from "./walletStandardConnector";
 
 const hasSolanaWalletStandardFeatures = (wallet: Wallet): boolean => {
@@ -17,16 +15,6 @@ const hasSolanaWalletStandardFeatures = (wallet: Wallet): boolean => {
   if (!hasRequiredFeatures) return false;
 
   return true;
-};
-
-export const getSolanaInjectedConnectors = (): ConnectorFn[] => {
-  // get installed wallets that support standard wallet
-  const standardWalletConnectors = [] as ConnectorFn[];
-  const wallets = getWallets().get();
-  wallets.forEach((wallet) => {
-    if (hasSolanaWalletStandardFeatures(wallet)) standardWalletConnectors.push(walletStandardConnector(wallet));
-  });
-  return standardWalletConnectors;
 };
 
 export { getWallets as createSolanaMipd, hasSolanaWalletStandardFeatures, type WalletsEventNames, walletStandardConnector };

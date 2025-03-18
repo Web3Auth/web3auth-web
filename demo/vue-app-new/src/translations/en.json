@@ -6,6 +6,7 @@
     "documentation": "Documentation",
     "network": "Network",
     "chains": "Chains",
+    "defaultChainId": "Default Chain ID",
     "loginProviders": "Login provider",
     "adapters": "Adapters",
     "showWalletDiscovery": "Show Wallet Discovery",
