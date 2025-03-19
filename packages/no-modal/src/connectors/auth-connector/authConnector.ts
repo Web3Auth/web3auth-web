@@ -1,5 +1,17 @@
 import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
-import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { SecurePubSub } from "@toruslabs/secure-pub-sub";
+import {
+  Auth,
+  AUTH_CONNECTION_TYPE,
+  Auth0ClientOptions,
+  createHandler,
+  CreateHandlerParams,
+  LoginParams,
+  PopupHandler,
+  randomId,
+  SUPPORTED_KEY_CURVES,
+  UX_MODE,
+} from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -27,7 +39,7 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import type { AuthConnectorOptions, LoginConfig, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -49,7 +61,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private authOptions: AuthConnectorOptions["connectorSettings"];
 
-  private loginSettings: LoginSettings = { loginProvider: "" };
+  private loginSettings: LoginSettings = { authConnection: "" };
 
   private wsSettings: WalletServicesSettings = {};
 
@@ -59,7 +71,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     super(params);
 
     this.authOptions = params.connectorSettings;
-    this.loginSettings = params.loginSettings || { loginProvider: "" };
+    this.loginSettings = params.loginSettings || { authConnection: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
 
@@ -89,13 +101,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
-    const web3AuthNetwork = this.coreOptions.web3AuthNetwork || WEB3AUTH_NETWORK.SAPPHIRE_MAINNET;
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
-      network: web3AuthNetwork,
+      network: this.coreOptions.web3AuthNetwork,
+      sdkMode: "iframe",
     });
-    log.debug("initializing auth connector init");
+    log.debug("initializing auth connector init", this.authOptions);
 
     await this.authInstance.init();
 
@@ -110,7 +122,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           const { default: WsEmbed } = await import("@web3auth/ws-embed");
           this.wsEmbedInstance = new WsEmbed({
             web3AuthClientId: this.coreOptions.clientId,
-            web3AuthNetwork,
+            web3AuthNetwork: this.coreOptions.web3AuthNetwork,
             modalZIndex: this.wsSettings.modalZIndex,
           });
           // TODO: once support multiple chains, only pass chains of solana and EVM
@@ -167,7 +179,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
-      if ((error as Error)?.message.includes("user closed popup")) {
+      if ((error as Error)?.message?.includes("user closed popup")) {
         throw WalletLoginError.popupClosed();
       } else if (error instanceof Web3AuthError) {
         throw error;
@@ -176,7 +188,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  public async enableMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+  public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -190,7 +202,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  public async manageMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+  public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -297,19 +309,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA
         ? this.authInstance?.sessionId
         : this._getFinalPrivKey();
+
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
 
-      if (!params.loginProvider && !this.loginSettings.loginProvider)
-        throw WalletInitializationError.invalidParams("loginProvider is required for login");
-      await this.authInstance.login(
-        deepmerge.all([
-          this.loginSettings,
-          params,
-          { extraLoginOptions: { ...(params.extraLoginOptions || {}), login_hint: params.login_hint || params.extraLoginOptions?.login_hint } },
-        ]) as AuthLoginParams
-      );
+      const loginParams = deepmerge(this.loginSettings, params) as Partial<AuthLoginParams> & { chainId: string };
+
+      if (params.extraLoginOptions?.id_token) {
+        await this.connectWithJwtLogin(loginParams);
+      } else {
+        await this.connectWithSocialLogin(loginParams);
+      }
     }
 
     // setup WS embed if chainNamespace is EIP155 or SOLANA
@@ -347,23 +358,115 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       }
     }
   }
+
+  private async connectWithSocialLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
+    const providerConfig = this.authInstance.getDappAuthConnectionConfig();
+    if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
+
+    const jwtParams = {
+      ...providerConfig.jwtParameters,
+      ...(params.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    } as Auth0ClientOptions;
+
+    const nonce = randomId();
+
+    // post a message to the auth provider to indicate that login has been initiated.
+    const loginParams = cloneDeep(params);
+    loginParams.extraLoginOptions = {
+      ...(loginParams.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    };
+    delete loginParams.chainId;
+
+    const popupParams: CreateHandlerParams = {
+      authConnection: params.authConnection as AUTH_CONNECTION_TYPE,
+      authConnectionId: providerConfig.authConnectionId,
+      clientId: providerConfig.clientId,
+      groupedAuthConnectionId: providerConfig.groupedAuthConnectionId,
+      redirect_uri: `${this.authInstance.baseUrl}/auth`,
+      jwtParams,
+      customState: {
+        nonce,
+        dapp_redirect_url: this.authOptions.redirectUrl,
+        appState: params.appState,
+        uxMode: this.authOptions.uxMode,
+        whiteLabel: JSON.stringify(this.authOptions.whiteLabel),
+        loginParams: JSON.stringify(loginParams),
+      },
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+    };
+
+    const loginHandler = createHandler(popupParams);
+    const verifierWindow = new PopupHandler({
+      url: loginHandler.finalURL,
+      timeout: 0,
+    });
+
+    if (this.authOptions.uxMode === UX_MODE.REDIRECT) return verifierWindow.redirect(this.authOptions.replaceUrlOnRedirect);
+
+    let isClosedWindow = false;
+
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      verifierWindow.open().catch((error: unknown) => {
+        log.error("Error during login with social", error);
+        this.authInstance.postLoginCancelledMessage(nonce);
+        reject(error);
+      });
+
+      // this is to close the popup when the login is finished.
+      const securePubSub = new SecurePubSub();
+      securePubSub
+        .subscribe(`web3auth-login-${nonce}`)
+        .then((data: string) => {
+          const parsedData = JSON.parse(data || "{}");
+          if (parsedData?.message === "login_finished") {
+            isClosedWindow = true;
+            securePubSub.cleanup();
+            verifierWindow.close();
+          }
+          return true;
+        })
+        .catch((error: unknown) => {
+          // swallow the error, dont need to throw.
+          log.error("Error during login with social", error);
+        });
+
+      verifierWindow.once("close", () => {
+        if (!isClosedWindow) {
+          securePubSub.cleanup();
+          this.authInstance.postLoginCancelledMessage(nonce);
+          reject(WalletLoginError.popupClosed());
+        }
+      });
+
+      const result = await this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams, nonce).catch(reject);
+      resolve(result);
+    });
+  }
+
+  private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
+    const loginConfig = this.authInstance.getDappAuthConnectionConfig();
+    if (!loginConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
+
+    const loginParams = cloneDeep(params);
+    loginParams.extraLoginOptions = {
+      ...(loginParams.extraLoginOptions || {}),
+      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+    };
+    delete loginParams.chainId;
+
+    return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
 }
 
 export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
-    if (smsOtpEnabled !== undefined) {
-      connectorSettings.loginConfig = {
-        [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-          showOnModal: smsOtpEnabled,
-          showOnDesktop: smsOtpEnabled,
-          showOnMobile: smsOtpEnabled,
-          showOnSocialBackupFactor: smsOtpEnabled,
-        } as LoginConfig[keyof LoginConfig],
-      };
-    }
+    const { whitelist } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
     const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});

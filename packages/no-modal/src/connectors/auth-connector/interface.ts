@@ -1,9 +1,9 @@
-import { type AuthOptions, type BaseRedirectParams, type LoginParams } from "@web3auth/auth";
+import { type AuthOptions, type LoginParams } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type BaseConnectorSettings, type IBaseProvider } from "@/core/base";
 
-export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
+export type LoginSettings = Partial<LoginParams>;
 
 export type PrivateKeyProvider = IBaseProvider<string>;
 
@@ -15,4 +15,11 @@ export interface AuthConnectorOptions extends BaseConnectorSettings {
   walletServicesSettings?: WalletServicesSettings;
 }
 
-export { type AuthOptions, type AuthUserInfo, LOGIN_PROVIDER, type LoginConfig, type LoginParams } from "@web3auth/auth";
+export {
+  AUTH_CONNECTION,
+  type AUTH_CONNECTION_TYPE,
+  type AuthConnectionConfig,
+  type AuthOptions,
+  type AuthUserInfo,
+  type LoginParams,
+} from "@web3auth/auth";
