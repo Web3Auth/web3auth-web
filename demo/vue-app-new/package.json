@@ -24,7 +24,7 @@
     "@web3auth/ws-embed": "^4.0.14",
     "bs58": "^6.0.0",
     "ethers": "^6.13.5",
-    "petite-vue-i18n": "^11.0.1",
+    "petite-vue-i18n": "^11.1.2",
     "tweetnacl": "^1.0.3",
     "vue": "^3.5.13"
   },
