@@ -12,39 +12,39 @@
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
     "@toruslabs/constants": "^14.2.0",
-    "@toruslabs/base-controllers": "^7.2.1",
-    "@toruslabs/ethereum-controllers": "^7.2.1",
-    "@toruslabs/solana-controllers": "^7.3.1",
+    "@toruslabs/base-controllers": "^7.4.0",
+    "@toruslabs/ethereum-controllers": "^7.4.0",
+    "@toruslabs/solana-controllers": "^7.4.0",
     "@toruslabs/vue-components": "^7.9.0",
     "@toruslabs/vue-icons": "^7.6.2",
     "@web3auth/auth": "^9.6.4",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",
-    "@web3auth/ws-embed": "^4.0.4",
+    "@web3auth/ws-embed": "^4.0.14",
     "bs58": "^6.0.0",
     "ethers": "^6.13.5",
-    "petite-vue-i18n": "^11.0.1",
+    "petite-vue-i18n": "^11.1.2",
     "tweetnacl": "^1.0.3",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^3.3.4",
     "@types/bs58": "^4.0.4",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "autoprefixer": "^10.4.20",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "autoprefixer": "^10.4.21",
     "eslint": "^8.54.0",
     "globals": "^15.14.0",
-    "postcss": "^8.5.1",
-    "prettier": "^3.4.2",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.7.3",
-    "vite": "^6.0.11",
-    "vue-tsc": "^2.2.0"
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vue-tsc": "^2.2.8"
   },
   "optionalDependencies": {
-    "@esbuild/linux-x64": "0.25.0"
+    "@esbuild/linux-x64": "0.25.1"
   },
   "lint-staged": {
     "!(*d).{js,ts}": [
