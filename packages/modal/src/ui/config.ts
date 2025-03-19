@@ -4,7 +4,12 @@ export function capitalizeFirstLetter(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const restrictedLoginMethods: Set<AUTH_CONNECTION_TYPE> = new Set([AUTH_CONNECTION.CUSTOM, AUTH_CONNECTION.PASSKEYS]);
+const restrictedLoginMethods: Set<AUTH_CONNECTION_TYPE> = new Set([
+  AUTH_CONNECTION.CUSTOM,
+  AUTH_CONNECTION.PASSKEYS,
+  AUTH_CONNECTION.TELEGRAM,
+  AUTH_CONNECTION.AUTHENTICATOR,
+]);
 export const AUTH_PROVIDERS = Object.values(AUTH_CONNECTION).filter((x) => !restrictedLoginMethods.has(x));
 
 export const AUTH_PROVIDERS_NAMES = AUTH_PROVIDERS.reduce(

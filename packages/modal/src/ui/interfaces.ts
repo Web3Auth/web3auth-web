@@ -1,5 +1,6 @@
 import type { SafeEventEmitter } from "@web3auth/auth";
 import {
+  AuthLoginParams,
   BaseConnectorConfig,
   ChainNamespaceType,
   LoginMethodConfig,
@@ -51,6 +52,10 @@ export interface UIConfig extends CoreUIConfig {
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
+export type ModalLoginParams = Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint"> & {
+  name: string;
+};
+
 export interface LoginModalProps extends UIConfig {
   chainNamespace: ChainNamespaceType;
   walletRegistry: WalletRegistry;
@@ -95,7 +100,7 @@ export interface ModalState {
   showExternalWalletsOnly: boolean;
 }
 
-export type SocialLoginEventType = { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
+export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
 export type ExternalWalletEventType = { connector: string };
 
 export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode

@@ -2,6 +2,7 @@ import { AUTH_CONNECTION } from "@web3auth/auth";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ModalLoginParams, SocialLoginsConfig } from "../interfaces";
 import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
 import Button from "./Button";
@@ -12,10 +13,11 @@ interface SocialLoginPasswordlessProps {
   isEmailVisible: boolean;
   isSmsVisible: boolean;
   connector: string;
-  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  socialLoginsConfig: SocialLoginsConfig;
+  handleSocialLoginClick: (params: { connector: string; loginParams: ModalLoginParams }) => void;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, connector, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
+  const { handleSocialLoginClick, connector, isPrimaryBtn, isEmailVisible, isSmsVisible, socialLoginsConfig } = props;
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
@@ -27,21 +29,35 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
     e.preventDefault();
     const value = fieldValue;
     if (isEmailVisible) {
+      const emailConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS];
       const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: AUTH_CONNECTION.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+            authConnectionId: emailConfig.authConnectionId,
+            groupedAuthConnectionId: "",
+            login_hint: value,
+            name: "Email",
+          },
         });
       }
     }
     if (isSmsVisible) {
+      const smsConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
       const number = value.startsWith("+") ? value : `${countryCode}${value}`;
       const result = await validatePhoneNumber(number);
       if (result) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: AUTH_CONNECTION.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS,
+            authConnectionId: smsConfig.authConnectionId,
+            groupedAuthConnectionId: smsConfig.groupedAuthConnectionId,
+            login_hint: typeof result === "string" ? result : number,
+            name: "Mobile",
+          },
         });
       }
     }

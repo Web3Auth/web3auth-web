@@ -4,11 +4,13 @@ import {
   Auth,
   AUTH_CONNECTION_TYPE,
   Auth0ClientOptions,
+  BUILD_ENV,
   createHandler,
   CreateHandlerParams,
   LoginParams,
   PopupHandler,
   randomId,
+  SDK_MODE,
   SUPPORTED_KEY_CURVES,
   UX_MODE,
 } from "@web3auth/auth";
@@ -39,7 +41,8 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import { getAuthConnectionConfig } from "./config/authConnectionConfig";
+import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -67,12 +70,15 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
+  private authConnectionConfig: AuthConnectionConfig = [];
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
     this.authOptions = params.connectorSettings;
     this.loginSettings = params.loginSettings || { authConnection: "" };
     this.wsSettings = params.walletServicesSettings || {};
+    this.authConnectionConfig = params.authConnectionConfig || [];
   }
 
   get provider(): IProvider | null {
@@ -105,7 +111,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
       network: this.coreOptions.web3AuthNetwork,
-      sdkMode: "iframe",
+      sdkMode: SDK_MODE.IFRAME,
+      authConnectionConfig: this.authConnectionConfig,
     });
     log.debug("initializing auth connector init", this.authOptions);
 
@@ -360,7 +367,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private async connectWithSocialLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
-    const providerConfig = this.authInstance.getDappAuthConnectionConfig();
+    const providerConfig = this.getOAuthProviderConfig({
+      authConnection: params.authConnection,
+      authConnectionId: params.authConnectionId,
+      groupedAuthConnectionId: params.groupedAuthConnectionId,
+    });
     if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
 
     const jwtParams = {
@@ -448,7 +459,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
-    const loginConfig = this.authInstance.getDappAuthConnectionConfig();
+    const loginConfig = this.getOAuthProviderConfig({
+      authConnection: params.authConnection,
+      authConnectionId: params.authConnectionId,
+      groupedAuthConnectionId: params.groupedAuthConnectionId,
+    });
+
     if (!loginConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
 
     const loginParams = cloneDeep(params);
@@ -456,13 +472,28 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       ...(loginParams.extraLoginOptions || {}),
       login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
     };
+
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
   }
+
+  private getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
+    const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
+    const providerConfig = this.authConnectionConfig.find((x) => {
+      if (groupedAuthConnectionId) {
+        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+      }
+      if (authConnectionId) {
+        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
+      }
+      return x.authConnection === authConnection;
+    });
+    return providerConfig;
+  }
 }
 
-export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">): ConnectorFn => {
+export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig">): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
@@ -473,7 +504,7 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
-      { uxMode: UX_MODE.POPUP }, // default settings
+      { uxMode: UX_MODE.POPUP, buildEnv: BUILD_ENV.PRODUCTION }, // default settings
       params?.connectorSettings || {},
       connectorSettings,
     ]) as AuthConnectorOptions["connectorSettings"];
@@ -493,12 +524,12 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">
 
     // Core options
     if (coreOptions.privateKeyProvider) coreOptions.privateKeyProvider.setKeyExportFlag(isKeyExportEnabled);
-
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
+      authConnectionConfig: getAuthConnectionConfig(finalConnectorSettings.buildEnv, coreOptions.web3AuthNetwork),
     });
   };
 };

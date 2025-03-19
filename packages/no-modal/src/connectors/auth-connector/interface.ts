@@ -1,4 +1,4 @@
-import { type AuthOptions, type LoginParams } from "@web3auth/auth";
+import { AuthConnectionConfig, type AuthOptions, type LoginParams } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type BaseConnectorSettings, type IBaseProvider } from "@/core/base";
@@ -10,9 +10,10 @@ export type PrivateKeyProvider = IBaseProvider<string>;
 export type WalletServicesSettings = WsEmbedParams & { modalZIndex?: number };
 
 export interface AuthConnectorOptions extends BaseConnectorSettings {
-  connectorSettings?: Omit<AuthOptions, "clientId" | "network">;
+  connectorSettings?: Omit<AuthOptions, "clientId" | "network" | "authConnectionConfig">;
   loginSettings?: LoginSettings;
   walletServicesSettings?: WalletServicesSettings;
+  authConnectionConfig?: AuthConnectionConfig;
 }
 
 export {

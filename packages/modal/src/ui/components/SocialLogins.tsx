@@ -1,11 +1,11 @@
-import { AUTH_CONNECTION } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../config";
 import { ThemedContext } from "../context/ThemeContext";
-import { SocialLoginsConfig } from "../interfaces";
+import { ModalLoginParams, SocialLoginsConfig } from "../interfaces";
 import i18n from "../localeImport";
 import Button from "./Button";
 import Image from "./Image";
@@ -14,7 +14,7 @@ import Image from "./Image";
 
 interface SocialLoginProps {
   socialLoginsConfig: SocialLoginsConfig;
-  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  handleSocialLoginClick: (params: { connector: string; loginParams: ModalLoginParams }) => void;
 }
 
 function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
@@ -53,7 +53,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
   useEffect(() => {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
-      return socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
+      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal;
     });
     setCanShowMore(maxOptions.length > 4);
   }, [socialLoginsConfig.loginMethods]);
@@ -69,6 +69,7 @@ export default function SocialLogins(props: SocialLoginProps) {
     AUTH_CONNECTION.EMAIL_PASSWORDLESS,
     AUTH_CONNECTION.PASSKEYS,
     AUTH_CONNECTION.TELEGRAM,
+    AUTH_CONNECTION.AUTHENTICATOR,
   ];
 
   return (
@@ -76,16 +77,17 @@ export default function SocialLogins(props: SocialLoginProps) {
       {/* <div className="w3a-group__title">{t("modal.social.continue")}</div> */}
       <ul className={adapterListClass}>
         {Object.keys(socialLoginsConfig.loginMethods).map((method) => {
-          const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method].name || method);
+          const socialLoginConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+          const name = capitalizeFirstLetter(socialLoginConfig.name || method);
           const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
           const order = orderIndex || Object.keys(socialLoginsConfig.loginMethods).length + 1;
 
-          const isMainOption = socialLoginsConfig.loginMethods[method].mainOption;
+          const isMainOption = socialLoginConfig.mainOption;
           const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
           const providerIcon = getProviderIcon(method, isDark, isPrimaryBtn);
 
-          if (socialLoginsConfig.loginMethods[method].showOnModal === false || restrictedLoginMethods.includes(method)) {
+          if (socialLoginConfig.showOnModal === false || restrictedLoginMethods.includes(method)) {
             return null;
           }
 
@@ -102,7 +104,13 @@ export default function SocialLogins(props: SocialLoginProps) {
                   onClick={() =>
                     handleSocialLoginClick({
                       connector: socialLoginsConfig.connector,
-                      loginParams: { loginProvider: method, name, login_hint: "" },
+                      loginParams: {
+                        authConnection: method,
+                        name: socialLoginConfig.name,
+                        authConnectionId: socialLoginConfig.authConnectionId,
+                        groupedAuthConnectionId: socialLoginConfig.groupedAuthConnectionId,
+                        login_hint: "",
+                      },
                     })
                   }
                   className="w3a--w-full"
@@ -121,7 +129,13 @@ export default function SocialLogins(props: SocialLoginProps) {
                 onClick={() =>
                   handleSocialLoginClick({
                     connector: socialLoginsConfig.connector,
-                    loginParams: { loginProvider: method, name, login_hint: "" },
+                    loginParams: {
+                      authConnection: method,
+                      name: socialLoginConfig.name,
+                      authConnectionId: socialLoginConfig.authConnectionId,
+                      groupedAuthConnectionId: socialLoginConfig.groupedAuthConnectionId,
+                      login_hint: "",
+                    },
                   })
                 }
                 className="w3a--w-full"

@@ -286,7 +286,12 @@ export class LoginModal extends SafeEventEmitter {
     const { connector, loginParams } = params;
     this.emit(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, {
       connector,
-      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
+      loginParams: {
+        authConnection: loginParams.authConnection,
+        authConnectionId: loginParams.authConnectionId,
+        groupedAuthConnectionId: loginParams.groupedAuthConnectionId,
+        login_hint: loginParams.login_hint,
+      },
     });
   };
 

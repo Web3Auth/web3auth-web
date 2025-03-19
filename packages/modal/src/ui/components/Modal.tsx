@@ -131,7 +131,7 @@ export default function Modal(props: ModalProps) {
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderConnector: loginParams.loginProvider, detailedLoaderConnectorName: loginParams.name };
+      return { ...prevState, detailedLoaderConnector: loginParams.authConnection, detailedLoaderConnectorName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -235,6 +235,7 @@ export default function Modal(props: ModalProps) {
                         isSmsVisible={isSmsPasswordlessLoginVisible}
                         connector={modalState.socialLoginsConfig?.connector}
                         handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                        socialLoginsConfig={modalState.socialLoginsConfig}
                         isPrimaryBtn={isEmailPrimary}
                       />
                     )}

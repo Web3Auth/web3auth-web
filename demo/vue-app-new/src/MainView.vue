@@ -137,8 +137,8 @@ onBeforeMount(() => {
     const storedValue = sessionStorage.getItem("state");
     try {
       if (storedValue) {
-        // console.log("storedValue", storedValue);
         const json = JSON.parse(storedValue);
+        console.log("storedValue", json);
         formData.connectors = json.connectors;
         formData.chains = json.chains;
         formData.chainNamespaces = json.chainNamespaces;
