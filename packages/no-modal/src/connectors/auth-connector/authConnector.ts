@@ -2,7 +2,6 @@ import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import {
   Auth,
-  AUTH_CONNECTION,
   AUTH_CONNECTION_TYPE,
   Auth0ClientOptions,
   createHandler,
@@ -40,7 +39,7 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -62,7 +61,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private authOptions: AuthConnectorOptions["connectorSettings"];
 
-  private loginSettings: LoginSettings = { loginProvider: "" };
+  private loginSettings: LoginSettings = { authConnection: "" };
 
   private wsSettings: WalletServicesSettings = {};
 
@@ -72,7 +71,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     super(params);
 
     this.authOptions = params.connectorSettings;
-    this.loginSettings = params.loginSettings || { loginProvider: "" };
+    this.loginSettings = params.loginSettings || { authConnection: "" };
     this.wsSettings = params.walletServicesSettings || {};
   }
 
@@ -112,44 +111,45 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     await this.authInstance.init();
 
-    // initialize ws embed or private key provider based on chain namespace
-    switch (chainConfig.chainNamespace) {
-      case CHAIN_NAMESPACES.EIP155:
-      case CHAIN_NAMESPACES.SOLANA: {
-        const { default: WsEmbed } = await import("@web3auth/ws-embed");
-        this.wsEmbedInstance = new WsEmbed({
-          web3AuthClientId: this.coreOptions.clientId,
-          web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-          modalZIndex: this.wsSettings.modalZIndex,
-        });
-        // TODO: once support multiple chains, only pass chains of solana and EVM
-        await this.wsEmbedInstance.init({
-          ...this.wsSettings,
-          chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
-          whiteLabel: {
-            ...this.authOptions.whiteLabel,
-            ...this.wsSettings.whiteLabel,
-          },
-        });
-        break;
-      }
-      case CHAIN_NAMESPACES.XRPL: {
-        const { XrplPrivateKeyProvider } = await import("@/core/xrpl-provider");
-        this.privateKeyProvider = new XrplPrivateKeyProvider({
-          config: { chain: chainConfig, chains: this.coreOptions.chains.filter((x) => x.chainNamespace === CHAIN_NAMESPACES.XRPL) },
-        });
-        break;
-      }
-      default: {
-        const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
-        this.privateKeyProvider = new CommonPrivateKeyProvider({
-          config: {
-            chain: chainConfig,
-            chains: this.coreOptions.chains,
-          },
-        });
+    // Use this for xrpl, mpc cases
+    if (this.coreOptions.privateKeyProvider) {
+      this.privateKeyProvider = this.coreOptions.privateKeyProvider;
+    } else {
+      // initialize ws embed or private key provider based on chain namespace
+      switch (chainConfig.chainNamespace) {
+        case CHAIN_NAMESPACES.EIP155:
+        case CHAIN_NAMESPACES.SOLANA: {
+          const { default: WsEmbed } = await import("@web3auth/ws-embed");
+          this.wsEmbedInstance = new WsEmbed({
+            web3AuthClientId: this.coreOptions.clientId,
+            web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+            modalZIndex: this.wsSettings.modalZIndex,
+          });
+          // TODO: once support multiple chains, only pass chains of solana and EVM
+          await this.wsEmbedInstance.init({
+            ...this.wsSettings,
+            chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
+            whiteLabel: {
+              ...this.authOptions.whiteLabel,
+              ...this.wsSettings.whiteLabel,
+            },
+          });
+          break;
+        }
+        case CHAIN_NAMESPACES.XRPL:
+          throw WalletLoginError.connectionError("Private key provider is required for XRPL");
+        default: {
+          const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
+          this.privateKeyProvider = new CommonPrivateKeyProvider({
+            config: {
+              chain: chainConfig,
+              chains: this.coreOptions.chains,
+            },
+          });
+        }
       }
     }
+
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
 
@@ -188,7 +188,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  public async enableMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+  public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -202,7 +202,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  public async manageMFA(params: AuthLoginParams = { loginProvider: "" }): Promise<void> {
+  public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -314,9 +314,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
 
-      if (!params.loginProvider && !this.loginSettings.loginProvider)
-        throw WalletInitializationError.invalidParams("loginProvider is required for login");
-
       const loginParams = deepmerge(this.loginSettings, params) as Partial<AuthLoginParams> & { chainId: string };
 
       if (params.extraLoginOptions?.id_token) {
@@ -363,9 +360,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private async connectWithSocialLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
-    const loginConfig = this.authInstance.getDappAuthConnectionConfig();
-    if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
-    const providerConfig = loginConfig[params.loginProvider];
+    const providerConfig = this.authInstance.getDappAuthConnectionConfig();
+    if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
 
     const jwtParams = {
       ...providerConfig.jwtParameters,
@@ -384,7 +380,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     const popupParams: CreateHandlerParams = {
-      authConnection: params.loginProvider as AUTH_CONNECTION_TYPE,
+      authConnection: params.authConnection as AUTH_CONNECTION_TYPE,
       authConnectionId: providerConfig.authConnectionId,
       clientId: providerConfig.clientId,
       groupedAuthConnectionId: providerConfig.groupedAuthConnectionId,
@@ -453,7 +449,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
     const loginConfig = this.authInstance.getDappAuthConnectionConfig();
-    if (!loginConfig || !loginConfig[params.loginProvider]) throw WalletLoginError.connectionError("Login provider is not available");
+    if (!loginConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
 
     const loginParams = cloneDeep(params);
     loginParams.extraLoginOptions = {
@@ -466,25 +462,24 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
+export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
-    const connectorSettings: AuthConnectorOptions["connectorSettings"] = { uxMode: UX_MODE.POPUP };
-    const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
-    if (smsOtpEnabled !== undefined) {
-      connectorSettings.authConnectionConfig = {
-        [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
-          showOnSocialBackupFactor: smsOtpEnabled,
-        } as AuthConnectionConfig[keyof AuthConnectionConfig],
-      };
-    }
+    const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
+    const { whitelist } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
     const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
-    const finalConnectorSettings = deepmerge(params?.connectorSettings || {}, connectorSettings) as AuthConnectorOptions["connectorSettings"];
+    const finalConnectorSettings = deepmerge.all([
+      { uxMode: UX_MODE.POPUP }, // default settings
+      params?.connectorSettings || {},
+      connectorSettings,
+    ]) as AuthConnectorOptions["connectorSettings"];
+
     // WS settings
+    const isKeyExportEnabled = typeof projectConfig.key_export_enabled === "boolean" ? projectConfig.key_export_enabled : true;
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel: {
@@ -493,7 +488,11 @@ export const authConnector = (params?: AuthConnectorOptions): ConnectorFn => {
       },
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
+      // enableKeyExport: keyExportEnabled, TODO: add this to ws embed and implement in WS
     };
+
+    // Core options
+    if (coreOptions.privateKeyProvider) coreOptions.privateKeyProvider.setKeyExportFlag(isKeyExportEnabled);
 
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,

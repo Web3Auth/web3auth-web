@@ -1,6 +1,6 @@
 import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
 
-import { CHAIN_NAMESPACES, ChainNamespaceType } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig } from "@/core/base";
 
 import { IConnectorSettings } from "./interface";
 
@@ -154,26 +154,22 @@ export const getRequiredNamespaces = (chains: string[]): ProposalTypes.RequiredN
 };
 
 export const getWalletConnectV2Settings = async (
-  namespace: ChainNamespaceType,
-  chainIds: string[],
+  chains: CustomChainConfig[],
   projectID: string
 ): Promise<{ connectorSettings: IConnectorSettings; loginSettings: EngineTypes.ConnectParams }> => {
-  if (namespace === CHAIN_NAMESPACES.EIP155 || namespace === CHAIN_NAMESPACES.SOLANA) {
-    const appMetadata = await getSiteMetadata();
-    const connectorSettings: IConnectorSettings = {
-      walletConnectInitOptions: {
-        projectId: projectID,
-        relayUrl: "wss://relay.walletconnect.com",
-        metadata: { name: appMetadata.name, description: appMetadata.name, url: window.location.origin, icons: [appMetadata.icon || ""] },
-      },
-    };
+  const appMetadata = await getSiteMetadata();
+  const connectorSettings: IConnectorSettings = {
+    walletConnectInitOptions: {
+      projectId: projectID,
+      relayUrl: "wss://relay.walletconnect.com",
+      metadata: { name: appMetadata.name, description: appMetadata.name, url: window.location.origin, icons: [appMetadata.icon || ""] },
+    },
+  };
 
-    const chainNamespaces = chainIds.map((chainId) => {
-      return `${namespace}:${namespace === CHAIN_NAMESPACES.SOLANA ? SOLANA_CAIP_CHAIN_MAP[chainId] : parseInt(chainId, 16)}`;
-    });
+  const chainNamespaces = chains.map((chain) => {
+    return `${chain.chainNamespace}:${chain.chainNamespace === CHAIN_NAMESPACES.SOLANA ? SOLANA_CAIP_CHAIN_MAP[chain.chainId] : parseInt(chain.chainId, 16)}`;
+  });
 
-    const loginSettings: EngineTypes.ConnectParams = { optionalNamespaces: getRequiredNamespaces(chainNamespaces) };
-    return { connectorSettings, loginSettings };
-  }
-  throw new Error(`Unsupported chain namespace: ${namespace}`);
+  const loginSettings: EngineTypes.ConnectParams = { optionalNamespaces: getRequiredNamespaces(chainNamespaces) };
+  return { connectorSettings, loginSettings };
 };

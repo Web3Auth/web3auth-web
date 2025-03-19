@@ -23,12 +23,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
-    const chainId = await this.provider.request<never, string>({ method: "solana_chainId" });
-    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
-    if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
-    const { chainNamespace } = currentChainConfig;
-
-    const accounts = await this.provider.request<never, string[]>({ method: "getAccounts" });
+    const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
       if (existingToken) {
@@ -37,6 +32,11 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
           return { idToken: existingToken };
         }
       }
+
+      const chainId = await this.provider.request<never, string>({ method: "solana_chainId" });
+      const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+      if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
+      const { chainNamespace } = currentChainConfig;
 
       const payload = {
         domain: window.location.origin,

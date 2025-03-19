@@ -1,4 +1,5 @@
 import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   BaseConnector,
@@ -20,9 +21,9 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
-    if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
+    if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with valid options");
 
-    const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
+    const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
       if (existingToken) {
@@ -49,7 +50,10 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       const challenge = await signChallenge(payload, chainNamespace);
       const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
 
-      const signedMessage = await this.provider.request<[string, string], string>({ method: "personal_sign", params: [hexChallenge, accounts[0]] });
+      const signedMessage = await this.provider.request<[string, string], string>({
+        method: EVM_METHOD_TYPES.PERSONAL_SIGN,
+        params: [hexChallenge, accounts[0]],
+      });
 
       const idToken = await verifySignedChallenge(
         chainNamespace,

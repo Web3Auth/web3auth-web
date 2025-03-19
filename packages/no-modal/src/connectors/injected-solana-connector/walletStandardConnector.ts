@@ -70,7 +70,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     super.checkInitializationRequirements({ chainConfig });
 
     this.injectedProvider = new WalletStandardProvider({ config: { chain: chainConfig, chains: this.coreOptions.chains } });
-    this.injectedProvider.setupProvider(this.wallet, options.chainId);
+    await this.injectedProvider.setupProvider(this.wallet, options.chainId);
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, this.name);

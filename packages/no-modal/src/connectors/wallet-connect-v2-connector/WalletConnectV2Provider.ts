@@ -1,14 +1,13 @@
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { AddEthereumChainParameter } from "viem";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError, WalletOperationsError } from "@/core/base";
+import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "@/core/base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
 import { createEthChainSwitchMiddleware, createEthJsonRpcClient, createEthMiddleware, IEthChainSwitchHandlers } from "@/core/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "@/core/solana-provider";
 
-import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {}
 
@@ -66,32 +65,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.lookupNetwork(this.connector, chainId);
 
     this.update({ chainId });
-  }
-
-  async addChain(chainId: string): Promise<void> {
-    const { chainId: currentChainId } = this.state;
-    const numChainId = parseInt(currentChainId, 16);
-    const newChain = this.getChain(chainId);
-    if (!newChain) throw WalletOperationsError.fromCode(5201, "Invalid chainId");
-    // currently we only support eip155 chains
-    if (newChain.chainNamespace !== CHAIN_NAMESPACES.EIP155) throw WalletOperationsError.chainNamespaceNotAllowed();
-
-    await addChain({
-      connector: this.connector,
-      chainId: numChainId,
-      chainConfig: {
-        chainId: newChain.chainId,
-        chainName: newChain.displayName,
-        nativeCurrency: {
-          name: newChain.tickerName,
-          symbol: newChain.ticker.toLocaleUpperCase(),
-          decimals: (newChain.decimals || 18) as AddEthereumChainParameter["nativeCurrency"]["decimals"],
-        },
-        rpcUrls: [newChain.rpcTarget],
-        blockExplorerUrls: [newChain.blockExplorerUrl],
-        iconUrls: [newChain.logo],
-      },
-    });
   }
 
   // no need to implement this method in wallet connect v2.

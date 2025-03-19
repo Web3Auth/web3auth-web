@@ -106,11 +106,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 connector");
     }
 
-    const wc2Settings = await getWalletConnectV2Settings(
-      chainConfig.chainNamespace as ChainNamespaceType,
-      [chainConfig.chainId as string],
-      projectId
-    );
+    const wc2Settings = await getWalletConnectV2Settings(this.coreOptions.chains, projectId);
     if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0) {
       this.connectorOptions.loginSettings = wc2Settings.loginSettings;
     }
@@ -182,8 +178,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     try {
       await this.wcProvider.switchChain({ chainId: params.chainId });
     } catch (error) {
-      await this.wcProvider.addChain(params.chainId);
-      await this.wcProvider.switchChain({ chainId: params.chainId });
+      log.error("error while switching chain", error);
+      throw error;
     }
   }
 
@@ -357,7 +353,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   private async onConnectHandler({ chain }: { chain: CustomChainConfig }) {
-    if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet adapteconnectorr is not ready yet");
+    if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet connect connector is not ready yet");
     this.subscribeEvents();
     if (this.connectorOptions.connectorSettings?.qrcodeModal) {
       this.wcProvider = new WalletConnectV2Provider({

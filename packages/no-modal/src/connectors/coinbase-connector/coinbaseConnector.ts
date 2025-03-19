@@ -1,4 +1,4 @@
-import { AppMetadata, CoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+import { AppMetadata, createCoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 
 import {
   BaseConnectorSettings,
@@ -15,7 +15,6 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  CustomChainConfig,
   IProvider,
   UserInfo,
   WALLET_CONNECTORS,
@@ -67,8 +66,14 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    const coinbaseInstance = new CoinbaseWalletSDK({ ...this.coinbaseOptions, appChainIds: [Number.parseInt(chainConfig.chainId, 16)] });
-    this.coinbaseProvider = coinbaseInstance.makeWeb3Provider({ options: this.coinbaseOptions.options || "smartWalletOnly" });
+    const coinbaseInstance = createCoinbaseWalletSDK({
+      ...this.coinbaseOptions,
+      preference: { options: this.coinbaseOptions.options || "smartWalletOnly" },
+      appChainIds: this.coreOptions.chains.map((x) => Number.parseInt(x.chainId, 16)),
+      appName: this.coinbaseOptions.appName || "Web3Auth",
+      appLogoUrl: this.coinbaseOptions.appLogoUrl || "",
+    });
+    this.coinbaseProvider = coinbaseInstance.getProvider();
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.COINBASE);
     try {
@@ -93,7 +98,6 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const currentChainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
       if (currentChainId !== chainConfig.chainId) {
-        await this.addChain(chainConfig);
         await this.switchChain(chainConfig, true);
       }
       this.status = CONNECTOR_STATUS.CONNECTED;
@@ -134,22 +138,6 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
-  }
-
-  public async addChain(chainConfig: CustomChainConfig, _init = false): Promise<void> {
-    await this.coinbaseProvider.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId: chainConfig.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorerUrl],
-          nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
-          iconUrls: [chainConfig.logo],
-        },
-      ],
-    });
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
