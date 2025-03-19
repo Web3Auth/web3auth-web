@@ -119,25 +119,25 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
-      // re-emit events from provider
-      const providerEvents = new Set([
-        EIP1193_EVENTS.CHAIN_CHANGED,
-        EIP1193_EVENTS.ACCOUNTS_CHANGED,
-        EIP1193_EVENTS.CONNECT,
-        EIP1193_EVENTS.DISCONNECT,
-        EIP1193_EVENTS.MESSAGE,
-        ...this._providerEngineProxy.eventNames(),
-      ]);
-      providerEvents.forEach((event) => {
-        provider.on(event as keyof ProviderEvents, (...args) => {
-          if (event === EIP1193_EVENTS.CHAIN_CHANGED) {
-            // update chainId state
-            this.update({ chainId: (args as string[])[0] } as Partial<S>);
-          }
-          // eslint-disable-next-line
-          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
-        });
-      });
+
+      // we want events to propagate from Ethereum provider -> wrapper provider (e.g. CommonJRPC provider) -> SDK -> dapp
+      // override emit method to capture and re-emit events
+      const originalEmit = provider.emit.bind(provider);
+      provider.emit = (...args) => {
+        const result = originalEmit(...args);
+
+        // handle chainChanged event: update chainId state
+        const event = args[0] as string;
+        if (event === EIP1193_EVENTS.CHAIN_CHANGED) {
+          const chainId = args[1] as string;
+          this.update({ chainId } as Partial<S>);
+        }
+
+        // re-emit event
+        // eslint-disable-next-line
+        this.emit(event as keyof BaseProviderEvents<S>, ...(args.slice(1) as any));
+        return result;
+      };
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
