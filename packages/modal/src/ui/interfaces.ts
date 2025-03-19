@@ -52,7 +52,7 @@ export interface UIConfig extends CoreUIConfig {
 }
 
 export interface LoginModalProps extends UIConfig {
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
 }
 
@@ -95,7 +95,7 @@ export interface ModalState {
 }
 
 export type SocialLoginEventType = { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } };
-export type ExternalWalletEventType = { connector: string };
+export type ExternalWalletEventType = { connector: string; chainNamespace?: ChainNamespaceType };
 
 export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode
 export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
@@ -116,4 +116,5 @@ export type ExternalButton = {
   hasInstallLinks: boolean;
   walletRegistryItem?: WalletRegistryItem;
   imgExtension?: string;
+  chainNamespaces?: ChainNamespaceType[];
 };
