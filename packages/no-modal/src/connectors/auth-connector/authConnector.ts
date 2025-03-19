@@ -1,4 +1,4 @@
-import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import { ProviderConfig } from "@toruslabs/base-controllers";
 import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
@@ -51,7 +51,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private loginSettings: LoginSettings = { loginProvider: "" };
 
-  private wsSettings: WalletServicesSettings = {};
+  private wsSettings: WalletServicesSettings;
 
   private wsEmbedInstance: WsEmbed | null = null;
 
@@ -60,7 +60,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     this.authOptions = params.connectorSettings;
     this.loginSettings = params.loginSettings || { loginProvider: "" };
-    this.wsSettings = params.walletServicesSettings || {};
+    this.wsSettings = params.walletServicesSettings;
   }
 
   get provider(): IProvider | null {
@@ -81,7 +81,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const { chains } = this.coreOptions;
+    const { chainId } = options;
+    const chainConfig = chains.find((x) => x.chainId === chainId);
 
     super.checkInitializationRequirements({ chainConfig });
     if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
@@ -113,10 +115,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             web3AuthNetwork,
             modalZIndex: this.wsSettings.modalZIndex,
           });
-          // TODO: once support multiple chains, only pass chains of solana and EVM
+          const wsSupportedChains = chains.filter(
+            (x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA
+          );
           await this.wsEmbedInstance.init({
             ...this.wsSettings,
-            chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
+            chains: wsSupportedChains as ProviderConfig[],
+            chainId,
             whiteLabel: {
               ...this.authOptions.whiteLabel,
               ...this.wsSettings.whiteLabel,
