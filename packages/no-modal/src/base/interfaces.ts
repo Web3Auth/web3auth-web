@@ -7,6 +7,7 @@ export interface WhitelistResponse {
   signed_urls: Record<string, string>;
 }
 
+// TODO: add more data from dashboard including chains
 export interface PROJECT_CONFIG_RESPONSE {
   whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;

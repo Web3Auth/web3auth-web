@@ -3,7 +3,6 @@ import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils"
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import base58 from "bs58";
-import { AddEthereumChainParameter } from "viem";
 
 import { WalletLoginError } from "@/core/base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
@@ -175,16 +174,4 @@ export async function switchChain({
   newChainId: string;
 }): Promise<void> {
   await sendJrpcRequest<string, { chainId: string }[]>(connector, `eip155:${chainId}`, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
-}
-
-export async function addChain({
-  connector,
-  chainId,
-  chainConfig,
-}: {
-  connector: ISignClient;
-  chainId: number;
-  chainConfig: AddEthereumChainParameter;
-}): Promise<void> {
-  await sendJrpcRequest<string, AddEthereumChainParameter[]>(connector, `eip155:${chainId}`, "wallet_addEthereumChain", [chainConfig]);
 }

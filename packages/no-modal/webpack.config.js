@@ -12,8 +12,8 @@ const config = generateWebpackConfig({
     '@/core/base-evm-connector': path.resolve(__dirname, 'src/connectors/base-evm-connector'),
     '@/core/base-solana-connector': path.resolve(__dirname, 'src/connectors/base-solana-connector'),
     '@/core/coinbase-connector': path.resolve(__dirname, 'src/connectors/coinbase-connector'),
-    '@/core/default-evm-connector': path.resolve(__dirname, 'src/connectors/default-evm-connector'),
-    '@/core/default-solana-connector': path.resolve(__dirname, 'src/connectors/default-solana-connector'),
+    '@/core/injected-evm-connector': path.resolve(__dirname, 'src/connectors/injected-evm-connector'),
+    '@/core/injected-solana-connector': path.resolve(__dirname, 'src/connectors/injected-solana-connector'),
     '@/core/wallet-connect-v2-connector': path.resolve(__dirname, 'src/connectors/wallet-connect-v2-connector'),
     
     // Plugin paths

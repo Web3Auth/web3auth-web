@@ -118,11 +118,17 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
+      // re-emit events from provider
+      this._providerEngineProxy.eventNames().forEach((event) => {
+        provider.on(event as keyof ProviderEvents, (...args) => {
+          // eslint-disable-next-line
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
+        });
+      });
+      this.handleChainChangedProvider();
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
-
-    this.handleChangeChangedProvider();
   }
 
   public setKeyExportFlag(flag: boolean): void {
@@ -141,10 +147,10 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this.config.chains.find((chain) => chain.chainId === chainId);
   }
 
-  private handleChangeChangedProvider() {
+  private handleChainChangedProvider() {
+    // This is only added because we don't have ethereum and solana private key providers anymore
     this.provider.on("chainChanged", (chainId: string) => {
       this.update({ chainId } as Partial<S>);
-      this.emit("chainChanged", chainId);
     });
   }
 

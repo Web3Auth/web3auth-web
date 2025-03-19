@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.0.0-alpha.0",
+  "version": "10.0.0-alpha.1",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -65,7 +65,7 @@
     "@walletconnect/types": "^2.17.3",
     "@walletconnect/utils": "^2.17.3",
     "@web3auth/auth": "^9.6.4",
-    "@web3auth/ws-embed": "^4.0.4",
+    "@web3auth/ws-embed": "^4.0.14",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",

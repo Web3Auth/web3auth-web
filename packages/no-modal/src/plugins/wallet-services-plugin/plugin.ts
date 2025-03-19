@@ -24,6 +24,7 @@ import {
 
 export { BUTTON_POSITION, type BUTTON_POSITION_TYPE, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/ws-embed";
 
+// TODO: support project config items here. incl. key export flag, multiple chains
 class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
 
