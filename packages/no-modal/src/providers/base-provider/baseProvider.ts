@@ -117,16 +117,31 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       (this._providerEngineProxy as any).setTarget(provider);
 
       // we want events to propagate from Ethereum provider -> wrapper provider (e.g. CommonJRPC provider) -> SDK -> dapp
-      // when a listener is added to the wrapper provider, listen to the same event from the Ethereum provider and re-emit it
-      this.once("newListener", (event, _listener) => {
+      // ensure that only one handler is added for each event
+      const reEmitHandler = (event: string) => {
+        // listen to the event from the Ethereum provider
         provider.on(event as keyof ProviderEvents, (...args) => {
           // handle chainChanged event: update chainId state
           if (event === EIP1193_EVENTS.CHAIN_CHANGED) {
             const chainId = args[0] as string;
             this.update({ chainId } as Partial<S>);
           }
-          this.emit(event as keyof BaseProviderEvents<S>, ...(args as never));
+
+          // re-emit the event
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
         });
+      };
+
+      // handle existing events
+      this.eventNames().forEach((event) => {
+        reEmitHandler(event as string);
+      });
+      // handle when a new listener is added
+      this.on("newListener", (event: string) => {
+        // skip if the event already exists
+        if (this.listenerCount(event as keyof BaseProviderEvents<S>) > 0) return;
+        reEmitHandler(event);
       });
     } else {
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
