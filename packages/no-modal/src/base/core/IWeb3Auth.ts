@@ -20,7 +20,7 @@ import { type WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export type WalletServicesConfig = Omit<
   WsEmbedParams,
-  "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy" | "accountAbstractionConfig"
+  "buildEnv" | "enableLogging" | "chainId" | "chains" | "confirmationStrategy" | "accountAbstractionConfig"
 > & {
   /**
    * Determines how to show confirmation screens
