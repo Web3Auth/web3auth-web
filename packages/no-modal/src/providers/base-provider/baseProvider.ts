@@ -10,9 +10,9 @@ import {
   WalletInitializationError,
   WalletProviderError,
 } from "@/core/base";
-import { EIP1193_EVENTS } from "@/core/wallet-connect-v2-connector";
 
 import { BaseProviderEvents } from "./interfaces";
+import { EIP1193_EVENTS } from "./utils";
 
 export interface BaseProviderState extends BaseState {
   chainId: string;
