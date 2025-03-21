@@ -78,7 +78,7 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
-
+  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "development" } });
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
@@ -93,7 +93,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    connectors: [...externalConnectors.value, authConnector({ connectorSettings: { buildEnv: "development" }, loginSettings: { mfaLevel: "mandatory"}})],
+    connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
@@ -138,7 +138,6 @@ onBeforeMount(() => {
     try {
       if (storedValue) {
         const json = JSON.parse(storedValue);
-        console.log("storedValue", json);
         formData.connectors = json.connectors;
         formData.chains = json.chains;
         formData.chainNamespaces = json.chainNamespaces;

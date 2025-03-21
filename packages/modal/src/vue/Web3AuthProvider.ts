@@ -110,7 +110,7 @@ export const Web3AuthProvider = defineComponent({
             initError.value = null;
             isInitializing.value = true;
             const { modalConfig, hideWalletDiscovery } = props.config;
-            if (modalConfig) {
+            if (modalConfig || typeof hideWalletDiscovery === "boolean") {
               await newWeb3Auth.initModal({ modalConfig, hideWalletDiscovery });
             } else {
               await newWeb3Auth.initModal();

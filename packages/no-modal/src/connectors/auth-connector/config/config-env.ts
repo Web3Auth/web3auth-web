@@ -67,7 +67,7 @@ export interface ConfigEnv {
   metadataHost: string;
 }
 
-const configEnv: Record<WEB3AUTH_NETWORK_TYPE, ConfigEnv> = {
+export const configEnv: Record<WEB3AUTH_NETWORK_TYPE, ConfigEnv> = {
   [WEB3AUTH_NETWORK.CELESTE]: {
     // client ids - no client ids actually
     googleClientId: "876733105116-80tsjqj79glh40206qnuq0uri8dk1o5s.apps.googleusercontent.com",
@@ -431,5 +431,3 @@ const configEnv: Record<WEB3AUTH_NETWORK_TYPE, ConfigEnv> = {
     signerHost: SIGNER_MAP[WEB3AUTH_NETWORK.SAPPHIRE_MAINNET], // used for allow host
   },
 };
-
-export default configEnv;
