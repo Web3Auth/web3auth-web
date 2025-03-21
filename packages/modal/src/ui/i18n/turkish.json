@@ -21,6 +21,8 @@
     "external.installed": "Yüklendi",
     "external.no-wallets-found": "Cüzdan bulunamadı",
     "external.search-wallet": "{{count}} cüzdan ara...",
+    "external.select-chain": "Zincir seç",
+    "external.select-chain-description": "Bu {{wallet}} cüzdan birden fazla zincir destekler. İstediğiniz zinciri seçin",
     "external.title": "Harici Cüzdan",
     "external.walletconnect-connect": "Bağla",
     "external.walletconnect-copy": "WalletConnect destekli bir cüzdanla tarayın veya panonuza kopyalamak için QR kodunu tıklayın.",

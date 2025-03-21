@@ -56,7 +56,7 @@ export class LoginModal extends SafeEventEmitter {
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  private chainNamespace: ChainNamespaceType;
+  private chainNamespaces: ChainNamespaceType[];
 
   private walletRegistry: WalletRegistry;
 
@@ -75,7 +75,7 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
-    this.chainNamespace = uiConfig.chainNamespace;
+    this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
@@ -209,7 +209,7 @@ export class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
-            chainNamespace={this.chainNamespace}
+            chainNamespaces={this.chainNamespaces}
             walletRegistry={this.walletRegistry}
           />
         </ThemedContext.Provider>
@@ -275,9 +275,10 @@ export class LoginModal extends SafeEventEmitter {
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
-    const { connector } = params;
+    const { connector, chainNamespace } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       connector,
+      loginParams: { chainNamespace },
     });
   };
 

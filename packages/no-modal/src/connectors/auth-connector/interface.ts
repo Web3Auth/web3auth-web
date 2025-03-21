@@ -7,7 +7,7 @@ export type LoginSettings = Partial<LoginParams> & Partial<BaseRedirectParams>;
 
 export type PrivateKeyProvider = IBaseProvider<string>;
 
-export type WalletServicesSettings = WsEmbedParams & { modalZIndex?: number };
+export type WalletServicesSettings = Omit<WsEmbedParams, "chains" | "chainId"> & { modalZIndex?: number };
 
 export interface AuthConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: Omit<AuthOptions, "clientId" | "network">;

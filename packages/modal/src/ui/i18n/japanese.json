@@ -21,6 +21,8 @@
     "external.installed": "インストール済み",
     "external.no-wallets-found": "ウォレットが見つかりません",
     "external.search-wallet": "{{count}} ウォレットを検索...",
+    "external.select-chain": "チェーンを選択",
+    "external.select-chain-description": "この {{wallet}} ウォレットは複数のチェーンをサポートしています。接続したいチェーンを選択してください",
     "external.title": "外部ウォレット",
     "external.walletconnect-connect": "接続する",
     "external.walletconnect-copy": "WalletConnect がサポートするウォレットでスキャンするか、QR コードをクリックしてクリップボードにコピーします。",

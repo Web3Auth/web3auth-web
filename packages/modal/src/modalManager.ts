@@ -76,7 +76,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       connectorListener: this,
-      chainNamespace: this.currentChain.chainNamespace,
+      chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
       walletRegistry,
     });
     this.subscribeToLoginModalEvents();

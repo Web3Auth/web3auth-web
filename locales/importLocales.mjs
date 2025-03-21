@@ -34,7 +34,7 @@ Promise.all(promises)
     });
 
     // Create json files
-    const folder = "./packages/ui/src/i18n/";
+    const folder = "./packages/modal/src/ui/i18n/";
     const folderPath = path.resolve(folder);
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath);

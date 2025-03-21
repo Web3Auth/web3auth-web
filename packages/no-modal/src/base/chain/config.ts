@@ -222,7 +222,7 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
       logo: "https://images.toruswallet.io/sol.svg",
       chainNamespace,
       chainId: "0x65",
-      rpcTarget: "https://rpc.ankr.com/solana",
+      rpcTarget: "https://api.mainnet-beta.solana.com",
       displayName: "Solana Mainnet",
       blockExplorerUrl: "https://explorer.solana.com",
       ticker: "SOL",

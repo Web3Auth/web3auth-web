@@ -12,6 +12,7 @@ import {
 } from "@/core/base";
 
 import { BaseProviderEvents } from "./interfaces";
+import { EIP1193_EVENTS } from "./utils";
 
 export interface BaseProviderState extends BaseState {
   chainId: string;
@@ -24,16 +25,12 @@ export interface BaseProviderConfig extends BaseConfig {
   keyExportEnabled?: boolean;
 }
 
-export interface CommonProviderEvents extends ProviderEvents {
-  chainChanged: (chainId: string) => void;
-}
-
 export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseProviderState, P>
   extends BaseController<C, S, BaseProviderEvents<S>>
   implements IBaseProvider<P>
 {
   // should be Assigned in setupProvider
-  public _providerEngineProxy: SafeEventEmitterProvider<CommonProviderEvents> | null = null;
+  public _providerEngineProxy: SafeEventEmitterProvider<ProviderEvents> | null = null;
 
   // set to true when the keyExportEnabled flag is set by code.
   // This is to prevent the flag from being overridden by the dashboard config.
@@ -61,7 +58,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
   }
 
-  get provider(): SafeEventEmitterProvider<CommonProviderEvents> | null {
+  get provider(): SafeEventEmitterProvider<ProviderEvents> | null {
     return this._providerEngineProxy;
   }
 
@@ -118,12 +115,37 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     if (this._providerEngineProxy) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this._providerEngineProxy as any).setTarget(provider);
+
+      // we want events to propagate from Ethereum provider -> wrapper provider (e.g. CommonJRPC provider) -> SDK -> dapp
+      // ensure that only one handler is added for each event
+      const reEmitHandler = (event: string) => {
+        // listen to the event from the Ethereum provider
+        provider.on(event as keyof ProviderEvents, (...args) => {
+          // handle chainChanged event: update chainId state
+          if (event === EIP1193_EVENTS.CHAIN_CHANGED) {
+            const chainId = args[0] as string;
+            this.update({ chainId } as Partial<S>);
+          }
+
+          // re-emit the event
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          this.emit(event as keyof BaseProviderEvents<S>, ...(args as any));
+        });
+      };
+
+      // handle existing events
+      this.eventNames().forEach((event) => {
+        reEmitHandler(event as string);
+      });
+      // handle when a new listener is added
+      this.on("newListener", (event: string) => {
+        // skip if the event already exists
+        if (this.listenerCount(event as keyof BaseProviderEvents<S>) > 0) return;
+        reEmitHandler(event);
+      });
     } else {
-      // TODO: need to test if provider.on("chainChanged") & other events are re-emitted by commonjrpc provider
       this._providerEngineProxy = createEventEmitterProxy<SafeEventEmitterProvider>(provider);
     }
-
-    this.handleChainChangedProvider();
   }
 
   public setKeyExportFlag(flag: boolean): void {
@@ -140,14 +162,6 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   protected getChain(chainId: string): CustomChainConfig {
     return this.config.chains.find((chain) => chain.chainId === chainId);
-  }
-
-  private handleChainChangedProvider() {
-    // This is only added because we don't have ethereum and solana private key providers anymore
-    this.provider.on("chainChanged", (chainId: string) => {
-      this.update({ chainId } as Partial<S>);
-      this.emit("chainChanged", chainId);
-    });
   }
 
   abstract setupProvider(provider: P, chainId: string): Promise<void>;

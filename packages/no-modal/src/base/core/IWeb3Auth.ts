@@ -20,7 +20,7 @@ import { type WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export type WalletServicesConfig = Omit<
   WsEmbedParams,
-  "buildEnv" | "enableLogging" | "chainConfig" | "confirmationStrategy" | "accountAbstractionConfig"
+  "buildEnv" | "enableLogging" | "chainId" | "chains" | "confirmationStrategy" | "accountAbstractionConfig"
 > & {
   /**
    * Determines how to show confirmation screens
@@ -59,10 +59,9 @@ export interface IWeb3AuthCoreOptions {
   chains?: CustomChainConfig[];
 
   /**
-   * TODO: should we make this mandatory? Is it possible to configure it from Dashboard?
    * default chain Id to use
    */
-  defaultChainId: string;
+  defaultChainId?: string;
 
   /**
    * setting to true will enable logs
@@ -75,6 +74,7 @@ export interface IWeb3AuthCoreOptions {
    *
    * @defaultValue "local"
    */
+  // TODO: rename this to match customauth, sfa
   storageType?: "session" | "local";
 
   /**
