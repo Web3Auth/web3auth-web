@@ -126,7 +126,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
-      // TODO: we're using mock project config to test, remove this before production
+      // // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
       //   chains: {
@@ -143,37 +143,37 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //       config: getChainConfig("solana", "0x67", this.options.clientId),
       //     },
       //   },
-      //   external_wallets: {
+      //   externalWalletLogin: {
       //     enabled: true,
-      //     wallets: {
+      //     config: {
       //       metamask: { enabled: true },
       //       phantom: { enabled: false },
       //       trust: { enabled: false },
       //     },
       //   },
-      //   social_login: {
+      //   socialLogin: {
       //     [LOGIN_PROVIDER.GOOGLE]: {
       //       enabled: true,
-      //       // config: {
-      //       //   verifier: "web3auth-jwt-verifier",
-      //       //   clientId: "taiclientId",
-      //       //   typeOfLogin: "jwt",
-      //       //   jwtParameters: {
-      //       //     domain: "https://tai.web3auth.io",
-      //       //   },
-      //       //   showOnModal: true,
-      //       //   showOnDesktop: true,
-      //       //   showOnMobile: true,
-      //       //   showOnSocialBackupFactor: true,
-      //       //   mainOption: true,
-      //       //   name: "Google",
-      //       // },
+      //       config: {
+      //         verifier: "web3auth-jwt-verifier",
+      //         clientId: "taiclientId",
+      //         typeOfLogin: "jwt",
+      //         jwtParameters: {
+      //           domain: "https://tai.web3auth.io",
+      //         },
+      //         showOnModal: true,
+      //         showOnDesktop: true,
+      //         showOnMobile: true,
+      //         showOnSocialBackupFactor: true,
+      //         mainOption: true,
+      //         name: "Google",
+      //       },
       //     },
       //     [LOGIN_PROVIDER.FACEBOOK]: {
       //       enabled: false,
       //     },
       //   },
-      //   email_passwordless_login: {
+      //   emailPasswordlessLogin: {
       //     enabled: true,
       //     config: {
       //       verifier: "web3auth-jwt-verifier",
@@ -190,7 +190,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //       name: "Email",
       //     },
       //   },
-      //   sms_passwordless_login: {
+      //   smsPasswordlessLogin: {
       //     enabled: true,
       //     config: {
       //       verifier: "web3auth-jwt-verifier",
@@ -207,7 +207,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //       name: "Email",
       //     },
       //   },
-      //   passkeys_login: { enabled: false },
+      //   passkeysLogin: { enabled: false },
       // };
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
@@ -216,14 +216,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    const isExternalWalletEnabled = projectConfig.external_wallets?.enabled ?? true;
-    // TODO: should we remove params?.hideWalletDiscovery, and only rely on projectConfig.external_wallets.enabled?
+    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
     if (!params?.hideWalletDiscovery && isExternalWalletEnabled) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
 
         // remove wallets that are disabled in project config from wallet registry
-        Object.entries(projectConfig.external_wallets?.wallets || {}).forEach(([wallet, { enabled }]) => {
+        Object.entries(projectConfig.externalWalletLogin?.config || {}).forEach(([wallet, { enabled }]) => {
           if (!enabled) {
             delete walletRegistry.default[wallet];
             delete walletRegistry.others[wallet];
@@ -269,10 +268,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private async filterConnectors(params: ModalConfigParams, projectConfig: ProjectConfig): Promise<string[]> {
     // modal config from project config
     const loginConfig: Record<string, LoginConfigItem> = {
-      ...(projectConfig.social_login || {}),
-      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: projectConfig.email_passwordless_login || { enabled: false },
-      [LOGIN_PROVIDER.SMS_PASSWORDLESS]: projectConfig.sms_passwordless_login || { enabled: false },
-      [LOGIN_PROVIDER.PASSKEYS]: projectConfig.passkeys_login || { enabled: false },
+      ...(projectConfig.socialLogin || {}),
+      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: projectConfig.emailPasswordlessLogin || { enabled: false },
+      [LOGIN_PROVIDER.SMS_PASSWORDLESS]: projectConfig.smsPasswordlessLogin || { enabled: false },
+      [LOGIN_PROVIDER.PASSKEYS]: projectConfig.passkeysLogin || { enabled: false },
     } as Record<string, LoginConfigItem>;
     const loginMethods: LoginMethodConfig = {};
     for (const [provider, loginConfigItem] of Object.entries(loginConfig || {})) {
@@ -294,9 +293,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     params.modalConfig = deepmerge(projectModalConfig, cloneDeep(params.modalConfig || {}));
 
     // external wallets config
-    const isExternalWalletEnabled = projectConfig.external_wallets?.enabled ?? true;
+    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
     const disabledExternalWallets = Object.fromEntries(
-      Object.entries(projectConfig.external_wallets?.wallets || {}).filter(([_, { enabled }]) => !enabled)
+      Object.entries(projectConfig.externalWalletLogin?.config || {}).filter(([_, { enabled }]) => !enabled)
     );
 
     // merge default connectors with the custom configured connectors.

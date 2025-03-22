@@ -358,26 +358,20 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const {
-      whitelist,
-      social_login: socialLoginConfig,
-      email_passwordless_login: emailPasswordlessLoginConfig,
-      sms_passwordless_login: smsPasswordlessLoginConfig,
-      passkeys_login: passkeysLoginConfig,
-    } = projectConfig;
+    const { whitelist, socialLogin, emailPasswordlessLogin, smsPasswordlessLogin, passkeysLogin } = projectConfig;
 
     const loginConfig: LoginConfig = {};
     // TODO: handling backward compatibility for smsOtpEnabled should be in the endpoint /getProjectConfig in Signer service
-    if (smsPasswordlessLoginConfig?.enabled) {
-      loginConfig[LOGIN_PROVIDER.SMS_PASSWORDLESS] = smsPasswordlessLoginConfig.config;
+    if (smsPasswordlessLogin?.enabled) {
+      loginConfig[LOGIN_PROVIDER.SMS_PASSWORDLESS] = smsPasswordlessLogin.config;
     }
-    if (emailPasswordlessLoginConfig?.enabled) {
-      loginConfig[LOGIN_PROVIDER.EMAIL_PASSWORDLESS] = emailPasswordlessLoginConfig.config;
+    if (emailPasswordlessLogin?.enabled) {
+      loginConfig[LOGIN_PROVIDER.EMAIL_PASSWORDLESS] = emailPasswordlessLogin.config;
     }
-    if (passkeysLoginConfig?.enabled) {
-      loginConfig[LOGIN_PROVIDER.PASSKEYS] = passkeysLoginConfig.config;
+    if (passkeysLogin?.enabled) {
+      loginConfig[LOGIN_PROVIDER.PASSKEYS] = passkeysLogin.config;
     }
-    for (const [provider, socialLoginConfigItem] of Object.entries(socialLoginConfig || {})) {
+    for (const [provider, socialLoginConfigItem] of Object.entries(socialLogin || {})) {
       loginConfig[provider] = socialLoginConfigItem.config;
     }
     connectorSettings.loginConfig = loginConfig;

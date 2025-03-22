@@ -14,7 +14,7 @@ export type ChainConfigItem = {
 
 export interface ExternalWalletsConfig {
   enabled: boolean;
-  wallets: Record<string, { enabled: boolean }>;
+  config: Record<string, { enabled: boolean }>;
 }
 
 export type LoginConfigItem = {
@@ -36,11 +36,11 @@ export interface ProjectConfig {
   // Chains
   chains?: Record<string, ChainConfigItem>;
   // Login config
-  external_wallets?: ExternalWalletsConfig;
-  social_login?: Record<string, LoginConfigItem>;
-  email_passwordless_login?: LoginConfigItem;
-  sms_passwordless_login?: LoginConfigItem;
-  passkeys_login?: LoginConfigItem;
+  externalWalletLogin?: ExternalWalletsConfig;
+  socialLogin?: Record<string, LoginConfigItem>;
+  emailPasswordlessLogin?: LoginConfigItem;
+  smsPasswordlessLogin?: LoginConfigItem;
+  passkeysLogin?: LoginConfigItem;
 }
 
 export interface WalletRegistryItem {
