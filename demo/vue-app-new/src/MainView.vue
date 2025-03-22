@@ -10,6 +10,8 @@ import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
 import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { formDataStore } from "./store/form";
+import { FormConfigSettings } from "./interfaces";
+import { LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
 
 const formData = formDataStore;
 
@@ -111,11 +113,13 @@ const options = computed((): Web3AuthOptions => {
 const loginMethodsConfig = computed(() => {
   if (formData.loginProviders.length === 0) return undefined;
 
-  if (!Object.values(formData.loginMethods).some((x) => x.showOnModal)) {
-    return undefined;
-  }
+  // only show login methods that are configured
+  const config = formData.loginProviders.reduce((acc, provider) => {
+    acc[provider] = formData.loginMethods[provider];
+    return acc;
+  }, {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>);
 
-  const loginMethods = JSON.parse(JSON.stringify(formData.loginMethods));
+  const loginMethods = JSON.parse(JSON.stringify(config));
   return loginMethods;
 });
 
