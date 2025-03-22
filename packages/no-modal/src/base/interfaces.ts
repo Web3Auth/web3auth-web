@@ -1,4 +1,4 @@
-import { WhiteLabelData } from "@web3auth/auth";
+import { LoginConfig, WhiteLabelData } from "@web3auth/auth";
 
 import { ChainNamespaceType, CustomChainConfig } from "./chain/IChainInterface";
 
@@ -11,6 +11,11 @@ export interface ExternalWalletsConfig {
   enabled: boolean;
   wallets: Record<string, { enabled: boolean }>;
 }
+
+export type LoginConfigItem = {
+  enabled: boolean;
+  config?: LoginConfig[keyof LoginConfig];
+};
 
 // TODO: finalize the project config
 export interface ProjectConfig {
@@ -25,8 +30,12 @@ export interface ProjectConfig {
   key_export_enabled?: boolean;
   // Chains
   chains?: CustomChainConfig[];
-  // External wallets
+  // Login config
   external_wallets?: ExternalWalletsConfig;
+  social_login?: Record<string, LoginConfigItem>;
+  email_passwordless_login?: LoginConfigItem;
+  sms_passwordless_login?: LoginConfigItem;
+  passkeys_login?: LoginConfigItem;
 }
 
 export interface WalletRegistryItem {
