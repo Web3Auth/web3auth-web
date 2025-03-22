@@ -7,6 +7,11 @@ export interface WhitelistResponse {
   signed_urls: Record<string, string>;
 }
 
+export type ChainConfigItem = {
+  enabled: boolean;
+  config: CustomChainConfig;
+};
+
 export interface ExternalWalletsConfig {
   enabled: boolean;
   wallets: Record<string, { enabled: boolean }>;
@@ -29,7 +34,7 @@ export interface ProjectConfig {
   whitelist?: WhitelistResponse;
   key_export_enabled?: boolean;
   // Chains
-  chains?: CustomChainConfig[];
+  chains?: Record<string, ChainConfigItem>;
   // Login config
   external_wallets?: ExternalWalletsConfig;
   social_login?: Record<string, LoginConfigItem>;

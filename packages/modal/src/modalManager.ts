@@ -129,7 +129,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
-      //   chains: [getChainConfig("eip155", "0x1", this.options.clientId), getChainConfig("solana", "0x1", this.options.clientId)],
+      //   chains: {
+      //     "0x1": {
+      //       enabled: true,
+      //       config: getChainConfig("eip155", "0x1", this.options.clientId),
+      //     },
+      //     "0x65": {
+      //       enabled: true,
+      //       config: getChainConfig("solana", "0x65", this.options.clientId),
+      //     },
+      //     "0x67": {
+      //       enabled: false,
+      //       config: getChainConfig("solana", "0x67", this.options.clientId),
+      //     },
+      //   },
       //   external_wallets: {
       //     enabled: true,
       //     wallets: {
@@ -141,20 +154,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //   social_login: {
       //     [LOGIN_PROVIDER.GOOGLE]: {
       //       enabled: true,
-      //       config: {
-      //         verifier: "web3auth-jwt-verifier",
-      //         clientId: "taiclientId",
-      //         typeOfLogin: "jwt",
-      //         jwtParameters: {
-      //           domain: "https://tai.web3auth.io",
-      //         },
-      //         showOnModal: true,
-      //         showOnDesktop: true,
-      //         showOnMobile: true,
-      //         showOnSocialBackupFactor: true,
-      //         mainOption: true,
-      //         name: "Google",
-      //       },
+      //       // config: {
+      //       //   verifier: "web3auth-jwt-verifier",
+      //       //   clientId: "taiclientId",
+      //       //   typeOfLogin: "jwt",
+      //       //   jwtParameters: {
+      //       //     domain: "https://tai.web3auth.io",
+      //       //   },
+      //       //   showOnModal: true,
+      //       //   showOnDesktop: true,
+      //       //   showOnMobile: true,
+      //       //   showOnSocialBackupFactor: true,
+      //       //   mainOption: true,
+      //       //   name: "Google",
+      //       // },
       //     },
       //     [LOGIN_PROVIDER.FACEBOOK]: {
       //       enabled: false,

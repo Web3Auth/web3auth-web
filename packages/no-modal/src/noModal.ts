@@ -3,6 +3,7 @@ import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth"
 import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
+  ChainConfigItem,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
@@ -222,18 +223,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected mergeChainsConfig(projectConfigChains?: CustomChainConfig[]) {
-    // merge chains from project config with core options, core options chains will override project config chains
-    const allChains = [...(projectConfigChains || []), ...(this.coreOptions.chains || [])];
-    const chainMap = new Map<string, CustomChainConfig>();
-    for (const chain of allChains) {
-      const existingChain = chainMap.get(chain.chainId);
-      if (!existingChain) chainMap.set(chain.chainId, chain);
+  protected mergeChainsConfig(projectConfigChains?: Record<string, ChainConfigItem>) {
+    // merge chains from project config with core options, core options chains will take precedence over project config chains
+    const mergedChains = { ...projectConfigChains };
+    (this.coreOptions.chains || []).forEach((chain) => {
+      const projectConfigChain = projectConfigChains?.[chain.chainId];
+      if (!projectConfigChain) mergedChains[chain.chainId] = { enabled: true, config: chain };
       else {
-        chainMap.set(chain.chainId, { ...existingChain, ...chain });
+        mergedChains[chain.chainId] = { ...projectConfigChain, ...{ ...chain, enabled: true } };
       }
-    }
-    this.coreOptions.chains = Array.from(chainMap.values());
+    });
+    this.coreOptions.chains = Object.values(mergedChains)
+      .filter((chain) => chain.enabled)
+      .map((chain) => chain.config);
 
     // validate chains and namespaces
     if (!this.coreOptions.chains?.length) throw WalletInitializationError.invalidParams("Please provide chains");
