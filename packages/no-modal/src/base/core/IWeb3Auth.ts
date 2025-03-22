@@ -141,7 +141,7 @@ export interface IWeb3AuthCoreOptions {
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: string | null;
-  currentChain: CustomChainConfig;
+  currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;

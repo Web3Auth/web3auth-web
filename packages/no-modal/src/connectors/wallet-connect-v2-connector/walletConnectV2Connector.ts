@@ -400,14 +400,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 }
 
 export const walletConnectV2Connector = (params?: IConnectorSettings): ConnectorFn => {
-  return ({ projectConfig, coreOptions }: ConnectorParams) => {
-    let { projectId } = params?.walletConnectInitOptions || {};
-
-    // use project config if projectId is not set
-    if (projectConfig) {
-      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-      if (walletConnectEnabled && walletConnectProjectId && !projectId) projectId = walletConnectProjectId;
-    }
+  return ({ coreOptions }: ConnectorParams) => {
+    const { projectId } = params?.walletConnectInitOptions || {};
 
     const connectorSettings = {
       ...params,

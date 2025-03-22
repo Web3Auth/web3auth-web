@@ -36,7 +36,7 @@ const props = defineProps<{
 }>();
 
 const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
-const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain.chainId);
+const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
 const connection = computed(() => {

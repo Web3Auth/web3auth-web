@@ -12,8 +12,9 @@ import {
   type IWeb3AuthCoreOptions,
   log,
   LOGIN_PROVIDER,
+  LoginConfigItem,
   type LoginMethodConfig,
-  type PROJECT_CONFIG_RESPONSE,
+  type ProjectConfig,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -62,12 +63,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(params?: ModalConfigParams): Promise<void> {
     super.checkInitRequirements();
-    super.initCachedConnectorAndChainId();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig(params);
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+
+    // chains config
+    super.mergeChainsConfig(projectConfig.chains);
+    super.initCachedConnectorAndChainId();
 
     // init login modal
     this.loginModal = new LoginModal({
@@ -115,13 +119,96 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private async getProjectAndWalletConfig(params?: ModalConfigParams) {
     // get project config
-    let projectConfig: PROJECT_CONFIG_RESPONSE;
+    let projectConfig: ProjectConfig;
     try {
       projectConfig = await fetchProjectConfig(
         this.options.clientId,
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
+      // // TODO: we're using mock project config to test, remove this before production
+      // projectConfig = {
+      //   ...projectConfig,
+      //   chains: {
+      //     "0x1": {
+      //       enabled: true,
+      //       config: getChainConfig("eip155", "0x1", this.options.clientId),
+      //     },
+      //     "0x65": {
+      //       enabled: true,
+      //       config: getChainConfig("solana", "0x65", this.options.clientId),
+      //     },
+      //     "0x67": {
+      //       enabled: false,
+      //       config: getChainConfig("solana", "0x67", this.options.clientId),
+      //     },
+      //   },
+      //   externalWalletLogin: {
+      //     enabled: true,
+      //     config: {
+      //       metamask: { enabled: true },
+      //       phantom: { enabled: false },
+      //       trust: { enabled: false },
+      //     },
+      //   },
+      //   socialLogin: {
+      //     [LOGIN_PROVIDER.GOOGLE]: {
+      //       enabled: true,
+      //       config: {
+      //         verifier: "web3auth-jwt-verifier",
+      //         clientId: "taiclientId",
+      //         typeOfLogin: "jwt",
+      //         jwtParameters: {
+      //           domain: "https://tai.web3auth.io",
+      //         },
+      //         showOnModal: true,
+      //         showOnDesktop: true,
+      //         showOnMobile: true,
+      //         showOnSocialBackupFactor: true,
+      //         mainOption: true,
+      //         name: "Google",
+      //       },
+      //     },
+      //     [LOGIN_PROVIDER.FACEBOOK]: {
+      //       enabled: false,
+      //     },
+      //   },
+      //   emailPasswordlessLogin: {
+      //     enabled: true,
+      //     config: {
+      //       verifier: "web3auth-jwt-verifier",
+      //       clientId: "taiclientId",
+      //       typeOfLogin: "jwt",
+      //       jwtParameters: {
+      //         domain: "https://tai.web3auth.io",
+      //       },
+      //       showOnModal: true,
+      //       showOnDesktop: true,
+      //       showOnMobile: true,
+      //       showOnSocialBackupFactor: true,
+      //       mainOption: true,
+      //       name: "Email",
+      //     },
+      //   },
+      //   smsPasswordlessLogin: {
+      //     enabled: true,
+      //     config: {
+      //       verifier: "web3auth-jwt-verifier",
+      //       clientId: "taiclientId",
+      //       typeOfLogin: "jwt",
+      //       jwtParameters: {
+      //         domain: "https://tai.web3auth.io",
+      //       },
+      //       showOnModal: true,
+      //       showOnDesktop: true,
+      //       showOnMobile: true,
+      //       showOnSocialBackupFactor: true,
+      //       mainOption: true,
+      //       name: "Email",
+      //     },
+      //   },
+      //   passkeysLogin: { enabled: false },
+      // };
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
@@ -129,9 +216,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    if (!params?.hideWalletDiscovery) {
+    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
+    if (!params?.hideWalletDiscovery && isExternalWalletEnabled) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
+
+        // remove wallets that are disabled in project config from wallet registry
+        Object.entries(projectConfig.externalWalletLogin?.config || {}).forEach(([wallet, { enabled }]) => {
+          if (!enabled) {
+            delete walletRegistry.default[wallet];
+            delete walletRegistry.others[wallet];
+          }
+        });
       } catch (e) {
         log.error("Failed to fetch wallet registry", e);
       }
@@ -145,7 +241,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     modalConfig,
   }: {
     connectors: IConnector<unknown>[];
-    projectConfig: PROJECT_CONFIG_RESPONSE;
+    projectConfig: ProjectConfig;
     modalConfig: ModalConfigParams;
   }) {
     // filter connectors based on config
@@ -169,31 +265,38 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  private async filterConnectors(params: ModalConfigParams, projectConfig: PROJECT_CONFIG_RESPONSE): Promise<string[]> {
-    // update auth connector config
-    const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
-    if (smsOtpEnabled !== undefined) {
-      // TODO: use the new login config method
-      const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
-        [WALLET_CONNECTORS.AUTH]: {
-          label: WALLET_CONNECTORS.AUTH,
-          loginMethods: {
-            [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
-              showOnModal: smsOtpEnabled,
-              showOnDesktop: smsOtpEnabled,
-              showOnMobile: smsOtpEnabled,
-            },
-          },
-        },
+  private async filterConnectors(params: ModalConfigParams, projectConfig: ProjectConfig): Promise<string[]> {
+    // modal config from project config
+    const loginConfig: Record<string, LoginConfigItem> = {
+      ...(projectConfig.socialLogin || {}),
+      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: projectConfig.emailPasswordlessLogin || { enabled: false },
+      [LOGIN_PROVIDER.SMS_PASSWORDLESS]: projectConfig.smsPasswordlessLogin || { enabled: false },
+      [LOGIN_PROVIDER.PASSKEYS]: projectConfig.passkeysLogin || { enabled: false },
+    } as Record<string, LoginConfigItem>;
+    const loginMethods: LoginMethodConfig = {};
+    for (const [provider, loginConfigItem] of Object.entries(loginConfig || {})) {
+      loginMethods[provider] = {
+        name: provider,
+        ...loginConfigItem.config,
+        showOnModal: loginConfigItem.enabled,
+        showOnDesktop: loginConfigItem.enabled,
+        showOnMobile: loginConfigItem.enabled,
       };
-      if (!params?.modalConfig) params = { modalConfig: {} };
-      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
-      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
-        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
-      }
-      params.modalConfig = deepmerge(connectorConfig, cloneDeep(params.modalConfig));
     }
+    const projectModalConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
+      [WALLET_CONNECTORS.AUTH]: { label: WALLET_CONNECTORS.AUTH, loginMethods },
+    };
+    // merge with user config
+    if (params?.modalConfig?.[WALLET_CONNECTORS.AUTH]) {
+      if (!params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods) params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods = {};
+    }
+    params.modalConfig = deepmerge(projectModalConfig, cloneDeep(params.modalConfig || {}));
+
+    // external wallets config
+    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
+    const disabledExternalWallets = Object.fromEntries(
+      Object.entries(projectConfig.externalWalletLogin?.config || {}).filter(([_, { enabled }]) => !enabled)
+    );
 
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [
@@ -211,39 +314,26 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (params?.modalConfig?.[connectorName]) {
         connectorConfig = { ...connectorConfig, ...params.modalConfig[connectorName] };
       }
-      (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName] = connectorConfig as ModalConfig;
 
       // check if connector is configured/added by user and exist in connectors map.
       const connector = this.getConnector(connectorName);
-      log.debug("connector config", connectorName, this.modalConfig.connectors?.[connectorName].showOnModal, connector);
+      log.debug("connector config", connectorName, connectorConfig.showOnModal, connector);
 
       // if connector is not custom configured then check if it is available in default connectors.
       // and if connector is not hidden by user
-      if (!connector && this.modalConfig.connectors?.[connectorName].showOnModal) {
-        throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
-      } else if (
-        connector?.type === CONNECTOR_CATEGORY.IN_APP ||
-        connector?.type === CONNECTOR_CATEGORY.EXTERNAL ||
-        connectorName === this.cachedConnector
-      ) {
-        if (!this.modalConfig.connectors?.[connectorName].showOnModal) return;
-        if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-          const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
-          if (walletConnectEnabled === false) {
-            // override user specified config by hiding wallet connect
-            this.modalConfig.connectors = {
-              ...(this.modalConfig.connectors ?? {}),
-              [WALLET_CONNECTORS.WALLET_CONNECT_V2]: {
-                ...(this.modalConfig.connectors?.[WALLET_CONNECTORS.WALLET_CONNECT_V2] ?? {}),
-                showOnModal: false,
-              },
-            } as Record<string, ModalConfig>;
-            this.modalConfig.connectors[WALLET_CONNECTORS.WALLET_CONNECT_V2].showOnModal = false;
-          }
-        }
-
-        return connectorName;
+      if (!connector) {
+        if (connectorConfig.showOnModal) throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
+        return;
       }
+      // skip connector if it is hidden by user
+      if (!connectorConfig.showOnModal) return;
+
+      // skip connector if it is external and external wallets are disabled or it is disabled in project config
+      const isExternalWallet = connector.type === CONNECTOR_CATEGORY.EXTERNAL || connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2;
+      if (isExternalWallet && (!isExternalWalletEnabled || disabledExternalWallets[connectorName])) return;
+
+      this.modalConfig.connectors[connectorName] = connectorConfig;
+      return connectorName;
     });
     const connectorNames = await Promise.all(connectorConfigurationPromises);
     return connectorNames.filter((name) => name !== undefined);
