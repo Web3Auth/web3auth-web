@@ -1,17 +1,17 @@
 <script setup lang="ts">
 
-import { CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { AccountAbstractionMultiChainConfig, CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
+import { LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { chainConfigs, clientIds, getDefaultBundlerUrl, NFT_CHECKOUT_CLIENT_ID } from "./config";
-import { formDataStore } from "./store/form";
+import { clientIds, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { FormConfigSettings } from "./interfaces";
-import { LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
+import { formDataStore } from "./store/form";
 
 const formData = formDataStore;
 
@@ -22,29 +22,34 @@ const showAAProviderSettings = computed(() => formData.chainNamespaces.includes(
 // Options for reinitializing the web3Auth object
 const options = computed((): Web3AuthOptions => {
   const { config: whiteLabel, enable: enabledWhiteLabel } = formData.whiteLabel;
-  // TODO: AA config need multi chain support
-  const evmChainIds = chainConfigs[CHAIN_NAMESPACES.EIP155].filter((x) => formData.chains.includes(x));
-  const firstEvmChainId = evmChainIds[0];
 
   // Account Abstraction
   const { useAccountAbstractionProvider } = formData;
   let accountAbstractionConfig: Web3AuthOptions["accountAbstractionConfig"];
   if (showAAProviderSettings.value && useAccountAbstractionProvider) {
+    const chains: AccountAbstractionMultiChainConfig["chains"] = {};
+    Object.entries(formData.smartAccountChainsConfig).forEach(([chainId, { bundlerUrl, paymasterUrl }]) => {
+      if (formData.chains.includes(chainId)) {
+        chains[chainId] = {
+          bundlerConfig: { url: bundlerUrl },
+          paymasterConfig: paymasterUrl ? { url: paymasterUrl } : undefined,
+          smartAccountConfig: undefined,
+        }
+      }
+    });
     accountAbstractionConfig = {
       smartAccountType: formData.smartAccountType as string,
-      smartAccountConfig: undefined,
-      bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(firstEvmChainId) },
-      paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
+      chains,
     }
   }
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
-    // walletUrls: {
-    //   production: {
-    //     url: "http://localhost:4050",
-    //   }
-    // }
+    walletUrls: {
+      production: {
+        url: "http://localhost:4050",
+      }
+    }
   };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
@@ -161,8 +166,8 @@ onBeforeMount(() => {
         formData.nftCheckoutPlugin = json.nftCheckoutPlugin || {};
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
-        formData.bundlerUrl = json.bundlerUrl;
-        formData.paymasterUrl = json.paymasterUrl;
+        formData.smartAccountChains = json.smartAccountChains;
+        formData.smartAccountChainsConfig = json.smartAccountChainsConfig;
       }
     } catch (error) { }
   }

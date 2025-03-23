@@ -102,7 +102,7 @@ export type FormData = {
   network: WEB3AUTH_NETWORK_TYPE;
   chainNamespaces: ChainNamespaceType[];
   chains: string[];
-  defaultChainId: string;
+  defaultChainId?: string;
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
@@ -122,8 +122,8 @@ export type FormData = {
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
-  bundlerUrl?: string;
-  paymasterUrl?: string;
+  smartAccountChains: string[];
+  smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
