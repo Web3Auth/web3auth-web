@@ -11,6 +11,7 @@ import Button from "./Button";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
+import Image from "./Image";
 // import Loader from "./Loader";
 import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
@@ -168,6 +169,26 @@ export default function Modal(props: ModalProps) {
     </div>
   );
 
+  const metamaskWalletButton = (
+    <div className="w3ajs-external-wallet w3a-group w3a--w-full">
+      <div className="w3a-external-toggle w3ajs-external-toggle">
+        {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
+        <Button
+          variant={isExternalPrimary ? "primary" : "tertiary"}
+          type="button"
+          className="w3a--w-full w3ajs-external-toggle__button"
+          style={{ width: "100%" }}
+          onClick={() => {
+            handleExternalWalletClick({ connector: "metamask" });
+          }}
+        >
+          <Image imageId="login-metamask" hoverImageId="login-metamask" fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
+          <span className="ml-2">{t("modal.external.metamaskConnect")}</span>
+        </Button>
+      </div>
+    </div>
+  );
+
   const areSocialLoginsVisible = useMemo(() => {
     if (modalState.showExternalWalletsOnly) return false;
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
@@ -240,6 +261,7 @@ export default function Modal(props: ModalProps) {
                     )}
 
                     {/* button to show external wallets */}
+                    {metamaskWalletButton}
                     {modalState.hasExternalWallets && externalWalletButton}
                   </div>
                 </>

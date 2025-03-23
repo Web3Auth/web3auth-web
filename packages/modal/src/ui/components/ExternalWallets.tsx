@@ -107,6 +107,7 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
       const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
         return Object.keys(wallets).reduce((acc, wallet) => {
           if (adapterVisibilityMap[wallet] === false) return acc;
+          if (wallet === "metamask") return acc;
 
           const walletRegistryItem: WalletRegistryItem = wallets[wallet];
           let href = "";

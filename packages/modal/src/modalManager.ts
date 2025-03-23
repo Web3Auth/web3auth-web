@@ -287,7 +287,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
           // only initialize a external connectors here if it is a cached connector.
-          if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
+          if (this.cachedConnector !== connectorName && connectorName !== "metamask" && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
 
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
