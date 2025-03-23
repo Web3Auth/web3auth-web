@@ -107,7 +107,8 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
       const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
         return Object.keys(wallets).reduce((acc, wallet) => {
           if (adapterVisibilityMap[wallet] === false) return acc;
-          if (wallet === "metamask") return acc;
+          // Metamask is always visible in the main screen, no need to show it in the external wallets list
+          if (wallet === WALLET_CONNECTORS.METAMASK) return acc;
 
           const walletRegistryItem: WalletRegistryItem = wallets[wallet];
           let href = "";
@@ -147,6 +148,8 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
 
       // Generate custom adapter buttons
       const customAdapterButtons: ExternalButton[] = Object.keys(config).reduce((acc, adapter) => {
+        // Metamask is always visible in the main screen, no need to show it in the external wallets list
+        if (adapter === WALLET_CONNECTORS.METAMASK) return acc;
         if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && !config[adapter].isInjected && adapterVisibilityMap[adapter]) {
           log.debug("custom adapter", adapter, config[adapter]);
           acc.push({

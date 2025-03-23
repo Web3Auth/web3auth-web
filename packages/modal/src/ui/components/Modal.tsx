@@ -1,5 +1,5 @@
 import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WalletRegistry } from "@web3auth/no-modal";
+import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WalletRegistry } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -179,7 +179,7 @@ export default function Modal(props: ModalProps) {
           className="w3a--w-full w3ajs-external-toggle__button"
           style={{ width: "100%" }}
           onClick={() => {
-            handleExternalWalletClick({ connector: "metamask" });
+            preHandleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
           }}
         >
           <Image imageId="login-metamask" hoverImageId="login-metamask" fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />

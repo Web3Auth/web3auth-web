@@ -1,0 +1,1 @@
+export { metaMaskConnector } from "./metaMaskConnector";
