@@ -1,3 +1,4 @@
+import { SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { LoginConfig, WhiteLabelData } from "@web3auth/auth";
 
 import { ChainNamespaceType, CustomChainConfig } from "./chain/IChainInterface";
@@ -22,6 +23,31 @@ export type LoginConfigItem = {
   config?: LoginConfig[keyof LoginConfig];
 };
 
+export const SMART_ACCOUNT_WALLET_SCOPE = {
+  EMBEDDED_ONLY: "embeddedOnly",
+  ALL: "all",
+} as const;
+
+export type SmartAccountWalletScope = (typeof SMART_ACCOUNT_WALLET_SCOPE)[keyof typeof SMART_ACCOUNT_WALLET_SCOPE];
+
+export interface SmartAccountsConfig {
+  enabled: boolean;
+  config: {
+    smartAccountType: SmartAccountType;
+    walletScope: SmartAccountWalletScope;
+    chains: {
+      [chainId: string]: {
+        bundlerConfig: {
+          url: string;
+        };
+        paymasterConfig?: {
+          url: string;
+        };
+      };
+    };
+  };
+}
+
 // TODO: finalize the project config
 export interface ProjectConfig {
   // Legacy
@@ -41,6 +67,8 @@ export interface ProjectConfig {
   emailPasswordlessLogin?: LoginConfigItem;
   smsPasswordlessLogin?: LoginConfigItem;
   passkeysLogin?: LoginConfigItem;
+  // Smart accounts
+  smartAccounts?: SmartAccountsConfig;
 }
 
 export interface WalletRegistryItem {

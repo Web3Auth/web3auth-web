@@ -69,8 +69,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
-    // chains config
-    super.mergeChainsConfig(projectConfig.chains);
+    // init config
+    super.initChainsConfig(projectConfig);
+    super.initAccountAbstractionConfig(projectConfig);
     super.initCachedConnectorAndChainId();
 
     // init login modal
@@ -126,7 +127,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
-      // // TODO: we're using mock project config to test, remove this before production
+      // // // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
       //   chains: {
@@ -154,20 +155,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //   socialLogin: {
       //     [LOGIN_PROVIDER.GOOGLE]: {
       //       enabled: true,
-      //       config: {
-      //         verifier: "web3auth-jwt-verifier",
-      //         clientId: "taiclientId",
-      //         typeOfLogin: "jwt",
-      //         jwtParameters: {
-      //           domain: "https://tai.web3auth.io",
-      //         },
-      //         showOnModal: true,
-      //         showOnDesktop: true,
-      //         showOnMobile: true,
-      //         showOnSocialBackupFactor: true,
-      //         mainOption: true,
-      //         name: "Google",
-      //       },
+      //       // config: {
+      //       //   verifier: "web3auth-jwt-verifier",
+      //       //   clientId: "taiclientId",
+      //       //   typeOfLogin: "jwt",
+      //       //   jwtParameters: {
+      //       //     domain: "https://tai.web3auth.io",
+      //       //   },
+      //       //   showOnModal: true,
+      //       //   showOnDesktop: true,
+      //       //   showOnMobile: true,
+      //       //   showOnSocialBackupFactor: true,
+      //       //   mainOption: true,
+      //       //   name: "Google",
+      //       // },
       //     },
       //     [LOGIN_PROVIDER.FACEBOOK]: {
       //       enabled: false,
@@ -208,6 +209,25 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //     },
       //   },
       //   passkeysLogin: { enabled: false },
+      //   smartAccounts: {
+      //     enabled: false,
+      //     config: {
+      //       walletScope: "all",
+      //       smartAccountType: "safe",
+      //       chains: {
+      //         "0xaa36a7": {
+      //           bundlerConfig: {
+      //             url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //           },
+      //         },
+      //         // "0x1": {
+      //         //   bundlerConfig: {
+      //         //     url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //         //   },
+      //         // },
+      //       },
+      //     },
+      //   },
       // };
     } catch (e) {
       log.error("Failed to fetch project configurations", e);

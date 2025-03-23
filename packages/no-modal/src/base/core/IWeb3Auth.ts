@@ -1,4 +1,4 @@
-import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
@@ -104,7 +104,7 @@ export interface IWeb3AuthCoreOptions {
   /**
    * Account abstraction config for your chain namespace
    */
-  accountAbstractionConfig?: AccountAbstractionConfig;
+  accountAbstractionConfig?: AccountAbstractionMultiChainConfig;
 
   /**
    * Whether to use AA with external wallet

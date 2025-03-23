@@ -1,9 +1,9 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import deepmerge from "deepmerge";
 
 import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
-  ChainConfigItem,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
@@ -22,6 +22,7 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   ProjectConfig,
+  SMART_ACCOUNT_WALLET_SCOPE,
   storageAvailable,
   UserAuthInfo,
   UserInfo,
@@ -105,8 +106,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
 
-    this.mergeChainsConfig(projectConfig.chains);
-
+    // init config
+    this.initChainsConfig(projectConfig);
+    this.initAccountAbstractionConfig(projectConfig);
     this.initCachedConnectorAndChainId();
 
     // setup common JRPC provider
@@ -223,7 +225,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  protected mergeChainsConfig(projectConfigChains?: Record<string, ChainConfigItem>) {
+  protected initChainsConfig(projectConfig: ProjectConfig) {
+    const projectConfigChains = projectConfig.chains;
     // merge chains from project config with core options, core options chains will take precedence over project config chains
     const mergedChains = { ...projectConfigChains };
     (this.coreOptions.chains || []).forEach((chain) => {
@@ -242,6 +245,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     for (const chain of this.coreOptions.chains) {
       if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
         throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
+    }
+  }
+
+  protected initAccountAbstractionConfig(projectConfig?: ProjectConfig) {
+    const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig) || projectConfig?.smartAccounts?.enabled;
+    if (!isAAEnabled) return;
+
+    // merge project config with core options, code config take precedence over project config
+    const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts?.config || {};
+    this.coreOptions.accountAbstractionConfig = deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {});
+
+    // determine if we should use AA with external wallet
+    if (this.coreOptions.useAAWithExternalWallet === undefined) {
+      this.coreOptions.useAAWithExternalWallet = walletScope === SMART_ACCOUNT_WALLET_SCOPE.ALL;
     }
   }
 
@@ -361,14 +378,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { provider } = data;
 
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
-      // setup aa provider for external wallets on EVM chains, for in app wallet, it uses WS provider which already supports AA
+
+      // setup AA provider for external wallets on EVM chains, no need for app wallet as it uses WS provider which already supports AA
       const { accountAbstractionConfig } = this.coreOptions;
-      if (
-        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
-        accountAbstractionConfig &&
-        data.connector !== WALLET_CONNECTORS.AUTH &&
-        this.coreOptions.useAAWithExternalWallet
-      ) {
+      const doesAASupportCurrentChain =
+        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 && accountAbstractionConfig?.chains[this.currentChain?.chainId];
+      const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
+      if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
         const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
@@ -377,7 +393,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           chains: this.coreOptions.chains,
         });
         finalProvider = aaProvider;
-        // TODO: when switching chains to Solana or other chains, we need to switch to the non-AA provider
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
