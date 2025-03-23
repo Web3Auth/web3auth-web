@@ -65,7 +65,7 @@
     "@walletconnect/sign-client": "^2.17.3",
     "@walletconnect/types": "^2.17.3",
     "@walletconnect/utils": "^2.17.3",
-    "@web3auth/auth": "../../../OpenLoginSdk",
+    "@web3auth/auth": "^10.2.1",
     "@web3auth/ws-embed": "4.0.4",
     "assert": "^2.1.0",
     "bignumber.js": "^9.1.2",

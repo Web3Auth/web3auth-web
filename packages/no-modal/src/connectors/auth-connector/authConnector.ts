@@ -428,12 +428,16 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       });
 
       // this is to close the popup when the login is finished.
-      const securePubSub = new SecurePubSub();
+      const securePubSub = new SecurePubSub({ sameIpCheck: true });
       securePubSub
         .subscribe(`web3auth-login-${nonce}`)
         .then((data: string) => {
           const parsedData = JSON.parse(data || "{}");
           if (parsedData?.message === "login_finished") {
+            if (parsedData?.error) {
+              this.authInstance.postLoginCancelledMessage(nonce);
+              reject(parsedData.error);
+            }
             isClosedWindow = true;
             securePubSub.cleanup();
             verifierWindow.close();
