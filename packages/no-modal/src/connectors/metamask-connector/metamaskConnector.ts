@@ -1,28 +1,30 @@
-import { MetaMaskSDK, type MetaMaskSDKOptions, type SDKProvider } from "@metamask/sdk";
+import { MetaMaskSDK, type MetaMaskSDKOptions } from "@metamask/sdk";
 
 import {
-  BaseConnectorSettings,
+  type BaseConnectorSettings,
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
+  type ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CONNECTOR_CATEGORY,
-  CONNECTOR_CATEGORY_TYPE,
+  type CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
-  CONNECTOR_STATUS_TYPE,
-  ConnectorFn,
-  ConnectorInitOptions,
-  ConnectorNamespaceType,
-  ConnectorParams,
-  IProvider,
-  UserInfo,
+  type CONNECTOR_STATUS_TYPE,
+  type ConnectorFn,
+  type ConnectorInitOptions,
+  type ConnectorNamespaceType,
+  type ConnectorParams,
+  type CustomChainConfig,
+  type IProvider,
+  type UserInfo,
   WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
 } from "@/core/base";
 
 import { BaseEvmConnector } from "../base-evm-connector";
+import { getSiteIcon, getSiteName } from "../utils";
 
 export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: MetaMaskSDKOptions;
@@ -39,15 +41,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  private metamaskProvider: SDKProvider | null = null;
+  private metamaskProvider: IProvider = null;
 
-  private metamaskSDK: MetaMaskSDK | null = null;
+  private metamaskSDK: MetaMaskSDK = null;
 
-  private metamaskOptions: MetaMaskSDKOptions = { dappMetadata: { name: "Web3Auth" } };
+  private metamaskOptions: MetaMaskSDKOptions;
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
-    this.metamaskOptions = { ...this.metamaskOptions, ...connectorOptions.connectorSettings };
+    this.metamaskOptions = connectorOptions.connectorSettings;
   }
 
   get provider(): IProvider | null {
@@ -66,7 +68,17 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    this.metamaskSDK = new MetaMaskSDK(this.metamaskOptions);
+    // Detect app metadata
+    const iconUrl = await getSiteIcon(window);
+    const appMetadata: MetaMaskSDKOptions["dappMetadata"] = {
+      name: getSiteName(window),
+      url: window.location.origin,
+      iconUrl,
+    };
+
+    // Initialize the MetaMask SDK
+    // TODO: do we need to pass InfuraKey
+    this.metamaskSDK = new MetaMaskSDK({ ...this.metamaskOptions, dappMetadata: appMetadata });
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -83,32 +95,38 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
+    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+    if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
     try {
-      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
-      if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-
       await this.metamaskSDK.connect();
-      this.metamaskProvider = this.metamaskSDK.getProvider();
+      this.metamaskProvider = this.metamaskSDK.getProvider() as unknown as IProvider;
+      if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
+      // switch chain if not connected to the right chain
       const currentChainId = (await this.metamaskProvider.request({ method: "eth_chainId" })) as string;
       if (currentChainId !== chainConfig.chainId) {
         await this.switchChain(chainConfig, true);
       }
-      this.status = CONNECTOR_STATUS.CONNECTED;
-      if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
-      this.provider.once("disconnect", () => {
-        // ready to be connected again
+
+      // handle disconnect event
+      const accountDisconnectHandler = (accounts: string[]) => {
+        if (accounts.length === 0) this.disconnect();
+      };
+      this.metamaskProvider.on("accountsChanged", accountDisconnectHandler);
+      this.metamaskProvider.once("disconnect", () => {
         this.disconnect();
       });
+
+      this.status = CONNECTOR_STATUS.CONNECTED;
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        provider: this.provider,
+        provider: this.metamaskProvider,
       } as CONNECTED_EVENT_DATA);
-      return this.provider;
+      return this.metamaskProvider;
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
@@ -120,8 +138,12 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
+    if (!this.metamaskProvider) throw WalletLoginError.connectionError("MetaMask provider is not available");
     await super.disconnectSession();
-    this.provider?.removeAllListeners();
+
+    if (typeof this.metamaskProvider.removeAllListeners !== "undefined") this.metamaskProvider.removeAllListeners();
+    await this.metamaskSDK.terminate();
+
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.metamaskProvider = null;
@@ -139,7 +161,19 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.metamaskProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+    const requestSwitchChain = () => this.metamaskProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+    try {
+      await requestSwitchChain();
+    } catch (error) {
+      // If the error code is 4902, the network needs to be added
+      if ((error as { code?: number })?.code === 4902) {
+        const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId && x.chainNamespace === this.connectorNamespace);
+        await this.addChain(chainConfig);
+        await requestSwitchChain();
+      } else {
+        throw error;
+      }
+    }
   }
 
   public async enableMFA(): Promise<void> {
@@ -148,6 +182,23 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public async manageMFA(): Promise<void> {
     throw new Error("Method Not implemented");
+  }
+
+  private async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.metamaskProvider) throw WalletLoginError.connectionError("Injected provider is not available");
+    await this.metamaskProvider.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: chainConfig.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: [chainConfig.blockExplorerUrl],
+          nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
+          iconUrls: [chainConfig.logo],
+        },
+      ],
+    });
   }
 }
 

@@ -33,7 +33,7 @@ import {
   Web3AuthNoModalEvents,
 } from "@/core/base";
 import { CommonJRPCProvider } from "@/core/base-provider";
-import { metaMaskConnector } from "@/core/meta-mask-connector";
+import { metaMaskConnector } from "@/core/metamask-connector";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
