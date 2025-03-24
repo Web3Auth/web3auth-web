@@ -12,7 +12,6 @@ import {
   type IWeb3AuthCoreOptions,
   log,
   LOGIN_PROVIDER,
-  LoginConfigItem,
   type LoginMethodConfig,
   type ProjectConfig,
   type WALLET_CONNECTOR_TYPE,
@@ -144,71 +143,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //       config: getChainConfig("solana", "0x67", this.options.clientId),
       //     },
       //   },
-      //   externalWalletLogin: {
-      //     enabled: true,
-      //     config: {
-      //       metamask: { enabled: true },
-      //       phantom: { enabled: false },
-      //       trust: { enabled: false },
-      //     },
-      //   },
-      //   socialLogin: {
-      //     [LOGIN_PROVIDER.GOOGLE]: {
-      //       enabled: true,
-      //       // config: {
-      //       //   verifier: "web3auth-jwt-verifier",
-      //       //   clientId: "taiclientId",
-      //       //   typeOfLogin: "jwt",
-      //       //   jwtParameters: {
-      //       //     domain: "https://tai.web3auth.io",
-      //       //   },
-      //       //   showOnModal: true,
-      //       //   showOnDesktop: true,
-      //       //   showOnMobile: true,
-      //       //   showOnSocialBackupFactor: true,
-      //       //   mainOption: true,
-      //       //   name: "Google",
-      //       // },
-      //     },
-      //     [LOGIN_PROVIDER.FACEBOOK]: {
-      //       enabled: false,
-      //     },
-      //   },
-      //   emailPasswordlessLogin: {
-      //     enabled: true,
-      //     config: {
-      //       verifier: "web3auth-jwt-verifier",
-      //       clientId: "taiclientId",
-      //       typeOfLogin: "jwt",
-      //       jwtParameters: {
-      //         domain: "https://tai.web3auth.io",
-      //       },
-      //       showOnModal: true,
-      //       showOnDesktop: true,
-      //       showOnMobile: true,
-      //       showOnSocialBackupFactor: true,
-      //       mainOption: true,
-      //       name: "Email",
-      //     },
-      //   },
-      //   smsPasswordlessLogin: {
-      //     enabled: true,
-      //     config: {
-      //       verifier: "web3auth-jwt-verifier",
-      //       clientId: "taiclientId",
-      //       typeOfLogin: "jwt",
-      //       jwtParameters: {
-      //         domain: "https://tai.web3auth.io",
-      //       },
-      //       showOnModal: true,
-      //       showOnDesktop: true,
-      //       showOnMobile: true,
-      //       showOnSocialBackupFactor: true,
-      //       mainOption: true,
-      //       name: "Email",
-      //     },
-      //   },
-      //   passkeysLogin: { enabled: false },
       //   smartAccounts: {
       //     enabled: false,
       //     config: {
@@ -286,31 +220,30 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   private async filterConnectors(params: ModalConfigParams, projectConfig: ProjectConfig): Promise<string[]> {
-    // modal config from project config
-    const loginConfig: Record<string, LoginConfigItem> = {
-      ...(projectConfig.socialLogin || {}),
-      [LOGIN_PROVIDER.EMAIL_PASSWORDLESS]: projectConfig.emailPasswordlessLogin || { enabled: false },
-      [LOGIN_PROVIDER.SMS_PASSWORDLESS]: projectConfig.smsPasswordlessLogin || { enabled: false },
-      [LOGIN_PROVIDER.PASSKEYS]: projectConfig.passkeysLogin || { enabled: false },
-    } as Record<string, LoginConfigItem>;
-    const loginMethods: LoginMethodConfig = {};
-    for (const [provider, loginConfigItem] of Object.entries(loginConfig || {})) {
-      loginMethods[provider] = {
-        name: provider,
-        ...loginConfigItem.config,
-        showOnModal: loginConfigItem.enabled,
-        showOnDesktop: loginConfigItem.enabled,
-        showOnMobile: loginConfigItem.enabled,
+    // update auth connector config
+    const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
+    if (smsOtpEnabled !== undefined) {
+      // TODO: use the new login config method
+      const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
+        [WALLET_CONNECTORS.AUTH]: {
+          label: WALLET_CONNECTORS.AUTH,
+          loginMethods: {
+            [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
+              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
+              showOnModal: smsOtpEnabled,
+              showOnDesktop: smsOtpEnabled,
+              showOnMobile: smsOtpEnabled,
+            },
+          },
+        },
       };
+      if (!params?.modalConfig) params = { modalConfig: {} };
+      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
+        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
+      }
+      params.modalConfig = deepmerge(connectorConfig, cloneDeep(params.modalConfig));
     }
-    const projectModalConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
-      [WALLET_CONNECTORS.AUTH]: { label: WALLET_CONNECTORS.AUTH, loginMethods },
-    };
-    // merge with user config
-    if (params?.modalConfig?.[WALLET_CONNECTORS.AUTH]) {
-      if (!params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods) params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods = {};
-    }
-    params.modalConfig = deepmerge(projectModalConfig, cloneDeep(params.modalConfig || {}));
 
     // external wallets config
     const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;

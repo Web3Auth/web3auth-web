@@ -63,10 +63,6 @@ export interface ProjectConfig {
   chains?: Record<string, ChainConfigItem>;
   // Login config
   externalWalletLogin?: ExternalWalletsConfig;
-  socialLogin?: Record<string, LoginConfigItem>;
-  emailPasswordlessLogin?: LoginConfigItem;
-  smsPasswordlessLogin?: LoginConfigItem;
-  passkeysLogin?: LoginConfigItem;
   // Smart accounts
   smartAccounts?: SmartAccountsConfig;
 }
