@@ -86,7 +86,7 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
-  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "development" } });
+  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "testing" } });
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
