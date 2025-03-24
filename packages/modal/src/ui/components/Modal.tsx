@@ -172,7 +172,6 @@ export default function Modal(props: ModalProps) {
   const metamaskWalletButton = (
     <div className="w3ajs-external-wallet w3a-group w3a--w-full">
       <div className="w3a-external-toggle w3ajs-external-toggle">
-        {/* <div className="w3a-group__title">{t("modal.external.title")}</div> */}
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
@@ -183,7 +182,7 @@ export default function Modal(props: ModalProps) {
           }}
         >
           <Image imageId="login-metamask" hoverImageId="login-metamask" fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
-          <span className="ml-2">{t("modal.external.metamaskConnect")}</span>
+          <span className="ml-2">{t("modal.external.continue-custom", { wallet: "MetaMask" })}</span>
         </Button>
       </div>
     </div>
