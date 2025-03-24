@@ -1,4 +1,4 @@
-import { ProviderConfig } from "@toruslabs/base-controllers";
+import { BUTTON_POSITION, CONFIRMATION_STRATEGY, ProviderConfig } from "@toruslabs/base-controllers";
 import { Auth, LOGIN_PROVIDER, LoginParams, SUPPORTED_KEY_CURVES, UX_MODE, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
@@ -358,7 +358,7 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const { sms_otp_enabled: smsOtpEnabled, whitelist } = projectConfig;
+    const { sms_otp_enabled: smsOtpEnabled, whitelist, sessionTime } = projectConfig;
     if (smsOtpEnabled !== undefined) {
       connectorSettings.loginConfig = {
         [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
@@ -370,27 +370,58 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions">
       };
     }
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
+    if (sessionTime) connectorSettings.sessionTime = sessionTime;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
     const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
       { uxMode: UX_MODE.POPUP }, // default settings
-      params?.connectorSettings || {},
       connectorSettings,
+      params?.connectorSettings || {},
     ]) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
-    const isKeyExportEnabled = typeof projectConfig.key_export_enabled === "boolean" ? projectConfig.key_export_enabled : true;
+    const { keyExportEnabled, walletUi } = projectConfig;
+    const isKeyExportEnabled = typeof keyExportEnabled === "boolean" ? keyExportEnabled : true;
+    const {
+      portfolioWidgetEnabled = false,
+      portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
+      defaultPortfolio = "token",
+      tokenDisplayEnabled = true,
+      nftDisplayEnabled = true,
+      walletConnectEnabled = true,
+      buyButtonEnabled = true,
+      sendButtonEnabled = true,
+      swapButtonEnabled = true,
+      receiveButtonEnabled = true,
+      showAllTokensButtonEnabled = true,
+      confirmationModalEnabled = false,
+    } = walletUi || {};
+    const projectConfigWhiteLabel: WalletServicesSettings["whiteLabel"] = {
+      showWidgetButton: portfolioWidgetEnabled,
+      hideNftDisplay: !nftDisplayEnabled,
+      hideTokenDisplay: !tokenDisplayEnabled,
+      hideTransfers: !sendButtonEnabled,
+      hideTopup: !buyButtonEnabled,
+      hideReceive: !receiveButtonEnabled,
+      hideSwap: !swapButtonEnabled,
+      hideShowAllTokens: !showAllTokensButtonEnabled,
+      hideWalletConnect: !walletConnectEnabled,
+      buttonPosition: portfolioWidgetPosition,
+      defaultPortfolio,
+    };
+    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, uiConfig, coreOptions.walletServicesConfig?.whiteLabel || {}]);
+    const confirmationStrategy =
+      coreOptions.walletServicesConfig?.confirmationStrategy ??
+      (confirmationModalEnabled ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
-      whiteLabel: {
-        ...uiConfig,
-        ...coreOptions.walletServicesConfig?.whiteLabel,
-      },
+      confirmationStrategy,
+      whiteLabel,
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
-      // enableKeyExport: keyExportEnabled, TODO: add this to ws embed and implement in WS
+      enableKeyExport: keyExportEnabled,
     };
 
     // Core options

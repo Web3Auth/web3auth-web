@@ -1,7 +1,8 @@
-import { SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { LoginConfig, WhiteLabelData } from "@web3auth/auth";
+import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
+import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
+import { type LoginConfig, type WhiteLabelData } from "@web3auth/auth";
 
-import { ChainNamespaceType, CustomChainConfig } from "./chain/IChainInterface";
+import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 
 export interface WhitelistResponse {
   urls: string[];
@@ -48,23 +49,45 @@ export interface SmartAccountsConfig {
   };
 }
 
+export interface WalletUiConfig {
+  portfolioWidgetEnabled: boolean;
+  portfolioWidgetPosition: BUTTON_POSITION_TYPE;
+  confirmationModalEnabled: boolean;
+  walletConnectEnabled: boolean;
+  tokenDisplayEnabled: boolean;
+  nftDisplayEnabled: boolean;
+  defaultPortfolio: "token" | "nft";
+  showAllTokensButtonEnabled: boolean;
+  buyButtonEnabled: boolean;
+  sendButtonEnabled: boolean;
+  swapButtonEnabled: boolean;
+  receiveButtonEnabled: boolean;
+}
+
 // TODO: finalize the project config
 export interface ProjectConfig {
   // Legacy
-  whitelabel?: WhiteLabelData;
   sms_otp_enabled: boolean;
   /** @deprecated If external_wallets.enabled is true, WC will be enabled automatically */
   wallet_connect_enabled: boolean;
   /** @deprecated always use Web3Auth WalletConnect project ID */
   wallet_connect_project_id?: string;
-  whitelist?: WhitelistResponse;
+  /** @deprecated use keyExportEnabled */
   key_export_enabled?: boolean;
+  // Project settings
+  userDataIncludedInToken?: boolean; // TODO: implement this
+  sessionTime?: number;
+  keyExportEnabled?: boolean; // TODO: implement this in WS
+  whitelist?: WhitelistResponse; // remain unchanged
+  whitelabel?: WhiteLabelData; // remain unchanged
   // Chains
   chains?: Record<string, ChainConfigItem>;
   // Login config
   externalWalletLogin?: ExternalWalletsConfig;
   // Smart accounts
   smartAccounts?: SmartAccountsConfig;
+  // WS settings
+  walletUi?: WalletUiConfig;
 }
 
 export interface WalletRegistryItem {

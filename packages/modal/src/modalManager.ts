@@ -126,7 +126,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
-      // // // TODO: we're using mock project config to test, remove this before production
+      // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
       //   chains: {
@@ -143,22 +143,35 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //       config: getChainConfig("solana", "0x67", this.options.clientId),
       //     },
       //   },
-      //   smartAccounts: {
-      //     enabled: false,
-      //     config: {
-      //       walletScope: "all",
-      //       smartAccountType: "safe",
-      //       chains: {
-      //         "0xaa36a7": {
-      //           bundlerConfig: {
-      //             url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //           },
+      //   walletUi: {
+      //     confirmationModalEnabled: true,
+      //     portfolioWidgetEnabled: true,
+      //     portfolioWidgetPosition: "bottom-left",
+      //     defaultPortfolio: "token",
+      //     tokenDisplayEnabled: true,
+      //     nftDisplayEnabled: true,
+      //     walletConnectEnabled: true,
+      //     buyButtonEnabled: true,
+      //     sendButtonEnabled: true,
+      //     swapButtonEnabled: true,
+      //     receiveButtonEnabled: true,
+      //     showAllTokensButtonEnabled: true,
+      //   },
+      // smartAccounts: {
+      //   enabled: false,
+      //   config: {
+      //     walletScope: "all",
+      //     smartAccountType: "safe",
+      //     chains: {
+      //       "0xaa36a7": {
+      //         bundlerConfig: {
+      //           url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
       //         },
-      //         // "0x1": {
-      //         //   bundlerConfig: {
-      //         //     url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //         //   },
-      //         // },
+      //       },
+      //       "0x1": {
+      //         bundlerConfig: {
+      //           url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //         },
       //       },
       //     },
       //   },
