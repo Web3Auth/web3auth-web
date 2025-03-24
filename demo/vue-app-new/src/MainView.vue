@@ -70,8 +70,16 @@ const options = computed((): Web3AuthOptions => {
     for (const chainId of formData.chains) {
       const chain = getChainConfig(namespace, chainId, clientIds[formData.network]);
       if (!chain) continue;
-      if (namespace === CHAIN_NAMESPACES.SOLANA && chainId === "0x65") {
-        chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC || chain.rpcTarget;
+      // we need to validate chain id as legacy Solana chainIds 0x1, 0x2, 0x3 are not valid anymore
+      if (chain.chainId !== chainId) continue;
+      if (namespace === CHAIN_NAMESPACES.SOLANA) {
+        if (chainId === "0x65") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC || chain.rpcTarget;
+        } else if (chainId === "0x66") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_TESTNET_RPC || chain.rpcTarget;
+        } else if (chainId === "0x67") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_DEVNET_RPC || chain.rpcTarget;
+        }
       }
       chains.push(chain);
     }

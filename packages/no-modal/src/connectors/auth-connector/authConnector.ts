@@ -1,4 +1,4 @@
-import { type EthereumProviderConfig } from "@toruslabs/ethereum-controllers";
+import { type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import {
   Auth,
@@ -66,7 +66,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private loginSettings: LoginSettings = { authConnection: "" };
 
-  private wsSettings: WalletServicesSettings = {};
+  private wsSettings: WalletServicesSettings;
 
   private wsEmbedInstance: WsEmbed | null = null;
 
@@ -84,7 +84,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   get provider(): IProvider | null {
     if (this.status !== CONNECTOR_STATUS.NOT_READY) {
       if (this.wsEmbedInstance?.provider) {
-        return this.wsEmbedInstance.provider;
+        return this.wsEmbedInstance.provider as IProvider;
       } else if (this.privateKeyProvider) return this.privateKeyProvider;
     }
     return null;
@@ -99,7 +99,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const { chains } = this.coreOptions;
+    const { chainId } = options;
+    const chainConfig = chains.find((x) => x.chainId === chainId);
 
     super.checkInitializationRequirements({ chainConfig });
     if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
@@ -132,12 +134,16 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             web3AuthNetwork: this.coreOptions.web3AuthNetwork,
             modalZIndex: this.wsSettings.modalZIndex,
           });
-          // TODO: once support multiple chains, only pass chains of solana and EVM
+          const wsSupportedChains = chains.filter(
+            (x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA
+          );
           await this.wsEmbedInstance.init({
             ...this.wsSettings,
-            chainConfig: chainConfig as EthereumProviderConfig, // TODO: upgrade ws-embed to support custom chain config
+            chains: wsSupportedChains as ProviderConfig[],
+            chainId,
             whiteLabel: {
-              ...this.authOptions.whiteLabel,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...(this.authOptions.whiteLabel as any),
               ...this.wsSettings.whiteLabel,
             },
           });
@@ -518,7 +524,8 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel: {
-        ...uiConfig,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(uiConfig as any),
         ...coreOptions.walletServicesConfig?.whiteLabel,
       },
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,

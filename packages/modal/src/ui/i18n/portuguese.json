@@ -21,6 +21,8 @@
     "external.installed": "Instalado",
     "external.no-wallets-found": "Nenhuma carteira encontrada",
     "external.search-wallet": "Pesquisar através de {{count}} carteiras...",
+    "external.select-chain": "Selecionar cadeia",
+    "external.select-chain-description": "Este {{wallet}} carteira suporta várias cadeias. Selecione a cadeia que você gostaria de conectar",
     "external.title": "Carteira Externa",
     "external.walletconnect-connect": "Conectar",
     "external.walletconnect-copy": "Digitalize com uma carteira compatível com WalletConnect ou clique no código QR para copiar para sua área de transferência.",

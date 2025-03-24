@@ -53,7 +53,7 @@
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
     "@toruslabs/eslint-config-react": "^3.4.4",
-    "@toruslabs/isomorphic-style-loader": "^5.3.3",
+    "@toruslabs/isomorphic-style-loader": "^5.4.0",
     "@toruslabs/vue-components": "^7.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -72,8 +72,8 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^10.2.1",
+    "@toruslabs/http-helpers": "^8.1.1",
+    "@web3auth/auth": "^10.2.3",
     "@web3auth/no-modal": "^10.0.0-alpha.1",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",

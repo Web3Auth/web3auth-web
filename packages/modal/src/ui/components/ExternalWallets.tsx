@@ -3,7 +3,7 @@ import bowser from "bowser";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ExternalButton, MODAL_STATUS, ModalStatusType } from "../interfaces";
+import { ExternalButton, ExternalWalletEventType, MODAL_STATUS, ModalStatusType } from "../interfaces";
 import i18n from "../localeImport";
 import ExternalWalletButton from "./ExternalWallet/ExternalWalletButton";
 import ExternalWalletDetail from "./ExternalWallet/ExternalWalletDetails";
@@ -12,13 +12,13 @@ import Loader from "./Loader";
 
 interface ExternalWalletsProps {
   hideExternalWallets: () => void;
-  handleExternalWalletClick: (params: { connector: string }) => void;
+  handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   closeModal: () => void;
   config: Record<string, BaseConnectorConfig>;
   walletConnectUri: string | undefined;
   showBackButton: boolean;
   modalStatus: ModalStatusType;
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
 }
 
@@ -33,7 +33,7 @@ function formatIOSMobile(params: { uri: string; link?: string }) {
   return "";
 }
 
-export default function ExternalWallet(props: ExternalWalletsProps) {
+export default function ExternalWallets(props: ExternalWalletsProps) {
   const {
     hideExternalWallets,
     handleExternalWalletClick,
@@ -42,7 +42,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
     walletConnectUri,
     showBackButton,
     modalStatus,
-    chainNamespace,
+    chainNamespaces,
     walletRegistry,
   } = props;
   const [externalButtons, setExternalButtons] = useState<ExternalButton[]>([]);
@@ -116,6 +116,10 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             href = universalLink || deepLink;
           }
 
+          const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+          const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+          const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+
           const button: ExternalButton = {
             name: wallet,
             displayName: walletRegistryItem.name,
@@ -125,13 +129,11 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
             hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
             walletRegistryItem,
             imgExtension: walletRegistryItem.imgExtension || "svg",
+            chainNamespaces: availableChainNamespaces,
           };
           // const isBrowserExtensionAvailable = walletRegistryItem.app?.chrome || walletRegistryItem.app?.firefox || walletRegistryItem.app?.edge;
           if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
-
-          const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-          const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-          if (!chainNamespaces.has(chainNamespace) && !injectedChainNamespaces.has(chainNamespace)) return acc;
+          if (availableChainNamespaces.length === 0) return acc;
 
           acc.push(button);
           return acc;
@@ -196,15 +198,16 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
       setExternalButtons(buttons);
       setTotalExternalWallets(buttons.length);
     }
-  }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespace, walletDiscoverySupported]);
+  }, [config, deviceDetails, adapterVisibilityMap, walletRegistry, walletSearch, chainNamespaces, walletDiscoverySupported]);
 
   const handleWalletClick = (button: ExternalButton) => {
-    // if has injected wallet, connect to injected wallet
-    // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
-    if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
+    // if has injected wallet and single chain namespace, connect to injected wallet
+    const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
+    // if doesn't have wallet connect & doesn't have install links, must be a custom connector
+    const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
+    if (isInjectedConnectorAndSingleChainNamespace || isCustomConnector) {
       handleExternalWalletClick({ connector: button.name });
     } else {
-      // else, show wallet detail
       setSelectedButton(button);
     }
   };
@@ -295,6 +298,7 @@ export default function ExternalWallet(props: ExternalWalletsProps) {
               goBack={() => setSelectedButton(null)}
               walletConnectUri={walletConnectUri}
               closeModal={closeModal}
+              handleExternalWalletClick={handleExternalWalletClick}
             />
           ))
         )}

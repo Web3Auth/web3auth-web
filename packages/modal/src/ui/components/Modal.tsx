@@ -19,7 +19,7 @@ interface ModalProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
@@ -58,7 +58,7 @@ export default function Modal(props: ModalProps) {
     stateListener,
     appLogo,
     appName,
-    chainNamespace,
+    chainNamespaces,
     walletRegistry,
     handleSocialLoginClick,
     handleExternalWalletClick,
@@ -250,7 +250,7 @@ export default function Modal(props: ModalProps) {
                     modalStatus={modalState.status}
                     showBackButton={areSocialLoginsVisible || isEmailPasswordlessLoginVisible || isSmsPasswordlessLoginVisible}
                     handleExternalWalletClick={preHandleExternalWalletClick}
-                    chainNamespace={chainNamespace}
+                    chainNamespaces={chainNamespaces}
                     walletConnectUri={modalState.walletConnectUri}
                     config={modalState.externalWalletsConfig}
                     hideExternalWallets={() =>
