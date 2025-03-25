@@ -142,6 +142,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             chains: wsSupportedChains as ProviderConfig[],
             chainId,
             whiteLabel: {
+              // TODO: fix this after ws is released
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ...(this.authOptions.whiteLabel as any),
               ...this.wsSettings.whiteLabel,
@@ -425,8 +426,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     let isClosedWindow = false;
 
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       verifierWindow.open().catch((error: unknown) => {
         log.error("Error during login with social", error);
         this.authInstance.postLoginCancelledMessage(nonce);
@@ -463,8 +463,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         }
       });
 
-      const result = await this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams, nonce).catch(reject);
-      resolve(result);
+      this.authInstance
+        .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
+        .then(resolve)
+        .catch(reject);
     });
   }
 
@@ -507,10 +509,10 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const { whitelist } = projectConfig;
+    const { whitelist, whitelabel } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
-    const uiConfig = deepmerge(cloneDeep(projectConfig?.whitelabel || {}), coreOptions.uiConfig || {});
+    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
@@ -524,13 +526,15 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel: {
+        // TODO: fix this after ws is released
+        // TODO: add enableKeyExport to ws embed and implement in WS
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(uiConfig as any),
         ...coreOptions.walletServicesConfig?.whiteLabel,
       },
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
-      // enableKeyExport: keyExportEnabled, TODO: add this to ws embed and implement in WS
+      // enableKeyExport: keyExportEnabled,
     };
 
     // Core options
