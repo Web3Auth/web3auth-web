@@ -1,6 +1,6 @@
 import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
 import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { type WhiteLabelData } from "@web3auth/auth";
+import { type AuthConnectionConfig, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 
@@ -83,6 +83,7 @@ export interface ProjectConfig {
   smartAccounts?: SmartAccountsConfig;
   // WS settings
   walletUi?: WalletUiConfig;
+  auth_connection_config?: AuthConnectionConfig;
 }
 
 export interface WalletRegistryItem {

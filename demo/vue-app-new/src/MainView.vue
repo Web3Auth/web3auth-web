@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import { AccountAbstractionMultiChainConfig, CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { AccountAbstractionMultiChainConfig, authConnector, CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { LOGIN_PROVIDER_TYPE } from "@web3auth/auth";
+import { AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -94,7 +94,7 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
-
+  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "testing" } });
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
@@ -109,7 +109,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    connectors: externalConnectors.value,
+    connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
@@ -123,7 +123,7 @@ const loginMethodsConfig = computed(() => {
   const config = formData.loginProviders.reduce((acc, provider) => {
     acc[provider] = formData.loginMethods[provider];
     return acc;
-  }, {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>);
+  }, {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>);
 
   const loginMethods = JSON.parse(JSON.stringify(config));
   return loginMethods;
@@ -143,6 +143,8 @@ const getExternalAdapterByName = (name: string): ConnectorFn[] => {
   switch (name) {
     case "coinbase":
       return [coinbaseConnector()];
+    case "wallet-connect-v2":
+      return [walletConnectV2Connector()];
     default:
       return [];
   }
@@ -153,7 +155,6 @@ onBeforeMount(() => {
     const storedValue = sessionStorage.getItem("state");
     try {
       if (storedValue) {
-        // console.log("storedValue", storedValue);
         const json = JSON.parse(storedValue);
         formData.connectors = json.connectors;
         formData.chains = json.chains;

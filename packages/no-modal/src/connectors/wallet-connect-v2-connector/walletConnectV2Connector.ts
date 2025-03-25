@@ -101,10 +101,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
-    if (!projectId) {
-      throw WalletInitializationError.invalidParams("Wallet connect project id is required in wallet connect v2 connector");
-    }
+    // use a global wc project id if not provided
+    const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId || "d3c63f19f9582f8ba48e982057eb096b";
 
     const wc2Settings = await getWalletConnectV2Settings(this.coreOptions.chains, projectId);
     if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0) {
@@ -316,7 +314,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
             this.status = CONNECTOR_STATUS.READY;
             this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.WALLET_CONNECT_V2);
           } catch (error) {
-            log.error("unable to open qr code modal");
+            log.error("unable to open qr code modal", error);
           }
         } else {
           this.updateConnectorData({ uri } as WalletConnectV2Data);

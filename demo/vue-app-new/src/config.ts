@@ -1,4 +1,4 @@
-import { LANGUAGE_TYPE, LANGUAGES, LOGIN_PROVIDER, LOGIN_PROVIDER_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { LANGUAGE_TYPE, LANGUAGES, AUTH_CONNECTION, AUTH_CONNECTION_TYPE, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -46,8 +46,8 @@ export const initWhiteLabel: WhiteLabelData = {
   },
 };
 
-export const loginProviderOptions = Object.values(LOGIN_PROVIDER)
-  .filter((x) => x !== "jwt" && x !== "webauthn")
+export const loginProviderOptions = Object.values(AUTH_CONNECTION)
+  .filter((x) => x !== "custom")
   .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
@@ -63,7 +63,7 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Turkish", value: LANGUAGES.tr },
 ];
 
-export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
+export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
   (acc, curr) => ({
     ...acc,
     [curr.value]: {
@@ -78,7 +78,7 @@ export const defaultLoginMethod: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
       showOnMobile: false,
     },
   }),
-  {} as Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>
+  {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
 );
 
 export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust";
@@ -107,11 +107,11 @@ export type FormData = {
     enable: boolean;
     config: WhiteLabelData;
   };
-  loginProviders: LOGIN_PROVIDER_TYPE[];
+  loginProviders: AUTH_CONNECTION_TYPE[];
   connectors: string[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
-  loginMethods: Record<LOGIN_PROVIDER_TYPE, FormConfigSettings>;
+  loginMethods: Record<AUTH_CONNECTION_TYPE, FormConfigSettings>;
   walletPlugin: {
     enable: boolean;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;

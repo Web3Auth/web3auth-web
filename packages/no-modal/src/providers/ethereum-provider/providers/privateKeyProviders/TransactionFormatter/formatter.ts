@@ -225,7 +225,7 @@ export class TransactionFormatter {
           } else {
             throw new Error("Chain id not supported by api");
           }
-        } catch (error) {
+        } catch {
           estimates = await this.fetchGasEstimatesViaEthFeeHistory();
         }
         gasData = {
@@ -241,7 +241,7 @@ export class TransactionFormatter {
       } else {
         throw new Error("Main gas fee/price estimation failed. Use fallback");
       }
-    } catch (e: unknown) {
+    } catch {
       try {
         const estimates = await this.fetchEthGasPriceEstimate();
         gasData = {

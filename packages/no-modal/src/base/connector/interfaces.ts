@@ -1,4 +1,5 @@
 import {
+  AUTH_CONNECTION_TYPE,
   AuthUserInfo,
   JRPCRequest,
   JRPCResponse,
@@ -114,46 +115,56 @@ export interface BaseConnectorConfig {
   showOnDesktop?: boolean;
 }
 
-export type LoginMethodConfig = Record<
-  string,
-  {
-    /**
-     * Display Name. If not provided, we use the default for auth app
-     */
-    name: string;
-    /**
-     * Description for button. If provided, it renders as a full length button. else, icon button
-     */
-    description?: string;
-    /**
-     * Logo to be shown on mouse hover. If not provided, we use the default for auth app
-     */
-    logoHover?: string;
-    /**
-     * Logo to be shown on dark background (dark theme). If not provided, we use the default for auth app
-     */
-    logoLight?: string;
-    /**
-     * Logo to be shown on light background (light theme). If not provided, we use the default for auth app
-     */
-    logoDark?: string;
-    /**
-     * Show login button on the main list
-     */
-    mainOption?: boolean;
-    /**
-     * Whether to show the login button on modal or not
-     */
-    showOnModal?: boolean;
-    /**
-     * Whether to show the login button on desktop
-     */
-    showOnDesktop?: boolean;
-    /**
-     * Whether to show the login button on mobile
-     */
-    showOnMobile?: boolean;
-  }
+export type LoginMethodConfig = Partial<
+  Record<
+    AUTH_CONNECTION_TYPE,
+    {
+      /**
+       * Display Name. If not provided, we use the default for auth app
+       */
+      name: string;
+      /**
+       * Description for button. If provided, it renders as a full length button. else, icon button
+       */
+      description?: string;
+      /**
+       * Logo to be shown on mouse hover. If not provided, we use the default for auth app
+       */
+      logoHover?: string;
+      /**
+       * Logo to be shown on dark background (dark theme). If not provided, we use the default for auth app
+       */
+      logoLight?: string;
+      /**
+       * Logo to be shown on light background (light theme). If not provided, we use the default for auth app
+       */
+      logoDark?: string;
+      /**
+       * Show login button on the main list
+       */
+      mainOption?: boolean;
+      /**
+       * Whether to show the login button on modal or not
+       */
+      showOnModal?: boolean;
+      /**
+       * Whether to show the login button on desktop
+       */
+      showOnDesktop?: boolean;
+      /**
+       * Whether to show the login button on mobile
+       */
+      showOnMobile?: boolean;
+      /**
+       * Auth connection id of the provider.
+       */
+      authConnectionId?: string;
+      /**
+       * Grouped auth connection id of the provider.
+       */
+      groupedAuthConnectionId?: string;
+    }
+  >
 >;
 
 export type WalletConnectV2Data = { uri: string };
