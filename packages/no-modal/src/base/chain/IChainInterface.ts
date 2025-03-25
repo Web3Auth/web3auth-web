@@ -1,12 +1,6 @@
-export const CHAIN_NAMESPACES = {
-  EIP155: "eip155",
-  SOLANA: "solana",
-  CASPER: "casper",
-  XRPL: "xrpl",
-  OTHER: "other",
-} as const;
-// eip155 for all evm chains
-export type ChainNamespaceType = (typeof CHAIN_NAMESPACES)[keyof typeof CHAIN_NAMESPACES];
+import { CHAIN_NAMESPACES, type ChainNamespaceType } from "@toruslabs/base-controllers";
+
+export { CHAIN_NAMESPACES, type ChainNamespaceType };
 
 export const CONNECTOR_NAMESPACES = {
   EIP155: "eip155",

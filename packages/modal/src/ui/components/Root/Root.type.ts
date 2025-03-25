@@ -7,7 +7,7 @@ export interface RootProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
-  chainNamespace: ChainNamespaceType;
+  chainNamespace: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   showPasswordLessInput: boolean;

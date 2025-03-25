@@ -19,7 +19,7 @@ import {
 import { createRoot } from "react-dom/client";
 
 // import Modal from "./components/Modal";
-import Widget from "./components-base/Widget";
+import Widget from "./components/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
@@ -62,7 +62,7 @@ export class LoginModal extends SafeEventEmitter {
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  private chainNamespace: ChainNamespaceType;
+  private chainNamespaces: ChainNamespaceType[];
 
   private walletRegistry: WalletRegistry;
 
@@ -87,7 +87,7 @@ export class LoginModal extends SafeEventEmitter {
     }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
-    this.chainNamespace = uiConfig.chainNamespace;
+    this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
@@ -229,7 +229,7 @@ export class LoginModal extends SafeEventEmitter {
             handleSocialLoginClick={this.handleSocialLoginClick}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
-            chainNamespace={this.chainNamespace}
+            chainNamespace={this.chainNamespaces}
             walletRegistry={this.walletRegistry}
             widget={this.uiConfig.widget}
           />
@@ -296,9 +296,10 @@ export class LoginModal extends SafeEventEmitter {
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
-    const { connector } = params;
+    const { connector, chainNamespace } = params;
     this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
       connector,
+      loginParams: { chainNamespace },
     });
   };
 

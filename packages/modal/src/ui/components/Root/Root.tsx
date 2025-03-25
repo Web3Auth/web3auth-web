@@ -4,7 +4,7 @@ import { useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PAGES } from "../../constants";
-import RootContext from "../../context/RootContext";
+import { RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
 import i18n from "../../localeImport";
@@ -220,6 +220,10 @@ function Root(props: RootProps) {
         href = universalLink || deepLink;
       }
 
+      const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+      const availableChainNamespaces = chainNamespace.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+
       const button: ExternalButton = {
         name: wallet,
         displayName: walletRegistryItem.name,
@@ -229,13 +233,11 @@ function Root(props: RootProps) {
         hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
         walletRegistryItem,
         imgExtension: walletRegistryItem.imgExtension || "svg",
+        chainNamespaces: availableChainNamespaces,
       };
 
       if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
-
-      const chainNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-      if (!chainNamespaces.has(chainNamespace) && !injectedChainNamespaces.has(chainNamespace)) return acc;
+      if (availableChainNamespaces.length === 0) return acc;
 
       acc.push(button);
       return acc;

@@ -13,7 +13,7 @@ import {
   walletServicesPlugin,
   type Web3AuthOptions,
 } from "@web3auth/modal";
-import { WidgetType } from "@web3auth/modal/dist/types/ui";
+// import { WidgetType } from "@web3auth/modal/dist/types/ui";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -83,8 +83,16 @@ const options = computed((): Web3AuthOptions => {
     for (const chainId of formData.chains) {
       const chain = getChainConfig(namespace, chainId, clientIds[formData.network]);
       if (!chain) continue;
-      if (namespace === CHAIN_NAMESPACES.SOLANA && chainId === "0x65") {
-        chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC || chain.rpcTarget;
+      // we need to validate chain id as legacy Solana chainIds 0x1, 0x2, 0x3 are not valid anymore
+      if (chain.chainId !== chainId) continue;
+      if (namespace === CHAIN_NAMESPACES.SOLANA) {
+        if (chainId === "0x65") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_MAINNET_RPC || chain.rpcTarget;
+        } else if (chainId === "0x66") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_TESTNET_RPC || chain.rpcTarget;
+        } else if (chainId === "0x67") {
+          chain.rpcTarget = import.meta.env.VITE_APP_SOLANA_DEVNET_RPC || chain.rpcTarget;
+        }
       }
       chains.push(chain);
     }
@@ -95,7 +103,9 @@ const options = computed((): Web3AuthOptions => {
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig: enabledWhiteLabel ? { ...whiteLabel, widget: widget as WidgetType, targetId } : { widget: widget as WidgetType, targetId },
+    uiConfig: enabledWhiteLabel
+      ? { ...whiteLabel, widget: widget as "embed" | "modal", targetId }
+      : { widget: widget as "embed" | "modal", targetId },
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
