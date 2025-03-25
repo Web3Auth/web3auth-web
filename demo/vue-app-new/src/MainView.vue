@@ -168,8 +168,8 @@ onBeforeMount(() => {
         formData.nftCheckoutPlugin = json.nftCheckoutPlugin || {};
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
-        formData.smartAccountChains = json.smartAccountChains;
-        formData.smartAccountChainsConfig = json.smartAccountChainsConfig;
+        formData.smartAccountChains = json.smartAccountChains || [];
+        formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
       }
     } catch (error) { }
   }

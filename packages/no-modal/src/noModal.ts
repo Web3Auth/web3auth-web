@@ -256,7 +256,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           ?.filter((chain) => chain.chainId && chain.bundlerConfig?.url)
           .map((chain) => chain.chainId) || []
       );
-      this.coreOptions.chains = this.coreOptions.chains.filter((chain) => aaSupportedChainIds.has(chain.chainId));
+      this.coreOptions.chains = this.coreOptions.chains.filter(
+        (chain) => chain.chainNamespace !== CHAIN_NAMESPACES.EIP155 || aaSupportedChainIds.has(chain.chainId)
+      );
       if (this.coreOptions.chains.length === 0) {
         log.error("Account Abstraction is enabled but no supported chains found");
         throw WalletInitializationError.invalidParams("Account Abstraction is enabled but no supported chains found");
