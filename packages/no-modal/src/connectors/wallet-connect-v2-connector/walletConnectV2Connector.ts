@@ -316,7 +316,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
             this.status = CONNECTOR_STATUS.READY;
             this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.WALLET_CONNECT_V2);
           } catch (error) {
-            log.error("unable to open qr code modal");
+            log.error("unable to open qr code modal", error);
           }
         } else {
           this.updateConnectorData({ uri } as WalletConnectV2Data);

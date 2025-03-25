@@ -12,7 +12,7 @@ import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@/co
 
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
-export interface CommonPrivKeyProviderConfig extends BaseProviderConfig {}
+export type CommonPrivKeyProviderConfig = BaseProviderConfig;
 
 export interface CommonPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;

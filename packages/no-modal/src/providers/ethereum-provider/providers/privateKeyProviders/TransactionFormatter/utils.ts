@@ -77,7 +77,7 @@ export async function validateTypedSignMessageDataV4(messageData: TypedMessagePa
   } else {
     try {
       data = JSON.parse(messageData.data);
-    } catch (e) {
+    } catch {
       throw new Error("Data must be passed as a valid JSON string.");
     }
   }

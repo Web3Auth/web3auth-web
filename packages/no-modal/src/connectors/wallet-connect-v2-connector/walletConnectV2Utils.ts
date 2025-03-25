@@ -1,8 +1,8 @@
+import { bs58 as base58 } from "@toruslabs/bs58";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import base58 from "bs58";
 
 import { WalletLoginError } from "@/core/base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
