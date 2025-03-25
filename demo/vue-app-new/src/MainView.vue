@@ -1,6 +1,22 @@
 <script setup lang="ts">
+import {
+  authConnector,
+  CHAIN_NAMESPACES,
+  coinbaseConnector,
+  ConnectorFn,
+  CustomChainConfig,
+  getChainConfig,
+  nftCheckoutPlugin,
+  PluginFn,
+  storageAvailable,
+  UX_MODE,
+  WALLET_CONNECTORS,
+  walletConnectV2Connector,
+  walletServicesPlugin,
+  type Web3AuthOptions,
+} from "@web3auth/modal";
 
-import { authConnector, CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, UX_MODE, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
+import { WidgetType } from "@web3auth/modal/dist/types/ui";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -33,7 +49,7 @@ const options = computed((): Web3AuthOptions => {
       smartAccountConfig: undefined,
       bundlerConfig: { url: formData.bundlerUrl ?? getDefaultBundlerUrl(firstEvmChainId) },
       paymasterConfig: formData.paymasterUrl ? { url: formData.paymasterUrl } : undefined,
-    }
+    };
   }
 
   // Wallet services settings
@@ -85,13 +101,14 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  const { widget, targetId } = formData;
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel, widget: widget as WidgetType, targetId } : { widget: widget as WidgetType, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "testing" } });
+
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
     uiConfig,
-    accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // enableLogging?: boolean;
@@ -161,7 +178,7 @@ onBeforeMount(() => {
         formData.bundlerUrl = json.bundlerUrl;
         formData.paymasterUrl = json.paymasterUrl;
       }
-    } catch (error) { }
+    } catch (error) {}
   }
 });
 
@@ -194,10 +211,12 @@ const configs = computed<Web3AuthContextConfig>(() => {
   <Web3AuthProvider :config="configs">
     <WalletServicesProvider>
       <AppHeader />
-      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-        <AppSettings />
-        <AppDashboard :chains="options.chains || []" />
-      </main>
+      <div class="flex flex-col items-center justify-center">
+        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+          <AppSettings />
+          <AppDashboard :chains="options.chains || []" />
+        </main>
+      </div>
     </WalletServicesProvider>
   </Web3AuthProvider>
 </template>
