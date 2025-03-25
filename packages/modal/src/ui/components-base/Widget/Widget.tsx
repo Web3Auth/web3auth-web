@@ -20,7 +20,7 @@ function Widget(props: WidgetProps) {
     widget,
     appLogo,
     appName,
-    chainNamespace,
+    chainNamespaces,
     walletRegistry,
   } = props;
 
@@ -185,7 +185,7 @@ function Widget(props: WidgetProps) {
           stateListener={stateListener}
           appLogo={appLogo}
           appName={appName}
-          chainNamespace={chainNamespace}
+          chainNamespace={chainNamespaces}
           walletRegistry={walletRegistry}
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
@@ -211,7 +211,7 @@ function Widget(props: WidgetProps) {
     <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
       <Root
         stateListener={stateListener}
-        chainNamespace={chainNamespace}
+        chainNamespace={chainNamespaces}
         walletRegistry={walletRegistry}
         appLogo={appLogo}
         appName={appName}
