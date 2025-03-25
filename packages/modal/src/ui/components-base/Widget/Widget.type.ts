@@ -7,7 +7,7 @@ export interface WidgetProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
-  chainNamespace: ChainNamespaceType;
+  chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
