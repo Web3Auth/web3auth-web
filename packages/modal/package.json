@@ -14,7 +14,7 @@
   "module": "dist/lib.esm/packages/modal/src/index.js",
   "unpkg": "dist/modal.umd.min.js",
   "jsdelivr": "dist/modal.umd.min.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/lib.cjs/types/index.d.ts",
   "author": "Torus Labs",
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
@@ -87,31 +87,31 @@
     ".": {
       "import": "./dist/lib.esm/packages/modal/src/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/lib.cjs/types/index.d.ts"
     },
     "./react": {
       "import": "./dist/lib.esm/packages/modal/src/react/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/react/index.js",
-      "types": "./dist/types/react/index.d.ts"
+      "types": "./dist/lib.cjs/types/react/index.d.ts"
     },
     "./vue": {
       "import": "./dist/lib.esm/packages/modal/src/vue/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/vue/index.js",
-      "types": "./dist/types/vue/index.d.ts"
+      "types": "./dist/lib.cjs/types/vue/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "react": [
-        "./dist/types/react/index.d.ts"
+        "./dist/lib.cjs/types/react/index.d.ts"
       ],
       "vue": [
-        "./dist/types/vue/index.d.ts"
+        "./dist/lib.cjs/types/vue/index.d.ts"
       ]
     }
   },
   "engines": {
-    "node": ">=18.x",
+    "node": ">=20.x",
     "npm": ">=9.x"
   },
   "lint-staged": {

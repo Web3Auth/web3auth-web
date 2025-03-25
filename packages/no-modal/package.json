@@ -97,26 +97,26 @@
     ".": {
       "import": "./dist/lib.esm/index.js",
       "require": "./dist/lib.cjs/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/lib.cjs/types/index.d.ts"
     },
     "./react": {
       "import": "./dist/lib.esm/react/index.js",
       "require": "./dist/lib.cjs/react/index.js",
-      "types": "./dist/types/react/index.d.ts"
+      "types": "./dist/lib.cjs/types/react/index.d.ts"
     },
     "./vue": {
       "import": "./dist/lib.esm/vue/index.js",
       "require": "./dist/lib.cjs/vue/index.js",
-      "types": "./dist/types/vue/index.d.ts"
+      "types": "./dist/lib.cjs/types/vue/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "react": [
-        "./dist/types/react/index.d.ts"
+        "./dist/lib.cjs/types/react/index.d.ts"
       ],
       "vue": [
-        "./dist/types/vue/index.d.ts"
+        "./dist/lib.cjs/types/vue/index.d.ts"
       ]
     }
   },
@@ -137,7 +137,7 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "engines": {
-    "node": ">=18.x",
+    "node": ">=20.x",
     "npm": ">=9.x"
   },
   "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
