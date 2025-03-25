@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION } from "@web3auth/auth";
 
 import { cn } from "../../../utils";
 import Image from "../../Image";
@@ -6,9 +6,9 @@ import { ButtonSocialProps } from "./ButtonSocial.type";
 
 function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
   const imageId =
-    method === LOGIN_PROVIDER.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+    method === AUTH_CONNECTION.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
   const hoverId =
-    method === LOGIN_PROVIDER.APPLE || method === LOGIN_PROVIDER.GITHUB || method === LOGIN_PROVIDER.TWITTER ? imageId : `login-${method}-active`;
+    method === AUTH_CONNECTION.APPLE || method === AUTH_CONNECTION.GITHUB || method === AUTH_CONNECTION.TWITTER ? imageId : `login-${method}-active`;
   if (isPrimaryBtn) {
     return <Image width="20" imageId={hoverId} hoverImageId={hoverId} isButton />;
   }

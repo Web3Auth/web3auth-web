@@ -109,6 +109,7 @@ const options = computed((): Web3AuthOptions => {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
     uiConfig,
+    accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
     // enableLogging?: boolean;

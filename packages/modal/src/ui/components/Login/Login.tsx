@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,12 +12,10 @@ import LoginOtp from "./LoginOtp";
 import LoginPasswordLess from "./LoginPasswordLess";
 
 export const restrictedLoginMethods: string[] = [
-  LOGIN_PROVIDER.WEBAUTHN,
-  LOGIN_PROVIDER.JWT,
-  LOGIN_PROVIDER.SMS_PASSWORDLESS,
-  LOGIN_PROVIDER.EMAIL_PASSWORDLESS,
-  LOGIN_PROVIDER.AUTHENTICATOR,
-  LOGIN_PROVIDER.PASSKEYS,
+  AUTH_CONNECTION.SMS_PASSWORDLESS,
+  AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+  AUTH_CONNECTION.AUTHENTICATOR,
+  AUTH_CONNECTION.PASSKEYS,
 ];
 
 function Login(props: LoginProps) {
@@ -61,7 +59,7 @@ function Login(props: LoginProps) {
 
   useEffect(() => {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
-      return socialLoginsConfig.loginMethods[loginMethodKey].showOnModal;
+      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal;
     });
 
     const visibleRows: rowType[] = [];
@@ -69,14 +67,14 @@ function Login(props: LoginProps) {
 
     Object.keys(socialLoginsConfig.loginMethods)
       .filter((method) => {
-        return !socialLoginsConfig.loginMethods[method].showOnModal === false && !restrictedLoginMethods.includes(method);
+        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
       })
       .forEach((method, index) => {
-        const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method].name || method);
+        const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].name || method);
         const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
         const order = orderIndex || index;
 
-        const isMainOption = socialLoginsConfig.loginMethods[method].mainOption || order === 1;
+        const isMainOption = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].mainOption || order === 1;
         const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
         if (order > 0 && order < 4) {
@@ -86,7 +84,7 @@ function Login(props: LoginProps) {
             isPrimaryBtn,
             name,
             adapter: socialLoginsConfig.connector,
-            loginParams: { loginProvider: method, name, login_hint: "" },
+            loginParams: { authConnection: method, name, login_hint: "" },
             order,
             isMainOption,
           });
@@ -98,7 +96,7 @@ function Login(props: LoginProps) {
           isPrimaryBtn,
           name: name === "Twitter" ? "X" : name,
           adapter: socialLoginsConfig.connector,
-          loginParams: { loginProvider: method, name, login_hint: "" },
+          loginParams: { authConnection: method, name, login_hint: "" },
           order,
           isMainOption,
         });
@@ -124,7 +122,7 @@ function Login(props: LoginProps) {
       if (isEmailValid) {
         return handleSocialLoginClick({
           connector: socialLoginsConfig.connector || "",
-          loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+          loginParams: { authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
         });
       }
     }
@@ -135,7 +133,7 @@ function Login(props: LoginProps) {
       if (result) {
         return handleSocialLoginClick({
           connector: socialLoginsConfig.connector || "",
-          loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+          loginParams: { authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
         });
       }
     }

@@ -156,7 +156,7 @@ export type rowType = {
   isPrimaryBtn: boolean;
   name: string;
   adapter: SocialLoginsConfig["connector"];
-  loginParams: { loginProvider: string; name: string; login_hint: string };
+  loginParams: { authConnection: string; name: string; login_hint: string };
   order: number;
   isMainOption: boolean;
 };

@@ -19,7 +19,7 @@ import {
 import { createRoot } from "react-dom/client";
 
 // import Modal from "./components/Modal";
-import Widget from "./components-base/Widget";
+import Widget from "./components/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,

@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION } from "@web3auth/auth";
 import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
@@ -79,7 +79,7 @@ function Widget(props: WidgetProps) {
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderConnector: loginParams.loginProvider, detailedLoaderConnectorName: loginParams.name };
+      return { ...prevState, detailedLoaderConnector: loginParams.authConnection, detailedLoaderConnectorName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -91,19 +91,19 @@ function Widget(props: WidgetProps) {
 
     const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ([k, v]) => k !== LOGIN_PROVIDER.EMAIL_PASSWORDLESS && (v as any).showOnModal !== false
+      ([k, v]) => k !== AUTH_CONNECTION.EMAIL_PASSWORDLESS && (v as any).showOnModal !== false
     );
     return isAnySocialLoginVisible;
   }, [modalState]);
 
   // Memo for checking if email passwordless login is visible
   const isEmailPasswordLessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
+    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]?.showOnModal;
   }, [modalState]);
 
   // Memo for checking if SMS passwordless login is visible
   const isSmsPasswordLessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState]);
 
   const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState]);

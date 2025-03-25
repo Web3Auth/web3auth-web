@@ -1,4 +1,4 @@
-import { SocialLoginsConfig } from "../../interfaces";
+import { SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
   isDark: boolean;
@@ -10,7 +10,7 @@ export interface LoginProps {
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;
-  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
