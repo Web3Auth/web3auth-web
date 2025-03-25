@@ -89,7 +89,6 @@
     "@coinbase/wallet-sdk": "^4.3.x",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
-    "@toruslabs/torus-scripts": "^7.1.3",
     "react": "^18.x",
     "vue": "^3.x"
   },
