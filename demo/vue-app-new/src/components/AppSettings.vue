@@ -99,7 +99,7 @@ const onChainNamespaceChange = (value: string[]) => {
 
 <template>
   <div class="flex !flex-col sm:!flex-row items-center justify-center gap-6 px-10 py-4">
-    <div v-if="isDisplay('form')" class="grid grid-cols-8 gap-0">
+    <div v-if="isDisplay('form')">
       <Card
         class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0 !w-full [@media(min-width:900px)]:!min-w-[700px] [@media(min-width:1200px)]:!min-w-[800px] [@media(min-width:1500px)]:!w-[800px]"
       >
@@ -463,6 +463,7 @@ const onChainNamespaceChange = (value: string[]) => {
         </Card>
         <div class="flex justify-center mt-5">
           <Button
+            v-if="formData.widget === 'modal'"
             :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
             data-testid="loginButton"
             type="button"
