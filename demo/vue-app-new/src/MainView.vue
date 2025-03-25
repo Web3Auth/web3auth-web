@@ -143,8 +143,6 @@ const getExternalAdapterByName = (name: string): ConnectorFn[] => {
   switch (name) {
     case "coinbase":
       return [coinbaseConnector()];
-    case "wallet-connect-v2":
-      return [walletConnectV2Connector()];
     default:
       return [];
   }

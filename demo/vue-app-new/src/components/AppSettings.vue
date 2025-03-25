@@ -52,11 +52,8 @@ const adapterOptions = computed(() =>
   formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
       ]
-    : [
-        { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
-      ]
+    : []
 );
 
 const isDisplay = (_name: string): boolean => {
