@@ -52,7 +52,7 @@
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
-    "@toruslabs/eslint-config-react": "^4.1.1",
+    "@toruslabs/eslint-config-react": "^3.4.4",
     "@toruslabs/isomorphic-style-loader": "^5.4.0",
     "@toruslabs/vue-components": "^8.0.0",
     "@types/react": "^19.0.11",

@@ -3,7 +3,6 @@ import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@torusl
 import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, getChainConfig, log } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
-
 import {
   chainConfigs,
   chainNamespaceOptions,
