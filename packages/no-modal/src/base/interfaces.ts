@@ -37,15 +37,14 @@ export interface SmartAccountsConfig {
     smartAccountType: SmartAccountType;
     walletScope: SmartAccountWalletScope;
     chains: {
-      [chainId: string]: {
-        bundlerConfig: {
-          url: string;
-        };
-        paymasterConfig?: {
-          url: string;
-        };
+      chainId: string;
+      bundlerConfig: {
+        url: string;
       };
-    };
+      paymasterConfig?: {
+        url: string;
+      };
+    }[];
   };
 }
 

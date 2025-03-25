@@ -27,14 +27,15 @@ const options = computed((): Web3AuthOptions => {
   const { useAccountAbstractionProvider } = formData;
   let accountAbstractionConfig: Web3AuthOptions["accountAbstractionConfig"];
   if (showAAProviderSettings.value && useAccountAbstractionProvider) {
-    const chains: AccountAbstractionMultiChainConfig["chains"] = {};
+    const chains: AccountAbstractionMultiChainConfig["chains"] = [];
     Object.entries(formData.smartAccountChainsConfig).forEach(([chainId, { bundlerUrl, paymasterUrl }]) => {
       if (formData.chains.includes(chainId)) {
-        chains[chainId] = {
+        chains.push({
+          chainId,
           bundlerConfig: { url: bundlerUrl },
           paymasterConfig: paymasterUrl ? { url: paymasterUrl } : undefined,
           smartAccountConfig: undefined,
-        }
+        });
       }
     });
     accountAbstractionConfig = {

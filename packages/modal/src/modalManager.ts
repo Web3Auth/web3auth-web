@@ -157,22 +157,25 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //     receiveButtonEnabled: true,
       //     showAllTokensButtonEnabled: true,
       //   },
-      // smartAccounts: {
-      //   enabled: false,
-      //   config: {
-      //     walletScope: "all",
-      //     smartAccountType: "safe",
-      //     chains: {
-      //       "0xaa36a7": {
-      //         bundlerConfig: {
-      //           url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //   smartAccounts: {
+      //     enabled: true,
+      //     config: {
+      //       walletScope: "all",
+      //       smartAccountType: "safe",
+      //       chains: [
+      //         {
+      //           chainId: "0xaa36a7",
+      //           bundlerConfig: {
+      //             url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //           },
       //         },
-      //       },
-      //       "0x1": {
-      //         bundlerConfig: {
-      //           url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //         {
+      //           chainId: "0x1",
+      //           bundlerConfig: {
+      //             url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
+      //           },
       //         },
-      //       },
+      //       ],
       //     },
       //   },
       // };

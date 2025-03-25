@@ -79,7 +79,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     const { currentChain } = this;
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
-    const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig[currentChain.chainId];
+    const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
     if (!bundlerAndPaymasterConfig)
       throw WalletInitializationError.invalidProviderConfigError(`Bundler and paymaster config not found for chain ${currentChain.chainId}`);
 
@@ -188,7 +188,7 @@ export const accountAbstractionProvider = async ({
   let smartAccountInit: ISmartAccount;
   // TODO: check if smartAccountConfig is per chain or global, if is per chain, need to move smartAccountInit to setupProvider
   const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
-  const { smartAccountConfig } = smartAccountChainsConfig[chain.chainId] || {};
+  const { smartAccountConfig } = smartAccountChainsConfig.find((config) => config.chainId === chain.chainId) || {};
   switch (smartAccountType) {
     case SMART_ACCOUNT.BICONOMY: {
       const { BiconomySmartAccount } = await import("@toruslabs/ethereum-controllers");

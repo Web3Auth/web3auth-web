@@ -382,7 +382,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // setup AA provider for external wallets on EVM chains, no need for app wallet as it uses WS provider which already supports AA
       const { accountAbstractionConfig } = this.coreOptions;
       const doesAASupportCurrentChain =
-        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 && accountAbstractionConfig?.chains[this.currentChain?.chainId];
+        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+        accountAbstractionConfig?.chains?.find((chain) => chain.chainId === this.currentChain?.chainId);
       const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
       if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
         const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
