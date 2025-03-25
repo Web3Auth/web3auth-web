@@ -29,4 +29,6 @@ export const formDataStore = reactive<FormData>({
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
   smartAccountType: "safe", // default smart account type to safe
+  widget: "modal",
+  targetId: "w3a-parent-test-container",
 });
