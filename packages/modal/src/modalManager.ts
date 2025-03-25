@@ -69,8 +69,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
     // init config
-    super.initChainsConfig(projectConfig);
     super.initAccountAbstractionConfig(projectConfig);
+    super.initChainsConfig(projectConfig);
     super.initCachedConnectorAndChainId();
 
     // init login modal
@@ -129,20 +129,23 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
-      //   chains: {
-      //     "0x1": {
+      //   chains: [
+      //     {
+      //       chainId: "0x1",
       //       enabled: true,
       //       config: getChainConfig("eip155", "0x1", this.options.clientId),
       //     },
-      //     "0x65": {
+      //     {
+      //       chainId: "0x65",
       //       enabled: true,
       //       config: getChainConfig("solana", "0x65", this.options.clientId),
       //     },
-      //     "0x67": {
+      //     {
+      //       chainId: "0x67",
       //       enabled: false,
       //       config: getChainConfig("solana", "0x67", this.options.clientId),
       //     },
-      //   },
+      //   ],
       //   walletUi: {
       //     confirmationModalEnabled: true,
       //     portfolioWidgetEnabled: true,
@@ -176,6 +179,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //           },
       //         },
       //       ],
+      //     },
+      //   },
+      //   externalWalletLogin: {
+      //     enabled: true,
+      //     config: {
+      //       phantom: { enabled: false },
+      //       trust: { enabled: false },
       //     },
       //   },
       // };

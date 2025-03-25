@@ -107,8 +107,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // init config
-    this.initChainsConfig(projectConfig);
     this.initAccountAbstractionConfig(projectConfig);
+    this.initChainsConfig(projectConfig);
     this.initCachedConnectorAndChainId();
 
     // setup common JRPC provider
@@ -226,25 +226,41 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected initChainsConfig(projectConfig: ProjectConfig) {
-    const projectConfigChains = projectConfig.chains;
     // merge chains from project config with core options, core options chains will take precedence over project config chains
-    const mergedChains = { ...projectConfigChains };
-    (this.coreOptions.chains || []).forEach((chain) => {
-      const projectConfigChain = projectConfigChains?.[chain.chainId];
-      if (!projectConfigChain) mergedChains[chain.chainId] = { enabled: true, config: chain };
-      else {
-        mergedChains[chain.chainId] = { ...projectConfigChain, ...{ ...chain, enabled: true } };
-      }
-    });
-    this.coreOptions.chains = Object.values(mergedChains)
-      .filter((chain) => chain.enabled)
-      .map((chain) => chain.config);
+    const chainMap = new Map<string, CustomChainConfig>();
+    const enabledProjectConfigChains = projectConfig.chains?.filter((chain) => chain.enabled).map((chain) => chain.config) || [];
+    const allChains = [...enabledProjectConfigChains, ...(this.coreOptions.chains || [])];
+    for (const chain of allChains) {
+      const existingChain = chainMap.get(chain.chainId);
+      if (!existingChain) chainMap.set(chain.chainId, chain);
+      else chainMap.set(chain.chainId, { ...existingChain, ...chain });
+    }
+    this.coreOptions.chains = Array.from(chainMap.values());
 
     // validate chains and namespaces
-    if (!this.coreOptions.chains?.length) throw WalletInitializationError.invalidParams("Please provide chains");
+    if (this.coreOptions.chains.length === 0) {
+      log.error("Please provide chains");
+      throw WalletInitializationError.invalidParams("Please provide chains");
+    }
     for (const chain of this.coreOptions.chains) {
-      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
-        throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
+      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace)) {
+        log.error(`Please provide a valid chainNamespace in chains for chain ${chain.chainId}`);
+        throw WalletInitializationError.invalidParams(`Please provide a valid chainNamespace in chains for chain ${chain.chainId}`);
+      }
+    }
+
+    // if AA is enabled, filter out chains that are not AA-supported
+    if (this.coreOptions.accountAbstractionConfig) {
+      const aaSupportedChainIds = new Set(
+        this.coreOptions.accountAbstractionConfig?.chains
+          ?.filter((chain) => chain.chainId && chain.bundlerConfig?.url)
+          .map((chain) => chain.chainId) || []
+      );
+      this.coreOptions.chains = this.coreOptions.chains.filter((chain) => aaSupportedChainIds.has(chain.chainId));
+      if (this.coreOptions.chains.length === 0) {
+        log.error("Account Abstraction is enabled but no supported chains found");
+        throw WalletInitializationError.invalidParams("Account Abstraction is enabled but no supported chains found");
+      }
     }
   }
 

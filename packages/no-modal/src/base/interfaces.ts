@@ -1,6 +1,6 @@
 import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
 import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { type LoginConfig, type WhiteLabelData } from "@web3auth/auth";
+import { type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 
@@ -9,20 +9,16 @@ export interface WhitelistResponse {
   signed_urls: Record<string, string>;
 }
 
-export type ChainConfigItem = {
+export type ChainsConfig = {
+  chainId: string;
   enabled: boolean;
   config: CustomChainConfig;
-};
+}[];
 
 export interface ExternalWalletsConfig {
   enabled: boolean;
   config: Record<string, { enabled: boolean }>;
 }
-
-export type LoginConfigItem = {
-  enabled: boolean;
-  config?: LoginConfig[keyof LoginConfig];
-};
 
 export const SMART_ACCOUNT_WALLET_SCOPE = {
   EMBEDDED_ONLY: "embeddedOnly",
@@ -76,11 +72,11 @@ export interface ProjectConfig {
   // Project settings
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;
-  keyExportEnabled?: boolean; // TODO: implement this in WS
+  keyExportEnabled?: boolean;
   whitelist?: WhitelistResponse; // remain unchanged
   whitelabel?: WhiteLabelData; // remain unchanged
   // Chains
-  chains?: Record<string, ChainConfigItem>;
+  chains?: ChainsConfig;
   // Login config
   externalWalletLogin?: ExternalWalletsConfig;
   // Smart accounts
