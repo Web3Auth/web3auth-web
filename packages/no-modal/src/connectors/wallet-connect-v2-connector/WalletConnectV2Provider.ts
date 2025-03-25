@@ -9,7 +9,7 @@ import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddle
 
 import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
-export interface WalletConnectV2ProviderConfig extends BaseProviderConfig {}
+export type WalletConnectV2ProviderConfig = BaseProviderConfig;
 
 export interface WalletConnectV2ProviderState extends BaseProviderState {
   accounts: string[];

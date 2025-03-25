@@ -1,4 +1,6 @@
 import {
+  AUTH_CONNECTION,
+  AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
   CONNECTOR_CATEGORY,
@@ -11,7 +13,6 @@ import {
   type IProvider,
   type IWeb3AuthCoreOptions,
   log,
-  LOGIN_PROVIDER,
   type LoginMethodConfig,
   type PROJECT_CONFIG_RESPONSE,
   type WALLET_CONNECTOR_TYPE,
@@ -178,8 +179,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         [WALLET_CONNECTORS.AUTH]: {
           label: WALLET_CONNECTORS.AUTH,
           loginMethods: {
-            [LOGIN_PROVIDER.SMS_PASSWORDLESS]: {
-              name: LOGIN_PROVIDER.SMS_PASSWORDLESS,
+            [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
+              name: AUTH_CONNECTION.SMS_PASSWORDLESS,
               showOnModal: smsOtpEnabled,
               showOnDesktop: smsOtpEnabled,
               showOnMobile: smsOtpEnabled,
@@ -188,7 +189,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         },
       };
       if (!params?.modalConfig) params = { modalConfig: {} };
-      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
       if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
         throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
       }
@@ -355,9 +356,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   private subscribeToLoginModalEvents(): void {
-    this.loginModal.on(LOGIN_MODAL_EVENTS.LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: unknown }) => {
+    this.loginModal.on(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE }) => {
       try {
-        await this.connectTo<unknown>(params.connector, params.loginParams);
+        await this.connectTo<unknown>(params.connector);
+      } catch (error) {
+        log.error(`Error while connecting to connector: ${params.connector}`, error);
+      }
+    });
+
+    this.loginModal.on(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }) => {
+      try {
+        await this.connectTo<AuthLoginParams>(params.connector, params.loginParams);
       } catch (error) {
         log.error(`Error while connecting to connector: ${params.connector}`, error);
       }

@@ -89,7 +89,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       if (this.injectedProvider.chainId !== chainConfig.chainId) {
         try {
           await this.switchChain(chainConfig, true);
-        } catch (error) {
+        } catch {
           await this.addChain(chainConfig, true);
           await this.switchChain(chainConfig, true);
         }
@@ -124,7 +124,9 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
     if (typeof this.injectedProvider.removeAllListeners !== "undefined") this.injectedProvider.removeAllListeners();
     try {
       await this.injectedProvider.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
-    } catch (error) {}
+    } catch {
+      // ignore error
+    }
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.injectedProvider = null;

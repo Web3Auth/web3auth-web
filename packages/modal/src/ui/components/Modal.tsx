@@ -1,4 +1,4 @@
-import { LOGIN_PROVIDER, type SafeEventEmitter } from "@web3auth/auth";
+import { AUTH_CONNECTION, type SafeEventEmitter } from "@web3auth/auth";
 import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WalletRegistry } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -131,7 +131,7 @@ export default function Modal(props: ModalProps) {
   const preHandleSocialWalletClick = (params: SocialLoginEventType) => {
     const { loginParams } = params;
     setModalState((prevState) => {
-      return { ...prevState, detailedLoaderConnector: loginParams.loginProvider, detailedLoaderConnectorName: loginParams.name };
+      return { ...prevState, detailedLoaderConnector: loginParams.authConnection, detailedLoaderConnectorName: loginParams.name };
     });
     handleSocialLoginClick(params);
   };
@@ -172,7 +172,7 @@ export default function Modal(props: ModalProps) {
     if (modalState.showExternalWalletsOnly) return false;
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
     const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
-      ([k, v]) => k !== LOGIN_PROVIDER.EMAIL_PASSWORDLESS && v.showOnModal !== false
+      ([k, v]) => k !== AUTH_CONNECTION.EMAIL_PASSWORDLESS && v.showOnModal !== false
     );
     if (isAnySocialLoginVisible) return true;
     return false;
@@ -180,11 +180,11 @@ export default function Modal(props: ModalProps) {
   log.info("modal state", modalState, areSocialLoginsVisible);
 
   const isEmailPasswordlessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.EMAIL_PASSWORDLESS]?.showOnModal;
+    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
   const isSmsPasswordlessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[LOGIN_PROVIDER.SMS_PASSWORDLESS]?.showOnModal;
+    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
   }, [modalState.socialLoginsConfig?.loginMethods]);
 
   return (
@@ -235,6 +235,7 @@ export default function Modal(props: ModalProps) {
                         isSmsVisible={isSmsPasswordlessLoginVisible}
                         connector={modalState.socialLoginsConfig?.connector}
                         handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+                        socialLoginsConfig={modalState.socialLoginsConfig}
                         isPrimaryBtn={isEmailPrimary}
                       />
                     )}

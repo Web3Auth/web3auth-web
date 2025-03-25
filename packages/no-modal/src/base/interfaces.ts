@@ -1,4 +1,4 @@
-import { WhiteLabelData } from "@web3auth/auth";
+import { AuthConnectionConfig, WhiteLabelData } from "@web3auth/auth";
 
 import { ChainNamespaceType } from "./chain/IChainInterface";
 
@@ -15,6 +15,7 @@ export interface PROJECT_CONFIG_RESPONSE {
   wallet_connect_project_id?: string;
   whitelist?: WhitelistResponse;
   key_export_enabled?: boolean;
+  auth_connection_config?: AuthConnectionConfig;
 }
 
 export interface WalletRegistryItem {

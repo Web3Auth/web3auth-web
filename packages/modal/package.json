@@ -14,7 +14,7 @@
   "module": "dist/lib.esm/packages/modal/src/index.js",
   "unpkg": "dist/modal.umd.min.js",
   "jsdelivr": "dist/modal.umd.min.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/lib.cjs/types/index.d.ts",
   "author": "Torus Labs",
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
@@ -52,15 +52,15 @@
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
-    "@toruslabs/eslint-config-react": "^3.4.4",
-    "@toruslabs/isomorphic-style-loader": "^5.3.3",
-    "@toruslabs/vue-components": "^7.9.0",
+    "@toruslabs/eslint-config-react": "^4.1.1",
+    "@toruslabs/isomorphic-style-loader": "^5.4.0",
+    "@toruslabs/vue-components": "^8.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.21",
     "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
     "postcss-prefix-selector": "^2.1.0",
     "react": "^18.3.1",
@@ -72,46 +72,46 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^7.0.0",
-    "@web3auth/auth": "^9.6.4",
+    "@toruslabs/http-helpers": "^8.1.1",
+    "@web3auth/auth": "^10.2.3",
     "@web3auth/no-modal": "^10.0.0-alpha.1",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
     "deepmerge": "^4.3.1",
     "i18next": "^23.16.8",
-    "react-i18next": "^15.2.0",
+    "react-i18next": "^15.4.1",
     "react-qrcode-logo": "^3.0.0"
   },
   "exports": {
     ".": {
       "import": "./dist/lib.esm/packages/modal/src/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/lib.cjs/types/index.d.ts"
     },
     "./react": {
       "import": "./dist/lib.esm/packages/modal/src/react/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/react/index.js",
-      "types": "./dist/types/react/index.d.ts"
+      "types": "./dist/lib.cjs/types/react/index.d.ts"
     },
     "./vue": {
       "import": "./dist/lib.esm/packages/modal/src/vue/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/vue/index.js",
-      "types": "./dist/types/vue/index.d.ts"
+      "types": "./dist/lib.cjs/types/vue/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "react": [
-        "./dist/types/react/index.d.ts"
+        "./dist/lib.cjs/types/react/index.d.ts"
       ],
       "vue": [
-        "./dist/types/vue/index.d.ts"
+        "./dist/lib.cjs/types/vue/index.d.ts"
       ]
     }
   },
   "engines": {
-    "node": ">=18.x",
+    "node": ">=20.x",
     "npm": ">=9.x"
   },
   "lint-staged": {
