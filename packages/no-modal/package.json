@@ -86,11 +86,7 @@
     "xrpl": "^2.14.0"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "@coinbase/wallet-sdk": "^4.3.x",
-=======
-    "@coinbase/wallet-sdk": "^4.2.x",
->>>>>>> b0f10c019a404cd2d4129b168766481aae8923e2
     "@types/react": "^18.3.12",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
