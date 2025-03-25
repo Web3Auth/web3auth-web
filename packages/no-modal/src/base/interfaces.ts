@@ -17,7 +17,7 @@ export type ChainsConfig = {
 
 export interface ExternalWalletsConfig {
   enabled: boolean;
-  config: Record<string, { enabled: boolean }>;
+  config: { wallet: string; enabled: boolean }[];
 }
 
 export const SMART_ACCOUNT_WALLET_SCOPE = {

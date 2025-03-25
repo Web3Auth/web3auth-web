@@ -186,7 +186,6 @@ export const accountAbstractionProvider = async ({
   provider: IProvider;
 }) => {
   let smartAccountInit: ISmartAccount;
-  // TODO: check if smartAccountConfig is per chain or global, if is per chain, need to move smartAccountInit to setupProvider
   const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
   const { smartAccountConfig } = smartAccountChainsConfig.find((config) => config.chainId === chain.chainId) || {};
   switch (smartAccountType) {

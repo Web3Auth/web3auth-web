@@ -184,10 +184,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       //   },
       //   externalWalletLogin: {
       //     enabled: true,
-      //     config: {
-      //       phantom: { enabled: false },
-      //       trust: { enabled: false },
-      //     },
+      //     config: [
+      //       { wallet: "phantom", enabled: false },
+      //       { wallet: "trust", enabled: false },
+      //     ],
       //   },
       // };
     } catch (e) {
@@ -203,7 +203,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
 
         // remove wallets that are disabled in project config from wallet registry
-        Object.entries(projectConfig.externalWalletLogin?.config || {}).forEach(([wallet, { enabled }]) => {
+        (projectConfig.externalWalletLogin?.config || []).forEach(({ wallet, enabled }) => {
           if (!enabled) {
             delete walletRegistry.default[wallet];
             delete walletRegistry.others[wallet];
@@ -274,8 +274,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // external wallets config
     const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
-    const disabledExternalWallets = Object.fromEntries(
-      Object.entries(projectConfig.externalWalletLogin?.config || {}).filter(([_, { enabled }]) => !enabled)
+    const disabledExternalWallets = new Set(
+      (projectConfig.externalWalletLogin?.config || []).filter(({ enabled }) => !enabled).map(({ wallet }) => wallet)
     );
 
     // merge default connectors with the custom configured connectors.
@@ -310,7 +310,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       // skip connector if it is external and external wallets are disabled or it is disabled in project config
       const isExternalWallet = connector.type === CONNECTOR_CATEGORY.EXTERNAL || connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2;
-      if (isExternalWallet && (!isExternalWalletEnabled || disabledExternalWallets[connectorName])) return;
+      if (isExternalWallet && (!isExternalWalletEnabled || disabledExternalWallets.has(connectorName))) return;
 
       this.modalConfig.connectors[connectorName] = connectorConfig;
       return connectorName;

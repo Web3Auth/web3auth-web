@@ -353,11 +353,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
       const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
-      connectorFns.push(
-        walletConnectV2Connector({
-          walletConnectInitOptions: { projectId: "d3c63f19f9582f8ba48e982057eb096b" }, // TODO: always use Web3Auth WalletConnect project ID
-        })
-      );
+      connectorFns.push(walletConnectV2Connector());
     }
 
     const connectors = connectorFns.map((connectorFn) => connectorFn(config));
