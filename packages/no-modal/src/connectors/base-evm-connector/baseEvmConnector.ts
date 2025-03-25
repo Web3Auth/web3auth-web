@@ -16,7 +16,6 @@ import {
 } from "@/core/base";
 
 export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async authenticateUser(): Promise<UserAuthInfo> {

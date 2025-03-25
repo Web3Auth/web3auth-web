@@ -4,6 +4,7 @@ import url from "@rollup/plugin-url";
 import svgr from "@svgr/rollup";
 import path from "path";
 import postcss from "rollup-plugin-postcss";
+// TODO: use ssr module for cjs build
 
 export const baseConfig = {
   input: ["./src/index.ts", "./src/react/index.ts", "./src/vue/index.ts"],

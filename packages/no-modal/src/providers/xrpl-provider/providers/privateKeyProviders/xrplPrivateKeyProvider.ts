@@ -8,7 +8,7 @@ import { createXrplJsonRpcClient } from "../../rpc/JrpcClient";
 import { createXRPLMiddleware, creatXrplChainSwitchMiddleware, IXrplChainSwitchHandlers, KeyPair, RPC_METHODS } from "../../rpc/xrplRpcMiddlewares";
 import { getProviderHandlers } from "./xrplWalletUtils";
 
-export interface XrplPrivKeyProviderConfig extends BaseProviderConfig {}
+export type XrplPrivKeyProviderConfig = BaseProviderConfig;
 
 export interface XrplPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;

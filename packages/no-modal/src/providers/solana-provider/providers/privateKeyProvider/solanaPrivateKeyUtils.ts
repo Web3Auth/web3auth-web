@@ -1,7 +1,7 @@
 import { Keypair, VersionedTransaction } from "@solana/web3.js";
+import { bs58 } from "@toruslabs/bs58";
 import { sign } from "@toruslabs/tweetnacl-js";
 import { JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
-import bs58 from "bs58";
 
 import { SafeEventEmitterProvider, WalletInitializationError } from "@/core/base";
 
