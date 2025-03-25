@@ -379,7 +379,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       authConnectionId: params.authConnectionId,
       groupedAuthConnectionId: params.groupedAuthConnectionId,
     });
-    if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
+
+    if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Invalid auth connection.");
 
     const jwtParams = {
       ...providerConfig.jwtParameters,
@@ -406,10 +407,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       jwtParams,
       customState: {
         nonce,
-        dapp_redirect_url: this.authOptions.redirectUrl,
         appState: params.appState,
-        uxMode: this.authOptions.uxMode,
-        whiteLabel: JSON.stringify(this.authOptions.whiteLabel),
+        // use the default settings from the auth instance.
+        dapp_redirect_url: this.authInstance.options.redirectUrl,
+        uxMode: this.authInstance.options.uxMode,
+        whiteLabel: JSON.stringify(this.authInstance.options.whiteLabel),
         loginParams: JSON.stringify(loginParams),
       },
       web3AuthClientId: this.coreOptions.clientId,
@@ -477,7 +479,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       groupedAuthConnectionId: params.groupedAuthConnectionId,
     });
 
-    if (!loginConfig?.authConnection) throw WalletLoginError.connectionError("Login provider is not available");
+    // throw error only when we cannot find the login config and authConnectionId is not provided in the params.
+    // otherwise, we will use the params to create a new auth connection config in the auth instance.
+    if (!loginConfig?.authConnection && !params.authConnectionId) throw WalletLoginError.connectionError("Invalid auth connection.");
 
     const loginParams = cloneDeep(params);
     loginParams.extraLoginOptions = {

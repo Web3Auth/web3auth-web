@@ -1,4 +1,4 @@
-import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import { SafeEventEmitter } from "@web3auth/auth";
 
 import { authConnector } from "@/core/auth-connector";
 import {
@@ -12,7 +12,6 @@ import {
   CustomChainConfig,
   fetchProjectConfig,
   getChainConfig,
-  IBaseProvider,
   IConnector,
   IPlugin,
   IProvider,
@@ -354,7 +353,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
 
-      let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
+      let finalProvider = provider;
       // setup aa provider for external wallets on EVM chains, for in app wallet, it uses WS provider which already supports AA
       const { accountAbstractionConfig } = this.coreOptions;
       if (
