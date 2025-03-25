@@ -9,14 +9,13 @@ import {
   nftCheckoutPlugin,
   PluginFn,
   storageAvailable,
+  UIConfig,
   UX_MODE,
   WALLET_CONNECTORS,
   walletConnectV2Connector,
   walletServicesPlugin,
   type Web3AuthOptions,
 } from "@web3auth/modal";
-
-import { WidgetType } from "@web3auth/modal/dist/types/ui";
 import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -102,13 +101,13 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const { widget, targetId } = formData;
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel, widget: widget as WidgetType, targetId } : { widget: widget as WidgetType, targetId };
+  const uiConfig = enabledWhiteLabel ? { ...whiteLabel, widget: widget, targetId } : { widget: widget, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "testing" } });
 
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig,
+    uiConfig: uiConfig as UIConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
