@@ -1,4 +1,4 @@
-import "./css/web3auth.css";
+import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
@@ -18,7 +18,8 @@ import {
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
-import Modal from "./components/Modal";
+// import Modal from "./components/Modal";
+import Widget from "./components-base/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
@@ -31,24 +32,29 @@ import {
   SocialLoginEventType,
   StateEmitterEvents,
   UIConfig,
+  WIDGET_TYPE,
 } from "./interfaces";
 import i18n from "./localeImport";
 import { getUserLanguage } from "./utils";
 
-function createWrapper(parentZIndex: string): HTMLElement {
+function createWrapperForModal(parentZIndex: string) {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
-
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
   parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
-  const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-container");
-  parent.appendChild(wrapper);
   document.body.appendChild(parent);
-  return wrapper;
+}
+
+function createWrapperForEmbed(targetId: string) {
+  const targetElement = document.getElementById(targetId);
+  if (!targetElement) {
+    log.error(`Element with ID ${targetId} not found`);
+    return;
+  }
+  targetElement.innerHTML = `<div id="w3a-parent-container" class="w3a-parent-container"></div>`;
 }
 
 export class LoginModal extends SafeEventEmitter {
@@ -73,6 +79,12 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+    if (!uiConfig.widget) this.uiConfig.widget = WIDGET_TYPE.MODAL;
+
+    if (uiConfig.widget === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
+      log.error("targetId is required for embed widget");
+      throw new Error("targetId is required for embed widget");
+    }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.chainNamespace = uiConfig.chainNamespace;
@@ -191,7 +203,15 @@ export class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      const container = createWrapper(this.uiConfig.modalZIndex);
+
+      if (this.uiConfig.widget === WIDGET_TYPE.MODAL) {
+        createWrapperForModal(this.uiConfig.modalZIndex);
+      } else {
+        createWrapperForEmbed(this.uiConfig.targetId);
+      }
+
+      const container = document.getElementById("w3a-parent-container");
+
       if (darkState.isDark) {
         container.classList.add("w3a--dark");
       } else {
@@ -201,7 +221,7 @@ export class LoginModal extends SafeEventEmitter {
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
-          <Modal
+          <Widget
             closeModal={this.closeModal}
             stateListener={this.stateEmitter}
             handleShowExternalWallets={this.handleShowExternalWallets}
@@ -211,6 +231,7 @@ export class LoginModal extends SafeEventEmitter {
             appName={this.uiConfig.appName}
             chainNamespace={this.chainNamespace}
             walletRegistry={this.walletRegistry}
+            widget={this.uiConfig.widget}
           />
         </ThemedContext.Provider>
       );

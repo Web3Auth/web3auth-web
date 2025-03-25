@@ -3,10 +3,10 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
   SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
-  type CONFIRMATION_STRATEGY_TYPE
 } from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
@@ -124,6 +124,8 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   bundlerUrl?: string;
   paymasterUrl?: string;
+  widget?: "embed" | "modal";
+  targetId?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({
