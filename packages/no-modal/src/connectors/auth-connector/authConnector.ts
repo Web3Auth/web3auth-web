@@ -483,6 +483,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     // otherwise, we will use the params to create a new auth connection config in the auth instance.
     if (!loginConfig?.authConnection && !params.authConnectionId) throw WalletLoginError.connectionError("Invalid auth connection.");
 
+    if (!loginConfig?.authConnection) {
+      this.authInstance.options.authConnectionConfig.push({
+        authConnection: params.authConnection as AUTH_CONNECTION_TYPE,
+        authConnectionId: params.authConnectionId,
+        groupedAuthConnectionId: params.groupedAuthConnectionId,
+      });
+    }
+
     const loginParams = cloneDeep(params);
     loginParams.extraLoginOptions = {
       ...(loginParams.extraLoginOptions || {}),
