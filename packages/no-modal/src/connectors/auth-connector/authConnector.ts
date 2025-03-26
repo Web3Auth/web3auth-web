@@ -1,13 +1,13 @@
-import { BUTTON_POSITION, CONFIRMATION_STRATEGY, ProviderConfig } from "@toruslabs/base-controllers";
+import { BUTTON_POSITION, CONFIRMATION_STRATEGY, type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import {
   Auth,
-  AUTH_CONNECTION_TYPE,
-  Auth0ClientOptions,
+  type AUTH_CONNECTION_TYPE,
+  type Auth0ClientOptions,
   BUILD_ENV,
   createHandler,
-  CreateHandlerParams,
-  LoginParams,
+  type CreateHandlerParams,
+  type LoginParams,
   PopupHandler,
   randomId,
   SDK_MODE,
@@ -41,7 +41,6 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import { getAuthConnectionConfig } from "./config/authConnectionConfig";
 import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
@@ -106,6 +105,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     super.checkInitializationRequirements({ chainConfig });
     if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
+    if (this.authConnectionConfig.length === 0)
+      throw WalletInitializationError.invalidParams("authConnectionConfig is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
@@ -142,9 +143,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             chains: wsSupportedChains as ProviderConfig[],
             chainId,
             whiteLabel: {
-              // TODO: fix this after ws is released
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...(this.authOptions.whiteLabel as any),
+              ...this.authOptions.whiteLabel,
               ...this.wsSettings.whiteLabel,
             },
           });
@@ -572,7 +571,7 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
-      authConnectionConfig: getAuthConnectionConfig(finalConnectorSettings.buildEnv, coreOptions.web3AuthNetwork),
+      authConnectionConfig: projectConfig.embeddedWalletAuth,
     });
   };
 };

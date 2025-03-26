@@ -51,23 +51,21 @@ export interface WalletUiConfig {
 
 // TODO: finalize the project config
 export interface ProjectConfig {
-  // Legacy
-  sms_otp_enabled: boolean;
-  // Project settings
+  // General config
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;
   enableKeyExport?: boolean;
   whitelist?: WhitelistResponse; // remain unchanged
   whitelabel?: WhiteLabelData; // remain unchanged
-  // Chains
+  // Chains config
   chains?: ChainsConfig;
-  // Smart accounts
+  // Smart accounts config
   smartAccounts?: SmartAccountsConfig;
-  // WS settings
+  // WS config
   walletUi?: WalletUiConfig;
-  // Login config
-  externalWalletLogin?: ExternalWalletsConfig;
-  auth_connection_config?: AuthConnectionConfig;
+  // Authentication config
+  externalWalletAuth?: ExternalWalletsConfig;
+  embeddedWalletAuth?: AuthConnectionConfig;
 }
 
 export interface WalletRegistryItem {

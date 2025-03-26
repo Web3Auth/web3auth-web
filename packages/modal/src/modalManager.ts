@@ -1,5 +1,4 @@
 import {
-  AUTH_CONNECTION,
   type AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
@@ -123,7 +122,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     walletRegistry: WalletRegistry,
     projectConfig: ProjectConfig
   ): { disabledExternalWallets: Set<string>; filteredWalletRegistry: WalletRegistry } {
-    const { disableAllRecommendedWallets, disableAllOtherWallets, disabledWallets } = projectConfig.externalWalletLogin || {};
+    const { disableAllRecommendedWallets, disableAllOtherWallets, disabledWallets } = projectConfig.externalWalletAuth || {};
 
     // add disabled wallets to set
     const disabledExternalWallets = new Set(disabledWallets || []);
@@ -152,53 +151,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.options.web3AuthNetwork,
         this.options.accountAbstractionConfig?.smartAccountType
       );
-      // TODO: we're using mock project config to test, remove this before production
-      // projectConfig = {
-      //   ...projectConfig,
-      //   enableKeyExport: true,
-      //   chains: [
-      //     getChainConfig("eip155", "0x1", this.options.clientId),
-      //     getChainConfig("solana", "0x65", this.options.clientId),
-      //     getChainConfig("solana", "0x67", this.options.clientId),
-      //   ],
-      //   walletUi: {
-      //     enableConfirmationModal: true,
-      //     enablePortfolioWidget: true,
-      //     enableTokenDisplay: true,
-      //     enableNftDisplay: true,
-      //     enableWalletConnect: true,
-      //     enableBuyButton: true,
-      //     enableSendButton: true,
-      //     enableSwapButton: true,
-      //     enableReceiveButton: true,
-      //     enableShowAllTokensButton: true,
-      //     portfolioWidgetPosition: "bottom-left",
-      //     defaultPortfolio: "token",
-      //   },
-      //   smartAccounts: {
-      //     walletScope: "all",
-      //     smartAccountType: "safe",
-      //     chains: [
-      //       {
-      //         chainId: "0xaa36a7",
-      //         bundlerConfig: {
-      //           url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //         },
-      //       },
-      //       {
-      //         chainId: "0x1",
-      //         bundlerConfig: {
-      //           url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //         },
-      //       },
-      //     ],
-      //   },
-      //   externalWalletLogin: {
-      //     disableAllRecommendedWallets: false,
-      //     disableAllOtherWallets: false,
-      //     disabledWallets: ["phantom", "trust"],
-      //   },
-      // };
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
@@ -206,7 +158,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     if (isExternalWalletEnabled && !params?.hideWalletDiscovery) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
@@ -258,33 +210,29 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     projectConfig: ProjectConfig;
     disabledExternalWallets: Set<string>;
   }): Promise<string[]> {
-    // update auth connector config
-    const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
-    if (smsOtpEnabled !== undefined) {
-      // TODO: use the new login config method
-      const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
-        [WALLET_CONNECTORS.AUTH]: {
-          label: WALLET_CONNECTORS.AUTH,
-          loginMethods: {
-            [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
-              name: AUTH_CONNECTION.SMS_PASSWORDLESS,
-              showOnModal: smsOtpEnabled,
-              showOnDesktop: smsOtpEnabled,
-              showOnMobile: smsOtpEnabled,
-            },
-          },
-        },
+    // modal config from project config
+    const loginMethods: LoginMethodConfig = {};
+    for (const authConnectionConfig of projectConfig.embeddedWalletAuth || []) {
+      const connectionType = authConnectionConfig.authConnection;
+      loginMethods[connectionType] = {
+        name: connectionType,
+        ...authConnectionConfig,
+        showOnModal: true,
+        showOnDesktop: true,
+        showOnMobile: true,
       };
-      if (!params?.modalConfig) params = { modalConfig: {} };
-      const localSmsOtpEnabled = params.modalConfig[WALLET_CONNECTORS.AUTH]?.loginMethods?.[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
-      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
-        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
-      }
-      params.modalConfig = deepmerge(connectorConfig, cloneDeep(params.modalConfig));
     }
+    const projectModalConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
+      [WALLET_CONNECTORS.AUTH]: { label: WALLET_CONNECTORS.AUTH, loginMethods },
+    };
+    // merge with user config
+    if (params?.modalConfig?.[WALLET_CONNECTORS.AUTH]) {
+      if (!params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods) params.modalConfig[WALLET_CONNECTORS.AUTH].loginMethods = {};
+    }
+    params.modalConfig = deepmerge(projectModalConfig, cloneDeep(params.modalConfig || {}));
 
     // external wallets config
-    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
 
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [

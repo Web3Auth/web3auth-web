@@ -14,7 +14,7 @@ export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
 };
 
 export const fetchProjectConfig = async (clientId: string, web3AuthNetwork: WEB3AUTH_NETWORK_TYPE, aaProvider?: string): Promise<ProjectConfig> => {
-  const url = new URL(`${signerHost(web3AuthNetwork)}/api/configuration`);
+  const url = new URL(`${signerHost(web3AuthNetwork)}/api/v2/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   url.searchParams.append("whitelist", "true");

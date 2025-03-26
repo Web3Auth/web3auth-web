@@ -316,7 +316,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
 
     // add injected connectors
-    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
     const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
     if (isMipdEnabled) {
