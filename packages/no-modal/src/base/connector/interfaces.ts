@@ -1,6 +1,7 @@
 import {
   AUTH_CONNECTION_TYPE,
   AuthUserInfo,
+  ExtraLoginOptions,
   JRPCRequest,
   JRPCResponse,
   Maybe,
@@ -163,6 +164,10 @@ export type LoginMethodConfig = Partial<
        * Grouped auth connection id of the provider.
        */
       groupedAuthConnectionId?: string;
+      /**
+       * ExtraLoginOption params to be used for social login.
+       */
+      extraLoginOptions?: ExtraLoginOptions;
     }
   >
 >;
