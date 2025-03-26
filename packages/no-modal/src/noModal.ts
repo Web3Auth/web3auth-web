@@ -25,6 +25,7 @@ import {
   storageAvailable,
   UserAuthInfo,
   UserInfo,
+  validateChainId,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -72,6 +73,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     for (const chain of chains) {
       if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace))
         throw WalletInitializationError.invalidParams("Please provide a valid chainNamespace in chains");
+      if (!validateChainId(chain.chainId)) throw WalletInitializationError.invalidParams("Please provide a valid chainId in chains");
     }
 
     if (options.storageType === "session") this.storage = "sessionStorage";
@@ -83,6 +85,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         ...chain,
       })),
     };
+    if (options.defaultChainId && !validateChainId(options.defaultChainId))
+      throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
 
     this.currentChainId = options.defaultChainId || chains[0].chainId;
   }
