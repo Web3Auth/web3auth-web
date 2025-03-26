@@ -3,76 +3,60 @@ import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { type AuthConnectionConfig, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
+import { SMART_ACCOUNT_WALLET_SCOPE } from "./connector";
 
 export interface WhitelistResponse {
   urls: string[];
   signed_urls: Record<string, string>;
 }
 
-export type ChainsConfig = {
-  chainId: string;
-  enabled: boolean;
-  config: CustomChainConfig;
-}[];
+export type ChainsConfig = CustomChainConfig[];
 
 export interface ExternalWalletsConfig {
-  enabled: boolean;
-  config: { wallet: string; enabled: boolean }[];
+  disableAllRecommendedWallets?: boolean;
+  disableAllOtherWallets?: boolean;
+  disabledWallets?: string[];
 }
-
-export const SMART_ACCOUNT_WALLET_SCOPE = {
-  EMBEDDED_ONLY: "embeddedOnly",
-  ALL: "all",
-} as const;
 
 export type SmartAccountWalletScope = (typeof SMART_ACCOUNT_WALLET_SCOPE)[keyof typeof SMART_ACCOUNT_WALLET_SCOPE];
 
 export interface SmartAccountsConfig {
-  enabled: boolean;
-  config: {
-    smartAccountType: SmartAccountType;
-    walletScope: SmartAccountWalletScope;
-    chains: {
-      chainId: string;
-      bundlerConfig: {
-        url: string;
-      };
-      paymasterConfig?: {
-        url: string;
-      };
-    }[];
-  };
+  smartAccountType: SmartAccountType;
+  walletScope: SmartAccountWalletScope;
+  chains: {
+    chainId: string;
+    bundlerConfig: {
+      url: string;
+    };
+    paymasterConfig?: {
+      url: string;
+    };
+  }[];
 }
 
 export interface WalletUiConfig {
-  portfolioWidgetEnabled: boolean;
-  portfolioWidgetPosition: BUTTON_POSITION_TYPE;
-  confirmationModalEnabled: boolean;
-  walletConnectEnabled: boolean;
-  tokenDisplayEnabled: boolean;
-  nftDisplayEnabled: boolean;
-  defaultPortfolio: "token" | "nft";
-  showAllTokensButtonEnabled: boolean;
-  buyButtonEnabled: boolean;
-  sendButtonEnabled: boolean;
-  swapButtonEnabled: boolean;
-  receiveButtonEnabled: boolean;
+  enablePortfolioWidget?: boolean;
+  enableConfirmationModal?: boolean;
+  enableWalletConnect?: boolean;
+  enableTokenDisplay?: boolean;
+  enableNftDisplay?: boolean;
+  enableShowAllTokensButton?: boolean;
+  enableBuyButton?: boolean;
+  enableSendButton?: boolean;
+  enableSwapButton?: boolean;
+  enableReceiveButton?: boolean;
+  portfolioWidgetPosition?: BUTTON_POSITION_TYPE;
+  defaultPortfolio?: "token" | "nft";
 }
 
 // TODO: finalize the project config
 export interface ProjectConfig {
   // Legacy
   sms_otp_enabled: boolean;
-  /** @deprecated If external_wallets.enabled is true, WC will be enabled automatically */
-  wallet_connect_enabled: boolean;
-  /** @deprecated always use Web3Auth WalletConnect project ID */
-  wallet_connect_project_id?: string;
-  /** @deprecated use keyExportEnabled */
-  key_export_enabled?: boolean;
   // Project settings
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;
-  keyExportEnabled?: boolean;
+  enableKeyExport?: boolean;
   whitelist?: WhitelistResponse; // remain unchanged
   whitelabel?: WhiteLabelData; // remain unchanged
   // Chains

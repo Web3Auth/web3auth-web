@@ -523,46 +523,46 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
     ]) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
-    const { keyExportEnabled, walletUi } = projectConfig;
-    const isKeyExportEnabled = typeof keyExportEnabled === "boolean" ? keyExportEnabled : true;
+    const { enableKeyExport, walletUi } = projectConfig;
+    const isKeyExportEnabled = typeof enableKeyExport === "boolean" ? enableKeyExport : true;
     const {
-      portfolioWidgetEnabled = false,
+      enablePortfolioWidget = false,
+      enableTokenDisplay = true,
+      enableNftDisplay = true,
+      enableWalletConnect = true,
+      enableBuyButton = true,
+      enableSendButton = true,
+      enableSwapButton = true,
+      enableReceiveButton = true,
+      enableShowAllTokensButton = true,
+      enableConfirmationModal = false,
       portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
       defaultPortfolio = "token",
-      tokenDisplayEnabled = true,
-      nftDisplayEnabled = true,
-      walletConnectEnabled = true,
-      buyButtonEnabled = true,
-      sendButtonEnabled = true,
-      swapButtonEnabled = true,
-      receiveButtonEnabled = true,
-      showAllTokensButtonEnabled = true,
-      confirmationModalEnabled = false,
     } = walletUi || {};
     const projectConfigWhiteLabel: WalletServicesSettings["whiteLabel"] = {
-      showWidgetButton: portfolioWidgetEnabled,
-      hideNftDisplay: !nftDisplayEnabled,
-      hideTokenDisplay: !tokenDisplayEnabled,
-      hideTransfers: !sendButtonEnabled,
-      hideTopup: !buyButtonEnabled,
-      hideReceive: !receiveButtonEnabled,
-      hideSwap: !swapButtonEnabled,
-      hideShowAllTokens: !showAllTokensButtonEnabled,
-      hideWalletConnect: !walletConnectEnabled,
+      showWidgetButton: enablePortfolioWidget,
+      hideNftDisplay: !enableNftDisplay,
+      hideTokenDisplay: !enableTokenDisplay,
+      hideTransfers: !enableSendButton,
+      hideTopup: !enableBuyButton,
+      hideReceive: !enableReceiveButton,
+      hideSwap: !enableSwapButton,
+      hideShowAllTokens: !enableShowAllTokensButton,
+      hideWalletConnect: !enableWalletConnect,
       buttonPosition: portfolioWidgetPosition,
       defaultPortfolio,
     };
     const whiteLabel = deepmerge.all([projectConfigWhiteLabel, uiConfig, coreOptions.walletServicesConfig?.whiteLabel || {}]);
     const confirmationStrategy =
       coreOptions.walletServicesConfig?.confirmationStrategy ??
-      (confirmationModalEnabled ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
+      (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       confirmationStrategy,
       whiteLabel,
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
-      enableKeyExport: keyExportEnabled,
+      enableKeyExport: enableKeyExport,
     };
 
     // Core options

@@ -228,8 +228,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected initChainsConfig(projectConfig: ProjectConfig) {
     // merge chains from project config with core options, core options chains will take precedence over project config chains
     const chainMap = new Map<string, CustomChainConfig>();
-    const enabledProjectConfigChains = projectConfig.chains?.filter((chain) => chain.enabled).map((chain) => chain.config) || [];
-    const allChains = [...enabledProjectConfigChains, ...(this.coreOptions.chains || [])];
+    const allChains = [...(projectConfig.chains || []), ...(this.coreOptions.chains || [])];
     for (const chain of allChains) {
       const existingChain = chainMap.get(chain.chainId);
       if (!existingChain) chainMap.set(chain.chainId, chain);
@@ -267,11 +266,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected initAccountAbstractionConfig(projectConfig?: ProjectConfig) {
-    const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig) || projectConfig?.smartAccounts?.enabled;
+    const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig || projectConfig?.smartAccounts);
     if (!isAAEnabled) return;
 
     // merge project config with core options, code config take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts?.config || {};
+    const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts || {};
     this.coreOptions.accountAbstractionConfig = deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {});
 
     // determine if we should use AA with external wallet
@@ -317,7 +316,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
 
     // add injected connectors
-    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
     const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
     if (isMipdEnabled) {
