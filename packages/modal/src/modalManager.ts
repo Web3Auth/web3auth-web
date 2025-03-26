@@ -1,6 +1,6 @@
 import {
   AUTH_CONNECTION,
-  AuthLoginParams,
+  type AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
   CONNECTOR_CATEGORY,
@@ -9,7 +9,7 @@ import {
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
-  IConnector,
+  type IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
   log,
@@ -75,11 +75,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     super.initCachedConnectorAndChainId();
 
     // init login modal
+    const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
     this.loginModal = new LoginModal({
       ...this.options.uiConfig,
       connectorListener: this,
       chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
-      walletRegistry,
+      walletRegistry: filteredWalletRegistry,
     });
     this.subscribeToLoginModalEvents();
     await this.loginModal.initModal();
@@ -89,7 +90,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) =>
-      this.initConnectors({ connectors: newConnectors, projectConfig, modalConfig: params })
+      this.initConnectors({ connectors: newConnectors, projectConfig, modalConfig: params, disabledExternalWallets })
     );
     await this.loadConnectors({ projectConfig });
 
@@ -118,6 +119,30 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
+  private filterWalletRegistry(
+    walletRegistry: WalletRegistry,
+    projectConfig: ProjectConfig
+  ): { disabledExternalWallets: Set<string>; filteredWalletRegistry: WalletRegistry } {
+    const { disableAllRecommendedWallets, disableAllOtherWallets, disabledWallets } = projectConfig.externalWalletLogin || {};
+
+    // add disabled wallets to set
+    const disabledExternalWallets = new Set(disabledWallets || []);
+    if (disableAllRecommendedWallets) {
+      Object.keys(walletRegistry.default).forEach((wallet) => disabledExternalWallets.add(wallet));
+    }
+    if (disableAllOtherWallets) {
+      Object.keys(walletRegistry.others).forEach((wallet) => disabledExternalWallets.add(wallet));
+    }
+
+    // remove wallets that are disabled in project config from wallet registry
+    const filteredWalletRegistry = cloneDeep(walletRegistry);
+    disabledExternalWallets.forEach((wallet) => {
+      delete filteredWalletRegistry.default[wallet];
+      delete filteredWalletRegistry.others[wallet];
+    });
+    return { disabledExternalWallets, filteredWalletRegistry };
+  }
+
   private async getProjectAndWalletConfig(params?: ModalConfigParams) {
     // get project config
     let projectConfig: ProjectConfig;
@@ -130,64 +155,48 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // TODO: we're using mock project config to test, remove this before production
       // projectConfig = {
       //   ...projectConfig,
+      //   enableKeyExport: true,
       //   chains: [
-      //     {
-      //       chainId: "0x1",
-      //       enabled: true,
-      //       config: getChainConfig("eip155", "0x1", this.options.clientId),
-      //     },
-      //     {
-      //       chainId: "0x65",
-      //       enabled: true,
-      //       config: getChainConfig("solana", "0x65", this.options.clientId),
-      //     },
-      //     {
-      //       chainId: "0x67",
-      //       enabled: false,
-      //       config: getChainConfig("solana", "0x67", this.options.clientId),
-      //     },
+      //     getChainConfig("eip155", "0x1", this.options.clientId),
+      //     getChainConfig("solana", "0x65", this.options.clientId),
+      //     getChainConfig("solana", "0x67", this.options.clientId),
       //   ],
       //   walletUi: {
-      //     confirmationModalEnabled: true,
-      //     portfolioWidgetEnabled: true,
+      //     enableConfirmationModal: true,
+      //     enablePortfolioWidget: true,
+      //     enableTokenDisplay: true,
+      //     enableNftDisplay: true,
+      //     enableWalletConnect: true,
+      //     enableBuyButton: true,
+      //     enableSendButton: true,
+      //     enableSwapButton: true,
+      //     enableReceiveButton: true,
+      //     enableShowAllTokensButton: true,
       //     portfolioWidgetPosition: "bottom-left",
       //     defaultPortfolio: "token",
-      //     tokenDisplayEnabled: true,
-      //     nftDisplayEnabled: true,
-      //     walletConnectEnabled: true,
-      //     buyButtonEnabled: true,
-      //     sendButtonEnabled: true,
-      //     swapButtonEnabled: true,
-      //     receiveButtonEnabled: true,
-      //     showAllTokensButtonEnabled: true,
       //   },
       //   smartAccounts: {
-      //     enabled: true,
-      //     config: {
-      //       walletScope: "all",
-      //       smartAccountType: "safe",
-      //       chains: [
-      //         {
-      //           chainId: "0xaa36a7",
-      //           bundlerConfig: {
-      //             url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //           },
+      //     walletScope: "all",
+      //     smartAccountType: "safe",
+      //     chains: [
+      //       {
+      //         chainId: "0xaa36a7",
+      //         bundlerConfig: {
+      //           url: "https://api.pimlico.io/v2/11155111/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
       //         },
-      //         {
-      //           chainId: "0x1",
-      //           bundlerConfig: {
-      //             url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
-      //           },
+      //       },
+      //       {
+      //         chainId: "0x1",
+      //         bundlerConfig: {
+      //           url: "https://api.pimlico.io/v2/1/rpc?apikey=pim_9ZMPA69qJ1BP19kt3Pi3Ro",
       //         },
-      //       ],
-      //     },
+      //       },
+      //     ],
       //   },
       //   externalWalletLogin: {
-      //     enabled: true,
-      //     config: [
-      //       { wallet: "phantom", enabled: false },
-      //       { wallet: "trust", enabled: false },
-      //     ],
+      //     disableAllRecommendedWallets: false,
+      //     disableAllOtherWallets: false,
+      //     disabledWallets: ["phantom", "trust"],
       //   },
       // };
     } catch (e) {
@@ -197,18 +206,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
-    if (!params?.hideWalletDiscovery && isExternalWalletEnabled) {
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
+    if (isExternalWalletEnabled && !params?.hideWalletDiscovery) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
-
-        // remove wallets that are disabled in project config from wallet registry
-        (projectConfig.externalWalletLogin?.config || []).forEach(({ wallet, enabled }) => {
-          if (!enabled) {
-            delete walletRegistry.default[wallet];
-            delete walletRegistry.others[wallet];
-          }
-        });
       } catch (e) {
         log.error("Failed to fetch wallet registry", e);
       }
@@ -220,13 +221,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     connectors,
     projectConfig,
     modalConfig,
+    disabledExternalWallets,
   }: {
     connectors: IConnector<unknown>[];
     projectConfig: ProjectConfig;
     modalConfig: ModalConfigParams;
+    disabledExternalWallets: Set<string>;
   }) {
     // filter connectors based on config
-    const filteredConnectorNames = await this.filterConnectors(modalConfig, projectConfig);
+    const filteredConnectorNames = await this.filterConnectors({ params: modalConfig, projectConfig, disabledExternalWallets });
 
     // initialize connectors based on availability
     const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames, modalConfig);
@@ -246,7 +249,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  private async filterConnectors(params: ModalConfigParams, projectConfig: ProjectConfig): Promise<string[]> {
+  private async filterConnectors({
+    params,
+    projectConfig,
+    disabledExternalWallets,
+  }: {
+    params: ModalConfigParams;
+    projectConfig: ProjectConfig;
+    disabledExternalWallets: Set<string>;
+  }): Promise<string[]> {
     // update auth connector config
     const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
     if (smsOtpEnabled !== undefined) {
@@ -273,10 +284,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     // external wallets config
-    const isExternalWalletEnabled = projectConfig.externalWalletLogin?.enabled ?? true;
-    const disabledExternalWallets = new Set(
-      (projectConfig.externalWalletLogin?.config || []).filter(({ enabled }) => !enabled).map(({ wallet }) => wallet)
-    );
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletLogin);
 
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [

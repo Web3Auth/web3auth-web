@@ -61,12 +61,12 @@ export interface ProjectConfig {
   whitelabel?: WhiteLabelData; // remain unchanged
   // Chains
   chains?: ChainsConfig;
-  // Login config
-  externalWalletLogin?: ExternalWalletsConfig;
   // Smart accounts
   smartAccounts?: SmartAccountsConfig;
   // WS settings
   walletUi?: WalletUiConfig;
+  // Login config
+  externalWalletLogin?: ExternalWalletsConfig;
   auth_connection_config?: AuthConnectionConfig;
 }
 
