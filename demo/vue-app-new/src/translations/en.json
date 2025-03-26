@@ -62,6 +62,7 @@
       "btnClearConsole": "Clear Console",
       "btnGetUserInfo": "Get User Info",
       "btnGetAccounts": "Get Accounts",
+      "btnGetPrivateKey": "Get Private Key",
       "btnGetBalance": "Get Balance",
       "btnSendEth": "Send ETH",
       "btnSignEthMessage": "Sign ETH Message",

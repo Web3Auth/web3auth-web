@@ -14,13 +14,14 @@ import {
   getAccounts,
   getBalance,
   getChainId,
+  getPrivateKey,
   sendEth,
   signEthMessage,
   signTransaction as signEthTransaction,
   signPersonalMessage,
   signTypedMessage,
 } from "../services/ethHandlers";
-import { getBalance as getSolBalance, signAllTransactions, signAndSendTransaction, signMessage as signSolMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
+import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions, signAndSendTransaction, signMessage as signSolMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
 import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
@@ -179,6 +180,10 @@ const onGetAccounts = async () => {
   await getAccounts(provider.value as IProvider, printToConsole);
 };
 
+const onGetPrivateKey = async () => {
+  await getPrivateKey(provider.value as IProvider, printToConsole);
+};
+
 const getConnectedChainId = async () => {
   await getChainId(provider.value as IProvider, printToConsole);
 };
@@ -200,6 +205,10 @@ const onSignPersonalMsg = async () => {
 };
 
 // Solana
+const onGetSolPrivateKey = async () => {
+  await getSolPrivateKey(provider.value as IProvider, printToConsole);
+};
+
 const onSignAndSendTransaction = async () => {
   await signAndSendTransaction(provider.value as IProvider, printToConsole);
 };
@@ -339,6 +348,9 @@ const authenticateUser = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
             {{ t("app.buttons.btnGetAccounts") }}
           </Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetPrivateKey">
+            {{ t("app.buttons.btnGetPrivateKey") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
@@ -364,6 +376,7 @@ const authenticateUser = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">{{ t("app.buttons.btnSwitchChainNamespace") }} to EVM</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
