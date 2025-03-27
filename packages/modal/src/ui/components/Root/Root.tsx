@@ -262,7 +262,7 @@ function Root(props: RootProps) {
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletRegistry]);
+  }, [config, walletRegistry]);
 
   const totalExternalWalletsLength = useMemo(() => {
     return allButtons.length + customAdapterButtons.length;
