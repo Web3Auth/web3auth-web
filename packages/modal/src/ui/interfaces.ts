@@ -1,4 +1,4 @@
-import type { SafeEventEmitter } from "@web3auth/auth";
+import type { AUTH_CONNECTION_TYPE, ExtraLoginOptions, SafeEventEmitter } from "@web3auth/auth";
 import {
   AuthLoginParams,
   BaseConnectorConfig,
@@ -71,7 +71,10 @@ export interface UIConfig extends CoreUIConfig {
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
-export type ModalLoginParams = Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint"> & {
+export type ModalLoginParams = Pick<
+  AuthLoginParams,
+  "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint" | "extraLoginOptions"
+> & {
   name: string;
 };
 
@@ -156,7 +159,14 @@ export type rowType = {
   isPrimaryBtn: boolean;
   name: string;
   adapter: SocialLoginsConfig["connector"];
-  loginParams: { authConnection: string; name: string; login_hint: string };
+  loginParams: {
+    authConnection: AUTH_CONNECTION_TYPE;
+    name: string;
+    login_hint: string;
+    authConnectionId?: string;
+    groupedAuthConnectionId?: string;
+    extraLoginOptions?: ExtraLoginOptions;
+  };
   order: number;
   isMainOption: boolean;
 };

@@ -313,6 +313,7 @@ export class LoginModal extends SafeEventEmitter {
         authConnectionId: loginParams.authConnectionId,
         groupedAuthConnectionId: loginParams.groupedAuthConnectionId,
         login_hint: loginParams.login_hint,
+        extraLoginOptions: loginParams.extraLoginOptions,
       },
     });
   };

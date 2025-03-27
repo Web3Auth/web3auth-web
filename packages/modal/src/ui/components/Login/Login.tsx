@@ -16,6 +16,8 @@ export const restrictedLoginMethods: string[] = [
   AUTH_CONNECTION.EMAIL_PASSWORDLESS,
   AUTH_CONNECTION.AUTHENTICATOR,
   AUTH_CONNECTION.PASSKEYS,
+  AUTH_CONNECTION.TELEGRAM,
+  AUTH_CONNECTION.CUSTOM,
 ];
 
 function Login(props: LoginProps) {
@@ -70,11 +72,12 @@ function Login(props: LoginProps) {
         return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
       })
       .forEach((method, index) => {
-        const name = capitalizeFirstLetter(socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].name || method);
+        const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+        const name = capitalizeFirstLetter(connectorConfig.name || method);
         const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
         const order = orderIndex || index;
 
-        const isMainOption = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].mainOption || order === 1;
+        const isMainOption = connectorConfig.mainOption || order === 1;
         const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
         if (order > 0 && order < 4) {
@@ -84,7 +87,14 @@ function Login(props: LoginProps) {
             isPrimaryBtn,
             name,
             adapter: socialLoginsConfig.connector,
-            loginParams: { authConnection: method, name, login_hint: "" },
+            loginParams: {
+              authConnection: method as AUTH_CONNECTION_TYPE,
+              authConnectionId: connectorConfig.authConnectionId,
+              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+              extraLoginOptions: connectorConfig.extraLoginOptions,
+              name,
+              login_hint: "",
+            },
             order,
             isMainOption,
           });
@@ -96,7 +106,14 @@ function Login(props: LoginProps) {
           isPrimaryBtn,
           name: name === "Twitter" ? "X" : name,
           adapter: socialLoginsConfig.connector,
-          loginParams: { authConnection: method, name, login_hint: "" },
+          loginParams: {
+            authConnection: method as AUTH_CONNECTION_TYPE,
+            authConnectionId: connectorConfig.authConnectionId,
+            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+            extraLoginOptions: connectorConfig.extraLoginOptions,
+            name,
+            login_hint: "",
+          },
           order,
           isMainOption,
         });
@@ -120,9 +137,17 @@ function Login(props: LoginProps) {
     if (isEmailPasswordLessLoginVisible) {
       const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
+        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS];
         return handleSocialLoginClick({
           connector: socialLoginsConfig.connector || "",
-          loginParams: { authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+            authConnectionId: connectorConfig.authConnectionId,
+            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+            extraLoginOptions: connectorConfig.extraLoginOptions,
+            login_hint: value,
+            name: "Email",
+          },
         });
       }
     }
@@ -131,9 +156,17 @@ function Login(props: LoginProps) {
       const number = value.startsWith("+") ? value : `${countryCode}${value}`;
       const result = await validatePhoneNumber(number);
       if (result) {
+        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
         return handleSocialLoginClick({
           connector: socialLoginsConfig.connector || "",
-          loginParams: { authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS,
+            authConnectionId: connectorConfig.authConnectionId,
+            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+            extraLoginOptions: connectorConfig.extraLoginOptions,
+            login_hint: typeof result === "string" ? result : number,
+            name: "Mobile",
+          },
         });
       }
     }
@@ -199,7 +232,7 @@ function Login(props: LoginProps) {
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure className="w3a--w-[200px] w3a--h-12 mx-auto">
+        <figure className="mx-auto w3a--h-12 w3a--w-[200px]">
           <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
         <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
@@ -245,10 +278,10 @@ function Login(props: LoginProps) {
       )}
 
       {!expand && showExternalWalletButton && showPasswordLessInput && (
-        <div className="w3a--flex w3a--items-center w3a--gap-x-2 w3a--w-full">
-          <div className="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-          <p className="w3a--text-xs w3a--font-normal w3a--text-app-gray-400 dark:w3a--text-app-gray-400 w3a--uppercase">or</p>
-          <div className="w3a--w-full w3a--h-[1px] w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+        <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
+          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+          <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
+          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
         </div>
       )}
 
@@ -257,7 +290,7 @@ function Login(props: LoginProps) {
           <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
           <div
             id="external-wallet-count"
-            className="w3a--w-auto w3a--px-2.5 w3a--py-0.5 w3a--rounded-full w3a--bg-app-primary-100 dark:w3a--bg-transparent dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--text-app-primary-500 w3a--text-xs w3a--font-medium w3a--text-app-primary-800"
+            className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
           >
             {totalExternalWallets - 1}+
           </div>

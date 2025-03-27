@@ -87,7 +87,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         setIsLoading(true);
         const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
         const authConnectorInstance = authConnector({
-          connectorSettings: { buildEnv: "development" },
+          connectorSettings: { buildEnv: "testing" },
         });
 
         const web3AuthInstance = new Web3AuthNoModal({
