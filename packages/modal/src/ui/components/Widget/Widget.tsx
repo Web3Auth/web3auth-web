@@ -90,8 +90,7 @@ function Widget(props: WidgetProps) {
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
 
     const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ([k, v]) => k !== AUTH_CONNECTION.EMAIL_PASSWORDLESS && (v as any).showOnModal !== false
+      ([k, v]) => k !== AUTH_CONNECTION.EMAIL_PASSWORDLESS && v.showOnModal !== false
     );
     return isAnySocialLoginVisible;
   }, [modalState]);
@@ -182,7 +181,6 @@ function Widget(props: WidgetProps) {
     return (
       <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
         <Root
-          stateListener={stateListener}
           appLogo={appLogo}
           appName={appName}
           chainNamespace={chainNamespaces}
@@ -210,7 +208,6 @@ function Widget(props: WidgetProps) {
   return (
     <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
       <Root
-        stateListener={stateListener}
         chainNamespace={chainNamespaces}
         walletRegistry={walletRegistry}
         appLogo={appLogo}

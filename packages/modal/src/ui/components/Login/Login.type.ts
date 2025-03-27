@@ -1,6 +1,7 @@
 import { SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
+  isModalVisible: boolean;
   isDark: boolean;
   appLogo?: string;
   appName?: string;

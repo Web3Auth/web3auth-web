@@ -93,7 +93,7 @@ function Root(props: RootProps) {
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
             <button
               type="button"
-              className="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800"
+              className="w3a-box-shadow w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800"
             >
               <Image
                 imageId={logoLight}
@@ -136,7 +136,7 @@ function Root(props: RootProps) {
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <button
             type="button"
-            className="w3a--rounded-full w3a--px-5 w3a--py-2.5 w3a--flex w3a--items-center w3a--justify-start w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800 w3a--gap-x-2 w3a--w-full w3a-box-shadow w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500 hover:w3a--translate-y-[0.5px] w3a--link-arrow hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800"
+            className="w3a-box-shadow w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800"
           >
             <Image
               imageId={deviceDetails.browser}
@@ -298,13 +298,13 @@ function Root(props: RootProps) {
     <RootContext.Provider value={contextValue}>
       <div className="w3a--flex w3a--flex-col">
         <div
-          className="h-screen w3a--transition-all w3a--overflow-hidden w3a--duration-[400ms] w3a--ease-in-out w3a--relative"
+          className="h-screen w3a--relative w3a--overflow-hidden w3a--transition-all w3a--duration-[400ms] w3a--ease-in-out"
           style={{
             maxHeight: containerMaxHeight,
           }}
         >
           <div className="w3a--modal-curtain" />
-          <div className="w3a--h-full w3a--p-6 w3a--flex w3a--flex-col w3a--flex-1 w3a--relative">
+          <div className="w3a--relative w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--p-6">
             {/* Content */}
             {modalState.status !== MODAL_STATUS.INITIALIZED ? (
               <Loader
@@ -318,6 +318,7 @@ function Root(props: RootProps) {
               <>
                 {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                   <Login
+                    isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
                     showPasswordLessInput={showPasswordLessInput}
                     showExternalWalletButton={showExternalWalletButton}
@@ -359,27 +360,27 @@ function Root(props: RootProps) {
               <>
                 {/* Backdrop */}
                 <div
-                  className="w3a--fixed w3a--top-0 w3a--left-0 w3a--w-full w3a--h-full w3a--bottom-sheet-bg w3a--transition-opacity w3a--duration-300"
+                  className="w3a--bottom-sheet-bg w3a--fixed w3a--left-0 w3a--top-0 w3a--size-full w3a--transition-opacity w3a--duration-300"
                   onClick={() => setBodyState({ showWalletDetails: false })}
                   aria-hidden="true"
                   role="button"
                 />
                 {/* Bottom Sheet */}
                 <div
-                  className={`w3a--fixed w3a--left-0 w3a--bottom-0 w3a--w-full w3a--bg-app-light-surface-main dark:w3a--bg-app-dark-surface-main 
-      w3a--rounded-t-3xl w3a--p-4 w3a--flex w3a--flex-col w3a--gap-y-2 w3a--shadow-lg w3a--border w3a--border-app-gray-100 
-      dark:w3a--border-app-gray-600 w3a--transition-transform w3a--duration-500 w3a--ease-out
+                  className={`w3a--fixed w3a--bottom-0 w3a--left-0 w3a--flex w3a--w-full w3a--flex-col 
+      w3a--gap-y-2 w3a--rounded-t-3xl w3a--border w3a--border-app-gray-100 w3a--bg-app-light-surface-main w3a--p-4 w3a--shadow-lg w3a--transition-transform 
+      w3a--duration-500 w3a--ease-out dark:w3a--border-app-gray-600 dark:w3a--bg-app-dark-surface-main
       ${bodyState.showWalletDetails ? "w3a--translate-y-0 w3a--delay-700" : "w3a--translate-y-full"}`}
                 >
                   {/* Drag Handle */}
                   <div
-                    className="w3a--h-1 w3a--w-16 w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--mx-auto w3a--rounded-full 
-        w3a--cursor-pointer"
+                    className="w3a--mx-auto w3a--h-1 w3a--w-16 w3a--cursor-pointer w3a--rounded-full w3a--bg-app-gray-200 
+        dark:w3a--bg-app-gray-700"
                     onClick={() => setBodyState({ showWalletDetails: false })}
                     aria-hidden="true"
                     role="button"
                   />
-                  <div className="w3a--flex w3a--justify-center w3a--my-4">
+                  <div className="w3a--my-4 w3a--flex w3a--justify-center">
                     <Image
                       imageId={`login-${bodyState.walletDetails.name}`}
                       hoverImageId={`login-${bodyState.walletDetails.name}`}

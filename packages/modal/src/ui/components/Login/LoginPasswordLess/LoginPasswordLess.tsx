@@ -1,10 +1,12 @@
-import { FormEvent, MouseEvent as ReactMouseEvent, useState } from "react";
+import { log } from "@web3auth/no-modal";
+import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 
 import { cn, getIcons } from "../../../utils";
 import { LoginPasswordLessProps } from "./LoginPasswordLess.type";
 
 function LoginPasswordLess(props: LoginPasswordLessProps) {
   const {
+    isModalVisible,
     isPasswordLessCtaClicked,
     setIsPasswordLessCtaClicked,
     title,
@@ -16,6 +18,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     isValidInput,
     isDark,
   } = props;
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
@@ -28,9 +31,28 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     setIsInputFocused(false);
   };
 
+  useEffect(() => {
+    log.debug("isModalVisible", isModalVisible);
+    if (!isModalVisible) {
+      setIsPasswordLessCtaClicked(false);
+    }
+  }, [isModalVisible, setIsPasswordLessCtaClicked]);
+
+  useEffect(() => {
+    if (isPasswordLessCtaClicked) {
+      inputRef.current?.focus();
+    }
+  }, [isPasswordLessCtaClicked]);
+
   if (!isPasswordLessCtaClicked) {
     return (
-      <button type="button" className={cn("w3a--btn !w3a--justify-between")} onClick={() => setIsPasswordLessCtaClicked(true)}>
+      <button
+        type="button"
+        className={cn("w3a--btn !w3a--justify-between")}
+        onClick={() => {
+          setIsPasswordLessCtaClicked(true);
+        }}
+      >
         <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">Continue with {title}</p>
       </button>
     );
@@ -40,11 +62,11 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     <>
       <div className={cn("w3a--input", isInputFocused && "!w3a--border-app-primary-600")}>
         <input
+          ref={inputRef}
           onInput={onInputChange}
           value={fieldValue}
           placeholder={placeholder}
-          onFocus={(e) => {
-            e.target.placeholder = "";
+          onFocus={() => {
             setIsInputFocused(true);
           }}
           onBlur={(e) => {
@@ -52,16 +74,16 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
             setIsInputFocused(false);
           }}
           type="text"
-          className="w-full w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white"
+          className="w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
         />
         {fieldValue && isValidInput && isInputFocused && (
-          <button type="button" className="w3a--appearance-none w3a--icon-animation" onClick={onFormSubmit}>
+          <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}
       </div>
       {!isValidInput && isPasswordLessCtaClicked && (
-        <p className="w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400 w3a--text-start -w3a--mt-2 w3a--w-full w3a--pl-6">
+        <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
           {invalidInputErrorMessage}
         </p>
       )}

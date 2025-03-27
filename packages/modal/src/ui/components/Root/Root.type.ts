@@ -1,10 +1,8 @@
-import { SafeEventEmitter } from "@web3auth/auth";
 import { ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
 
-import { ModalState, SocialLoginEventType, SocialLoginsConfig, StateEmitterEvents } from "../../interfaces";
+import { ModalState, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface RootProps {
-  stateListener: SafeEventEmitter<StateEmitterEvents>;
   appLogo?: string;
   appName?: string;
   chainNamespace: ChainNamespaceType[];

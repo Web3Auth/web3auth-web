@@ -83,14 +83,16 @@ export interface LoginModalProps extends UIConfig {
   walletRegistry: WalletRegistry;
 }
 
+export interface LoginModalCallbacks {
+  onInitExternalWallets: (params: { externalWalletsInitialized: boolean }) => Promise<void>;
+  onSocialLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams }) => Promise<void>;
+  onExternalWalletLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: { chainNamespace: ChainNamespaceType } }) => Promise<void>;
+  onModalVisibility: (visibility: boolean) => Promise<void>;
+}
+
 export const LOGIN_MODAL_EVENTS = {
-  INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",
-  EXTERNAL_WALLET_LOGIN: "EXTERNAL_WALLET_LOGIN",
-  SOCIAL_LOGIN: "SOCIAL_LOGIN",
-  DISCONNECT: "DISCONNECT",
   MODAL_VISIBILITY: "MODAL_VISIBILITY",
 } as const;
-
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;

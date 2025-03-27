@@ -2,6 +2,7 @@ import {
   AUTH_CONNECTION,
   type AuthLoginParams,
   type BaseConnectorConfig,
+  ChainNamespaceType,
   cloneDeep,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -74,13 +75,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
     // init login modal
-    this.loginModal = new LoginModal({
-      ...this.options.uiConfig,
-      connectorListener: this,
-      chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
-      walletRegistry,
-    });
-    this.subscribeToLoginModalEvents();
+    this.loginModal = new LoginModal(
+      {
+        ...this.options.uiConfig,
+        connectorListener: this,
+        chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
+        walletRegistry,
+      },
+      {
+        onInitExternalWallets: this.onInitExternalWallets,
+        onSocialLogin: this.onSocialLogin,
+        onExternalWalletLogin: this.onExternalWalletLogin,
+        onModalVisibility: this.onModalVisibility,
+      }
+    );
     await this.loginModal.initModal();
 
     // setup common JRPC provider
@@ -347,59 +355,55 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
-  private subscribeToLoginModalEvents(): void {
-    this.loginModal.on(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE }) => {
-      try {
-        await this.connectTo<unknown>(params.connector);
-      } catch (error) {
-        log.error(`Error while connecting to connector: ${params.connector}`, error);
-      }
-    });
+  private onInitExternalWallets = async (params: { externalWalletsInitialized: boolean }): Promise<void> => {
+    await this.initExternalConnectors(this.connectors, params.externalWalletsInitialized);
+  };
 
-    this.loginModal.on(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }) => {
-      try {
-        await this.connectTo<AuthLoginParams>(params.connector, params.loginParams);
-      } catch (error) {
-        log.error(`Error while connecting to connector: ${params.connector}`, error);
-      }
-    });
-    this.loginModal.on(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, async (params: { externalWalletsInitialized: boolean }) => {
-      await this.initExternalConnectors(this.connectors, params.externalWalletsInitialized);
-    });
-    this.loginModal.on(LOGIN_MODAL_EVENTS.DISCONNECT, async () => {
-      try {
-        await this.logout();
-      } catch (error) {
-        log.error(`Error while disconnecting`, error);
-      }
-    });
-    this.loginModal.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, async (visibility: boolean) => {
-      log.debug("is login modal visible", visibility);
-      this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
-      const wcConnector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
-      if (wcConnector) {
-        const walletConnectStatus = wcConnector?.status;
-        log.debug("trying refreshing wc session", visibility, walletConnectStatus);
-        if (visibility && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
-          log.debug("refreshing wc session");
+  private onSocialLogin = async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }): Promise<void> => {
+    try {
+      await this.connectTo<AuthLoginParams>(params.connector, params.loginParams);
+    } catch (error) {
+      log.error(`Error while connecting to connector: ${params.connector}`, error);
+    }
+  };
 
-          // refreshing session for wallet connect whenever modal is opened.
-          try {
-            const initialChain = this.getInitialChainIdForConnector(wcConnector);
-            wcConnector.connect({ chainId: initialChain.chainId });
-          } catch (error) {
-            log.error(`Error while disconnecting to wallet connect in core`, error);
-          }
-        }
-        if (
-          !visibility &&
-          this.status === CONNECTOR_STATUS.CONNECTED &&
-          (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
-        ) {
-          log.debug("this stops wc connector from trying to reconnect once proposal expires");
-          wcConnector.status = CONNECTOR_STATUS.READY;
+  private onExternalWalletLogin = async (params: {
+    connector: WALLET_CONNECTOR_TYPE;
+    loginParams: { chainNamespace: ChainNamespaceType };
+  }): Promise<void> => {
+    try {
+      await this.connectTo<unknown>(params.connector, params.loginParams);
+    } catch (error) {
+      log.error(`Error while connecting to connector: ${params.connector}`, error);
+    }
+  };
+
+  private onModalVisibility = async (visibility: boolean): Promise<void> => {
+    log.debug("is login modal visible", visibility);
+    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+    const wcConnector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
+    if (wcConnector) {
+      const walletConnectStatus = wcConnector?.status;
+      log.debug("trying refreshing wc session", visibility, walletConnectStatus);
+      if (visibility && (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)) {
+        log.debug("refreshing wc session");
+
+        // refreshing session for wallet connect whenever modal is opened.
+        try {
+          const initialChain = this.getInitialChainIdForConnector(wcConnector);
+          wcConnector.connect({ chainId: initialChain.chainId });
+        } catch (error) {
+          log.error(`Error while disconnecting to wallet connect in core`, error);
         }
       }
-    });
-  }
+      if (
+        !visibility &&
+        this.status === CONNECTOR_STATUS.CONNECTED &&
+        (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
+      ) {
+        log.debug("this stops wc connector from trying to reconnect once proposal expires");
+        wcConnector.status = CONNECTOR_STATUS.READY;
+      }
+    }
+  };
 }

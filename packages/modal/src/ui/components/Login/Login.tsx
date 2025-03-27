@@ -24,6 +24,7 @@ function Login(props: LoginProps) {
   const {
     // appName,
     // appLogo,
+    isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
     isDark,
@@ -264,6 +265,7 @@ function Login(props: LoginProps) {
 
       {!expand && showPasswordLessInput && (
         <LoginPasswordLess
+          isModalVisible={isModalVisible}
           isPasswordLessCtaClicked={isPasswordLessCtaClicked}
           setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
           title={title}

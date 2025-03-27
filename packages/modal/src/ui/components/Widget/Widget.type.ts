@@ -9,9 +9,9 @@ export interface WidgetProps {
   appName?: string;
   chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
+  widget?: WidgetType;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  widget?: WidgetType;
 }

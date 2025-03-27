@@ -1,6 +1,7 @@
 import { FormEvent, MouseEvent as ReactMouseEvent } from "react";
 
 export interface LoginPasswordLessProps {
+  isModalVisible: boolean;
   isPasswordLessCtaClicked: boolean;
   setIsPasswordLessCtaClicked: (isPasswordLessCtaClicked: boolean) => void;
   title: string;

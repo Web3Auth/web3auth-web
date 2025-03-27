@@ -25,7 +25,7 @@ import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
-  LOGIN_MODAL_EVENTS,
+  LoginModalCallbacks,
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
@@ -57,7 +57,7 @@ function createWrapperForEmbed(targetId: string) {
   targetElement.innerHTML = `<div id="w3a-parent-container" class="w3a-parent-container"></div>`;
 }
 
-export class LoginModal extends SafeEventEmitter {
+export class LoginModal {
   private uiConfig: UIConfig;
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
@@ -66,8 +66,9 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps) {
-    super();
+  private callbacks: LoginModalCallbacks;
+
+  constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
@@ -89,6 +90,7 @@ export class LoginModal extends SafeEventEmitter {
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
+    this.callbacks = callbacks;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
 
@@ -222,16 +224,16 @@ export class LoginModal extends SafeEventEmitter {
       root.render(
         <ThemedContext.Provider value={darkState}>
           <Widget
-            closeModal={this.closeModal}
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
+            widget={this.uiConfig.widget}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
             chainNamespaces={this.chainNamespaces}
             walletRegistry={this.walletRegistry}
-            widget={this.uiConfig.widget}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
+            closeModal={this.closeModal}
           />
         </ThemedContext.Provider>
       );
@@ -273,7 +275,9 @@ export class LoginModal extends SafeEventEmitter {
     this.setState({
       modalVisibility: true,
     });
-    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, true);
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
   };
 
   closeModal = () => {
@@ -281,7 +285,9 @@ export class LoginModal extends SafeEventEmitter {
       modalVisibility: false,
       externalWalletsVisibility: false,
     });
-    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(false);
+    }
   };
 
   initExternalWalletContainer = () => {
@@ -291,31 +297,25 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private handleShowExternalWallets = (status: boolean) => {
-    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: status });
+    if (this.callbacks.onInitExternalWallets) {
+      this.callbacks.onInitExternalWallets({ externalWalletsInitialized: status });
+    }
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
-    this.emit(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, {
-      connector,
-      loginParams: { chainNamespace },
-    });
+    if (this.callbacks.onExternalWalletLogin) {
+      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
+    }
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
-    this.emit(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, {
-      connector,
-      loginParams: {
-        authConnection: loginParams.authConnection,
-        authConnectionId: loginParams.authConnectionId,
-        groupedAuthConnectionId: loginParams.groupedAuthConnectionId,
-        login_hint: loginParams.login_hint,
-        extraLoginOptions: loginParams.extraLoginOptions,
-      },
-    });
+    if (this.callbacks.onSocialLogin) {
+      this.callbacks.onSocialLogin({ connector, loginParams });
+    }
   };
 
   private setState = (newState: Partial<ModalState>) => {
