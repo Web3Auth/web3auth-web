@@ -110,18 +110,32 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (this.connectedConnectorName && this.status === CONNECTOR_STATUS.CONNECTED && this.provider) return this.provider;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
-      this.once(CONNECTOR_EVENTS.CONNECTED, () => {
+      // remove all listeners when promise is resolved or rejected.
+      // this is to prevent memory leaks if user clicks connect button multiple times.
+      const handleConnected = () => {
+        this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
+        this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return resolve(this.provider);
-      });
-      this.once(CONNECTOR_EVENTS.ERRORED, (err: unknown) => {
+      };
+
+      const handleError = (err: unknown) => {
+        this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+        this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
-      });
-      this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, (visibility: boolean) => {
+      };
+
+      const handleVisibility = (visibility: boolean) => {
         // modal is closed but user is not connected to any wallet.
         if (!visibility && this.status !== CONNECTOR_STATUS.CONNECTED) {
+          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+          this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
           return reject(new Error("User closed the modal"));
         }
-      });
+      };
+
+      this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+      this.once(CONNECTOR_EVENTS.ERRORED, handleError);
+      this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
   }
 
