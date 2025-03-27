@@ -4,6 +4,7 @@ import {
   Auth,
   type AUTH_CONNECTION_TYPE,
   type Auth0ClientOptions,
+  AuthConnectionConfigItem,
   BUILD_ENV,
   createHandler,
   type CreateHandlerParams,
@@ -41,7 +42,7 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -69,7 +70,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
-  private authConnectionConfig: AuthConnectionConfig = [];
+  private authConnectionConfig: (AuthConnectionConfigItem & { isDefault?: boolean })[] = [];
 
   constructor(params: AuthConnectorOptions) {
     super(params);
@@ -491,16 +492,23 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
     const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
-    const providerConfig = this.authConnectionConfig.find((x) => {
-      if (groupedAuthConnectionId) {
-        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
-      }
-      if (authConnectionId) {
-        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
-      }
-      return x.authConnection === authConnection;
-    });
-    return providerConfig;
+    // if groupedAuthConnectionId or authConnectionId, then use the specific auth connection
+    if (groupedAuthConnectionId || authConnectionId) {
+      const authConnectionItem = this.authConnectionConfig.find((x) => {
+        if (groupedAuthConnectionId) return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+        if (authConnectionId) return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
+        return false;
+      });
+      // if no auth connection item found, then return undefined
+      return authConnectionItem;
+    } else {
+      // if no groupedAuthConnectionId or authConnectionId, then use the default auth connection
+      const defaultAuthConnectionItem = this.authConnectionConfig.find((x) => x.authConnection === authConnection && x.isDefault);
+      if (defaultAuthConnectionItem) return defaultAuthConnectionItem;
+
+      // if no default auth connection, then use the first auth connection
+      return this.authConnectionConfig.find((x) => x.authConnection === authConnection);
+    }
   }
 }
 

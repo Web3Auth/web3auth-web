@@ -1,6 +1,6 @@
 import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
 import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { type AuthConnectionConfig, type WhiteLabelData } from "@web3auth/auth";
+import { type AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 import { SMART_ACCOUNT_WALLET_SCOPE } from "./connector";
@@ -65,7 +65,8 @@ export interface ProjectConfig {
   walletUi?: WalletUiConfig;
   // Authentication config
   externalWalletAuth?: ExternalWalletsConfig;
-  embeddedWalletAuth?: AuthConnectionConfig;
+  embeddedWalletAuth?: (AuthConnectionConfigItem & { isDefault?: boolean })[];
+  // Login modal config
 }
 
 export interface WalletRegistryItem {
