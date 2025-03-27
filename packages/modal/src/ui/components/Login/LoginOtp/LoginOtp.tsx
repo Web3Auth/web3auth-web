@@ -12,9 +12,9 @@ function OtpInput(props: OtpInputProps) {
 
   if (otpSuccess) {
     return (
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
-        <img src={getIcons("success-light")} alt="success" className="w3a--w-auto w3a--h-auto" />
-        <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white w3a--w-[80%] w3a--mx-auto w3a--text-center">
+      <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+        <img src={getIcons("success-light")} alt="success" className="w3a--size-auto" />
+        <p className="w3a--mx-auto w3a--w-4/5 w3a--text-center w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
           You are connected to your account!
         </p>
       </div>
@@ -23,10 +23,10 @@ function OtpInput(props: OtpInputProps) {
 
   return (
     <>
-      <div className="w3a--flex w3a--items-start w3a--justify-start w3a--mr-auto w3a--w-full">
+      <div className="w3a--mr-auto w3a--flex w3a--w-full w3a--items-start w3a--justify-start">
         <button
           type="button"
-          className="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center w3a--z-20"
+          className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
           onClick={() => setShowOtpFlow(false)}
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--text-app-gray-900 dark:w3a--text-app-white">
@@ -39,8 +39,8 @@ function OtpInput(props: OtpInputProps) {
           </svg>
         </button>
       </div>
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
-        <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--w-auto w3a--h-auto" />
+      <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+        <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
         <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
             {isMobileOtp ? "OTP verification" : "Email verification"}
@@ -69,12 +69,12 @@ function LoginOtp(props: LoginOtpProps) {
   const { otpLoading, otpSuccess, setShowOtpFlow, isMobileOtp, handleOtpComplete } = props;
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1">
+    <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {otpLoading ? (
-        <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--w-full w3a--h-full w3a--flex-1 w3a--gap-x-2">
-          <div className="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-600 dark:w3a--bg-app-primary-500 w3a--animate-pulse" />
-          <div className="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-500 dark:w3a--bg-app-primary-400 w3a--animate-pulse" />
-          <div className="w3a--w-3 w3a--h-3 w3a--rounded-full w3a--bg-app-primary-400 dark:w3a--bg-app-primary-300 w3a--animate-pulse" />
+        <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--items-center w3a--justify-center w3a--gap-x-2 w3a--gap-y-4">
+          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-600 dark:w3a--bg-app-primary-500" />
+          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-500 dark:w3a--bg-app-primary-400" />
+          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-400 dark:w3a--bg-app-primary-300" />
         </div>
       ) : (
         <OtpInput isMobileOtp={isMobileOtp} otpSuccess={otpSuccess} setShowOtpFlow={setShowOtpFlow} handleOtpComplete={handleOtpComplete} />

@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import type { JSX } from "react";
 
 export interface EmbedProps {
   children: JSX.Element[] | JSX.Element;
@@ -6,6 +6,6 @@ export interface EmbedProps {
   shadow?: boolean;
   border?: boolean;
   showCloseIcon?: boolean;
-  onClose?: () => void;
   open?: boolean;
+  onClose?: () => void;
 }

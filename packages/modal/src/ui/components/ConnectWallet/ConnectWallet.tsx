@@ -1,11 +1,10 @@
 import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
-import { CHAIN_LIST, CONNECT_WALLET_PAGES } from "../../constants";
+import { CONNECT_WALLET_PAGES } from "../../constants";
 import { RootContext } from "../../context/RootContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
-import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
 import ConnectWalletHeader from "./ConnectWalletHeader";
 import ConnectWalletList from "./ConnectWalletList";
 import ConnectWalletQrCode from "./ConnectWalletQrCode";
@@ -36,7 +35,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedChain, setSelectedChain] = useState<string>("all");
+  // const [selectedChain, setSelectedChain] = useState<string>("all");
   const [initialWalletCount, setInitialWalletCount] = useState<number>(0);
 
   const handleBack = () => {
@@ -139,7 +138,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   };
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--flex-1 w3a--relative">
+    <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
       {/* Header */}
       <ConnectWalletHeader onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
       {/* Body */}
@@ -153,14 +152,14 @@ function ConnectWallet(props: ConnectWalletProps) {
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
-          {/* Chain Filters */}
-          <ConnectWalletChainFilter
+          {/* TODO: To be implemented */}
+          {/* <ConnectWalletChainFilter
             isDark={isDark}
             isLoading={isLoading}
             selectedChain={selectedChain}
             setSelectedChain={setSelectedChain}
             chains={CHAIN_LIST}
-          />
+          /> */}
           {/* Search Input */}
           <ConnectWalletSearch
             totalExternalWallets={totalExternalWalletsCount}

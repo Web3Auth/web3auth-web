@@ -11,10 +11,10 @@ export interface LoginProps {
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;
-  handleSocialLoginClick: (params: SocialLoginEventType) => void;
-  handleExternalWalletBtnClick?: (flag: boolean) => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
+  handleExternalWalletBtnClick?: (flag: boolean) => void;
+  handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleSocialLoginHeight: () => void;
 }

@@ -26,8 +26,8 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   return (
     <div className="w3a--contents">
       {walletConnectUri ? (
-        <div className="w3a--flex w3a--flex-col w3a--gap-y-4 w3a--items-center w3a--justify-center w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-700 w3a--rounded-2xl w3a--p-4">
-          <div className="w3a--relative w3a--rounded-2xl w3a--h-[300px] w3a--w-[300px] w3a--flex w3a--items-center w3a--justify-center">
+        <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--p-4 dark:w3a--border-app-gray-700">
+          <div className="w3a--relative w3a--flex w3a--size-[300px] w3a--items-center w3a--justify-center w3a--rounded-2xl">
             <QRCode
               size={isDesktop ? 300 : 260}
               eyeRadius={5}
@@ -42,7 +42,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               bgColor={isDark ? modalColor : whiteColor}
               fgColor={isDark ? whiteColor : blackColor}
             />
-            <div className="w3a--absolute w3a--top-[43%] w3a--left-[43%] w3a--transform -translate-y-1/2 w3a--w-10 w3a--h-10 w3a--bg-app-white w3a--rounded-full w3a--flex w3a--items-center w3a--justify-center">
+            <div className="w3a--absolute w3a--left-[43%] w3a--top-[43%] w3a--flex w3a--size-10 w3a--translate-y-1/2 w3a--transform w3a--items-center w3a--justify-center w3a--rounded-full w3a--bg-app-white">
               <Image
                 imageId={`login-${selectedButton.name}`}
                 hoverImageId={`login-${selectedButton.name}`}
@@ -54,12 +54,12 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               />
             </div>
           </div>
-          <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-300 w3a--font-normal">
+          <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
             {t("modal.external.walletconnect-copy")}
           </p>
         </div>
       ) : (
-        <div className="w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse w3a--rounded-lg w3a--h-[300px] w3a--w-[300px] w3a--mx-auto w3a--p-2 w3a--flex w3a--items-center w3a--justify-center">
+        <div className="w3a--mx-auto w3a--flex w3a--size-[300px] w3a--animate-pulse w3a--items-center w3a--justify-center w3a--rounded-lg w3a--bg-app-gray-200 w3a--p-2 dark:w3a--bg-app-gray-700">
           <Image
             imageId={`login-${selectedButton.name}`}
             hoverImageId={`login-${selectedButton.name}`}
@@ -73,15 +73,15 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
       )}
 
       <div
-        className="w3a--flex w3a--items-center w3a--justify-between w3a--w-full w3a--text-app-gray-900 w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-800 dark:w3a--text-app-white w3a--rounded-2xl w3a--px-4 w3a--py-2"
+        className="w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--rounded-2xl w3a--bg-app-gray-50 
+      w3a--px-4 w3a--py-2 w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white"
       >
         <p className="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">
           {t("modal.external.dont-have")} <span>{selectedButton?.displayName}</span>?
         </p>
         <button
           type="button"
-          className="w3a--appearance-none w3a--border w3a--border-app-gray-400 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 hover:w3a--bg-app-white dark:hover:w3a--bg-app-gray-700 dark:w3a--text-app-gray-300 dark:w3a--border-app-gray-300 w3a--rounded-full w3a--px-3 w3a--py-2 hover:w3a--shadow-2xl"
+          className="w3a--appearance-none w3a--rounded-full w3a--border w3a--border-app-gray-400 w3a--px-3 w3a--py-2 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 hover:w3a--bg-app-white hover:w3a--shadow-2xl dark:w3a--border-app-gray-300 dark:w3a--text-app-gray-300 dark:hover:w3a--bg-app-gray-700"
           onClick={() => {
             setBodyState({
               ...bodyState,

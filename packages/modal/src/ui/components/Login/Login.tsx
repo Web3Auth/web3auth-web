@@ -233,7 +233,7 @@ function Login(props: LoginProps) {
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure className="mx-auto w3a--h-12 w3a--w-[200px]">
+        <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
           <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
         <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>

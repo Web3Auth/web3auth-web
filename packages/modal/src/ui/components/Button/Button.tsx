@@ -1,6 +1,6 @@
-import { ButtonProps } from "./Button.type";
-import ButtonSocial, { ButtonSocialProps } from "./ButtonSocial";
-import ButtonWallet, { ButtonWalletProps } from "./ButtonWallet";
+import { BUTTON_TYPE, ButtonProps } from "./Button.type";
+import ButtonSocial, { type ButtonSocialProps } from "./ButtonSocial";
+import ButtonWallet, { type ButtonWalletProps } from "./ButtonWallet";
 
 function Button(props: ButtonProps) {
   const { type, props: buttonProps } = props;
@@ -13,7 +13,7 @@ function Button(props: ButtonProps) {
 
   return (
     <>
-      {type === "social" && (
+      {type === BUTTON_TYPE.SOCIAL && (
         <ButtonSocial
           text={text}
           showIcon={showIcon}
@@ -27,7 +27,7 @@ function Button(props: ButtonProps) {
           {children}
         </ButtonSocial>
       )}
-      {type === "wallet" && (
+      {type === BUTTON_TYPE.WALLET && (
         <ButtonWallet label={label} walletConnectUri={walletConnectUri} onClick={walletOnClick} button={button} deviceDetails={deviceDetails} />
       )}
     </>

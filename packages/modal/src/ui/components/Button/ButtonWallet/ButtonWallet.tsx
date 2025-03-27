@@ -31,12 +31,12 @@ function ButtonWallet(props: ButtonWalletProps) {
   return (
     <button
       type="button"
-      className="w3a--w-full w3a--flex w3a--items-center w3a--justify-between w3a--p-3 w3a--rounded-2xl w3a--bg-app-gray-50 
-      dark:w3a--bg-app-gray-800 hover:w3a--bg-app-gray-200 hover:text-app-gray-900 dark:hover:w3a--bg-app-gray-600"
+      className="w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--rounded-2xl w3a--bg-app-gray-50 w3a--p-3 
+      hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600"
       onClick={handleBtnClick}
     >
       <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-        <figure className="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--bg-app-gray-300">
+        <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
           <Image
             imageId={`login-${button.name}`}
             hoverImageId={`login-${button.name}`}
@@ -51,8 +51,8 @@ function ButtonWallet(props: ButtonWalletProps) {
       </div>
       {button.hasInjectedWallet && (
         <span
-          className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--bg-app-primary-100 w3a--text-app-primary-800 
-        dark:w3a--bg-transparent dark:w3a--text-app-primary-400 dark:w3a--border dark:w3a--border-app-primary-400"
+          className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
+        dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
         >
           {t("modal.external.installed")}
         </span>

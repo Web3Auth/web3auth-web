@@ -1,4 +1,3 @@
-import { log } from "@web3auth/no-modal";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 
 import { cn, getIcons } from "../../../utils";
@@ -32,7 +31,6 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
   };
 
   useEffect(() => {
-    log.debug("isModalVisible", isModalVisible);
     if (!isModalVisible) {
       setIsPasswordLessCtaClicked(false);
     }
@@ -74,7 +72,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
             setIsInputFocused(false);
           }}
           type="text"
-          className="w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
+          className="w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
         />
         {fieldValue && isValidInput && isInputFocused && (
           <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>

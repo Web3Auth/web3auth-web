@@ -1,4 +1,4 @@
-import { ModalStatusType } from "../../interfaces";
+import type { ModalStatusType } from "../../interfaces";
 
 export interface LoaderProps {
   message?: string;

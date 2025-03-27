@@ -14,7 +14,7 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
     <div className="w3a--flex w3a--items-center w3a--justify-between">
       <button
         type="button"
-        className="w3a--w-5 w3a--h-5 w3a--rounded-full w3a--cursor-pointer w3a--flex w3a--items-center w3a--justify-center w3a--z-20"
+        className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
         onClick={handleBack}
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--text-app-gray-900 dark:w3a--text-app-white">
@@ -29,7 +29,7 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
       <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900">
         {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET ? selectedButton?.displayName : currentPage}
       </p>
-      <div className="w3a--w-5 w3a--h-5 w3a--z-[-1]" />
+      <div className="w3a--z-[-1] w3a--size-5" />
     </div>
   );
 }

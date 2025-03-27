@@ -12,6 +12,7 @@ import {
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletConnectV2Data,
+  WalletInitializationError,
   WalletRegistry,
   Web3AuthError,
   Web3AuthNoModalEvents,
@@ -208,8 +209,10 @@ export class LoginModal {
 
       if (this.uiConfig.widget === WIDGET_TYPE.MODAL) {
         createWrapperForModal(this.uiConfig.modalZIndex);
-      } else {
+      } else if (this.uiConfig.widget === WIDGET_TYPE.EMBED) {
         createWrapperForEmbed(this.uiConfig.targetId);
+      } else {
+        throw WalletInitializationError.invalidParams(`Invalid widget type: ${this.uiConfig.widget}`);
       }
 
       const container = document.getElementById("w3a-parent-container");

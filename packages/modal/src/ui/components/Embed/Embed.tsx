@@ -44,7 +44,7 @@ function Embed(props: EmbedProps) {
       )}
     >
       {showCloseIcon && (
-        <div className="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--cursor-pointer z-10">
+        <div className="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--z-10 w3a--cursor-pointer">
           <svg
             width="13"
             height="13"

@@ -1,7 +1,7 @@
 import { AUTH_CONNECTION } from "@web3auth/auth";
 
 import { getIcons } from "../../utils";
-import Button from "../Button";
+import Button, { BUTTON_TYPE } from "../Button";
 import { SocialLoginListProps } from "./SocialLoginList.type";
 
 function getProviderIcon(method: string, isDark: boolean, extension: string) {
@@ -15,14 +15,9 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
         id="active-login-img"
         src={`https://images.web3auth.io/${hoverId}${extension}`}
         alt="active-login-img"
-        className="w3a--object-contain w3a--w-5 w3a--h-5"
+        className="w3a--size-5 w3a--object-contain"
       />
-      <img
-        id="login-img"
-        src={`https://images.web3auth.io/${imageId}${extension}`}
-        alt="login-img"
-        className="w3a--object-contain w3a--w-5 w3a--h-5"
-      />
+      <img id="login-img" src={`https://images.web3auth.io/${imageId}${extension}`} alt="login-img" className="w3a--size-5 w3a--object-contain" />
     </>
   );
 }
@@ -32,10 +27,10 @@ function SocialLoginList(props: SocialLoginListProps) {
 
   if (visibleRow.length !== 0 && otherRow?.length === 0) {
     return (
-      <div className="w3a--grid w3a--grid-cols-4 w3a--gap-x-2 w3a--w-full">
+      <div className="w3a--grid w3a--w-full w3a--grid-cols-4 w3a--gap-x-2">
         {visibleRow.map((row) => (
           <Button
-            type="social"
+            type={BUTTON_TYPE.SOCIAL}
             key={row.method}
             props={{
               showText: false,
@@ -50,7 +45,7 @@ function SocialLoginList(props: SocialLoginListProps) {
         ))}
         {canShowMore && (
           <Button
-            type="social"
+            type={BUTTON_TYPE.SOCIAL}
             props={{
               showIcon: false,
               onClick: handleExpandSocialLogins,
@@ -63,15 +58,15 @@ function SocialLoginList(props: SocialLoginListProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4 w3a--w-full">
+    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4">
       <button type="button" className="w3a--appearance-none" onClick={() => handleExpandSocialLogins()}>
         <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="w3a--object-contain" />
       </button>
-      <div className="w3a--grid w3a--grid-cols-1 w3a--gap-y-2 w3a--w-full w3a--h-[344px] w3a--overflow-y-auto px-1">
+      <div className="w3a--grid w3a--h-[344px] w3a--w-full w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--px-1">
         {otherRow.map((row) => (
-          <div className="w3a--w-full w3a--h-[50px]" key={row.method}>
+          <div className="w3a--h-[50px] w3a--w-full" key={row.method}>
             <Button
-              type="social"
+              type={BUTTON_TYPE.SOCIAL}
               props={{
                 method: row.method,
                 isDark,

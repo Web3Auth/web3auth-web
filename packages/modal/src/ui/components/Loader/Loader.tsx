@@ -21,10 +21,10 @@ function ConnectingStatus(props: ConnectingStatusType) {
   );
 
   return (
-    <div className="w3a--h-full w3a--flex w3a--flex-col w3a--flex-1 w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-6">
-        <figure className="w3a--loader-logo-size w3a--overflow-hidden w3a--flex w3a--items-center w3a--justify-center">
-          <img src={appLogo} alt="" className="w3a--h-full w3a--w-full w3a--object-contain" />
+        <figure className="w3a--loader-logo-size w3a--flex w3a--items-center w3a--justify-center w3a--overflow-hidden">
+          <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
         </figure>
 
         <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2">
@@ -37,10 +37,10 @@ function ConnectingStatus(props: ConnectingStatusType) {
         {providerIcon}
       </div>
       <div className="w3a--flex w3a--flex-col w3a--gap-y-1">
-        <div className="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">
+        <div className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
           {t("modal.adapter-loader.message1", { adapter: connectorName })}
         </div>
-        <div className="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">
+        <div className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
           {t("modal.adapter-loader.message2", { adapter: connectorName })}
         </div>
       </div>
@@ -65,7 +65,7 @@ function ConnectedStatus(props: ConnectedStatusType) {
           clipRule="evenodd"
         />
       </svg>
-      <p className="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{message}</p>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{message}</p>
     </div>
   );
 }
@@ -87,7 +87,7 @@ function ErroredStatus(props: ErroredStatusType) {
           clipRule="evenodd"
         />
       </svg>
-      <p className="w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400 w3a--text-center">{message}</p>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{message}</p>
     </div>
   );
 }
@@ -109,7 +109,7 @@ function Loader(props: LoaderProps) {
   }, [modalStatus, onClose]);
 
   return (
-    <div className="w3a--h-full w3a--flex w3a--flex-col w3a--flex-1 w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
       {modalStatus === MODAL_STATUS.CONNECTED && <ConnectedStatus message={message} />}

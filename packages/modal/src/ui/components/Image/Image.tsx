@@ -35,7 +35,7 @@ export default function Image(props: ImageProps) {
       height={height}
       width={width}
       alt={hoverImageId}
-      className={`w3a--object-contain w3a--rounded ${imgClass}`}
+      className={`w3a--rounded w3a--object-contain ${imgClass}`}
     />;
   }
 
@@ -46,7 +46,7 @@ export default function Image(props: ImageProps) {
       height={height}
       width={width}
       alt={imageId}
-      className={`w3a--object-contain w3a--rounded ${imgClass}`}
+      className={`w3a--rounded w3a--object-contain ${imgClass}`}
       onError={({ currentTarget }) => {
         if (fallbackImageId) {
           const img = currentTarget;

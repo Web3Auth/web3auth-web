@@ -1,8 +1,8 @@
 export interface LoginOtpProps {
   otpLoading: boolean;
   otpSuccess: boolean;
-  setShowOtpFlow: (showOtpFlow: boolean) => void;
   isMobileOtp: boolean;
+  setShowOtpFlow: (showOtpFlow: boolean) => void;
   handleOtpComplete: (otp: string) => void;
 }
 

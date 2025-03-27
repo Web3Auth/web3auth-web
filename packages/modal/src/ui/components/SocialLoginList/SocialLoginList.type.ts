@@ -5,7 +5,7 @@ export interface SocialLoginListProps {
   visibleRow: rowType[];
   canShowMore: boolean;
   socialLoginsConfig: SocialLoginsConfig;
+  otherRow?: rowType[];
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExpandSocialLogins: () => void;
-  otherRow?: rowType[];
 }
