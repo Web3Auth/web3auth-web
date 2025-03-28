@@ -117,12 +117,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       try {
         setInitError(null);
         setIsInitializing(true);
-        const { modalConfig, hideWalletDiscovery } = config;
-        if (modalConfig) {
-          await web3Auth.initModal({ modalConfig, hideWalletDiscovery });
-        } else {
-          await web3Auth.initModal();
-        }
+        await web3Auth.initModal();
       } catch (error) {
         setInitError(error as Error);
       } finally {

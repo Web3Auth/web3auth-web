@@ -114,6 +114,10 @@ const options = computed((): Web3AuthOptions => {
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
+    modalConfig: {
+      connectors: modalParams.value,
+      hideWalletDiscovery: !formData.showWalletDiscovery,
+    }
   };
 });
 
@@ -193,8 +197,6 @@ watch(
 const configs = computed<Web3AuthContextConfig>(() => {
   return {
     web3AuthOptions: options.value,
-    modalConfig: modalParams.value,
-    hideWalletDiscovery: !formData.showWalletDiscovery,
   };
 });
 </script>

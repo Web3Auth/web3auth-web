@@ -52,7 +52,10 @@ export interface UIConfig extends CoreUIConfig {
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
-export type ModalLoginParams = Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint"> & {
+export type ModalLoginParams = Pick<
+  AuthLoginParams,
+  "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint" | "extraLoginOptions"
+> & {
   name: string;
 };
 

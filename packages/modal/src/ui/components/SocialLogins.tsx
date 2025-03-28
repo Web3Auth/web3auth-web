@@ -98,7 +98,7 @@ export default function SocialLogins(props: SocialLoginProps) {
 
           if (isMainOption || order === 1) {
             return (
-              <li className="w3a--col-span-6 w3a-adapter-item" key={method} style={{ order }}>
+              <li className="w3a-adapter-item w3a--col-span-6" key={method} style={{ order }}>
                 <Button
                   variant="secondary"
                   onClick={() =>
@@ -109,6 +109,7 @@ export default function SocialLogins(props: SocialLoginProps) {
                         name: socialLoginConfig.name,
                         authConnectionId: socialLoginConfig.authConnectionId,
                         groupedAuthConnectionId: socialLoginConfig.groupedAuthConnectionId,
+                        extraLoginOptions: socialLoginConfig.extraLoginOptions,
                         login_hint: "",
                       },
                     })

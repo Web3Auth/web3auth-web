@@ -146,7 +146,7 @@ export default function Modal(props: ModalProps) {
         <Button
           variant={isExternalPrimary ? "primary" : "tertiary"}
           type="button"
-          className="w3a--w-full w3ajs-external-toggle__button"
+          className="w3ajs-external-toggle__button w3a--w-full"
           style={{ width: "100%" }}
           onClick={() => {
             setModalState((prevState) => {
