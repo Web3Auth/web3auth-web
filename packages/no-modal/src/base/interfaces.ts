@@ -71,6 +71,7 @@ export interface ProjectConfig {
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;
   enableKeyExport?: boolean;
+  walletConnectProjectId?: string;
   whitelist?: WhitelistResponse; // remain unchanged
   // Chains config
   chains?: ChainsConfig;
