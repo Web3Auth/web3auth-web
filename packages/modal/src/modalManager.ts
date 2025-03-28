@@ -228,6 +228,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (!this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods) this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods = {};
     }
     this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
+    // TODO: validate modal connector config here.!!
 
     // external wallets config
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
@@ -237,7 +238,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const allConnectorNames = [
       ...new Set([...Object.keys(this.modalConfig.connectors || {}), ...this.connectors.map((connector) => connector.name)]),
     ];
-    const connectorConfigurationPromises = allConnectorNames.map(async (connectorName: string) => {
+    const connectorNames = allConnectorNames.map((connectorName: string) => {
       // start with the default config of connector.
       const defaultConnectorConfig = {
         label: CONNECTOR_NAMES[connectorName] || connectorName.split("-").map(capitalizeFirstLetter).join(" "),
@@ -281,7 +282,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.modalConfig.connectors[connectorName] = connectorConfig;
       return connectorName;
     });
-    const connectorNames = await Promise.all(connectorConfigurationPromises);
+    // const connectorNames = await Promise.all(connectorConfigurationPromises);
     return connectorNames.filter((name) => name !== undefined);
   }
 

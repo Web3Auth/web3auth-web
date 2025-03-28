@@ -383,7 +383,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Invalid auth connection.");
 
     const jwtParams = {
-      ...providerConfig.jwtParameters,
+      ...(providerConfig.jwtParameters || {}),
       ...(params.extraLoginOptions || {}),
       login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
@@ -595,6 +595,7 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
+      // TODO: check, test this and may need to send modal config here later on.!!
       authConnectionConfig: projectConfig.embeddedWalletAuth,
     });
   };
