@@ -23,7 +23,7 @@ export const restrictedLoginMethods: string[] = [
 function Login(props: LoginProps) {
   const {
     // appName,
-    // appLogo,
+    appLogo,
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
@@ -234,9 +234,13 @@ function Login(props: LoginProps) {
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
         <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
-          <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+          {appLogo ? (
+            <img src={appLogo} alt="Logo" className="w3a--object-contain" />
+          ) : (
+            <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+          )}
         </figure>
-        <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
+        <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.social.sign-in")}</p>
       </div>
 
       {expand && (
