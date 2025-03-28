@@ -25,15 +25,7 @@ import deepmerge from "deepmerge";
 
 import { defaultConnectorsModalConfig, walletRegistryUrl } from "./config";
 import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig } from "./interface";
-import {
-  AUTH_PROVIDERS,
-  capitalizeFirstLetter,
-  getConnectorSocialLogins,
-  getUserLanguage,
-  LOGIN_MODAL_EVENTS,
-  LoginModal,
-  type UIConfig,
-} from "./ui";
+import { AUTH_PROVIDERS, capitalizeFirstLetter, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, type UIConfig } from "./ui";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -306,8 +298,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (connector.type !== CONNECTOR_CATEGORY.IN_APP) return false;
       if (this.modalConfig.connectors?.[connector.name]?.showOnModal !== true) return false;
       if (!this.modalConfig.connectors?.[connector.name]?.loginMethods) return true;
-      const mergedLoginMethods = getConnectorSocialLogins(connector.name, this.modalConfig.connectors[connector.name]?.loginMethods);
-      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
+      if (Object.values(this.modalConfig.connectors[connector.name].loginMethods).some((method) => method.showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppConnectors, this.connectors, connectorNames, "hasInAppWallets");
@@ -343,7 +334,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // adding it later if no in-app wallets are available.
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
             log.info("connectorInitResults", connectorName);
-            const loginMethods = getConnectorSocialLogins(connectorName, this.modalConfig.connectors[connectorName]?.loginMethods);
+            const loginMethods = this.modalConfig.connectors[connectorName]?.loginMethods || {};
             this.loginModal.addSocialLogins(connectorName, loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
               ...this.options.uiConfig,
               loginGridCol: this.options.uiConfig?.loginGridCol || 3,
