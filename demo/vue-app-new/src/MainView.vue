@@ -5,7 +5,7 @@ import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -46,11 +46,11 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
-    // walletUrls: {
-    //   production: {
-    //     url: "http://localhost:4050",
-    //   }
-    // }
+    walletUrls: {
+      production: {
+        url: "https://develop-wallet.web3auth.io",
+      }
+    }
   };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
@@ -94,7 +94,7 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
-  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "testing" } });
+  const authConnectorInstance = authConnector({ connectorSettings: {} });
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
@@ -109,6 +109,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
+    authBuildEnv: BUILD_ENV.TESTING, // Custom build env
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
