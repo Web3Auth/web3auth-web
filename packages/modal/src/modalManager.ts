@@ -1,4 +1,5 @@
 import {
+  type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
   type BaseConnectorConfig,
   cloneDeep,
@@ -212,9 +213,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // Auth connector config: merge code config with config from dashboard
     const loginMethods: LoginMethodConfig = {};
     for (const authConnectionConfig of projectConfig.embeddedWalletAuth || []) {
-      const connectionType = authConnectionConfig.authConnection;
-      loginMethods[connectionType] = {
-        name: connectionType,
+      const { isDefault, authConnectionId, groupedAuthConnectionId, authConnection } = authConnectionConfig;
+      // for custom auth connections, authConnectionId or groupedAuthConnectionId are required.
+      if (!isDefault && (!authConnectionId || !groupedAuthConnectionId)) return;
+
+      loginMethods[authConnection] = {
+        name: authConnection,
         ...authConnectionConfig,
         showOnModal: true,
         showOnDesktop: true,
@@ -229,6 +233,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
     this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
     // TODO: validate modal connector config here.!!
+
+    if (this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]?.loginMethods) {
+      const authProviders = new Set(AUTH_PROVIDERS);
+      Object.keys(this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods).forEach((key) => {
+        if (!authProviders.has(key as AUTH_CONNECTION_TYPE)) {
+          throw WalletInitializationError.invalidParams(`Invalid auth connection: ${key}`);
+        }
+      });
+    }
 
     // external wallets config
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
