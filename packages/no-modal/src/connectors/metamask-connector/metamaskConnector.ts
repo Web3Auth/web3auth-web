@@ -1,4 +1,5 @@
 import { MetaMaskSDK, type MetaMaskSDKOptions } from "@metamask/sdk";
+import deepmerge from "deepmerge";
 
 import {
   type BaseConnectorSettings,
@@ -77,8 +78,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     };
 
     // Initialize the MetaMask SDK
-    // TODO: do we need to pass InfuraKey
-    this.metamaskSDK = new MetaMaskSDK({ ...this.metamaskOptions, dappMetadata: appMetadata });
+    const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
+    this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
