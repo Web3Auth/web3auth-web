@@ -1,4 +1,4 @@
-import "./css/web3auth.css";
+import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
@@ -12,46 +12,53 @@ import {
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletConnectV2Data,
+  WalletInitializationError,
   WalletRegistry,
   Web3AuthError,
   Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
-import Modal from "./components/Modal";
+// import Modal from "./components/Modal";
+import Widget from "./components/Widget";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   DEFAULT_LOGO_DARK,
   DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
-  LOGIN_MODAL_EVENTS,
+  LoginModalCallbacks,
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
   SocialLoginEventType,
   StateEmitterEvents,
   UIConfig,
+  WIDGET_TYPE,
 } from "./interfaces";
 import i18n from "./localeImport";
 import { getUserLanguage } from "./utils";
 
-function createWrapper(parentZIndex: string): HTMLElement {
+function createWrapperForModal(parentZIndex: string) {
   const existingWrapper = document.getElementById("w3a-parent-container");
   if (existingWrapper) existingWrapper.remove();
-
   const parent = document.createElement("section");
   parent.classList.add("w3a-parent-container");
   parent.setAttribute("id", "w3a-parent-container");
   parent.style.zIndex = parentZIndex;
   parent.style.position = "relative";
-  const wrapper = document.createElement("section");
-  wrapper.setAttribute("id", "w3a-container");
-  parent.appendChild(wrapper);
   document.body.appendChild(parent);
-  return wrapper;
 }
 
-export class LoginModal extends SafeEventEmitter {
+function createWrapperForEmbed(targetId: string) {
+  const targetElement = document.getElementById(targetId);
+  if (!targetElement) {
+    log.error(`Element with ID ${targetId} not found`);
+    return;
+  }
+  targetElement.innerHTML = `<div id="w3a-parent-container" class="w3a-parent-container"></div>`;
+}
+
+export class LoginModal {
   private uiConfig: UIConfig;
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
@@ -60,8 +67,9 @@ export class LoginModal extends SafeEventEmitter {
 
   private walletRegistry: WalletRegistry;
 
-  constructor(uiConfig: LoginModalProps) {
-    super();
+  private callbacks: LoginModalCallbacks;
+
+  constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
@@ -73,10 +81,17 @@ export class LoginModal extends SafeEventEmitter {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
+    if (!uiConfig.widget) this.uiConfig.widget = WIDGET_TYPE.MODAL;
+
+    if (uiConfig.widget === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
+      log.error("targetId is required for embed widget");
+      throw new Error("targetId is required for embed widget");
+    }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
     this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
+    this.callbacks = callbacks;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
 
@@ -191,7 +206,17 @@ export class LoginModal extends SafeEventEmitter {
         });
         return resolve();
       });
-      const container = createWrapper(this.uiConfig.modalZIndex);
+
+      if (this.uiConfig.widget === WIDGET_TYPE.MODAL) {
+        createWrapperForModal(this.uiConfig.modalZIndex);
+      } else if (this.uiConfig.widget === WIDGET_TYPE.EMBED) {
+        createWrapperForEmbed(this.uiConfig.targetId);
+      } else {
+        throw WalletInitializationError.invalidParams(`Invalid widget type: ${this.uiConfig.widget}`);
+      }
+
+      const container = document.getElementById("w3a-parent-container");
+
       if (darkState.isDark) {
         container.classList.add("w3a--dark");
       } else {
@@ -201,16 +226,17 @@ export class LoginModal extends SafeEventEmitter {
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
-          <Modal
-            closeModal={this.closeModal}
+          <Widget
             stateListener={this.stateEmitter}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
+            widget={this.uiConfig.widget}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
             chainNamespaces={this.chainNamespaces}
             walletRegistry={this.walletRegistry}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleSocialLoginClick={this.handleSocialLoginClick}
+            closeModal={this.closeModal}
           />
         </ThemedContext.Provider>
       );
@@ -252,7 +278,9 @@ export class LoginModal extends SafeEventEmitter {
     this.setState({
       modalVisibility: true,
     });
-    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, true);
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
   };
 
   closeModal = () => {
@@ -260,7 +288,9 @@ export class LoginModal extends SafeEventEmitter {
       modalVisibility: false,
       externalWalletsVisibility: false,
     });
-    this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(false);
+    }
   };
 
   initExternalWalletContainer = () => {
@@ -270,31 +300,25 @@ export class LoginModal extends SafeEventEmitter {
   };
 
   private handleShowExternalWallets = (status: boolean) => {
-    this.emit(LOGIN_MODAL_EVENTS.INIT_EXTERNAL_WALLETS, { externalWalletsInitialized: status });
+    if (this.callbacks.onInitExternalWallets) {
+      this.callbacks.onInitExternalWallets({ externalWalletsInitialized: status });
+    }
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
-    this.emit(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, {
-      connector,
-      loginParams: { chainNamespace },
-    });
+    if (this.callbacks.onExternalWalletLogin) {
+      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
+    }
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
-    this.emit(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, {
-      connector,
-      loginParams: {
-        authConnection: loginParams.authConnection,
-        authConnectionId: loginParams.authConnectionId,
-        groupedAuthConnectionId: loginParams.groupedAuthConnectionId,
-        login_hint: loginParams.login_hint,
-        extraLoginOptions: loginParams.extraLoginOptions,
-      },
-    });
+    if (this.callbacks.onSocialLogin) {
+      this.callbacks.onSocialLogin({ connector, loginParams });
+    }
   };
 
   private setState = (newState: Partial<ModalState>) => {
