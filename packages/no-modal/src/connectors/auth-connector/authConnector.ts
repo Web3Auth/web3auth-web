@@ -116,7 +116,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       clientId: this.coreOptions.clientId,
       network: this.coreOptions.web3AuthNetwork,
       sdkMode: SDK_MODE.IFRAME,
-      authConnectionConfig: this.authConnectionConfig,
+      authConnectionConfig: this.authConnectionConfig.filter((x) => !x.isDefault),
     });
     log.debug("initializing auth connector init", this.authOptions);
 
