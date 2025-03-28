@@ -3,7 +3,7 @@ import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState 
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
-import { rowType } from "../../interfaces";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
 import SocialLoginList from "../SocialLoginList/SocialLoginList";
@@ -230,12 +230,14 @@ function Login(props: LoginProps) {
     );
   }
 
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
         <figure className="w3a--mx-auto w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
-          {appLogo ? (
-            <img src={appLogo} alt="Logo" className="w3a--object-contain" />
+          {headerLogo ? (
+            <img src={headerLogo} alt="Logo" className="w3a--object-contain" />
           ) : (
             <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
           )}
