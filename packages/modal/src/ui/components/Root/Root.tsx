@@ -320,6 +320,7 @@ function Root(props: RootProps) {
                   <Login
                     isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
+                    appLogo={appLogo}
                     showPasswordLessInput={showPasswordLessInput}
                     showExternalWalletButton={showExternalWalletButton}
                     handleSocialLoginClick={handleSocialLoginClick}

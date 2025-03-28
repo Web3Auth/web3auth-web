@@ -233,7 +233,7 @@ function Login(props: LoginProps) {
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
+        <figure className="w3a--mx-auto w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
           {appLogo ? (
             <img src={appLogo} alt="Logo" className="w3a--object-contain" />
           ) : (
