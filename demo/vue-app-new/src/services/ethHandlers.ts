@@ -4,6 +4,7 @@ import { BrowserProvider, parseEther, Transaction } from "ethers";
 
 import { getV4TypedData } from "../config";
 import { formDataStore } from "../store/form";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 export const sendEth = async (provider: IProvider, uiConsole: any) => {
   try {
@@ -32,7 +33,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
     log.info("fromAddress", fromAddress);
 
     const message = "Some string";
-    const sig = await ethProvider.send("eth_sign", [fromAddress, message]);
+    const sig = await ethProvider.send(EVM_METHOD_TYPES.ETH_SIGN, [fromAddress, message]);
     uiConsole("eth sign", sig);
   } catch (error) {
     log.error("error", error);
@@ -53,6 +54,22 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
     return [];
   }
 };
+
+export const getPrivateKey = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
+  try {
+    const privateKey = await provider.request({
+      method: EVM_METHOD_TYPES.ETH_PRIVATE_KEY,
+      params: [],
+    }) as string;
+    uiConsole("privateKey", { privateKey });
+    return privateKey;
+  } catch (error) {
+    log.error("Error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
+    return undefined;
+  }
+};
+
 export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
   try {
     const ethProvider = new BrowserProvider(provider);
@@ -68,6 +85,7 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
     return undefined;
   }
 };
+
 export const getBalance = async (provider: IProvider, uiConsole: any) => {
   try {
     const ethProvider = new BrowserProvider(provider);

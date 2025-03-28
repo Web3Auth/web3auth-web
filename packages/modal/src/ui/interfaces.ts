@@ -1,14 +1,14 @@
 import type { AUTH_CONNECTION_TYPE, ExtraLoginOptions, SafeEventEmitter } from "@web3auth/auth";
 import {
-  AuthLoginParams,
-  BaseConnectorConfig,
-  ChainNamespaceType,
-  LoginMethodConfig,
-  UIConfig as CoreUIConfig,
-  WALLET_CONNECTOR_TYPE,
-  WalletRegistry,
-  WalletRegistryItem,
-  Web3AuthNoModalEvents,
+  type AuthLoginParams,
+  type BaseConnectorConfig,
+  type ChainNamespaceType,
+  type LoginMethodConfig,
+  type UIConfig as CoreUIConfig,
+  type WALLET_CONNECTOR_TYPE,
+  type WalletRegistry,
+  type WalletRegistryItem,
+  type Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
 
 export enum WIDGET_TYPE {

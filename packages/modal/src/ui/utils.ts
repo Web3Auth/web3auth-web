@@ -79,12 +79,8 @@ export const getConnectorSocialLogins = (connectorName: string, loginMethodsConf
   const finalLoginMethodsConfig: LoginMethodConfig = {};
   if (connectorName === WALLET_CONNECTORS.AUTH) {
     AUTH_PROVIDERS.forEach((loginMethod) => {
-      const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {
-        name: AUTH_PROVIDERS_NAMES[loginMethod],
-        showOnMobile: true,
-        showOnModal: true,
-        showOnDesktop: true,
-      };
+      if (!loginMethodsConfig[loginMethod]) return;
+      const currentLoginMethodConfig = { name: AUTH_PROVIDERS_NAMES[loginMethod], ...loginMethodsConfig[loginMethod] };
       finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
     });
     log.debug("auth login method ui config", finalLoginMethodsConfig);

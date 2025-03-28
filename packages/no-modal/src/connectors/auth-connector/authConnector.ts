@@ -1,13 +1,14 @@
-import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { BUTTON_POSITION, CONFIRMATION_STRATEGY, type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import {
   Auth,
-  AUTH_CONNECTION_TYPE,
-  Auth0ClientOptions,
+  type AUTH_CONNECTION_TYPE,
+  type Auth0ClientOptions,
+  AuthConnectionConfigItem,
   BUILD_ENV,
   createHandler,
-  CreateHandlerParams,
-  LoginParams,
+  type CreateHandlerParams,
+  type LoginParams,
   PopupHandler,
   randomId,
   SDK_MODE,
@@ -41,8 +42,7 @@ import {
   Web3AuthError,
 } from "@/core/base";
 
-import { getAuthConnectionConfig } from "./config/authConnectionConfig";
-import type { AuthConnectionConfig, AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -70,7 +70,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstance: WsEmbed | null = null;
 
-  private authConnectionConfig: AuthConnectionConfig = [];
+  private authConnectionConfig: (AuthConnectionConfigItem & { isDefault?: boolean })[] = [];
 
   constructor(params: AuthConnectorOptions) {
     super(params);
@@ -106,6 +106,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     super.checkInitializationRequirements({ chainConfig });
     if (!this.coreOptions.clientId) throw WalletInitializationError.invalidParams("clientId is required before auth's initialization");
     if (!this.authOptions) throw WalletInitializationError.invalidParams("authOptions is required before auth's initialization");
+    if (this.authConnectionConfig.length === 0)
+      throw WalletInitializationError.invalidParams("authConnectionConfig is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
     this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
@@ -114,7 +116,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       clientId: this.coreOptions.clientId,
       network: this.coreOptions.web3AuthNetwork,
       sdkMode: SDK_MODE.IFRAME,
-      authConnectionConfig: this.authConnectionConfig,
+      authConnectionConfig: this.authConnectionConfig.filter((x) => !x.isDefault),
     });
     log.debug("initializing auth connector init", this.authOptions);
 
@@ -142,9 +144,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             chains: wsSupportedChains as ProviderConfig[],
             chainId,
             whiteLabel: {
-              // TODO: fix this after ws is released
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...(this.authOptions.whiteLabel as any),
+              ...this.authOptions.whiteLabel,
               ...this.wsSettings.whiteLabel,
             },
           });
@@ -504,49 +504,88 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
     const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
-    const providerConfig = this.authConnectionConfig.find((x) => {
-      if (groupedAuthConnectionId) {
-        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
-      }
-      if (authConnectionId) {
-        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
-      }
-      return x.authConnection === authConnection;
-    });
-    return providerConfig;
+    // if groupedAuthConnectionId or authConnectionId, then use the specific auth connection
+    if (groupedAuthConnectionId || authConnectionId) {
+      const authConnectionItem = this.authConnectionConfig.find((x) => {
+        if (groupedAuthConnectionId) return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+        if (authConnectionId) return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
+        return false;
+      });
+      // if no auth connection item found, then return undefined
+      return authConnectionItem;
+    } else {
+      // if no groupedAuthConnectionId or authConnectionId, then use the default auth connection
+      const defaultAuthConnectionItem = this.authConnectionConfig.find((x) => x.authConnection === authConnection && x.isDefault);
+      if (defaultAuthConnectionItem) return defaultAuthConnectionItem;
+
+      // if no default auth connection, then use the first auth connection
+      return this.authConnectionConfig.find((x) => x.authConnection === authConnection);
+    }
   }
 }
 
-export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig">): ConnectorFn => {
+type AuthConnectorFuncParams = Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig" | "connectorSettings"> & {
+  connectorSettings?: Omit<AuthConnectorOptions["connectorSettings"], "buildEnv">;
+};
+
+export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const { whitelist, whitelabel } = projectConfig;
+    const { whitelist, whitelabel, sessionTime } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
+    if (sessionTime) connectorSettings.sessionTime = sessionTime;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
     const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
-      { uxMode: UX_MODE.POPUP, buildEnv: BUILD_ENV.PRODUCTION }, // default settings
-      params?.connectorSettings || {},
+      { uxMode: UX_MODE.POPUP, buildEnv: coreOptions.authBuildEnv || BUILD_ENV.PRODUCTION }, // default settings
       connectorSettings,
+      params?.connectorSettings || {},
     ]) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
-    const isKeyExportEnabled = typeof projectConfig.key_export_enabled === "boolean" ? projectConfig.key_export_enabled : true;
+    const { enableKeyExport, walletUi } = projectConfig;
+    const isKeyExportEnabled = typeof enableKeyExport === "boolean" ? enableKeyExport : true;
+    const {
+      enablePortfolioWidget = false,
+      enableTokenDisplay = true,
+      enableNftDisplay = true,
+      enableWalletConnect = true,
+      enableBuyButton = true,
+      enableSendButton = true,
+      enableSwapButton = true,
+      enableReceiveButton = true,
+      enableShowAllTokensButton = true,
+      enableConfirmationModal = false,
+      portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
+      defaultPortfolio = "token",
+    } = walletUi || {};
+    const projectConfigWhiteLabel: WalletServicesSettings["whiteLabel"] = {
+      showWidgetButton: enablePortfolioWidget,
+      hideNftDisplay: !enableNftDisplay,
+      hideTokenDisplay: !enableTokenDisplay,
+      hideTransfers: !enableSendButton,
+      hideTopup: !enableBuyButton,
+      hideReceive: !enableReceiveButton,
+      hideSwap: !enableSwapButton,
+      hideShowAllTokens: !enableShowAllTokensButton,
+      hideWalletConnect: !enableWalletConnect,
+      buttonPosition: portfolioWidgetPosition,
+      defaultPortfolio,
+    };
+    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, uiConfig, coreOptions.walletServicesConfig?.whiteLabel || {}]);
+    const confirmationStrategy =
+      coreOptions.walletServicesConfig?.confirmationStrategy ??
+      (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
-      whiteLabel: {
-        // TODO: fix this after ws is released
-        // TODO: add enableKeyExport to ws embed and implement in WS
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(uiConfig as any),
-        ...coreOptions.walletServicesConfig?.whiteLabel,
-      },
+      confirmationStrategy,
+      whiteLabel,
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
-      // enableKeyExport: keyExportEnabled,
+      enableKeyExport: enableKeyExport,
     };
 
     // Core options
@@ -556,7 +595,7 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
-      authConnectionConfig: getAuthConnectionConfig(finalConnectorSettings.buildEnv, coreOptions.web3AuthNetwork),
+      authConnectionConfig: projectConfig.embeddedWalletAuth,
     });
   };
 };

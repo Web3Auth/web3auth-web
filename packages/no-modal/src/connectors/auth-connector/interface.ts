@@ -1,4 +1,4 @@
-import { AuthConnectionConfig, type AuthOptions, type LoginParams } from "@web3auth/auth";
+import { type AuthConnectionConfigItem, type AuthOptions, type LoginParams } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type BaseConnectorSettings, type IBaseProvider } from "@/core/base";
@@ -13,7 +13,7 @@ export interface AuthConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: Omit<AuthOptions, "clientId" | "network" | "authConnectionConfig">;
   loginSettings?: LoginSettings;
   walletServicesSettings?: WalletServicesSettings;
-  authConnectionConfig?: AuthConnectionConfig;
+  authConnectionConfig?: (AuthConnectionConfigItem & { isDefault?: boolean })[];
 }
 
 export {

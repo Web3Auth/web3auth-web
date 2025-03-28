@@ -99,8 +99,8 @@ export function createSolanaMiddleware(providerHandlers: ISolanaProviderHandlers
       unknown,
       unknown
     >,
-    createGenericJRPCMiddleware<void, string>("solanaPrivateKey", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<void, string>("private_key", getPrivateKey) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<void, string>(SOLANA_METHOD_TYPES.SOLANA_PRIVATE_KEY, getPrivateKey) as JRPCMiddleware<unknown, unknown>,
+    createGenericJRPCMiddleware<void, string>(SOLANA_METHOD_TYPES.PRIVATE_KEY, getPrivateKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("public_key", getPublicKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("solanaPublicKey", getPublicKey) as JRPCMiddleware<unknown, unknown>,
     createGenericJRPCMiddleware<void, string>("solanaSecretKey", getSecretKey) as JRPCMiddleware<unknown, unknown>,
