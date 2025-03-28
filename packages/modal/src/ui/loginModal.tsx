@@ -276,7 +276,7 @@ export class LoginModal extends SafeEventEmitter {
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
-    this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
+    this.emit(LOGIN_MODAL_EVENTS.EXTERNAL_WALLET_LOGIN, {
       connector,
       loginParams: { chainNamespace },
     });
@@ -285,9 +285,15 @@ export class LoginModal extends SafeEventEmitter {
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
-    this.emit(LOGIN_MODAL_EVENTS.LOGIN, {
+    this.emit(LOGIN_MODAL_EVENTS.SOCIAL_LOGIN, {
       connector,
-      loginParams: { loginProvider: loginParams.loginProvider, login_hint: loginParams.login_hint, name: loginParams.name },
+      loginParams: {
+        authConnection: loginParams.authConnection,
+        authConnectionId: loginParams.authConnectionId,
+        groupedAuthConnectionId: loginParams.groupedAuthConnectionId,
+        login_hint: loginParams.login_hint,
+        extraLoginOptions: loginParams.extraLoginOptions,
+      },
     });
   };
 

@@ -1,16 +1,11 @@
 import type { AuthUserInfo, LoginParams } from "@web3auth/auth";
-import type { CONNECTOR_STATUS_TYPE, ConnectorFn, IPlugin, IProvider, PluginFn, UserAuthInfo, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, UserAuthInfo } from "@web3auth/no-modal";
 import { Ref, ShallowRef } from "vue";
 
-import type { ModalConfig } from "../interface";
 import type { Web3Auth, Web3AuthOptions } from "../modalManager";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: Web3AuthOptions;
-  modalConfig?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
-  hideWalletDiscovery?: boolean;
-  connectors?: ConnectorFn[];
-  plugins?: PluginFn[];
 };
 
 export interface Web3AuthProviderProps {

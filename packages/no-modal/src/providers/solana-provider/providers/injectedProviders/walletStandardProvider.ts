@@ -7,9 +7,9 @@ import {
   type SolanaSignTransactionFeature,
 } from "@solana/wallet-standard-features";
 import { PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { bs58 } from "@toruslabs/bs58";
 import { type WalletWithFeatures } from "@wallet-standard/base";
 import { type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
-import bs58 from "bs58";
 
 import { WalletLoginError } from "@/core/base";
 

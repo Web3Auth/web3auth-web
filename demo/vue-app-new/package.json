@@ -17,7 +17,7 @@
     "@toruslabs/solana-controllers": "^7.4.0",
     "@toruslabs/vue-components": "^7.9.0",
     "@toruslabs/vue-icons": "^7.6.2",
-    "@web3auth/auth": "^9.6.4",
+    "@web3auth/auth": "^10.2.3",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",

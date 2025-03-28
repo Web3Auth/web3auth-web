@@ -13,7 +13,7 @@ import {
 } from "../../rpc/solanaRpcMiddlewares";
 import { getProviderHandlers } from "./solanaPrivateKeyUtils";
 
-export interface SolanaPrivKeyProviderConfig extends BaseProviderConfig {}
+export type SolanaPrivKeyProviderConfig = BaseProviderConfig;
 export interface SolanaPrivKeyProviderState extends BaseProviderState {
   privateKey?: string;
 }

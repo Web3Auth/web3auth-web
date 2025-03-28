@@ -1,7 +1,8 @@
-import { LOGIN_PROVIDER } from "@web3auth/auth";
+import { AUTH_CONNECTION } from "@web3auth/auth";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ModalLoginParams, SocialLoginsConfig } from "../interfaces";
 import i18n from "../localeImport";
 import { getUserCountry, validatePhoneNumber } from "../utils";
 import Button from "./Button";
@@ -12,10 +13,11 @@ interface SocialLoginPasswordlessProps {
   isEmailVisible: boolean;
   isSmsVisible: boolean;
   connector: string;
-  handleSocialLoginClick: (params: { connector: string; loginParams: { loginProvider: string; login_hint?: string; name: string } }) => void;
+  socialLoginsConfig: SocialLoginsConfig;
+  handleSocialLoginClick: (params: { connector: string; loginParams: ModalLoginParams }) => void;
 }
 export default function SocialLoginPasswordless(props: SocialLoginPasswordlessProps) {
-  const { handleSocialLoginClick, connector, isPrimaryBtn, isEmailVisible, isSmsVisible } = props;
+  const { handleSocialLoginClick, connector, isPrimaryBtn, isEmailVisible, isSmsVisible, socialLoginsConfig } = props;
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
@@ -27,21 +29,37 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
     e.preventDefault();
     const value = fieldValue;
     if (isEmailVisible) {
+      const emailConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS];
       const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: LOGIN_PROVIDER.EMAIL_PASSWORDLESS, login_hint: value, name: "Email" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+            authConnectionId: emailConfig.authConnectionId,
+            groupedAuthConnectionId: emailConfig.groupedAuthConnectionId,
+            extraLoginOptions: emailConfig.extraLoginOptions,
+            login_hint: value,
+            name: "Email",
+          },
         });
       }
     }
     if (isSmsVisible) {
+      const smsConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
       const number = value.startsWith("+") ? value : `${countryCode}${value}`;
       const result = await validatePhoneNumber(number);
       if (result) {
         return handleSocialLoginClick({
           connector,
-          loginParams: { loginProvider: LOGIN_PROVIDER.SMS_PASSWORDLESS, login_hint: typeof result === "string" ? result : number, name: "Mobile" },
+          loginParams: {
+            authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS,
+            authConnectionId: smsConfig.authConnectionId,
+            groupedAuthConnectionId: smsConfig.groupedAuthConnectionId,
+            extraLoginOptions: smsConfig.extraLoginOptions,
+            login_hint: typeof result === "string" ? result : number,
+            name: "Mobile",
+          },
         });
       }
     }
@@ -88,12 +106,12 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       <div className="w3a-group__title">
         {t(title)}
         {isSmsVisible && (
-          <div className="w3a--relative w3a--flex w3a--flex-col w3a--items-center w3a--cursor-pointer w3a--group">
+          <div className="w3a--group w3a--relative w3a--flex w3a--cursor-pointer w3a--flex-col w3a--items-center">
             <Icon iconName="information-circle-light" darkIconName="information-circle" />
-            <div className="w3a--absolute w3a--z-20 w3a--flex-col w3a--items-center w3a--hidden w3a--mb-5 w3a--top-4 group-hover:w3a--flex">
-              <div className="w3a--w-3 w3a--h-3 w3a--ml-[3px] -w3a--mb-2 w3a--rotate-45 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-600" />
+            <div className="w3a--absolute w3a--top-4 w3a--z-20 w3a--mb-5 w3a--hidden w3a--flex-col w3a--items-center group-hover:w3a--flex">
+              <div className="-w3a--mb-2 w3a--ml-[3px] w3a--size-3 w3a--rotate-45 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-600" />
               <div
-                className={`w3a--relative w3a--p-4 w3a--w-[300px] w3a--text-xs w3a--leading-none w3a--text-app-white w3a--rounded-md w3a--bg-app-gray-50 dark:w3a--bg-app-gray-600 w3a--shadow-lg ${
+                className={`w3a--relative w3a--w-[300px] w3a--rounded-md w3a--bg-app-gray-50 w3a--p-4 w3a--text-xs w3a--leading-none w3a--text-app-white w3a--shadow-lg dark:w3a--bg-app-gray-600 ${
                   isSmsVisible && !isEmailVisible ? "w3a--left-20" : "w3a--left-8"
                 }`}
               >
@@ -108,7 +126,7 @@ export default function SocialLoginPasswordless(props: SocialLoginPasswordlessPr
       </div>
       <form className="w3ajs-passwordless-form" onSubmit={(e) => handleFormSubmit(e)}>
         <input
-          className="w3a--w-full w3a--mb-4 w3a-text-field"
+          className="w3a-text-field w3a--mb-4 w3a--w-full"
           name="passwordless-input"
           required
           placeholder={`${t("modal.social.sms-placeholder-text")} ${placeholder}`}

@@ -1,10 +1,10 @@
 import {
-  AuthUserInfo,
+  type AuthUserInfo,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type IProvider,
-  LoginParams,
+  type LoginParams,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthContextKey,
@@ -109,12 +109,7 @@ export const Web3AuthProvider = defineComponent({
           try {
             initError.value = null;
             isInitializing.value = true;
-            const { modalConfig, hideWalletDiscovery } = props.config;
-            if (modalConfig) {
-              await newWeb3Auth.initModal({ modalConfig, hideWalletDiscovery });
-            } else {
-              await newWeb3Auth.initModal();
-            }
+            await newWeb3Auth.initModal();
           } catch (error) {
             initError.value = error as Error;
           } finally {

@@ -1,5 +1,5 @@
+import { bs58 } from "@toruslabs/bs58";
 import { JRPCRequest, rpcErrors } from "@web3auth/auth";
-import bs58 from "bs58";
 
 import { IBaseWalletProvider } from "../../../interface";
 import { ISolanaProviderHandlers } from "../../../rpc";

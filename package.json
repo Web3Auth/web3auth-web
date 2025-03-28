@@ -6,33 +6,33 @@
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
     "@babel/register": "^7.25.9",
-    "@rollup/plugin-node-resolve": "^16.0.0",
-    "@toruslabs/config": "^2.2.0",
-    "@toruslabs/eslint-config-typescript": "^3.3.4",
-    "@toruslabs/torus-scripts": "^6.1.7",
-    "@types/chai": "^5.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@toruslabs/config": "^3.1.0",
+    "@toruslabs/eslint-config-typescript": "^4.1.1",
+    "@toruslabs/torus-scripts": "^7.1.4",
+    "@types/chai": "^5.2.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22",
-    "chai": "^5.1.2",
+    "chai": "^5.2.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
-    "eslint": "^8.57.0",
-    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint": "^9.23.0",
+    "eslint-import-resolver-typescript": "^4.2.2",
     "husky": "^9.1.7",
-    "lerna": "^8.1.9",
-    "lint-staged": "^15.4.3",
+    "lerna": "^8.2.1",
+    "lint-staged": "^15.5.0",
     "mocha": "^11.1.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "~5.7.3",
-    "typescript-transform-paths": "^3.5.3"
+    "typescript-transform-paths": "^3.5.5"
   },
   "engines": {
-    "node": ">=18.x",
+    "node": ">=20.x",
     "npm": ">=9.x"
   },
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
@@ -53,8 +53,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^20.4.0",
-    "@rollup/rollup-linux-x64-gnu": "^4.34.1"
+    "@nx/nx-linux-x64-gnu": "^20.6.3",
+    "@rollup/rollup-linux-x64-gnu": "^4.37.0"
   },
   "private": true,
   "repository": {

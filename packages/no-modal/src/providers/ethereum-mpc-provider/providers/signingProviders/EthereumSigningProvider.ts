@@ -20,7 +20,7 @@ interface ProviderParams {
   getPublic: () => Promise<Buffer>;
 }
 
-export interface EthereumSigningProviderConfig extends BaseProviderConfig {}
+export type EthereumSigningProviderConfig = BaseProviderConfig;
 
 export interface EthereumSigningProviderState extends BaseProviderState {
   signMethods?: {
