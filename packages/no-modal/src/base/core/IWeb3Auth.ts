@@ -1,5 +1,5 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import { type BUILD_ENV_TYPE, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type CustomChainConfig } from "../chain/IChainInterface";
@@ -136,6 +136,13 @@ export interface IWeb3AuthCoreOptions {
    * Private key provider for xrpl, mpc cases
    */
   privateKeyProvider?: IBaseProvider<string>;
+
+  /**
+   * Build environment for Auth connector
+   * @internal
+   * @defaultValue BUILD_ENV.PRODUCTION
+   */
+  authBuildEnv?: BUILD_ENV_TYPE;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

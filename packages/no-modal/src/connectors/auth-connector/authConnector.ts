@@ -512,7 +512,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 }
 
-export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig">): ConnectorFn => {
+type AuthConnectorFuncParams = Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig" | "connectorSettings"> & {
+  connectorSettings?: Omit<AuthConnectorOptions["connectorSettings"], "buildEnv">;
+};
+
+export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => {
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
@@ -524,7 +528,7 @@ export const authConnector = (params?: Omit<AuthConnectorOptions, "coreOptions" 
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
-      { uxMode: UX_MODE.POPUP, buildEnv: BUILD_ENV.PRODUCTION }, // default settings
+      { uxMode: UX_MODE.POPUP, buildEnv: coreOptions.authBuildEnv || BUILD_ENV.PRODUCTION }, // default settings
       connectorSettings,
       params?.connectorSettings || {},
     ]) as AuthConnectorOptions["connectorSettings"];
