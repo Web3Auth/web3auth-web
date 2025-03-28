@@ -1,6 +1,6 @@
 import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
 import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { type AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
+import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 import { SMART_ACCOUNT_WALLET_SCOPE } from "./connector";
@@ -49,24 +49,41 @@ export interface WalletUiConfig {
   defaultPortfolio?: "token" | "nft";
 }
 
-// TODO: finalize the project config
+export interface LoginModalConfig {
+  // design
+  widgetType?: "embed" | "modal";
+  logoAlignment?: "left" | "center";
+  borderRadiusType?: "small" | "medium" | "large";
+  buttonRadiusType?: "pill" | "rounded" | "square";
+  tncLink?: string; // TODO: whitelabel also has this
+  privacyPolicy?: string; // TODO: whitelabel also has this
+  // authentication
+  enableMainSocialLoginButton?: boolean;
+  signInMethods?: ("social" | "passwordless" | "externalWallets")[];
+  addPreviousLoginHint?: boolean;
+  // external wallets
+  displayInstalledExternalWallets?: boolean;
+  displayExternalWalletsCount?: boolean;
+}
+
 export interface ProjectConfig {
   // General config
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;
   enableKeyExport?: boolean;
   whitelist?: WhitelistResponse; // remain unchanged
-  whitelabel?: WhiteLabelData; // remain unchanged
   // Chains config
   chains?: ChainsConfig;
   // Smart accounts config
   smartAccounts?: SmartAccountsConfig;
-  // WS config
+  // Wallet config
   walletUi?: WalletUiConfig;
   // Authentication config
   externalWalletAuth?: ExternalWalletsConfig;
   embeddedWalletAuth?: (AuthConnectionConfigItem & { isDefault?: boolean })[];
-  // Login modal config
+  // Branding config
+  whitelabel?: WhiteLabelData; // remain unchanged
+  loginModal?: LoginModalConfig;
 }
 
 export interface WalletRegistryItem {
