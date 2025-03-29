@@ -21,7 +21,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const whiteColor = "#FFFFFF";
   const blackColor = "#000000";
   const modalColor = getComputedStyle(root)?.getPropertyValue("--app-gray-800")?.trim() || "#1f2a37";
-  const qrColor = primaryColor.toLowerCase() === "#ffffff" ? "#000000" : primaryColor;
+  const qrColor = primaryColor?.toLowerCase() === "#ffffff" ? "#000000" : primaryColor;
 
   return (
     <div className="w3a--contents">

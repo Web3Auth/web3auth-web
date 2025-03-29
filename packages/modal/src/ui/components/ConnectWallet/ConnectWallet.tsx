@@ -122,9 +122,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       setExternalButtons(visibleButtons);
       setTotalExternalWalletsCount(visibleButtons.length);
     }
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    setIsLoading(false);
   }, [walletDiscoverySupported, sortedButtons, visibleButtons, totalExternalWallets]);
 
   const handleWalletClick = (button: ExternalButton) => {
@@ -165,6 +163,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           selectedButton={selectedButton}
           setBodyState={setBodyState}
           bodyState={bodyState}
+          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
