@@ -282,7 +282,8 @@ function Login(props: LoginProps) {
         />
       )}
 
-      {!expand && showExternalWalletButton && showPasswordLessInput && (
+      {/* "OR" DELIMITER */}
+      {!expand && showExternalWalletButton && (areSocialLoginsVisible || showPasswordLessInput) && (
         <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
           <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
           <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>

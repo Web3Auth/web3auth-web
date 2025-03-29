@@ -284,7 +284,12 @@ function Root(props: RootProps) {
   }, [config, walletRegistry]);
 
   const totalExternalWalletsLength = useMemo(() => {
-    return allButtons.length + customAdapterButtons.length;
+    const uniqueWalletSet = new Set();
+    return allButtons.concat(customAdapterButtons).filter((button) => {
+      if (uniqueWalletSet.has(button.name)) return false;
+      uniqueWalletSet.add(button.name);
+      return true;
+    }).length;
   }, [allButtons, customAdapterButtons]);
 
   const handleSocialLoginHeight = () => {

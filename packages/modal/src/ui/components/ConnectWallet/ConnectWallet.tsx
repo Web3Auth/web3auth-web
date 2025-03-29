@@ -1,4 +1,4 @@
-import { WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { EVM_CONNECTORS, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -55,18 +55,35 @@ function ConnectWallet(props: ConnectWalletProps) {
     return supported;
   }, [walletRegistry]);
 
+  const allUniqueButtons = useMemo(() => {
+    const uniqueButtonSet = new Set();
+    return allExternalButtons.concat(customAdapterButtons).filter((button) => {
+      if (uniqueButtonSet.has(button.name)) return false;
+      uniqueButtonSet.add(button.name);
+      return true;
+    });
+  }, [allExternalButtons, customAdapterButtons]);
+
   const filteredButtons = (searchValue: string) => {
-    return allExternalButtons.concat(customAdapterButtons).filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
+    return allUniqueButtons.filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
   };
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
   const sortedButtons = useMemo(() => {
-    return [
+    // display order: default injected buttons > custom adapter buttons > default non-injected buttons
+    const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customAdapterButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ];
+
+    const buttonSet = new Set();
+    return buttons.filter((button) => {
+      if (buttonSet.has(button.name)) return false;
+      buttonSet.add(button.name);
+      return true;
+    });
   }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
 
   const visibleButtons = useMemo(() => {
@@ -132,8 +149,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const handleMoreWallets = () => {
     // setIsLoading(true);
     setInitialWalletCount((prev) => prev + 10);
-    const allButtons = [...allExternalButtons, ...customAdapterButtons];
-    const buttons = allButtons.slice(initialWalletCount, initialWalletCount + 10);
+    const buttons = allUniqueButtons.slice(initialWalletCount, initialWalletCount + 10);
     setExternalButtons((prev) => [...prev, ...buttons]);
   };
 

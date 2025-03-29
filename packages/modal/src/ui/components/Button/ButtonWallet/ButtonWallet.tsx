@@ -44,7 +44,7 @@ function ButtonWallet(props: ButtonWalletProps) {
             height="24"
             width="24"
             isButton
-            extension={button.imgExtension}
+            extension={button.imgExtension || "webp"}
           />
         </figure>
         <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
