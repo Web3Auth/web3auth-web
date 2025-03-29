@@ -4,6 +4,7 @@ import {
   CHAIN_NAMESPACES,
   coinbaseConnector,
   ConnectorFn,
+  ConnectorsModalConfig,
   CustomChainConfig,
   getChainConfig,
   nftCheckoutPlugin,
@@ -109,7 +110,7 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const { widget, targetId } = formData;
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel, widget: widget, targetId } : { widget: widget, targetId };
+  const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel ? { ...whiteLabel, widgetType: widget, targetId } : { widgetType: widget, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {

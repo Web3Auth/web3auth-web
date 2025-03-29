@@ -8,3 +8,8 @@ export const MODAL_SIGN_IN_METHODS = {
   PASSWORDLESS: "passwordless",
   EXTERNAL_WALLETS: "externalWallets",
 } as const;
+
+export const WIDGET_TYPE = {
+  MODAL: "modal",
+  EMBED: "embed",
+} as const;

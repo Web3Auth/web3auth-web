@@ -1,10 +1,10 @@
 import { AUTH_CONNECTION } from "@web3auth/auth";
-import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../../constants";
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, WIDGET_TYPE } from "../../interfaces";
+import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
 import Modal from "../Modal";
 import Root from "../Root";
