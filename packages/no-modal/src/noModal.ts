@@ -35,6 +35,7 @@ import {
   Web3AuthNoModalEvents,
 } from "@/core/base";
 import { CommonJRPCProvider } from "@/core/base-provider";
+import { metaMaskConnector } from "@/core/metamask-connector";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -386,6 +387,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
     }
+
+    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
+    connectorFns.push(metaMaskConnector());
 
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {

@@ -10,6 +10,7 @@ export const SOLANA_CONNECTORS = {
 
 export const EVM_CONNECTORS = {
   COINBASE: "coinbase",
+  METAMASK: "metamask",
   ...MULTI_CHAIN_CONNECTORS,
 };
 

@@ -13,6 +13,7 @@
     "external.search-subtext": "Probeer in plaats daarvan te zoeken",
     "external.connect-wallet": "Verbinden met portemonnee",
     "external.continue": "Ga verder met externe portemonnee",
+    "external.continue-custom": "Doorgaan met {{wallet}}",
     "external.dont-have": "Heb niet",
     "external.get": "Krijgen",
     "external.get-wallet": "Portemonnee krijgen",
