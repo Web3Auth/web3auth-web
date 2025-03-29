@@ -383,7 +383,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (!providerConfig?.authConnection) throw WalletLoginError.connectionError("Invalid auth connection.");
 
     const jwtParams = {
-      ...providerConfig.jwtParameters,
+      ...(providerConfig.jwtParameters || {}),
       ...(params.extraLoginOptions || {}),
       login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
@@ -504,23 +504,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
     const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
-    // if groupedAuthConnectionId or authConnectionId, then use the specific auth connection
-    if (groupedAuthConnectionId || authConnectionId) {
-      const authConnectionItem = this.authConnectionConfig.find((x) => {
-        if (groupedAuthConnectionId) return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
-        if (authConnectionId) return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
-        return false;
-      });
-      // if no auth connection item found, then return undefined
-      return authConnectionItem;
-    } else {
-      // if no groupedAuthConnectionId or authConnectionId, then use the default auth connection
-      const defaultAuthConnectionItem = this.authConnectionConfig.find((x) => x.authConnection === authConnection && x.isDefault);
-      if (defaultAuthConnectionItem) return defaultAuthConnectionItem;
-
-      // if no default auth connection, then use the first auth connection
-      return this.authConnectionConfig.find((x) => x.authConnection === authConnection);
-    }
+    const providerConfig = this.authConnectionConfig.find((x) => {
+      if (groupedAuthConnectionId) {
+        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+      }
+      if (authConnectionId) {
+        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
+      }
+      // return the default auth connection, if not found, return undefined
+      return x.authConnection === authConnection && x.isDefault;
+    });
+    return providerConfig;
   }
 }
 
@@ -595,6 +589,7 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
+      // TODO: check, test this and may need to send modal config here later on.!!
       authConnectionConfig: projectConfig.embeddedWalletAuth,
     });
   };

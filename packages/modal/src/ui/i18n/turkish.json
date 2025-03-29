@@ -13,6 +13,7 @@
     "external.search-subtext": "Bunun yerine aramayı deneyin",
     "external.connect-wallet": "Cüzdanı Bağla",
     "external.continue": "Harici cüzdanla devam et",
+    "external.continue-custom": "{{wallet}} ile devam et",
     "external.dont-have": "Yok",
     "external.get": "Al",
     "external.get-wallet": "Cüzdan Al",

@@ -16,6 +16,7 @@ import {
   IConnector,
   IPlugin,
   IProvider,
+  isHexStrict,
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
@@ -35,6 +36,7 @@ import {
   Web3AuthNoModalEvents,
 } from "@/core/base";
 import { CommonJRPCProvider } from "@/core/base-provider";
+import { metaMaskConnector } from "@/core/metamask-connector";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -241,30 +243,67 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // validate chains and namespaces
     if (this.coreOptions.chains.length === 0) {
-      log.error("Please provide chains");
-      throw WalletInitializationError.invalidParams("Please provide chains");
+      log.error("chain info not found. Please configure chains on dashboard at https://dashboard.web3auth.io");
+      throw WalletInitializationError.invalidParams("Please configure chains on dashboard at https://dashboard.web3auth.io");
     }
+    const validChainNamespaces = new Set(Object.values(CHAIN_NAMESPACES));
     for (const chain of this.coreOptions.chains) {
-      if (!chain.chainNamespace || !Object.values(CHAIN_NAMESPACES).includes(chain.chainNamespace)) {
+      if (!chain.chainNamespace || !validChainNamespaces.has(chain.chainNamespace)) {
         log.error(`Please provide a valid chainNamespace in chains for chain ${chain.chainId}`);
         throw WalletInitializationError.invalidParams(`Please provide a valid chainNamespace in chains for chain ${chain.chainId}`);
+      }
+      if (chain.chainNamespace !== CHAIN_NAMESPACES.OTHER && !isHexStrict(chain.chainId)) {
+        log.error(`Please provide a valid chainId in chains for chain ${chain.chainId}`);
+        throw WalletInitializationError.invalidParams(`Please provide a valid chainId as hex string in chains for chain ${chain.chainId}`);
+      }
+      if (chain.chainNamespace !== CHAIN_NAMESPACES.OTHER) {
+        try {
+          new URL(chain.rpcTarget);
+        } catch (error) {
+          // TODO: add support for chain.wsTarget
+          log.error(`Please provide a valid rpcTarget in chains for chain ${chain.chainId}`, error);
+          throw WalletInitializationError.invalidParams(`Please provide a valid rpcTarget in chains for chain ${chain.chainId}`);
+        }
       }
     }
 
     // if AA is enabled, filter out chains that are not AA-supported
     if (this.coreOptions.accountAbstractionConfig) {
-      const aaSupportedChainIds = new Set(
-        this.coreOptions.accountAbstractionConfig?.chains
-          ?.filter((chain) => chain.chainId && chain.bundlerConfig?.url)
-          .map((chain) => chain.chainId) || []
-      );
-      this.coreOptions.chains = this.coreOptions.chains.filter(
-        (chain) => chain.chainNamespace !== CHAIN_NAMESPACES.EIP155 || aaSupportedChainIds.has(chain.chainId)
-      );
-      if (this.coreOptions.chains.length === 0) {
-        log.error("Account Abstraction is enabled but no supported chains found");
-        throw WalletInitializationError.invalidParams("Account Abstraction is enabled but no supported chains found");
+      // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
+      for (const chain of this.coreOptions.accountAbstractionConfig.chains) {
+        if (!isHexStrict(chain.chainId)) {
+          log.error(`Please provide a valid chainId in accountAbstractionConfig.chains for chain ${chain.chainId}`);
+          throw WalletInitializationError.invalidParams(
+            `Please provide a valid chainId in accountAbstractionConfig.chains for chain ${chain.chainId}`
+          );
+        }
+        try {
+          new URL(chain.bundlerConfig?.url);
+        } catch (error) {
+          log.error(`Please provide a valid bundlerConfig.url in accountAbstractionConfig.chains for chain ${chain.chainId}`, error);
+          throw WalletInitializationError.invalidParams(
+            `Please provide a valid bundlerConfig.url in accountAbstractionConfig.chains for chain ${chain.chainId}`
+          );
+        }
+        if (!chainMap.has(chain.chainId)) {
+          log.error(`Please provide chain config for AA chain in accountAbstractionConfig.chains for chain ${chain.chainId}`);
+          throw WalletInitializationError.invalidParams(
+            `Please provide chain config for AA chain in accountAbstractionConfig.chains for chain ${chain.chainId}`
+          );
+        }
       }
+      // const aaSupportedChainIds = new Set(
+      //   this.coreOptions.accountAbstractionConfig?.chains
+      //     ?.filter((chain) => chain.chainId && chain.bundlerConfig?.url)
+      //     .map((chain) => chain.chainId) || []
+      // );
+      // this.coreOptions.chains = this.coreOptions.chains.filter(
+      //   (chain) => chain.chainNamespace !== CHAIN_NAMESPACES.EIP155 || aaSupportedChainIds.has(chain.chainId)
+      // );
+      // if (this.coreOptions.chains.length === 0) {
+      //   log.error("Account Abstraction is enabled but no supported chains found");
+      //   throw WalletInitializationError.invalidParams("Account Abstraction is enabled but no supported chains found");
+      // }
     }
   }
 
@@ -352,6 +391,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     }
 
+    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
+    connectorFns.push(metaMaskConnector());
+
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
       const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
@@ -399,15 +441,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { accountAbstractionConfig } = this.coreOptions;
       const doesAASupportCurrentChain =
         this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
-        accountAbstractionConfig?.chains?.find((chain) => chain.chainId === this.currentChain?.chainId);
+        accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
       const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
       if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
+        const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
         const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
           provider,
           chain: this.currentChain,
-          chains: this.coreOptions.chains,
+          chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
         });
         finalProvider = aaProvider;
       }
