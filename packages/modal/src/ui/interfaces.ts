@@ -4,6 +4,7 @@ import {
   type BaseConnectorConfig,
   type ChainNamespaceType,
   type LoginMethodConfig,
+  LoginModalConfig,
   type UIConfig as CoreUIConfig,
   type WALLET_CONNECTOR_TYPE,
   type WalletRegistry,
@@ -19,7 +20,7 @@ export enum WIDGET_TYPE {
 export type WidgetType = (typeof WIDGET_TYPE)[keyof typeof WIDGET_TYPE];
 
 // capture whitelabel only once
-export interface UIConfig extends CoreUIConfig {
+export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   /**
    * Whether to use the modal or embed widget
    *
@@ -112,6 +113,8 @@ export interface ModalState {
   status: ModalStatusType;
   externalWalletsInitialized: boolean;
   hasExternalWallets: boolean;
+  showExternalWalletCount: boolean;
+  showInstalledExternalWallets: boolean;
   externalWalletsVisibility: boolean;
   modalVisibility: boolean;
   modalVisibilityDelayed: boolean;

@@ -1,9 +1,10 @@
-import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
-import { rowType } from "../../interfaces";
+import { type rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
 import Image from "../Image";
@@ -41,6 +42,8 @@ function Login(props: LoginProps) {
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
+    showExternalWalletCount,
+    showInstalledExternalWallets,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -209,6 +212,12 @@ function Login(props: LoginProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
   };
 
+  const installedExternalWallets = useMemo(() => {
+    if (showInstalledExternalWallets) return installedExternalWalletConfig;
+    // always show MetaMask
+    return installedExternalWalletConfig.filter((wallet) => wallet.name === WALLET_CONNECTORS.METAMASK);
+  }, [installedExternalWalletConfig, showInstalledExternalWallets]);
+
   const handleOtpComplete = (otp: string) => {
     // eslint-disable-next-line no-console
     console.log(otp);
@@ -233,110 +242,162 @@ function Login(props: LoginProps) {
     );
   }
 
+  const socialLoginSection = (otherRow: rowType[] = []) => {
+    return (
+      <SocialLoginList
+        key="social-login-section"
+        otherRow={otherRow}
+        isDark={isDark}
+        visibleRow={visibleRow}
+        canShowMore={canShowMore}
+        handleSocialLoginClick={handleSocialLoginClick}
+        socialLoginsConfig={socialLoginsConfig}
+        handleExpandSocialLogins={handleExpand}
+      />
+    );
+  };
+
+  const passwordlessLoginSection = () => {
+    return (
+      <LoginPasswordLess
+        key="passwordless-section"
+        isModalVisible={isModalVisible}
+        isPasswordLessCtaClicked={isPasswordLessCtaClicked}
+        setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
+        title={title}
+        fieldValue={fieldValue}
+        handleInputChange={handleInputChange}
+        placeholder={placeholder}
+        handleFormSubmit={handleFormSubmit}
+        invalidInputErrorMessage={invalidInputErrorMessage}
+        isValidInput={isValidInput}
+        isDark={isDark}
+      />
+    );
+  };
+
+  const externalWalletSection = () => {
+    return (
+      <div key="external-wallets-section" className="w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2">
+        {/* INSTALLED EXTERNAL WALLETS */}
+        {installedExternalWallets.length > 0 &&
+          installedExternalWallets.map((wallet) => (
+            <button
+              key={wallet.name}
+              type="button"
+              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")}
+              onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
+            >
+              <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
+              <div className="w3a--flex w3a--items-center w3a--gap-x-2">
+                <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
+                  <Image
+                    imageId={`login-${wallet.name}`}
+                    hoverImageId={`login-${wallet.name}`}
+                    fallbackImageId="wallet"
+                    height="24"
+                    width="24"
+                    isButton
+                    extension={wallet.imgExtension || "webp"}
+                  />
+                </figure>
+              </div>
+            </button>
+          ))}
+
+        {/* EXTERNAL WALLETS DISCOVERY */}
+        {
+          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
+            {showExternalWalletCount && (
+              <div
+                id="external-wallet-count"
+                className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+              >
+                {totalExternalWallets - 1}+
+              </div>
+            )}
+            <img
+              id="external-wallet-arrow"
+              className="w3a--icon-animation"
+              src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+              alt="arrow"
+            />
+          </button>
+        }
+      </div>
+    );
+  };
+
+  const delimiter = (index: number) => {
+    return (
+      <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2" key={`section-delimiter-${index}`}>
+        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+        <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
+        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+      </div>
+    );
+  };
+
+  const defaultView = () => {
+    const sectionMap = {
+      social: socialLoginSection,
+      passwordless: passwordlessLoginSection,
+      externalWallets: externalWalletSection,
+    };
+    const sectionVisibility = {
+      social: areSocialLoginsVisible,
+      passwordless: showPasswordLessInput,
+      externalWallets: showExternalWalletButton,
+    } as Record<ModalSignInMethodType, boolean>;
+    const signInMethods = socialLoginsConfig.uiConfig?.signInMethods || ["social", "passwordless", "externalWallets"];
+
+    // add missing signInMethods in case uiConfig.signInMethods is not set correctly
+    Object.entries(sectionVisibility).forEach(([method, visibility]) => {
+      if (visibility && !signInMethods.includes(method as ModalSignInMethodType)) {
+        signInMethods.push(method as ModalSignInMethodType);
+      }
+    });
+    const sections = signInMethods.map((method) => sectionVisibility[method] && sectionMap[method]()).filter(Boolean);
+
+    // add delimiter between external wallets and other sections
+    if (sections.length === 3) {
+      const externalWalletIndex = signInMethods.findIndex((section) => section === "externalWallets");
+      if (externalWalletIndex === 0) {
+        // add after it
+        sections.splice(1, 0, delimiter(1));
+      } else if (externalWalletIndex === 1) {
+        // add before it
+        sections.splice(1, 0, delimiter(1));
+        // add after it
+        sections.splice(3, 0, delimiter(2));
+      } else if (externalWalletIndex === 2) {
+        // add before it
+        sections.splice(2, 0, delimiter(1));
+      }
+    } else if (sections.length === 2) {
+      if (sectionVisibility["externalWallets"]) {
+        sections.splice(1, 0, delimiter(1));
+      }
+    }
+
+    return sections;
+  };
+
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2 w3a--p-4">
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
+      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10" key="login-header">
         <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
           <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
         <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
       </div>
 
-      {expand && (
-        <SocialLoginList
-          otherRow={otherRow}
-          isDark={isDark}
-          visibleRow={visibleRow}
-          canShowMore={canShowMore}
-          handleSocialLoginClick={handleSocialLoginClick}
-          socialLoginsConfig={socialLoginsConfig}
-          handleExpandSocialLogins={handleExpand}
-        />
-      )}
+      {/* DEFAULT VIEW */}
+      {!expand && defaultView()}
 
-      {!expand && areSocialLoginsVisible && (
-        <SocialLoginList
-          otherRow={[]}
-          isDark={isDark}
-          visibleRow={visibleRow}
-          canShowMore={canShowMore}
-          handleSocialLoginClick={handleSocialLoginClick}
-          socialLoginsConfig={socialLoginsConfig}
-          handleExpandSocialLogins={handleExpand}
-        />
-      )}
-
-      {!expand && showPasswordLessInput && (
-        <LoginPasswordLess
-          isModalVisible={isModalVisible}
-          isPasswordLessCtaClicked={isPasswordLessCtaClicked}
-          setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
-          title={title}
-          fieldValue={fieldValue}
-          handleInputChange={handleInputChange}
-          placeholder={placeholder}
-          handleFormSubmit={handleFormSubmit}
-          invalidInputErrorMessage={invalidInputErrorMessage}
-          isValidInput={isValidInput}
-          isDark={isDark}
-        />
-      )}
-
-      {/* "OR" DELIMITER */}
-      {!expand && showExternalWalletButton && (areSocialLoginsVisible || showPasswordLessInput) && (
-        <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
-          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-          <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
-          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-        </div>
-      )}
-
-      {/* INSTALLED EXTERNAL WALLETS */}
-      {!expand &&
-        showExternalWalletButton &&
-        installedExternalWalletConfig.length > 0 &&
-        installedExternalWalletConfig.map((wallet) => (
-          <button
-            key={wallet.name}
-            type="button"
-            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")}
-            onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
-          >
-            <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
-            <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-              <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
-                <Image
-                  imageId={`login-${wallet.name}`}
-                  hoverImageId={`login-${wallet.name}`}
-                  fallbackImageId="wallet"
-                  height="24"
-                  width="24"
-                  isButton
-                  extension={wallet.imgExtension || "webp"}
-                />
-              </figure>
-            </div>
-          </button>
-        ))}
-
-      {/* EXTERNAL WALLETS DISCOVERY */}
-      {!expand && showExternalWalletButton && (
-        <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
-          <div
-            id="external-wallet-count"
-            className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
-          >
-            {totalExternalWallets - 1}+
-          </div>
-          <img
-            id="external-wallet-arrow"
-            className="w3a--icon-animation"
-            src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
-            alt="arrow"
-          />
-        </button>
-      )}
+      {/* EXPANDED VIEW */}
+      {expand && socialLoginSection(otherRow)}
     </div>
   );
 }

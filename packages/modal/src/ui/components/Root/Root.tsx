@@ -28,6 +28,8 @@ function Root(props: RootProps) {
     handleSocialLoginClick,
     showPasswordLessInput,
     showExternalWalletButton,
+    showExternalWalletCount,
+    showInstalledExternalWallets,
     socialLoginsConfig,
     areSocialLoginsVisible,
     isEmailPrimary,
@@ -350,6 +352,8 @@ function Root(props: RootProps) {
                     isDark={isDark}
                     showPasswordLessInput={showPasswordLessInput}
                     showExternalWalletButton={showExternalWalletButton}
+                    showExternalWalletCount={showExternalWalletCount}
+                    showInstalledExternalWallets={showInstalledExternalWallets}
                     handleSocialLoginClick={handleSocialLoginClick}
                     socialLoginsConfig={socialLoginsConfig}
                     areSocialLoginsVisible={areSocialLoginsVisible}

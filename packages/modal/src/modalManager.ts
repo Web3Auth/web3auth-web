@@ -64,6 +64,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig || {});
 
     // init config
     super.initAccountAbstractionConfig(projectConfig);
@@ -206,21 +207,27 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const filteredConnectors = connectors.filter((x) => filteredConnectorNames.includes(x.name));
     if (hasInAppConnectors) {
       await this.initInAppAndCachedConnectors(filteredConnectors);
-      // show connect button if external wallets are available
-      if (hasExternalConnectors) {
+    }
+    if (hasExternalConnectors) {
+      this.loginModal.setExternalWalletConfig({
+        showExternalWalletCount: projectConfig.loginModal?.displayExternalWalletsCount ?? true,
+        showInstalledExternalWallets: projectConfig.loginModal?.displayInstalledExternalWallets ?? true,
+      });
+      if (hasInAppConnectors) {
+        // show connect button if both in-app and external wallets are available
         this.loginModal.initExternalWalletContainer();
         // initialize installed external wallets (except WC), don't mark external wallets as fully initialized
         this.initExternalConnectors(
           filteredConnectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL && x.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2),
           { externalWalletsInitialized: false, showExternalWalletsOnly: false, externalWalletsVisibility: false }
         );
+      } else {
+        // if no in app wallet is available then initialize all external wallets in modal
+        await this.initExternalConnectors(
+          filteredConnectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL),
+          { externalWalletsInitialized: true, showExternalWalletsOnly: true, externalWalletsVisibility: true }
+        );
       }
-    } else if (hasExternalConnectors) {
-      // if no in app wallet is available then initialize all external wallets in modal
-      await this.initExternalConnectors(
-        filteredConnectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL),
-        { externalWalletsInitialized: true, showExternalWalletsOnly: true, externalWalletsVisibility: true }
-      );
     }
 
     // emit ready event if connector is ready

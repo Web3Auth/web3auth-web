@@ -30,6 +30,8 @@ function Widget(props: WidgetProps) {
     externalWalletsVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
     hasExternalWallets: false,
+    showExternalWalletCount: true,
+    showInstalledExternalWallets: true,
     externalWalletsInitialized: false,
     modalVisibility: false,
     modalVisibilityDelayed: false,
@@ -112,6 +114,8 @@ function Widget(props: WidgetProps) {
     [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
   );
   const showExternalWalletButton = useMemo(() => modalState.hasExternalWallets, [modalState]);
+  const showExternalWalletCount = useMemo(() => modalState.showExternalWalletCount, [modalState]);
+  const showInstalledExternalWallets = useMemo(() => modalState.showInstalledExternalWallets, [modalState]);
   const showExternalWalletPage = useMemo(
     () => (areSocialLoginsVisible || showPasswordLessInput) && !modalState.externalWalletsVisibility,
     [areSocialLoginsVisible, showPasswordLessInput, modalState]
@@ -188,6 +192,8 @@ function Widget(props: WidgetProps) {
             walletRegistry={walletRegistry}
             showPasswordLessInput={showPasswordLessInput}
             showExternalWalletButton={showExternalWalletButton}
+            showExternalWalletCount={showExternalWalletCount}
+            showInstalledExternalWallets={showInstalledExternalWallets}
             handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
             socialLoginsConfig={modalState.socialLoginsConfig}
             areSocialLoginsVisible={areSocialLoginsVisible}
@@ -217,6 +223,8 @@ function Widget(props: WidgetProps) {
           appName={appName}
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
+          showExternalWalletCount={showExternalWalletCount}
+          showInstalledExternalWallets={showInstalledExternalWallets}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
           socialLoginsConfig={modalState.socialLoginsConfig}
           areSocialLoginsVisible={areSocialLoginsVisible}

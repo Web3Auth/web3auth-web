@@ -302,6 +302,13 @@ export class LoginModal {
     });
   };
 
+  setExternalWalletConfig = (config: { showExternalWalletCount: boolean; showInstalledExternalWallets: boolean }) => {
+    this.setState({
+      showExternalWalletCount: config.showExternalWalletCount,
+      showInstalledExternalWallets: config.showInstalledExternalWallets,
+    });
+  };
+
   private handleShowExternalWallets = (status: boolean) => {
     if (this.callbacks.onInitExternalWallets) {
       this.callbacks.onInitExternalWallets({ externalWalletsInitialized: status });

@@ -7,6 +7,8 @@ export interface LoginProps {
   appName?: string;
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
+  showExternalWalletCount: boolean;
+  showInstalledExternalWallets: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   installedExternalWalletConfig: ExternalButton[];
   areSocialLoginsVisible: boolean;
