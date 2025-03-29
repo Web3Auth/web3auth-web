@@ -308,7 +308,7 @@ function Login(props: LoginProps) {
         {/* EXTERNAL WALLETS DISCOVERY */}
         {
           <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
+            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
             {showExternalWalletCount && (
               <div
                 id="external-wallet-count"

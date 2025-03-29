@@ -7,6 +7,7 @@
     "errors-invalid-number": "유효하지 않은 전화번호",
     "errors-invalid-number-email": "유효하지 않은 이메일 또는 전화번호",
     "errors-required": "필수",
+    "external.all-wallets": "모든 지갑",
     "external.back": "뒤로",
     "external.connect": "지갑으로 계속하기",
     "external.search-text": "지갑이 보이지 않나요?",

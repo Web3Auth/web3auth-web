@@ -7,6 +7,7 @@
     "errors-invalid-number": "Número de teléfono no válido",
     "errors-invalid-number-email": "Correo electrónico o número de teléfono no válido",
     "errors-required": "Campo obligatorio",
+    "external.all-wallets": "Todas las billeteras",
     "external.back": "Atrás",
     "external.connect": "Conectar con la billetera",
     "external.search-text": "¿No ves tu billetera?",

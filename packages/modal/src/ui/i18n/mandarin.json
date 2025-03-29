@@ -7,6 +7,7 @@
     "errors-invalid-number": "电话号码无效",
     "errors-invalid-number-email": "无效的电子邮件或电话号码",
     "errors-required": "必填",
+    "external.all-wallets": "所有钱包",
     "external.back": "返回",
     "external.connect": "继续使用钱包",
     "external.search-text": "没看到你的钱包吗？",

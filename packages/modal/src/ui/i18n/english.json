@@ -7,6 +7,7 @@
     "errors-invalid-number": "Invalid Phone Number",
     "errors-invalid-number-email": "Invalid Email or Phone Number",
     "errors-required": "Required",
+    "external.all-wallets": "All Wallets",
     "external.back": "Back",
     "external.connect": "Continue with a wallet",
     "external.search-text": "Don't see your wallet?",

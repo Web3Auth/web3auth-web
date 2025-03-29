@@ -7,6 +7,7 @@
     "errors-invalid-number": "無効な電話番号",
     "errors-invalid-number-email": "無効なメールアドレスまたは電話番号",
     "errors-required": "必須",
+    "external.all-wallets": "すべてのウォレット",
     "external.back": "戻る",
     "external.connect": "ウォレットを続ける",
     "external.search-text": "財布が見えませんか？",

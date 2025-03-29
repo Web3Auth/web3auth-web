@@ -7,6 +7,7 @@
     "errors-invalid-number": "Número de telefone inválido",
     "errors-invalid-number-email": "Email ou número de telefone inválido",
     "errors-required": "Obrigatório",
+    "external.all-wallets": "Todas as carteiras",
     "external.back": "Voltar",
     "external.connect": "Continuar com uma carteira",
     "external.search-text": "Não vê sua carteira?",
