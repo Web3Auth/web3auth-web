@@ -6,6 +6,7 @@ import { capitalizeFirstLetter } from "../../config";
 import { rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
+import Image from "../Image";
 import SocialLoginList from "../SocialLoginList/SocialLoginList";
 import { LoginProps } from "./Login.type";
 import LoginOtp from "./LoginOtp";
@@ -27,6 +28,7 @@ function Login(props: LoginProps) {
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
+    installedExternalWalletConfig,
     isDark,
     // isEmailPrimary,
     // isExternalPrimary,
@@ -35,6 +37,7 @@ function Login(props: LoginProps) {
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
+    handleInstalledExternalWalletClick,
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
@@ -231,7 +234,7 @@ function Login(props: LoginProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
         <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
           <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
@@ -287,6 +290,35 @@ function Login(props: LoginProps) {
         </div>
       )}
 
+      {/* INSTALLED EXTERNAL WALLETS */}
+      {!expand &&
+        showExternalWalletButton &&
+        installedExternalWalletConfig.length > 0 &&
+        installedExternalWalletConfig.map((wallet) => (
+          <button
+            key={wallet.name}
+            type="button"
+            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")}
+            onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
+          >
+            <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
+            <div className="w3a--flex w3a--items-center w3a--gap-x-2">
+              <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
+                <Image
+                  imageId={`login-${wallet.name}`}
+                  hoverImageId={`login-${wallet.name}`}
+                  fallbackImageId="wallet"
+                  height="24"
+                  width="24"
+                  isButton
+                  extension={wallet.imgExtension || "webp"}
+                />
+              </figure>
+            </div>
+          </button>
+        ))}
+
+      {/* EXTERNAL WALLETS DISCOVERY */}
       {!expand && showExternalWalletButton && (
         <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
           <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>

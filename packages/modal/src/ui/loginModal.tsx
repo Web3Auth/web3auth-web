@@ -265,12 +265,15 @@ export class LoginModal {
     log.info("addSocialLogins", connector, loginMethods, loginMethodsOrder, uiConfig);
   };
 
-  addWalletLogins = (externalWalletsConfig: Record<string, BaseConnectorConfig>, options: { showExternalWalletsOnly: boolean }): void => {
+  addWalletLogins = (
+    externalWalletsConfig: Record<string, BaseConnectorConfig>,
+    options?: { externalWalletsInitialized: boolean; externalWalletsVisibility: boolean; showExternalWalletsOnly: boolean }
+  ): void => {
     this.setState({
       externalWalletsConfig,
-      externalWalletsInitialized: true,
-      showExternalWalletsOnly: !!options?.showExternalWalletsOnly,
-      externalWalletsVisibility: true,
+      externalWalletsInitialized: !!options.externalWalletsInitialized,
+      showExternalWalletsOnly: !!options.showExternalWalletsOnly,
+      externalWalletsVisibility: !!options.externalWalletsVisibility,
     });
   };
 

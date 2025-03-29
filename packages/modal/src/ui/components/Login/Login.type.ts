@@ -1,4 +1,4 @@
-import { SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { ExternalButton, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
   isModalVisible: boolean;
@@ -8,6 +8,7 @@ export interface LoginProps {
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
   socialLoginsConfig: SocialLoginsConfig;
+  installedExternalWalletConfig: ExternalButton[];
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;
@@ -15,6 +16,7 @@ export interface LoginProps {
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
+  handleInstalledExternalWalletClick?: (params: { connector: string }) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleSocialLoginHeight: () => void;
 }

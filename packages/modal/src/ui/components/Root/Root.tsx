@@ -259,6 +259,21 @@ function Root(props: RootProps) {
     }, [] as ExternalButton[]);
   }, [config, adapterVisibilityMap]);
 
+  const installedConnectorButtons = useMemo(() => {
+    return Object.keys(config).reduce((acc, connector) => {
+      if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) && adapterVisibilityMap[connector]) {
+        acc.push({
+          name: connector,
+          displayName: config[connector].label || connector,
+          hasInjectedWallet: false,
+          hasWalletConnect: false,
+          hasInstallLinks: false,
+        });
+      }
+      return acc;
+    }, [] as ExternalButton[]);
+  }, [config, adapterVisibilityMap]);
+
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,7 +298,7 @@ function Root(props: RootProps) {
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
       return "642px";
     }
-    return "539px";
+    return "588px";
   }, [isWalletDetailsExpanded, modalState.currentPage, isSocialLoginsExpanded]);
 
   const contextValue = useMemo(
@@ -327,6 +342,8 @@ function Root(props: RootProps) {
                     areSocialLoginsVisible={areSocialLoginsVisible}
                     isEmailPrimary={isEmailPrimary}
                     isExternalPrimary={isExternalPrimary}
+                    installedExternalWalletConfig={installedConnectorButtons}
+                    handleInstalledExternalWalletClick={preHandleExternalWalletClick}
                     handleExternalWalletBtnClick={onExternalWalletBtnClick}
                     isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                     isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
