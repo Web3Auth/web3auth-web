@@ -17,7 +17,7 @@ import {
 import { ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
-import { PROJECT_CONFIG_RESPONSE } from "../interfaces";
+import { ProjectConfig } from "../interfaces";
 import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
@@ -83,7 +83,7 @@ export interface IConnector<T> extends SafeEventEmitter {
 }
 
 export type ConnectorParams = {
-  projectConfig?: PROJECT_CONFIG_RESPONSE;
+  projectConfig?: ProjectConfig;
   coreOptions: IWeb3AuthCoreOptions;
 };
 

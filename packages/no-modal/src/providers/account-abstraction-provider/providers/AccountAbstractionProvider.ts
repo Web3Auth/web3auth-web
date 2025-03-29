@@ -1,5 +1,5 @@
 import {
-  type AccountAbstractionConfig,
+  type AccountAbstractionMultiChainConfig,
   type BiconomySmartAccountConfig,
   type BundlerConfig,
   type ISmartAccount,
@@ -22,8 +22,7 @@ import { getProviderHandlers } from "./utils";
 
 interface AccountAbstractionProviderConfig extends BaseProviderConfig {
   smartAccountInit: ISmartAccount;
-  bundlerConfig: BundlerConfig;
-  paymasterConfig?: PaymasterConfig;
+  smartAccountChainsConfig: AccountAbstractionMultiChainConfig["chains"];
 }
 interface AccountAbstractionProviderState extends BaseProviderState {
   eoaProvider?: IProvider;
@@ -80,6 +79,11 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     const { currentChain } = this;
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
+    const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
+    if (!bundlerAndPaymasterConfig)
+      throw WalletInitializationError.invalidProviderConfigError(`Bundler and paymaster config not found for chain ${currentChain.chainId}`);
+
+    const { bundlerConfig, paymasterConfig } = bundlerAndPaymasterConfig;
     const chain = defineChain({
       id: Number.parseInt(currentChain.chainId, 16), // id in number form
       name: currentChain.displayName,
@@ -114,17 +118,17 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     });
 
     // setup bundler and paymaster
-    if (this.config.paymasterConfig) {
+    if (paymasterConfig) {
       this._paymasterClient = createPaymasterClient({
-        ...this.config.paymasterConfig,
-        transport: this.config.paymasterConfig.transport ?? http(this.config.paymasterConfig.url),
+        ...paymasterConfig,
+        transport: paymasterConfig.transport ?? http(paymasterConfig.url),
       });
     }
     this._bundlerClient = createBundlerClient({
-      ...this.config.bundlerConfig,
+      ...bundlerConfig,
       account: this.smartAccount,
       client: this._publicClient,
-      transport: this.config.bundlerConfig.transport ?? http(this.config.bundlerConfig.url),
+      transport: bundlerConfig.transport ?? http(bundlerConfig.url),
       paymaster: this._paymasterClient,
     });
 
@@ -176,13 +180,14 @@ export const accountAbstractionProvider = async ({
   chains,
   provider,
 }: {
-  accountAbstractionConfig: AccountAbstractionConfig;
+  accountAbstractionConfig: AccountAbstractionMultiChainConfig;
   chain: CustomChainConfig;
   chains: CustomChainConfig[];
   provider: IProvider;
 }) => {
   let smartAccountInit: ISmartAccount;
-  const { smartAccountType, smartAccountConfig, bundlerConfig, paymasterConfig } = accountAbstractionConfig;
+  const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
+  const { smartAccountConfig } = smartAccountChainsConfig.find((config) => config.chainId === chain.chainId) || {};
   switch (smartAccountType) {
     case SMART_ACCOUNT.BICONOMY: {
       const { BiconomySmartAccount } = await import("@toruslabs/ethereum-controllers");
@@ -217,9 +222,8 @@ export const accountAbstractionProvider = async ({
     smartAccountInit,
     chain,
     chains,
-    bundlerConfig,
-    paymasterConfig,
+    smartAccountChainsConfig,
   });
 };
 
-export { type AccountAbstractionConfig, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };
+export { type AccountAbstractionMultiChainConfig, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };

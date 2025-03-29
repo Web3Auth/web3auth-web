@@ -52,7 +52,7 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
   const [t] = useTranslation(undefined, { i18n });
 
   const walletDiscoverySupported = useMemo(() => {
-    const supported = walletRegistry && Object.keys(walletRegistry.default).length > 0 && Object.keys(walletRegistry.others).length > 0;
+    const supported = walletRegistry && (Object.keys(walletRegistry.default).length > 0 || Object.keys(walletRegistry.others).length > 0);
     return supported;
   }, [walletRegistry]);
 
@@ -102,7 +102,6 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
   useEffect(() => {
     if (walletDiscoverySupported) {
       const isWalletConnectAdapterIncluded = Object.keys(config).some((adapter) => adapter === WALLET_CONNECTORS.WALLET_CONNECT_V2);
-      const defaultButtonKeys = new Set(Object.keys(walletRegistry.default));
 
       const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
         return Object.keys(wallets).reduce((acc, wallet) => {
@@ -174,6 +173,8 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
         log.debug("filteredLists", filteredList);
         setExternalButtons(filteredList);
       } else {
+        const finalDefaultButtons = defaultButtons.length > 0 ? defaultButtons : allButtons.slice(0, 10);
+        const defaultButtonKeys = new Set(finalDefaultButtons.map((button) => button.name));
         const sortedButtons = [
           ...allButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
           ...customAdapterButtons,
@@ -239,7 +240,7 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
               {totalExternalWallets > 15 && (
                 <div className="w3a--py-4">
                   <input
-                    className="w3a--w-full w3a-text-field"
+                    className="w3a-text-field w3a--w-full"
                     name="passwordless-input"
                     required
                     value={walletSearch}
@@ -257,7 +258,7 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
 
               {/* Wallet List */}
               {externalButtons.length === 0 ? (
-                <div className="w3a--w-full w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500 w3a--py-6 w3a--flex w3a--justify-center w3a--items-center">
+                <div className="w3a--flex w3a--w-full w3a--items-center w3a--justify-center w3a--py-6 w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500">
                   {t("modal.external.no-wallets-found")}
                 </div>
               ) : (
@@ -284,7 +285,7 @@ export default function ExternalWallets(props: ExternalWalletsProps) {
                       );
                     })}
                     {totalExternalWallets > 10 && !walletSearch && (
-                      <li className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-0.5 w3a--my-4 w3a--w-full w3a--mx-auto w3a-adapter-item--full">
+                      <li className="w3a-adapter-item--full w3a--mx-auto w3a--my-4 w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-0.5">
                         <p className="w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.external.search-text")}</p>
                         <p className="w3a--text-xs w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
                           {t("modal.external.search-subtext")}

@@ -101,8 +101,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    // use a global wc project id if not provided
-    const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId || "d3c63f19f9582f8ba48e982057eb096b";
+    const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
 
     const wc2Settings = await getWalletConnectV2Settings(this.coreOptions.chains, projectId);
     if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0) {
@@ -398,18 +397,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 }
 
 export const walletConnectV2Connector = (params?: IConnectorSettings): ConnectorFn => {
-  return ({ projectConfig, coreOptions }: ConnectorParams) => {
-    let { projectId } = params?.walletConnectInitOptions || {};
-
-    // use project config if projectId is not set
-    if (projectConfig) {
-      const { wallet_connect_enabled: walletConnectEnabled, wallet_connect_project_id: walletConnectProjectId } = projectConfig;
-      if (walletConnectEnabled && walletConnectProjectId && !projectId) projectId = walletConnectProjectId;
-    }
+  return ({ coreOptions, projectConfig }: ConnectorParams) => {
+    const projectId = params?.walletConnectInitOptions?.projectId || projectConfig?.walletConnectProjectId;
 
     const connectorSettings = {
       ...params,
-      walletConnectInitOptions: { ...params?.walletConnectInitOptions, projectId },
+      walletConnectInitOptions: { ...params?.walletConnectInitOptions, projectId: projectId },
     };
 
     return new WalletConnectV2Connector({
