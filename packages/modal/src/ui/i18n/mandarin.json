@@ -13,6 +13,7 @@
     "external.search-subtext": "尝试改为搜索",
     "external.connect-wallet": "连接钱包",
     "external.continue": "继续使用外部钱包",
+    "external.continue-custom": "继续使用{{wallet}}",
     "external.dont-have": "没有",
     "external.get": "获取",
     "external.get-wallet": "获取钱包",

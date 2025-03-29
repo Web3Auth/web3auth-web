@@ -13,6 +13,7 @@
     "external.search-subtext": "Versuchen Sie es stattdessen mit der Suche",
     "external.connect-wallet": "Wallet verbinden",
     "external.continue": "Fahren Sie mit der externen Wallet fort",
+    "external.continue-custom": "Fahren Sie mit {{wallet}} fort",
     "external.dont-have": "Haben nicht",
     "external.get": "Erhalten",
     "external.get-wallet": "Wallet erhalten",

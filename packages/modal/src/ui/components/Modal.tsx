@@ -1,5 +1,5 @@
 import { AUTH_CONNECTION, type SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WalletRegistry } from "@web3auth/no-modal";
+import { ChainNamespaceType, cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WalletRegistry } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import Button from "./Button";
 import ExternalWallets from "./ExternalWallets";
 import Footer from "./Footer";
 import Header from "./Header";
+import Image from "./Image";
 // import Loader from "./Loader";
 import SocialLoginPasswordless from "./SocialLoginPasswordless";
 import SocialLogins from "./SocialLogins";
@@ -168,6 +169,25 @@ export default function Modal(props: ModalProps) {
     </div>
   );
 
+  const metamaskWalletButton = (
+    <div className="w3ajs-external-wallet w3a-group w3a--w-full">
+      <div className="w3a-external-toggle w3ajs-external-toggle">
+        <Button
+          variant={isExternalPrimary ? "primary" : "tertiary"}
+          type="button"
+          className="w3a--w-full w3ajs-external-toggle__button"
+          style={{ width: "100%" }}
+          onClick={() => {
+            preHandleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
+          }}
+        >
+          <Image imageId="login-metamask" hoverImageId="login-metamask" fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
+          <span className="ml-2">{t("modal.external.continue-custom", { wallet: "MetaMask" })}</span>
+        </Button>
+      </div>
+    </div>
+  );
+
   const areSocialLoginsVisible = useMemo(() => {
     if (modalState.showExternalWalletsOnly) return false;
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
@@ -241,6 +261,7 @@ export default function Modal(props: ModalProps) {
                     )}
 
                     {/* button to show external wallets */}
+                    {metamaskWalletButton}
                     {modalState.hasExternalWallets && externalWalletButton}
                   </div>
                 </>
