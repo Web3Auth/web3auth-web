@@ -259,8 +259,9 @@ function Root(props: RootProps) {
     }, [] as ExternalButton[]);
   }, [config, adapterVisibilityMap]);
 
-  const installedConnectorButtons = useMemo(() => {
-    return Object.keys(config).reduce((acc, connector) => {
+  const topInstalledConnectorButtons = useMemo(() => {
+    const MAX_TOP_INSTALLED_CONNECTORS = 3;
+    const installedConnectors = Object.keys(config).reduce((acc, connector) => {
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) && adapterVisibilityMap[connector]) {
         acc.push({
           name: connector,
@@ -272,6 +273,9 @@ function Root(props: RootProps) {
       }
       return acc;
     }, [] as ExternalButton[]);
+
+    // make metamask the first button and limit the number of buttons
+    return installedConnectors.sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1)).slice(0, MAX_TOP_INSTALLED_CONNECTORS);
   }, [config, adapterVisibilityMap]);
 
   const allButtons = useMemo(() => {
@@ -298,8 +302,12 @@ function Root(props: RootProps) {
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
       return "642px";
     }
-    return "588px";
-  }, [isWalletDetailsExpanded, modalState.currentPage, isSocialLoginsExpanded]);
+    if (topInstalledConnectorButtons.length > 0) {
+      const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
+      return `${maxHeight}px`;
+    }
+    return "539px";
+  }, [isWalletDetailsExpanded, modalState.currentPage, isSocialLoginsExpanded, topInstalledConnectorButtons]);
 
   const contextValue = useMemo(
     () => ({
@@ -342,7 +350,7 @@ function Root(props: RootProps) {
                     areSocialLoginsVisible={areSocialLoginsVisible}
                     isEmailPrimary={isEmailPrimary}
                     isExternalPrimary={isExternalPrimary}
-                    installedExternalWalletConfig={installedConnectorButtons}
+                    installedExternalWalletConfig={topInstalledConnectorButtons}
                     handleInstalledExternalWalletClick={preHandleExternalWalletClick}
                     handleExternalWalletBtnClick={onExternalWalletBtnClick}
                     isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
