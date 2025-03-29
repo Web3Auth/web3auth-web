@@ -150,6 +150,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (disableAllOtherWallets) {
       Object.keys(walletRegistry.others).forEach((wallet) => disabledExternalWallets.add(wallet));
     }
+    // always show MetaMask, force enable it
+    disabledExternalWallets.delete(WALLET_CONNECTORS.METAMASK);
 
     // remove wallets that are disabled in project config from wallet registry
     const filteredWalletRegistry = cloneDeep(walletRegistry);
@@ -201,24 +203,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // initialize connectors based on availability
     const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames);
+    const filteredConnectors = connectors.filter((x) => filteredConnectorNames.includes(x.name));
     if (hasInAppConnectors) {
-      await this.initInAppAndCachedConnectors(connectors, filteredConnectorNames);
+      await this.initInAppAndCachedConnectors(filteredConnectors);
       // show connect button if external wallets are available
       if (hasExternalConnectors) {
         this.loginModal.initExternalWalletContainer();
-        const showInstalledExternalWallets = true;
         // initialize installed external wallets (except WC), don't mark external wallets as fully initialized
-        if (showInstalledExternalWallets) {
-          this.initExternalConnectors(
-            connectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL && x.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2),
-            { externalWalletsInitialized: false, showExternalWalletsOnly: false, externalWalletsVisibility: false }
-          );
-        }
+        this.initExternalConnectors(
+          filteredConnectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL && x.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2),
+          { externalWalletsInitialized: false, showExternalWalletsOnly: false, externalWalletsVisibility: false }
+        );
       }
     } else if (hasExternalConnectors) {
-      // if no in app wallet is available then initialize external wallets in modal
+      // if no in app wallet is available then initialize all external wallets in modal
       await this.initExternalConnectors(
-        connectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL),
+        filteredConnectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL),
         { externalWalletsInitialized: true, showExternalWalletsOnly: true, externalWalletsVisibility: true }
       );
     }
@@ -270,10 +270,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       });
     }
 
-    // external wallets config
-    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
-    const isInstalledWalletWalletDisplayed = Boolean(projectConfig.loginModal?.displayInstalledExternalWallets ?? true);
-
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [
       ...new Set([...Object.keys(this.modalConfig.connectors || {}), ...this.connectors.map((connector) => connector.name)]),
@@ -306,11 +302,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // skip connector if it is hidden by user
       if (!connectorConfig.showOnModal) return;
 
-      // skip external connector if external wallets are disabled or it is disabled or displayInstalledExternalWallets is false
-      if (connector.type === CONNECTOR_CATEGORY.EXTERNAL) {
+      // skip external connector if external wallets are disabled except for MetaMask
+      const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
+      if (connector.type === CONNECTOR_CATEGORY.EXTERNAL && connector.name !== WALLET_CONNECTORS.METAMASK) {
         if (!isExternalWalletEnabled) return;
         if (disabledExternalWallets.has(connectorName)) return;
-        if (!isInstalledWalletWalletDisplayed) return;
       }
 
       // skip WC connector if external wallets are disabled or hideWalletDiscovery is true
@@ -346,11 +342,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return { hasInAppConnectors, hasExternalConnectors };
   }
 
-  private async initInAppAndCachedConnectors(connectors: IConnector<unknown>[], connectorNames: string[]) {
+  private async initInAppAndCachedConnectors(connectors: IConnector<unknown>[]) {
     await Promise.all(
-      connectorNames.map(async (connectorName) => {
-        const connector = connectors.find((x) => x.name === connectorName);
-        if (!connector) return;
+      connectors.map(async (connector) => {
+        const connectorName = connector.name;
         try {
           // skip if connector is already initialized
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
@@ -397,11 +392,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     externalConnectors.forEach(async (connector) => {
       const connectorName = connector.name;
       log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
-      // we are not initializing cached connector here as it is already being initialized in initModal before.
-      if (this.cachedConnector === connectorName) {
-        return;
-      }
       if (connector.status === CONNECTOR_STATUS.NOT_READY) {
+        // we are not initializing cached connector here as it is already being initialized in initModal before.
+        if (this.cachedConnector === connectorName) return;
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
@@ -433,8 +426,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private onInitExternalWallets = async (params: { externalWalletsInitialized: boolean }): Promise<void> => {
     if (params.externalWalletsInitialized) return;
+    // initialize WC connector only as other external wallets are initialized in initModal
     await this.initExternalConnectors(
-      this.connectors.filter((x) => x.type === CONNECTOR_CATEGORY.EXTERNAL),
+      this.connectors.filter((x) => x.name === WALLET_CONNECTORS.WALLET_CONNECT_V2),
       { externalWalletsInitialized: true, externalWalletsVisibility: true }
     );
   };

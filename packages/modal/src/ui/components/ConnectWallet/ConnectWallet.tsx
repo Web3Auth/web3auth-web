@@ -1,4 +1,4 @@
-import { EVM_CONNECTORS, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
