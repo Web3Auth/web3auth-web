@@ -3,7 +3,7 @@ import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { SMART_ACCOUNT_WALLET_SCOPE } from "./connector";
+import { SMART_ACCOUNT_WALLET_SCOPE } from "./constants";
 
 export interface WhitelistResponse {
   urls: string[];
