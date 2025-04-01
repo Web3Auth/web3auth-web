@@ -9,7 +9,7 @@ export const formDataStore = reactive<FormData>({
   network: WEB3AUTH_NETWORK.TESTNET,
   chainNamespaces: [CHAIN_NAMESPACES.EIP155],
   chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.EIP155][1]],
-  defaultChainId: chainConfigs[CHAIN_NAMESPACES.EIP155][0],
+  defaultChainId: undefined,
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,
@@ -29,6 +29,8 @@ export const formDataStore = reactive<FormData>({
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
   smartAccountType: "safe", // default smart account type to safe
+  smartAccountChains: [],
+  smartAccountChainsConfig: {},
   widget: "modal",
   targetId: "w3a-parent-test-container",
 });

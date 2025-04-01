@@ -13,6 +13,7 @@
     "external.search-subtext": "代わりに検索してみてください",
     "external.connect-wallet": "ウォレットを接続",
     "external.continue": "外部ウォレットを続行する",
+    "external.continue-custom": "{{wallet}}を続けます",
     "external.dont-have": "持っていない",
     "external.get": "取得",
     "external.get-wallet": "ウォレットを取得",

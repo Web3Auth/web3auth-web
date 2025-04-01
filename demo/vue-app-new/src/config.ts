@@ -1,4 +1,4 @@
-import { LANGUAGE_TYPE, LANGUAGES, AUTH_CONNECTION, AUTH_CONNECTION_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -35,7 +35,7 @@ export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
 
 export const initWhiteLabel: WhiteLabelData = {
   appName: "HelloDemo",
-  appUrl: "http://localhost:8080",
+  appUrl: window.location.origin,
   logoDark: "https://images.web3auth.io/example-hello.svg", // dark logo for light background
   logoLight: "https://images.web3auth.io/example-hello-light.svg", // light logo for dark background
   mode: "auto",
@@ -102,7 +102,7 @@ export type FormData = {
   network: WEB3AUTH_NETWORK_TYPE;
   chainNamespaces: ChainNamespaceType[];
   chains: string[];
-  defaultChainId: string;
+  defaultChainId?: string;
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
@@ -122,8 +122,8 @@ export type FormData = {
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
-  bundlerUrl?: string;
-  paymasterUrl?: string;
+  smartAccountChains: string[];
+  smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
   widget?: "embed" | "modal";
   targetId?: string;
 };

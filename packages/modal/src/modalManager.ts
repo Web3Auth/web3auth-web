@@ -1,8 +1,8 @@
 import {
-  AUTH_CONNECTION,
+  type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
   type BaseConnectorConfig,
-  ChainNamespaceType,
+  type ChainNamespaceType,
   cloneDeep,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -10,12 +10,12 @@ import {
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
-  IConnector,
+  type IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
   log,
   type LoginMethodConfig,
-  type PROJECT_CONFIG_RESPONSE,
+  type ProjectConfig,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -26,15 +26,7 @@ import deepmerge from "deepmerge";
 
 import { defaultConnectorsModalConfig, walletRegistryUrl } from "./config";
 import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig } from "./interface";
-import {
-  AUTH_PROVIDERS,
-  capitalizeFirstLetter,
-  getConnectorSocialLogins,
-  getUserLanguage,
-  LOGIN_MODAL_EVENTS,
-  LoginModal,
-  type UIConfig,
-} from "./ui";
+import { AUTH_PROVIDERS, capitalizeFirstLetter, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, type UIConfig } from "./ui";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -67,20 +59,25 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   public async initModal(): Promise<void> {
     super.checkInitRequirements();
-    super.initCachedConnectorAndChainId();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
 
+    // init config
+    super.initAccountAbstractionConfig(projectConfig);
+    super.initChainsConfig(projectConfig);
+    super.initCachedConnectorAndChainId();
+
     // init login modal
+    const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
     this.loginModal = new LoginModal(
       {
         ...this.options.uiConfig,
         connectorListener: this,
         chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
-        walletRegistry,
+        walletRegistry: filteredWalletRegistry,
       },
       {
         onInitExternalWallets: this.onInitExternalWallets,
@@ -96,7 +93,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) =>
-      this.initConnectors({ connectors: newConnectors, projectConfig })
+      this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets })
     );
     await this.loadConnectors({ projectConfig });
 
@@ -139,9 +136,33 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
+  private filterWalletRegistry(
+    walletRegistry: WalletRegistry,
+    projectConfig: ProjectConfig
+  ): { disabledExternalWallets: Set<string>; filteredWalletRegistry: WalletRegistry } {
+    const { disableAllRecommendedWallets, disableAllOtherWallets, disabledWallets } = projectConfig.externalWalletAuth || {};
+
+    // add disabled wallets to set
+    const disabledExternalWallets = new Set(disabledWallets || []);
+    if (disableAllRecommendedWallets) {
+      Object.keys(walletRegistry.default).forEach((wallet) => disabledExternalWallets.add(wallet));
+    }
+    if (disableAllOtherWallets) {
+      Object.keys(walletRegistry.others).forEach((wallet) => disabledExternalWallets.add(wallet));
+    }
+
+    // remove wallets that are disabled in project config from wallet registry
+    const filteredWalletRegistry = cloneDeep(walletRegistry);
+    disabledExternalWallets.forEach((wallet) => {
+      delete filteredWalletRegistry.default[wallet];
+      delete filteredWalletRegistry.others[wallet];
+    });
+    return { disabledExternalWallets, filteredWalletRegistry };
+  }
+
   private async getProjectAndWalletConfig() {
     // get project config
-    let projectConfig: PROJECT_CONFIG_RESPONSE;
+    let projectConfig: ProjectConfig;
     try {
       projectConfig = await fetchProjectConfig(
         this.options.clientId,
@@ -155,7 +176,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
-    if (!this.modalConfig?.hideWalletDiscovery) {
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
+    if (isExternalWalletEnabled && !this.modalConfig?.hideWalletDiscovery) {
       try {
         walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
       } catch (e) {
@@ -165,9 +187,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return { projectConfig, walletRegistry };
   }
 
-  private async initConnectors({ connectors, projectConfig }: { connectors: IConnector<unknown>[]; projectConfig: PROJECT_CONFIG_RESPONSE }) {
+  private async initConnectors({
+    connectors,
+    projectConfig,
+    disabledExternalWallets,
+  }: {
+    connectors: IConnector<unknown>[];
+    projectConfig: ProjectConfig;
+    disabledExternalWallets: Set<string>;
+  }) {
     // filter connectors based on config
-    const filteredConnectorNames = await this.filterConnectors(projectConfig);
+    const filteredConnectorNames = await this.filterConnectors({ projectConfig, disabledExternalWallets });
 
     // initialize connectors based on availability
     const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames);
@@ -187,37 +217,55 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  private async filterConnectors(projectConfig: PROJECT_CONFIG_RESPONSE): Promise<string[]> {
-    // update auth connector config
-    const { sms_otp_enabled: smsOtpEnabled } = projectConfig;
-    if (smsOtpEnabled !== undefined) {
-      // TODO: use the new login config method
-      const connectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
-        [WALLET_CONNECTORS.AUTH]: {
-          label: WALLET_CONNECTORS.AUTH,
-          loginMethods: {
-            [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
-              name: AUTH_CONNECTION.SMS_PASSWORDLESS,
-              showOnModal: smsOtpEnabled,
-              showOnDesktop: smsOtpEnabled,
-              showOnMobile: smsOtpEnabled,
-            },
-          },
-        },
+  private async filterConnectors({
+    projectConfig,
+    disabledExternalWallets,
+  }: {
+    projectConfig: ProjectConfig;
+    disabledExternalWallets: Set<string>;
+  }): Promise<string[]> {
+    // Auth connector config: merge code config with config from dashboard
+    const loginMethods: LoginMethodConfig = {};
+    for (const authConnectionConfig of projectConfig.embeddedWalletAuth || []) {
+      const { isDefault, authConnectionId, groupedAuthConnectionId, authConnection } = authConnectionConfig;
+      // for custom auth connections, authConnectionId or groupedAuthConnectionId are required.
+      if (!isDefault && (!authConnectionId || !groupedAuthConnectionId)) return;
+
+      loginMethods[authConnection] = {
+        name: authConnection,
+        ...authConnectionConfig,
+        showOnModal: true,
+        showOnDesktop: true,
+        showOnMobile: true,
       };
-      if (!this.modalConfig?.connectors) this.modalConfig = { connectors: {} };
-      const localSmsOtpEnabled = this.modalConfig.connectors[WALLET_CONNECTORS.AUTH]?.loginMethods?.[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
-      if (localSmsOtpEnabled === true && smsOtpEnabled === false) {
-        throw WalletInitializationError.invalidParams("must enable sms otp on dashboard in order to utilise it");
-      }
-      this.modalConfig.connectors = deepmerge(connectorConfig, cloneDeep(this.modalConfig.connectors));
     }
+    const dashboardConnectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
+      [WALLET_CONNECTORS.AUTH]: { label: WALLET_CONNECTORS.AUTH, loginMethods },
+    };
+    if (this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]) {
+      if (!this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods) this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods = {};
+    }
+    this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
+    // TODO: validate modal connector config here.!!
+
+    if (this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]?.loginMethods) {
+      const authProviders = new Set(AUTH_PROVIDERS);
+      Object.keys(this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods).forEach((key) => {
+        if (!authProviders.has(key as AUTH_CONNECTION_TYPE)) {
+          throw WalletInitializationError.invalidParams(`Invalid auth connection: ${key}`);
+        }
+      });
+    }
+
+    // external wallets config
+    const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
+    const isInstalledWalletWalletDisplayed = Boolean(projectConfig.loginModal?.displayInstalledExternalWallets ?? true);
 
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [
       ...new Set([...Object.keys(this.modalConfig.connectors || {}), ...this.connectors.map((connector) => connector.name)]),
     ];
-    const connectorConfigurationPromises = allConnectorNames.map(async (connectorName: string) => {
+    const connectorNames = allConnectorNames.map((connectorName: string) => {
       // start with the default config of connector.
       const defaultConnectorConfig = {
         label: CONNECTOR_NAMES[connectorName] || connectorName.split("-").map(capitalizeFirstLetter).join(" "),
@@ -235,35 +283,33 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const connector = this.getConnector(connectorName);
       log.debug("connector config", connectorName, this.modalConfig.connectors?.[connectorName]?.showOnModal, connector);
 
-      // if connector is not custom configured then check if it is available in default connectors.
-      // and if connector is not hidden by user
-      if (!connector && this.modalConfig.connectors?.[connectorName].showOnModal) {
-        throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
-      } else if (
-        connector?.type === CONNECTOR_CATEGORY.IN_APP ||
-        connector?.type === CONNECTOR_CATEGORY.EXTERNAL ||
-        connectorName === this.cachedConnector
-      ) {
-        if (!this.modalConfig.connectors?.[connectorName]?.showOnModal) return;
-        if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-          const { wallet_connect_enabled: walletConnectEnabled } = projectConfig;
-          if (walletConnectEnabled === false) {
-            // override user specified config by hiding wallet connect
-            this.modalConfig.connectors = {
-              ...(this.modalConfig.connectors ?? {}),
-              [WALLET_CONNECTORS.WALLET_CONNECT_V2]: {
-                ...(this.modalConfig.connectors?.[WALLET_CONNECTORS.WALLET_CONNECT_V2] ?? {}),
-                showOnModal: false,
-              },
-            } as Record<string, ModalConfig>;
-            this.modalConfig.connectors[WALLET_CONNECTORS.WALLET_CONNECT_V2].showOnModal = false;
-          }
-        }
-
-        return connectorName;
+      // check if connector is configured/added by user and exist in connectors map.
+      const connectorConfig = this.modalConfig.connectors?.[connectorName];
+      if (!connector) {
+        if (connectorConfig.showOnModal) throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
+        return;
       }
+
+      // skip connector if it is hidden by user
+      if (!connectorConfig.showOnModal) return;
+
+      // skip external connector if external wallets are disabled or it is disabled or displayInstalledExternalWallets is false
+      if (connector.type === CONNECTOR_CATEGORY.EXTERNAL) {
+        if (!isExternalWalletEnabled) return;
+        if (disabledExternalWallets.has(connectorName)) return;
+        if (!isInstalledWalletWalletDisplayed) return;
+      }
+
+      // skip WC connector if external wallets are disabled or hideWalletDiscovery is true
+      if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+        if (!isExternalWalletEnabled) return;
+        if (this.modalConfig?.hideWalletDiscovery) return;
+      }
+
+      this.modalConfig.connectors[connectorName] = connectorConfig;
+      return connectorName;
     });
-    const connectorNames = await Promise.all(connectorConfigurationPromises);
+    // const connectorNames = await Promise.all(connectorConfigurationPromises);
     return connectorNames.filter((name) => name !== undefined);
   }
 
@@ -274,19 +320,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (connector.type !== CONNECTOR_CATEGORY.IN_APP) return false;
       if (this.modalConfig.connectors?.[connector.name]?.showOnModal !== true) return false;
       if (!this.modalConfig.connectors?.[connector.name]?.loginMethods) return true;
-      const mergedLoginMethods = getConnectorSocialLogins(
-        connector.name,
-        (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connector.name]?.loginMethods
-      );
-      if (Object.values(mergedLoginMethods).some((method: LoginMethodConfig[keyof LoginMethodConfig]) => method.showOnModal)) return true;
+      if (Object.values(this.modalConfig.connectors[connector.name].loginMethods).some((method) => method.showOnModal)) return true;
       return false;
     });
     log.debug(hasInAppConnectors, this.connectors, connectorNames, "hasInAppWallets");
 
     // check if external connectors are available
     const hasExternalConnectors = connectorNames.some((connectorName) => {
-      // if wallet connect connector is available but hideWalletDiscovery is true then don't consider it as external wallet
-      if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 && this.modalConfig?.hideWalletDiscovery) return false;
+      if (connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) return true;
       return this.getConnector(connectorName)?.type === CONNECTOR_CATEGORY.EXTERNAL && this.modalConfig.connectors?.[connectorName].showOnModal;
     });
     return { hasInAppConnectors, hasExternalConnectors };
@@ -302,7 +343,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
           // only initialize a external connectors here if it is a cached connector.
-          if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
+          if (
+            this.cachedConnector !== connectorName &&
+            connectorName !== WALLET_CONNECTORS.METAMASK &&
+            connector.type === CONNECTOR_CATEGORY.EXTERNAL
+          )
+            return;
 
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
@@ -315,10 +361,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // adding it later if no in-app wallets are available.
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
             log.info("connectorInitResults", connectorName);
-            const loginMethods = getConnectorSocialLogins(
-              connectorName,
-              (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName]?.loginMethods
-            );
+            const loginMethods = this.modalConfig.connectors[connectorName]?.loginMethods || {};
             this.loginModal.addSocialLogins(connectorName, loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
               ...this.options.uiConfig,
               loginGridCol: this.options.uiConfig?.loginGridCol || 3,

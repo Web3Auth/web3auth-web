@@ -8,6 +8,7 @@ import {
   chainNamespaceOptions,
   clientIds,
   confirmationStrategyOptions,
+  getDefaultBundlerUrl,
   languageOptions,
   loginProviderOptions,
   networkOptions,
@@ -40,13 +41,18 @@ const defaultChainOptions = computed(() => {
   return formData.chains.map((chain) => ({ name: chain, value: chain }));
 });
 
+const aaSupportedChains = computed(() => {
+  return formData.chains.map((chainId) => {
+    return getChainConfig(CHAIN_NAMESPACES.EIP155, chainId, clientIds[formData.network]);
+  }).filter((chainConfig) => chainConfig).map((chainConfig) => ({ name: `${chainConfig!.chainId} ${chainConfig!.displayName}`, value: chainConfig!.chainId }));
+});
+
 const adapterOptions = computed(() =>
   formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
     ? [
         { name: "coinbase-adapter", value: "coinbase" },
-        { name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" },
       ]
-    : [{ name: "wallet-connect-v2-adapter", value: "wallet-connect-v2" }]
+    : []
 );
 
 const isDisplay = (_name: string): boolean => {
@@ -68,6 +74,7 @@ const isDisabled = (name: string): boolean => {
       return !isInitialized.value;
 
     case "smartAccountType":
+    case "smartAccountChains":
     case "bundlerUrl":
     case "paymasterUrl":
     case "useAAWithExternalWallet":
@@ -91,8 +98,31 @@ const isActiveTab = (index: number) => activeTab.value === index;
 const onChainNamespaceChange = (value: string[]) => {
   log.info("onChainNamespaceChange", value);
   formData.chains = value.map((namespace) => chainConfigs[namespace as ChainNamespaceType][0]);
-  formData.defaultChainId = formData.chains[0];
+  onChainChange(formData.chains);
   formData.connectors = [];
+};
+
+const onChainChange = (chainIds: string[]) => {
+  log.info("onChainChange", chainIds);
+  // update default chain Id if not found in the new chains
+  if (formData.defaultChainId && chainIds.includes(formData.defaultChainId)) {
+    formData.defaultChainId = chainIds[0];
+  }
+  // update smart account chains if not found in the new chains
+  formData.smartAccountChains = formData.smartAccountChains.filter((chain) => chainIds.includes(chain));
+};
+
+const onSmartAccountChainChange = (chainIds: string[]) => {
+  log.info("onSmartAccountChainChange", chainIds);
+  formData.smartAccountChainsConfig = {};
+  for (const chainId of chainIds) {
+    if (!formData.smartAccountChainsConfig[chainId]) {
+      formData.smartAccountChainsConfig[chainId] = {
+        bundlerUrl: getDefaultBundlerUrl(chainId),
+        paymasterUrl: "",
+      };
+    }
+  }
 };
 </script>
 
@@ -445,20 +475,36 @@ const onChainNamespaceChange = (value: string[]) => {
             :options="SmartAccountOptions"
             :disabled="isDisabled('smartAccountType')"
           />
-          <TextField
-            v-model="formData.bundlerUrl"
-            :label="$t('app.accountAbstractionProvider.bundlerUrl')"
-            :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
-            :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
-            :disabled="isDisabled('bundlerUrl')"
+          <Select
+            v-model="formData.smartAccountChains"
+            data-testid="selectSmartAccountChains"
+            :label="$t('app.chains')"
+            :aria-label="$t('app.chains')"
+            :placeholder="$t('app.chains')"
+            :options="aaSupportedChains"
+            multiple
+            :disabled="isDisabled('smartAccountChains')"
+            @update:model-value="onSmartAccountChainChange"
           />
-          <TextField
-            v-model="formData.paymasterUrl"
-            :label="$t('app.accountAbstractionProvider.paymasterUrl')"
-            :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
-            :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
-            :disabled="isDisabled('paymasterUrl')"
-          />
+          <Card v-for="c in formData.smartAccountChains" :key="c" :shadow="false" class="gap-2 px-4 py-4">
+            <div class="font-bold leading-tight text-left sm:col-span-2">{{ c }}</div>
+            <TextField
+              class="mt-3"
+              v-model="formData.smartAccountChainsConfig[c].bundlerUrl"
+              :label="$t('app.accountAbstractionProvider.bundlerUrl')"
+              :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
+              :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
+              :disabled="isDisabled('bundlerUrl')"
+            />
+            <TextField
+              class="mt-3"
+              v-model="formData.smartAccountChainsConfig[c].paymasterUrl"
+              :label="$t('app.accountAbstractionProvider.paymasterUrl')"
+              :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
+              :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
+              :disabled="isDisabled('paymasterUrl')"
+            />
+          </Card>
         </Card>
         <div class="flex justify-center mt-5">
           <Button

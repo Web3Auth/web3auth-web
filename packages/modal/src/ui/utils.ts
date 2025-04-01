@@ -1,10 +1,9 @@
 import { get, post } from "@toruslabs/http-helpers";
 import { LANGUAGE_MAP, LANGUAGE_TYPE, LANGUAGES } from "@web3auth/auth";
-import { log, LoginMethodConfig, WALLET_CONNECTORS, WalletInitializationError } from "@web3auth/no-modal";
+import { log } from "@web3auth/no-modal";
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import { AUTH_PROVIDERS, AUTH_PROVIDERS_NAMES } from "./config";
 import { browser, mobileOs, platform } from "./interfaces";
 
 const cache = new Map<string, string>();
@@ -73,25 +72,6 @@ export const getBrowserName = (browserType: browser) => {
 
 export const getIcons = (icon: string) => {
   return `https://images.web3auth.io/login-modal/${icon}.svg`;
-};
-
-export const getConnectorSocialLogins = (connectorName: string, loginMethodsConfig: LoginMethodConfig = {}): LoginMethodConfig => {
-  const finalLoginMethodsConfig: LoginMethodConfig = {};
-  if (connectorName === WALLET_CONNECTORS.AUTH) {
-    AUTH_PROVIDERS.forEach((loginMethod) => {
-      const currentLoginMethodConfig = loginMethodsConfig[loginMethod] || {
-        name: AUTH_PROVIDERS_NAMES[loginMethod],
-        showOnMobile: true,
-        showOnModal: true,
-        showOnDesktop: true,
-      };
-      finalLoginMethodsConfig[loginMethod] = { ...currentLoginMethodConfig };
-    });
-    log.debug("auth login method ui config", finalLoginMethodsConfig);
-  } else {
-    throw WalletInitializationError.invalidParams(`${connectorName} is not a valid connector`);
-  }
-  return finalLoginMethodsConfig;
 };
 
 export async function validateImageUrl(url: string): Promise<boolean> {

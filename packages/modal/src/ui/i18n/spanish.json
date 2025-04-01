@@ -13,6 +13,7 @@
     "external.search-subtext": "Intenta buscar en su lugar",
     "external.connect-wallet": "Conectar billetera",
     "external.continue": "Continuar con billetera externa",
+    "external.continue-custom": "Continuar con {{wallet}}",
     "external.dont-have": "No tiene",
     "external.get": "Obtener",
     "external.get-wallet": "Obtener billetera",

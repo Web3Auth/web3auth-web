@@ -2,6 +2,7 @@ import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
 
 import { CHAIN_NAMESPACES, CustomChainConfig } from "@/core/base";
 
+import { getSiteIcon, getSiteName } from "../utils";
 import { IConnectorSettings } from "./interface";
 
 export enum DEFAULT_EIP155_METHODS {
@@ -36,68 +37,6 @@ export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
   "0x66": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
   "0x67": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
 };
-
-/**
- * Extracts a name for the site from the DOM
- */
-const getSiteName = (window: Window) => {
-  const { document } = window;
-
-  const siteName = document.querySelector<HTMLMetaElement>('head > meta[property="og:site_name"]');
-  if (siteName) {
-    return siteName.content;
-  }
-
-  const metaTitle = document.querySelector<HTMLMetaElement>('head > meta[name="title"]');
-  if (metaTitle) {
-    return metaTitle.content;
-  }
-
-  if (document.title && document.title.length > 0) {
-    return document.title;
-  }
-
-  return window.location.hostname;
-};
-
-/**
- * Returns whether the given image URL exists
- * @param url - the url of the image
- * @returns - whether the image exists
- */
-function imgExists(url: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    try {
-      const img = document.createElement("img");
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
-
-/**
- * Extracts an icon for the site from the DOM
- */
-async function getSiteIcon(window: Window): Promise<string | null> {
-  const { document } = window;
-
-  // Use the site's favicon if it exists
-  let icon = document.querySelector<HTMLLinkElement>('head > link[rel="shortcut icon"]');
-  if (icon && (await imgExists(icon.href))) {
-    return icon.href;
-  }
-
-  // Search through available icons in no particular order
-  icon = Array.from(document.querySelectorAll<HTMLLinkElement>('head > link[rel="icon"]')).find((_icon) => Boolean(_icon.href)) || null;
-  if (icon && (await imgExists(icon.href))) {
-    return icon.href;
-  }
-
-  return null;
-}
 
 /**
  * Gets site metadata and returns it

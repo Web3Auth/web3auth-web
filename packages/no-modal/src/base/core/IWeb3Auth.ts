@@ -1,5 +1,5 @@
-import { type AccountAbstractionConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
+import { type BUILD_ENV_TYPE, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type CustomChainConfig } from "../chain/IChainInterface";
@@ -104,7 +104,7 @@ export interface IWeb3AuthCoreOptions {
   /**
    * Account abstraction config for your chain namespace
    */
-  accountAbstractionConfig?: AccountAbstractionConfig;
+  accountAbstractionConfig?: AccountAbstractionMultiChainConfig;
 
   /**
    * Whether to use AA with external wallet
@@ -136,12 +136,19 @@ export interface IWeb3AuthCoreOptions {
    * Private key provider for xrpl, mpc cases
    */
   privateKeyProvider?: IBaseProvider<string>;
+
+  /**
+   * Build environment for Auth connector
+   * @internal
+   * @defaultValue BUILD_ENV.PRODUCTION
+   */
+  authBuildEnv?: BUILD_ENV_TYPE;
 }
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: string | null;
-  currentChain: CustomChainConfig;
+  currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   init(): Promise<void>;
