@@ -104,7 +104,7 @@ function Loader(props: LoaderProps) {
     if (modalStatus === MODAL_STATUS.CONNECTED) {
       setTimeout(() => {
         onClose();
-      }, 3000);
+      }, 2000);
     }
   }, [modalStatus, onClose]);
 

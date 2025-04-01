@@ -77,6 +77,12 @@ function SocialLoginList(props: SocialLoginListProps) {
                   <>
                     {getProviderIcon(row.method, isDark, ".svg")}
                     <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
+                    <img
+                      id="login-arrow"
+                      className="w3a--icon-animation w3a--ml-auto"
+                      src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
+                      alt="arrow"
+                    />
                   </>
                 ),
               }}

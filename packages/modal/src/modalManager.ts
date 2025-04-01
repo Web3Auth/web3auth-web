@@ -2,7 +2,7 @@ import {
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
   type BaseConnectorConfig,
-  ChainNamespaceType,
+  type ChainNamespaceType,
   cloneDeep,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
