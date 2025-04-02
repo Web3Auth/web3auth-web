@@ -176,7 +176,16 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
-
+    projectConfig = {
+      ...projectConfig,
+      loginModal: {
+        ...projectConfig.loginModal,
+        logoAlignment: "left",
+        displayInstalledExternalWallets: false,
+        displayExternalWalletsCount: false,
+        signInMethods: ["passwordless", "externalWallets", "social"],
+      },
+    };
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);

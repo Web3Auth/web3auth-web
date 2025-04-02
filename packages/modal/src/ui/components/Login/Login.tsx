@@ -74,44 +74,30 @@ function Login(props: LoginProps) {
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
 
-    Object.keys(socialLoginsConfig.loginMethods)
-      .filter((method) => {
-        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
-      })
-      .forEach((method, index) => {
-        const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
-        const name = capitalizeFirstLetter(connectorConfig.name || method);
-        const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
-        const order = orderIndex || index;
+    const loginOptions = Object.keys(socialLoginsConfig.loginMethods).filter((method) => {
+      return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+    });
 
-        const isMainOption = connectorConfig.mainOption || order === 1;
-        const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+    loginOptions.forEach((method, index) => {
+      const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+      const name = capitalizeFirstLetter(connectorConfig.name || method);
+      const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
+      const order = orderIndex || index;
 
-        if (order > 0 && order < 4) {
-          visibleRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: socialLoginsConfig.connector,
-            loginParams: {
-              authConnection: method as AUTH_CONNECTION_TYPE,
-              authConnectionId: connectorConfig.authConnectionId,
-              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-              extraLoginOptions: connectorConfig.extraLoginOptions,
-              name,
-              login_hint: "",
-            },
-            order,
-            isMainOption,
-          });
-        }
+      const isMainOption = connectorConfig.mainOption || order === 1;
+      const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
-        otherRows.push({
+      const loginOptionLength = loginOptions.length;
+      const moreThanFour = loginOptionLength >= 4;
+
+      const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
+
+      if (lengthCheck) {
+        visibleRows.push({
           method,
           isDark,
           isPrimaryBtn,
-          name: name === "Twitter" ? "X" : name,
+          name,
           adapter: socialLoginsConfig.connector,
           loginParams: {
             authConnection: method as AUTH_CONNECTION_TYPE,
@@ -124,7 +110,26 @@ function Login(props: LoginProps) {
           order,
           isMainOption,
         });
+      }
+
+      otherRows.push({
+        method,
+        isDark,
+        isPrimaryBtn,
+        name: name === "Twitter" ? "X" : name,
+        adapter: socialLoginsConfig.connector,
+        loginParams: {
+          authConnection: method as AUTH_CONNECTION_TYPE,
+          authConnectionId: connectorConfig.authConnectionId,
+          groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+          extraLoginOptions: connectorConfig.extraLoginOptions,
+          name,
+          login_hint: "",
+        },
+        order,
+        isMainOption,
       });
+    });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
@@ -384,20 +389,38 @@ function Login(props: LoginProps) {
     return sections;
   };
 
+  // TODO: remove this once we have a proper logo alignment coming from uiConfig
+  const logoAlignment: "center" | "left" = "center";
+
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2 w3a--p-4">
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10" key="login-header">
-        <figure className="w3a--mx-auto w3a--h-12 w3a--w-[200px]">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
+      <div
+        className={cn(
+          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",
+          logoAlignment === "center" ? "" : "w3a--w-full"
+        )}
+        key="login-header"
+      >
+        <figure className={cn("w3a--mx-auto w3a--h-12 w3a--w-[200px]", logoAlignment === "center" ? "" : "w3a--ml-0")}>
           <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
-        <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">Sign In</p>
+        <p
+          className={cn(
+            "w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white",
+            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4"
+          )}
+        >
+          Sign In
+        </p>
       </div>
 
-      {/* DEFAULT VIEW */}
-      {!expand && defaultView()}
+      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        {/* DEFAULT VIEW */}
+        {!expand && defaultView()}
 
-      {/* EXPANDED VIEW */}
-      {expand && socialLoginSection(otherRow)}
+        {/* EXPANDED VIEW */}
+        {expand && socialLoginSection(otherRow)}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { JSX } from "react";
 
+import { BorderRadiusType } from "../../../interface";
+
 export type ModalPlacement = "center" | "top-center" | "bottom-center" | "left" | "right";
 
 export interface ModalProps {
@@ -11,4 +13,5 @@ export interface ModalProps {
   border?: boolean;
   showCloseIcon?: boolean;
   onClose?: () => void;
+  borderRadius?: BorderRadiusType;
 }
