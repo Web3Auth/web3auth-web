@@ -1,7 +1,9 @@
-import { cloneDeep } from "@toruslabs/base-controllers";
+import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
+import { type Chain } from "viem";
 
+import { CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 
@@ -49,5 +51,23 @@ export const normalizeWalletName = (name: string) => {
 
   return normalizedName;
 };
+
+export const fromWagmiChain = (chain: Chain): CustomChainConfig => {
+  return {
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    chainId: `0x${chain.id.toString(16)}`,
+    rpcTarget: chain.rpcUrls.default.http[0],
+    displayName: chain.name,
+    blockExplorerUrl: chain.blockExplorers?.default.url || "",
+    ticker: chain.nativeCurrency.symbol,
+    tickerName: chain.nativeCurrency.name,
+    logo: "",
+    decimals: chain.nativeCurrency.decimals,
+    isTestnet: chain.testnet,
+    wsTarget: chain.rpcUrls.default.webSocket?.[0],
+  };
+};
+
+export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };
