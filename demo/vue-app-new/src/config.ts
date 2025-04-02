@@ -1,4 +1,4 @@
-import { LANGUAGE_TYPE, LANGUAGES, AUTH_CONNECTION, AUTH_CONNECTION_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,

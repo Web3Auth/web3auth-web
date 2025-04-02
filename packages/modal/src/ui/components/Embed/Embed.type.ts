@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 
-import { BorderRadiusType } from "../../../interface";
+import { BorderRadiusType } from "../../interfaces";
 
 export interface EmbedProps {
   children: JSX.Element[] | JSX.Element;

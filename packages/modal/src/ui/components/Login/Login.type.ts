@@ -1,4 +1,4 @@
-import { ExternalButton, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { ExternalButton, LogoAlignmentType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
   isModalVisible: boolean;
@@ -21,4 +21,5 @@ export interface LoginProps {
   handleInstalledExternalWalletClick?: (params: { connector: string }) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleSocialLoginHeight: () => void;
+  logoAlignment?: LogoAlignmentType;
 }

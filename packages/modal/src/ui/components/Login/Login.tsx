@@ -4,7 +4,7 @@ import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState 
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
-import { type rowType } from "../../interfaces";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, type rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
 import Image from "../Image";
@@ -25,7 +25,7 @@ export const restrictedLoginMethods: string[] = [
 function Login(props: LoginProps) {
   const {
     // appName,
-    // appLogo,
+    appLogo,
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
@@ -44,6 +44,7 @@ function Login(props: LoginProps) {
     showExternalWalletButton,
     showExternalWalletCount,
     showInstalledExternalWallets,
+    logoAlignment = "center",
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -389,20 +390,22 @@ function Login(props: LoginProps) {
     return sections;
   };
 
-  // TODO: remove this once we have a proper logo alignment coming from uiConfig
-  const logoAlignment: "center" | "left" = "center";
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div
         className={cn(
           "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",
           logoAlignment === "center" ? "" : "w3a--w-full"
         )}
-        key="login-header"
       >
         <figure className={cn("w3a--mx-auto w3a--h-12 w3a--w-[200px]", logoAlignment === "center" ? "" : "w3a--ml-0")}>
-          <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+          {headerLogo ? (
+            <img src={headerLogo} alt="Logo" className="w3a--object-contain" />
+          ) : (
+            <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+          )}
         </figure>
         <p
           className={cn(
@@ -410,7 +413,7 @@ function Login(props: LoginProps) {
             logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4"
           )}
         >
-          Sign In
+          {t("modal.social.sign-in")}
         </p>
       </div>
 

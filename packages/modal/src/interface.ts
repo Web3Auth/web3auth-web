@@ -12,6 +12,3 @@ export interface IWeb3AuthModal extends IWeb3Auth {
   initModal(): Promise<void>;
   connect(): Promise<IProvider | null>;
 }
-
-export type BorderRadiusType = "large" | "medium" | "small";
-export type LogoAlignmentType = "center" | "left";

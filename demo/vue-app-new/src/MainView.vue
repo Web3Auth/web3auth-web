@@ -3,21 +3,20 @@ import {
   authConnector,
   CHAIN_NAMESPACES,
   coinbaseConnector,
-  ConnectorFn,
-  ConnectorsModalConfig,
-  CustomChainConfig,
+  type ConnectorFn,
+  type CustomChainConfig,
   getChainConfig,
   nftCheckoutPlugin,
-  PluginFn,
+  type PluginFn,
   storageAvailable,
-  UIConfig,
+  type UIConfig,
   WALLET_CONNECTORS,
   walletServicesPlugin,
+  type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions
 } from "@web3auth/modal";
 
-import { AccountAbstractionMultiChainConfig } from "@web3auth/modal";
-import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 

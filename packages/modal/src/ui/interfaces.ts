@@ -171,3 +171,6 @@ export type rowType = {
   order: number;
   isMainOption: boolean;
 };
+
+export type LogoAlignmentType = "left" | "center";
+export type BorderRadiusType = "large" | "medium" | "small";

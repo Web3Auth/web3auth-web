@@ -1,6 +1,6 @@
 import { JSX } from "react";
 
-import { BorderRadiusType } from "../../../interface";
+import { BorderRadiusType } from "../../interfaces";
 
 export type ModalPlacement = "center" | "top-center" | "bottom-center" | "left" | "right";
 
