@@ -24,7 +24,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     adapterVisibilityMap,
     deviceDetails,
     handleWalletDetailsHeight,
-    buttonRadius,
+    buttonRadius = "pill",
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);

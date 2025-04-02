@@ -41,7 +41,7 @@ function Root(props: RootProps) {
     uiConfig,
   } = props;
 
-  const { logoAlignment, buttonRadiusType, enableMainSocialLoginButton, privacyPolicy, tncLink } = uiConfig;
+  const { logoAlignment, buttonRadiusType, enableMainSocialLoginButton, privacyPolicy, tncLink, displayInstalledExternalWallets } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -294,8 +294,10 @@ function Root(props: RootProps) {
     }, [] as ExternalButton[]);
 
     // make metamask the first button and limit the number of buttons
-    return installedConnectors.sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1)).slice(0, MAX_TOP_INSTALLED_CONNECTORS);
-  }, [config, adapterVisibilityMap]);
+    return installedConnectors
+      .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
+      .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
+  }, [config, adapterVisibilityMap, displayInstalledExternalWallets]);
 
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
@@ -326,9 +328,18 @@ function Root(props: RootProps) {
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
       return privacyPolicy || tncLink || enableMainSocialLoginButton ? "700px" : "650px";
     }
-    if (topInstalledConnectorButtons.length > 0) {
+    if (topInstalledConnectorButtons.length === 1) {
+      if (privacyPolicy || tncLink) {
+        return enableMainSocialLoginButton ? "600px" : "560px";
+      }
+      return enableMainSocialLoginButton ? "570px" : "530px";
+    }
+    if (topInstalledConnectorButtons.length > 1) {
       const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
-      return `${maxHeight}px`;
+      if (privacyPolicy || tncLink) {
+        return `${maxHeight + (enableMainSocialLoginButton ? 120 : 60)}px`;
+      }
+      return `${maxHeight + (enableMainSocialLoginButton ? 66 : 16)}px`;
     }
     return "539px";
   }, [

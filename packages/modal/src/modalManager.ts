@@ -181,13 +181,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       loginModal: {
         ...projectConfig.loginModal,
         logoAlignment: "left",
-        buttonRadiusType: "pill",
-        borderRadiusType: "large",
-        displayInstalledExternalWallets: false,
-        displayExternalWalletsCount: false,
-        // enableMainSocialLoginButton: true,
-        privacyPolicy: "https://www.google.com",
-        tncLink: "https://www.google.com",
+        buttonRadiusType: "rounded",
+        borderRadiusType: "medium",
+        // displayInstalledExternalWallets: true,
+        // displayExternalWalletsCount: true,
+        enableMainSocialLoginButton: true,
+        // privacyPolicy: "https://www.google.com",
+        // tncLink: "https://www.google.com",
       },
     };
     // get wallet registry
