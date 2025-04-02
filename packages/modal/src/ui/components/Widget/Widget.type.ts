@@ -1,7 +1,7 @@
 import { SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, UIConfig, WalletRegistry } from "@web3auth/no-modal";
+import { ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
 
-import { ExternalWalletEventType, SocialLoginEventType, StateEmitterEvents, WidgetType } from "../../interfaces";
+import { ExternalWalletEventType, SocialLoginEventType, StateEmitterEvents, UIConfig } from "../../interfaces";
 
 export interface WidgetProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
@@ -9,10 +9,9 @@ export interface WidgetProps {
   appName?: string;
   chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
-  widget?: WidgetType;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   closeModal: () => void;
-  uiConfig?: UIConfig;
+  uiConfig: UIConfig;
 }

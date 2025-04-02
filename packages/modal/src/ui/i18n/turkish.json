@@ -76,6 +76,10 @@
     "social.view-less-socials": "Daha az socials görüntüle",
     "social.view-more": "Daha fazla görüntüle",
     "social.view-more-socials": "Daha fazlasını görüntüle socials",
-    "social.sign-in": "Giriş yap"
+    "social.sign-in": "Giriş yap",
+    "footer.by-signing-in": "Giriş yapmak, bizimle ilgili",
+    "footer.terms-of-service": "Kullanım Şartları",
+    "footer.privacy-policy": "Gizlilik Politikası",
+    "footer.and": "ve"
   }
 }

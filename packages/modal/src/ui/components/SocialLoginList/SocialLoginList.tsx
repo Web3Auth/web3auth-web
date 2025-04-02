@@ -23,7 +23,7 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
 }
 
 function SocialLoginList(props: SocialLoginListProps) {
-  const { visibleRow, otherRow, isDark, canShowMore, handleSocialLoginClick, handleExpandSocialLogins } = props;
+  const { visibleRow, otherRow, isDark, canShowMore, handleSocialLoginClick, handleExpandSocialLogins, buttonRadius } = props;
 
   // eslint-disable-next-line no-console
   console.log("visibleRow", visibleRow);
@@ -40,35 +40,59 @@ function SocialLoginList(props: SocialLoginListProps) {
   };
 
   if (visibleRow.length !== 0 && otherRow?.length === 0) {
+    const isMainOption = visibleRow[0]?.isMainOption;
+    const rowsToShow = isMainOption ? visibleRow.filter((row) => !row.isMainOption) : visibleRow;
     return (
-      <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
-        {visibleRow
-          .filter((_, index) => (visibleRow.length === 4 ? index <= 3 : index < 3))
-          .map((row) => (
-            <Button
-              type={BUTTON_TYPE.SOCIAL}
-              key={row.method}
-              props={{
-                showText: false,
-                method: row.method,
-                isDark,
-                isPrimaryBtn: false,
-                btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
-                children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
-                onClick: () => handleSocialLoginClick({ connector: row.adapter, loginParams: row.loginParams }),
-              }}
-            />
-          ))}
-        {canShowMore && visibleRow.length > 4 && (
+      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        {isMainOption && (
           <Button
             type={BUTTON_TYPE.SOCIAL}
+            key={visibleRow[0].method}
             props={{
-              showIcon: false,
-              onClick: handleExpandSocialLogins,
-              children: <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="w3a--object-contain" />,
+              showText: false,
+              method: visibleRow[0].method,
+              isDark,
+              isPrimaryBtn: false,
+              btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+              children: <>{getProviderIcon(visibleRow[0].method, isDark, ".svg")}</>,
+              onClick: () => handleSocialLoginClick({ connector: visibleRow[0].adapter, loginParams: visibleRow[0].loginParams }),
+              buttonRadius,
             }}
           />
         )}
+        <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
+          {rowsToShow
+            .filter((_, index) => (rowsToShow.length === 4 ? index <= 3 : index < 3))
+            .map((row) => (
+              <Button
+                type={BUTTON_TYPE.SOCIAL}
+                key={row.method}
+                props={{
+                  showText: false,
+                  method: row.method,
+                  isDark,
+                  isPrimaryBtn: false,
+                  btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+                  children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
+                  onClick: () => handleSocialLoginClick({ connector: row.adapter, loginParams: row.loginParams }),
+                  buttonRadius,
+                }}
+              />
+            ))}
+          {canShowMore && rowsToShow.length > 4 && (
+            <Button
+              type={BUTTON_TYPE.SOCIAL}
+              props={{
+                showIcon: false,
+                onClick: handleExpandSocialLogins,
+                children: (
+                  <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="w3a--object-contain" />
+                ),
+                buttonRadius,
+              }}
+            />
+          )}
+        </div>
       </div>
     );
   }
@@ -89,6 +113,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 isPrimaryBtn: false,
                 onClick: () => handleSocialLoginClick({ connector: row.adapter, loginParams: row.loginParams }),
                 btnStyle: "w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+                buttonRadius,
                 children: (
                   <>
                     {getProviderIcon(row.method, isDark, ".svg")}

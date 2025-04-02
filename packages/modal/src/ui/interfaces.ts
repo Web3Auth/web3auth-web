@@ -10,20 +10,10 @@ import {
   type WalletRegistry,
   type WalletRegistryItem,
   type Web3AuthNoModalEvents,
-  type WidgetType,
 } from "@web3auth/no-modal";
-
-export { type WidgetType };
 
 // capture whitelabel only once
 export interface UIConfig extends CoreUIConfig, LoginModalConfig {
-  /**
-   * Whether to use the modal or embed widget
-   *
-   * @defaultValue `modal`
-   */
-  widgetType?: WidgetType;
-
   /**
    * ID of the element to embed the widget into
    */
@@ -172,5 +162,6 @@ export type rowType = {
   isMainOption: boolean;
 };
 
-export type LogoAlignmentType = "left" | "center";
-export type BorderRadiusType = "large" | "medium" | "small";
+export type LogoAlignmentType = UIConfig["logoAlignment"];
+export type BorderRadiusType = UIConfig["borderRadiusType"];
+export type ButtonRadiusType = UIConfig["buttonRadiusType"];

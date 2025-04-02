@@ -230,7 +230,6 @@ export class LoginModal {
         <ThemedContext.Provider value={darkState}>
           <Widget
             stateListener={this.stateEmitter}
-            widget={this.uiConfig.widgetType}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
             chainNamespaces={this.chainNamespaces}

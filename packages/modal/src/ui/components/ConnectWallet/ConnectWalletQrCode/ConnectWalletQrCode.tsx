@@ -42,17 +42,6 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               bgColor={isDark ? modalColor : whiteColor}
               fgColor={isDark ? whiteColor : blackColor}
             />
-            <div className="w3a--absolute w3a--left-[43%] w3a--top-[43%] w3a--flex w3a--size-10 w3a--translate-y-1/2 w3a--transform w3a--items-center w3a--justify-center w3a--rounded-full w3a--bg-app-white">
-              <Image
-                imageId={`login-${selectedButton.name}`}
-                hoverImageId={`login-${selectedButton.name}`}
-                fallbackImageId="wallet"
-                height="20"
-                width="20"
-                isButton
-                extension={selectedButton.imgExtension}
-              />
-            </div>
           </div>
           <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
             {t("modal.external.walletconnect-copy")}

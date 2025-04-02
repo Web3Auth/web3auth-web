@@ -1,4 +1,4 @@
-import { ExternalButton, LogoAlignmentType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { ButtonRadiusType, ExternalButton, LogoAlignmentType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
   isModalVisible: boolean;
@@ -22,4 +22,6 @@ export interface LoginProps {
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleSocialLoginHeight: () => void;
   logoAlignment?: LogoAlignmentType;
+  buttonRadius?: ButtonRadiusType;
+  enableMainSocialLoginButton?: boolean;
 }

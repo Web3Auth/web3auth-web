@@ -76,6 +76,10 @@
     "social.view-less-socials": "查看更少socials",
     "social.view-more": "查看更多",
     "social.view-more-socials": "查看更多socials",
-    "social.sign-in": "登录"
+    "social.sign-in": "登录",
+    "footer.by-signing-in": "登录即表示您同意我们的",
+    "footer.terms-of-service": "服务条款",
+    "footer.privacy-policy": "隐私政策",
+    "footer.and": "和"
   }
 }

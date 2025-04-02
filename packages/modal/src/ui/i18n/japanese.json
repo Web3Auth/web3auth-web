@@ -76,6 +76,10 @@
     "social.view-less-socials": "表示を減らす socials",
     "social.view-more": "もっと見る",
     "social.view-more-socials": "もっと見る socials",
-    "social.sign-in": "ログイン"
+    "social.sign-in": "ログイン",
+    "footer.by-signing-in": "ログインすると、私たちの",
+    "footer.terms-of-service": "利用規約",
+    "footer.privacy-policy": "プライバシーポリシー",
+    "footer.and": "および"
   }
 }

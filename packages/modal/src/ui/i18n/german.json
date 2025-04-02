@@ -76,6 +76,10 @@
     "social.view-less-socials": "Weniger anzeigen socials",
     "social.view-more": "Mehr anzeigen",
     "social.view-more-socials": "Weitere socials anzeigen",
-    "social.sign-in": "Anmelden"
+    "social.sign-in": "Anmelden",
+    "footer.by-signing-in": "Durch das Anmelden stimmen Sie unseren",
+    "footer.terms-of-service": "Nutzungsbedingungen",
+    "footer.privacy-policy": "Datenschutzrichtlinie",
+    "footer.and": "und"
   }
 }

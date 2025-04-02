@@ -17,14 +17,16 @@ function Widget(props: WidgetProps) {
     handleExternalWalletClick,
     handleShowExternalWallets,
     closeModal,
-    widget,
     appLogo,
     appName,
     chainNamespaces,
     walletRegistry,
+    uiConfig,
   } = props;
 
-  const visible = useMemo(() => widget === WIDGET_TYPE.EMBED, [widget]);
+  const { widgetType } = uiConfig;
+
+  const visible = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
 
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
@@ -181,9 +183,16 @@ function Widget(props: WidgetProps) {
     }
   }, [modalState, handleExternalWalletClick]);
 
-  if (widget === WIDGET_TYPE.MODAL) {
+  if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+      <Modal
+        open={modalState.modalVisibility}
+        placement="center"
+        padding={false}
+        showCloseIcon={showCloseIcon}
+        onClose={onCloseModal}
+        borderRadius={uiConfig.borderRadiusType}
+      >
         {modalState.modalVisibility && (
           <Root
             appLogo={appLogo}
@@ -207,6 +216,7 @@ function Widget(props: WidgetProps) {
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+            uiConfig={uiConfig}
           />
         )}
       </Modal>
@@ -214,7 +224,7 @@ function Widget(props: WidgetProps) {
   }
 
   return (
-    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
+    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
       {modalState.modalVisibility && (
         <Root
           chainNamespace={chainNamespaces}
@@ -238,6 +248,7 @@ function Widget(props: WidgetProps) {
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+          uiConfig={uiConfig}
         />
       )}
     </Embed>

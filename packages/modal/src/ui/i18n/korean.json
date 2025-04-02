@@ -76,6 +76,10 @@
     "social.view-less-socials": "Socials 간략히 보기",
     "social.view-more": "더보기",
     "social.view-more-socials": "Socials 더보기",
-    "social.sign-in": "로그인"
+    "social.sign-in": "로그인",
+    "footer.by-signing-in": "로그인하면 우리의",
+    "footer.terms-of-service": "이용 약관",
+    "footer.privacy-policy": "개인정보 처리방침",
+    "footer.and": "및"
   }
 }

@@ -76,6 +76,10 @@
     "social.view-less-socials": "Bekijk minder socials",
     "social.view-more": "Meer bekijken",
     "social.view-more-socials": "Bekijk meer socials",
-    "social.sign-in": "Aanmelden"
+    "social.sign-in": "Aanmelden",
+    "footer.by-signing-in": "Door in te loggen, gaat u akkoord met onze",
+    "footer.terms-of-service": "Gebruiksvoorwaarden",
+    "footer.privacy-policy": "Privacybeleid",
+    "footer.and": "en"
   }
 }

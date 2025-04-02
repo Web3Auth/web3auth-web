@@ -16,6 +16,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     invalidInputErrorMessage,
     isValidInput,
     isDark,
+    buttonRadius,
   } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -46,7 +47,11 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     return (
       <button
         type="button"
-        className={cn("w3a--btn !w3a--justify-between")}
+        className={cn("w3a--btn !w3a--justify-between", {
+          "w3a--rounded-full": buttonRadius === "pill",
+          "w3a--rounded-lg": buttonRadius === "rounded",
+          "w3a--rounded-none": buttonRadius === "square",
+        })}
         onClick={() => {
           setIsPasswordLessCtaClicked(true);
         }}
@@ -58,7 +63,13 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
 
   return (
     <>
-      <div className={cn("w3a--input", isInputFocused && "!w3a--border-app-primary-600")}>
+      <div
+        className={cn("w3a--input", isInputFocused && "!w3a--border-app-primary-600", {
+          "w3a--rounded-full": buttonRadius === "pill",
+          "w3a--rounded-lg": buttonRadius === "rounded",
+          "w3a--rounded-none": buttonRadius === "square",
+        })}
+      >
         <input
           ref={inputRef}
           onInput={onInputChange}
@@ -72,7 +83,9 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
             setIsInputFocused(false);
           }}
           type="text"
-          className="w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
+          className={cn(
+            "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
+          )}
         />
         {fieldValue && isValidInput && isInputFocused && (
           <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>

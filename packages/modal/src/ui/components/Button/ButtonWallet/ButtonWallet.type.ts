@@ -1,4 +1,4 @@
-import { browser, ExternalButton, os, platform } from "../../../interfaces";
+import { browser, ButtonRadiusType, ExternalButton, os, platform } from "../../../interfaces";
 
 export interface ButtonWalletProps {
   label: string;
@@ -6,4 +6,5 @@ export interface ButtonWalletProps {
   button?: ExternalButton;
   deviceDetails?: { platform: platform; os: os; browser: browser };
   walletConnectUri: string | undefined;
+  buttonRadius?: ButtonRadiusType;
 }

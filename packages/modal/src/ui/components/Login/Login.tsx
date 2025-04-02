@@ -24,15 +24,12 @@ export const restrictedLoginMethods: string[] = [
 
 function Login(props: LoginProps) {
   const {
-    // appName,
     appLogo,
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
     installedExternalWalletConfig,
     isDark,
-    // isEmailPrimary,
-    // isExternalPrimary,
     handleSocialLoginClick,
     totalExternalWallets,
     isEmailPasswordLessLoginVisible,
@@ -45,6 +42,8 @@ function Login(props: LoginProps) {
     showExternalWalletCount,
     showInstalledExternalWallets,
     logoAlignment = "center",
+    buttonRadius = "pill",
+    enableMainSocialLoginButton = false,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -79,20 +78,24 @@ function Login(props: LoginProps) {
       return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
     });
 
+    // eslint-disable-next-line no-console
+    console.log("loginOptions", loginOptions);
+
     loginOptions.forEach((method, index) => {
       const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
       const name = capitalizeFirstLetter(connectorConfig.name || method);
-      const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
-      const order = orderIndex || index;
+      // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
+      const order = index + 1;
 
-      const isMainOption = connectorConfig.mainOption || order === 1;
+      const isMainOption = order === 1 && enableMainSocialLoginButton;
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
       const loginOptionLength = loginOptions.length;
       const moreThanFour = loginOptionLength >= 4;
 
       const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
-
+      // eslint-disable-next-line no-console
+      console.log("lengthCheck", lengthCheck, moreThanFour, loginOptionLength, method, order);
       if (lengthCheck) {
         visibleRows.push({
           method,
@@ -135,7 +138,7 @@ function Login(props: LoginProps) {
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark]);
+  }, [socialLoginsConfig, isDark, enableMainSocialLoginButton, buttonRadius]);
 
   const handleFormSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -259,6 +262,7 @@ function Login(props: LoginProps) {
         handleSocialLoginClick={handleSocialLoginClick}
         socialLoginsConfig={socialLoginsConfig}
         handleExpandSocialLogins={handleExpand}
+        buttonRadius={buttonRadius}
       />
     );
   };
@@ -278,20 +282,25 @@ function Login(props: LoginProps) {
         invalidInputErrorMessage={invalidInputErrorMessage}
         isValidInput={isValidInput}
         isDark={isDark}
+        buttonRadius={buttonRadius}
       />
     );
   };
 
   const externalWalletSection = () => {
     return (
-      <div key="external-wallets-section" className="w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2">
+      <div key="external-wallets-section" className={cn("w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2")}>
         {/* INSTALLED EXTERNAL WALLETS */}
         {installedExternalWallets.length > 0 &&
           installedExternalWallets.map((wallet) => (
             <button
               key={wallet.name}
               type="button"
-              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")}
+              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+                "w3a--rounded-full": buttonRadius === "pill",
+                "w3a--rounded-lg": buttonRadius === "rounded",
+                "w3a--rounded-none": buttonRadius === "square",
+              })}
               onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
@@ -313,7 +322,15 @@ function Login(props: LoginProps) {
 
         {/* EXTERNAL WALLETS DISCOVERY */}
         {
-          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+          <button
+            type="button"
+            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+              "w3a--rounded-full": buttonRadius === "pill",
+              "w3a--rounded-lg": buttonRadius === "rounded",
+              "w3a--rounded-none": buttonRadius === "square",
+            })}
+            onClick={handleConnectWallet}
+          >
             <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
             {showExternalWalletCount && (
               <div
@@ -393,7 +410,7 @@ function Login(props: LoginProps) {
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
       <div
         className={cn(
           "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",

@@ -8,7 +8,7 @@ import { RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
 import i18n from "../../localeImport";
-import { getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
+import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
 import ConnectWallet from "../ConnectWallet";
 import Footer from "../Footer/Footer";
 import Image from "../Image";
@@ -38,7 +38,10 @@ function Root(props: RootProps) {
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     preHandleExternalWalletClick,
+    uiConfig,
   } = props;
+
+  const { logoAlignment, buttonRadiusType, enableMainSocialLoginButton, privacyPolicy, tncLink } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -95,7 +98,14 @@ function Root(props: RootProps) {
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
             <button
               type="button"
-              className="w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800"
+              className={cn(
+                "w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+                {
+                  "w3a--rounded-full": buttonRadiusType === "pill",
+                  "w3a--rounded-lg": buttonRadiusType === "rounded",
+                  "w3a--rounded-none": buttonRadiusType === "square",
+                }
+              )}
             >
               <Image
                 imageId={logoLight}
@@ -138,7 +148,14 @@ function Root(props: RootProps) {
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <button
             type="button"
-            className="w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800"
+            className={cn(
+              "w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+              {
+                "w3a--rounded-full": buttonRadiusType === "pill",
+                "w3a--rounded-lg": buttonRadiusType === "rounded",
+                "w3a--rounded-none": buttonRadiusType === "square",
+              }
+            )}
           >
             <Image
               imageId={deviceDetails.browser}
@@ -307,14 +324,22 @@ function Root(props: RootProps) {
       return "588px";
     }
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
-      return "642px";
+      return privacyPolicy || tncLink || enableMainSocialLoginButton ? "700px" : "650px";
     }
     if (topInstalledConnectorButtons.length > 0) {
       const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
       return `${maxHeight}px`;
     }
     return "539px";
-  }, [isWalletDetailsExpanded, modalState.currentPage, isSocialLoginsExpanded, topInstalledConnectorButtons]);
+  }, [
+    isWalletDetailsExpanded,
+    modalState.currentPage,
+    isSocialLoginsExpanded,
+    topInstalledConnectorButtons,
+    privacyPolicy,
+    tncLink,
+    enableMainSocialLoginButton,
+  ]);
 
   const contextValue = useMemo(
     () => ({
@@ -367,6 +392,9 @@ function Root(props: RootProps) {
                     isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                     totalExternalWallets={totalExternalWalletsLength}
                     handleSocialLoginHeight={handleSocialLoginHeight}
+                    logoAlignment={logoAlignment}
+                    buttonRadius={buttonRadiusType}
+                    enableMainSocialLoginButton={enableMainSocialLoginButton}
                   />
                 )}
                 {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
@@ -383,13 +411,14 @@ function Root(props: RootProps) {
                     customAdapterButtons={customAdapterButtons}
                     deviceDetails={deviceDetailsWallets}
                     handleWalletDetailsHeight={handleWalletDetailsHeight}
+                    buttonRadius={buttonRadiusType}
                   />
                 )}
               </>
             )}
 
             {/* Footer */}
-            <Footer />
+            <Footer privacyPolicy={privacyPolicy} termsOfService={tncLink} />
 
             {bodyState.showWalletDetails && (
               <>

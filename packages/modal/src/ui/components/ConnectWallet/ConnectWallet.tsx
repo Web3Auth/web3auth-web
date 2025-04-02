@@ -24,6 +24,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     adapterVisibilityMap,
     deviceDetails,
     handleWalletDetailsHeight,
+    buttonRadius,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
@@ -181,6 +182,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isLoading={isLoading}
             walletSearch={walletSearch}
             handleWalletSearch={handleWalletSearch}
+            buttonRadius={buttonRadius}
           />
           {/* Wallet List */}
           <ConnectWalletList
@@ -193,6 +195,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isDark={isDark}
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
+            buttonRadius={buttonRadius}
           />
         </div>
       )}
