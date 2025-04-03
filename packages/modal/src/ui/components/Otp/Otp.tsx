@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import { ClipboardEvent, FormEvent, forwardRef, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { cn } from "../../utils";
 import { OtpProps } from "./Otp.type";
 
-const OtpInput = React.forwardRef<HTMLDivElement, OtpProps>(
+const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
   (
     {
       length,
@@ -34,7 +34,7 @@ const OtpInput = React.forwardRef<HTMLDivElement, OtpProps>(
       return /^\d$/.test(value) && value.trim().length === 1;
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    const handleKeyDown = (e: KeyboardEvent, index: number) => {
       if (e.key === "Backspace" || e.key === "Delete") {
         e.preventDefault();
         const newOtpArray = [...otpArray];
@@ -58,7 +58,7 @@ const OtpInput = React.forwardRef<HTMLDivElement, OtpProps>(
       }
     };
 
-    const handleInputChange = (e: React.FormEvent, index: number) => {
+    const handleInputChange = (e: FormEvent, index: number) => {
       e.preventDefault();
       const { value } = e.target as HTMLInputElement;
       if (value && value.length > 1 && value.length === length) {
@@ -84,7 +84,7 @@ const OtpInput = React.forwardRef<HTMLDivElement, OtpProps>(
       }
     };
 
-    const handlePaste = (e: React.ClipboardEvent) => {
+    const handlePaste = (e: ClipboardEvent) => {
       e.preventDefault();
       const pastedData = e.clipboardData.getData("text").slice(0, length);
       if (pastedData && /^\d+$/.test(pastedData)) {
