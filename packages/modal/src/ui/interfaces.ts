@@ -99,8 +99,6 @@ export interface ModalState {
   status: ModalStatusType;
   externalWalletsInitialized: boolean;
   hasExternalWallets: boolean;
-  showExternalWalletCount: boolean;
-  showInstalledExternalWallets: boolean;
   externalWalletsVisibility: boolean;
   modalVisibility: boolean;
   modalVisibilityDelayed: boolean;
