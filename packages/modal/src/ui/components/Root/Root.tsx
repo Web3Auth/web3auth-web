@@ -1,10 +1,10 @@
-import { WALLET_CONNECTORS, WalletRegistryItem } from "@web3auth/no-modal";
+import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import Bowser from "bowser";
 import { useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PAGES } from "../../constants";
-import { RootContext } from "../../context/RootContext";
+import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
 import i18n from "../../localeImport";
@@ -41,10 +41,7 @@ function Root(props: RootProps) {
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
 
-  const [bodyState, setBodyState] = useState<{
-    showWalletDetails: boolean;
-    walletDetails?: ExternalButton;
-  }>({
+  const [bodyState, setBodyState] = useState<BodyState>({
     showWalletDetails: false,
     walletDetails: null,
   });

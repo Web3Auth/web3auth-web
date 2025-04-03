@@ -87,7 +87,7 @@ function Login(props: LoginProps) {
             isDark,
             isPrimaryBtn,
             name,
-            adapter: socialLoginsConfig.connector,
+            connector: socialLoginsConfig.connector,
             loginParams: {
               authConnection: method as AUTH_CONNECTION_TYPE,
               authConnectionId: connectorConfig.authConnectionId,
@@ -106,7 +106,7 @@ function Login(props: LoginProps) {
           isDark,
           isPrimaryBtn,
           name: name === "Twitter" ? "X" : name,
-          adapter: socialLoginsConfig.connector,
+          connector: socialLoginsConfig.connector,
           loginParams: {
             authConnection: method as AUTH_CONNECTION_TYPE,
             authConnectionId: connectorConfig.authConnectionId,

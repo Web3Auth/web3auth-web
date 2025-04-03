@@ -160,7 +160,7 @@ export type rowType = {
   isDark: boolean;
   isPrimaryBtn: boolean;
   name: string;
-  adapter: SocialLoginsConfig["connector"];
+  connector: SocialLoginsConfig["connector"];
   loginParams: {
     authConnection: AUTH_CONNECTION_TYPE;
     name: string;

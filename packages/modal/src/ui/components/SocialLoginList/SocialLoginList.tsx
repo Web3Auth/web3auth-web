@@ -39,7 +39,7 @@ function SocialLoginList(props: SocialLoginListProps) {
               isPrimaryBtn: false,
               btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
               children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
-              onClick: () => handleSocialLoginClick({ connector: row.adapter, loginParams: row.loginParams }),
+              onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
             }}
           />
         ))}
@@ -71,7 +71,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 method: row.method,
                 isDark,
                 isPrimaryBtn: false,
-                onClick: () => handleSocialLoginClick({ connector: row.adapter, loginParams: row.loginParams }),
+                onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
                 btnStyle: "w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
                 children: (
                   <>
