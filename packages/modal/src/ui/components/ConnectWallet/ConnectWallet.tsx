@@ -107,12 +107,14 @@ function ConnectWallet(props: ConnectWalletProps) {
     }
     setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 0);
   }, [walletDiscoverySupported, sortedButtons, visibleButtons, totalExternalWallets]);
 
   const handleWalletClick = (button: ExternalButton) => {
     // if has injected wallet, connect to injected wallet
     // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
+    // TODO: handle multiple chain namespaces with ui
+    // TODO: fix more wallets not shown in UI + scroll issue
     if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
       handleExternalWalletClick({ connector: button.name });
     } else if (button.hasWalletConnect) {

@@ -21,6 +21,7 @@ export const restrictedLoginMethods: string[] = [
 ];
 
 function Login(props: LoginProps) {
+  // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
     // appName,
     appLogo,
@@ -206,9 +207,7 @@ function Login(props: LoginProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
   };
 
-  const handleOtpComplete = (otp: string) => {
-    // eslint-disable-next-line no-console
-    console.log(otp);
+  const handleOtpComplete = (_: string) => {
     setOtpSuccess(true);
     setTimeout(() => {
       setOtpSuccess(false);
@@ -245,21 +244,9 @@ function Login(props: LoginProps) {
         <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.social.sign-in")}</p>
       </div>
 
-      {expand && (
+      {areSocialLoginsVisible && (
         <SocialLoginList
-          otherRow={otherRow}
-          isDark={isDark}
-          visibleRow={visibleRow}
-          canShowMore={canShowMore}
-          handleSocialLoginClick={handleSocialLoginClick}
-          socialLoginsConfig={socialLoginsConfig}
-          handleExpandSocialLogins={handleExpand}
-        />
-      )}
-
-      {!expand && areSocialLoginsVisible && (
-        <SocialLoginList
-          otherRow={[]}
+          otherRow={!expand ? [] : otherRow}
           isDark={isDark}
           visibleRow={visibleRow}
           canShowMore={canShowMore}

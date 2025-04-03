@@ -1,6 +1,6 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import Bowser from "bowser";
-import { useContext, useMemo, useState } from "react";
+import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PAGES } from "../../constants";
@@ -74,9 +74,11 @@ function Root(props: RootProps) {
       os: browserData.getOSName() as mobileOs,
     };
   }, []);
+  // TODO: metamask must always be shown here and installed wallets must be shown here
 
-  const mobileInstallLinks = () => {
-    const installConfig = bodyState.walletDetails.walletRegistryItem.app || {};
+  const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
+    if (deviceDetails.platform === "desktop") return [];
+    const installConfig = bodyState.walletDetails?.walletRegistryItem?.app || {};
     const installLinks = Object.keys(installConfig).reduce((acc, osKey) => {
       if (!["android", "ios"].includes(osKey)) return acc;
       const appId = installConfig[osKey as mobileOs];
@@ -117,16 +119,17 @@ function Root(props: RootProps) {
       return acc;
     }, []);
     return installLinks;
-  };
+  }, [bodyState.walletDetails?.walletRegistryItem?.app, deviceDetails.platform, isDark, t]);
 
-  const desktopInstallLinks = () => {
+  const desktopInstallLinks = useMemo<JSX.Element[]>(() => {
+    if (deviceDetails.platform !== "desktop") return [];
     // if browser is brave, use chrome extension
     const browserType = deviceDetails.browser === "brave" ? "chrome" : deviceDetails.browser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const browserExtensionConfig: any = bodyState.walletDetails.walletRegistryItem.app || {};
+
+    const browserExtensionConfig = bodyState.walletDetails?.walletRegistryItem?.app || {};
     const extensionForCurrentBrowser =
       browserExtensionConfig.browser && browserExtensionConfig.browser.includes(browserType) ? browserExtensionConfig.browser : undefined;
-    const browserExtensionId = browserExtensionConfig[browserType] || extensionForCurrentBrowser;
+    const browserExtensionId = browserExtensionConfig[browserType as keyof typeof browserExtensionConfig] || extensionForCurrentBrowser;
     const browserExtensionUrl = browserExtensionId ? getBrowserExtensionUrl(browserType, browserExtensionId) : null;
     const installLink = browserExtensionUrl ? (
       <li>
@@ -157,19 +160,10 @@ function Root(props: RootProps) {
         </a>
       </li>
     ) : null;
-    return [installLink, ...mobileInstallLinks()];
-  };
+    return [installLink, ...mobileInstallLinks];
+  }, [bodyState.walletDetails?.walletRegistryItem?.app, deviceDetails.browser, deviceDetails.platform, isDark, mobileInstallLinks, t]);
 
   // External Wallets
-
-  const deviceDetailsWallets = useMemo<{ platform: platform; browser: browser; os: os }>(() => {
-    const browserData = Bowser.getParser(window.navigator.userAgent);
-    return {
-      platform: browserData.getPlatformType() as platform,
-      browser: browserData.getBrowserName().toLowerCase() as browser,
-      os: browserData.getOSName() as os,
-    };
-  }, []);
 
   const config = useMemo(() => modalState.externalWalletsConfig, [modalState.externalWalletsConfig]);
 
@@ -203,43 +197,45 @@ function Root(props: RootProps) {
     () => Object.keys(config).some((adapter) => adapter === WALLET_CONNECTORS.WALLET_CONNECT_V2),
     [config]
   );
-  const adapterVisibility = useMemo(() => adapterVisibilityMap, [adapterVisibilityMap]);
 
-  const generateWalletButtons = (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
-    return Object.keys(wallets).reduce((acc, wallet) => {
-      if (adapterVisibility[wallet] === false) return acc;
+  const generateWalletButtons = useCallback(
+    (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
+      return Object.keys(wallets).reduce((acc, wallet) => {
+        if (adapterVisibilityMap[wallet] === false) return acc;
 
-      const walletRegistryItem: WalletRegistryItem = wallets[wallet];
-      let href = "";
-      if (deviceDetails.platform === Bowser.PLATFORMS_MAP.mobile) {
-        const universalLink = walletRegistryItem?.mobile?.universal;
-        const deepLink = walletRegistryItem?.mobile?.native;
-        href = universalLink || deepLink;
-      }
+        const walletRegistryItem: WalletRegistryItem = wallets[wallet];
+        let href = "";
+        if (deviceDetails.platform !== "desktop") {
+          const universalLink = walletRegistryItem?.mobile?.universal;
+          const deepLink = walletRegistryItem?.mobile?.native;
+          href = universalLink || deepLink;
+        }
 
-      const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
-      const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-      const availableChainNamespaces = chainNamespace.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+        const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
+        const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
+        const availableChainNamespaces = chainNamespace.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
 
-      const button: ExternalButton = {
-        name: wallet,
-        displayName: walletRegistryItem.name,
-        href,
-        hasInjectedWallet: config[wallet]?.isInjected || false,
-        hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
-        hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
-        walletRegistryItem,
-        imgExtension: walletRegistryItem.imgExtension || "svg",
-        chainNamespaces: availableChainNamespaces,
-      };
+        const button: ExternalButton = {
+          name: wallet,
+          displayName: walletRegistryItem.name,
+          href,
+          hasInjectedWallet: config[wallet]?.isInjected || false,
+          hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+          hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
+          walletRegistryItem,
+          imgExtension: walletRegistryItem.imgExtension || "svg",
+          chainNamespaces: availableChainNamespaces,
+        };
 
-      if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
-      if (availableChainNamespaces.length === 0) return acc;
+        if (!button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks) return acc;
+        if (availableChainNamespaces.length === 0) return acc;
 
-      acc.push(button);
-      return acc;
-    }, [] as ExternalButton[]);
-  };
+        acc.push(button);
+        return acc;
+      }, [] as ExternalButton[]);
+    },
+    [adapterVisibilityMap, chainNamespace, config, deviceDetails.platform, isWalletConnectAdapterIncluded]
+  );
 
   const customAdapterButtons = useMemo(() => {
     return Object.keys(config).reduce((acc, adapter) => {
@@ -258,8 +254,7 @@ function Root(props: RootProps) {
 
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, walletRegistry]);
+  }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
 
   const totalExternalWalletsLength = useMemo(() => {
     return allButtons.length + customAdapterButtons.length;
@@ -342,9 +337,13 @@ function Root(props: RootProps) {
                     walletRegistry={walletRegistry}
                     totalExternalWallets={totalExternalWalletsLength}
                     allExternalButtons={allButtons}
-                    adapterVisibilityMap={adapterVisibility}
+                    adapterVisibilityMap={adapterVisibilityMap}
                     customAdapterButtons={customAdapterButtons}
-                    deviceDetails={deviceDetailsWallets}
+                    deviceDetails={{
+                      platform: deviceDetails.platform,
+                      browser: deviceDetails.browser,
+                      os: deviceDetails.os as os,
+                    }}
                     handleWalletDetailsHeight={handleWalletDetailsHeight}
                   />
                 )}
@@ -390,7 +389,7 @@ function Root(props: RootProps) {
                     />
                   </div>
                   <ul className="w3a--flex w3a--flex-col w3a--gap-y-2">
-                    {deviceDetails.platform === "desktop" ? desktopInstallLinks() : mobileInstallLinks()}
+                    {deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}
                   </ul>
                 </div>
               </>

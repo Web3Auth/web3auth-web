@@ -29,14 +29,16 @@ export default function Image(props: ImageProps) {
   const hoverImgName = useMemo(() => (isDark && darkHoverImageId ? darkHoverImageId : hoverImageId), [isDark, darkHoverImageId, hoverImageId]);
 
   if (isButton) {
-    <img
-      id={id}
-      src={`https://images.web3auth.io/${hoverImgName}.${extension}`}
-      height={height}
-      width={width}
-      alt={hoverImageId}
-      className={`w3a--rounded w3a--object-contain ${imgClass}`}
-    />;
+    return (
+      <img
+        id={id}
+        src={`https://images.web3auth.io/${hoverImgName}.${extension}`}
+        height={height}
+        width={width}
+        alt={hoverImageId}
+        className={`w3a--rounded w3a--object-contain ${imgClass}`}
+      />
+    );
   }
 
   return (
