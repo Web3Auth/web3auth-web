@@ -9,10 +9,6 @@ export const isHexStrict = (hex: string): boolean => {
   return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
 };
 
-export const validateChainId = (chainId: string): boolean => {
-  return isHexStrict(chainId);
-};
-
 export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
   return SIGNER_MAP[web3AuthNetwork ?? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET];
 };

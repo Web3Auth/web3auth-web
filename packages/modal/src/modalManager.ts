@@ -80,10 +80,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         walletRegistry: filteredWalletRegistry,
       },
       {
-        onInitExternalWallets: this.onInitExternalWallets,
-        onSocialLogin: this.onSocialLogin,
-        onExternalWalletLogin: this.onExternalWalletLogin,
-        onModalVisibility: this.onModalVisibility,
+        onInitExternalWallets: this.onInitExternalWallets.bind(this),
+        onSocialLogin: this.onSocialLogin.bind(this),
+        onExternalWalletLogin: this.onExternalWalletLogin.bind(this),
+        onModalVisibility: this.onModalVisibility.bind(this),
       }
     );
     await this.loginModal.initModal();

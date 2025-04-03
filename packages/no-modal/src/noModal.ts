@@ -27,7 +27,6 @@ import {
   storageAvailable,
   UserAuthInfo,
   UserInfo,
-  validateChainId,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -69,10 +68,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     if (options.storageType === "session") this.storage = "sessionStorage";
     this.coreOptions = options;
-    if (options.defaultChainId && !validateChainId(options.defaultChainId))
-      throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
-
-    this.currentChainId = options.defaultChainId;
   }
 
   get currentChain(): CustomChainConfig | undefined {
@@ -327,6 +322,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
     const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
+      throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
     this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
   }
 
