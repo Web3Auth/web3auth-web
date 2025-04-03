@@ -165,6 +165,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           setBodyState={setBodyState}
           bodyState={bodyState}
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
