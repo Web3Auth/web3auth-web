@@ -80,6 +80,14 @@
     "footer.by-signing-in": "Durch das Anmelden stimmen Sie unseren",
     "footer.terms-of-service": "Nutzungsbedingungen",
     "footer.privacy-policy": "Datenschutzrichtlinie",
-    "footer.and": "und"
+    "footer.and": "und",
+    "connect-wallet.more-wallets": "Mehr Geldbörsen",
+    "otp.success": "Sie sind mit Ihrem Konto verbunden!",
+    "otp.mobile-title": "OTP-Verifikation",
+    "otp.mobile-subtext": "Geben Sie den OTP ein, der an",
+    "otp.email-title": "E-Mail-Verifikation",
+    "otp.email-subtext": "Bitte geben Sie den 6-stelligen Verifikationscode ein",
+    "otp.email-subtext-example": "der an Ihre E-Mail {{email}} gesendet wurde",
+    "passwordless.title": "Weitermachen mit {{title}}"
   }
 }

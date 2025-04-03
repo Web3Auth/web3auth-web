@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+
+import i18n from "../../../localeImport";
 import { getIcons } from "../../../utils";
 import Otp from "../../Otp";
 import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
@@ -10,12 +13,14 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
 function OtpInput(props: OtpInputProps) {
   const { isMobileOtp, otpSuccess, setShowOtpFlow, handleOtpComplete } = props;
 
+  const [t] = useTranslation(undefined, { i18n });
+
   if (otpSuccess) {
     return (
       <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
         <img src={getIcons("success-light")} alt="success" className="w3a--size-auto" />
         <p className="w3a--mx-auto w3a--w-4/5 w3a--text-center w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
-          You are connected to your account!
+          {t("modal.otp.success")}
         </p>
       </div>
     );
@@ -43,14 +48,14 @@ function OtpInput(props: OtpInputProps) {
         <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
         <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
-            {isMobileOtp ? "OTP verification" : "Email verification"}
+            {isMobileOtp ? t("modal.otp.mobile-title") : t("modal.otp.email-title")}
           </p>
           <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
             <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
-              {isMobileOtp ? "Enter the OTP sent to" : "Please enter the 6-digit verification code "}
+              {isMobileOtp ? t("modal.otp.mobile-subtext") : t("modal.otp.email-subtext")}
             </p>
             <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
-              {isMobileOtp ? "🇸🇬+91 ****0999" : "that was sent to your email ja****@email.com"}
+              {isMobileOtp ? "🇸🇬+91 ****0999" : t("modal.otp.email-subtext-example", { email: "ja****@email.com" })}
             </p>
           </div>
         </div>

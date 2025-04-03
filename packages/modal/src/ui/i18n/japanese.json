@@ -80,6 +80,14 @@
     "footer.by-signing-in": "ログインすると、私たちの",
     "footer.terms-of-service": "利用規約",
     "footer.privacy-policy": "プライバシーポリシー",
-    "footer.and": "および"
+    "footer.and": "および",
+    "connect-wallet.more-wallets": "ウォレットをもっと見る",
+    "otp.success": "あなたはあなたのアカウントに接続されています!",
+    "otp.mobile-title": "OTP 検証",
+    "otp.mobile-subtext": "OTP が送信された",
+    "otp.email-title": "メール検証",
+    "otp.email-subtext": "6 桁の検証コードを入力してください",
+    "otp.email-subtext-example": "あなたのメール {{email}} に送信されました",
+    "passwordless.title": "{{title}} で続行"
   }
 }

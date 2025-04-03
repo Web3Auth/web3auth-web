@@ -78,9 +78,6 @@ function Login(props: LoginProps) {
       return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
     });
 
-    // eslint-disable-next-line no-console
-    console.log("loginOptions", loginOptions);
-
     loginOptions.forEach((method, index) => {
       const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
       const name = capitalizeFirstLetter(connectorConfig.name || method);
@@ -94,8 +91,7 @@ function Login(props: LoginProps) {
       const moreThanFour = loginOptionLength >= 4;
 
       const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
-      // eslint-disable-next-line no-console
-      console.log("lengthCheck", lengthCheck, moreThanFour, loginOptionLength, method, order);
+
       if (lengthCheck) {
         visibleRows.push({
           method,

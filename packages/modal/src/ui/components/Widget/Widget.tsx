@@ -166,14 +166,6 @@ function Widget(props: WidgetProps) {
     );
   }, [modalState]);
 
-  // const handleBackClick = () => {
-  //   setModalState({
-  //     ...modalState,
-  //     currentPage: PAGES.LOGIN,
-  //   });
-  //   log.debug("handleBackClick Body");
-  // };
-
   useEffect(() => {
     if (typeof modalState.externalWalletsConfig === "object") {
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;

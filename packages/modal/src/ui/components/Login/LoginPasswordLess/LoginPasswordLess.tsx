@@ -1,5 +1,7 @@
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
 import { LoginPasswordLessProps } from "./LoginPasswordLess.type";
 
@@ -18,6 +20,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     isDark,
     buttonRadius,
   } = props;
+  const [t] = useTranslation(undefined, { i18n });
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
@@ -56,7 +59,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
           setIsPasswordLessCtaClicked(true);
         }}
       >
-        <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">Continue with {title}</p>
+        <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.passwordless.title", { title })}</p>
       </button>
     );
   }

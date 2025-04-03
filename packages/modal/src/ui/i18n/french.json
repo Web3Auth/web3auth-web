@@ -78,6 +78,14 @@
     "footer.by-signing-in": "En vous connectant, vous acceptez nos",
     "footer.terms-of-service": "Conditions d'utilisation",
     "footer.privacy-policy": "Politique de confidentialité",
-    "footer.and": "et"
+    "footer.and": "et",
+    "connect-wallet.more-wallets": "Plus de portefeuilles",
+    "otp.success": "Vous êtes connecté à votre compte!",
+    "otp.mobile-title": "Vérification OTP",
+    "otp.mobile-subtext": "Entrez le code OTP envoyé à",
+    "otp.email-title": "Vérification de l'email",
+    "otp.email-subtext": "Veuillez entrer le code de vérification à 6 chiffres",
+    "otp.email-subtext-example": "envoyé à votre email {{email}}",
+    "passwordless.title": "Continuer avec {{title}}"
   }
 }

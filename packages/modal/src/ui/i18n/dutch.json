@@ -80,6 +80,14 @@
     "footer.by-signing-in": "Door in te loggen, gaat u akkoord met onze",
     "footer.terms-of-service": "Gebruiksvoorwaarden",
     "footer.privacy-policy": "Privacybeleid",
-    "footer.and": "en"
+    "footer.and": "en",
+    "connect-wallet.more-wallets": "Meer portemonnees",
+    "otp.success": "U bent verbonden met uw account!",
+    "otp.mobile-title": "OTP verificatie",
+    "otp.mobile-subtext": "Voer de OTP in die naar",
+    "otp.email-title": "E-mail verificatie",
+    "otp.email-subtext": "Voer de 6-cijferige verificatiecode in",
+    "otp.email-subtext-example": "die naar uw e-mail {{email}} is verstuurd",
+    "passwordless.title": "Doorgaan met {{title}}"
   }
 }

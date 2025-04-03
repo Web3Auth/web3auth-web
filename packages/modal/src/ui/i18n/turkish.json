@@ -80,6 +80,14 @@
     "footer.by-signing-in": "Giriş yapmak, bizimle ilgili",
     "footer.terms-of-service": "Kullanım Şartları",
     "footer.privacy-policy": "Gizlilik Politikası",
-    "footer.and": "ve"
+    "footer.and": "ve",
+    "connect-wallet.more-wallets": "Daha fazla cüzdan",
+    "otp.success": "Hesabınıza bağlandınız!",
+    "otp.mobile-title": "OTP doğrulama",
+    "otp.mobile-subtext": "Gönderilen OTP'yi girin",
+    "otp.email-title": "E-posta doğrulama",
+    "otp.email-subtext": "Lütfen {{email}} adresine gönderilen 6 haneli doğrulama kodunu girin",
+    "otp.email-subtext-example": "{{email}} adresine gönderildi",
+    "passwordless.title": "{{title}} ile devam et"
   }
 }

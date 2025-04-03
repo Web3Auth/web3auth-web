@@ -57,7 +57,7 @@ function WalletsFound(props: WalletsFoundProps) {
 
 function MoreWalletsButton(props: MoreWalletsButtonProps) {
   const { totalExternalWallets, initialWalletCount, handleMoreWallets, isLoading, isDark, buttonRadius } = props;
-
+  const [t] = useTranslation(undefined, { i18n });
   const onMoreWalletsClick = () => {
     if (handleMoreWallets) {
       handleMoreWallets();
@@ -90,7 +90,7 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
       onClick={onMoreWalletsClick}
     >
       <img src={getIcons(isDark ? "view-dark" : "view-light")} alt="view" height="24" width="24" />
-      <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">More Wallets</p>
+      <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{t("modal.connect-wallet.more-wallets")}</p>
       <span
         className="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
         dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"

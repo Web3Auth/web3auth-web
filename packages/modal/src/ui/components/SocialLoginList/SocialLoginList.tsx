@@ -25,8 +25,6 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
 function SocialLoginList(props: SocialLoginListProps) {
   const { visibleRow, otherRow, isDark, canShowMore, handleSocialLoginClick, handleExpandSocialLogins, buttonRadius } = props;
 
-  // eslint-disable-next-line no-console
-  console.log("visibleRow", visibleRow);
   const getGridRowFromVisibleLogin = () => {
     if (visibleRow.length === 1) {
       return "w3a--grid-cols-1";

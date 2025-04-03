@@ -80,6 +80,14 @@
     "footer.by-signing-in": "登录即表示您同意我们的",
     "footer.terms-of-service": "服务条款",
     "footer.privacy-policy": "隐私政策",
-    "footer.and": "和"
+    "footer.and": "和",
+    "connect-wallet.more-wallets": "更多钱包",
+    "otp.success": "您已连接到您的帐户!",
+    "otp.mobile-title": "OTP验证",
+    "otp.mobile-subtext": "输入发送给",
+    "otp.email-title": "电子邮件验证",
+    "otp.email-subtext": "请输入发送给您的6位验证码",
+    "otp.email-subtext-example": "发送给您的电子邮件 {{email}}",
+    "passwordless.title": "继续使用{{title}}"
   }
 }

@@ -80,6 +80,14 @@
     "footer.by-signing-in": "Al iniciar sesión, acepta nuestros",
     "footer.terms-of-service": "Términos de servicio",
     "footer.privacy-policy": "Política de privacidad",
-    "footer.and": "y"
+    "footer.and": "y",
+    "connect-wallet.more-wallets": "Más billeteras",
+    "otp.success": "Estás conectado a tu cuenta!",
+    "otp.mobile-title": "Verificación OTP",
+    "otp.mobile-subtext": "Ingrese el código OTP enviado a",
+    "otp.email-title": "Verificación de correo electrónico",
+    "otp.email-subtext": "Por favor, ingrese el código de verificación de 6 dígitos enviado a su correo electrónico",
+    "otp.email-subtext-example": "enviado a su correo electrónico {{email}}",
+    "passwordless.title": "Continuar con {{title}}"
   }
 }

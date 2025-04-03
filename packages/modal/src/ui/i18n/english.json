@@ -80,6 +80,14 @@
     "footer.by-signing-in": "By signing in, you agree to our",
     "footer.terms-of-service": "Terms of Service",
     "footer.privacy-policy": "Privacy Policy",
-    "footer.and": "and"
+    "footer.and": "and",
+    "connect-wallet.more-wallets": "More Wallets",
+    "otp.success": "You are connected to your account!",
+    "otp.mobile-title": "OTP verification",
+    "otp.mobile-subtext": "Enter the OTP sent to",
+    "otp.email-title": "Email verification",
+    "otp.email-subtext": "Please enter the 6-digit verification code",
+    "otp.email-subtext-example": "that was sent to your email {{email}}",
+    "passwordless.title": "Continue with {{title}}"
   }
 }
