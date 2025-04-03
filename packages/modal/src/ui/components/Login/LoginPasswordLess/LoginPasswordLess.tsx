@@ -9,24 +9,26 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     isPasswordLessCtaClicked,
     setIsPasswordLessCtaClicked,
     title,
-    fieldValue,
-    handleInputChange,
     placeholder,
     handleFormSubmit,
     invalidInputErrorMessage,
     isValidInput,
     isDark,
+    isPasswordLessLoading,
   } = props;
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [inputValue, setInputValue] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
-    handleInputChange(e);
+    setInputValue((e.target as HTMLInputElement).value);
     setIsInputFocused(true);
   };
 
   const onFormSubmit = (e: ReactMouseEvent<HTMLButtonElement>) => {
-    handleFormSubmit(e);
+    e.preventDefault();
+    handleFormSubmit(inputValue);
     setIsInputFocused(false);
   };
 
@@ -62,20 +64,31 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
         <input
           ref={inputRef}
           onInput={onInputChange}
-          value={fieldValue}
+          value={inputValue}
           placeholder={placeholder}
           onFocus={() => {
             setIsInputFocused(true);
           }}
-          onBlur={(e) => {
-            e.target.placeholder = `${placeholder}`;
-            setIsInputFocused(false);
-          }}
+          // onBlur={(e) => {
+          //   e.target.placeholder = `${placeholder}`;
+          //   setIsInputFocused(false);
+          // }}
           type="text"
           className="w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
         />
-        {fieldValue && isValidInput && isInputFocused && (
-          <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
+        {isPasswordLessLoading && (
+          // TODO: Add loading spinner
+          <div>Loading..</div>
+        )}
+        {inputValue && isValidInput && isInputFocused && !isPasswordLessLoading && (
+          <button
+            type="button"
+            className="w3a--icon-animation w3a--appearance-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFormSubmit(e);
+            }}
+          >
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}

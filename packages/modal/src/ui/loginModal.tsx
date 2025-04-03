@@ -59,7 +59,7 @@ function createWrapperForEmbed(targetId: string) {
 }
 
 export class LoginModal {
-  private uiConfig: UIConfig;
+  private uiConfig: LoginModalProps;
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
@@ -203,6 +203,8 @@ export class LoginModal {
         log.info("rendered");
         this.setState({
           status: MODAL_STATUS.INITIALIZED,
+          web3authClientId: this.uiConfig.web3authClientId,
+          web3authNetwork: this.uiConfig.web3authNetwork,
         });
         return resolve();
       });

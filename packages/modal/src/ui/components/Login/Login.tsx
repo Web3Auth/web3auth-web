@@ -1,8 +1,12 @@
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
+import { log } from "@web3auth/no-modal";
+import { MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { capitalizeFirstLetter } from "../../config";
+import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
+import { PasswordlessHandler } from "../../handlers/AbstractHandler";
+import { createPasswordlessHandler } from "../../handlers/factory";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
@@ -11,7 +15,7 @@ import { LoginProps } from "./Login.type";
 import LoginOtp from "./LoginOtp";
 import LoginPasswordLess from "./LoginPasswordLess";
 
-export const restrictedLoginMethods: string[] = [
+const restrictedLoginMethods: string[] = [
   AUTH_CONNECTION.SMS_PASSWORDLESS,
   AUTH_CONNECTION.EMAIL_PASSWORDLESS,
   AUTH_CONNECTION.AUTHENTICATOR,
@@ -23,6 +27,8 @@ export const restrictedLoginMethods: string[] = [
 function Login(props: LoginProps) {
   const {
     // appName,
+    web3authClientId,
+    web3authNetwork,
     appLogo,
     isModalVisible,
     handleSocialLoginHeight,
@@ -42,7 +48,6 @@ function Login(props: LoginProps) {
 
   const [t] = useTranslation(undefined, { i18n });
 
-  const [fieldValue, setFieldValue] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean>(true);
   const [expand, setExpand] = useState(false);
   const [canShowMore, setCanShowMore] = useState(false);
@@ -50,9 +55,13 @@ function Login(props: LoginProps) {
   const [otherRow, setOtherRow] = useState<rowType[]>([]);
   const [isPasswordLessCtaClicked, setIsPasswordLessCtaClicked] = useState(false);
   const [showOtpFlow, setShowOtpFlow] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(true);
-  const [isMobileOtp, setIsMobileOtp] = useState(false);
-  const [otpSuccess, setOtpSuccess] = useState(false);
+  const [authConnection, setAuthConnection] = useState<AUTH_CONNECTION_TYPE | undefined>(undefined);
+  const [passwordlessHandler, setPasswordlessHandler] = useState<PasswordlessHandler | undefined>(undefined);
+  const [isPasswordLessLoading, setIsPasswordLessLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaError, setCaptchaError] = useState<string>("");
+  const captchaRef = useRef<HCaptcha>(null);
 
   const handleExpand = () => {
     setExpand((prev) => !prev);
@@ -89,7 +98,7 @@ function Login(props: LoginProps) {
             name,
             adapter: socialLoginsConfig.connector,
             loginParams: {
-              authConnection: method as AUTH_CONNECTION_TYPE,
+              authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
@@ -108,7 +117,7 @@ function Login(props: LoginProps) {
           name: name === "Twitter" ? "X" : name,
           adapter: socialLoginsConfig.connector,
           loginParams: {
-            authConnection: method as AUTH_CONNECTION_TYPE,
+            authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
             authConnectionId: connectorConfig.authConnectionId,
             groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
             extraLoginOptions: connectorConfig.extraLoginOptions,
@@ -125,61 +134,91 @@ function Login(props: LoginProps) {
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
   }, [socialLoginsConfig, isDark]);
 
-  const handleFormSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    // setShowOtpFlow(true);
-    // setTimeout(() => {
-    //   setOtpLoading(false);
-    //   setIsMobileOtp(true);
-    // }, 3000);
+  const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
+    try {
+      // const connectorConfig = socialLoginsConfig.loginMethods[authConnection];
+      const handler = createPasswordlessHandler(authConnection, {
+        loginHint,
+        clientId: "BKZDJP0ouZP0PtfQYssMiezINbUwnIthw6ClTtTICvh0MCRgAxi5GJbHKH9cjM6xyWxe73c6c94ASCTxbGNLUt8",
+        web3authClientId,
+        network: web3authNetwork,
+        uiConfig: socialLoginsConfig.uiConfig,
+        authConnection,
+      });
 
-    const value = fieldValue;
+      let token = "";
+      if (authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS) {
+        const res = await captchaRef.current?.execute({ async: true });
+        if (!res) {
+          throw new Error("Captcha token is required");
+        }
+        token = res.response;
+      }
 
+      const result = await handler.sendVerificationCode({ captchaToken: token });
+      if (result?.success) {
+        setAuthConnection(authConnection);
+        setShowOtpFlow(true);
+        setPasswordlessHandler(handler);
+      }
+    } catch (error) {
+      log.error(error);
+    } finally {
+      setIsPasswordLessLoading(false);
+    }
+  };
+
+  const handleFormSubmit = async (loginHint: string) => {
+    setIsPasswordLessLoading(true);
     if (isEmailPasswordLessLoginVisible) {
-      const isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
+      const isEmailValid = loginHint.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
         const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS];
-        return handleSocialLoginClick({
-          connector: socialLoginsConfig.connector || "",
-          loginParams: {
-            authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS,
-            authConnectionId: connectorConfig.authConnectionId,
-            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-            extraLoginOptions: connectorConfig.extraLoginOptions,
-            login_hint: value,
-            name: "Email",
-          },
-        });
+        if (connectorConfig.isDefault) {
+          return handleSocialLoginClick({
+            connector: socialLoginsConfig.connector || "",
+            loginParams: {
+              authConnection: AUTH_CONNECTION.EMAIL_PASSWORDLESS,
+              authConnectionId: connectorConfig.authConnectionId,
+              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+              extraLoginOptions: connectorConfig.extraLoginOptions,
+              login_hint: loginHint,
+              name: "Email",
+            },
+          });
+        } else {
+          return handleCustomLogin(AUTH_CONNECTION.EMAIL_PASSWORDLESS, loginHint);
+        }
       }
     }
+
     if (isSmsPasswordLessLoginVisible) {
       const countryCode = "";
-      const number = value.startsWith("+") ? value : `${countryCode}${value}`;
+      const number = loginHint.startsWith("+") ? loginHint : `${countryCode}${loginHint}`;
       const result = await validatePhoneNumber(number);
       if (result) {
         const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
-        return handleSocialLoginClick({
-          connector: socialLoginsConfig.connector || "",
-          loginParams: {
-            authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS,
-            authConnectionId: connectorConfig.authConnectionId,
-            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-            extraLoginOptions: connectorConfig.extraLoginOptions,
-            login_hint: typeof result === "string" ? result : number,
-            name: "Mobile",
-          },
-        });
+        if (connectorConfig.isDefault) {
+          return handleSocialLoginClick({
+            connector: socialLoginsConfig.connector || "",
+            loginParams: {
+              authConnection: AUTH_CONNECTION.SMS_PASSWORDLESS,
+              authConnectionId: connectorConfig.authConnectionId,
+              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+              extraLoginOptions: connectorConfig.extraLoginOptions,
+              login_hint: typeof result === "string" ? result : number,
+              name: "Mobile",
+            },
+          });
+        } else {
+          return handleCustomLogin(AUTH_CONNECTION.SMS_PASSWORDLESS, loginHint);
+        }
       }
     }
 
     setIsValidInput(false);
+    setIsPasswordLessLoading(false);
     return undefined;
-  };
-
-  const handleInputChange = (e: FormEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFieldValue(target.value);
-    if (isValidInput === false) setIsValidInput(true);
   };
 
   const title = useMemo(() => {
@@ -206,31 +245,116 @@ function Login(props: LoginProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
   };
 
-  const handleOtpComplete = (otp: string) => {
-    // eslint-disable-next-line no-console
-    console.log(otp);
-    setOtpSuccess(true);
-    setTimeout(() => {
-      setOtpSuccess(false);
-      setShowOtpFlow(false);
-    }, 1000);
-    setOtpLoading(false);
-    setIsMobileOtp(false);
+  const handleOtpComplete = async (otp: string) => {
+    setOtpLoading(true);
+
+    try {
+      const connectorConfig = socialLoginsConfig.loginMethods[authConnection];
+      const result = await passwordlessHandler?.verifyCode(otp);
+      if (result?.id_token) {
+        return handleSocialLoginClick({
+          connector: socialLoginsConfig.connector || "",
+          loginParams: {
+            authConnection: authConnection,
+            authConnectionId: connectorConfig.authConnectionId,
+            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+            extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.id_token },
+            login_hint: passwordlessHandler.passwordlessParams.loginHint,
+            name: passwordlessHandler.name,
+          },
+        });
+      }
+    } catch (error) {
+      log.error(error);
+    } finally {
+      setOtpLoading(false);
+    }
   };
 
   if (showOtpFlow) {
     return (
       <LoginOtp
         otpLoading={otpLoading}
-        otpSuccess={otpSuccess}
+        loginHint={passwordlessHandler?.passwordlessParams.loginHint}
         setShowOtpFlow={setShowOtpFlow}
-        isMobileOtp={isMobileOtp}
+        authConnection={authConnection}
         handleOtpComplete={handleOtpComplete}
       />
     );
   }
 
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+
+  const renderLoginOptions = () => {
+    return (
+      <>
+        {expand && (
+          <SocialLoginList
+            otherRow={otherRow}
+            isDark={isDark}
+            visibleRow={visibleRow}
+            canShowMore={canShowMore}
+            handleSocialLoginClick={handleSocialLoginClick}
+            socialLoginsConfig={socialLoginsConfig}
+            handleExpandSocialLogins={handleExpand}
+          />
+        )}
+
+        {!expand && areSocialLoginsVisible && (
+          <SocialLoginList
+            otherRow={[]}
+            isDark={isDark}
+            visibleRow={visibleRow}
+            canShowMore={canShowMore}
+            handleSocialLoginClick={handleSocialLoginClick}
+            socialLoginsConfig={socialLoginsConfig}
+            handleExpandSocialLogins={handleExpand}
+          />
+        )}
+
+        {!expand && showPasswordLessInput && (
+          <LoginPasswordLess
+            isPasswordLessLoading={isPasswordLessLoading}
+            isModalVisible={isModalVisible}
+            isPasswordLessCtaClicked={isPasswordLessCtaClicked}
+            setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
+            title={title}
+            placeholder={placeholder}
+            handleFormSubmit={handleFormSubmit}
+            invalidInputErrorMessage={invalidInputErrorMessage}
+            isValidInput={isValidInput}
+            isDark={isDark}
+          />
+        )}
+
+        {!expand && showExternalWalletButton && showPasswordLessInput && (
+          <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
+            <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+            <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
+            <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+          </div>
+        )}
+
+        {!expand && showExternalWalletButton && (
+          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
+            <div
+              id="external-wallet-count"
+              className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+            >
+              {totalExternalWallets - 1}+
+            </div>
+            <img
+              id="external-wallet-arrow"
+              className="w3a--icon-animation"
+              src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+              alt="arrow"
+            />
+          </button>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
@@ -245,71 +369,25 @@ function Login(props: LoginProps) {
         <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.social.sign-in")}</p>
       </div>
 
-      {expand && (
-        <SocialLoginList
-          otherRow={otherRow}
-          isDark={isDark}
-          visibleRow={visibleRow}
-          canShowMore={canShowMore}
-          handleSocialLoginClick={handleSocialLoginClick}
-          socialLoginsConfig={socialLoginsConfig}
-          handleExpandSocialLogins={handleExpand}
-        />
+      <HCaptcha
+        ref={captchaRef}
+        sitekey={CAPTCHA_SITE_KEY}
+        size="invisible"
+        languageOverride={socialLoginsConfig.uiConfig.defaultLanguage}
+        theme={socialLoginsConfig.uiConfig.theme}
+        onOpen={() => setShowCaptcha(true)}
+        onClose={() => setShowCaptcha(false)}
+        onError={() => setCaptchaError("passwordless.captcha-default-error")}
+        onChalExpired={() => setCaptchaError("passwordless.captcha-default-error")}
+      />
+
+      {captchaError && showCaptcha && (
+        <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
+          {t(captchaError)}
+        </p>
       )}
 
-      {!expand && areSocialLoginsVisible && (
-        <SocialLoginList
-          otherRow={[]}
-          isDark={isDark}
-          visibleRow={visibleRow}
-          canShowMore={canShowMore}
-          handleSocialLoginClick={handleSocialLoginClick}
-          socialLoginsConfig={socialLoginsConfig}
-          handleExpandSocialLogins={handleExpand}
-        />
-      )}
-
-      {!expand && showPasswordLessInput && (
-        <LoginPasswordLess
-          isModalVisible={isModalVisible}
-          isPasswordLessCtaClicked={isPasswordLessCtaClicked}
-          setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
-          title={title}
-          fieldValue={fieldValue}
-          handleInputChange={handleInputChange}
-          placeholder={placeholder}
-          handleFormSubmit={handleFormSubmit}
-          invalidInputErrorMessage={invalidInputErrorMessage}
-          isValidInput={isValidInput}
-          isDark={isDark}
-        />
-      )}
-
-      {!expand && showExternalWalletButton && showPasswordLessInput && (
-        <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
-          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-          <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
-          <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-        </div>
-      )}
-
-      {!expand && showExternalWalletButton && (
-        <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
-          <div
-            id="external-wallet-count"
-            className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
-          >
-            {totalExternalWallets - 1}+
-          </div>
-          <img
-            id="external-wallet-arrow"
-            className="w3a--icon-animation"
-            src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
-            alt="arrow"
-          />
-        </button>
-      )}
+      {!showCaptcha && renderLoginOptions()}
     </div>
   );
 }

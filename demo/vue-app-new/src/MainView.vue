@@ -20,7 +20,7 @@ import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
+import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -126,7 +126,7 @@ const options = computed((): Web3AuthOptions => {
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
     authBuildEnv: BUILD_ENV.TESTING, // Custom build env
-    connectors: [...externalConnectors.value, authConnectorInstance],
+    connectors: [authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
@@ -154,7 +154,14 @@ const modalParams = computed(() => {
   const modalConfig = {
     [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
-      loginMethods: loginMethodsConfig.value,
+      loginMethods: {
+        [AUTH_CONNECTION.EMAIL_PASSWORDLESS]: {
+          authConnectionId: "custom-email-passwordless1",
+        },
+        [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
+          authConnectionId: "custom-sms-passwordless",
+        },
+      },
     },
   };
   return modalConfig;
@@ -175,7 +182,6 @@ onBeforeMount(() => {
     try {
       if (storedValue) {
         const json = JSON.parse(storedValue);
-        formData.connectors = json.connectors;
         formData.chains = json.chains;
         formData.chainNamespaces = json.chainNamespaces;
         formData.loginProviders = json.loginProviders;
@@ -199,16 +205,16 @@ watch(formData, () => {
 });
 
 // Every time the form data changes, reinitialize the web3Auth object
-watch(
-  () => formData.connectors,
-  async () => {
-    let connectors: ConnectorFn[] = [];
-    for (let i = 0; i <= formData.connectors.length; i += 1) {
-      connectors = connectors.concat(getExternalAdapterByName(formData.connectors[i]));
-    }
-    externalConnectors.value = connectors;
-  }
-);
+// watch(
+//   () => formData.connectors,
+//   async () => {
+//     let connectors: ConnectorFn[] = [];
+//     for (let i = 0; i <= formData.connectors.length; i += 1) {
+//       connectors = connectors.concat(getExternalAdapterByName(formData.connectors[i]));
+//     }
+//     externalConnectors.value = connectors;
+//   }
+// );
 
 const configs = computed<Web3AuthContextConfig>(() => {
   return {

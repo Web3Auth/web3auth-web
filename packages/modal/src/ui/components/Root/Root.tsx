@@ -318,6 +318,8 @@ function Root(props: RootProps) {
               <>
                 {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                   <Login
+                    web3authClientId={modalState.web3authClientId}
+                    web3authNetwork={modalState.web3authNetwork}
                     isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
                     appLogo={appLogo}

@@ -1,15 +1,12 @@
-import type { FormEvent, MouseEvent as ReactMouseEvent } from "react";
-
 export interface LoginPasswordLessProps {
   isModalVisible: boolean;
   isPasswordLessCtaClicked: boolean;
+  isPasswordLessLoading: boolean;
   title: string;
-  fieldValue: string;
   placeholder: string;
   invalidInputErrorMessage: string;
   isValidInput: boolean;
   isDark: boolean;
+  handleFormSubmit: (loginHint: string) => void;
   setIsPasswordLessCtaClicked: (isPasswordLessCtaClicked: boolean) => void;
-  handleInputChange: (e: FormEvent<HTMLInputElement>) => void;
-  handleFormSubmit: (e: ReactMouseEvent<HTMLButtonElement>) => void;
 }

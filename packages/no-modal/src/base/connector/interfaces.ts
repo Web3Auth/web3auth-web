@@ -123,7 +123,7 @@ export type LoginMethodConfig = Partial<
       /**
        * Display Name. If not provided, we use the default for auth app
        */
-      name: string;
+      name?: string;
       /**
        * Description for button. If provided, it renders as a full length button. else, icon button
        */
@@ -168,6 +168,19 @@ export type LoginMethodConfig = Partial<
        * ExtraLoginOption params to be used for social login.
        */
       extraLoginOptions?: ExtraLoginOptions;
+      /**
+       * Auth connection type of the auth connector.
+       * Can be different from the original key.
+       *
+       * Example: This helps in customizing the google login button with auth0 custom connector.
+       */
+      authConnection?: AUTH_CONNECTION_TYPE;
+      /**
+       * Whether is it default connector.
+       *
+       * @internal
+       */
+      isDefault?: boolean;
     }
   >
 >;

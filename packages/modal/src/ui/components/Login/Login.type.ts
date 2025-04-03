@@ -1,6 +1,10 @@
+import { WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
+
 import { SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
   isModalVisible: boolean;
   isDark: boolean;
   appLogo?: string;

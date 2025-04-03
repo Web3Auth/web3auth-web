@@ -1,4 +1,12 @@
-import type { AUTH_CONNECTION_TYPE, ExtraLoginOptions, SafeEventEmitter } from "@web3auth/auth";
+import type {
+  AUTH_CONNECTION_TYPE,
+  EMAIL_FLOW_TYPE,
+  ExtraLoginOptions,
+  LANGUAGES,
+  SafeEventEmitter,
+  THEME_MODE_TYPE,
+  WEB3AUTH_NETWORK_TYPE,
+} from "@web3auth/auth";
 import {
   type AuthLoginParams,
   type BaseConnectorConfig,
@@ -81,6 +89,8 @@ export type ModalLoginParams = Pick<
 export interface LoginModalProps extends UIConfig {
   chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
 }
 
 export interface LoginModalCallbacks {
@@ -123,6 +133,8 @@ export interface ModalState {
   detailedLoaderConnectorName: string;
   showExternalWalletsOnly: boolean;
   currentPage?: string;
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
 }
 
 export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
@@ -171,4 +183,53 @@ export type rowType = {
   };
   order: number;
   isMainOption: boolean;
+};
+
+export type PasswordlessHandlerParams = {
+  authConnection: AUTH_CONNECTION_TYPE;
+  web3authClientId: string;
+  clientId: string;
+  loginHint: string;
+  network: string;
+  uiConfig?: Omit<UIConfig, "connectorListener">;
+};
+
+export interface WhiteLabelParams {
+  name?: string;
+  url?: string;
+  language?: keyof typeof LANGUAGES;
+  theme?: Record<string, string>;
+  logo?: string;
+  mode?: THEME_MODE_TYPE;
+}
+
+export interface CodeInitiateRequestBodyParams {
+  client_id: string;
+  connection: "email" | "sms";
+  login_hint: string;
+  web3auth_client_id: string;
+  tracking_id?: string;
+  whitelabel?: WhiteLabelParams;
+  version?: string;
+  network?: string;
+  flow_type?: EMAIL_FLOW_TYPE;
+  captcha_token?: string;
+}
+
+export interface CodeVerifyRequestBodyParams {
+  client_id: string;
+  login_hint: string;
+  code: string;
+  connection: "email" | "sms";
+  tracking_id: string;
+  version?: string;
+  network?: string;
+  flow_type?: EMAIL_FLOW_TYPE;
+}
+
+export type IStartResponse = {
+  success?: boolean;
+  message: string;
+  error?: string;
+  data?: { trackingId: string };
 };
