@@ -28,8 +28,6 @@ function Root(props: RootProps) {
     handleSocialLoginClick,
     showPasswordLessInput,
     showExternalWalletButton,
-    showExternalWalletCount,
-    showInstalledExternalWallets,
     socialLoginsConfig,
     areSocialLoginsVisible,
     isEmailPrimary,
@@ -41,7 +39,15 @@ function Root(props: RootProps) {
     uiConfig,
   } = props;
 
-  const { logoAlignment, buttonRadiusType, enableMainSocialLoginButton, privacyPolicy, tncLink, displayInstalledExternalWallets } = uiConfig;
+  const {
+    logoAlignment,
+    buttonRadiusType,
+    enableMainSocialLoginButton,
+    privacyPolicy,
+    tncLink,
+    displayInstalledExternalWallets = true,
+    displayExternalWalletsCount = true,
+  } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -389,8 +395,8 @@ function Root(props: RootProps) {
                     appLogo={appLogo}
                     showPasswordLessInput={showPasswordLessInput}
                     showExternalWalletButton={showExternalWalletButton}
-                    showExternalWalletCount={showExternalWalletCount}
-                    showInstalledExternalWallets={showInstalledExternalWallets}
+                    showExternalWalletCount={displayExternalWalletsCount}
+                    showInstalledExternalWallets={displayInstalledExternalWallets}
                     handleSocialLoginClick={handleSocialLoginClick}
                     socialLoginsConfig={socialLoginsConfig}
                     areSocialLoginsVisible={areSocialLoginsVisible}

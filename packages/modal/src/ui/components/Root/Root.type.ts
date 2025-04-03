@@ -10,8 +10,6 @@ export interface RootProps {
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
-  showExternalWalletCount: boolean;
-  showInstalledExternalWallets: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
