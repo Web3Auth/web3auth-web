@@ -74,7 +74,6 @@ function Root(props: RootProps) {
       os: browserData.getOSName() as mobileOs,
     };
   }, []);
-  // TODO: metamask must always be shown here and installed wallets must be shown here
 
   const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
     if (deviceDetails.platform === "desktop") return [];
@@ -203,6 +202,9 @@ function Root(props: RootProps) {
       return Object.keys(wallets).reduce((acc, wallet) => {
         if (adapterVisibilityMap[wallet] === false) return acc;
 
+        // Metamask is always visible in the main screen, no need to show it in the external wallets list
+        if (wallet === WALLET_CONNECTORS.METAMASK) return acc;
+
         const walletRegistryItem: WalletRegistryItem = wallets[wallet];
         let href = "";
         if (deviceDetails.platform !== "desktop") {
@@ -239,6 +241,8 @@ function Root(props: RootProps) {
 
   const customAdapterButtons = useMemo(() => {
     return Object.keys(config).reduce((acc, adapter) => {
+      // Metamask is always visible in the main screen, no need to show it in the external wallets list
+      if (adapter === WALLET_CONNECTORS.METAMASK) return acc;
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && !config[adapter].isInjected && adapterVisibilityMap[adapter]) {
         acc.push({
           name: adapter,
@@ -325,6 +329,7 @@ function Root(props: RootProps) {
                     isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                     totalExternalWallets={totalExternalWalletsLength}
                     handleSocialLoginHeight={handleSocialLoginHeight}
+                    handleExternalWalletClick={preHandleExternalWalletClick}
                   />
                 )}
                 {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
@@ -344,6 +349,7 @@ function Root(props: RootProps) {
                       browser: deviceDetails.browser,
                       os: deviceDetails.os as os,
                     }}
+                    chainNamespace={chainNamespace}
                     handleWalletDetailsHeight={handleWalletDetailsHeight}
                   />
                 )}

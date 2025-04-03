@@ -184,11 +184,43 @@ function Widget(props: WidgetProps) {
   if (widget === WIDGET_TYPE.MODAL) {
     return (
       <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+        {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
+        {modalState.modalVisibility && (
+          <Root
+            appLogo={appLogo}
+            appName={appName}
+            chainNamespace={chainNamespaces}
+            walletRegistry={walletRegistry}
+            showPasswordLessInput={showPasswordLessInput}
+            showExternalWalletButton={showExternalWalletButton}
+            handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+            socialLoginsConfig={modalState.socialLoginsConfig}
+            areSocialLoginsVisible={areSocialLoginsVisible}
+            isEmailPrimary={isEmailPrimary}
+            isExternalPrimary={isExternalPrimary}
+            showExternalWalletPage={showExternalWalletPage}
+            handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+            modalState={modalState}
+            preHandleExternalWalletClick={preHandleExternalWalletClick}
+            setModalState={setModalState}
+            onCloseLoader={onCloseLoader}
+            isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
+            isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+          />
+        )}
+      </Modal>
+    );
+  }
+
+  return (
+    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
+      {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
+      {modalState.modalVisibility && (
         <Root
-          appLogo={appLogo}
-          appName={appName}
           chainNamespace={chainNamespaces}
           walletRegistry={walletRegistry}
+          appLogo={appLogo}
+          appName={appName}
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
@@ -205,33 +237,7 @@ function Widget(props: WidgetProps) {
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
         />
-      </Modal>
-    );
-  }
-
-  return (
-    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
-      <Root
-        chainNamespace={chainNamespaces}
-        walletRegistry={walletRegistry}
-        appLogo={appLogo}
-        appName={appName}
-        showPasswordLessInput={showPasswordLessInput}
-        showExternalWalletButton={showExternalWalletButton}
-        handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-        socialLoginsConfig={modalState.socialLoginsConfig}
-        areSocialLoginsVisible={areSocialLoginsVisible}
-        isEmailPrimary={isEmailPrimary}
-        isExternalPrimary={isExternalPrimary}
-        showExternalWalletPage={showExternalWalletPage}
-        handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-        modalState={modalState}
-        preHandleExternalWalletClick={preHandleExternalWalletClick}
-        setModalState={setModalState}
-        onCloseLoader={onCloseLoader}
-        isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
-        isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-      />
+      )}
     </Embed>
   );
 }

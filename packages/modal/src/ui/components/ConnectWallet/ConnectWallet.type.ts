@@ -1,4 +1,4 @@
-import type { BaseConnectorConfig, WalletRegistry } from "@web3auth/no-modal";
+import type { BaseConnectorConfig, ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
 
 import type { browser, ExternalButton, os, platform } from "../../interfaces";
 
@@ -12,7 +12,8 @@ export interface ConnectWalletProps {
   customAdapterButtons: ExternalButton[];
   adapterVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
+  chainNamespace: ChainNamespaceType[];
   onBackClick?: (flag: boolean) => void;
-  handleExternalWalletClick: (params: { connector: string }) => void;
+  handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   handleWalletDetailsHeight: () => void;
 }

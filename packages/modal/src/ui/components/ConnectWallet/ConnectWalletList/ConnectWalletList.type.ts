@@ -3,13 +3,13 @@ import { browser, ExternalButton, os, platform } from "../../../interfaces";
 export interface ConnectWalletListProps {
   externalButtons: ExternalButton[];
   isLoading: boolean;
-  totalExternalWallets: number;
+  totalExternalWalletsCount: number;
   initialWalletCount: number;
-  handleWalletClick: (button: ExternalButton) => void;
-  handleMoreWallets: () => void;
   isDark: boolean;
   deviceDetails: { platform: platform; browser: browser; os: os };
   walletConnectUri: string;
+  handleWalletClick: (button: ExternalButton) => void;
+  handleMoreWallets: () => void;
 }
 
 export type WalletsFoundProps = Pick<
@@ -19,5 +19,5 @@ export type WalletsFoundProps = Pick<
 
 export type MoreWalletsButtonProps = Pick<
   ConnectWalletListProps,
-  "totalExternalWallets" | "initialWalletCount" | "handleMoreWallets" | "isLoading" | "isDark"
+  "totalExternalWalletsCount" | "initialWalletCount" | "handleMoreWallets" | "isLoading" | "isDark"
 >;

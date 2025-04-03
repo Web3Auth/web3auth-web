@@ -1,4 +1,5 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +7,7 @@ import { capitalizeFirstLetter } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
+import Image from "../Image";
 import SocialLoginList from "../SocialLoginList/SocialLoginList";
 import { LoginProps } from "./Login.type";
 import LoginOtp from "./LoginOtp";
@@ -39,6 +41,7 @@ function Login(props: LoginProps) {
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
+    handleExternalWalletClick,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -231,6 +234,19 @@ function Login(props: LoginProps) {
 
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
+  const metamaskWalletButton = (
+    <button
+      type="button"
+      className={cn("w3a--btn w3a-external-wallet-btn")}
+      onClick={() => {
+        handleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
+      }}
+    >
+      <Image imageId="login-metamask" hoverImageId="login-metamask" fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
+      <span className="w3a--ml-2">{t("modal.external.continue-custom", { wallet: "MetaMask" })}</span>
+    </button>
+  );
+
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
       <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
@@ -281,21 +297,24 @@ function Login(props: LoginProps) {
       )}
 
       {!expand && showExternalWalletButton && (
-        <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
-          <div
-            id="external-wallet-count"
-            className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
-          >
-            {totalExternalWallets - 1}+
-          </div>
-          <img
-            id="external-wallet-arrow"
-            className="w3a--icon-animation"
-            src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
-            alt="arrow"
-          />
-        </button>
+        <>
+          {metamaskWalletButton}
+          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
+            <div
+              id="external-wallet-count"
+              className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+            >
+              {totalExternalWallets - 1}+
+            </div>
+            <img
+              id="external-wallet-arrow"
+              className="w3a--icon-animation"
+              src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+              alt="arrow"
+            />
+          </button>
+        </>
       )}
     </div>
   );
