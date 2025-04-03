@@ -72,8 +72,6 @@ export class LoginModal {
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
-    log.info("uiConfig", uiConfig);
-
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
     if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
     if (!uiConfig.mode) this.uiConfig.mode = "light";

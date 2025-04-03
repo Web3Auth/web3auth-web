@@ -138,6 +138,7 @@ function Login(props: LoginProps) {
 
   const handleFormSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     // setShowOtpFlow(true);
     // setTimeout(() => {
     //   setOtpLoading(false);
