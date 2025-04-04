@@ -13,7 +13,7 @@ import {
 import { getErrorMessages } from "../utils";
 
 export abstract class PasswordlessHandler {
-  readonly authBaseApiUrl = `${PASSWORDLESS_BUILD_ENV_MAP[BUILD_ENV.DEVELOPMENT]}/api/v3/auth`;
+  readonly authBaseApiUrl = `${PASSWORDLESS_BUILD_ENV_MAP[BUILD_ENV.TESTING]}/api/v3/auth`;
 
   passwordlessParams: PasswordlessHandlerParams;
 
