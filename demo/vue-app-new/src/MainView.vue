@@ -3,20 +3,20 @@ import {
   authConnector,
   CHAIN_NAMESPACES,
   coinbaseConnector,
-  ConnectorFn,
-  CustomChainConfig,
+  type ConnectorFn,
+  type CustomChainConfig,
   getChainConfig,
   nftCheckoutPlugin,
-  PluginFn,
+  type PluginFn,
   storageAvailable,
-  UIConfig,
+  type UIConfig,
   WALLET_CONNECTORS,
   walletServicesPlugin,
-  AccountAbstractionMultiChainConfig,
+  type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions
 } from "@web3auth/modal";
 
-import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
@@ -109,8 +109,9 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const { widget, targetId } = formData;
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel, widget: widget, targetId } : { widget: widget, targetId };
+  const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel ? { ...whiteLabel, widgetType: widget, targetId } : { widgetType: widget, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
+
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,

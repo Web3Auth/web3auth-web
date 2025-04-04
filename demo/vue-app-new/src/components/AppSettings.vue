@@ -201,6 +201,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.chains')"
             :multiple="true"
             :options="chainOptions"
+            @update:model-value="onChainChange"
           />
           <Select
             v-model="formData.defaultChainId"

@@ -7,6 +7,7 @@
     "errors-invalid-number": "Invalid Phone Number",
     "errors-invalid-number-email": "Invalid Email or Phone Number",
     "errors-required": "Required",
+    "external.all-wallets": "All Wallets",
     "external.back": "Back",
     "external.connect": "Continue with a wallet",
     "external.search-text": "Don't see your wallet?",
@@ -75,6 +76,18 @@
     "social.view-less-socials": "View less socials",
     "social.view-more": "View more",
     "social.view-more-socials": "View more socials",
-    "social.sign-in": "Sign in"
+    "social.sign-in": "Sign in",
+    "footer.by-signing-in": "By signing in, you agree to our",
+    "footer.terms-of-service": "Terms of Service",
+    "footer.and": "and",
+    "footer.privacy-policy": "Privacy Policy",
+    "connect-wallet.more-wallets": "More Wallets",
+    "otp.success": "You are connected to your account!",
+    "otp.mobile-title": "OTP verification",
+    "otp.mobile-subtext": "Enter the OTP sent to",
+    "otp.email-title": "Email verification",
+    "otp.email-subtext": "Please enter the 6-digit verification code",
+    "otp.email-subtext-example": "that was sent to your email {{email}}",
+    "passwordless.title": "Continue with {{title}}"
   }
 }

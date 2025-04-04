@@ -2,29 +2,29 @@ import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
-  BaseConnectorConfig,
-  ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
+  type BaseConnectorConfig,
+  type ChainNamespaceType,
+  type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
-  IConnectorDataEvent,
+  type IConnectorDataEvent,
   log,
-  LoginMethodConfig,
-  WALLET_CONNECTOR_TYPE,
+  type LoginMethodConfig,
+  type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
-  WalletConnectV2Data,
+  type WalletConnectV2Data,
   WalletInitializationError,
-  WalletRegistry,
-  Web3AuthError,
-  Web3AuthNoModalEvents,
+  type WalletRegistry,
+  type Web3AuthError,
+  type Web3AuthNoModalEvents,
+  WIDGET_TYPE,
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
 // import Modal from "./components/Modal";
 import Widget from "./components/Widget";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";
 import {
-  DEFAULT_LOGO_DARK,
-  DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
   LoginModalCallbacks,
   LoginModalProps,
@@ -33,7 +33,6 @@ import {
   SocialLoginEventType,
   StateEmitterEvents,
   UIConfig,
-  WIDGET_TYPE,
 } from "./interfaces";
 import i18n from "./localeImport";
 import { getUserLanguage } from "./utils";
@@ -81,9 +80,9 @@ export class LoginModal {
     if (!uiConfig.loginGridCol) this.uiConfig.loginGridCol = 3;
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
-    if (!uiConfig.widget) this.uiConfig.widget = WIDGET_TYPE.MODAL;
+    if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
 
-    if (uiConfig.widget === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
+    if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
       throw new Error("targetId is required for embed widget");
     }
@@ -209,12 +208,12 @@ export class LoginModal {
         return resolve();
       });
 
-      if (this.uiConfig.widget === WIDGET_TYPE.MODAL) {
+      if (this.uiConfig.widgetType === WIDGET_TYPE.MODAL) {
         createWrapperForModal(this.uiConfig.modalZIndex);
-      } else if (this.uiConfig.widget === WIDGET_TYPE.EMBED) {
+      } else if (this.uiConfig.widgetType === WIDGET_TYPE.EMBED) {
         createWrapperForEmbed(this.uiConfig.targetId);
       } else {
-        throw WalletInitializationError.invalidParams(`Invalid widget type: ${this.uiConfig.widget}`);
+        throw WalletInitializationError.invalidParams(`Invalid widget type: ${this.uiConfig.widgetType}`);
       }
 
       const container = document.getElementById("w3a-parent-container");
@@ -230,7 +229,6 @@ export class LoginModal {
         <ThemedContext.Provider value={darkState}>
           <Widget
             stateListener={this.stateEmitter}
-            widget={this.uiConfig.widget}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
             chainNamespaces={this.chainNamespaces}
@@ -239,6 +237,7 @@ export class LoginModal {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
             closeModal={this.closeModal}
+            uiConfig={this.uiConfig}
           />
         </ThemedContext.Provider>
       );
@@ -267,12 +266,15 @@ export class LoginModal {
     log.info("addSocialLogins", connector, loginMethods, loginMethodsOrder, uiConfig);
   };
 
-  addWalletLogins = (externalWalletsConfig: Record<string, BaseConnectorConfig>, options: { showExternalWalletsOnly: boolean }): void => {
+  addWalletLogins = (
+    externalWalletsConfig: Record<string, BaseConnectorConfig>,
+    options?: { externalWalletsInitialized: boolean; externalWalletsVisibility: boolean; showExternalWalletsOnly: boolean }
+  ): void => {
     this.setState({
       externalWalletsConfig,
-      externalWalletsInitialized: true,
-      showExternalWalletsOnly: !!options?.showExternalWalletsOnly,
-      externalWalletsVisibility: true,
+      externalWalletsInitialized: !!options.externalWalletsInitialized,
+      showExternalWalletsOnly: !!options.showExternalWalletsOnly,
+      externalWalletsVisibility: !!options.externalWalletsVisibility,
     });
   };
 

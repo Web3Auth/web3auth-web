@@ -1,5 +1,7 @@
 import type { JSX } from "react";
 
+import { BorderRadiusType } from "../../interfaces";
+
 export interface EmbedProps {
   children: JSX.Element[] | JSX.Element;
   padding?: boolean;
@@ -8,4 +10,5 @@ export interface EmbedProps {
   showCloseIcon?: boolean;
   open?: boolean;
   onClose?: () => void;
+  borderRadius?: BorderRadiusType;
 }

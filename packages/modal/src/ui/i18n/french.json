@@ -7,6 +7,7 @@
     "errors-invalid-number": "Numéro de téléphone invalide",
     "errors-invalid-number-email": "Adresse e-mail ou numéro de téléphone invalide",
     "errors-required": "Champ obligatoire",
+    "external.all-wallets": "Toutes les billeteras",
     "external.back": "Retour",
     "external.connect": "Continuer avec un portefeuille",
     "external.search-text": "Vous ne voyez pas votre portefeuille ?",
@@ -73,6 +74,18 @@
     "social.view-less-socials": "Voir moins socials",
     "social.view-more": "Voir plus",
     "social.view-more-socials": "Voir plus socials",
-    "social.sign-in": "Se connecter"
+    "social.sign-in": "Connexion",
+    "footer.by-signing-in": "En vous connectant, vous acceptez nos",
+    "footer.terms-of-service": "Conditions d'utilisation",
+    "footer.and": "et",
+    "footer.privacy-policy": "Politique de confidentialité",
+    "connect-wallet.more-wallets": "Plus de portefeuilles",
+    "otp.success": "Vous êtes connecté à votre compte!",
+    "otp.mobile-title": "Vérification OTP",
+    "otp.mobile-subtext": "Entrez le OTP envoyé à",
+    "otp.email-title": "Vérification de l'email",
+    "otp.email-subtext": "Veuillez entrer le code de vérification 6 chiffres",
+    "otp.email-subtext-example": "qui a été envoyé à votre email {{email}}",
+    "passwordless.title": "Continuer avec {{title}}"
   }
 }

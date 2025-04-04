@@ -1,4 +1,4 @@
-import React from "react";
+import { InputHTMLAttributes } from "react";
 
 export type OtpClassesType =
   | "root"
@@ -12,7 +12,7 @@ export type OtpClassesType =
   | "disabled"
   | "helperText";
 
-export interface OtpProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "placeholder"> {
+export interface OtpProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "placeholder"> {
   length: number;
   resendTimer?: number;
   error?: boolean;

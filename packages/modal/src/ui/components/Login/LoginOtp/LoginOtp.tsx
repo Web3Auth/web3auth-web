@@ -1,6 +1,8 @@
 import { AUTH_CONNECTION } from "@web3auth/auth";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
+import i18n from "../../../localeImport";
 import { getIcons } from "../../../utils";
 import Otp from "../../Otp";
 import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
@@ -13,6 +15,7 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
 function OtpInput(props: OtpInputProps) {
   const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint } = props;
   const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
+  const [t] = useTranslation(undefined, { i18n });
 
   const parsedLoginHint = useMemo(() => {
     if (authConnection === AUTH_CONNECTION.EMAIL_PASSWORDLESS) return loginHint;
@@ -44,11 +47,11 @@ function OtpInput(props: OtpInputProps) {
         <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
         <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
-            {isMobileOtp ? "OTP verification" : "Email verification"}
+            {isMobileOtp ? t("modal.otp.mobile-title") : t("modal.otp.email-title")}
           </p>
           <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
             <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
-              {isMobileOtp ? "Enter the OTP sent to" : "Please enter the 6-digit verification code "}
+              {isMobileOtp ? t("modal.otp.mobile-subtext") : t("modal.otp.email-subtext")}
             </p>
             <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{parsedLoginHint}</p>
           </div>

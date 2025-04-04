@@ -1,15 +1,17 @@
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { log } from "@web3auth/no-modal";
+import { log, type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, rowType } from "../../interfaces";
+import type { rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
+import Image from "../Image";
 import SocialLoginList from "../SocialLoginList/SocialLoginList";
 import { LoginProps } from "./Login.type";
 import LoginOtp from "./LoginOtp";
@@ -25,6 +27,7 @@ const restrictedLoginMethods: string[] = [
 ];
 
 function Login(props: LoginProps) {
+  // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
     // appName,
     web3authClientId,
@@ -33,17 +36,22 @@ function Login(props: LoginProps) {
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
+    installedExternalWalletConfig,
     isDark,
-    // isEmailPrimary,
-    // isExternalPrimary,
     handleSocialLoginClick,
     totalExternalWallets,
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
+    handleExternalWalletClick,
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
+    showExternalWalletCount,
+    showInstalledExternalWallets,
+    logoAlignment = "center",
+    buttonRadius = "pill",
+    enableMainSocialLoginButton = false,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -77,45 +85,31 @@ function Login(props: LoginProps) {
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
 
-    Object.keys(socialLoginsConfig.loginMethods)
-      .filter((method) => {
-        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
-      })
-      .forEach((method, index) => {
-        const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
-        const name = capitalizeFirstLetter(connectorConfig.name || method);
-        const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
-        const order = orderIndex || index;
+    const loginOptions = Object.keys(socialLoginsConfig.loginMethods).filter((method) => {
+      return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+    });
 
-        const isMainOption = connectorConfig.mainOption || order === 1;
-        const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+    loginOptions.forEach((method, index) => {
+      const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+      const name = capitalizeFirstLetter(connectorConfig.name || method);
+      // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
+      const order = index + 1;
 
-        if (order > 0 && order < 4) {
-          visibleRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: socialLoginsConfig.connector,
-            loginParams: {
-              authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
-              authConnectionId: connectorConfig.authConnectionId,
-              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-              extraLoginOptions: connectorConfig.extraLoginOptions,
-              name,
-              login_hint: "",
-            },
-            order,
-            isMainOption,
-          });
-        }
+      const isMainOption = order === 1 && enableMainSocialLoginButton;
+      const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
-        otherRows.push({
+      const loginOptionLength = loginOptions.length;
+      const moreThanFour = loginOptionLength >= 4;
+
+      const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
+
+      if (lengthCheck) {
+        visibleRows.push({
           method,
           isDark,
           isPrimaryBtn,
-          name: name === "Twitter" ? "X" : name,
-          adapter: socialLoginsConfig.connector,
+          name,
+          connector: socialLoginsConfig.connector,
           loginParams: {
             authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
             authConnectionId: connectorConfig.authConnectionId,
@@ -127,12 +121,31 @@ function Login(props: LoginProps) {
           order,
           isMainOption,
         });
+      }
+
+      otherRows.push({
+        method,
+        isDark,
+        isPrimaryBtn,
+        name: name === "Twitter" ? "X" : name,
+        connector: socialLoginsConfig.connector,
+        loginParams: {
+          authConnection: method as AUTH_CONNECTION_TYPE,
+          authConnectionId: connectorConfig.authConnectionId,
+          groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+          extraLoginOptions: connectorConfig.extraLoginOptions,
+          name,
+          login_hint: "",
+        },
+        order,
+        isMainOption,
       });
+    });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark]);
+  }, [socialLoginsConfig, isDark, enableMainSocialLoginButton, buttonRadius]);
 
   const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
     try {
@@ -271,6 +284,12 @@ function Login(props: LoginProps) {
     }
   };
 
+  const installedExternalWallets = useMemo(() => {
+    if (showInstalledExternalWallets) return installedExternalWalletConfig;
+    // always show MetaMask
+    return installedExternalWalletConfig.filter((wallet) => wallet.name === WALLET_CONNECTORS.METAMASK);
+  }, [installedExternalWalletConfig, showInstalledExternalWallets]);
+
   if (showOtpFlow) {
     return (
       <LoginOtp
@@ -283,67 +302,94 @@ function Login(props: LoginProps) {
     );
   }
 
-  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
-
-  const renderLoginOptions = () => {
+  const socialLoginSection = (otherRow: rowType[] = []) => {
     return (
-      <>
-        {expand && (
-          <SocialLoginList
-            otherRow={otherRow}
-            isDark={isDark}
-            visibleRow={visibleRow}
-            canShowMore={canShowMore}
-            handleSocialLoginClick={handleSocialLoginClick}
-            socialLoginsConfig={socialLoginsConfig}
-            handleExpandSocialLogins={handleExpand}
-          />
-        )}
+      <SocialLoginList
+        key="social-login-section"
+        otherRow={otherRow}
+        isDark={isDark}
+        visibleRow={visibleRow}
+        canShowMore={canShowMore}
+        handleSocialLoginClick={handleSocialLoginClick}
+        socialLoginsConfig={socialLoginsConfig}
+        handleExpandSocialLogins={handleExpand}
+        buttonRadius={buttonRadius}
+      />
+    );
+  };
 
-        {!expand && areSocialLoginsVisible && (
-          <SocialLoginList
-            otherRow={[]}
-            isDark={isDark}
-            visibleRow={visibleRow}
-            canShowMore={canShowMore}
-            handleSocialLoginClick={handleSocialLoginClick}
-            socialLoginsConfig={socialLoginsConfig}
-            handleExpandSocialLogins={handleExpand}
-          />
-        )}
+  const passwordlessLoginSection = () => {
+    return (
+      <LoginPasswordLess
+        key="passwordless-section"
+        isModalVisible={isModalVisible}
+        isPasswordLessCtaClicked={isPasswordLessCtaClicked}
+        setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
+        title={title}
+        placeholder={placeholder}
+        handleFormSubmit={handleFormSubmit}
+        invalidInputErrorMessage={invalidInputErrorMessage}
+        isValidInput={isValidInput}
+        isDark={isDark}
+        buttonRadius={buttonRadius}
+        isPasswordLessLoading={isPasswordLessLoading}
+      />
+    );
+  };
 
-        {!expand && showPasswordLessInput && (
-          <LoginPasswordLess
-            isPasswordLessLoading={isPasswordLessLoading}
-            isModalVisible={isModalVisible}
-            isPasswordLessCtaClicked={isPasswordLessCtaClicked}
-            setIsPasswordLessCtaClicked={setIsPasswordLessCtaClicked}
-            title={title}
-            placeholder={placeholder}
-            handleFormSubmit={handleFormSubmit}
-            invalidInputErrorMessage={invalidInputErrorMessage}
-            isValidInput={isValidInput}
-            isDark={isDark}
-          />
-        )}
-
-        {!expand && showExternalWalletButton && showPasswordLessInput && (
-          <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2">
-            <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-            <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
-            <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-          </div>
-        )}
-
-        {!expand && showExternalWalletButton && (
-          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
-            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.connect")}</p>
-            <div
-              id="external-wallet-count"
-              className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+  const externalWalletSection = () => {
+    return (
+      <div key="external-wallets-section" className={cn("w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2")}>
+        {/* INSTALLED EXTERNAL WALLETS */}
+        {installedExternalWallets.length > 0 &&
+          installedExternalWallets.map((wallet) => (
+            <button
+              key={wallet.name}
+              type="button"
+              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+                "w3a--rounded-full": buttonRadius === "pill",
+                "w3a--rounded-lg": buttonRadius === "rounded",
+                "w3a--rounded-none": buttonRadius === "square",
+              })}
+              onClick={() => handleExternalWalletClick({ connector: wallet.name })}
             >
-              {totalExternalWallets - 1}+
-            </div>
+              <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
+              <div className="w3a--flex w3a--items-center w3a--gap-x-2">
+                <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
+                  <Image
+                    imageId={`login-${wallet.name}`}
+                    hoverImageId={`login-${wallet.name}`}
+                    fallbackImageId="wallet"
+                    height="24"
+                    width="24"
+                    isButton
+                    extension={wallet.imgExtension || "webp"}
+                  />
+                </figure>
+              </div>
+            </button>
+          ))}
+
+        {/* EXTERNAL WALLETS DISCOVERY */}
+        {
+          <button
+            type="button"
+            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+              "w3a--rounded-full": buttonRadius === "pill",
+              "w3a--rounded-lg": buttonRadius === "rounded",
+              "w3a--rounded-none": buttonRadius === "square",
+            })}
+            onClick={handleConnectWallet}
+          >
+            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
+            {showExternalWalletCount && (
+              <div
+                id="external-wallet-count"
+                className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+              >
+                {totalExternalWallets - 1}+
+              </div>
+            )}
             <img
               id="external-wallet-arrow"
               className="w3a--icon-animation"
@@ -351,22 +397,94 @@ function Login(props: LoginProps) {
               alt="arrow"
             />
           </button>
-        )}
-      </>
+        }
+      </div>
     );
   };
 
+  const delimiter = (index: number) => {
+    return (
+      <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2" key={`section-delimiter-${index}`}>
+        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+        <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
+        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+      </div>
+    );
+  };
+
+  const defaultView = () => {
+    const sectionMap = {
+      social: socialLoginSection,
+      passwordless: passwordlessLoginSection,
+      externalWallets: externalWalletSection,
+    };
+    const sectionVisibility = {
+      social: areSocialLoginsVisible,
+      passwordless: showPasswordLessInput,
+      externalWallets: showExternalWalletButton,
+    } as Record<ModalSignInMethodType, boolean>;
+    const signInMethods = socialLoginsConfig.uiConfig?.signInMethods || ["social", "passwordless", "externalWallets"];
+
+    // add missing signInMethods in case uiConfig.signInMethods is not set correctly
+    Object.entries(sectionVisibility).forEach(([method, visibility]) => {
+      if (visibility && !signInMethods.includes(method as ModalSignInMethodType)) {
+        signInMethods.push(method as ModalSignInMethodType);
+      }
+    });
+    const sections = signInMethods.map((method) => sectionVisibility[method] && sectionMap[method]()).filter(Boolean);
+
+    // add delimiter between external wallets and other sections
+    if (sections.length === 3) {
+      const externalWalletIndex = signInMethods.findIndex((section) => section === "externalWallets");
+      if (externalWalletIndex === 0) {
+        // add after it
+        sections.splice(1, 0, delimiter(1));
+      } else if (externalWalletIndex === 1) {
+        // add before it
+        sections.splice(1, 0, delimiter(1));
+        // add after it
+        sections.splice(3, 0, delimiter(2));
+      } else if (externalWalletIndex === 2) {
+        // add before it
+        sections.splice(2, 0, delimiter(1));
+      }
+    } else if (sections.length === 2) {
+      if (sectionVisibility["externalWallets"]) {
+        sections.splice(1, 0, delimiter(1));
+      }
+    }
+
+    return sections;
+  };
+
+  const expandedView = () => socialLoginSection(otherRow);
+
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure className="w3a--mx-auto w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
-          {headerLogo ? (
-            <img src={headerLogo} alt="Logo" className="w3a--object-contain" />
-          ) : (
-            <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
+      <div
+        className={cn(
+          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",
+          logoAlignment === "center" ? "" : "w3a--w-full"
+        )}
+      >
+        <figure
+          className={cn(
+            "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
+            logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0"
           )}
+        >
+          <img src={headerLogo || getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
-        <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.social.sign-in")}</p>
+        <p
+          className={cn(
+            "w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white",
+            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4"
+          )}
+        >
+          {t("modal.social.sign-in")}
+        </p>
       </div>
 
       <HCaptcha
@@ -387,7 +505,13 @@ function Login(props: LoginProps) {
         </p>
       )}
 
-      {!showCaptcha && renderLoginOptions()}
+      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        {/* DEFAULT VIEW */}
+        {!expand && defaultView()}
+
+        {/* EXPANDED VIEW */}
+        {expand && expandedView()}
+      </div>
     </div>
   );
 }

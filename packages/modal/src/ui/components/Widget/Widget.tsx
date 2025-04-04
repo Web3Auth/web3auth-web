@@ -1,10 +1,10 @@
 import { AUTH_CONNECTION, WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../../constants";
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, WIDGET_TYPE } from "../../interfaces";
+import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
 import Modal from "../Modal";
 import Root from "../Root";
@@ -17,14 +17,16 @@ function Widget(props: WidgetProps) {
     handleExternalWalletClick,
     handleShowExternalWallets,
     closeModal,
-    widget,
     appLogo,
     appName,
     chainNamespaces,
     walletRegistry,
+    uiConfig,
   } = props;
 
-  const visible = useMemo(() => widget === WIDGET_TYPE.EMBED, [widget]);
+  const { widgetType } = uiConfig;
+
+  const visible = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
 
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
@@ -100,15 +102,18 @@ function Widget(props: WidgetProps) {
   // Memo for checking if email passwordless login is visible
   const isEmailPasswordLessLoginVisible = useMemo(() => {
     return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]?.showOnModal;
-  }, [modalState]);
+  }, [modalState.socialLoginsConfig]);
 
   // Memo for checking if SMS passwordless login is visible
   const isSmsPasswordLessLoginVisible = useMemo(() => {
     return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
-  }, [modalState]);
+  }, [modalState.socialLoginsConfig]);
 
-  const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState]);
-  const isExternalPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin", [modalState]);
+  const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState.socialLoginsConfig]);
+  const isExternalPrimary = useMemo(
+    () => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin",
+    [modalState.socialLoginsConfig]
+  );
   const showPasswordLessInput = useMemo(
     () => isEmailPasswordLessLoginVisible || isSmsPasswordLessLoginVisible,
     [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
@@ -116,7 +121,7 @@ function Widget(props: WidgetProps) {
   const showExternalWalletButton = useMemo(() => modalState.hasExternalWallets, [modalState]);
   const showExternalWalletPage = useMemo(
     () => (areSocialLoginsVisible || showPasswordLessInput) && !modalState.externalWalletsVisibility,
-    [areSocialLoginsVisible, showPasswordLessInput, modalState]
+    [areSocialLoginsVisible, showPasswordLessInput, modalState.externalWalletsVisibility]
   );
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
@@ -160,17 +165,10 @@ function Widget(props: WidgetProps) {
     return (
       modalState.status === MODAL_STATUS.INITIALIZED || modalState.status === MODAL_STATUS.CONNECTED || modalState.status === MODAL_STATUS.ERRORED
     );
-  }, [modalState]);
-
-  // const handleBackClick = () => {
-  //   setModalState({
-  //     ...modalState,
-  //     currentPage: PAGES.LOGIN,
-  //   });
-  //   log.debug("handleBackClick Body");
-  // };
+  }, [modalState.status]);
 
   useEffect(() => {
+    // TODO: maybe move this inside root
     if (typeof modalState.externalWalletsConfig === "object") {
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
       if (wcAvailable && !modalState.walletConnectUri && typeof handleExternalWalletClick === "function") {
@@ -179,9 +177,17 @@ function Widget(props: WidgetProps) {
     }
   }, [modalState, handleExternalWalletClick]);
 
-  if (widget === WIDGET_TYPE.MODAL) {
+  if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+      <Modal
+        open={modalState.modalVisibility}
+        placement="center"
+        padding={false}
+        showCloseIcon={showCloseIcon}
+        onClose={onCloseModal}
+        borderRadius={uiConfig.borderRadiusType}
+      >
+        {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root
             appLogo={appLogo}
@@ -203,6 +209,7 @@ function Widget(props: WidgetProps) {
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+            uiConfig={uiConfig}
           />
         )}
       </Modal>
@@ -210,7 +217,8 @@ function Widget(props: WidgetProps) {
   }
 
   return (
-    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
+    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
+      {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
           chainNamespace={chainNamespaces}
@@ -232,6 +240,7 @@ function Widget(props: WidgetProps) {
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+          uiConfig={uiConfig}
         />
       )}
     </Embed>

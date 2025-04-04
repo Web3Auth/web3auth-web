@@ -1,4 +1,4 @@
-import { rowType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { ButtonRadiusType, rowType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface SocialLoginListProps {
   isDark: boolean;
@@ -8,4 +8,5 @@ export interface SocialLoginListProps {
   otherRow?: rowType[];
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExpandSocialLogins: () => void;
+  buttonRadius?: ButtonRadiusType;
 }

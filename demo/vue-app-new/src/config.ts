@@ -7,6 +7,7 @@ import {
   SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
+  type WidgetType,
 } from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
@@ -123,7 +124,7 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   smartAccountChains: string[];
   smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
-  widget?: "embed" | "modal";
+  widget?: WidgetType;
   targetId?: string;
 };
 

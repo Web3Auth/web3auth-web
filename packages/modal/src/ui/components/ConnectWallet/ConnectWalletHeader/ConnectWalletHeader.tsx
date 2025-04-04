@@ -26,7 +26,7 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
           />
         </svg>
       </button>
-      <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900">
+      <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
         {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET ? selectedButton?.displayName : currentPage}
       </p>
       <div className="w3a--z-[-1] w3a--size-5" />

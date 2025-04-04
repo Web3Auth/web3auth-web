@@ -1,14 +1,17 @@
-import { WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { type ChainNamespaceType, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { RootContext } from "../../context/RootContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
+import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
 import ConnectWalletHeader from "./ConnectWalletHeader";
 import ConnectWalletList from "./ConnectWalletList";
 import ConnectWalletQrCode from "./ConnectWalletQrCode";
 import ConnectWalletSearch from "./ConnectWalletSearch";
+
+const WALLET_LIMIT_COUNT = 10;
 
 function ConnectWallet(props: ConnectWalletProps) {
   const {
@@ -24,6 +27,8 @@ function ConnectWallet(props: ConnectWalletProps) {
     adapterVisibilityMap,
     deviceDetails,
     handleWalletDetailsHeight,
+    buttonRadius = "pill",
+    chainNamespace,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
@@ -35,7 +40,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // const [selectedChain, setSelectedChain] = useState<string>("all");
+  const [selectedChain, setSelectedChain] = useState<string>("all");
   const [initialWalletCount, setInitialWalletCount] = useState<number>(0);
 
   const handleBack = () => {
@@ -55,18 +60,35 @@ function ConnectWallet(props: ConnectWalletProps) {
     return supported;
   }, [walletRegistry]);
 
+  const allUniqueButtons = useMemo(() => {
+    const uniqueButtonSet = new Set();
+    return allExternalButtons.concat(customAdapterButtons).filter((button) => {
+      if (uniqueButtonSet.has(button.name)) return false;
+      uniqueButtonSet.add(button.name);
+      return true;
+    });
+  }, [allExternalButtons, customAdapterButtons]);
+
   const filteredButtons = (searchValue: string) => {
-    return allExternalButtons.concat(customAdapterButtons).filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
+    return allUniqueButtons.filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
   };
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
   const sortedButtons = useMemo(() => {
-    return [
+    // display order: default injected buttons > custom adapter buttons > default non-injected buttons
+    const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customAdapterButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ];
+
+    const buttonSet = new Set();
+    return buttons.filter((button) => {
+      if (buttonSet.has(button.name)) return false;
+      buttonSet.add(button.name);
+      return true;
+    });
   }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
 
   const visibleButtons = useMemo(() => {
@@ -107,15 +129,18 @@ function ConnectWallet(props: ConnectWalletProps) {
     }
     setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 0);
   }, [walletDiscoverySupported, sortedButtons, visibleButtons, totalExternalWallets]);
 
   const handleWalletClick = (button: ExternalButton) => {
-    // if has injected wallet, connect to injected wallet
-    // if doesn't have wallet connect & doesn't have install links, must be a custom adapter
-    if (button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks)) {
-      handleExternalWalletClick({ connector: button.name });
-    } else if (button.hasWalletConnect) {
+    const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
+    // if doesn't have wallet connect & doesn't have install links, must be a custom connector
+    const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
+    if (isInjectedConnectorAndSingleChainNamespace || isCustomConnector) {
+      return handleExternalWalletClick({ connector: button.name });
+    }
+
+    if (button.hasWalletConnect || !isInjectedConnectorAndSingleChainNamespace) {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
@@ -132,9 +157,22 @@ function ConnectWallet(props: ConnectWalletProps) {
   const handleMoreWallets = () => {
     // setIsLoading(true);
     setInitialWalletCount((prev) => prev + 10);
-    const allButtons = [...allExternalButtons, ...customAdapterButtons];
-    const buttons = allButtons.slice(initialWalletCount, initialWalletCount + 10);
+    const buttons = allUniqueButtons.slice(initialWalletCount, initialWalletCount + WALLET_LIMIT_COUNT);
     setExternalButtons((prev) => [...prev, ...buttons]);
+    setInitialWalletCount((prev) => prev + WALLET_LIMIT_COUNT);
+  };
+
+  const handleChainFilterChange = (chain: string) => {
+    setInitialWalletCount(0);
+    setSelectedChain(chain);
+    if (chain === "all") {
+      setExternalButtons(sortedButtons.slice(0, WALLET_LIMIT_COUNT));
+      setTotalExternalWalletsCount(sortedButtons.length);
+    } else {
+      const filteredButtons = sortedButtons.filter((button) => button.chainNamespaces.includes(chain as ChainNamespaceType));
+      setExternalButtons(filteredButtons.slice(0, WALLET_LIMIT_COUNT));
+      setTotalExternalWalletsCount(filteredButtons.length);
+    }
   };
 
   return (
@@ -147,37 +185,41 @@ function ConnectWallet(props: ConnectWalletProps) {
           walletConnectUri={walletConnectUri}
           isDark={isDark}
           selectedButton={selectedButton}
-          setBodyState={setBodyState}
           bodyState={bodyState}
+          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+          setBodyState={setBodyState}
+          handleExternalWalletClick={handleExternalWalletClick}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
-          {/* TODO: To be implemented */}
-          {/* <ConnectWalletChainFilter
+          <ConnectWalletChainFilter
             isDark={isDark}
             isLoading={isLoading}
             selectedChain={selectedChain}
-            setSelectedChain={setSelectedChain}
-            chains={CHAIN_LIST}
-          /> */}
+            setSelectedChain={handleChainFilterChange}
+            chainNamespace={chainNamespace}
+          />
           {/* Search Input */}
           <ConnectWalletSearch
-            totalExternalWallets={totalExternalWalletsCount}
+            totalExternalWalletCount={totalExternalWalletsCount}
             isLoading={isLoading}
             walletSearch={walletSearch}
             handleWalletSearch={handleWalletSearch}
+            buttonRadius={buttonRadius}
           />
           {/* Wallet List */}
           <ConnectWalletList
             externalButtons={externalButtons}
             isLoading={isLoading}
-            totalExternalWallets={totalExternalWalletsCount}
+            totalExternalWalletsCount={totalExternalWalletsCount}
             initialWalletCount={initialWalletCount}
             handleWalletClick={handleWalletClick}
             handleMoreWallets={handleMoreWallets}
             isDark={isDark}
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
+            buttonRadius={buttonRadius}
           />
         </div>
       )}

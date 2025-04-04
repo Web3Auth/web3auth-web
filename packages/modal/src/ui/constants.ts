@@ -10,9 +10,7 @@ export const CONNECT_WALLET_PAGES = {
   SELECTED_WALLET: "Selected Wallet",
 };
 
-// export const CHAIN_LIST: { id: string; name: string; icon?: string }[] = [
-//   // { id: "all", name: "All Chains" },
-//   // { id: "ethereum", name: "Ethereum", icon: "ethereum" },
-//   // { id: "polygon", name: "Polygon", icon: "polygon" },
-//   // { id: "solana", name: "Solana", icon: "solana" },
-// ];
+export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode
+export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
+
+export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
