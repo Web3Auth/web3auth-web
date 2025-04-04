@@ -1,4 +1,4 @@
-import { browser, ExternalButton, os, platform } from "../../../interfaces";
+import { browser, ButtonRadiusType, ExternalButton, os, platform } from "../../../interfaces";
 
 export interface ConnectWalletListProps {
   externalButtons: ExternalButton[];
@@ -8,16 +8,17 @@ export interface ConnectWalletListProps {
   isDark: boolean;
   deviceDetails: { platform: platform; browser: browser; os: os };
   walletConnectUri: string;
+  buttonRadius: ButtonRadiusType;
   handleWalletClick: (button: ExternalButton) => void;
   handleMoreWallets: () => void;
 }
 
 export type WalletsFoundProps = Pick<
   ConnectWalletListProps,
-  "externalButtons" | "isLoading" | "handleWalletClick" | "deviceDetails" | "walletConnectUri"
+  "externalButtons" | "isLoading" | "handleWalletClick" | "deviceDetails" | "walletConnectUri" | "buttonRadius"
 >;
 
 export type MoreWalletsButtonProps = Pick<
   ConnectWalletListProps,
-  "totalExternalWalletsCount" | "initialWalletCount" | "handleMoreWallets" | "isLoading" | "isDark"
+  "totalExternalWalletsCount" | "initialWalletCount" | "handleMoreWallets" | "isLoading" | "isDark" | "buttonRadius"
 >;

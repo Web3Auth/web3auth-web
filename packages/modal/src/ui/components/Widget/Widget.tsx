@@ -1,10 +1,10 @@
 import { AUTH_CONNECTION } from "@web3auth/auth";
-import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../../constants";
-import { ExternalWalletEventType, MODAL_STATUS, ModalState, SocialLoginEventType, WIDGET_TYPE } from "../../interfaces";
+import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
 import Modal from "../Modal";
 import Root from "../Root";
@@ -17,14 +17,16 @@ function Widget(props: WidgetProps) {
     handleExternalWalletClick,
     handleShowExternalWallets,
     closeModal,
-    widget,
     appLogo,
     appName,
     chainNamespaces,
     walletRegistry,
+    uiConfig,
   } = props;
 
-  const visible = useMemo(() => widget === WIDGET_TYPE.EMBED, [widget]);
+  const { widgetType } = uiConfig;
+
+  const visible = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
 
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
@@ -163,14 +165,6 @@ function Widget(props: WidgetProps) {
     );
   }, [modalState.status]);
 
-  // const handleBackClick = () => {
-  //   setModalState({
-  //     ...modalState,
-  //     currentPage: PAGES.LOGIN,
-  //   });
-  //   log.debug("handleBackClick Body");
-  // };
-
   useEffect(() => {
     // TODO: maybe move this inside root
     if (typeof modalState.externalWalletsConfig === "object") {
@@ -181,9 +175,16 @@ function Widget(props: WidgetProps) {
     }
   }, [modalState, handleExternalWalletClick]);
 
-  if (widget === WIDGET_TYPE.MODAL) {
+  if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+      <Modal
+        open={modalState.modalVisibility}
+        placement="center"
+        padding={false}
+        showCloseIcon={showCloseIcon}
+        onClose={onCloseModal}
+        borderRadius={uiConfig.borderRadiusType}
+      >
         {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root
@@ -206,6 +207,7 @@ function Widget(props: WidgetProps) {
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+            uiConfig={uiConfig}
           />
         )}
       </Modal>
@@ -213,7 +215,7 @@ function Widget(props: WidgetProps) {
   }
 
   return (
-    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
+    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
       {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
@@ -236,6 +238,7 @@ function Widget(props: WidgetProps) {
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+          uiConfig={uiConfig}
         />
       )}
     </Embed>

@@ -3,7 +3,7 @@ import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { SMART_ACCOUNT_WALLET_SCOPE } from "./connector";
+import { MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
 
 export interface WhitelistResponse {
   urls: string[];
@@ -49,9 +49,13 @@ export interface WalletUiConfig {
   defaultPortfolio?: "token" | "nft";
 }
 
+export type ModalSignInMethodType = (typeof MODAL_SIGN_IN_METHODS)[keyof typeof MODAL_SIGN_IN_METHODS];
+
+export type WidgetType = (typeof WIDGET_TYPE)[keyof typeof WIDGET_TYPE];
+
 export interface LoginModalConfig {
   // design
-  widgetType?: "embed" | "modal";
+  widgetType?: WidgetType;
   logoAlignment?: "left" | "center";
   borderRadiusType?: "small" | "medium" | "large";
   buttonRadiusType?: "pill" | "rounded" | "square";
@@ -59,7 +63,7 @@ export interface LoginModalConfig {
   privacyPolicy?: string; // TODO: whitelabel also has this
   // authentication
   enableMainSocialLoginButton?: boolean;
-  signInMethods?: ("social" | "passwordless" | "externalWallets")[];
+  signInMethods?: ModalSignInMethodType[];
   addPreviousLoginHint?: boolean;
   // external wallets
   displayInstalledExternalWallets?: boolean;

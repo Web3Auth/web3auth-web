@@ -4,6 +4,7 @@ import {
   type BaseConnectorConfig,
   type ChainNamespaceType,
   type LoginMethodConfig,
+  type LoginModalConfig,
   type UIConfig as CoreUIConfig,
   type WALLET_CONNECTOR_TYPE,
   type WalletRegistry,
@@ -11,22 +12,8 @@ import {
   type Web3AuthNoModalEvents,
 } from "@web3auth/no-modal";
 
-export enum WIDGET_TYPE {
-  MODAL = "modal",
-  EMBED = "embed",
-}
-
-export type WidgetType = (typeof WIDGET_TYPE)[keyof typeof WIDGET_TYPE];
-
 // capture whitelabel only once
-export interface UIConfig extends CoreUIConfig {
-  /**
-   * Whether to use the modal or embed widget
-   *
-   * @defaultValue `modal`
-   */
-  widget?: WidgetType;
-
+export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   /**
    * ID of the element to embed the widget into
    */
@@ -172,3 +159,7 @@ export type rowType = {
   order: number;
   isMainOption: boolean;
 };
+
+export type LogoAlignmentType = UIConfig["logoAlignment"];
+export type BorderRadiusType = UIConfig["borderRadiusType"];
+export type ButtonRadiusType = UIConfig["buttonRadiusType"];

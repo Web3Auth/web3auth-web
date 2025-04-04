@@ -19,8 +19,3 @@ export const CONNECTOR_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",
 } as const;
-
-export const SMART_ACCOUNT_WALLET_SCOPE = {
-  EMBEDDED: "embedded",
-  ALL: "all",
-} as const;

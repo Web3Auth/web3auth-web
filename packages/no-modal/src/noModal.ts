@@ -65,9 +65,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-
     if (options.storageType === "session") this.storage = "sessionStorage";
     this.coreOptions = options;
+    this.currentChainId = options.defaultChainId;
   }
 
   get currentChain(): CustomChainConfig | undefined {
@@ -97,11 +97,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // get project config
     let projectConfig: ProjectConfig;
     try {
-      projectConfig = await fetchProjectConfig(
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork,
-        this.coreOptions.accountAbstractionConfig?.smartAccountType
-      );
+      projectConfig = await fetchProjectConfig({
+        clientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        aaProvider: this.coreOptions.accountAbstractionConfig?.smartAccountType,
+        authBuildEnv: this.coreOptions.authBuildEnv,
+      });
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);

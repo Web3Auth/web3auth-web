@@ -9,7 +9,7 @@ import { EmbedProps } from "./Embed.type";
  * @returns Embed component
  */
 function Embed(props: EmbedProps) {
-  const { open = true, padding = true, shadow = true, border = false, showCloseIcon = false, onClose, children } = props;
+  const { open = true, padding = true, shadow = true, border = false, showCloseIcon = false, onClose, children, borderRadius = "large" } = props;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -40,6 +40,9 @@ function Embed(props: EmbedProps) {
           "w3a--p-4": padding,
           "w3a--shadow-xl sm:w3a--shadow-lg": shadow,
           "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": border,
+          "w3a--rounded-[30px]": borderRadius === "large",
+          "w3a--rounded-2xl": borderRadius === "medium",
+          "w3a--rounded-none": borderRadius === "small",
         }
       )}
     >

@@ -1,4 +1,4 @@
-import { ChainNamespaceType, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { type ChainNamespaceType, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -27,6 +27,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     adapterVisibilityMap,
     deviceDetails,
     handleWalletDetailsHeight,
+    buttonRadius = "pill",
     chainNamespace,
   } = props;
 
@@ -59,18 +60,35 @@ function ConnectWallet(props: ConnectWalletProps) {
     return supported;
   }, [walletRegistry]);
 
+  const allUniqueButtons = useMemo(() => {
+    const uniqueButtonSet = new Set();
+    return allExternalButtons.concat(customAdapterButtons).filter((button) => {
+      if (uniqueButtonSet.has(button.name)) return false;
+      uniqueButtonSet.add(button.name);
+      return true;
+    });
+  }, [allExternalButtons, customAdapterButtons]);
+
   const filteredButtons = (searchValue: string) => {
-    return allExternalButtons.concat(customAdapterButtons).filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
+    return allUniqueButtons.filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
   };
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
   const sortedButtons = useMemo(() => {
-    return [
+    // display order: default injected buttons > custom adapter buttons > default non-injected buttons
+    const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customAdapterButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ];
+
+    const buttonSet = new Set();
+    return buttons.filter((button) => {
+      if (buttonSet.has(button.name)) return false;
+      buttonSet.add(button.name);
+      return true;
+    });
   }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
 
   const visibleButtons = useMemo(() => {
@@ -137,8 +155,9 @@ function ConnectWallet(props: ConnectWalletProps) {
   };
 
   const handleMoreWallets = () => {
-    const allButtons = [...allExternalButtons, ...customAdapterButtons];
-    const buttons = allButtons.slice(initialWalletCount, initialWalletCount + WALLET_LIMIT_COUNT);
+    // setIsLoading(true);
+    setInitialWalletCount((prev) => prev + 10);
+    const buttons = allUniqueButtons.slice(initialWalletCount, initialWalletCount + WALLET_LIMIT_COUNT);
     setExternalButtons((prev) => [...prev, ...buttons]);
     setInitialWalletCount((prev) => prev + WALLET_LIMIT_COUNT);
   };
@@ -167,6 +186,8 @@ function ConnectWallet(props: ConnectWalletProps) {
           isDark={isDark}
           selectedButton={selectedButton}
           bodyState={bodyState}
+          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
           setBodyState={setBodyState}
           handleExternalWalletClick={handleExternalWalletClick}
         />
@@ -185,6 +206,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isLoading={isLoading}
             walletSearch={walletSearch}
             handleWalletSearch={handleWalletSearch}
+            buttonRadius={buttonRadius}
           />
           {/* Wallet List */}
           <ConnectWalletList
@@ -197,6 +219,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isDark={isDark}
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
+            buttonRadius={buttonRadius}
           />
         </div>
       )}
