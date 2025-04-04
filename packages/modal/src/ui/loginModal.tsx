@@ -2,20 +2,20 @@ import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
-  BaseConnectorConfig,
-  ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
+  type BaseConnectorConfig,
+  type ChainNamespaceType,
+  type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
-  IConnectorDataEvent,
+  type IConnectorDataEvent,
   log,
-  LoginMethodConfig,
-  WALLET_CONNECTOR_TYPE,
+  type LoginMethodConfig,
+  type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
-  WalletConnectV2Data,
+  type WalletConnectV2Data,
   WalletInitializationError,
-  WalletRegistry,
-  Web3AuthError,
-  Web3AuthNoModalEvents,
+  type WalletRegistry,
+  type Web3AuthError,
+  type Web3AuthNoModalEvents,
   WIDGET_TYPE,
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
@@ -201,9 +201,10 @@ export class LoginModal {
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
         log.info("rendered");
-        this.setState({
-          status: MODAL_STATUS.INITIALIZED,
-        });
+        // not needed, the default state is initialized inside the modal
+        // this.setState({
+        //   status: MODAL_STATUS.INITIALIZED,
+        // });
         return resolve();
       });
 

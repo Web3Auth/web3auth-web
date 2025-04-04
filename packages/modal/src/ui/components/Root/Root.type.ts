@@ -17,7 +17,7 @@ export interface RootProps {
   showExternalWalletPage: boolean;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   modalState: ModalState;
-  preHandleExternalWalletClick: (params: { connector: string }) => void;
+  preHandleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   setModalState: (state: ModalState) => void;
   onCloseLoader: () => void;
   isEmailPasswordLessLoginVisible: boolean;

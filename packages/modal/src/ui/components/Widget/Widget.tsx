@@ -100,15 +100,18 @@ function Widget(props: WidgetProps) {
   // Memo for checking if email passwordless login is visible
   const isEmailPasswordLessLoginVisible = useMemo(() => {
     return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]?.showOnModal;
-  }, [modalState]);
+  }, [modalState.socialLoginsConfig]);
 
   // Memo for checking if SMS passwordless login is visible
   const isSmsPasswordLessLoginVisible = useMemo(() => {
     return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
-  }, [modalState]);
+  }, [modalState.socialLoginsConfig]);
 
-  const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState]);
-  const isExternalPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin", [modalState]);
+  const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState.socialLoginsConfig]);
+  const isExternalPrimary = useMemo(
+    () => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin",
+    [modalState.socialLoginsConfig]
+  );
   const showPasswordLessInput = useMemo(
     () => isEmailPasswordLessLoginVisible || isSmsPasswordLessLoginVisible,
     [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
@@ -116,7 +119,7 @@ function Widget(props: WidgetProps) {
   const showExternalWalletButton = useMemo(() => modalState.hasExternalWallets, [modalState]);
   const showExternalWalletPage = useMemo(
     () => (areSocialLoginsVisible || showPasswordLessInput) && !modalState.externalWalletsVisibility,
-    [areSocialLoginsVisible, showPasswordLessInput, modalState]
+    [areSocialLoginsVisible, showPasswordLessInput, modalState.externalWalletsVisibility]
   );
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
@@ -160,9 +163,10 @@ function Widget(props: WidgetProps) {
     return (
       modalState.status === MODAL_STATUS.INITIALIZED || modalState.status === MODAL_STATUS.CONNECTED || modalState.status === MODAL_STATUS.ERRORED
     );
-  }, [modalState]);
+  }, [modalState.status]);
 
   useEffect(() => {
+    // TODO: maybe move this inside root
     if (typeof modalState.externalWalletsConfig === "object") {
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
       if (wcAvailable && !modalState.walletConnectUri && typeof handleExternalWalletClick === "function") {
@@ -181,6 +185,7 @@ function Widget(props: WidgetProps) {
         onClose={onCloseModal}
         borderRadius={uiConfig.borderRadiusType}
       >
+        {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root
             appLogo={appLogo}
@@ -211,6 +216,7 @@ function Widget(props: WidgetProps) {
 
   return (
     <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
+      {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
           chainNamespace={chainNamespaces}

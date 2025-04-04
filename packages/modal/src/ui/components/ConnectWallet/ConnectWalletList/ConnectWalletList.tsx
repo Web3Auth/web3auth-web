@@ -56,7 +56,7 @@ function WalletsFound(props: WalletsFoundProps) {
 }
 
 function MoreWalletsButton(props: MoreWalletsButtonProps) {
-  const { totalExternalWallets, initialWalletCount, handleMoreWallets, isLoading, isDark, buttonRadius } = props;
+  const { totalExternalWalletsCount, initialWalletCount, handleMoreWallets, isLoading, isDark, buttonRadius } = props;
   const [t] = useTranslation(undefined, { i18n });
   const onMoreWalletsClick = () => {
     if (handleMoreWallets) {
@@ -64,7 +64,7 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
     }
   };
 
-  if (isLoading && initialWalletCount < totalExternalWallets) {
+  if (isLoading && initialWalletCount < totalExternalWalletsCount) {
     return (
       <div
         className={cn("w3a--h-12 w3a--w-full w3a--animate-pulse w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700", {
@@ -95,7 +95,7 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
         className="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
         dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
       >
-        {totalExternalWallets - initialWalletCount}
+        {totalExternalWalletsCount - initialWalletCount}
       </span>
     </button>
   );
@@ -105,7 +105,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
   const {
     externalButtons,
     isLoading,
-    totalExternalWallets,
+    totalExternalWalletsCount,
     initialWalletCount,
     handleWalletClick,
     handleMoreWallets,
@@ -131,9 +131,9 @@ function ConnectWalletList(props: ConnectWalletListProps) {
           />
         )}
       </ul>
-      {totalExternalWallets > 15 && !isLoading && initialWalletCount < totalExternalWallets && (
+      {totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
         <MoreWalletsButton
-          totalExternalWallets={totalExternalWallets}
+          totalExternalWalletsCount={totalExternalWalletsCount}
           initialWalletCount={initialWalletCount}
           handleMoreWallets={handleMoreWallets}
           isLoading={isLoading}

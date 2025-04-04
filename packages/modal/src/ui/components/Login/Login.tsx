@@ -23,6 +23,7 @@ export const restrictedLoginMethods: string[] = [
 ];
 
 function Login(props: LoginProps) {
+  // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
     appLogo,
     isModalVisible,
@@ -35,7 +36,7 @@ function Login(props: LoginProps) {
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
-    handleInstalledExternalWalletClick,
+    handleExternalWalletClick,
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
@@ -86,6 +87,25 @@ function Login(props: LoginProps) {
 
       const isMainOption = order === 1 && enableMainSocialLoginButton;
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+      if (order > 0 && order < 4) {
+        visibleRows.push({
+          method,
+          isDark,
+          isPrimaryBtn,
+          name,
+          connector: socialLoginsConfig.connector,
+          loginParams: {
+            authConnection: method as AUTH_CONNECTION_TYPE,
+            authConnectionId: connectorConfig.authConnectionId,
+            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+            extraLoginOptions: connectorConfig.extraLoginOptions,
+            name,
+            login_hint: "",
+          },
+          order,
+          isMainOption,
+        });
+      }
 
       const loginOptionLength = loginOptions.length;
       const moreThanFour = loginOptionLength >= 4;
@@ -98,7 +118,7 @@ function Login(props: LoginProps) {
           isDark,
           isPrimaryBtn,
           name,
-          adapter: socialLoginsConfig.connector,
+          connector: socialLoginsConfig.connector,
           loginParams: {
             authConnection: method as AUTH_CONNECTION_TYPE,
             authConnectionId: connectorConfig.authConnectionId,
@@ -117,7 +137,7 @@ function Login(props: LoginProps) {
         isDark,
         isPrimaryBtn,
         name: name === "Twitter" ? "X" : name,
-        adapter: socialLoginsConfig.connector,
+        connector: socialLoginsConfig.connector,
         loginParams: {
           authConnection: method as AUTH_CONNECTION_TYPE,
           authConnectionId: connectorConfig.authConnectionId,
@@ -224,9 +244,7 @@ function Login(props: LoginProps) {
     return installedExternalWalletConfig.filter((wallet) => wallet.name === WALLET_CONNECTORS.METAMASK);
   }, [installedExternalWalletConfig, showInstalledExternalWallets]);
 
-  const handleOtpComplete = (otp: string) => {
-    // eslint-disable-next-line no-console
-    console.log(otp);
+  const handleOtpComplete = (_: string) => {
     setOtpSuccess(true);
     setTimeout(() => {
       setOtpSuccess(false);
@@ -298,7 +316,7 @@ function Login(props: LoginProps) {
                 "w3a--rounded-lg": buttonRadius === "rounded",
                 "w3a--rounded-none": buttonRadius === "square",
               })}
-              onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
+              onClick={() => handleExternalWalletClick({ connector: wallet.name })}
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
@@ -404,6 +422,8 @@ function Login(props: LoginProps) {
     return sections;
   };
 
+  const expandedView = () => socialLoginSection(otherRow);
+
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
   return (
@@ -436,7 +456,7 @@ function Login(props: LoginProps) {
         {!expand && defaultView()}
 
         {/* EXPANDED VIEW */}
-        {expand && socialLoginSection(otherRow)}
+        {expand && expandedView()}
       </div>
     </div>
   );
