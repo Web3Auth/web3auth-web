@@ -6,9 +6,11 @@ import {
   CodeInitiateRequestBodyParams,
   CodeVerifyRequestBodyParams,
   IStartResponse,
+  IVerifyResponse,
   PasswordlessHandlerParams,
   WhiteLabelParams,
 } from "../interfaces";
+import { getErrorMessages } from "../utils";
 
 export abstract class PasswordlessHandler {
   readonly authBaseApiUrl = `${PASSWORDLESS_BUILD_ENV_MAP[BUILD_ENV.DEVELOPMENT]}/api/v3/auth`;
@@ -20,7 +22,6 @@ export abstract class PasswordlessHandler {
   constructor(params: PasswordlessHandlerParams) {
     if (!params.authConnection) throw new Error("authConnection is required");
     if (!params.web3authClientId) throw new Error("web3authClientId is required");
-    if (!params.clientId) throw new Error("clientId is required");
     if (!params.loginHint) throw new Error("loginHint is required");
     if (!params.network) throw new Error("network is required");
     this.passwordlessParams = params;
@@ -67,26 +68,56 @@ export abstract class PasswordlessHandler {
   }
 
   protected async start(params: CodeInitiateRequestBodyParams): Promise<IStartResponse> {
-    const result = await post<IStartResponse>(`${this.authBaseApiUrl}/passwordless/start`, params);
-    if (result && result.success) {
-      this.trackingId = result.data?.trackingId;
-      if (this.sessionStorageAvailable) window.sessionStorage.setItem("trackingId", this.trackingId as string);
+    try {
+      const result = await post<IStartResponse>(`${this.authBaseApiUrl}/passwordless/start`, params);
+      if (result && result.success) {
+        this.trackingId = result.data?.trackingId;
+        if (this.sessionStorageAvailable) window.sessionStorage.setItem("trackingId", this.trackingId as string);
+      }
+      return result;
+    } catch (e: unknown) {
+      return this.handleError(e);
     }
-    return result;
   }
 
-  protected async verify(params: CodeVerifyRequestBodyParams): Promise<{ id_token: string } | null> {
-    const result = await post<{ success: boolean; id_token?: string; message: string }>(`${this.authBaseApiUrl}/passwordless/verify`, params);
-    if (result.success) {
-      if (this.sessionStorageAvailable) window.sessionStorage.removeItem("trackingId");
+  protected async verify(params: CodeVerifyRequestBodyParams): Promise<IVerifyResponse> {
+    try {
+      const result = await post<{ success: boolean; id_token?: string; message: string }>(`${this.authBaseApiUrl}/passwordless/verify`, params);
+      if (result.success) {
+        if (this.sessionStorageAvailable) window.sessionStorage.removeItem("trackingId");
+        return {
+          success: true,
+          data: { id_token: result.id_token as string },
+        };
+      }
       return {
-        id_token: result.id_token as string,
+        success: false,
+        error: result.message,
       };
+    } catch (e: unknown) {
+      return this.handleError(e);
     }
-    return null;
+  }
+
+  private async handleError(e: unknown): Promise<{ success: boolean; error: string }> {
+    let error: string;
+    if ((e as Response).status === 429) {
+      error = "passwordless.error-too-many-requests";
+    } else {
+      try {
+        const err: { error_code: string; message: string } = await (e as Response).json();
+        error = err.error_code ? getErrorMessages(err.error_code) : err.message;
+      } catch {
+        error = "passwordless.verify-error-error";
+      }
+    }
+    return {
+      success: false,
+      error: error,
+    };
   }
 
   abstract sendVerificationCode(params?: { captchaToken: string }): Promise<IStartResponse>;
 
-  abstract verifyCode(code: string): Promise<{ id_token: string } | null>;
+  abstract verifyCode(code: string): Promise<IVerifyResponse>;
 }

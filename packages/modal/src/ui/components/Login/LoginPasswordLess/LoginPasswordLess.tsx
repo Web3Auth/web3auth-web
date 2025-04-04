@@ -13,8 +13,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     title,
     placeholder,
     handleFormSubmit,
-    invalidInputErrorMessage,
-    isValidInput,
+    errorMessage,
     isDark,
     isPasswordLessLoading,
     buttonRadius,
@@ -84,10 +83,10 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
           onFocus={() => {
             setIsInputFocused(true);
           }}
-          // onBlur={(e) => {
-          //   e.target.placeholder = `${placeholder}`;
-          //   setIsInputFocused(false);
-          // }}
+          onBlur={(e) => {
+            e.target.placeholder = `${placeholder}`;
+            setIsInputFocused(false);
+          }}
           type="text"
           className={cn(
             "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
@@ -97,15 +96,15 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
           // TODO: Add loading spinner
           <div>Loading..</div>
         )}
-        {inputValue && isValidInput && isInputFocused && !isPasswordLessLoading && (
+        {inputValue && !isPasswordLessLoading && (
           <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}
       </div>
-      {!isValidInput && isPasswordLessCtaClicked && (
+      {errorMessage && !isInputFocused && isPasswordLessCtaClicked && (
         <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
-          {invalidInputErrorMessage}
+          {errorMessage}
         </p>
       )}
     </>

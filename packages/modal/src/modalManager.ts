@@ -290,6 +290,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         authConnection: configFromDashboard.authConnection,
         authConnectionId: configFromDashboard.authConnectionId,
         groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
+        isDefault: configFromDashboard.isDefault || false,
         extraLoginOptions: {
           ...configFromDashboard.jwtParameters,
           ...userConfig.extraLoginOptions,

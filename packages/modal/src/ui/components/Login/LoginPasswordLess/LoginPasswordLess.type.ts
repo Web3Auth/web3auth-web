@@ -6,8 +6,7 @@ export interface LoginPasswordLessProps {
   isPasswordLessLoading: boolean;
   title: string;
   placeholder: string;
-  invalidInputErrorMessage: string;
-  isValidInput: boolean;
+  errorMessage: string;
   isDark: boolean;
   buttonRadius?: ButtonRadiusType;
   handleFormSubmit: (loginHint: string) => void;

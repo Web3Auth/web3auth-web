@@ -11,7 +11,7 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
   }
 
   async sendVerificationCode(params?: { captchaToken: string }) {
-    const { clientId, loginHint, network, web3authClientId } = this.passwordlessParams;
+    const { loginHint, network, web3authClientId } = this.passwordlessParams;
 
     const captchaToken = params?.captchaToken ?? "";
 
@@ -20,7 +20,7 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
     }
 
     const finalParams: CodeInitiateRequestBodyParams = {
-      client_id: clientId,
+      client_id: web3authClientId,
       web3auth_client_id: web3authClientId,
       connection: this.connection,
       login_hint: loginHint,
@@ -34,10 +34,10 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
   }
 
   async verifyCode(code: string) {
-    const { clientId, loginHint, network } = this.passwordlessParams;
+    const { loginHint, network, web3authClientId } = this.passwordlessParams;
 
     const params: CodeVerifyRequestBodyParams = {
-      client_id: clientId,
+      client_id: web3authClientId,
       login_hint: loginHint,
       code,
       connection: this.connection,

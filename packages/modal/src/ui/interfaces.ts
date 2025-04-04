@@ -170,7 +170,6 @@ export type rowType = {
 export type PasswordlessHandlerParams = {
   authConnection: AUTH_CONNECTION_TYPE;
   web3authClientId: string;
-  clientId: string;
   loginHint: string;
   network: string;
   uiConfig?: Omit<UIConfig, "connectorListener">;
@@ -211,10 +210,16 @@ export interface CodeVerifyRequestBodyParams {
 
 export type IStartResponse = {
   success?: boolean;
-  message: string;
   error?: string;
   data?: { trackingId: string };
 };
+
+export type IVerifyResponse = {
+  success?: boolean;
+  error?: string;
+  data?: { id_token: string };
+};
+
 export type LogoAlignmentType = UIConfig["logoAlignment"];
 export type BorderRadiusType = UIConfig["borderRadiusType"];
 export type ButtonRadiusType = UIConfig["buttonRadiusType"];

@@ -15,10 +15,10 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
   }
 
   async sendVerificationCode() {
-    const { loginHint, clientId, network, web3authClientId } = this.passwordlessParams;
+    const { loginHint, network, web3authClientId } = this.passwordlessParams;
 
     const finalParams: CodeInitiateRequestBodyParams = {
-      client_id: clientId,
+      client_id: web3authClientId,
       web3auth_client_id: web3authClientId,
       connection: this.connection,
       login_hint: loginHint,
@@ -32,11 +32,11 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
     return super.start(finalParams);
   }
 
-  async verifyCode(code: string): Promise<{ id_token: string } | null> {
-    const { clientId, loginHint, network } = this.passwordlessParams;
+  async verifyCode(code: string) {
+    const { loginHint, network, web3authClientId } = this.passwordlessParams;
 
     const params: CodeVerifyRequestBodyParams = {
-      client_id: clientId,
+      client_id: web3authClientId,
       login_hint: loginHint,
       code,
       connection: "email",

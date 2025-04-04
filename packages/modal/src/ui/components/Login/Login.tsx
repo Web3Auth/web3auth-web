@@ -10,7 +10,7 @@ import { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
 import type { rowType } from "../../interfaces";
 import i18n from "../../localeImport";
-import { cn, getIcons, validatePhoneNumber } from "../../utils";
+import { cn, getIcons, getUserCountry, validatePhoneNumber } from "../../utils";
 import Image from "../Image";
 import SocialLoginList from "../SocialLoginList/SocialLoginList";
 import { LoginProps } from "./Login.type";
@@ -56,7 +56,9 @@ function Login(props: LoginProps) {
 
   const [t] = useTranslation(undefined, { i18n });
 
-  const [isValidInput, setIsValidInput] = useState<boolean>(true);
+  const [countryCode, setCountryCode] = useState<string>("");
+  const [passwordlessErrorMessage, setPasswordlessErrorMessage] = useState<string>("");
+  const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [expand, setExpand] = useState(false);
   const [canShowMore, setCanShowMore] = useState(false);
   const [visibleRow, setVisibleRow] = useState<rowType[]>([]);
@@ -149,10 +151,8 @@ function Login(props: LoginProps) {
 
   const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
     try {
-      // const connectorConfig = socialLoginsConfig.loginMethods[authConnection];
       const handler = createPasswordlessHandler(authConnection, {
         loginHint,
-        clientId: "BKZDJP0ouZP0PtfQYssMiezINbUwnIthw6ClTtTICvh0MCRgAxi5GJbHKH9cjM6xyWxe73c6c94ASCTxbGNLUt8",
         web3authClientId,
         network: web3authNetwork,
         uiConfig: socialLoginsConfig.uiConfig,
@@ -169,11 +169,14 @@ function Login(props: LoginProps) {
       }
 
       const result = await handler.sendVerificationCode({ captchaToken: token });
-      if (result?.success) {
-        setAuthConnection(authConnection);
-        setShowOtpFlow(true);
-        setPasswordlessHandler(handler);
+      if (result?.error) {
+        setPasswordlessErrorMessage(t(result.error));
+        return;
       }
+
+      setAuthConnection(authConnection);
+      setShowOtpFlow(true);
+      setPasswordlessHandler(handler);
     } catch (error) {
       log.error(error);
     } finally {
@@ -206,10 +209,10 @@ function Login(props: LoginProps) {
     }
 
     if (isSmsPasswordLessLoginVisible) {
-      const countryCode = "";
       const number = loginHint.startsWith("+") ? loginHint : `${countryCode}${loginHint}`;
       const result = await validatePhoneNumber(number);
       if (result) {
+        const finalLoginHint = typeof result === "string" ? result : number;
         const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
         if (connectorConfig.isDefault) {
           return handleSocialLoginClick({
@@ -219,17 +222,17 @@ function Login(props: LoginProps) {
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
-              login_hint: typeof result === "string" ? result : number,
+              login_hint: finalLoginHint,
               name: "Mobile",
             },
           });
         } else {
-          return handleCustomLogin(AUTH_CONNECTION.SMS_PASSWORDLESS, loginHint);
+          return handleCustomLogin(AUTH_CONNECTION.SMS_PASSWORDLESS, finalLoginHint);
         }
       }
     }
 
-    setIsValidInput(false);
+    setPasswordlessErrorMessage(invalidInputErrorMessage);
     setIsPasswordLessLoading(false);
     return undefined;
   };
@@ -252,6 +255,16 @@ function Login(props: LoginProps) {
     return t("modal.errors-invalid-number");
   }, [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible, t]);
 
+  useEffect(() => {
+    const getLocation = async () => {
+      const result = await getUserCountry();
+      if (result && result.dialCode) {
+        setCountryCode(result.dialCode);
+      }
+    };
+    if (isSmsPasswordLessLoginVisible) getLocation();
+  }, [isSmsPasswordLessLoginVisible]);
+
   const handleConnectWallet = (e: ReactMouseEvent<HTMLButtonElement>) => {
     setIsPasswordLessCtaClicked(false);
     e.preventDefault();
@@ -260,18 +273,24 @@ function Login(props: LoginProps) {
 
   const handleOtpComplete = async (otp: string) => {
     setOtpLoading(true);
+    if (otpErrorMessage) setOtpErrorMessage("");
 
     try {
       const connectorConfig = socialLoginsConfig.loginMethods[authConnection];
       const result = await passwordlessHandler?.verifyCode(otp);
-      if (result?.id_token) {
+      if (result?.error) {
+        setOtpErrorMessage(t(result.error));
+        return;
+      }
+
+      if (result?.data?.id_token) {
         return handleSocialLoginClick({
           connector: socialLoginsConfig.connector || "",
           loginParams: {
             authConnection: authConnection,
             authConnectionId: connectorConfig.authConnectionId,
             groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-            extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.id_token },
+            extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.data?.id_token },
             login_hint: passwordlessHandler.passwordlessParams.loginHint,
             name: passwordlessHandler.name,
           },
@@ -298,6 +317,7 @@ function Login(props: LoginProps) {
         setShowOtpFlow={setShowOtpFlow}
         authConnection={authConnection}
         handleOtpComplete={handleOtpComplete}
+        errorMessage={otpErrorMessage}
       />
     );
   }
@@ -328,8 +348,7 @@ function Login(props: LoginProps) {
         title={title}
         placeholder={placeholder}
         handleFormSubmit={handleFormSubmit}
-        invalidInputErrorMessage={invalidInputErrorMessage}
-        isValidInput={isValidInput}
+        errorMessage={passwordlessErrorMessage}
         isDark={isDark}
         buttonRadius={buttonRadius}
         isPasswordLessLoading={isPasswordLessLoading}
@@ -505,13 +524,15 @@ function Login(props: LoginProps) {
         </p>
       )}
 
-      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
-        {/* DEFAULT VIEW */}
-        {!expand && defaultView()}
+      {!showCaptcha && (
+        <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+          {/* DEFAULT VIEW */}
+          {!expand && defaultView()}
 
-        {/* EXPANDED VIEW */}
-        {expand && expandedView()}
-      </div>
+          {/* EXPANDED VIEW */}
+          {expand && expandedView()}
+        </div>
+      )}
     </div>
   );
 }

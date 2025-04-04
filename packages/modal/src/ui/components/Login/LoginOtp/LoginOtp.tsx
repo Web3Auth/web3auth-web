@@ -13,7 +13,7 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
  * @returns OtpInput component
  */
 function OtpInput(props: OtpInputProps) {
-  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint } = props;
+  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage, otpLoading } = props;
   const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
   const [t] = useTranslation(undefined, { i18n });
 
@@ -56,7 +56,7 @@ function OtpInput(props: OtpInputProps) {
             <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{parsedLoginHint}</p>
           </div>
         </div>
-        <Otp length={6} onComplete={handleOtpComplete} />
+        <Otp length={6} onComplete={handleOtpComplete} error={errorMessage} disabled={otpLoading} />
       </div>
     </>
   );
@@ -68,19 +68,18 @@ function OtpInput(props: OtpInputProps) {
  * @returns LoginOtp component
  */
 function LoginOtp(props: LoginOtpProps) {
-  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint } = props;
+  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage } = props;
 
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-      {otpLoading ? (
-        <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--items-center w3a--justify-center w3a--gap-x-2 w3a--gap-y-4">
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-600 dark:w3a--bg-app-primary-500" />
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-500 dark:w3a--bg-app-primary-400" />
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-400 dark:w3a--bg-app-primary-300" />
-        </div>
-      ) : (
-        <OtpInput setShowOtpFlow={setShowOtpFlow} handleOtpComplete={handleOtpComplete} authConnection={authConnection} loginHint={loginHint} />
-      )}
+      <OtpInput
+        errorMessage={errorMessage}
+        setShowOtpFlow={setShowOtpFlow}
+        handleOtpComplete={handleOtpComplete}
+        authConnection={authConnection}
+        loginHint={loginHint}
+        otpLoading={otpLoading}
+      />
     </div>
   );
 }
