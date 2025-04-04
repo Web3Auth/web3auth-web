@@ -15,11 +15,11 @@ function ConnectWalletSearch(props: ConnectWalletSearchProps) {
     setIsInputFocused(true);
   };
 
-  const isShowSearch = totalExternalWalletCount > 15 && !isLoading;
+  // const isShowSearch = totalExternalWalletCount > 15 && !isLoading;
 
-  if (!isShowSearch) {
-    return <div className="w3a--h-[50px] w3a--w-full w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />;
-  }
+  // if (!isShowSearch) {
+  //   return <div className="w3a--h-[50px] w3a--w-full w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />;
+  // }
 
   return (
     <input

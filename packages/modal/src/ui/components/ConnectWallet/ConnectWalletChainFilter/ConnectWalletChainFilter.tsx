@@ -32,7 +32,7 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2">
+    <div className="w3a--flex w3a--items-center w3a--justify-items-start w3a--gap-x-2">
       {chains.map((chain) => (
         <button
           type="button"

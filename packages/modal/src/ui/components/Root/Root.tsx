@@ -336,7 +336,7 @@ function Root(props: RootProps) {
       return "588px";
     }
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
-      return privacyPolicy || tncLink || enableMainSocialLoginButton ? "700px" : "650px";
+      return privacyPolicy || tncLink || enableMainSocialLoginButton ? "750px" : "700px";
     }
     if (topInstalledConnectorButtons.length === 1) {
       if (privacyPolicy || tncLink) {

@@ -87,25 +87,6 @@ function Login(props: LoginProps) {
 
       const isMainOption = order === 1 && enableMainSocialLoginButton;
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
-      if (order > 0 && order < 4) {
-        visibleRows.push({
-          method,
-          isDark,
-          isPrimaryBtn,
-          name,
-          connector: socialLoginsConfig.connector,
-          loginParams: {
-            authConnection: method as AUTH_CONNECTION_TYPE,
-            authConnectionId: connectorConfig.authConnectionId,
-            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-            extraLoginOptions: connectorConfig.extraLoginOptions,
-            name,
-            login_hint: "",
-          },
-          order,
-          isMainOption,
-        });
-      }
 
       const loginOptionLength = loginOptions.length;
       const moreThanFour = loginOptionLength >= 4;
@@ -434,12 +415,13 @@ function Login(props: LoginProps) {
           logoAlignment === "center" ? "" : "w3a--w-full"
         )}
       >
-        <figure className={cn("w3a--mx-auto w3a--h-12 w3a--w-[200px]", logoAlignment === "center" ? "" : "w3a--ml-0")}>
-          {headerLogo ? (
-            <img src={headerLogo} alt="Logo" className="w3a--object-contain" />
-          ) : (
-            <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
+        <figure
+          className={cn(
+            "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
+            logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0"
           )}
+        >
+          <img src={headerLogo || getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
         </figure>
         <p
           className={cn(

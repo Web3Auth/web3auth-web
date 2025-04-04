@@ -58,16 +58,6 @@ function SocialLoginList(props: SocialLoginListProps) {
             }}
           />
         )}
-        {canShowMore && (
-          <Button
-            type={BUTTON_TYPE.SOCIAL}
-            props={{
-              showIcon: false,
-              onClick: handleExpandSocialLogins,
-              children: <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="w3a--object-contain" />,
-            }}
-          />
-        )}
         <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
           {rowsToShow
             .filter((_, index) => (rowsToShow.length === 4 ? index <= 3 : index < 3))
