@@ -1,3 +1,4 @@
+import { AuthConnectionConfigItem } from "@web3auth/auth";
 import {
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
@@ -26,7 +27,7 @@ import deepmerge from "deepmerge";
 
 import { defaultConnectorsModalConfig, walletRegistryUrl } from "./config";
 import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig } from "./interface";
-import { AUTH_PROVIDERS, capitalizeFirstLetter, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, type UIConfig } from "./ui";
+import { AUTH_PROVIDERS, AUTH_PROVIDERS_NAMES, capitalizeFirstLetter, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, type UIConfig } from "./ui";
 
 export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
@@ -240,38 +241,61 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     projectConfig: ProjectConfig;
     disabledExternalWallets: Set<string>;
   }): Promise<string[]> {
-    // Auth connector config: merge code config with config from dashboard
+    // Auth connector config: populate this with the default config for auth connectors.
     const loginMethods: LoginMethodConfig = {};
+    const embedWalletConfigMap: Map<string, AuthConnectionConfigItem & { isDefault?: boolean }> = new Map();
     for (const authConnectionConfig of projectConfig.embeddedWalletAuth || []) {
-      const { isDefault, authConnectionId, groupedAuthConnectionId, authConnection } = authConnectionConfig;
-      // for custom auth connections, authConnectionId or groupedAuthConnectionId are required.
-      if (!isDefault && (!authConnectionId || !groupedAuthConnectionId)) return;
-
-      loginMethods[authConnection] = {
-        name: authConnection,
-        ...authConnectionConfig,
-        showOnModal: true,
-        showOnDesktop: true,
-        showOnMobile: true,
-      };
+      const { isDefault, authConnection, groupedAuthConnectionId, authConnectionId } = authConnectionConfig;
+      if (isDefault) {
+        loginMethods[authConnection] = {
+          name: AUTH_PROVIDERS_NAMES[authConnection],
+          authConnection: authConnection as AUTH_CONNECTION_TYPE,
+          authConnectionId: authConnectionId,
+          groupedAuthConnectionId: groupedAuthConnectionId,
+          extraLoginOptions: authConnectionConfig.jwtParameters,
+          showOnModal: true,
+          showOnDesktop: true,
+          showOnMobile: true,
+        };
+      }
+      embedWalletConfigMap.set(groupedAuthConnectionId || authConnectionId, authConnectionConfig);
     }
+
     const dashboardConnectorConfig: Record<WALLET_CONNECTOR_TYPE, ModalConfig> = {
       [WALLET_CONNECTORS.AUTH]: { label: WALLET_CONNECTORS.AUTH, loginMethods },
     };
+
+    // populate the user config data with the dashboard config.
     if (this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]) {
       if (!this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods) this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods = {};
     }
-    this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
-    // TODO: validate modal connector config here.!!
 
-    if (this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]?.loginMethods) {
-      const authProviders = new Set(AUTH_PROVIDERS);
-      Object.keys(this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods).forEach((key) => {
-        if (!authProviders.has(key as AUTH_CONNECTION_TYPE)) {
-          throw WalletInitializationError.invalidParams(`Invalid auth connection: ${key}`);
-        }
-      });
-    }
+    const authProviders = new Set(AUTH_PROVIDERS);
+    Object.keys(this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods).forEach((key) => {
+      const userConfig = this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods[key as AUTH_CONNECTION_TYPE];
+      const { authConnectionId, groupedAuthConnectionId } = userConfig;
+      if (!authProviders.has(key as AUTH_CONNECTION_TYPE)) {
+        throw WalletInitializationError.invalidParams(`Invalid auth connection: ${key}`);
+      }
+
+      if (!embedWalletConfigMap.has(groupedAuthConnectionId || authConnectionId))
+        throw WalletInitializationError.invalidParams(
+          `Invalid auth connection config, authConnection: ${key}. Missing AuthConnectionConfig from the dashboard.`
+        );
+
+      const configFromDashboard = embedWalletConfigMap.get(groupedAuthConnectionId || authConnectionId);
+      this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods[key as AUTH_CONNECTION_TYPE] = {
+        authConnection: configFromDashboard.authConnection,
+        authConnectionId: configFromDashboard.authConnectionId,
+        groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
+        extraLoginOptions: {
+          ...configFromDashboard.jwtParameters,
+          ...userConfig.extraLoginOptions,
+        },
+      };
+    });
+
+    this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
 
     // merge default connectors with the custom configured connectors.
     const allConnectorNames = [
