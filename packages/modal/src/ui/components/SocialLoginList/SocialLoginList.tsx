@@ -2,6 +2,7 @@ import { AUTH_CONNECTION } from "@web3auth/auth";
 
 import { cn, getIcons } from "../../utils";
 import Button, { BUTTON_TYPE } from "../Button";
+import LoginHint from "../LoginHint";
 import { SocialLoginListProps } from "./SocialLoginList.type";
 
 function getProviderIcon(method: string, isDark: boolean, extension: string) {
@@ -62,20 +63,22 @@ function SocialLoginList(props: SocialLoginListProps) {
           {rowsToShow
             .filter((_, index) => (rowsToShow.length === 4 ? index <= 3 : index < 3))
             .map((row) => (
-              <Button
-                type={BUTTON_TYPE.SOCIAL}
-                key={row.method}
-                props={{
-                  showText: false,
-                  method: row.method,
-                  isDark,
-                  isPrimaryBtn: false,
-                  btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
-                  children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
-                  onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
-                  buttonRadius,
-                }}
-              />
+              <LoginHint key={row.method} content={"Last Login"} isDark={isDark} hideHint={true}>
+                <Button
+                  type={BUTTON_TYPE.SOCIAL}
+                  key={row.method}
+                  props={{
+                    showText: false,
+                    method: row.method,
+                    isDark,
+                    isPrimaryBtn: false,
+                    btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+                    children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
+                    onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
+                    buttonRadius,
+                  }}
+                />
+              </LoginHint>
             ))}
           {canShowMore && rowsToShow.length > 4 && (
             <Button
