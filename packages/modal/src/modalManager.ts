@@ -167,11 +167,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // get project config
     let projectConfig: ProjectConfig;
     try {
-      projectConfig = await fetchProjectConfig(
-        this.options.clientId,
-        this.options.web3AuthNetwork,
-        this.options.accountAbstractionConfig?.smartAccountType
-      );
+      projectConfig = await fetchProjectConfig({
+        clientId: this.options.clientId,
+        web3AuthNetwork: this.options.web3AuthNetwork,
+        aaProvider: this.options.accountAbstractionConfig?.smartAccountType,
+        authBuildEnv: this.options.authBuildEnv,
+      });
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
