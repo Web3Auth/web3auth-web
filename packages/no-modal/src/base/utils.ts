@@ -1,7 +1,7 @@
 import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
 import { get } from "@toruslabs/http-helpers";
-import { BUILD_ENV, BUILD_ENV_TYPE } from "@web3auth/auth";
+import { BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
 import { CustomChainConfig } from "./chain/IChainInterface";
@@ -16,18 +16,23 @@ export const signerHost = (web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE): string => {
   return SIGNER_MAP[web3AuthNetwork ?? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET];
 };
 
-export const fetchProjectConfig = async (
-  clientId: string,
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE,
-  aaProvider?: string,
-  buildEnv: BUILD_ENV_TYPE = BUILD_ENV.PRODUCTION
-): Promise<ProjectConfig> => {
+export const fetchProjectConfig = async ({
+  clientId,
+  web3AuthNetwork,
+  aaProvider,
+  authBuildEnv,
+}: {
+  clientId: string;
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
+  aaProvider?: string;
+  authBuildEnv?: BUILD_ENV_TYPE;
+}): Promise<ProjectConfig> => {
   // const url = new URL(`${signerHost(web3AuthNetwork)}/api/v2/configuration`);
   // TODO: remove this before production
   const url = new URL("https://test-signer.web3auth.io/api/v2/configuration");
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
-  url.searchParams.append("build_env", buildEnv);
+  if (authBuildEnv) url.searchParams.append("build_env", authBuildEnv);
   if (aaProvider) url.searchParams.append("aa_provider", aaProvider);
   const res = await get<ProjectConfig>(url.href);
   return res;

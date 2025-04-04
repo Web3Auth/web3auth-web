@@ -33,8 +33,8 @@
   ],
   "peerDependencies": {
     "@babel/runtime": "^7.x",
-    "@coinbase/wallet-sdk": "^4.2.x",
-    "react": "^18.x",
+    "@coinbase/wallet-sdk": "^4.3.x",
+    "react": "^18 || ^19",
     "vue": "^3.x"
   },
   "peerDependenciesMeta": {
@@ -89,9 +89,10 @@
   },
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.3.x",
+    "@types/react": "^18.3.12",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
-    "react": "^18.x",
+    "react": "^18 || ^19",
     "vue": "^3.x"
   },
   "exports": {

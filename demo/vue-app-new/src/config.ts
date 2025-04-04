@@ -1,12 +1,13 @@
-import { LANGUAGE_TYPE, LANGUAGES, AUTH_CONNECTION, AUTH_CONNECTION_TYPE, WhiteLabelData } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONFIRMATION_STRATEGY,
+  type CONFIRMATION_STRATEGY_TYPE,
   SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
-  type CONFIRMATION_STRATEGY_TYPE
+  type WidgetType,
 } from "@web3auth/modal";
 
 import { FormConfigSettings } from "./interfaces";
@@ -124,6 +125,8 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   smartAccountChains: string[];
   smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
+  widget?: WidgetType;
+  targetId?: string;
 };
 
 export const getV4TypedData = (chainId: string): SignTypedDataMessageV4 => ({

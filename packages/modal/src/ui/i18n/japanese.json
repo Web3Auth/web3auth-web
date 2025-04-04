@@ -7,6 +7,7 @@
     "errors-invalid-number": "無効な電話番号",
     "errors-invalid-number-email": "無効なメールアドレスまたは電話番号",
     "errors-required": "必須",
+    "external.all-wallets": "すべてのウォレット",
     "external.back": "戻る",
     "external.connect": "ウォレットを続ける",
     "external.search-text": "財布が見えませんか？",
@@ -74,6 +75,19 @@
     "social.view-less": "表示が少なくなります",
     "social.view-less-socials": "表示を減らす socials",
     "social.view-more": "もっと見る",
-    "social.view-more-socials": "もっと見る socials"
+    "social.view-more-socials": "もっと見る socials",
+    "social.sign-in": "ログイン",
+    "footer.by-signing-in": "サインインすると、私たちの",
+    "footer.terms-of-service": "利用規約",
+    "footer.and": "および",
+    "footer.privacy-policy": "プライバシーポリシー",
+    "connect-wallet.more-wallets": "ウォレットをもっと見る",
+    "otp.success": "あなたはあなたのアカウントに接続されています!",
+    "otp.mobile-title": "OTP 検証",
+    "otp.mobile-subtext": "OTP 検証",
+    "otp.email-title": "メール 検証",
+    "otp.email-subtext": "6桁の検証コードを入力してください",
+    "otp.email-subtext-example": "{{email}}に送信されたものです",
+    "passwordless.title": "{{title}} で続行"
   }
 }

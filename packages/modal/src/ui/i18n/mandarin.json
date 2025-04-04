@@ -7,6 +7,7 @@
     "errors-invalid-number": "电话号码无效",
     "errors-invalid-number-email": "无效的电子邮件或电话号码",
     "errors-required": "必填",
+    "external.all-wallets": "所有钱包",
     "external.back": "返回",
     "external.connect": "继续使用钱包",
     "external.search-text": "没看到你的钱包吗？",
@@ -74,6 +75,19 @@
     "social.view-less": "少查看",
     "social.view-less-socials": "查看更少socials",
     "social.view-more": "查看更多",
-    "social.view-more-socials": "查看更多socials"
+    "social.view-more-socials": "查看更多socials",
+    "social.sign-in": "登录",
+    "footer.by-signing-in": "登录即表示您同意我们的",
+    "footer.terms-of-service": "使用条款",
+    "footer.and": "和",
+    "footer.privacy-policy": "隐私政策",
+    "connect-wallet.more-wallets": "查看更多钱包",
+    "otp.success": "您已连接到您的帐户！",
+    "otp.mobile-title": "OTP 验证",
+    "otp.mobile-subtext": "输入 OTP 验证",
+    "otp.email-title": "电子邮件验证",
+    "otp.email-subtext": "请输入6位验证码",
+    "otp.email-subtext-example": "{{email}} 发送的",
+    "passwordless.title": "继续使用 {{title}}"
   }
 }
