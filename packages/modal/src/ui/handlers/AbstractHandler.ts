@@ -108,7 +108,7 @@ export abstract class PasswordlessHandler {
         const err: { error_code: string; message: string } = await (e as Response).json();
         error = err.error_code ? getErrorMessages(err.error_code) : err.message;
       } catch {
-        error = "passwordless.verify-error-error";
+        error = "passwordless.something-wrong-error";
       }
     }
     return {

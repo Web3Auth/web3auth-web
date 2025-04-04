@@ -89,5 +89,19 @@
     "otp.email-subtext": "Voer de 6-cijferige verificatiecode in",
     "otp.email-subtext-example": "{{email}} adres is verstuurd",
     "passwordless.title": "Doorgaan met {{title}}"
+  },
+  "passwordless": {
+    "error-invalid-params": "Ontbrekende of ongeldige parameters",
+    "error-sending-sms-failed": "Er is een fout opgetreden bij het verzenden van een sms. Probeer het opnieuw.",
+    "error-no-mail-generated": "Geen e-mail gegenereerd. Start eerst de wachtwoordloze flow.",
+    "error-invalid-link": "Ongeldige verificatielink of link verlopen",
+    "error-new-link-generated-heading": "Nieuwe verificatielink gegenereerd",
+    "error-invalid-otp": "Ongeldige OTP, probeer het opnieuw",
+    "error-otp-expired": "OTP verlopen",
+    "error-no-sms-generated": "Geen OTP gegenereerd. Start eerst de wachtwoordloze flow.",
+    "error-max-retry-limit-reached": "U heeft de limiet voor verkeerde pogingen bereikt. Start de stroom opnieuw om de verificatie te voltooien.",
+    "error-recaptcha-verification-failed": "Er is iets misgegaan tijdens het verifiëren. Probeer het opnieuw door de pagina te laden.",
+    "error-plan-limit-reached": "E411. Limiet bereikt",
+    "something-wrong-error": "Er is iets misgegaan"
   }
 }

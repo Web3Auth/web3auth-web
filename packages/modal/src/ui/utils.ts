@@ -167,7 +167,7 @@ export function formatIOSMobile(params: { uri: string; link?: string }) {
 }
 
 export const getErrorMessages = (errorCode: string): string => {
-  if (!errorCode) return "passwordless.start-something-wrong-error";
+  if (!errorCode) return "passwordless.something-wrong-error";
 
   switch (errorCode) {
     case "E001":
@@ -180,27 +180,21 @@ export const getErrorMessages = (errorCode: string): string => {
       return "passwordless.error-invalid-link";
     case "E302":
       return "passwordless.error-new-link-generated-heading";
-    case "E303":
-      return "passwordless.error-otp-expired";
     case "E304":
+    case "E403":
       return "passwordless.error-max-retry-limit-reached";
     case "E305":
+    case "E401":
       return "passwordless.error-invalid-otp";
     case "E306":
       return "passwordless.error-otp-expired";
     case "E400":
       return "passwordless.error-no-sms-generated";
-    case "E401":
-      return "passwordless.error-invalid-otp";
-    case "E402":
-      return "passwordless.error-otp-expired";
-    case "E403":
-      return "passwordless.error-max-retry-limit-reached";
     case "E411":
       return "passwordless.error-plan-limit-reached";
     case "E412":
       return "passwordless.error-recaptcha-verification-failed";
     default:
-      return "passwordless.start-something-wrong-error";
+      return "passwordless.something-wrong-error";
   }
 };

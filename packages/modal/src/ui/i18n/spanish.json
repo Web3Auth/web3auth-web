@@ -89,5 +89,19 @@
     "otp.email-subtext": "Por favor, ingrese el código de verificación de 6 dígitos",
     "otp.email-subtext-example": "que fue enviado a su email {{email}}",
     "passwordless.title": "Continuar con {{title}}"
+  },
+  "passwordless": {
+    "error-invalid-params": "Parámetros faltantes o no válidos",
+    "error-sending-sms-failed": "Hubo un error al enviar el SMS. Inténtalo de nuevo.",
+    "error-no-mail-generated": "No se generó el correo. Inicie primero el proceso sin contraseña.",
+    "error-invalid-link": "El enlace o el enlace de verificación ha expirado",
+    "error-new-link-generated-heading": "Nuevo enlace de verificación generado",
+    "error-invalid-otp": "OTP no válido, intente nuevamente",
+    "error-otp-expired": "OTP expiró",
+    "error-no-sms-generated": "No se generó OTP. Inicie primero el proceso sin contraseña.",
+    "error-max-retry-limit-reached": "Has alcanzado el límite para intentos incorrectos. Reinicie el proceso para completar la verificación.",
+    "error-recaptcha-verification-failed": "La verificación de Captcha ha fallado. Por favor, inténtelo de nuevo.",
+    "error-plan-limit-reached": "E411. Límite alcanzado",
+    "something-wrong-error": "Algo salió mal"
   }
 }
