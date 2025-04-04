@@ -101,7 +101,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       projectConfig = await fetchProjectConfig(
         this.coreOptions.clientId,
         this.coreOptions.web3AuthNetwork,
-        this.coreOptions.accountAbstractionConfig?.smartAccountType
+        this.coreOptions.accountAbstractionConfig?.smartAccountType,
+        this.coreOptions.authBuildEnv
       );
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
