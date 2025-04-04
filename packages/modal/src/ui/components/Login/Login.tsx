@@ -24,15 +24,12 @@ export const restrictedLoginMethods: string[] = [
 
 function Login(props: LoginProps) {
   const {
-    // appName,
     appLogo,
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
     installedExternalWalletConfig,
     isDark,
-    // isEmailPrimary,
-    // isExternalPrimary,
     handleSocialLoginClick,
     totalExternalWallets,
     isEmailPasswordLessLoginVisible,
@@ -44,6 +41,9 @@ function Login(props: LoginProps) {
     showExternalWalletButton,
     showExternalWalletCount,
     showInstalledExternalWallets,
+    logoAlignment = "center",
+    buttonRadius = "pill",
+    enableMainSocialLoginButton = false,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -74,44 +74,30 @@ function Login(props: LoginProps) {
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
 
-    Object.keys(socialLoginsConfig.loginMethods)
-      .filter((method) => {
-        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
-      })
-      .forEach((method, index) => {
-        const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
-        const name = capitalizeFirstLetter(connectorConfig.name || method);
-        const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
-        const order = orderIndex || index;
+    const loginOptions = Object.keys(socialLoginsConfig.loginMethods).filter((method) => {
+      return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+    });
 
-        const isMainOption = connectorConfig.mainOption || order === 1;
-        const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+    loginOptions.forEach((method, index) => {
+      const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+      const name = capitalizeFirstLetter(connectorConfig.name || method);
+      // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
+      const order = index + 1;
 
-        if (order > 0 && order < 4) {
-          visibleRows.push({
-            method,
-            isDark,
-            isPrimaryBtn,
-            name,
-            adapter: socialLoginsConfig.connector,
-            loginParams: {
-              authConnection: method as AUTH_CONNECTION_TYPE,
-              authConnectionId: connectorConfig.authConnectionId,
-              groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-              extraLoginOptions: connectorConfig.extraLoginOptions,
-              name,
-              login_hint: "",
-            },
-            order,
-            isMainOption,
-          });
-        }
+      const isMainOption = order === 1 && enableMainSocialLoginButton;
+      const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
-        otherRows.push({
+      const loginOptionLength = loginOptions.length;
+      const moreThanFour = loginOptionLength >= 4;
+
+      const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
+
+      if (lengthCheck) {
+        visibleRows.push({
           method,
           isDark,
           isPrimaryBtn,
-          name: name === "Twitter" ? "X" : name,
+          name,
           adapter: socialLoginsConfig.connector,
           loginParams: {
             authConnection: method as AUTH_CONNECTION_TYPE,
@@ -124,15 +110,35 @@ function Login(props: LoginProps) {
           order,
           isMainOption,
         });
+      }
+
+      otherRows.push({
+        method,
+        isDark,
+        isPrimaryBtn,
+        name: name === "Twitter" ? "X" : name,
+        adapter: socialLoginsConfig.connector,
+        loginParams: {
+          authConnection: method as AUTH_CONNECTION_TYPE,
+          authConnectionId: connectorConfig.authConnectionId,
+          groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
+          extraLoginOptions: connectorConfig.extraLoginOptions,
+          name,
+          login_hint: "",
+        },
+        order,
+        isMainOption,
       });
+    });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark]);
+  }, [socialLoginsConfig, isDark, enableMainSocialLoginButton, buttonRadius]);
 
   const handleFormSubmit = async (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     // setShowOtpFlow(true);
     // setTimeout(() => {
     //   setOtpLoading(false);
@@ -253,6 +259,7 @@ function Login(props: LoginProps) {
         handleSocialLoginClick={handleSocialLoginClick}
         socialLoginsConfig={socialLoginsConfig}
         handleExpandSocialLogins={handleExpand}
+        buttonRadius={buttonRadius}
       />
     );
   };
@@ -272,20 +279,25 @@ function Login(props: LoginProps) {
         invalidInputErrorMessage={invalidInputErrorMessage}
         isValidInput={isValidInput}
         isDark={isDark}
+        buttonRadius={buttonRadius}
       />
     );
   };
 
   const externalWalletSection = () => {
     return (
-      <div key="external-wallets-section" className="w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2">
+      <div key="external-wallets-section" className={cn("w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2")}>
         {/* INSTALLED EXTERNAL WALLETS */}
         {installedExternalWallets.length > 0 &&
           installedExternalWallets.map((wallet) => (
             <button
               key={wallet.name}
               type="button"
-              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")}
+              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+                "w3a--rounded-full": buttonRadius === "pill",
+                "w3a--rounded-lg": buttonRadius === "rounded",
+                "w3a--rounded-none": buttonRadius === "square",
+              })}
               onClick={() => handleInstalledExternalWalletClick({ connector: wallet.name })}
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
@@ -307,7 +319,15 @@ function Login(props: LoginProps) {
 
         {/* EXTERNAL WALLETS DISCOVERY */}
         {
-          <button type="button" className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn")} onClick={handleConnectWallet}>
+          <button
+            type="button"
+            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+              "w3a--rounded-full": buttonRadius === "pill",
+              "w3a--rounded-lg": buttonRadius === "rounded",
+              "w3a--rounded-none": buttonRadius === "square",
+            })}
+            onClick={handleConnectWallet}
+          >
             <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
             {showExternalWalletCount && (
               <div
@@ -387,23 +407,37 @@ function Login(props: LoginProps) {
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-4">
-      <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10">
-        <figure className="w3a--mx-auto w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
+      <div
+        className={cn(
+          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",
+          logoAlignment === "center" ? "" : "w3a--w-full"
+        )}
+      >
+        <figure className={cn("w3a--mx-auto w3a--h-12 w3a--w-[200px]", logoAlignment === "center" ? "" : "w3a--ml-0")}>
           {headerLogo ? (
             <img src={headerLogo} alt="Logo" className="w3a--object-contain" />
           ) : (
             <img src={getIcons(isDark ? "dark-logo" : "light-logo")} alt="Logo" className="w3a--object-contain" />
           )}
         </figure>
-        <p className="w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.social.sign-in")}</p>
+        <p
+          className={cn(
+            "w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white",
+            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4"
+          )}
+        >
+          {t("modal.social.sign-in")}
+        </p>
       </div>
 
-      {/* DEFAULT VIEW */}
-      {!expand && defaultView()}
+      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        {/* DEFAULT VIEW */}
+        {!expand && defaultView()}
 
-      {/* EXPANDED VIEW */}
-      {expand && socialLoginSection(otherRow)}
+        {/* EXPANDED VIEW */}
+        {expand && socialLoginSection(otherRow)}
+      </div>
     </div>
   );
 }

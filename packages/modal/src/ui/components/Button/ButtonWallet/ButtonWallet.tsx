@@ -1,3 +1,4 @@
+import cn from "classnames";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +9,7 @@ import { ButtonWalletProps } from "./ButtonWallet.type";
 
 function ButtonWallet(props: ButtonWalletProps) {
   const [t] = useTranslation(undefined, { i18n });
-  const { deviceDetails, button, walletConnectUri, onClick, label } = props;
+  const { deviceDetails, button, walletConnectUri, onClick, label, buttonRadius } = props;
 
   const isLink = useMemo(
     () => deviceDetails.platform !== "desktop" && button.href && button.hasWalletConnect && !button.hasInjectedWallet,
@@ -31,8 +32,14 @@ function ButtonWallet(props: ButtonWalletProps) {
   return (
     <button
       type="button"
-      className="w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--rounded-2xl w3a--bg-app-gray-50 w3a--p-3 
-      hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600"
+      className={cn(
+        `w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--bg-app-gray-50 w3a--p-3 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600`,
+        {
+          "w3a--rounded-full": buttonRadius === "pill",
+          "w3a--rounded-lg": buttonRadius === "rounded",
+          "w3a--rounded-none": buttonRadius === "square",
+        }
+      )}
       onClick={handleBtnClick}
     >
       <div className="w3a--flex w3a--items-center w3a--gap-x-2">

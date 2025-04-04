@@ -24,6 +24,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     adapterVisibilityMap,
     deviceDetails,
     handleWalletDetailsHeight,
+    buttonRadius = "pill",
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
@@ -164,6 +165,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           setBodyState={setBodyState}
           bodyState={bodyState}
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
@@ -181,6 +183,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isLoading={isLoading}
             walletSearch={walletSearch}
             handleWalletSearch={handleWalletSearch}
+            buttonRadius={buttonRadius}
           />
           {/* Wallet List */}
           <ConnectWalletList
@@ -193,6 +196,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             isDark={isDark}
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
+            buttonRadius={buttonRadius}
           />
         </div>
       )}

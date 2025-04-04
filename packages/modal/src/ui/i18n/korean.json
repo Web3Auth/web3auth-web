@@ -76,6 +76,18 @@
     "social.view-less-socials": "Socials 간략히 보기",
     "social.view-more": "더보기",
     "social.view-more-socials": "Socials 더보기",
-    "social.sign-in": "로그인"
+    "social.sign-in": "로그인",
+    "footer.by-signing-in": "로그인하면 우리의",
+    "footer.terms-of-service": "이용 약관",
+    "footer.privacy-policy": "개인정보 처리방침",
+    "footer.and": "및",
+    "connect-wallet.more-wallets": "더 많은 지갑",
+    "otp.success": "계정에 연결되었습니다!",
+    "otp.mobile-title": "OTP 검증",
+    "otp.mobile-subtext": "OTP가 전송된",
+    "otp.email-title": "이메일 검증",
+    "otp.email-subtext": "6자리 검증 코드를 입력하세요",
+    "otp.email-subtext-example": "당신의 이메일 {{email}}에 전송되었습니다",
+    "passwordless.title": "{{title}}로 계속하기"
   }
 }

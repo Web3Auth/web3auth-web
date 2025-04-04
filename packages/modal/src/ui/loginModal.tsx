@@ -228,7 +228,6 @@ export class LoginModal {
         <ThemedContext.Provider value={darkState}>
           <Widget
             stateListener={this.stateEmitter}
-            widget={this.uiConfig.widgetType}
             appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
             appName={this.uiConfig.appName}
             chainNamespaces={this.chainNamespaces}
@@ -237,6 +236,7 @@ export class LoginModal {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleSocialLoginClick={this.handleSocialLoginClick}
             closeModal={this.closeModal}
+            uiConfig={this.uiConfig}
           />
         </ThemedContext.Provider>
       );
@@ -299,13 +299,6 @@ export class LoginModal {
   initExternalWalletContainer = () => {
     this.setState({
       hasExternalWallets: true,
-    });
-  };
-
-  setExternalWalletConfig = (config: { showExternalWalletCount: boolean; showInstalledExternalWallets: boolean }) => {
-    this.setState({
-      showExternalWalletCount: config.showExternalWalletCount,
-      showInstalledExternalWallets: config.showInstalledExternalWallets,
     });
   };
 

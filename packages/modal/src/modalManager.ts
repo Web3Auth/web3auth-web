@@ -176,7 +176,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
     }
-
     // get wallet registry
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
@@ -209,10 +208,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       await this.initInAppAndCachedConnectors(filteredConnectors);
     }
     if (hasExternalConnectors) {
-      this.loginModal.setExternalWalletConfig({
-        showExternalWalletCount: projectConfig.loginModal?.displayExternalWalletsCount ?? true,
-        showInstalledExternalWallets: projectConfig.loginModal?.displayInstalledExternalWallets ?? true,
-      });
       if (hasInAppConnectors) {
         // show connect button if both in-app and external wallets are available
         this.loginModal.initExternalWalletContainer();

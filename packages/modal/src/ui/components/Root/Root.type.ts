@@ -1,6 +1,6 @@
 import { ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
 
-import { ModalState, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { ModalState, SocialLoginEventType, SocialLoginsConfig, UIConfig } from "../../interfaces";
 
 export interface RootProps {
   appLogo?: string;
@@ -10,8 +10,6 @@ export interface RootProps {
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
-  showExternalWalletCount: boolean;
-  showInstalledExternalWallets: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
@@ -24,4 +22,5 @@ export interface RootProps {
   onCloseLoader: () => void;
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
+  uiConfig: UIConfig;
 }

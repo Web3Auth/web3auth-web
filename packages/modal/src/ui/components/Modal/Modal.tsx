@@ -9,7 +9,17 @@ import { ModalProps } from "./Modal.type";
  * @returns Modal component
  */
 function Modal(props: ModalProps) {
-  const { children, open, onClose, placement = "center", padding = true, shadow = true, border = true, showCloseIcon = true } = props;
+  const {
+    children,
+    open,
+    onClose,
+    placement = "center",
+    padding = true,
+    shadow = true,
+    border = true,
+    showCloseIcon = true,
+    borderRadius = "medium",
+  } = props;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -53,13 +63,16 @@ function Modal(props: ModalProps) {
     >
       <div
         className={cn(
-          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[356px] [@media(min-width:375px)]:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
+          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--w-[356px] [@media(min-width:375px)]:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
           {
             "w3a--translate-y-0 w3a--delay-100": isOpen,
             "w3a--translate-y-[100vh]": !isOpen,
             "w3a--p-4": padding,
             "w3a--shadow-xl sm:w3a--shadow-lg": shadow,
             "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": border,
+            "w3a--rounded-[30px]": borderRadius === "large",
+            "w3a--rounded-2xl": borderRadius === "medium",
+            "w3a--rounded-none": borderRadius === "small",
           }
         )}
       >

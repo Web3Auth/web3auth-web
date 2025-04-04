@@ -17,21 +17,21 @@ function Widget(props: WidgetProps) {
     handleExternalWalletClick,
     handleShowExternalWallets,
     closeModal,
-    widget,
     appLogo,
     appName,
     chainNamespaces,
     walletRegistry,
+    uiConfig,
   } = props;
 
-  const visible = useMemo(() => widget === WIDGET_TYPE.EMBED, [widget]);
+  const { widgetType } = uiConfig;
+
+  const visible = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
 
   const [modalState, setModalState] = useState<ModalState>({
     externalWalletsVisibility: false,
     status: MODAL_STATUS.INITIALIZED,
     hasExternalWallets: false,
-    showExternalWalletCount: true,
-    showInstalledExternalWallets: true,
     externalWalletsInitialized: false,
     modalVisibility: false,
     modalVisibilityDelayed: false,
@@ -114,8 +114,6 @@ function Widget(props: WidgetProps) {
     [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
   );
   const showExternalWalletButton = useMemo(() => modalState.hasExternalWallets, [modalState]);
-  const showExternalWalletCount = useMemo(() => modalState.showExternalWalletCount, [modalState]);
-  const showInstalledExternalWallets = useMemo(() => modalState.showInstalledExternalWallets, [modalState]);
   const showExternalWalletPage = useMemo(
     () => (areSocialLoginsVisible || showPasswordLessInput) && !modalState.externalWalletsVisibility,
     [areSocialLoginsVisible, showPasswordLessInput, modalState]
@@ -164,14 +162,6 @@ function Widget(props: WidgetProps) {
     );
   }, [modalState]);
 
-  // const handleBackClick = () => {
-  //   setModalState({
-  //     ...modalState,
-  //     currentPage: PAGES.LOGIN,
-  //   });
-  //   log.debug("handleBackClick Body");
-  // };
-
   useEffect(() => {
     if (typeof modalState.externalWalletsConfig === "object") {
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
@@ -181,9 +171,16 @@ function Widget(props: WidgetProps) {
     }
   }, [modalState, handleExternalWalletClick]);
 
-  if (widget === WIDGET_TYPE.MODAL) {
+  if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+      <Modal
+        open={modalState.modalVisibility}
+        placement="center"
+        padding={false}
+        showCloseIcon={showCloseIcon}
+        onClose={onCloseModal}
+        borderRadius={uiConfig.borderRadiusType}
+      >
         {modalState.modalVisibility && (
           <Root
             appLogo={appLogo}
@@ -192,8 +189,6 @@ function Widget(props: WidgetProps) {
             walletRegistry={walletRegistry}
             showPasswordLessInput={showPasswordLessInput}
             showExternalWalletButton={showExternalWalletButton}
-            showExternalWalletCount={showExternalWalletCount}
-            showInstalledExternalWallets={showInstalledExternalWallets}
             handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
             socialLoginsConfig={modalState.socialLoginsConfig}
             areSocialLoginsVisible={areSocialLoginsVisible}
@@ -207,6 +202,7 @@ function Widget(props: WidgetProps) {
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+            uiConfig={uiConfig}
           />
         )}
       </Modal>
@@ -214,7 +210,7 @@ function Widget(props: WidgetProps) {
   }
 
   return (
-    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal}>
+    <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
       {modalState.modalVisibility && (
         <Root
           chainNamespace={chainNamespaces}
@@ -223,8 +219,6 @@ function Widget(props: WidgetProps) {
           appName={appName}
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
-          showExternalWalletCount={showExternalWalletCount}
-          showInstalledExternalWallets={showInstalledExternalWallets}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
           socialLoginsConfig={modalState.socialLoginsConfig}
           areSocialLoginsVisible={areSocialLoginsVisible}
@@ -238,6 +232,7 @@ function Widget(props: WidgetProps) {
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+          uiConfig={uiConfig}
         />
       )}
     </Embed>
