@@ -127,7 +127,7 @@ const options = computed((): Web3AuthOptions => {
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
     authBuildEnv: BUILD_ENV.TESTING, // Custom build env
-    connectors: [authConnectorInstance],
+    connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
     walletServicesConfig,
@@ -155,14 +155,7 @@ const modalParams = computed(() => {
   const modalConfig = {
     [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
-      loginMethods: {
-        [AUTH_CONNECTION.EMAIL_PASSWORDLESS]: {
-          authConnectionId: "custom-email-passwordless1",
-        },
-        [AUTH_CONNECTION.SMS_PASSWORDLESS]: {
-          authConnectionId: "custom-sms-passwordless",
-        },
-      },
+      loginMethods: loginMethodsConfig.value
     },
   };
   return modalConfig;
@@ -183,6 +176,7 @@ onBeforeMount(() => {
     try {
       if (storedValue) {
         const json = JSON.parse(storedValue);
+        formData.connectors = json.connectors;
         formData.chains = json.chains;
         formData.chainNamespaces = json.chainNamespaces;
         formData.loginProviders = json.loginProviders;
@@ -206,16 +200,16 @@ watch(formData, () => {
 });
 
 // Every time the form data changes, reinitialize the web3Auth object
-// watch(
-//   () => formData.connectors,
-//   async () => {
-//     let connectors: ConnectorFn[] = [];
-//     for (let i = 0; i <= formData.connectors.length; i += 1) {
-//       connectors = connectors.concat(getExternalAdapterByName(formData.connectors[i]));
-//     }
-//     externalConnectors.value = connectors;
-//   }
-// );
+watch(
+  () => formData.connectors,
+  async () => {
+    let connectors: ConnectorFn[] = [];
+    for (let i = 0; i <= formData.connectors.length; i += 1) {
+      connectors = connectors.concat(getExternalAdapterByName(formData.connectors[i]));
+    }
+    externalConnectors.value = connectors;
+  }
+);
 
 const configs = computed<Web3AuthContextConfig>(() => {
   return {

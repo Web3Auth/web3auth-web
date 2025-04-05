@@ -6,6 +6,7 @@ import { chainConfigs, defaultLoginMethod, FormData, initWhiteLabel } from "../c
 
 export const formDataStore = reactive<FormData>({
   // authMode: "",
+  connectors: [],
   network: WEB3AUTH_NETWORK.TESTNET,
   chainNamespaces: [CHAIN_NAMESPACES.EIP155],
   chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.EIP155][1]],
