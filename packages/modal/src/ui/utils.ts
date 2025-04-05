@@ -165,3 +165,36 @@ export function formatIOSMobile(params: { uri: string; link?: string }) {
   if (params.link) return `${params.link}wc?uri=${encodedUri}`;
   return "";
 }
+
+export const getErrorMessages = (errorCode: string): string => {
+  if (!errorCode) return "passwordless.something-wrong-error";
+
+  switch (errorCode) {
+    case "E001":
+      return "passwordless.error-invalid-params";
+    case "E201":
+      return "passwordless.error-sending-sms-failed";
+    case "E300":
+      return "passwordless.error-no-mail-generated";
+    case "E301":
+      return "passwordless.error-invalid-link";
+    case "E302":
+      return "passwordless.error-new-link-generated-heading";
+    case "E304":
+    case "E403":
+      return "passwordless.error-max-retry-limit-reached";
+    case "E305":
+    case "E401":
+      return "passwordless.error-invalid-otp";
+    case "E306":
+      return "passwordless.error-otp-expired";
+    case "E400":
+      return "passwordless.error-no-sms-generated";
+    case "E411":
+      return "passwordless.error-plan-limit-reached";
+    case "E412":
+      return "passwordless.error-recaptcha-verification-failed";
+    default:
+      return "passwordless.something-wrong-error";
+  }
+};

@@ -108,8 +108,8 @@ export type FormData = {
     enable: boolean;
     config: WhiteLabelData;
   };
-  loginProviders: AUTH_CONNECTION_TYPE[];
   connectors: string[];
+  loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
   loginMethods: Record<AUTH_CONNECTION_TYPE, FormConfigSettings>;

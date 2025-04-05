@@ -10,7 +10,7 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
       resendTimer,
       onComplete,
       onChange,
-      error = false,
+      error = "",
       success = false,
       disabled = false,
       resendBtnText = "Resend OTP",
@@ -28,6 +28,12 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
   ) => {
     const [otpArray, setOtpArray] = useState<string[]>(Array(length).fill(""));
     const [timer, setTimer] = useState<number>(resendTimer ?? 0);
+    const [showError, setShowError] = useState(!!error);
+
+    useEffect(() => {
+      setShowError(!!error);
+    }, [error]);
+
     const inputRefs = useRef<HTMLInputElement[]>([]);
 
     const isInputValueValid = (value: string) => {
@@ -37,6 +43,8 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     const handleKeyDown = (e: KeyboardEvent, index: number) => {
       if (e.key === "Backspace" || e.key === "Delete") {
         e.preventDefault();
+        // Hide error when user provides input
+        setShowError(false);
         const newOtpArray = [...otpArray];
         if (otpArray[index] !== "") {
           newOtpArray[index] = "";
@@ -61,6 +69,8 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     const handleInputChange = (e: FormEvent, index: number) => {
       e.preventDefault();
       const { value } = e.target as HTMLInputElement;
+      // Hide error when user provides input
+      setShowError(false);
       if (value && value.length > 1 && value.length === length) {
         const pastedOtp = value.split("");
         const newOtpArray = [...otpArray];
@@ -158,7 +168,7 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
                 "w-12 h-[42px] rounded-full border text-center text-xl focus:outline-none active:outline-none focus:border-app-primary-600 dark:focus:border-app-primary-500 border-app-gray-300 dark:border-app-gray-500 bg-app-gray-50 dark:bg-app-gray-700 text-app-gray-900 dark:text-app-white",
                 success &&
                   (classes?.success ?? "border-app-green-400 dark:border-app-green-500 focus:border-app-green-400 dark:focus:border-app-green-500"),
-                error && (classes?.error ?? "border-app-red-600 dark:border-app-red-500 focus:border-app-red-600 dark:focus:border-app-red-500"),
+                showError && (classes?.error ?? "border-app-red-600 dark:border-app-red-500 focus:border-app-red-600 dark:focus:border-app-red-500"),
                 disabled &&
                   (classes?.disabled ??
                     "border-app-gray-200 bg-app-gray-200 dark:border-app-gray-700 focus:border-app-gray-200 dark:focus:border-app-gray-700 cursor-not-allowed"),
@@ -172,6 +182,11 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
           ))}
         </form>
         {helperText && <p className={helperTextClass}>{helperText}</p>}
+        {showError && (
+          <p className="w3a--mt-4 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
+            {error}
+          </p>
+        )}
         {showCta && (
           <div className={cn("flex items-center mt-3", classes?.ctaContainer)}>
             {timer > 0 && showTimer && !disabled ? (

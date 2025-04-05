@@ -89,5 +89,19 @@
     "otp.email-subtext": "Bitte geben Sie den 6-stelligen Überprüfungscodes ein",
     "otp.email-subtext-example": "die an Ihre E-Mail {{email}} gesendet wurde",
     "passwordless.title": "Mit {{title}} fortfahren"
+  },
+  "passwordless": {
+    "error-invalid-params": "Fehlende oder ungültige Parameter",
+    "error-sending-sms-failed": "Es gab einen Fehler beim Senden einer SMS. Bitte versuche es erneut.",
+    "error-no-mail-generated": "Keine Mail generiert. Bitte initiieren Sie zuerst den passwortlosen Fluss.",
+    "error-invalid-link": "Ungültiger Überprüfungsverbindung oder Link ist abgelaufen",
+    "error-new-link-generated-heading": "Neuer Verifizierungslink",
+    "error-invalid-otp": "Ungültiges OTP, bitte versuchen Sie es erneut",
+    "error-otp-expired": "OTP abgelaufen",
+    "error-no-sms-generated": "Kein OTP erzeugt. Bitte initiieren Sie zuerst den passwortlosen Fluss.",
+    "error-max-retry-limit-reached": "Sie haben die Grenze für falsche Versuche erreicht. Bitte starten Sie den Fluss erneut neu, um die Überprüfung abzuschließen.",
+    "error-recaptcha-verification-failed": "Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "error-plan-limit-reached": "E411. Grenze erreicht",
+    "something-wrong-error": "Etwas ist schief gelaufen"
   }
 }

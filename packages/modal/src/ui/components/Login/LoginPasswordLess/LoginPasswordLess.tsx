@@ -11,28 +11,28 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     isPasswordLessCtaClicked,
     setIsPasswordLessCtaClicked,
     title,
-    fieldValue,
-    handleInputChange,
     placeholder,
     handleFormSubmit,
-    invalidInputErrorMessage,
-    isValidInput,
+    errorMessage,
     isDark,
+    isPasswordLessLoading,
     buttonRadius,
   } = props;
   const [t] = useTranslation(undefined, { i18n });
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [inputValue, setInputValue] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
-    handleInputChange(e);
+    setInputValue((e.target as HTMLInputElement).value);
     setIsInputFocused(true);
   };
 
   const onFormSubmit = (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    handleFormSubmit(e);
+    handleFormSubmit(inputValue);
     setIsInputFocused(false);
   };
 
@@ -78,7 +78,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
         <input
           ref={inputRef}
           onInput={onInputChange}
-          value={fieldValue}
+          value={inputValue}
           placeholder={placeholder}
           onFocus={() => {
             setIsInputFocused(true);
@@ -92,15 +92,19 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
             "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
           )}
         />
-        {fieldValue && isValidInput && (
+        {isPasswordLessLoading && (
+          // TODO: Add loading spinner
+          <div>Loading..</div>
+        )}
+        {inputValue && !isPasswordLessLoading && (
           <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}
       </div>
-      {!isValidInput && isPasswordLessCtaClicked && (
+      {errorMessage && !isInputFocused && isPasswordLessCtaClicked && (
         <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
-          {invalidInputErrorMessage}
+          {errorMessage}
         </p>
       )}
     </>

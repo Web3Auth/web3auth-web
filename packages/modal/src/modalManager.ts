@@ -78,6 +78,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       {
         ...this.options.uiConfig,
         connectorListener: this,
+        web3authClientId: this.options.clientId,
+        web3authNetwork: this.options.web3AuthNetwork,
         chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
         walletRegistry: filteredWalletRegistry,
       },
@@ -288,6 +290,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         authConnection: configFromDashboard.authConnection,
         authConnectionId: configFromDashboard.authConnectionId,
         groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
+        isDefault: configFromDashboard.isDefault || false,
         extraLoginOptions: {
           ...configFromDashboard.jwtParameters,
           ...userConfig.extraLoginOptions,
