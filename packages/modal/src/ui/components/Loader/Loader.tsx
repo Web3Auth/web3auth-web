@@ -28,10 +28,9 @@ function ConnectingStatus(props: ConnectingStatusType) {
         </figure>
 
         <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2">
-          <div className="w3a--animate-circle" />
-          <div className="w3a--animate-circle" />
-          <div className="w3a--animate-circle" />
-          <div className="w3a--animate-circle" />
+          <div className="w3a--animate-circle w3a--bg-app-gray-500 dark:w3a--bg-app-gray-200" />
+          <div className="w3a--animate-circle w3a--bg-app-gray-400 dark:w3a--bg-app-gray-400" />
+          <div className="w3a--animate-circle w3a--bg-app-gray-200 dark:w3a--bg-app-gray-600" />
         </div>
 
         {providerIcon}

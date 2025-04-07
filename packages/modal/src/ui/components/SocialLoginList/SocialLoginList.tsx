@@ -100,7 +100,7 @@ function SocialLoginList(props: SocialLoginListProps) {
       <button type="button" className="w3a--appearance-none" onClick={() => handleExpandSocialLogins()}>
         <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="w3a--object-contain" />
       </button>
-      <div className="w3a--grid w3a--h-[344px] w3a--w-full w3a--auto-rows-min w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--px-1">
+      <div className="w3a--grid w3a--h-[300px] w3a--w-full w3a--auto-rows-min w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--px-1">
         {otherRow.map((row) => (
           <div className="w3a--h-[50px] w3a--w-full" key={row.method}>
             <Button

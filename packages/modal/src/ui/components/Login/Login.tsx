@@ -4,6 +4,8 @@ import { log, type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no
 import { MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+// import LogoDark from "../../assets/logo-dark.svg";
+// import LogoLight from "../../assets/logo-light.svg";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { PasswordlessHandler } from "../../handlers/AbstractHandler";
@@ -481,10 +483,10 @@ function Login(props: LoginProps) {
   const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-8 w3a--p-4">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-2">
       <div
         className={cn(
-          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-10",
+          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-6",
           logoAlignment === "center" ? "" : "w3a--w-full"
         )}
       >

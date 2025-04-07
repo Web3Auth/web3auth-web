@@ -1,8 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 import { CONNECT_WALLET_PAGES } from "../../../constants";
+import i18n from "../../../localeImport";
 import { ConnectWalletHeaderProps } from "./ConnectWalletHeader.type";
 
 function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
   const { onBackClick, currentPage, selectedButton } = props;
+  const [t] = useTranslation(undefined, { i18n });
 
   const handleBack = () => {
     if (onBackClick) {
@@ -27,7 +31,11 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
         </svg>
       </button>
       <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
-        {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET ? selectedButton?.displayName : currentPage}
+        {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET
+          ? selectedButton?.displayName
+          : currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET
+            ? t("modal.connectYourWallet")
+            : currentPage}
       </p>
       <div className="w3a--z-[-1] w3a--size-5" />
     </div>

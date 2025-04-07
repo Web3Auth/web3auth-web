@@ -1,4 +1,4 @@
-import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
@@ -27,6 +27,14 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
     setInputValue((e.target as HTMLInputElement).value);
     setIsInputFocused(true);
+  };
+
+  const handleEnter = (e: KeyboardEvent<HTMLInputElement>) => {
+    const { key } = e;
+    if (key === "Enter") {
+      handleFormSubmit(inputValue);
+      setIsInputFocused(false);
+    }
   };
 
   const onFormSubmit = (e: ReactMouseEvent<HTMLButtonElement>) => {
@@ -91,6 +99,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
           className={cn(
             "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
           )}
+          onKeyDown={(e) => handleEnter(e)}
         />
         {isPasswordLessLoading && (
           // TODO: Add loading spinner
