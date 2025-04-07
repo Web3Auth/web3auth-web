@@ -190,7 +190,7 @@ function Widget(props: WidgetProps) {
           <Root
             appLogo={appLogo}
             appName={appName}
-            chainNamespace={chainNamespaces}
+            chainNamespaces={chainNamespaces}
             walletRegistry={walletRegistry}
             showPasswordLessInput={showPasswordLessInput}
             showExternalWalletButton={showExternalWalletButton}
@@ -219,7 +219,7 @@ function Widget(props: WidgetProps) {
       {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
-          chainNamespace={chainNamespaces}
+          chainNamespaces={chainNamespaces}
           walletRegistry={walletRegistry}
           appLogo={appLogo}
           appName={appName}

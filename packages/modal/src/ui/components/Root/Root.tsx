@@ -21,7 +21,7 @@ function Root(props: RootProps) {
     setModalState,
     modalState,
     handleExternalWalletBtnClick,
-    chainNamespace,
+    chainNamespaces,
     walletRegistry,
     appLogo,
     onCloseLoader,
@@ -59,13 +59,15 @@ function Root(props: RootProps) {
 
   const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = useState(false);
   const [isWalletDetailsExpanded, setIsWalletDetailsExpanded] = useState(false);
+  const [initialConnectedWallet, setInitialConnectedWallet] = useState<ExternalButton | null>(null);
 
-  const onExternalWalletBtnClick = (flag: boolean) => {
+  const onExternalWalletBtnClick = (flag: boolean, wallet?: ExternalButton) => {
     setModalState({
       ...modalState,
       currentPage: PAGES.CONNECT_WALLET,
     });
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
+    setInitialConnectedWallet(wallet);
   };
 
   const onBackClick = (flag: boolean) => {
@@ -74,6 +76,7 @@ function Root(props: RootProps) {
       currentPage: PAGES.LOGIN,
     });
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
+    setInitialConnectedWallet(null);
   };
 
   // Wallet Details
@@ -235,9 +238,6 @@ function Root(props: RootProps) {
       return Object.keys(wallets).reduce((acc, wallet) => {
         if (adapterVisibilityMap[wallet] === false) return acc;
 
-        // Metamask is always visible in the main screen, no need to show it in the external wallets list
-        if (wallet === WALLET_CONNECTORS.METAMASK) return acc;
-
         const walletRegistryItem: WalletRegistryItem = wallets[wallet];
         let href = "";
         if (deviceDetails.platform !== "desktop") {
@@ -248,7 +248,7 @@ function Root(props: RootProps) {
 
         const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
         const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-        const availableChainNamespaces = chainNamespace.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+        const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
 
         const button: ExternalButton = {
           name: wallet,
@@ -269,13 +269,11 @@ function Root(props: RootProps) {
         return acc;
       }, [] as ExternalButton[]);
     },
-    [adapterVisibilityMap, chainNamespace, config, deviceDetails.platform, isWalletConnectAdapterIncluded]
+    [adapterVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectAdapterIncluded]
   );
 
   const customAdapterButtons = useMemo(() => {
     return Object.keys(config).reduce((acc, adapter) => {
-      // Metamask is always visible in the main screen, no need to show it in the external wallets list
-      if (adapter === WALLET_CONNECTORS.METAMASK) return acc;
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && !config[adapter].isInjected && adapterVisibilityMap[adapter]) {
         acc.push({
           name: adapter,
@@ -292,15 +290,23 @@ function Root(props: RootProps) {
   const topInstalledConnectorButtons = useMemo(() => {
     const MAX_TOP_INSTALLED_CONNECTORS = 3;
     const installedConnectors = Object.keys(config).reduce((acc, connector) => {
-      if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) && adapterVisibilityMap[connector]) {
-        acc.push({
-          name: connector,
-          displayName: config[connector].label || connector,
-          hasInjectedWallet: config[connector]?.isInjected || false,
-          hasWalletConnect: false,
-          hasInstallLinks: false,
-        });
-      }
+      if ([WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) || !adapterVisibilityMap[connector]) return acc;
+
+      // determine chain namespaces based on wallet registry
+      const walletRegistryItem = walletRegistry.default[connector];
+      const registryNamespaces = new Set(walletRegistryItem?.chains?.map((chain) => chain.split(":")[0]));
+      const injectedChainNamespaces = new Set(walletRegistryItem?.injected?.map((injected) => injected.namespace));
+      const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
+
+      acc.push({
+        name: connector,
+        displayName: config[connector].label || connector,
+        hasInjectedWallet: config[connector]?.isInjected || false,
+        hasWalletConnect: false,
+        hasInstallLinks: false,
+        walletRegistryItem,
+        chainNamespaces: availableChainNamespaces,
+      });
       return acc;
     }, [] as ExternalButton[]);
 
@@ -308,7 +314,7 @@ function Root(props: RootProps) {
     return installedConnectors
       .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
       .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
-  }, [config, adapterVisibilityMap, displayInstalledExternalWallets]);
+  }, [config, displayInstalledExternalWallets, adapterVisibilityMap, walletRegistry.default, chainNamespaces]);
 
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
@@ -401,28 +407,26 @@ function Root(props: RootProps) {
                     showExternalWalletButton={showExternalWalletButton}
                     showExternalWalletCount={displayExternalWalletsCount}
                     showInstalledExternalWallets={displayInstalledExternalWallets}
-                    handleSocialLoginClick={handleSocialLoginClick}
                     socialLoginsConfig={socialLoginsConfig}
                     areSocialLoginsVisible={areSocialLoginsVisible}
                     isEmailPrimary={isEmailPrimary}
                     isExternalPrimary={isExternalPrimary}
                     installedExternalWalletConfig={topInstalledConnectorButtons}
-                    handleExternalWalletBtnClick={onExternalWalletBtnClick}
                     isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                     isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                     totalExternalWallets={totalExternalWalletsLength}
-                    handleSocialLoginHeight={handleSocialLoginHeight}
                     logoAlignment={logoAlignment}
                     buttonRadius={buttonRadiusType}
                     enableMainSocialLoginButton={enableMainSocialLoginButton}
+                    handleSocialLoginClick={handleSocialLoginClick}
+                    handleExternalWalletBtnClick={onExternalWalletBtnClick}
+                    handleSocialLoginHeight={handleSocialLoginHeight}
                     handleExternalWalletClick={preHandleExternalWalletClick}
                   />
                 )}
                 {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                   <ConnectWallet
                     isDark={isDark}
-                    onBackClick={onBackClick}
-                    handleExternalWalletClick={preHandleExternalWalletClick}
                     walletConnectUri={modalState.walletConnectUri}
                     config={modalState.externalWalletsConfig}
                     walletRegistry={walletRegistry}
@@ -434,9 +438,12 @@ function Root(props: RootProps) {
                       browser: deviceDetails.browser,
                       os: deviceDetails.os as os,
                     }}
-                    chainNamespace={chainNamespace}
-                    handleWalletDetailsHeight={handleWalletDetailsHeight}
+                    chainNamespace={chainNamespaces}
                     buttonRadius={buttonRadiusType}
+                    initialConnectedWallet={initialConnectedWallet}
+                    handleWalletDetailsHeight={handleWalletDetailsHeight}
+                    onBackClick={onBackClick}
+                    handleExternalWalletClick={preHandleExternalWalletClick}
                   />
                 )}
               </>

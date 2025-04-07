@@ -6,6 +6,7 @@ import { RootContext } from "../../context/RootContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
 import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
+import ConnectWalletChainNamespaceSelect from "./ConnectWalletChainNamespaceSelect";
 import ConnectWalletHeader from "./ConnectWalletHeader";
 import ConnectWalletList from "./ConnectWalletList";
 import ConnectWalletQrCode from "./ConnectWalletQrCode";
@@ -14,8 +15,6 @@ import ConnectWalletSearch from "./ConnectWalletSearch";
 function ConnectWallet(props: ConnectWalletProps) {
   const {
     isDark,
-    onBackClick,
-    handleExternalWalletClick,
     config,
     walletConnectUri,
     walletRegistry,
@@ -23,24 +22,33 @@ function ConnectWallet(props: ConnectWalletProps) {
     customAdapterButtons,
     adapterVisibilityMap,
     deviceDetails,
-    handleWalletDetailsHeight,
     buttonRadius = "pill",
     chainNamespace,
+    initialConnectedWallet,
+    onBackClick,
+    handleExternalWalletClick,
+    handleWalletDetailsHeight,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
-  const [selectedWallet, setSelectedWallet] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState(!!initialConnectedWallet);
   const [isLoading] = useState<boolean>(false);
-  const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
+  const [selectedButton, setSelectedButton] = useState<ExternalButton>(initialConnectedWallet);
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [selectedChain, setSelectedChain] = useState<string>("all");
   const [isShowAllWallets, setIsShowAllWallets] = useState<boolean>(false);
 
   const handleBack = () => {
+    if (initialConnectedWallet) {
+      onBackClick(false);
+      return;
+    }
+
     if (!selectedWallet && currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET && onBackClick) {
       onBackClick(false);
+      return;
     }
 
     if (selectedWallet) {
@@ -166,16 +174,19 @@ function ConnectWallet(props: ConnectWalletProps) {
       <ConnectWalletHeader onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
       {/* Body */}
       {selectedWallet ? (
-        <ConnectWalletQrCode
-          walletConnectUri={walletConnectUri}
-          isDark={isDark}
-          selectedButton={selectedButton}
-          bodyState={bodyState}
-          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
-          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
-          setBodyState={setBodyState}
-          handleExternalWalletClick={handleExternalWalletClick}
-        />
+        selectedButton?.hasInjectedWallet ? (
+          <ConnectWalletChainNamespaceSelect handleExternalWalletClick={handleExternalWalletClick} selectedButton={selectedButton} />
+        ) : (
+          <ConnectWalletQrCode
+            walletConnectUri={walletConnectUri}
+            isDark={isDark}
+            selectedButton={selectedButton}
+            bodyState={bodyState}
+            primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+            logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+            setBodyState={setBodyState}
+          />
+        )
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
           <ConnectWalletChainFilter

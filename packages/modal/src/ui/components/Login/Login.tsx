@@ -4,7 +4,7 @@ import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState 
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, type rowType } from "../../interfaces";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, ExternalButton, type rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
 import Image from "../Image";
@@ -219,6 +219,15 @@ function Login(props: LoginProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
   };
 
+  const handleInstalledWalletClick = (wallet: ExternalButton) => {
+    // when having multiple namespaces, ask user to select one
+    if (wallet.chainNamespaces?.length > 1) {
+      handleExternalWalletBtnClick(true, wallet);
+    } else {
+      handleExternalWalletClick({ connector: wallet.name });
+    }
+  };
+
   const installedExternalWallets = useMemo(() => {
     if (showInstalledExternalWallets) return installedExternalWalletConfig;
     // always show MetaMask
@@ -297,7 +306,7 @@ function Login(props: LoginProps) {
                 "w3a--rounded-lg": buttonRadius === "rounded",
                 "w3a--rounded-none": buttonRadius === "square",
               })}
-              onClick={() => handleExternalWalletClick({ connector: wallet.name })}
+              onClick={() => handleInstalledWalletClick(wallet)}
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
