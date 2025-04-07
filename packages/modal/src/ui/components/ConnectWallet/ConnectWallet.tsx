@@ -6,7 +6,6 @@ import { RootContext } from "../../context/RootContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
 import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
-import ConnectWalletChainNamespaceSelect from "./ConnectWalletChainNamespaceSelect";
 import ConnectWalletHeader from "./ConnectWalletHeader";
 import ConnectWalletList from "./ConnectWalletList";
 import ConnectWalletQrCode from "./ConnectWalletQrCode";
@@ -142,6 +141,17 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   const handleWalletClick = (button: ExternalButton) => {
+    // show chain namespace selector if the button is an injected connector with multiple chain namespaces
+    const isChainNamespaceSelectorRequired = button.hasInjectedWallet && button.chainNamespaces?.length > 1;
+    if (isChainNamespaceSelectorRequired) {
+      setBodyState({
+        ...bodyState,
+        showMultiChainSelector: true,
+        walletDetails: button,
+      });
+      return;
+    }
+
     const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
     // if doesn't have wallet connect & doesn't have install links, must be a custom connector
     const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
@@ -173,19 +183,15 @@ function ConnectWallet(props: ConnectWalletProps) {
       <ConnectWalletHeader onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
       {/* Body */}
       {selectedWallet ? (
-        selectedButton?.hasInjectedWallet ? (
-          <ConnectWalletChainNamespaceSelect handleExternalWalletClick={handleExternalWalletClick} selectedButton={selectedButton} />
-        ) : (
-          <ConnectWalletQrCode
-            walletConnectUri={walletConnectUri}
-            isDark={isDark}
-            selectedButton={selectedButton}
-            bodyState={bodyState}
-            primaryColor={selectedButton.walletRegistryItem?.primaryColor}
-            logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
-            setBodyState={setBodyState}
-          />
-        )
+        <ConnectWalletQrCode
+          walletConnectUri={walletConnectUri}
+          isDark={isDark}
+          selectedButton={selectedButton}
+          bodyState={bodyState}
+          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+          setBodyState={setBodyState}
+        />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
           <ConnectWalletChainFilter

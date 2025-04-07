@@ -1,9 +1,10 @@
 import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
+import { RootContext } from "../../context/RootContext";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, ExternalButton, type rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
@@ -48,6 +49,7 @@ function Login(props: LoginProps) {
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
+  const { bodyState, setBodyState } = useContext(RootContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean>(true);
@@ -222,7 +224,11 @@ function Login(props: LoginProps) {
   const handleInstalledWalletClick = (wallet: ExternalButton) => {
     // when having multiple namespaces, ask user to select one
     if (wallet.chainNamespaces?.length > 1) {
-      handleExternalWalletBtnClick(true, wallet);
+      setBodyState({
+        ...bodyState,
+        showMultiChainSelector: true,
+        walletDetails: wallet,
+      });
     } else {
       handleExternalWalletClick({ connector: wallet.name });
     }

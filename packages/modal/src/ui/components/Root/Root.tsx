@@ -9,7 +9,9 @@ import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
+import BottomSheet from "../BottomSheet";
 import ConnectWallet from "../ConnectWallet";
+import ConnectWalletChainNamespaceSelect from "../ConnectWallet/ConnectWalletChainNamespaceSelect";
 import Footer from "../Footer/Footer";
 import Image from "../Image";
 import Loader from "../Loader";
@@ -55,6 +57,7 @@ function Root(props: RootProps) {
   const [bodyState, setBodyState] = useState<BodyState>({
     showWalletDetails: false,
     walletDetails: null,
+    showMultiChainSelector: false,
   });
 
   const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = useState(false);
@@ -448,46 +451,38 @@ function Root(props: RootProps) {
             {/* Footer */}
             <Footer privacyPolicy={privacyPolicy} termsOfService={tncLink} />
 
-            {bodyState.showWalletDetails && (
-              <>
-                {/* Backdrop */}
-                <div
-                  className="w3a--bottom-sheet-bg w3a--fixed w3a--left-0 w3a--top-0 w3a--size-full w3a--transition-opacity w3a--duration-300"
-                  onClick={() => setBodyState({ showWalletDetails: false })}
-                  aria-hidden="true"
-                  role="button"
+            {/* Multi Chain Selector */}
+            {bodyState.showMultiChainSelector && (
+              <BottomSheet isShowed={bodyState.showMultiChainSelector} onClose={() => setBodyState({ showMultiChainSelector: false })}>
+                <ConnectWalletChainNamespaceSelect
+                  isDark={isDark}
+                  wallet={bodyState.walletDetails}
+                  handleExternalWalletClick={(params) => {
+                    preHandleExternalWalletClick(params);
+                    setBodyState({ showMultiChainSelector: false });
+                  }}
                 />
-                {/* Bottom Sheet */}
-                <div
-                  className={`w3a--fixed w3a--bottom-0 w3a--left-0 w3a--flex w3a--w-full w3a--flex-col 
-      w3a--gap-y-2 w3a--rounded-t-3xl w3a--border w3a--border-app-gray-100 w3a--bg-app-light-surface-main w3a--p-4 w3a--shadow-lg w3a--transition-transform 
-      w3a--duration-500 w3a--ease-out dark:w3a--border-app-gray-600 dark:w3a--bg-app-dark-surface-main
-      ${bodyState.showWalletDetails ? "w3a--translate-y-0 w3a--delay-700" : "w3a--translate-y-full"}`}
-                >
-                  {/* Drag Handle */}
-                  <div
-                    className="w3a--mx-auto w3a--h-1 w3a--w-16 w3a--cursor-pointer w3a--rounded-full w3a--bg-app-gray-200 
-        dark:w3a--bg-app-gray-700"
-                    onClick={() => setBodyState({ showWalletDetails: false })}
-                    aria-hidden="true"
-                    role="button"
+              </BottomSheet>
+            )}
+
+            {/* Wallet Install Links */}
+            {bodyState.showWalletDetails && (
+              <BottomSheet isShowed={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
+                <div className="w3a--my-4 w3a--flex w3a--justify-center">
+                  <Image
+                    imageId={`login-${bodyState.walletDetails.name}`}
+                    hoverImageId={`login-${bodyState.walletDetails.name}`}
+                    fallbackImageId="wallet"
+                    height="80"
+                    width="80"
+                    isButton
+                    extension={bodyState.walletDetails.imgExtension}
                   />
-                  <div className="w3a--my-4 w3a--flex w3a--justify-center">
-                    <Image
-                      imageId={`login-${bodyState.walletDetails.name}`}
-                      hoverImageId={`login-${bodyState.walletDetails.name}`}
-                      fallbackImageId="wallet"
-                      height="80"
-                      width="80"
-                      isButton
-                      extension={bodyState.walletDetails.imgExtension}
-                    />
-                  </div>
-                  <ul className="w3a--flex w3a--flex-col w3a--gap-y-2">
-                    {deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}
-                  </ul>
                 </div>
-              </>
+                <ul className="w3a--flex w3a--flex-col w3a--gap-y-2">
+                  {deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}
+                </ul>
+              </BottomSheet>
             )}
           </div>
         </div>
