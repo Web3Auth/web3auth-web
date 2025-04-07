@@ -88,7 +88,11 @@
     "otp.email-title": "电子邮件验证",
     "otp.email-subtext": "请输入6位验证码",
     "otp.email-subtext-example": "{{email}} 发送的",
-    "passwordless.title": "继续使用 {{title}}"
+    "passwordless.title": "继续使用 {{title}}",
+    "resendCode": "重新发送代码",
+    "resendTimer": " {{timer}} 秒后重新发送",
+    "connectYourWallet": "连接您的钱包",
+    "allChains": "所有链"
   },
   "passwordless": {
     "error-invalid-params": "缺失或无效参数",

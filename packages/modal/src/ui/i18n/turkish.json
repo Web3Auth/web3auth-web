@@ -88,7 +88,11 @@
     "otp.email-title": "Email Doğrulama",
     "otp.email-subtext": "6 haneli doğrulama kodunu giriniz",
     "otp.email-subtext-example": "{{email}} adresine gönderildi",
-    "passwordless.title": "{{title}} ile devam et"
+    "passwordless.title": "{{title}} ile devam et",
+    "resendCode": "Kodu tekrar gönder",
+    "resendTimer": " {{timer}} saniye sonra tekrar gönder",
+    "connectYourWallet": "Cüzdanınızı bağlayın",
+    "allChains": "Tüm zincirler"
   },
   "passwordless": {
     "error-invalid-params": "Eksik ya da hatalı parametreler var.",

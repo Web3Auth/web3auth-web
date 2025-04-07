@@ -88,7 +88,11 @@
     "otp.email-title": "Email verification",
     "otp.email-subtext": "Please enter the 6-digit verification code",
     "otp.email-subtext-example": "that was sent to your email {{email}}",
-    "passwordless.title": "Continue with {{title}}"
+    "passwordless.title": "Continue with {{title}}",
+    "resendCode": "Resend Code",
+    "resendTimer": " Resend in {{timer}} seconds",
+    "connectYourWallet": "Connect your wallet",
+    "allChains": "All Chains"
   },
   "passwordless": {
     "error-invalid-params": "Missing or Invalid Parameters.",

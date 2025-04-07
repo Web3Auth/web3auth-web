@@ -88,7 +88,11 @@
     "otp.email-title": "Email-Überprüfung",
     "otp.email-subtext": "Bitte geben Sie den 6-stelligen Überprüfungscodes ein",
     "otp.email-subtext-example": "die an Ihre E-Mail {{email}} gesendet wurde",
-    "passwordless.title": "Mit {{title}} fortfahren"
+    "passwordless.title": "Mit {{title}} fortfahren",
+    "resendCode": "Code erneut senden",
+    "resendTimer": " {{timer}} Sekunden später erneut senden",
+    "connectYourWallet": "Ihre Wallet verbinden",
+    "allChains": "Alle Kettens"
   },
   "passwordless": {
     "error-invalid-params": "Fehlende oder ungültige Parameter",
