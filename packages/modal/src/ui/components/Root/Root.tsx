@@ -451,7 +451,6 @@ function Root(props: RootProps) {
                     walletConnectUri={modalState.walletConnectUri}
                     config={modalState.externalWalletsConfig}
                     walletRegistry={walletRegistry}
-                    totalExternalWallets={totalExternalWalletsLength}
                     allExternalButtons={allButtons}
                     adapterVisibilityMap={adapterVisibilityMap}
                     customAdapterButtons={customAdapterButtons}

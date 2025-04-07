@@ -1,5 +1,5 @@
 import { type ChainNamespaceType, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
+import { FormEvent, useContext, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { RootContext } from "../../context/RootContext";
@@ -11,8 +11,6 @@ import ConnectWalletList from "./ConnectWalletList";
 import ConnectWalletQrCode from "./ConnectWalletQrCode";
 import ConnectWalletSearch from "./ConnectWalletSearch";
 
-const WALLET_LIMIT_COUNT = 10;
-
 function ConnectWallet(props: ConnectWalletProps) {
   const {
     isDark,
@@ -22,7 +20,6 @@ function ConnectWallet(props: ConnectWalletProps) {
     walletConnectUri,
     walletRegistry,
     allExternalButtons,
-    totalExternalWallets,
     customAdapterButtons,
     adapterVisibilityMap,
     deviceDetails,
@@ -35,13 +32,11 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
-  const [externalButtons, setExternalButtons] = useState<ExternalButton[]>([]);
-  const [totalExternalWalletsCount, setTotalExternalWalletsCount] = useState<number>(0);
+  const [isLoading] = useState<boolean>(false);
   const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedChain, setSelectedChain] = useState<string>("all");
-  const [initialWalletCount, setInitialWalletCount] = useState<number>(0);
+  const [isShowAllWallets, setIsShowAllWallets] = useState<boolean>(false);
 
   const handleBack = () => {
     if (!selectedWallet && currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET && onBackClick) {
@@ -69,13 +64,9 @@ function ConnectWallet(props: ConnectWalletProps) {
     });
   }, [allExternalButtons, customAdapterButtons]);
 
-  const filteredButtons = (searchValue: string) => {
-    return allUniqueButtons.filter((button) => button.name.toLowerCase().includes(searchValue.toLowerCase()));
-  };
-
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
-  const sortedButtons = useMemo(() => {
+  const defaultButtons = useMemo(() => {
     // display order: default injected buttons > custom adapter buttons > default non-injected buttons
     const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
@@ -91,7 +82,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     });
   }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
 
-  const visibleButtons = useMemo(() => {
+  const installedWalletButtons = useMemo(() => {
     const visibilityMap = adapterVisibilityMap;
     return Object.keys(config).reduce((acc, adapter) => {
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
@@ -110,27 +101,38 @@ function ConnectWallet(props: ConnectWalletProps) {
   const handleWalletSearch = (e: FormEvent<HTMLInputElement>) => {
     const searchValue = (e.target as HTMLInputElement).value;
     setWalletSearch(searchValue);
-    if (searchValue) {
-      setExternalButtons(filteredButtons(searchValue));
-    } else {
-      setExternalButtons(sortedButtons);
-    }
-    setInitialWalletCount(sortedButtons.length);
   };
 
-  useEffect(() => {
+  const handleChainFilterChange = (chain: string) => {
+    setSelectedChain(chain);
+    setIsShowAllWallets(false);
+  };
+
+  const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
-      setExternalButtons(sortedButtons);
-      setInitialWalletCount(sortedButtons.length);
-      setTotalExternalWalletsCount(totalExternalWallets);
-    } else {
-      setExternalButtons(visibleButtons);
-      setTotalExternalWalletsCount(visibleButtons.length);
+      const buttons = allUniqueButtons;
+      return buttons
+        .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
+        .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 0);
-  }, [walletDiscoverySupported, sortedButtons, visibleButtons, totalExternalWallets]);
+    return installedWalletButtons;
+  }, [walletDiscoverySupported, installedWalletButtons, walletSearch, allUniqueButtons, selectedChain]);
+
+  const externalButtons = useMemo(() => {
+    if (walletDiscoverySupported && !walletSearch && !isShowAllWallets) {
+      return defaultButtons;
+    }
+    return filteredButtons;
+  }, [walletDiscoverySupported, walletSearch, filteredButtons, defaultButtons, isShowAllWallets]);
+
+  const totalExternalWalletsCount = useMemo(() => {
+    return filteredButtons.length;
+  }, [filteredButtons]);
+
+  const initialWalletCount = useMemo(() => {
+    if (isShowAllWallets) return totalExternalWalletsCount;
+    return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
+  }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   const handleWalletClick = (button: ExternalButton) => {
     const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
@@ -155,24 +157,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   };
 
   const handleMoreWallets = () => {
-    // setIsLoading(true);
-    setInitialWalletCount((prev) => prev + 10);
-    const buttons = allUniqueButtons.slice(initialWalletCount, initialWalletCount + WALLET_LIMIT_COUNT);
-    setExternalButtons((prev) => [...prev, ...buttons]);
-    setInitialWalletCount((prev) => prev + WALLET_LIMIT_COUNT);
-  };
-
-  const handleChainFilterChange = (chain: string) => {
-    setInitialWalletCount(0);
-    setSelectedChain(chain);
-    if (chain === "all") {
-      setExternalButtons(sortedButtons.slice(0, WALLET_LIMIT_COUNT));
-      setTotalExternalWalletsCount(sortedButtons.length);
-    } else {
-      const filteredButtons = sortedButtons.filter((button) => button.chainNamespaces.includes(chain as ChainNamespaceType));
-      setExternalButtons(filteredButtons.slice(0, WALLET_LIMIT_COUNT));
-      setTotalExternalWalletsCount(filteredButtons.length);
-    }
+    setIsShowAllWallets(true);
   };
 
   return (
