@@ -42,17 +42,16 @@ const defaultChainOptions = computed(() => {
 });
 
 const aaSupportedChains = computed(() => {
-  return formData.chains.map((chainId) => {
-    return getChainConfig(CHAIN_NAMESPACES.EIP155, chainId, clientIds[formData.network]);
-  }).filter((chainConfig) => chainConfig).map((chainConfig) => ({ name: `${chainConfig!.chainId} ${chainConfig!.displayName}`, value: chainConfig!.chainId }));
+  return formData.chains
+    .map((chainId) => {
+      return getChainConfig(CHAIN_NAMESPACES.EIP155, chainId, clientIds[formData.network]);
+    })
+    .filter((chainConfig) => chainConfig)
+    .map((chainConfig) => ({ name: `${chainConfig!.chainId} ${chainConfig!.displayName}`, value: chainConfig!.chainId }));
 });
 
 const adapterOptions = computed(() =>
-  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)
-    ? [
-        { name: "coinbase-adapter", value: "coinbase" },
-      ]
-    : []
+  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) ? [{ name: "coinbase-adapter", value: "coinbase" }] : []
 );
 
 const isDisplay = (_name: string): boolean => {

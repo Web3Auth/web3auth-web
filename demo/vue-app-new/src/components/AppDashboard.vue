@@ -21,8 +21,21 @@ import {
   signPersonalMessage,
   signTypedMessage,
 } from "../services/ethHandlers";
-import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions, signAndSendTransaction, signMessage as signSolMessage, signTransaction as signSolTransaction } from "../services/solHandlers";
-import { walletSendEth, walletSignPersonalMessage, walletSignSolanaMessage, walletSignSolanaVersionedTransaction, walletSignTypedMessage } from "../services/walletServiceHandlers";
+import {
+  getBalance as getSolBalance,
+  getPrivateKey as getSolPrivateKey,
+  signAllTransactions,
+  signAndSendTransaction,
+  signMessage as signSolMessage,
+  signTransaction as signSolTransaction,
+} from "../services/solHandlers";
+import {
+  walletSendEth,
+  walletSignPersonalMessage,
+  walletSignSolanaMessage,
+  walletSignSolanaVersionedTransaction,
+  walletSignTypedMessage,
+} from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -46,18 +59,22 @@ const connection = computed(() => {
 
 const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
-}
+};
 
-watch(isConnected, (newIsConnected, _, onCleanup) => {
-  if (!newIsConnected || ! provider.value) return;
-  currentChainId.value = web3Auth.value?.currentChain?.chainId;
-  provider.value.on("chainChanged", chainChangedListener)
-  onCleanup(() => {
-    provider.value?.off("chainChanged", chainChangedListener)
-  })
-}, {
-  immediate: true
-})
+watch(
+  isConnected,
+  (newIsConnected, _, onCleanup) => {
+    if (!newIsConnected || !provider.value) return;
+    currentChainId.value = web3Auth.value?.currentChain?.chainId;
+    provider.value.on("chainChanged", chainChangedListener);
+    onCleanup(() => {
+      provider.value?.off("chainChanged", chainChangedListener);
+    });
+  },
+  {
+    immediate: true,
+  }
+);
 
 const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletServices" | "nftCheckoutServices"): boolean => {
   const chainNamespace = currentChainNamespace.value;
@@ -265,7 +282,8 @@ const onSwitchChainNamespace = async () => {
   log.info("switching chain namespace");
   try {
     const chainNamespace = currentChainNamespace.value;
-    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 && chainNamespace !== CHAIN_NAMESPACES.SOLANA) throw new Error("switching to differnt chainNamespaces is not supported for current chainNamespace");
+    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 && chainNamespace !== CHAIN_NAMESPACES.SOLANA)
+      throw new Error("switching to differnt chainNamespaces is not supported for current chainNamespace");
     const newChainNamespace = chainNamespace === CHAIN_NAMESPACES.EIP155 ? CHAIN_NAMESPACES.SOLANA : CHAIN_NAMESPACES.EIP155;
     const supportedChains = props.chains || [];
     const newChain = supportedChains.find((chain) => chain.chainNamespace === newChainNamespace);
@@ -355,7 +373,9 @@ const authenticateUser = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
-          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">{{ t("app.buttons.btnSwitchChainNamespace") }} to Solana</Button>
+          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
+            {{ t("app.buttons.btnSwitchChainNamespace") }} to Solana
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
@@ -378,7 +398,9 @@ const authenticateUser = async () => {
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
-          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">{{ t("app.buttons.btnSwitchChainNamespace") }} to EVM</Button>
+          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
+            {{ t("app.buttons.btnSwitchChainNamespace") }} to EVM
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">

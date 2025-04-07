@@ -7,7 +7,6 @@ export default defineConfig(({ mode }) => {
     mode,
     process.cwd()
   );
-  console.log(VITE_APP_INFURA_PROJECT_KEY, VITE_APP_SOLANA_MAINNET_RPC, VITE_APP_SOLANA_TESTNET_RPC, VITE_APP_SOLANA_DEVNET_RPC);
 
   return {
     mode,
