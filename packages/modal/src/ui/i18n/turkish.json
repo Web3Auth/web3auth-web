@@ -7,6 +7,7 @@
     "errors-invalid-number": "Geçersiz Telefon Numarası",
     "errors-invalid-number-email": "Geçersiz E-posta veya Telefon Numarası",
     "errors-required": "Zorunlu",
+    "external.all-wallets": "Tüm cüzdanlar",
     "external.back": "Geri",
     "external.connect": "Cüzdanla devam et",
     "external.search-text": "Cüzdanınızı görmüyor musunuz?",
@@ -74,6 +75,19 @@
     "social.view-less": "Daha az görüntüle",
     "social.view-less-socials": "Daha az socials görüntüle",
     "social.view-more": "Daha fazla görüntüle",
-    "social.view-more-socials": "Daha fazlasını görüntüle socials"
+    "social.view-more-socials": "Daha fazlasını görüntüle socials",
+    "social.sign-in": "Giriş yap",
+    "footer.by-signing-in": "Giriş yapmak, bizimle ilgili şartları kabul ettiğiniz anlamına gelir.",
+    "footer.terms-of-service": "Kullanım Şartları",
+    "footer.and": "ve",
+    "footer.privacy-policy": "Gizlilik Politikası",
+    "connect-wallet.more-wallets": "Daha fazla cüzdan",
+    "otp.success": "Hesabınıza bağlandınız!",
+    "otp.mobile-title": "OTP Doğrulama",
+    "otp.mobile-subtext": "OTP Doğrulama",
+    "otp.email-title": "Email Doğrulama",
+    "otp.email-subtext": "6 haneli doğrulama kodunu giriniz",
+    "otp.email-subtext-example": "{{email}} adresine gönderildi",
+    "passwordless.title": "{{title}} ile devam et"
   }
 }

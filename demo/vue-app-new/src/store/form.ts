@@ -1,5 +1,5 @@
 import { WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { CHAIN_NAMESPACES } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, WIDGET_TYPE } from "@web3auth/modal";
 import { reactive } from "vue";
 
 import { chainConfigs, defaultLoginMethod, FormData, initWhiteLabel } from "../config";
@@ -31,4 +31,6 @@ export const formDataStore = reactive<FormData>({
   smartAccountType: "safe", // default smart account type to safe
   smartAccountChains: [],
   smartAccountChainsConfig: {},
+  widget: WIDGET_TYPE.MODAL,
+  targetId: "w3a-parent-test-container",
 });

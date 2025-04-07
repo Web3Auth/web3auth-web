@@ -23,4 +23,9 @@ export {
   type AuthOptions,
   type AuthUserInfo,
   type LoginParams,
+  MFA_FACTOR,
+  type MFA_FACTOR_TYPE,
+  MFA_LEVELS,
+  type MFA_SETTINGS,
+  type MfaLevelType,
 } from "@web3auth/auth";

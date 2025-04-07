@@ -1,9 +1,10 @@
-import type { SafeEventEmitter } from "@web3auth/auth";
+import type { AUTH_CONNECTION_TYPE, ExtraLoginOptions, SafeEventEmitter } from "@web3auth/auth";
 import {
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
   type LoginMethodConfig,
+  type LoginModalConfig,
   type UIConfig as CoreUIConfig,
   type WALLET_CONNECTOR_TYPE,
   type WalletRegistry,
@@ -12,7 +13,12 @@ import {
 } from "@web3auth/no-modal";
 
 // capture whitelabel only once
-export interface UIConfig extends CoreUIConfig {
+export interface UIConfig extends CoreUIConfig, LoginModalConfig {
+  /**
+   * ID of the element to embed the widget into
+   */
+  targetId?: string;
+
   /**
    * order of how login methods are shown
    *
@@ -64,14 +70,16 @@ export interface LoginModalProps extends UIConfig {
   walletRegistry: WalletRegistry;
 }
 
+export interface LoginModalCallbacks {
+  onInitExternalWallets: (params: { externalWalletsInitialized: boolean }) => Promise<void>;
+  onSocialLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams }) => Promise<void>;
+  onExternalWalletLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: { chainNamespace: ChainNamespaceType } }) => Promise<void>;
+  onModalVisibility: (visibility: boolean) => Promise<void>;
+}
+
 export const LOGIN_MODAL_EVENTS = {
-  INIT_EXTERNAL_WALLETS: "INIT_EXTERNAL_WALLETS",
-  EXTERNAL_WALLET_LOGIN: "EXTERNAL_WALLET_LOGIN",
-  SOCIAL_LOGIN: "SOCIAL_LOGIN",
-  DISCONNECT: "DISCONNECT",
   MODAL_VISIBILITY: "MODAL_VISIBILITY",
 } as const;
-
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
@@ -84,7 +92,7 @@ export const MODAL_STATUS = {
   CONNECTED: "connected",
   CONNECTING: "connecting",
   ERRORED: "errored",
-};
+} as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
 export interface ModalState {
@@ -101,6 +109,7 @@ export interface ModalState {
   detailedLoaderConnector: string;
   detailedLoaderConnectorName: string;
   showExternalWalletsOnly: boolean;
+  currentPage?: string;
 }
 
 export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
@@ -127,3 +136,30 @@ export type ExternalButton = {
   imgExtension?: string;
   chainNamespaces?: ChainNamespaceType[];
 };
+
+export type os = "iOS" | "Android";
+export type platform = "mobile" | "desktop" | "tablet";
+export type browser = "chrome" | "firefox" | "edge" | "safari" | "brave";
+export type mobileOs = "ios" | "android";
+
+export type rowType = {
+  method: string;
+  isDark: boolean;
+  isPrimaryBtn: boolean;
+  name: string;
+  connector: SocialLoginsConfig["connector"];
+  loginParams: {
+    authConnection: AUTH_CONNECTION_TYPE;
+    name: string;
+    login_hint: string;
+    authConnectionId?: string;
+    groupedAuthConnectionId?: string;
+    extraLoginOptions?: ExtraLoginOptions;
+  };
+  order: number;
+  isMainOption: boolean;
+};
+
+export type LogoAlignmentType = UIConfig["logoAlignment"];
+export type BorderRadiusType = UIConfig["borderRadiusType"];
+export type ButtonRadiusType = UIConfig["buttonRadiusType"];

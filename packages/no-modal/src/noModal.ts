@@ -65,7 +65,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-
     if (options.storageType === "session") this.storage = "sessionStorage";
     this.coreOptions = options;
     this.currentChainId = options.defaultChainId;
@@ -98,12 +97,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // get project config
     let projectConfig: ProjectConfig;
     try {
-      projectConfig = await fetchProjectConfig(
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork,
-        this.coreOptions.accountAbstractionConfig?.smartAccountType,
-        this.coreOptions.authBuildEnv
-      );
+      projectConfig = await fetchProjectConfig({
+        clientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        aaProvider: this.coreOptions.accountAbstractionConfig?.smartAccountType,
+        authBuildEnv: this.coreOptions.authBuildEnv,
+      });
     } catch (e) {
       log.error("Failed to fetch project configurations", e);
       throw WalletInitializationError.notReady("failed to fetch project configurations", e);
@@ -324,6 +323,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
     const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
+      throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
     this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
   }
 

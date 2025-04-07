@@ -1,7 +1,22 @@
 <script setup lang="ts">
+import {
+  authConnector,
+  CHAIN_NAMESPACES,
+  coinbaseConnector,
+  type ConnectorFn,
+  type CustomChainConfig,
+  getChainConfig,
+  nftCheckoutPlugin,
+  type PluginFn,
+  storageAvailable,
+  type UIConfig,
+  WALLET_CONNECTORS,
+  walletServicesPlugin,
+  type AccountAbstractionMultiChainConfig,
+  type Web3AuthOptions
+} from "@web3auth/modal";
 
-import { AccountAbstractionMultiChainConfig, authConnector, CHAIN_NAMESPACES, coinbaseConnector, ConnectorFn, CustomChainConfig, getChainConfig, nftCheckoutPlugin, PluginFn, storageAvailable, WALLET_CONNECTORS, walletConnectV2Connector, walletServicesPlugin, type Web3AuthOptions } from "@web3auth/modal";
-import { Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
@@ -93,12 +108,14 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const uiConfig = enabledWhiteLabel ? { ...whiteLabel } : undefined;
+  const { widget, targetId } = formData;
+  const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel ? { ...whiteLabel, widgetType: widget, targetId } : { widgetType: widget, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
+
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig,
+    uiConfig: uiConfig as UIConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
@@ -174,7 +191,7 @@ onBeforeMount(() => {
         formData.smartAccountChains = json.smartAccountChains || [];
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
       }
-    } catch (error) { }
+    } catch (error) {}
   }
 });
 
@@ -205,10 +222,12 @@ const configs = computed<Web3AuthContextConfig>(() => {
   <Web3AuthProvider :config="configs">
     <WalletServicesProvider>
       <AppHeader />
-      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-        <AppSettings />
-        <AppDashboard :chains="options.chains || []" />
-      </main>
+      <div class="flex flex-col items-center justify-center">
+        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+          <AppSettings />
+          <AppDashboard :chains="options.chains || []" />
+        </main>
+      </div>
     </WalletServicesProvider>
   </Web3AuthProvider>
 </template>

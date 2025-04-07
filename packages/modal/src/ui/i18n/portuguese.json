@@ -7,6 +7,7 @@
     "errors-invalid-number": "Número de telefone inválido",
     "errors-invalid-number-email": "Email ou número de telefone inválido",
     "errors-required": "Obrigatório",
+    "external.all-wallets": "Todas as carteiras",
     "external.back": "Voltar",
     "external.connect": "Continuar com uma carteira",
     "external.search-text": "Não vê sua carteira?",
@@ -74,6 +75,19 @@
     "social.view-less": "Ver menos",
     "social.view-less-socials": "Ver menos socials",
     "social.view-more": "Ver mais",
-    "social.view-more-socials": "Ver mais socials"
+    "social.view-more-socials": "Ver mais socials",
+    "social.sign-in": "Entrar",
+    "footer.by-signing-in": "Ao se conectar, você concorda com nossos",
+    "footer.terms-of-service": "Termos de uso",
+    "footer.and": "e",
+    "footer.privacy-policy": "Política de privacidade",
+    "connect-wallet.more-wallets": "Mais carteiras",
+    "otp.success": "Você está conectado ao seu conta!",
+    "otp.mobile-title": "Verificação OTP",
+    "otp.mobile-subtext": "Verifique o OTP enviado para",
+    "otp.email-title": "Verificação de email",
+    "otp.email-subtext": "Por favor, insira o código de verificação de 6 dígitos",
+    "otp.email-subtext-example": "que foi enviado para o seu email {{email}}",
+    "passwordless.title": "Continuar com {{title}}"
   }
 }

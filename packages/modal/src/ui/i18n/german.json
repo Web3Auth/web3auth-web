@@ -7,6 +7,7 @@
     "errors-invalid-number": "Ungültige Telefonnummer",
     "errors-invalid-number-email": "Ungültige E-Mail-Adresse oder Telefonnummer",
     "errors-required": "Erforderlich",
+    "external.all-wallets": "Alle Geldbörsen",
     "external.back": "Zurück",
     "external.connect": "Fahren Sie mit einer Brieftasche fort",
     "external.search-text": "Sie sehen Ihr Portemonnaie nicht?",
@@ -74,6 +75,19 @@
     "social.view-less": "Weniger anzeigen",
     "social.view-less-socials": "Weniger anzeigen socials",
     "social.view-more": "Mehr anzeigen",
-    "social.view-more-socials": "Weitere socials anzeigen"
+    "social.view-more-socials": "Weitere socials anzeigen",
+    "social.sign-in": "Anmelden",
+    "footer.by-signing-in": "Durch das Anmelden stimmen Sie unseren",
+    "footer.terms-of-service": "Nutzungsbedingungen",
+    "footer.and": "und",
+    "footer.privacy-policy": "Datenschutzerklärung",
+    "connect-wallet.more-wallets": "Mehr Wallets",
+    "otp.success": "Sie sind mit Ihrem Konto verbunden!",
+    "otp.mobile-title": "OTP-Überprüfung",
+    "otp.mobile-subtext": "Geben Sie den OTP ein, der an",
+    "otp.email-title": "Email-Überprüfung",
+    "otp.email-subtext": "Bitte geben Sie den 6-stelligen Überprüfungscodes ein",
+    "otp.email-subtext-example": "die an Ihre E-Mail {{email}} gesendet wurde",
+    "passwordless.title": "Mit {{title}} fortfahren"
   }
 }
