@@ -296,7 +296,7 @@ function Root(props: RootProps) {
         acc.push({
           name: connector,
           displayName: config[connector].label || connector,
-          hasInjectedWallet: false,
+          hasInjectedWallet: config[connector]?.isInjected || false,
           hasWalletConnect: false,
           hasInstallLinks: false,
         });
