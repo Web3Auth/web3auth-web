@@ -301,6 +301,14 @@ function Login(props: LoginProps) {
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
+                {wallet.hasInjectedWallet && (
+                  <span
+                    className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
+                  dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
+                  >
+                    {t("modal.external.installed")}
+                  </span>
+                )}
                 <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
                   <Image
                     imageId={`login-${wallet.name}`}
