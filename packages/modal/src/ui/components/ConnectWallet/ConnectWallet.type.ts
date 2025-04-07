@@ -8,7 +8,7 @@ export interface ConnectWalletProps {
   walletConnectUri: string | undefined;
   walletRegistry?: WalletRegistry;
   allExternalButtons: ExternalButton[];
-  customAdapterButtons: ExternalButton[];
+  customConnectorButtons: ExternalButton[];
   adapterVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
   chainNamespace: ChainNamespaceType[];

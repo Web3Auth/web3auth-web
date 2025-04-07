@@ -334,7 +334,7 @@ function Login(props: LoginProps) {
           ))}
 
         {/* EXTERNAL WALLETS DISCOVERY */}
-        {
+        {totalExternalWallets > 3 && (
           <button
             type="button"
             className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
@@ -360,7 +360,7 @@ function Login(props: LoginProps) {
               alt="arrow"
             />
           </button>
-        }
+        )}
       </div>
     );
   };

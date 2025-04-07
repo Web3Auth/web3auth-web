@@ -202,41 +202,42 @@ function Root(props: RootProps) {
 
   const config = useMemo(() => modalState.externalWalletsConfig, [modalState.externalWalletsConfig]);
 
-  const adapterVisibilityMap = useMemo(() => {
+  const connectorVisibilityMap = useMemo(() => {
     const canShowMap: Record<string, boolean> = {};
 
-    Object.keys(config).forEach((adapter) => {
-      const adapterConfig = config[adapter];
+    Object.keys(config).forEach((connector) => {
+      const connectorConfig = config[connector];
 
-      if (!adapterConfig.showOnModal) {
-        canShowMap[adapter] = false;
+      if (!connectorConfig.showOnModal) {
+        canShowMap[connector] = false;
         return;
       }
 
-      if (deviceDetails.platform === "desktop" && adapterConfig.showOnDesktop) {
-        canShowMap[adapter] = true;
+      if (deviceDetails.platform === "desktop" && connectorConfig.showOnDesktop) {
+        canShowMap[connector] = true;
         return;
       }
 
-      if ((deviceDetails.platform === "mobile" || deviceDetails.platform === "tablet") && adapterConfig.showOnMobile) {
-        canShowMap[adapter] = true;
+      if ((deviceDetails.platform === "mobile" || deviceDetails.platform === "tablet") && connectorConfig.showOnMobile) {
+        canShowMap[connector] = true;
         return;
       }
 
-      canShowMap[adapter] = false;
+      canShowMap[connector] = false;
     });
     return canShowMap;
   }, [deviceDetails, config]);
 
-  const isWalletConnectAdapterIncluded = useMemo(
-    () => Object.keys(config).some((adapter) => adapter === WALLET_CONNECTORS.WALLET_CONNECT_V2),
-    [config]
+  const isWalletConnectConnectorIncluded = useMemo(
+    // WC is always included when enabling wallet discovery
+    () => Object.keys(walletRegistry?.default || {}).length > 0 || Object.keys(walletRegistry?.others || {}).length > 0,
+    [walletRegistry]
   );
 
   const generateWalletButtons = useCallback(
     (wallets: Record<string, WalletRegistryItem>): ExternalButton[] => {
       return Object.keys(wallets).reduce((acc, wallet) => {
-        if (adapterVisibilityMap[wallet] === false) return acc;
+        if (connectorVisibilityMap[wallet] === false) return acc;
 
         const walletRegistryItem: WalletRegistryItem = wallets[wallet];
         let href = "";
@@ -255,7 +256,7 @@ function Root(props: RootProps) {
           displayName: walletRegistryItem.name,
           href,
           hasInjectedWallet: config[wallet]?.isInjected || false,
-          hasWalletConnect: isWalletConnectAdapterIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+          hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
           hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
           walletRegistryItem,
           imgExtension: walletRegistryItem.imgExtension || "svg",
@@ -269,28 +270,12 @@ function Root(props: RootProps) {
         return acc;
       }, [] as ExternalButton[]);
     },
-    [adapterVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectAdapterIncluded]
+    [connectorVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectConnectorIncluded]
   );
 
-  const customAdapterButtons = useMemo(() => {
-    return Object.keys(config).reduce((acc, adapter) => {
-      if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && !config[adapter].isInjected && adapterVisibilityMap[adapter]) {
-        acc.push({
-          name: adapter,
-          displayName: config[adapter].label || adapter,
-          hasInjectedWallet: false,
-          hasWalletConnect: false,
-          hasInstallLinks: false,
-        });
-      }
-      return acc;
-    }, [] as ExternalButton[]);
-  }, [config, adapterVisibilityMap]);
-
-  const topInstalledConnectorButtons = useMemo(() => {
-    const MAX_TOP_INSTALLED_CONNECTORS = 3;
+  const installedConnectorButtons = useMemo(() => {
     const installedConnectors = Object.keys(config).reduce((acc, connector) => {
-      if ([WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) || !adapterVisibilityMap[connector]) return acc;
+      if ([WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) || !connectorVisibilityMap[connector]) return acc;
 
       // determine chain namespaces based on wallet registry
       const walletRegistryItem = walletRegistry.default[connector];
@@ -311,23 +296,34 @@ function Root(props: RootProps) {
     }, [] as ExternalButton[]);
 
     // make metamask the first button and limit the number of buttons
-    return installedConnectors
+    return installedConnectors;
+  }, [config, connectorVisibilityMap, walletRegistry.default, chainNamespaces]);
+
+  const customConnectorButtons = useMemo(() => {
+    return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);
+  }, [installedConnectorButtons]);
+
+  const topInstalledConnectorButtons = useMemo(() => {
+    const MAX_TOP_INSTALLED_CONNECTORS = 3;
+
+    // make metamask the first button and limit the number of buttons
+    return installedConnectorButtons
       .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
       .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
-  }, [config, displayInstalledExternalWallets, adapterVisibilityMap, walletRegistry.default, chainNamespaces]);
+  }, [installedConnectorButtons, displayInstalledExternalWallets]);
 
   const allButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
   }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
 
-  const totalExternalWalletsLength = useMemo(() => {
+  const totalExternalWallets = useMemo(() => {
     const uniqueWalletSet = new Set();
-    return allButtons.concat(customAdapterButtons).filter((button) => {
+    return allButtons.concat(installedConnectorButtons).filter((button) => {
       if (uniqueWalletSet.has(button.name)) return false;
       uniqueWalletSet.add(button.name);
       return true;
     }).length;
-  }, [allButtons, customAdapterButtons]);
+  }, [allButtons, installedConnectorButtons]);
 
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
@@ -344,14 +340,14 @@ function Root(props: RootProps) {
     if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
       return privacyPolicy || tncLink || enableMainSocialLoginButton ? "750px" : "700px";
     }
-    if (topInstalledConnectorButtons.length === 1) {
+    if (installedConnectorButtons.length === 1) {
       if (privacyPolicy || tncLink) {
         return enableMainSocialLoginButton ? "600px" : "560px";
       }
       return enableMainSocialLoginButton ? "570px" : "530px";
     }
-    if (topInstalledConnectorButtons.length > 1) {
-      const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
+    if (installedConnectorButtons.length > 1) {
+      const maxHeight = 500 + (installedConnectorButtons.length - 1) * 58;
       if (privacyPolicy || tncLink) {
         return `${maxHeight + (enableMainSocialLoginButton ? 120 : 60)}px`;
       }
@@ -362,7 +358,7 @@ function Root(props: RootProps) {
     isWalletDetailsExpanded,
     modalState.currentPage,
     isSocialLoginsExpanded,
-    topInstalledConnectorButtons,
+    installedConnectorButtons,
     privacyPolicy,
     tncLink,
     enableMainSocialLoginButton,
@@ -414,7 +410,7 @@ function Root(props: RootProps) {
                     installedExternalWalletConfig={topInstalledConnectorButtons}
                     isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                     isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-                    totalExternalWallets={totalExternalWalletsLength}
+                    totalExternalWallets={totalExternalWallets}
                     logoAlignment={logoAlignment}
                     buttonRadius={buttonRadiusType}
                     enableMainSocialLoginButton={enableMainSocialLoginButton}
@@ -431,8 +427,8 @@ function Root(props: RootProps) {
                     config={modalState.externalWalletsConfig}
                     walletRegistry={walletRegistry}
                     allExternalButtons={allButtons}
-                    adapterVisibilityMap={adapterVisibilityMap}
-                    customAdapterButtons={customAdapterButtons}
+                    adapterVisibilityMap={connectorVisibilityMap}
+                    customConnectorButtons={customConnectorButtons}
                     deviceDetails={{
                       platform: deviceDetails.platform,
                       browser: deviceDetails.browser,

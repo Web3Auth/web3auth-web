@@ -19,7 +19,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     walletConnectUri,
     walletRegistry,
     allExternalButtons,
-    customAdapterButtons,
+    customConnectorButtons,
     adapterVisibilityMap,
     deviceDetails,
     buttonRadius = "pill",
@@ -65,12 +65,12 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const allUniqueButtons = useMemo(() => {
     const uniqueButtonSet = new Set();
-    return allExternalButtons.concat(customAdapterButtons).filter((button) => {
+    return allExternalButtons.concat(customConnectorButtons).filter((button) => {
       if (uniqueButtonSet.has(button.name)) return false;
       uniqueButtonSet.add(button.name);
       return true;
     });
-  }, [allExternalButtons, customAdapterButtons]);
+  }, [allExternalButtons, customConnectorButtons]);
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
@@ -78,7 +78,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     // display order: default injected buttons > custom adapter buttons > default non-injected buttons
     const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-      ...customAdapterButtons,
+      ...customConnectorButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ];
 
@@ -88,7 +88,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       buttonSet.add(button.name);
       return true;
     });
-  }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
+  }, [allExternalButtons, customConnectorButtons, defaultButtonKeys]);
 
   const installedWalletButtons = useMemo(() => {
     const visibilityMap = adapterVisibilityMap;
@@ -118,8 +118,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
-      const buttons = allUniqueButtons;
-      return buttons
+      return allUniqueButtons
         .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
         .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }
