@@ -8,12 +8,12 @@ export interface ConnectWalletProps {
   walletConnectUri: string | undefined;
   walletRegistry?: WalletRegistry;
   allExternalButtons: ExternalButton[];
-  customAdapterButtons: ExternalButton[];
-  adapterVisibilityMap: Record<string, boolean>;
+  customConnectorButtons: ExternalButton[];
+  connectorVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
   chainNamespace: ChainNamespaceType[];
+  buttonRadius: ButtonRadiusType;
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   handleWalletDetailsHeight: () => void;
-  buttonRadius: ButtonRadiusType;
 }

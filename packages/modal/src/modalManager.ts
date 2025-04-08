@@ -427,7 +427,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           const initialChain = this.getInitialChainIdForConnector(connector);
           await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
           const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
+          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected, icon: connector.icon };
           this.loginModal.addWalletLogins(connectorsConfig, {
             showExternalWalletsOnly: !!options.showExternalWalletsOnly,
             externalWalletsVisibility: !!options.externalWalletsVisibility,
@@ -440,7 +440,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
           // we use connecting status for wallet connect
           const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected };
+          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected, icon: connector.icon };
           this.loginModal.addWalletLogins(connectorsConfig, {
             showExternalWalletsOnly: !!options.showExternalWalletsOnly,
             externalWalletsVisibility: !!options.externalWalletsVisibility,

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { CustomChainConfig, IProvider, log, SolanaWallet, TransactionOrVersionedTransaction  } from "@web3auth/modal";
+import { CustomChainConfig, IProvider, log, SolanaWallet, TransactionOrVersionedTransaction } from "@web3auth/modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import base58 from "bs58";
 
 const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
@@ -36,10 +35,10 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
 
 export const getPrivateKey = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
   try {
-    const privateKey = await provider.request({
+    const privateKey = (await provider.request({
       method: SOLANA_METHOD_TYPES.SOLANA_PRIVATE_KEY,
       params: [],
-    }) as string;
+    })) as string;
     uiConsole("privateKey", { privateKey });
     return privateKey;
   } catch (error) {

@@ -14,18 +14,18 @@ import ConnectWalletSearch from "./ConnectWalletSearch";
 function ConnectWallet(props: ConnectWalletProps) {
   const {
     isDark,
-    onBackClick,
-    handleExternalWalletClick,
     config,
     walletConnectUri,
     walletRegistry,
     allExternalButtons,
-    customAdapterButtons,
-    adapterVisibilityMap,
+    customConnectorButtons,
+    connectorVisibilityMap,
     deviceDetails,
-    handleWalletDetailsHeight,
     buttonRadius = "pill",
     chainNamespace,
+    onBackClick,
+    handleExternalWalletClick,
+    handleWalletDetailsHeight,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
@@ -41,6 +41,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const handleBack = () => {
     if (!selectedWallet && currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET && onBackClick) {
       onBackClick(false);
+      return;
     }
 
     if (selectedWallet) {
@@ -57,12 +58,12 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const allUniqueButtons = useMemo(() => {
     const uniqueButtonSet = new Set();
-    return allExternalButtons.concat(customAdapterButtons).filter((button) => {
+    return allExternalButtons.concat(customConnectorButtons).filter((button) => {
       if (uniqueButtonSet.has(button.name)) return false;
       uniqueButtonSet.add(button.name);
       return true;
     });
-  }, [allExternalButtons, customAdapterButtons]);
+  }, [allExternalButtons, customConnectorButtons]);
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
@@ -70,20 +71,22 @@ function ConnectWallet(props: ConnectWalletProps) {
     // display order: default injected buttons > custom adapter buttons > default non-injected buttons
     const buttons = [
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-      ...customAdapterButtons,
+      ...customConnectorButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ];
 
     const buttonSet = new Set();
-    return buttons.filter((button) => {
-      if (buttonSet.has(button.name)) return false;
-      buttonSet.add(button.name);
-      return true;
-    });
-  }, [allExternalButtons, customAdapterButtons, defaultButtonKeys]);
+    return buttons
+      .filter((button) => {
+        if (buttonSet.has(button.name)) return false;
+        buttonSet.add(button.name);
+        return true;
+      })
+      .filter((button) => selectedChain === "all" || button.chainNamespaces?.includes(selectedChain as ChainNamespaceType));
+  }, [allExternalButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
 
   const installedWalletButtons = useMemo(() => {
-    const visibilityMap = adapterVisibilityMap;
+    const visibilityMap = connectorVisibilityMap;
     return Object.keys(config).reduce((acc, adapter) => {
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
         acc.push({
@@ -96,7 +99,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       }
       return acc;
     }, [] as ExternalButton[]);
-  }, [adapterVisibilityMap, config]);
+  }, [connectorVisibilityMap, config]);
 
   const handleWalletSearch = (e: FormEvent<HTMLInputElement>) => {
     const searchValue = (e.target as HTMLInputElement).value;
@@ -110,8 +113,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
-      const buttons = allUniqueButtons;
-      return buttons
+      return allUniqueButtons
         .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
         .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }
@@ -125,9 +127,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     return filteredButtons;
   }, [walletDiscoverySupported, walletSearch, filteredButtons, defaultButtons, isShowAllWallets]);
 
-  const totalExternalWalletsCount = useMemo(() => {
-    return filteredButtons.length;
-  }, [filteredButtons]);
+  const totalExternalWalletsCount = useMemo(() => filteredButtons.length, [filteredButtons]);
 
   const initialWalletCount = useMemo(() => {
     if (isShowAllWallets) return totalExternalWalletsCount;
@@ -135,6 +135,17 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   const handleWalletClick = (button: ExternalButton) => {
+    // show chain namespace selector if the button is an injected connector with multiple chain namespaces
+    const isChainNamespaceSelectorRequired = button.hasInjectedWallet && button.chainNamespaces?.length > 1;
+    if (isChainNamespaceSelectorRequired) {
+      setBodyState({
+        ...bodyState,
+        showMultiChainSelector: true,
+        walletDetails: button,
+      });
+      return;
+    }
+
     const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
     // if doesn't have wallet connect & doesn't have install links, must be a custom connector
     const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
@@ -174,7 +185,6 @@ function ConnectWallet(props: ConnectWalletProps) {
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
           logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
           setBodyState={setBodyState}
-          handleExternalWalletClick={handleExternalWalletClick}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">

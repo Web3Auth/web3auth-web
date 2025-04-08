@@ -1,10 +1,11 @@
 import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter } from "../../config";
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, type rowType } from "../../interfaces";
+import { RootContext } from "../../context/RootContext";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, ExternalButton, type rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, validatePhoneNumber } from "../../utils";
 import Image from "../Image";
@@ -48,6 +49,7 @@ function Login(props: LoginProps) {
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
+  const { bodyState, setBodyState } = useContext(RootContext);
 
   const [fieldValue, setFieldValue] = useState<string>("");
   const [isValidInput, setIsValidInput] = useState<boolean>(true);
@@ -219,6 +221,19 @@ function Login(props: LoginProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
   };
 
+  const handleInstalledWalletClick = (wallet: ExternalButton) => {
+    // when having multiple namespaces, ask user to select one
+    if (wallet.chainNamespaces?.length > 1) {
+      setBodyState({
+        ...bodyState,
+        showMultiChainSelector: true,
+        walletDetails: wallet,
+      });
+    } else {
+      handleExternalWalletClick({ connector: wallet.name });
+    }
+  };
+
   const installedExternalWallets = useMemo(() => {
     if (showInstalledExternalWallets) return installedExternalWalletConfig;
     // always show MetaMask
@@ -297,12 +312,21 @@ function Login(props: LoginProps) {
                 "w3a--rounded-lg": buttonRadius === "rounded",
                 "w3a--rounded-none": buttonRadius === "square",
               })}
-              onClick={() => handleExternalWalletClick({ connector: wallet.name })}
+              onClick={() => handleInstalledWalletClick(wallet)}
             >
               <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-                <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
+                {wallet.hasInjectedWallet && (
+                  <span
+                    className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
+                  dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
+                  >
+                    {t("modal.external.installed")}
+                  </span>
+                )}
+                <figure className={wallet.icon ? "w3a--size-5" : "w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300"}>
                   <Image
+                    imageData={wallet.icon}
                     imageId={`login-${wallet.name}`}
                     hoverImageId={`login-${wallet.name}`}
                     fallbackImageId="wallet"
@@ -317,7 +341,7 @@ function Login(props: LoginProps) {
           ))}
 
         {/* EXTERNAL WALLETS DISCOVERY */}
-        {
+        {totalExternalWallets > 3 && (
           <button
             type="button"
             className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
@@ -333,7 +357,7 @@ function Login(props: LoginProps) {
                 id="external-wallet-count"
                 className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
               >
-                {totalExternalWallets - 1}+
+                {totalExternalWallets - 1}
               </div>
             )}
             <img
@@ -343,7 +367,7 @@ function Login(props: LoginProps) {
               alt="arrow"
             />
           </button>
-        }
+        )}
       </div>
     );
   };
