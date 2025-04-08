@@ -58,7 +58,14 @@ function OtpInput(props: OtpInputProps) {
             </p>
           </div>
         </div>
-        <Otp length={6} onComplete={handleOtpComplete} error={Boolean(errorMessage)} helperText={errorMessage} disabled={otpLoading} />
+        <Otp
+          length={6}
+          onComplete={handleOtpComplete}
+          error={Boolean(errorMessage)}
+          helperText={errorMessage}
+          loading={otpLoading}
+          disabled={otpLoading}
+        />
       </div>
     </>
   );

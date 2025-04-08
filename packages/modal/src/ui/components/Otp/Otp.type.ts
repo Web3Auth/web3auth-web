@@ -14,6 +14,7 @@ export type OtpClassesType =
 
 export interface OtpProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "placeholder"> {
   length: number;
+  loading?: boolean;
   resendTimer?: number;
   error?: boolean;
   success?: boolean;

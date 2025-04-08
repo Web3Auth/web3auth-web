@@ -3,13 +3,15 @@ import { useTranslation } from "react-i18next";
 
 import i18n from "../../localeImport";
 import { cn } from "../../utils";
+import PulseLoader from "../PulseLoader";
 import { OtpProps } from "./Otp.type";
 
 const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
   (
     {
       length,
-      resendTimer,
+      loading,
+      resendTimer = 60,
       onComplete,
       onChange,
       error = false,
@@ -179,9 +181,14 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
           ))}
         </form>
         {helperText && <p className={helperTextClass}>{helperText}</p>}
-        {showCta && (
+        {loading && (
+          <div className="w3a--mt-3">
+            <PulseLoader />
+          </div>
+        )}
+        {showCta && !loading && (
           <div className={cn("w3a--flex w3a--items-center w3a--mt-3", classes?.ctaContainer)}>
-            {timer > 0 && showTimer && !disabled ? (
+            {timer > 0 && showTimer ? (
               <span className={cn("w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400", classes?.timerText)}>
                 {t("modal.resendTimer", { timer: timer })}
               </span>
@@ -190,7 +197,7 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
                 type="button"
                 className={cn("w3a--text-xs w3a--p-0 w3a--text-app-primary-600 dark:w3a--text-app-primary-500", classes?.resendBtnText)}
                 onClick={handleResendClick}
-                disabled={(timer > 0 && showTimer) || disabled}
+                disabled={timer > 0 && showTimer}
               >
                 {resendBtnText || t("modal.resendCode")}
               </button>
