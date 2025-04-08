@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "10.0.0-beta.0",
+  "version": "10.0.0-beta.1",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -75,16 +75,16 @@
     "@hcaptcha/react-hcaptcha": "^1.12.0",
     "@toruslabs/http-helpers": "^8.1.1",
     "@web3auth/auth": "^10.2.3",
-    "@web3auth/no-modal": "^10.0.0-beta.0",
+    "@web3auth/no-modal": "^10.0.0-beta.1",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "deepmerge": "^4.3.1",
     "i18next": "^24.2.3",
     "react-i18next": "^15.4.1",
     "react-qrcode-logo": "^3.0.0",
-    "tailwind-merge": "^3.0.2",
-    "clsx": "^2.1.1"
+    "tailwind-merge": "^3.0.2"
   },
   "exports": {
     ".": {
