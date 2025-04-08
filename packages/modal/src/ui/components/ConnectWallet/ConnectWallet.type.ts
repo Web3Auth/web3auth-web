@@ -12,7 +12,6 @@ export interface ConnectWalletProps {
   connectorVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
   chainNamespace: ChainNamespaceType[];
-  initialConnectedWallet: ExternalButton;
   buttonRadius: ButtonRadiusType;
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;

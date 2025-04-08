@@ -71,15 +71,13 @@ function Root(props: RootProps) {
 
   const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = useState(false);
   const [isWalletDetailsExpanded, setIsWalletDetailsExpanded] = useState(false);
-  const [initialConnectedWallet, setInitialConnectedWallet] = useState<ExternalButton | null>(null);
 
-  const onExternalWalletBtnClick = (flag: boolean, wallet?: ExternalButton) => {
+  const onExternalWalletBtnClick = (flag: boolean) => {
     setModalState({
       ...modalState,
       currentPage: PAGES.CONNECT_WALLET,
     });
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
-    setInitialConnectedWallet(wallet);
   };
 
   const onBackClick = (flag: boolean) => {
@@ -88,7 +86,6 @@ function Root(props: RootProps) {
       currentPage: PAGES.LOGIN,
     });
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
-    setInitialConnectedWallet(null);
   };
 
   // Wallet Details
@@ -476,7 +473,6 @@ function Root(props: RootProps) {
                     }}
                     chainNamespace={chainNamespaces}
                     buttonRadius={buttonRadiusType}
-                    initialConnectedWallet={initialConnectedWallet}
                     handleWalletDetailsHeight={handleWalletDetailsHeight}
                     onBackClick={onBackClick}
                     handleExternalWalletClick={preHandleExternalWalletClick}
