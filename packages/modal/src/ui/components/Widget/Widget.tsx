@@ -1,4 +1,4 @@
-import { AUTH_CONNECTION } from "@web3auth/auth";
+import { AUTH_CONNECTION, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
@@ -48,6 +48,8 @@ function Widget(props: WidgetProps) {
     currentPage: PAGES.LOGIN,
     detailedLoaderConnector: "",
     detailedLoaderConnectorName: "",
+    web3authClientId: "",
+    web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
   });
 
   useEffect(() => {
@@ -55,7 +57,6 @@ function Widget(props: WidgetProps) {
   }, [visible]);
 
   useEffect(() => {
-    stateListener.emit("MOUNTED");
     stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
       log.debug("state updated", newModalState);
 
@@ -64,6 +65,7 @@ function Widget(props: WidgetProps) {
         return mergedState;
       });
     });
+    stateListener.emit("MOUNTED");
   }, [stateListener]);
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {

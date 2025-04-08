@@ -88,6 +88,25 @@
     "otp.email-title": "이메일 검증",
     "otp.email-subtext": "6자리 인증 코드를 입력하세요",
     "otp.email-subtext-example": "{{email}}에 전송된 것입니다",
-    "passwordless.title": "{{title}} 로 계속하기"
+    "passwordless.title": "{{title}} 로 계속하기",
+    "resendCode": "코드 다시 보내기",
+    "resendTimer": " {{timer}} 초 후 다시 보내기",
+    "connectYourWallet": "지갑 연결",
+    "allChains": "모든 체인"
+  },
+  "passwordless": {
+    "error-invalid-params": "누락되었거나 유효하지 않은 정보입니다.",
+    "error-sending-sms-failed": "SMS 전송 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "error-no-mail-generated": "메일이 생성되지 않았습니다. 비밀번호가 없는 절차부터 시작해 주세요.",
+    "error-invalid-link": "유효하지 않은 인증 링크이거나 링크가 만료되었습니다",
+    "error-new-link-generated-heading": "새 인증 링크가 생성되었습니다.",
+    "error-invalid-otp": "유효하지 않은 OTP입니다. 다시 시도해 주세요.",
+    "error-otp-expired": "OTP가 만료되었습니다",
+    "error-no-sms-generated": "OTP가 생성되지 않았습니다. 비밀번호가 없는 절차부터 시작해 주세요.",
+    "error-max-retry-limit-reached": "잘못된 시도 횟수를 초과했습니다. 인증을 완료하려면 절차를 다시 시작해 주세요.",
+    "error-recaptcha-verification-failed": "Captcha 인증에 실패했습니다. 다시 시도해 주세요.",
+    "error-plan-limit-reached": "E411. 제한에 도달했습니다",
+    "something-wrong-error": "문제가 발생했습니다",
+    "error-invalid-origin": "문제가 발생했습니다, 오류 코드: E002"
   }
 }

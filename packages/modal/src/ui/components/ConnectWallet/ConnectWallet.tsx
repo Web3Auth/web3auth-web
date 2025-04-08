@@ -28,7 +28,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     handleWalletDetailsHeight,
   } = props;
 
-  const { bodyState, setBodyState } = useContext(RootContext);
+  const { bodyState, setBodyState, toast, setToast } = useContext(RootContext);
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
@@ -178,6 +178,8 @@ function ConnectWallet(props: ConnectWalletProps) {
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
+          toast={toast}
+          setToast={setToast}
           walletConnectUri={walletConnectUri}
           isDark={isDark}
           selectedButton={selectedButton}

@@ -22,10 +22,9 @@ import { createRoot } from "react-dom/client";
 
 // import Modal from "./components/Modal";
 import Widget from "./components/Widget";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";
 import {
-  DEFAULT_LOGO_DARK,
-  DEFAULT_LOGO_LIGHT,
   ExternalWalletEventType,
   LoginModalCallbacks,
   LoginModalProps,
@@ -59,7 +58,7 @@ function createWrapperForEmbed(targetId: string) {
 }
 
 export class LoginModal {
-  private uiConfig: UIConfig;
+  private uiConfig: LoginModalProps;
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
@@ -85,7 +84,7 @@ export class LoginModal {
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
-      throw new Error("targetId is required for embed widget");
+      throw WalletInitializationError.invalidParams("targetId is required for embed widget");
     }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
@@ -201,10 +200,11 @@ export class LoginModal {
     return new Promise((resolve) => {
       this.stateEmitter.once("MOUNTED", () => {
         log.info("rendered");
-        // not needed, the default state is initialized inside the modal
-        // this.setState({
-        //   status: MODAL_STATUS.INITIALIZED,
-        // });
+        this.setState({
+          status: MODAL_STATUS.INITIALIZED,
+          web3authClientId: this.uiConfig.web3authClientId,
+          web3authNetwork: this.uiConfig.web3authNetwork,
+        });
         return resolve();
       });
 

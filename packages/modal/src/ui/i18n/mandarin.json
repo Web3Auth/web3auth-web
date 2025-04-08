@@ -88,6 +88,25 @@
     "otp.email-title": "电子邮件验证",
     "otp.email-subtext": "请输入6位验证码",
     "otp.email-subtext-example": "{{email}} 发送的",
-    "passwordless.title": "继续使用 {{title}}"
+    "passwordless.title": "继续使用 {{title}}",
+    "resendCode": "重新发送代码",
+    "resendTimer": " {{timer}} 秒后重新发送",
+    "connectYourWallet": "连接您的钱包",
+    "allChains": "所有链"
+  },
+  "passwordless": {
+    "error-invalid-params": "缺失或无效参数",
+    "error-sending-sms-failed": "发送短信的错误。请再试一遍。",
+    "error-no-mail-generated": "没有生成邮件。请先启动无密码流。",
+    "error-invalid-link": "无效的验证链接或链接已过期",
+    "error-new-link-generated-heading": "生成的新验证链接",
+    "error-invalid-otp": "无效的OTP，请重试",
+    "error-otp-expired": "OTP过期",
+    "error-no-sms-generated": "没有生成OTP。请先启动无密码流。",
+    "error-max-retry-limit-reached": "您已经达到了错误的尝试的极限。请再次重新启动流程以完成验证。",
+    "error-recaptcha-verification-failed": "Captcha 验证失败。请再试一次。",
+    "error-plan-limit-reached": "E411. 限制已达到",
+    "something-wrong-error": "出问题了",
+    "error-invalid-origin": "出问题了, 错误代码: E002"
   }
 }

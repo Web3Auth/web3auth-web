@@ -19,6 +19,8 @@ module.exports = {
         modal: "0px 4px 16px rgba(0, 0, 0, 0.08)",
         autofill: "0 0 0 30px #f9fafb inset !important",
         autofillDark: "0 0 0 30px #374151 inset !important",
+        light: "0px 2px 8px 2px #E5E7EB",
+        dark: "0px 2px 8px 2px #111928",
       },
       backgroundImage: {
         select: `url('data:image/svg + xml;charset=utf-8,%3Csvgxmlns="http://www.w3.org/2000/svg"fill="none"viewBox="002020"%3E%3Cpathstroke="%236B7280"stroke-linecap="round"stroke-linejoin="round"stroke-width="1.5"d="m68444-4"/%3E%3C/svg%3E')`,

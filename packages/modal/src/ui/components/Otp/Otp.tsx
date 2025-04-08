@@ -1,19 +1,22 @@
 import { ClipboardEvent, FormEvent, forwardRef, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import i18n from "../../localeImport";
 import { cn } from "../../utils";
+import PulseLoader from "../PulseLoader";
 import { OtpProps } from "./Otp.type";
 
 const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
   (
     {
       length,
-      resendTimer,
+      loading,
+      resendTimer = 60,
       onComplete,
       onChange,
       error = false,
       success = false,
       disabled = false,
-      resendBtnText = "Resend OTP",
       classes,
       helperText = "",
       onResendTimer,
@@ -23,11 +26,14 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
       placeholder = "",
       autoComplete = "one-time-code",
       type = "text",
+      resendBtnText = "",
     },
     ref
   ) => {
     const [otpArray, setOtpArray] = useState<string[]>(Array(length).fill(""));
     const [timer, setTimer] = useState<number>(resendTimer ?? 0);
+    const [t] = useTranslation(undefined, { i18n });
+
     const inputRefs = useRef<HTMLInputElement[]>([]);
 
     const isInputValueValid = (value: string) => {
@@ -129,10 +135,10 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     }, [autoFocus]);
 
     const helperTextClass = cn(
-      "text-xs font-normal text-app-gray-500 dark:text-app-white mt-2",
+      "w3a--text-xs w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-white w3a--mt-2",
       {
-        "text-app-red-500 dark:text-app-red-400": error,
-        "text-app-green-500 dark:text-app-green-400": success,
+        "w3a--text-app-red-500 dark:w3a--text-app-red-400": error,
+        "w3a--text-app-green-500 dark:w3a--text-app-green-400": success,
       },
       classes?.helperText
     );
@@ -140,8 +146,8 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     const inputKey = new Date().getFullYear();
 
     return (
-      <div className={cn("flex flex-col items-center", classes?.root)} ref={ref}>
-        <form className={cn("flex space-x-2", classes?.inputContainer)}>
+      <div className={cn("w3a--flex w3a--flex-col w3a--items-center", classes?.root)} ref={ref}>
+        <form className={cn("w3a--flex w3a--space-x-2", classes?.inputContainer)}>
           {otpArray.map((digit, index) => (
             <input
               id={`${inputKey + index}`}
@@ -155,13 +161,16 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
               onKeyUp={(e) => handleKeyDown(e, index)}
               onPaste={handlePaste}
               className={cn(
-                "w-12 h-[42px] rounded-full border text-center text-xl focus:outline-none active:outline-none focus:border-app-primary-600 dark:focus:border-app-primary-500 border-app-gray-300 dark:border-app-gray-500 bg-app-gray-50 dark:bg-app-gray-700 text-app-gray-900 dark:text-app-white",
+                "w3a--w-12 w3a--h-[42px] w3a--rounded-full w3a--border w3a--text-center w3a--text-xl w3a--focus:outline-none w3a--active:outline-none w3a--focus:border-app-primary-600 dark:w3a--focus:border-app-primary-500 w3a--border-app-gray-300 dark:w3a--border-app-gray-500 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--text-app-gray-900 dark:w3a--text-app-white",
                 success &&
-                  (classes?.success ?? "border-app-green-400 dark:border-app-green-500 focus:border-app-green-400 dark:focus:border-app-green-500"),
-                error && (classes?.error ?? "border-app-red-600 dark:border-app-red-500 focus:border-app-red-600 dark:focus:border-app-red-500"),
+                  (classes?.success ??
+                    "w3a--border-app-green-400 dark:w3a--border-app-green-500 w3a--focus:w3a--border-app-green-400 dark:w3a--focus:w3a--border-app-green-500"),
+                error &&
+                  (classes?.error ??
+                    "w3a--border-app-red-600 dark:w3a--border-app-red-500 w3a--focus:w3a--border-app-red-600 dark:w3a--focus:w3a--border-app-red-500"),
                 disabled &&
                   (classes?.disabled ??
-                    "border-app-gray-200 bg-app-gray-200 dark:border-app-gray-700 focus:border-app-gray-200 dark:focus:border-app-gray-700 cursor-not-allowed"),
+                    "w3a--border-app-gray-200 w3a--bg-app-gray-200 dark:w3a--border-app-gray-700 w3a--focus:w3a--border-app-gray-200 dark:w3a--focus:w3a--border-app-gray-700 w3a--cursor-not-allowed"),
                 classes?.input
               )}
               ref={(el) => {
@@ -172,18 +181,25 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
           ))}
         </form>
         {helperText && <p className={helperTextClass}>{helperText}</p>}
-        {showCta && (
-          <div className={cn("flex items-center mt-3", classes?.ctaContainer)}>
-            {timer > 0 && showTimer && !disabled ? (
-              <span className={cn("text-xs text-app-gray-500 dark:text-app-gray-400", classes?.timerText)}>Resend in {timer} seconds</span>
+        {loading && (
+          <div className="w3a--mt-3">
+            <PulseLoader />
+          </div>
+        )}
+        {showCta && !loading && (
+          <div className={cn("w3a--flex w3a--items-center w3a--mt-3", classes?.ctaContainer)}>
+            {timer > 0 && showTimer ? (
+              <span className={cn("w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400", classes?.timerText)}>
+                {t("modal.resendTimer", { timer: timer })}
+              </span>
             ) : (
               <button
                 type="button"
-                className={cn("text-sm p-0", classes?.resendBtnText)}
+                className={cn("w3a--text-xs w3a--p-0 w3a--text-app-primary-600 dark:w3a--text-app-primary-500", classes?.resendBtnText)}
                 onClick={handleResendClick}
-                disabled={(timer > 0 && showTimer) || disabled}
+                disabled={timer > 0 && showTimer}
               >
-                {resendBtnText}
+                {resendBtnText || t("modal.resendCode")}
               </button>
             )}
           </div>

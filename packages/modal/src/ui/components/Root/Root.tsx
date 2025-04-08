@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
-import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
+import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
 import BottomSheet from "../BottomSheet";
@@ -16,6 +16,7 @@ import Footer from "../Footer/Footer";
 import Image from "../Image";
 import Loader from "../Loader";
 import Login from "../Login";
+import Toast from "../Toast";
 import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {
@@ -42,11 +43,11 @@ function Root(props: RootProps) {
   } = props;
 
   const {
-    logoAlignment,
-    buttonRadiusType,
-    enableMainSocialLoginButton,
-    privacyPolicy,
-    tncLink,
+    logoAlignment = "center",
+    buttonRadiusType = "pill",
+    enableMainSocialLoginButton = false,
+    privacyPolicy = "",
+    tncLink = "",
     displayInstalledExternalWallets = true,
     displayExternalWalletsCount = true,
   } = uiConfig;
@@ -58,6 +59,14 @@ function Root(props: RootProps) {
     showWalletDetails: false,
     walletDetails: null,
     showMultiChainSelector: false,
+  });
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  }>({
+    message: "",
+    type: TOAST_TYPE.SUCCESS,
   });
 
   const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = useState(false);
@@ -336,25 +345,46 @@ function Root(props: RootProps) {
   };
 
   const containerMaxHeight = useMemo(() => {
+    const isPrivacyPolicyOrTncLink = privacyPolicy || tncLink;
+    const isEnableMainSocialLoginButton = enableMainSocialLoginButton;
+
+    // Loader Screen
+    if (modalState.status !== MODAL_STATUS.INITIALIZED) {
+      return "642px";
+    }
+
+    // Wallet Details Screen
     if (isWalletDetailsExpanded) {
       return "588px";
     }
-    if (modalState.currentPage === PAGES.CONNECT_WALLET || isSocialLoginsExpanded) {
-      return privacyPolicy || tncLink || enableMainSocialLoginButton ? "750px" : "700px";
+
+    // Connect Wallet Screen
+    if (modalState.currentPage === PAGES.CONNECT_WALLET) {
+      return isPrivacyPolicyOrTncLink ? "640px" : "580px";
     }
-    if (installedConnectorButtons.length === 1) {
-      if (privacyPolicy || tncLink) {
-        return enableMainSocialLoginButton ? "600px" : "560px";
+
+    // Expanded Social Login Screen
+    if (isSocialLoginsExpanded) {
+      return isPrivacyPolicyOrTncLink ? "644px" : "588px";
+    }
+
+    // Only MetaMask
+    if (topInstalledConnectorButtons.length === 1) {
+      if (isPrivacyPolicyOrTncLink) {
+        return isEnableMainSocialLoginButton ? "600px" : "560px";
       }
-      return enableMainSocialLoginButton ? "570px" : "530px";
+      return isEnableMainSocialLoginButton ? "570px" : "530px";
     }
-    if (installedConnectorButtons.length > 1) {
-      const maxHeight = 500 + (installedConnectorButtons.length - 1) * 58;
-      if (privacyPolicy || tncLink) {
-        return `${maxHeight + (enableMainSocialLoginButton ? 120 : 60)}px`;
+
+    // More than 1 connector
+    if (topInstalledConnectorButtons.length > 1) {
+      const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
+      if (isPrivacyPolicyOrTncLink) {
+        return `${maxHeight + (isEnableMainSocialLoginButton ? 120 : 60)}px`;
       }
-      return `${maxHeight + (enableMainSocialLoginButton ? 66 : 16)}px`;
+      return `${maxHeight + (isEnableMainSocialLoginButton ? 66 : 16)}px`;
     }
+    // Default
     return "539px";
   }, [
     isWalletDetailsExpanded,
@@ -364,19 +394,22 @@ function Root(props: RootProps) {
     privacyPolicy,
     tncLink,
     enableMainSocialLoginButton,
+    modalState.status,
   ]);
 
   const contextValue = useMemo(
     () => ({
       bodyState,
       setBodyState,
+      toast,
+      setToast,
     }),
-    [bodyState, setBodyState]
+    [bodyState, setBodyState, toast, setToast]
   );
 
   return (
     <RootContext.Provider value={contextValue}>
-      <div className="w3a--flex w3a--flex-col">
+      <div className="w3a--relative w3a--flex w3a--flex-col">
         <div
           className="w3a--relative w3a--h-screen w3a--overflow-hidden w3a--transition-all w3a--duration-[400ms] w3a--ease-in-out"
           style={{
@@ -398,6 +431,8 @@ function Root(props: RootProps) {
               <>
                 {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                   <Login
+                    web3authClientId={modalState.web3authClientId}
+                    web3authNetwork={modalState.web3authNetwork}
                     isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
                     appLogo={appLogo}
@@ -451,7 +486,11 @@ function Root(props: RootProps) {
 
             {/* Multi Chain Selector */}
             {bodyState.showMultiChainSelector && (
-              <BottomSheet isShown={bodyState.showMultiChainSelector} onClose={() => setBodyState({ showMultiChainSelector: false })}>
+              <BottomSheet
+                uiConfig={uiConfig}
+                isShown={bodyState.showMultiChainSelector}
+                onClose={() => setBodyState({ showMultiChainSelector: false })}
+              >
                 <ConnectWalletChainNamespaceSelect
                   isDark={isDark}
                   wallet={bodyState.walletDetails}
@@ -465,7 +504,7 @@ function Root(props: RootProps) {
 
             {/* Wallet Install Links */}
             {bodyState.showWalletDetails && (
-              <BottomSheet isShown={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
+              <BottomSheet uiConfig={uiConfig} isShown={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
                 <div className="w3a--my-4 w3a--flex w3a--justify-center">
                   <Image
                     imageId={`login-${bodyState.walletDetails.name}`}
@@ -484,6 +523,7 @@ function Root(props: RootProps) {
             )}
           </div>
         </div>
+        <Toast />
       </div>
     </RootContext.Provider>
   );

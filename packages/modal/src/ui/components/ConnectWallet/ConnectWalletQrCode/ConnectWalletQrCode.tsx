@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
-import { WALLET_CONNECT_LOGO } from "../../../interfaces";
+import { WALLET_CONNECT_LOGO } from "../../../constants";
 import i18n from "../../../localeImport";
 import Image from "../../Image";
 import { ConnectWalletQrCodeProps } from "./ConnectWalletQrCode.type";

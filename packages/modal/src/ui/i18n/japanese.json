@@ -88,6 +88,25 @@
     "otp.email-title": "メール 検証",
     "otp.email-subtext": "6桁の検証コードを入力してください",
     "otp.email-subtext-example": "{{email}}に送信されたものです",
-    "passwordless.title": "{{title}} で続行"
+    "passwordless.title": "{{title}} で続行",
+    "resendCode": "コードを再送信",
+    "resendTimer": " {{timer}} 秒後に再送信",
+    "connectYourWallet": "ウォレットを接続",
+    "allChains": "すべてのチェーン"
+  },
+  "passwordless": {
+    "error-invalid-params": "パラメーターの欠落または無効なパラメーター",
+    "error-sending-sms-failed": "SMSの送信エラーがありました。もう一度やり直してください。",
+    "error-no-mail-generated": "メールが生成されていません。最初にパスワードレスフローを開始してください。",
+    "error-invalid-link": "無効な検証リンクまたはリンクが期限切れになりました",
+    "error-new-link-generated-heading": "新しい検証リンクが生成されました",
+    "error-invalid-otp": "無効なOTP、もう一度やり直してください",
+    "error-otp-expired": "OTPの有効期限が切れました",
+    "error-no-sms-generated": "OTP生成はありません。最初にパスワードレスフローを開始してください。",
+    "error-max-retry-limit-reached": "間違った試みの制限に達しました。確認を完了するには、フローをもう一度再起動してください。",
+    "error-recaptcha-verification-failed": "Captcha 検証に失敗しました。もう一度試してください。",
+    "error-plan-limit-reached": "E411. 制限に達しました",
+    "something-wrong-error": "何かがうまくいかなかった",
+    "error-invalid-origin": "何かがうまくいかなかった, エラーコード: E002"
   }
 }

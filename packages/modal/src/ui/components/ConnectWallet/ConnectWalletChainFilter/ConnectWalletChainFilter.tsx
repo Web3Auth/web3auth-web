@@ -1,17 +1,20 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
+import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
 import { ConnectWalletChainFilterProps } from "./ConnectWalletChainFilter.type";
 
 function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
   const { isDark, isLoading, selectedChain, setSelectedChain, chainNamespace } = props;
+  const [t] = useTranslation(undefined, { i18n });
 
   const chains = useMemo(() => {
-    const chains = [{ id: "all", name: "All Chains", icon: "" }];
+    const chains = [{ id: "all", name: "modal.allChains", icon: "" }];
     for (const chain of chainNamespace) {
       chains.push({
         id: chain,
-        name: chain === "eip155" ? "Ethereum" : chain,
+        name: chain === "eip155" ? "EVM" : chain,
         icon: chain === "eip155" ? "ethereum" : chain,
       });
     }
@@ -38,15 +41,18 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
           type="button"
           key={chain.id}
           className={cn(
-            "w3a--text-sm w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-900 dark:w3a--text-app-white w3a--rounded-2xl w3a--h-12",
+            "w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-1 w3a--text-xs w3a--font-medium w3a--px-4 w3a--py-3 w3a--text-app-gray-500 dark:w3a--text-app-gray-300 w3a--h-12",
             {
-              "w3a--bg-app-gray-50 dark:w3a--bg-app-gray-800": selectedChain === chain.id,
+              "w3a--bg-app-gray-100 dark:w3a--bg-app-gray-800 w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-700 w3a--rounded-2xl hover:w3a--bg-app-gray-200 dark:hover:w3a--bg-app-gray-700 w3a--text-app-gray-900 dark:w3a--text-app-white":
+                selectedChain === chain.id,
             }
           )}
           onClick={() => setSelectedChain(chain.id)}
         >
-          {chain.id === "all" && chain.name}
-          {chain.icon && <img src={getIcons(isDark ? `${chain.icon}-dark` : `${chain.icon}-light`)} alt={chain.name} />}
+          {chain.icon && (
+            <img src={getIcons(isDark ? `${chain.icon}-dark` : `${chain.icon}-light`)} alt={chain.name} className="w3a--size-5 w3a--object-contain" />
+          )}
+          {t(chain.name)}
         </button>
       ))}
     </div>

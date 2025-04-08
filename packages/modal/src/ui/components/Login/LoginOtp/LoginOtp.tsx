@@ -1,3 +1,5 @@
+import { AUTH_CONNECTION } from "@web3auth/auth";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
@@ -11,20 +13,17 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
  * @returns OtpInput component
  */
 function OtpInput(props: OtpInputProps) {
-  const { isMobileOtp, otpSuccess, setShowOtpFlow, handleOtpComplete } = props;
-
+  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading } = props;
+  const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
   const [t] = useTranslation(undefined, { i18n });
 
-  if (otpSuccess) {
-    return (
-      <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-        <img src={getIcons("success-light")} alt="success" className="w3a--size-auto" />
-        <p className="w3a--mx-auto w3a--w-4/5 w3a--text-center w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
-          {t("modal.otp.success")}
-        </p>
-      </div>
-    );
-  }
+  const parsedLoginHint = useMemo(() => {
+    if (authConnection === AUTH_CONNECTION.EMAIL_PASSWORDLESS) return loginHint;
+
+    const [countryCode, number] = loginHint.includes("-") ? loginHint.split("-") : ["", loginHint];
+    const masked = `${number}`.slice(-Math.floor((number as string).length / 2)).padStart(`${number}`.length, "*");
+    return `${countryCode} ${masked}`;
+  }, [loginHint, authConnection]);
 
   return (
     <>
@@ -44,22 +43,29 @@ function OtpInput(props: OtpInputProps) {
           </svg>
         </button>
       </div>
-      <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+      <div className="-w3a--mt-10 w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
         <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
-        <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        <div className="-w3a--mt-6 w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
             {isMobileOtp ? t("modal.otp.mobile-title") : t("modal.otp.email-title")}
           </p>
           <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
-            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
+            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
               {isMobileOtp ? t("modal.otp.mobile-subtext") : t("modal.otp.email-subtext")}
             </p>
-            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">
-              {isMobileOtp ? "🇸🇬+91 ****0999" : t("modal.otp.email-subtext-example", { email: "ja****@email.com" })}
+            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+              {isMobileOtp ? parsedLoginHint : t("modal.otp.email-subtext-example", { email: parsedLoginHint })}
             </p>
           </div>
         </div>
-        <Otp length={6} onComplete={handleOtpComplete} />
+        <Otp
+          length={6}
+          onComplete={handleOtpComplete}
+          error={Boolean(errorMessage)}
+          helperText={errorMessage}
+          loading={otpLoading}
+          disabled={otpLoading}
+        />
       </div>
     </>
   );
@@ -71,19 +77,18 @@ function OtpInput(props: OtpInputProps) {
  * @returns LoginOtp component
  */
 function LoginOtp(props: LoginOtpProps) {
-  const { otpLoading, otpSuccess, setShowOtpFlow, isMobileOtp, handleOtpComplete } = props;
+  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage } = props;
 
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-      {otpLoading ? (
-        <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--items-center w3a--justify-center w3a--gap-x-2 w3a--gap-y-4">
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-600 dark:w3a--bg-app-primary-500" />
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-500 dark:w3a--bg-app-primary-400" />
-          <div className="w3a--size-3 w3a--animate-pulse w3a--rounded-full w3a--bg-app-primary-400 dark:w3a--bg-app-primary-300" />
-        </div>
-      ) : (
-        <OtpInput isMobileOtp={isMobileOtp} otpSuccess={otpSuccess} setShowOtpFlow={setShowOtpFlow} handleOtpComplete={handleOtpComplete} />
-      )}
+      <OtpInput
+        errorMessage={errorMessage}
+        setShowOtpFlow={setShowOtpFlow}
+        handleOtpComplete={handleOtpComplete}
+        authConnection={authConnection}
+        loginHint={loginHint}
+        otpLoading={otpLoading}
+      />
     </div>
   );
 }
