@@ -82,12 +82,14 @@ function ConnectWallet(props: ConnectWalletProps) {
     ];
 
     const buttonSet = new Set();
-    return buttons.filter((button) => {
-      if (buttonSet.has(button.name)) return false;
-      buttonSet.add(button.name);
-      return true;
-    });
-  }, [allExternalButtons, customConnectorButtons, defaultButtonKeys]);
+    return buttons
+      .filter((button) => {
+        if (buttonSet.has(button.name)) return false;
+        buttonSet.add(button.name);
+        return true;
+      })
+      .filter((button) => selectedChain === "all" || button.chainNamespaces?.includes(selectedChain as ChainNamespaceType));
+  }, [allExternalButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
 
   const installedWalletButtons = useMemo(() => {
     const visibilityMap = adapterVisibilityMap;
