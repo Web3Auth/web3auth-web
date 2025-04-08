@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "You have reached the limit for wrong attempts. Please restart the flow again to complete verification.",
     "error-recaptcha-verification-failed": "Captcha verification failed. Please try again.",
     "error-plan-limit-reached": "E411. Limit Reached",
-    "something-wrong-error": "Something went wrong"
+    "something-wrong-error": "Something went wrong",
+    "error-invalid-origin": "Something went wrong, error code: E002"
   }
 }

@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "您已经达到了错误的尝试的极限。请再次重新启动流程以完成验证。",
     "error-recaptcha-verification-failed": "Captcha 验证失败。请再试一次。",
     "error-plan-limit-reached": "E411. 限制已达到",
-    "something-wrong-error": "出问题了"
+    "something-wrong-error": "出问题了",
+    "error-invalid-origin": "出问题了, 错误代码: E002"
   }
 }

@@ -172,6 +172,8 @@ export const getErrorMessages = (errorCode: string): string => {
   switch (errorCode) {
     case "E001":
       return "passwordless.error-invalid-params";
+    case "E002":
+      return "passwordless.error-invalid-origin";
     case "E201":
       return "passwordless.error-sending-sms-failed";
     case "E300":

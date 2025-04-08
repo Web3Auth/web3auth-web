@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "間違った試みの制限に達しました。確認を完了するには、フローをもう一度再起動してください。",
     "error-recaptcha-verification-failed": "Captcha 検証に失敗しました。もう一度試してください。",
     "error-plan-limit-reached": "E411. 制限に達しました",
-    "something-wrong-error": "何かがうまくいかなかった"
+    "something-wrong-error": "何かがうまくいかなかった",
+    "error-invalid-origin": "何かがうまくいかなかった, エラーコード: E002"
   }
 }

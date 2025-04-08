@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "U heeft de limiet voor verkeerde pogingen bereikt. Start de stroom opnieuw om de verificatie te voltooien.",
     "error-recaptcha-verification-failed": "Er is iets misgegaan tijdens het verifiëren. Probeer het opnieuw door de pagina te laden.",
     "error-plan-limit-reached": "E411. Limiet bereikt",
-    "something-wrong-error": "Er is iets misgegaan"
+    "something-wrong-error": "Er is iets misgegaan",
+    "error-invalid-origin": "Er is iets misgegaan, foutcode: E002"
   }
 }

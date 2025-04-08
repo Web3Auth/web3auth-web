@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "Hatalı deneme limitine ulaştınız. Doğrulamayı tamamlamak için lütfen akışı baştan başlatın.",
     "error-recaptcha-verification-failed": "Captcha doğrulama hatası. Lütfen tekrar deneyin.",
     "error-plan-limit-reached": "E411. Sınır aşıldı",
-    "something-wrong-error": "Bir şeyler ters gitti"
+    "something-wrong-error": "Bir şeyler ters gitti",
+    "error-invalid-origin": "Bir şeyler ters gitti, hata kodu: E002"
   }
 }

@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "Has alcanzado el límite para intentos incorrectos. Reinicie el proceso para completar la verificación.",
     "error-recaptcha-verification-failed": "La verificación de Captcha ha fallado. Por favor, inténtelo de nuevo.",
     "error-plan-limit-reached": "E411. Límite alcanzado",
-    "something-wrong-error": "Algo salió mal"
+    "something-wrong-error": "Algo salió mal",
+    "error-invalid-origin": "Algo salió mal, código de error: E002"
   }
 }

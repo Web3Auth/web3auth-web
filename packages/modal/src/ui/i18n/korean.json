@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "잘못된 시도 횟수를 초과했습니다. 인증을 완료하려면 절차를 다시 시작해 주세요.",
     "error-recaptcha-verification-failed": "Captcha 인증에 실패했습니다. 다시 시도해 주세요.",
     "error-plan-limit-reached": "E411. 제한에 도달했습니다",
-    "something-wrong-error": "문제가 발생했습니다"
+    "something-wrong-error": "문제가 발생했습니다",
+    "error-invalid-origin": "문제가 발생했습니다, 오류 코드: E002"
   }
 }

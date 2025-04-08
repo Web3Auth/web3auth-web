@@ -106,6 +106,7 @@
     "error-max-retry-limit-reached": "Sie haben die Grenze für falsche Versuche erreicht. Bitte starten Sie den Fluss erneut neu, um die Überprüfung abzuschließen.",
     "error-recaptcha-verification-failed": "Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "error-plan-limit-reached": "E411. Grenze erreicht",
-    "something-wrong-error": "Etwas ist schief gelaufen"
+    "something-wrong-error": "Etwas ist schief gelaufen",
+    "error-invalid-origin": "Etwas ist schief gelaufen, Fehlercode: E002"
   }
 }
