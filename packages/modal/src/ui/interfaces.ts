@@ -223,3 +223,12 @@ export type IVerifyResponse = {
 export type LogoAlignmentType = UIConfig["logoAlignment"];
 export type BorderRadiusType = UIConfig["borderRadiusType"];
 export type ButtonRadiusType = UIConfig["buttonRadiusType"];
+
+export enum TOAST_TYPE {
+  SUCCESS = "success",
+  ERROR = "error",
+  WARNING = "warning",
+  INFO = "info",
+}
+
+export type ToastType = (typeof TOAST_TYPE)[keyof typeof TOAST_TYPE];

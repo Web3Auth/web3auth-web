@@ -4,8 +4,6 @@ import { log, type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no
 import { MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-// import LogoDark from "../../assets/logo-dark.svg";
-// import LogoLight from "../../assets/logo-light.svg";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { PasswordlessHandler } from "../../handlers/AbstractHandler";
@@ -31,7 +29,6 @@ const restrictedLoginMethods: string[] = [
 function Login(props: LoginProps) {
   // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
-    // appName,
     web3authClientId,
     web3authNetwork,
     appLogo,

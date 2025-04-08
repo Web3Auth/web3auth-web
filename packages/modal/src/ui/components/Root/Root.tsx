@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
-import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform } from "../../interfaces";
+import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
 import ConnectWallet from "../ConnectWallet";
@@ -14,6 +14,7 @@ import Footer from "../Footer/Footer";
 import Image from "../Image";
 import Loader from "../Loader";
 import Login from "../Login";
+import Toast from "../Toast";
 import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {
@@ -56,6 +57,14 @@ function Root(props: RootProps) {
   const [bodyState, setBodyState] = useState<BodyState>({
     showWalletDetails: false,
     walletDetails: null,
+  });
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  }>({
+    message: "",
+    type: TOAST_TYPE.SUCCESS,
   });
 
   const [isSocialLoginsExpanded, setIsSocialLoginsExpanded] = useState(false);
@@ -389,13 +398,15 @@ function Root(props: RootProps) {
     () => ({
       bodyState,
       setBodyState,
+      toast,
+      setToast,
     }),
-    [bodyState, setBodyState]
+    [bodyState, setBodyState, toast, setToast]
   );
 
   return (
     <RootContext.Provider value={contextValue}>
-      <div className="w3a--flex w3a--flex-col">
+      <div className="w3a--relative w3a--flex w3a--flex-col">
         <div
           className="w3a--relative w3a--h-screen w3a--overflow-hidden w3a--transition-all w3a--duration-[400ms] w3a--ease-in-out"
           style={{
@@ -534,6 +545,7 @@ function Root(props: RootProps) {
             )}
           </div>
         </div>
+        <Toast />
       </div>
     </RootContext.Provider>
   );
