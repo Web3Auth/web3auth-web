@@ -23,7 +23,6 @@ function ConnectWallet(props: ConnectWalletProps) {
     deviceDetails,
     buttonRadius = "pill",
     chainNamespace,
-    initialConnectedWallet,
     onBackClick,
     handleExternalWalletClick,
     handleWalletDetailsHeight,
@@ -32,19 +31,14 @@ function ConnectWallet(props: ConnectWalletProps) {
   const { bodyState, setBodyState } = useContext(RootContext);
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
-  const [selectedWallet, setSelectedWallet] = useState(!!initialConnectedWallet);
+  const [selectedWallet, setSelectedWallet] = useState(false);
   const [isLoading] = useState<boolean>(false);
-  const [selectedButton, setSelectedButton] = useState<ExternalButton>(initialConnectedWallet);
+  const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [selectedChain, setSelectedChain] = useState<string>("all");
   const [isShowAllWallets, setIsShowAllWallets] = useState<boolean>(false);
 
   const handleBack = () => {
-    if (initialConnectedWallet) {
-      onBackClick(false);
-      return;
-    }
-
     if (!selectedWallet && currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET && onBackClick) {
       onBackClick(false);
       return;

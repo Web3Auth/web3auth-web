@@ -24,7 +24,7 @@ export interface LoginProps {
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
-  handleExternalWalletBtnClick?: (flag: boolean, wallet?: ExternalButton) => void;
+  handleExternalWalletBtnClick?: (flag: boolean) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleSocialLoginHeight: () => void;
