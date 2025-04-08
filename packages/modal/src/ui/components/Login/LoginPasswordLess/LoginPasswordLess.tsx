@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
+import PulseLoader from "../../PulseLoader";
 import { LoginPasswordLessProps } from "./LoginPasswordLess.type";
 
 function LoginPasswordLess(props: LoginPasswordLessProps) {
@@ -100,11 +101,9 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
             "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
           )}
           onKeyDown={(e) => handleEnter(e)}
+          disabled={isPasswordLessLoading}
         />
-        {isPasswordLessLoading && (
-          // TODO: Add loading spinner
-          <div>Loading..</div>
-        )}
+        {isPasswordLessLoading && <PulseLoader />}
         {inputValue && !isPasswordLessLoading && (
           <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />

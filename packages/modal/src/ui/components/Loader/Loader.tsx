@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import Image from "../Image";
+import PulseLoader from "../PulseLoader";
 import { ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
@@ -27,11 +28,7 @@ function ConnectingStatus(props: ConnectingStatusType) {
           <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
         </figure>
 
-        <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-2">
-          <div className="w3a--animate-circle w3a--bg-app-gray-500 dark:w3a--bg-app-gray-200" />
-          <div className="w3a--animate-circle w3a--bg-app-gray-400 dark:w3a--bg-app-gray-400" />
-          <div className="w3a--animate-circle w3a--bg-app-gray-200 dark:w3a--bg-app-gray-600" />
-        </div>
+        <PulseLoader />
 
         {providerIcon}
       </div>
