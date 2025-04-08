@@ -13,7 +13,7 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
  * @returns OtpInput component
  */
 function OtpInput(props: OtpInputProps) {
-  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "gpatra1996@gmail.com", errorMessage, otpLoading } = props;
+  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading } = props;
   const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
   const [t] = useTranslation(undefined, { i18n });
 

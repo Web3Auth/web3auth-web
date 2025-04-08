@@ -106,7 +106,7 @@ export async function getNetworkIconId(ticker: string): Promise<string> {
   }
 }
 
-export const passwordlessBackendUrl = "https://api-passwordless.web3auth.io";
+export const passwordlessBackendUrl = "https://api.web3auth.io/passwordless-service";
 
 export const getUserCountry = async (): Promise<{ country: string; dialCode: string } | null> => {
   try {
