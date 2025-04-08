@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
-    "@toruslabs/constants": "^15.0.0",
     "@toruslabs/base-controllers": "^8.1.0",
     "@toruslabs/ethereum-controllers": "^8.2.0",
     "@toruslabs/solana-controllers": "^8.1.0",
