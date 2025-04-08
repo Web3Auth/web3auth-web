@@ -9,3 +9,8 @@ export const CONNECT_WALLET_PAGES = {
   CONNECT_WALLET: "Connect Your Wallet",
   SELECTED_WALLET: "Selected Wallet",
 };
+
+export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode
+export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
+
+export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";

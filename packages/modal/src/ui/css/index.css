@@ -91,7 +91,7 @@
   }
 
   .w3a--animate-circle {
-    @apply w3a--h-3 w3a--w-3 w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700 w3a--animate-pulse;
+    @apply w3a--h-3 w3a--w-3 w3a--rounded-full w3a--animate-pulse;
   }
 
   .w3a--bottom {
@@ -118,6 +118,7 @@
     @apply w3a--appearance-none w3a--text-app-gray-700 w3a--text-base w3a--font-normal w3a--w-full 
     w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500
     w3a--px-5 w3a--py-3 w3a--flex w3a--items-center w3a--justify-center 
+    hover:w3a--shadow-light dark:hover:w3a--shadow-dark
     w3a--gap-x-2 hover:w3a--bg-app-gray-50 dark:hover:w3a--bg-app-gray-800 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800;
   }
 

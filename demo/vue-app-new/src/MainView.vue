@@ -13,14 +13,14 @@ import {
   WALLET_CONNECTORS,
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
-  type Web3AuthOptions
+  type Web3AuthOptions,
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
+import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -56,7 +56,7 @@ const options = computed((): Web3AuthOptions => {
     accountAbstractionConfig = {
       smartAccountType: formData.smartAccountType as string,
       chains,
-    }
+    };
   }
 
   // Wallet services settings
@@ -64,8 +64,8 @@ const options = computed((): Web3AuthOptions => {
     walletUrls: {
       production: {
         url: "https://develop-wallet.web3auth.io",
-      }
-    }
+      },
+    },
   };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
@@ -109,8 +109,10 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const { widget, targetId } = formData;
-  const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel ? { ...whiteLabel, widgetType: widget, targetId } : { widgetType: widget, targetId };
-  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "development" }, loginSettings: { mfaLevel: "mandatory" } });
+  const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
+    ? { ...whiteLabel, widgetType: widget, targetId }
+    : { widgetType: widget, targetId };
+  const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
     clientId: clientIds[formData.network],
@@ -134,7 +136,7 @@ const options = computed((): Web3AuthOptions => {
     modalConfig: {
       connectors: modalParams.value,
       hideWalletDiscovery: !formData.showWalletDiscovery,
-    }
+    },
   };
 });
 
@@ -142,10 +144,13 @@ const loginMethodsConfig = computed(() => {
   if (formData.loginProviders.length === 0) return undefined;
 
   // only show login methods that are configured
-  const config = formData.loginProviders.reduce((acc, provider) => {
-    acc[provider] = formData.loginMethods[provider];
-    return acc;
-  }, {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>);
+  const config = formData.loginProviders.reduce(
+    (acc, provider) => {
+      acc[provider] = formData.loginMethods[provider];
+      return acc;
+    },
+    {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
+  );
 
   const loginMethods = JSON.parse(JSON.stringify(config));
   return loginMethods;
@@ -155,7 +160,7 @@ const modalParams = computed(() => {
   const modalConfig = {
     [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
-      loginMethods: loginMethodsConfig.value,
+      loginMethods: loginMethodsConfig.value
     },
   };
   return modalConfig;

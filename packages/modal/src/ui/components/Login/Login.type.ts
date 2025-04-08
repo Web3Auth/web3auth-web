@@ -1,3 +1,5 @@
+import { WEB3AUTH_NETWORK_TYPE } from "@web3auth/no-modal";
+
 import type {
   ButtonRadiusType,
   ExternalButton,
@@ -8,6 +10,8 @@ import type {
 } from "../../interfaces";
 
 export interface LoginProps {
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
   isModalVisible: boolean;
   isDark: boolean;
   appLogo?: string;
@@ -24,11 +28,11 @@ export interface LoginProps {
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
+  logoAlignment?: LogoAlignmentType;
+  buttonRadius?: ButtonRadiusType;
+  enableMainSocialLoginButton?: boolean;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleSocialLoginHeight: () => void;
-  logoAlignment?: LogoAlignmentType;
-  buttonRadius?: ButtonRadiusType;
-  enableMainSocialLoginButton?: boolean;
 }

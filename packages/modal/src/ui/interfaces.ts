@@ -1,4 +1,12 @@
-import type { AUTH_CONNECTION_TYPE, ExtraLoginOptions, SafeEventEmitter } from "@web3auth/auth";
+import type {
+  AUTH_CONNECTION_TYPE,
+  EMAIL_FLOW_TYPE,
+  ExtraLoginOptions,
+  LANGUAGES,
+  SafeEventEmitter,
+  THEME_MODE_TYPE,
+  WEB3AUTH_NETWORK_TYPE,
+} from "@web3auth/auth";
 import {
   type AuthLoginParams,
   type BaseConnectorConfig,
@@ -68,6 +76,8 @@ export type ModalLoginParams = Pick<
 export interface LoginModalProps extends UIConfig {
   chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
 }
 
 export interface LoginModalCallbacks {
@@ -110,15 +120,12 @@ export interface ModalState {
   detailedLoaderConnectorName: string;
   showExternalWalletsOnly: boolean;
   currentPage?: string;
+  web3authClientId: string;
+  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
 }
 
 export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
 export type ExternalWalletEventType = { connector: string; chainNamespace?: ChainNamespaceType };
-
-export const DEFAULT_LOGO_LIGHT = "https://images.web3auth.io/web3auth-logo-w.svg"; // logo used on light mode
-export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-light.svg"; // logo used on dark mode
-
-export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
 
 export type StateEmitterEvents = {
   STATE_UPDATED: (state: Partial<ModalState>) => void;
@@ -129,6 +136,7 @@ export type ExternalButton = {
   name: string;
   displayName?: string;
   href?: string;
+  icon?: string;
   hasInjectedWallet: boolean;
   hasWalletConnect: boolean;
   hasInstallLinks: boolean;
@@ -160,6 +168,68 @@ export type rowType = {
   isMainOption: boolean;
 };
 
+export type PasswordlessHandlerParams = {
+  authConnection: AUTH_CONNECTION_TYPE;
+  web3authClientId: string;
+  loginHint: string;
+  network: string;
+  uiConfig?: Omit<UIConfig, "connectorListener">;
+};
+
+export interface WhiteLabelParams {
+  name?: string;
+  url?: string;
+  language?: keyof typeof LANGUAGES;
+  theme?: Record<string, string>;
+  logo?: string;
+  mode?: THEME_MODE_TYPE;
+}
+
+export interface CodeInitiateRequestBodyParams {
+  client_id: string;
+  connection: "email" | "sms";
+  login_hint: string;
+  web3auth_client_id: string;
+  tracking_id?: string;
+  whitelabel?: WhiteLabelParams;
+  version?: string;
+  network?: string;
+  flow_type?: EMAIL_FLOW_TYPE;
+  captcha_token?: string;
+}
+
+export interface CodeVerifyRequestBodyParams {
+  client_id: string;
+  login_hint: string;
+  code: string;
+  connection: "email" | "sms";
+  tracking_id: string;
+  version?: string;
+  network?: string;
+  flow_type?: EMAIL_FLOW_TYPE;
+}
+
+export type IStartResponse = {
+  success?: boolean;
+  error?: string;
+  data?: { trackingId: string };
+};
+
+export type IVerifyResponse = {
+  success?: boolean;
+  error?: string;
+  data?: { id_token: string };
+};
+
 export type LogoAlignmentType = UIConfig["logoAlignment"];
 export type BorderRadiusType = UIConfig["borderRadiusType"];
 export type ButtonRadiusType = UIConfig["buttonRadiusType"];
+
+export enum TOAST_TYPE {
+  SUCCESS = "success",
+  ERROR = "error",
+  WARNING = "warning",
+  INFO = "info",
+}
+
+export type ToastType = (typeof TOAST_TYPE)[keyof typeof TOAST_TYPE];

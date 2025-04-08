@@ -88,6 +88,25 @@
     "otp.email-title": "Email verification",
     "otp.email-subtext": "Please enter the 6-digit verification code",
     "otp.email-subtext-example": "that was sent to your email {{email}}",
-    "passwordless.title": "Continue with {{title}}"
+    "passwordless.title": "Continue with {{title}}",
+    "resendCode": "Resend Code",
+    "resendTimer": " Resend in {{timer}} seconds",
+    "connectYourWallet": "Connect your wallet",
+    "allChains": "All Chains"
+  },
+  "passwordless": {
+    "error-invalid-params": "Missing or Invalid Parameters.",
+    "error-sending-sms-failed": "There was an error sending an sms. Please try again.",
+    "error-no-mail-generated": "No mail generated. Please initiate the passwordless flow first.",
+    "error-invalid-link": "Invalid verification link or link expired",
+    "error-new-link-generated-heading": "New verification link generated",
+    "error-invalid-otp": "Invalid OTP, please try again",
+    "error-otp-expired": "OTP Expired",
+    "error-no-sms-generated": "No OTP generated. Please initiate the passwordless flow first.",
+    "error-max-retry-limit-reached": "You have reached the limit for wrong attempts. Please restart the flow again to complete verification.",
+    "error-recaptcha-verification-failed": "Captcha verification failed. Please try again.",
+    "error-plan-limit-reached": "E411. Limit Reached",
+    "something-wrong-error": "Something went wrong",
+    "error-invalid-origin": "Something went wrong, error code: E002"
   }
 }

@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Connection, PublicKey } from "@solana/web3.js";
+import { bs58 } from "@toruslabs/bs58";
+import { sign } from "@toruslabs/tweetnacl-js";
 import { log, type WalletServicesPluginType } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
-import { BrowserProvider, parseEther } from "ethers";
-import nacl from "tweetnacl";
-import bs58 from "bs58";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { getV4TypedData } from "../config";
 import { SOLANA_METHOD_TYPES as SOL_METHOD_TYPES } from "@web3auth/ws-embed";
-import { generateVersionedTransaction } from "@/utils/solana";
-import { generateSolTransferInstruction } from "@/utils/solana";
+import { BrowserProvider, parseEther } from "ethers";
+
+import { getV4TypedData } from "../config";
+import { generateSolTransferInstruction, generateVersionedTransaction } from "../utils/solana";
 
 // EVM
-export const walletSignPersonalMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
+export const walletSignPersonalMessage = async (
+  provider: WalletServicesPluginType["provider"],
+  uiConsole: (name: string, value: unknown) => void
+) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -37,7 +39,7 @@ export const walletSignPersonalMessage = async (provider: WalletServicesPluginTy
   }
 };
 
-export const walletSignTypedMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
+export const walletSignTypedMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -61,7 +63,7 @@ export const walletSignTypedMessage = async (provider: WalletServicesPluginType[
   }
 };
 
-export const walletSendEth = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
+export const walletSendEth = async (provider: WalletServicesPluginType["provider"], uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -79,7 +81,7 @@ export const walletSendEth = async (provider: WalletServicesPluginType["provider
   }
 };
 
-export const walletSignTransaction = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
+export const walletSignTransaction = async (provider: WalletServicesPluginType["provider"], uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const accounts = await provider.request({ method: "eth_accounts" });
@@ -101,7 +103,7 @@ export const walletSignTransaction = async (provider: WalletServicesPluginType["
 };
 
 // Solana
-export const walletSignSolanaMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: any) => {
+export const walletSignSolanaMessage = async (provider: WalletServicesPluginType["provider"], uiConsole: (name: string, value: unknown) => void) => {
   try {
     const message = "Test Signing Message";
     const accounts = await provider.request({ method: SOL_METHOD_TYPES.GET_ACCOUNTS });
@@ -111,14 +113,18 @@ export const walletSignSolanaMessage = async (provider: WalletServicesPluginType
       method: SOL_METHOD_TYPES.SIGN_MESSAGE,
       params: { data: message, from: account },
     })) as string;
-    nacl.sign.detached.verify(Buffer.from(message, "utf8"), bs58.decode(signature), new PublicKey(account).toBytes());
+    sign.detached.verify(Buffer.from(message, "utf8"), bs58.decode(signature), new PublicKey(account).toBytes());
     uiConsole("Success", { signature });
   } catch (e) {
     uiConsole("Error signing message", (e as Error).message);
   }
 };
 
-export const walletSignSolanaVersionedTransaction = async (provider: WalletServicesPluginType["provider"], connection: Connection, uiConsole: any) => {
+export const walletSignSolanaVersionedTransaction = async (
+  provider: WalletServicesPluginType["provider"],
+  connection: Connection,
+  uiConsole: (name: string, value?: unknown) => void
+) => {
   uiConsole("Signing Versioned Transaction");
   try {
     const accounts = await provider.request({ method: SOL_METHOD_TYPES.GET_ACCOUNTS });

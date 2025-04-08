@@ -16,9 +16,9 @@ function Modal(props: ModalProps) {
     placement = "center",
     padding = true,
     shadow = true,
-    border = true,
+    border = false,
     showCloseIcon = true,
-    borderRadius = "medium",
+    borderRadius = "large",
   } = props;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -85,7 +85,7 @@ function Modal(props: ModalProps) {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               onClick={onCloseHandler}
-              className="w3a--text-app-gray-900 dark:w3a--text-app-white"
+              className="w3a--text-app-gray-500 dark:w3a--text-app-gray-200"
             >
               <path
                 fillRule="evenodd"

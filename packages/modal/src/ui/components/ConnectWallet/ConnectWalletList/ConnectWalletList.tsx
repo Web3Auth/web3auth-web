@@ -117,7 +117,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
 
   return (
     <>
-      <ul className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[400px]")}>
+      <ul className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px]")}>
         {externalButtons.length === 0 ? (
           <NoWalletsFound />
         ) : (

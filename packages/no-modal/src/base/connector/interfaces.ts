@@ -72,6 +72,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   connectorData?: unknown;
   connnected: boolean;
   isInjected?: boolean;
+  icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
   connect(params: T & { chainId: string }): Promise<IProvider | null>;
@@ -110,6 +111,7 @@ export type ConnectorEvents = {
 
 export interface BaseConnectorConfig {
   label: string;
+  icon?: string;
   isInjected?: boolean;
   showOnModal?: boolean;
   showOnMobile?: boolean;
@@ -175,6 +177,12 @@ export type LoginMethodConfig = Partial<
        * Example: This helps in customizing the google login button with auth0 custom connector.
        */
       authConnection?: AUTH_CONNECTION_TYPE;
+      /**
+       * Whether is it default connector.
+       *
+       * @internal
+       */
+      isDefault?: boolean;
     }
   >
 >;

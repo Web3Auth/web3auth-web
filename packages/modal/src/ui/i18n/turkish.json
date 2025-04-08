@@ -88,6 +88,25 @@
     "otp.email-title": "Email Doğrulama",
     "otp.email-subtext": "6 haneli doğrulama kodunu giriniz",
     "otp.email-subtext-example": "{{email}} adresine gönderildi",
-    "passwordless.title": "{{title}} ile devam et"
+    "passwordless.title": "{{title}} ile devam et",
+    "resendCode": "Kodu tekrar gönder",
+    "resendTimer": " {{timer}} saniye sonra tekrar gönder",
+    "connectYourWallet": "Cüzdanınızı bağlayın",
+    "allChains": "Tüm zincirler"
+  },
+  "passwordless": {
+    "error-invalid-params": "Eksik ya da hatalı parametreler var.",
+    "error-sending-sms-failed": "SMS gönderilirken bir hata oldu. Lütfen tekrar deneyin.",
+    "error-no-mail-generated": "E-posta oluşturulmadı. Lütfen önce şifresiz akışı başlatın.",
+    "error-invalid-link": "Hatalı ya da süresi geçmiş doğrulama linki",
+    "error-new-link-generated-heading": "Yeni doğrulama linki oluşturuldu.",
+    "error-invalid-otp": "Hatalı OTP, lütfen tekrar deneyin.",
+    "error-otp-expired": "OTP'nin süresi geçti.",
+    "error-no-sms-generated": "OTP oluşturulmadı. Lütfen önce şifresiz akışı başlatın.",
+    "error-max-retry-limit-reached": "Hatalı deneme limitine ulaştınız. Doğrulamayı tamamlamak için lütfen akışı baştan başlatın.",
+    "error-recaptcha-verification-failed": "Captcha doğrulama hatası. Lütfen tekrar deneyin.",
+    "error-plan-limit-reached": "E411. Sınır aşıldı",
+    "something-wrong-error": "Bir şeyler ters gitti",
+    "error-invalid-origin": "Bir şeyler ters gitti, hata kodu: E002"
   }
 }

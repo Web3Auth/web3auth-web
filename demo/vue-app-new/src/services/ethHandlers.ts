@@ -1,12 +1,12 @@
 import { IProvider, log } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { BrowserProvider, parseEther, Transaction } from "ethers";
 
 import { getV4TypedData } from "../config";
 import { formDataStore } from "../store/form";
-import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
-export const sendEth = async (provider: IProvider, uiConsole: any) => {
+export const sendEth = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -24,7 +24,7 @@ export const sendEth = async (provider: IProvider, uiConsole: any) => {
   }
 };
 
-export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
+export const signEthMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -41,7 +41,7 @@ export const signEthMessage = async (provider: IProvider, uiConsole: any) => {
   }
 };
 
-export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<string[] | undefined> => {
+export const getAccounts = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void): Promise<string[] | undefined> => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -55,12 +55,12 @@ export const getAccounts = async (provider: IProvider, uiConsole: any): Promise<
   }
 };
 
-export const getPrivateKey = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
+export const getPrivateKey = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void): Promise<string | undefined> => {
   try {
-    const privateKey = await provider.request({
+    const privateKey = (await provider.request({
       method: EVM_METHOD_TYPES.ETH_PRIVATE_KEY,
       params: [],
-    }) as string;
+    })) as string;
     uiConsole("privateKey", { privateKey });
     return privateKey;
   } catch (error) {
@@ -70,7 +70,7 @@ export const getPrivateKey = async (provider: IProvider, uiConsole: any): Promis
   }
 };
 
-export const getChainId = async (provider: IProvider, uiConsole: any): Promise<string | undefined> => {
+export const getChainId = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void): Promise<string | undefined> => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const req = ethProvider.getRpcRequest({ method: "chainId" });
@@ -86,7 +86,7 @@ export const getChainId = async (provider: IProvider, uiConsole: any): Promise<s
   }
 };
 
-export const getBalance = async (provider: IProvider, uiConsole: any) => {
+export const getBalance = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -99,7 +99,7 @@ export const getBalance = async (provider: IProvider, uiConsole: any) => {
   }
 };
 
-export const signTransaction = async (provider: IProvider, uiConsole: any) => {
+export const signTransaction = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -124,7 +124,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: any) => {
   }
 };
 
-export const signPersonalMessage = async (provider: IProvider, uiConsole: any) => {
+export const signPersonalMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
@@ -150,7 +150,7 @@ export const signPersonalMessage = async (provider: IProvider, uiConsole: any) =
   }
 };
 
-export const signTypedMessage = async (provider: IProvider, uiConsole: any) => {
+export const signTypedMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
     const ethProvider = new BrowserProvider(provider);
     const signer = await ethProvider.getSigner();
