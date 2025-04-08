@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, getChainConfig, log } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import {
@@ -15,6 +15,7 @@ import {
   SmartAccountOptions,
 } from "../config";
 import { formDataStore } from "../store/form";
+import { getChainConfig } from "@/utils/chainconfig";
 
 const formData = formDataStore;
 
