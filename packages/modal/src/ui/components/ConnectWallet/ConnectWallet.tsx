@@ -19,7 +19,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     walletRegistry,
     allExternalButtons,
     customConnectorButtons,
-    adapterVisibilityMap,
+    connectorVisibilityMap,
     deviceDetails,
     buttonRadius = "pill",
     chainNamespace,
@@ -92,7 +92,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [allExternalButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
 
   const installedWalletButtons = useMemo(() => {
-    const visibilityMap = adapterVisibilityMap;
+    const visibilityMap = connectorVisibilityMap;
     return Object.keys(config).reduce((acc, adapter) => {
       if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
         acc.push({
@@ -105,7 +105,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       }
       return acc;
     }, [] as ExternalButton[]);
-  }, [adapterVisibilityMap, config]);
+  }, [connectorVisibilityMap, config]);
 
   const handleWalletSearch = (e: FormEvent<HTMLInputElement>) => {
     const searchValue = (e.target as HTMLInputElement).value;

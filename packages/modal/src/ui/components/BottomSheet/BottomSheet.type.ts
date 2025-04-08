@@ -1,5 +1,5 @@
 export interface BottomSheetProps {
-  isShowed: boolean;
+  isShown: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }
