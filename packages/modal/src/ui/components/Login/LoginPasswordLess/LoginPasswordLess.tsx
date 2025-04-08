@@ -111,7 +111,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
         )}
       </div>
       {errorMessage && !isInputFocused && isPasswordLessCtaClicked && (
-        <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
+        <p className="w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
           {errorMessage}
         </p>
       )}
