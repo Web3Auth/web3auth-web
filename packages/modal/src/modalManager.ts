@@ -255,6 +255,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           authConnectionId: authConnectionId,
           groupedAuthConnectionId: groupedAuthConnectionId,
           extraLoginOptions: authConnectionConfig.jwtParameters,
+          isDefault: true,
           showOnModal: true,
           showOnDesktop: true,
           showOnMobile: true,
