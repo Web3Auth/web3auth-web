@@ -6,69 +6,11 @@ import { QRCode } from "react-qrcode-logo";
 import { WALLET_CONNECT_LOGO } from "../../../constants";
 import i18n from "../../../localeImport";
 import Image from "../../Image";
-import { ConnectWalletQrCodeProps, SelectWalletChainNamespaceProps } from "./ConnectWalletQrCode.type";
-
-const SelectWalletChainNamespace = (props: SelectWalletChainNamespaceProps) => {
-  const { handleExternalWalletClick, selectedButton } = props;
-  const [t] = useTranslation(undefined, { i18n });
-
-  const chainNamespaces = selectedButton.chainNamespaces!.map((chainNamespace) => {
-    const imageId = chainNamespace === "eip155" ? "evm" : chainNamespace;
-    const displayName = chainNamespace === "eip155" ? "EVM" : chainNamespace;
-    return {
-      chainNamespace,
-      displayName,
-      imageId: `chain-${imageId}`,
-    };
-  });
-
-  return (
-    <div>
-      {/* Wallet image */}
-      <div className="w3a--my-6 w3a--flex w3a--justify-center">
-        <Image
-          imageId={`login-${selectedButton.name}`}
-          hoverImageId={`login-${selectedButton.name}`}
-          fallbackImageId="wallet"
-          height="100"
-          width="100"
-          isButton
-          extension={selectedButton.imgExtension}
-        />
-      </div>
-
-      {/* Description */}
-      <p className="w3a--my-6 w3a--text-center w3a--text-sm w3a--text-app-gray-500">
-        {t("modal.external.select-chain-description", { wallet: selectedButton.displayName })}
-      </p>
-
-      {/* Chain namespace buttons */}
-      <ul className="w3a--flex w3a--flex-col w3a--gap-3">
-        {chainNamespaces.map(({ chainNamespace, displayName, imageId }) => (
-          <li key={chainNamespace}>
-            <button
-              type="button"
-              className="w3a--btn w3a--size-xl w3a--w-full w3a--items-center !w3a--justify-between w3a--rounded-full"
-              onClick={() => handleExternalWalletClick({ connector: selectedButton.name, chainNamespace })}
-            >
-              <div className="w3a--flex w3a--items-center">
-                <Image imageId={imageId} hoverImageId={imageId} fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
-                <p className="w3a--ml-2 w3a--text-left w3a--text-sm first-letter:w3a--capitalize">{displayName}</p>
-              </div>
-              <span className="w3a--inline-flex w3a--items-center w3a--rounded-lg w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800">
-                {t("modal.external.installed")}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+import { ConnectWalletQrCodeProps } from "./ConnectWalletQrCode.type";
 
 function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const [t] = useTranslation(undefined, { i18n });
-  const { walletConnectUri, isDark, selectedButton, setBodyState, bodyState, logoImage, primaryColor, handleExternalWalletClick } = props;
+  const { walletConnectUri, isDark, selectedButton, setBodyState, bodyState, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
@@ -80,10 +22,6 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const blackColor = "#000000";
   const modalColor = getComputedStyle(root)?.getPropertyValue("--app-gray-800")?.trim() || "#1f2a37";
   const qrColor = primaryColor && primaryColor.toLowerCase() === "#ffffff" ? "#000000" : primaryColor;
-
-  if (selectedButton.hasInjectedWallet) {
-    return <SelectWalletChainNamespace handleExternalWalletClick={handleExternalWalletClick} selectedButton={selectedButton} />;
-  }
 
   return (
     <div className="w3a--contents">

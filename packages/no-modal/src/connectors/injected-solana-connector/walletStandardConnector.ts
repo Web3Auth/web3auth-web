@@ -47,6 +47,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   constructor(options: BaseConnectorSettings & { name: string; wallet: Wallet }) {
     super(options);
     this.name = options.name;
+    this.icon = options.wallet.icon;
     // in VueJS, for some wallets e.g. Gate, Solflare, when connecting it throws error "attempted to get private field on non-instance"
     // it seems that Vue create a Proxy object for the wallet object which causes the issue
     // ref: https://stackoverflow.com/questions/64917686/vue-array-converted-to-proxy-object

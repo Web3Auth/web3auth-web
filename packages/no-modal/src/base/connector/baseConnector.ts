@@ -19,7 +19,9 @@ import type {
 export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents> implements IConnector<T> {
   public connectorData?: unknown = {};
 
-  isInjected?: boolean;
+  public isInjected?: boolean;
+
+  public icon?: string;
 
   public coreOptions: BaseConnectorSettings["coreOptions"];
 

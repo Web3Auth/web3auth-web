@@ -41,10 +41,11 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
 
   private injectedProvider: IProvider | null = null;
 
-  constructor(options: BaseConnectorSettings & { name: string; provider: IProvider }) {
+  constructor(options: BaseConnectorSettings & { name: string; provider: IProvider; icon?: string }) {
     super(options);
     this.name = options.name;
     this.injectedProvider = options.provider;
+    this.icon = options.icon;
   }
 
   get provider(): IProvider | null {
@@ -179,6 +180,7 @@ export const injectedEvmConnector = (providerDetail: EIP6963ProviderDetail): Con
     return new InjectedEvmConnector({
       name: normalizeWalletName(providerDetail.info.name),
       provider: providerDetail.provider as IProvider,
+      icon: providerDetail.info.icon,
       coreOptions,
     });
   };

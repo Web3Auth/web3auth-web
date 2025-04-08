@@ -31,7 +31,7 @@ export interface LoginProps {
   logoAlignment?: LogoAlignmentType;
   buttonRadius?: ButtonRadiusType;
   enableMainSocialLoginButton?: boolean;
-  handleExternalWalletBtnClick?: (flag: boolean) => void;
+  handleExternalWalletBtnClick?: (flag: boolean, wallet?: ExternalButton) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleSocialLoginHeight: () => void;
