@@ -36,7 +36,7 @@ const props = defineProps<{
   chains: CustomChainConfig[];
 }>();
 
-const { userInfo, isConnected, provider, switchChain, web3Auth } = useWeb3Auth();
+const { userInfo, isConnected, provider, switchChain, web3Auth, isMFAEnabled, enableMFA, manageMFA } = useWeb3Auth();
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
@@ -301,6 +301,16 @@ const authenticateUser = async () => {
         <div class="mb-2">
           <Button block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
+          </Button>
+
+          <Button class="my-2" block size="xs" pill @click="() => {
+            if (isMFAEnabled) {
+              manageMFA();
+            } else {
+              enableMFA();
+            }
+          }">
+            {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
         <!-- Wallet Services -->

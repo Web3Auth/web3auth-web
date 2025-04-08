@@ -110,7 +110,7 @@ const options = computed((): Web3AuthOptions => {
 
   const { widget, targetId } = formData;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel ? { ...whiteLabel, widgetType: widget, targetId } : { widgetType: widget, targetId };
-  const authConnectorInstance = authConnector({ connectorSettings: {} });
+  const authConnectorInstance = authConnector({ connectorSettings: { buildEnv: "development" }, loginSettings: { mfaLevel: "mandatory" } });
 
   return {
     clientId: clientIds[formData.network],

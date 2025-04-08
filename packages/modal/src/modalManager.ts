@@ -278,21 +278,24 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         throw WalletInitializationError.invalidParams(`Invalid auth connection: ${key}`);
       }
 
-      if (!embedWalletConfigMap.has(groupedAuthConnectionId || authConnectionId))
-        throw WalletInitializationError.invalidParams(
-          `Invalid auth connection config, authConnection: ${key}. Missing AuthConnectionConfig from the dashboard.`
-        );
+      // only throw error if one of them is defined in the config.
+      if (groupedAuthConnectionId || authConnectionId) {
+        if (!embedWalletConfigMap.has(groupedAuthConnectionId || authConnectionId))
+          throw WalletInitializationError.invalidParams(
+            `Invalid auth connection config, authConnection: ${key}. Missing AuthConnectionConfig from the dashboard.`
+          );
 
-      const configFromDashboard = embedWalletConfigMap.get(groupedAuthConnectionId || authConnectionId);
-      this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods[key as AUTH_CONNECTION_TYPE] = {
-        authConnection: configFromDashboard.authConnection,
-        authConnectionId: configFromDashboard.authConnectionId,
-        groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
-        extraLoginOptions: {
-          ...configFromDashboard.jwtParameters,
-          ...userConfig.extraLoginOptions,
-        },
-      };
+        const configFromDashboard = embedWalletConfigMap.get(groupedAuthConnectionId || authConnectionId);
+        this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods[key as AUTH_CONNECTION_TYPE] = {
+          authConnection: configFromDashboard.authConnection,
+          authConnectionId: configFromDashboard.authConnectionId,
+          groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
+          extraLoginOptions: {
+            ...configFromDashboard.jwtParameters,
+            ...userConfig.extraLoginOptions,
+          },
+        };
+      }
     });
 
     this.modalConfig.connectors = deepmerge(dashboardConnectorConfig, cloneDeep(this.modalConfig.connectors || {}));
