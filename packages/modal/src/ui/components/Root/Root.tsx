@@ -430,7 +430,7 @@ function Root(props: RootProps) {
                     config={modalState.externalWalletsConfig}
                     walletRegistry={walletRegistry}
                     allExternalButtons={allButtons}
-                    adapterVisibilityMap={connectorVisibilityMap}
+                    connectorVisibilityMap={connectorVisibilityMap}
                     customConnectorButtons={customConnectorButtons}
                     deviceDetails={{
                       platform: deviceDetails.platform,
@@ -453,7 +453,7 @@ function Root(props: RootProps) {
 
             {/* Multi Chain Selector */}
             {bodyState.showMultiChainSelector && (
-              <BottomSheet isShowed={bodyState.showMultiChainSelector} onClose={() => setBodyState({ showMultiChainSelector: false })}>
+              <BottomSheet isShown={bodyState.showMultiChainSelector} onClose={() => setBodyState({ showMultiChainSelector: false })}>
                 <ConnectWalletChainNamespaceSelect
                   isDark={isDark}
                   wallet={bodyState.walletDetails}
@@ -467,7 +467,7 @@ function Root(props: RootProps) {
 
             {/* Wallet Install Links */}
             {bodyState.showWalletDetails && (
-              <BottomSheet isShowed={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
+              <BottomSheet isShown={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
                 <div className="w3a--my-4 w3a--flex w3a--justify-center">
                   <Image
                     imageId={`login-${bodyState.walletDetails.name}`}
