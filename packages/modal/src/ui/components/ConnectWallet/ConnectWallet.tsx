@@ -131,9 +131,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     return filteredButtons;
   }, [walletDiscoverySupported, walletSearch, filteredButtons, defaultButtons, isShowAllWallets]);
 
-  const totalExternalWalletsCount = useMemo(() => {
-    return filteredButtons.length;
-  }, [filteredButtons]);
+  const totalExternalWalletsCount = useMemo(() => filteredButtons.length, [filteredButtons]);
 
   const initialWalletCount = useMemo(() => {
     if (isShowAllWallets) return totalExternalWalletsCount;

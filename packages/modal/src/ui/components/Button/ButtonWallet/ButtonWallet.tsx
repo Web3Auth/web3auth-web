@@ -43,8 +43,9 @@ function ButtonWallet(props: ButtonWalletProps) {
       onClick={handleBtnClick}
     >
       <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-        <figure className="w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300">
+        <figure className={button.icon ? "w3a--size-5" : "w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300"}>
           <Image
+            imageData={button.icon}
             imageId={`login-${button.name}`}
             hoverImageId={`login-${button.name}`}
             fallbackImageId="wallet"

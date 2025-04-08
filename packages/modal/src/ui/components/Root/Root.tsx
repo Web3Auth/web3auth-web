@@ -253,16 +253,17 @@ function Root(props: RootProps) {
         const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
         const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
         const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
-
+        const connector = config[wallet];
         const button: ExternalButton = {
           name: wallet,
           displayName: walletRegistryItem.name,
           href,
-          hasInjectedWallet: config[wallet]?.isInjected || false,
+          hasInjectedWallet: connector?.isInjected || false,
           hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
           hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
           walletRegistryItem,
           imgExtension: walletRegistryItem.imgExtension || "svg",
+          icon: connector?.icon,
           chainNamespaces: availableChainNamespaces,
         };
 
@@ -293,6 +294,7 @@ function Root(props: RootProps) {
         hasWalletConnect: false,
         hasInstallLinks: false,
         walletRegistryItem,
+        icon: config[connector]?.icon,
         chainNamespaces: availableChainNamespaces,
       });
       return acc;
