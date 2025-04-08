@@ -1,6 +1,6 @@
 import type { BaseConnectorConfig, IProvider, IWeb3Auth, LoginMethodConfig, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 
-export interface ModalConfig extends Omit<BaseConnectorConfig, "isInjected"> {
+export interface ModalConfig extends Omit<BaseConnectorConfig, "isInjected" | "chainNamespace"> {
   loginMethods?: LoginMethodConfig;
 }
 
