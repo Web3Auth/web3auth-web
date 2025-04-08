@@ -1,6 +1,6 @@
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { log, type ModalSignInMethodType, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { log, type ModalSignInMethodType, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
 import { MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -164,7 +164,7 @@ function Login(props: LoginProps) {
       if (authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS) {
         const res = await captchaRef.current?.execute({ async: true });
         if (!res) {
-          throw new Error("Captcha token is required");
+          throw WalletLoginError.connectionError("Captcha token is required");
         }
         token = res.response;
       }

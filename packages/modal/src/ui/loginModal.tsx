@@ -84,7 +84,7 @@ export class LoginModal {
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
-      throw new Error("targetId is required for embed widget");
+      throw WalletInitializationError.invalidParams("targetId is required for embed widget");
     }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();

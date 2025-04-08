@@ -1,4 +1,5 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { WalletInitializationError } from "@web3auth/no-modal";
 
 import type { PasswordlessHandlerParams } from "../interfaces";
 import EmailPasswordlessHandler from "./EmailPasswordlessHandler";
@@ -11,6 +12,6 @@ export const createPasswordlessHandler = (authConnection: AUTH_CONNECTION_TYPE, 
     case AUTH_CONNECTION.SMS_PASSWORDLESS:
       return new SmsPasswordlessHandler(params);
     default:
-      throw new Error(`Unsupported auth connection: ${authConnection}`);
+      throw WalletInitializationError.invalidParams(`Unsupported auth connection: ${authConnection}`);
   }
 };

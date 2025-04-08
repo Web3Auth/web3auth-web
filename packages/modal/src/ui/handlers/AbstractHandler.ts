@@ -1,5 +1,6 @@
 import { post } from "@toruslabs/http-helpers";
 import { AUTH_CONNECTION, BUILD_ENV, storageAvailable } from "@web3auth/auth";
+import { WalletInitializationError } from "@web3auth/no-modal";
 
 import { PASSWORDLESS_BUILD_ENV_MAP } from "../config";
 import {
@@ -20,23 +21,23 @@ export abstract class PasswordlessHandler {
   trackingIdentifier?: string;
 
   constructor(params: PasswordlessHandlerParams) {
-    if (!params.authConnection) throw new Error("authConnection is required");
-    if (!params.web3authClientId) throw new Error("web3authClientId is required");
-    if (!params.loginHint) throw new Error("loginHint is required");
-    if (!params.network) throw new Error("network is required");
+    if (!params.authConnection) throw WalletInitializationError.invalidParams("authConnection is required");
+    if (!params.web3authClientId) throw WalletInitializationError.invalidParams("web3authClientId is required");
+    if (!params.loginHint) throw WalletInitializationError.invalidParams("loginHint is required");
+    if (!params.network) throw WalletInitializationError.invalidParams("network is required");
     this.passwordlessParams = params;
   }
 
   get name(): string {
     if (this.passwordlessParams.authConnection === AUTH_CONNECTION.EMAIL_PASSWORDLESS) return "Email";
     if (this.passwordlessParams.authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS) return "Mobile";
-    throw new Error("Invalid authConnection");
+    throw WalletInitializationError.invalidParams("Invalid authConnection");
   }
 
   get connection(): "email" | "sms" {
     if (this.passwordlessParams.authConnection === AUTH_CONNECTION.EMAIL_PASSWORDLESS) return "email";
     if (this.passwordlessParams.authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS) return "sms";
-    throw new Error("Invalid authConnection");
+    throw WalletInitializationError.invalidParams("Invalid authConnection");
   }
 
   get trackingId(): string | undefined {
