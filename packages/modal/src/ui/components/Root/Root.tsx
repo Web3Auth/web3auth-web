@@ -385,14 +385,14 @@ function Root(props: RootProps) {
     // Default
     return "539px";
   }, [
-    isWalletDetailsExpanded,
-    modalState.currentPage,
-    isSocialLoginsExpanded,
-    installedConnectorButtons,
     privacyPolicy,
     tncLink,
     enableMainSocialLoginButton,
     modalState.status,
+    modalState.currentPage,
+    isWalletDetailsExpanded,
+    isSocialLoginsExpanded,
+    topInstalledConnectorButtons.length,
   ]);
 
   const contextValue = useMemo(
