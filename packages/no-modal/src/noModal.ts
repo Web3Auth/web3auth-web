@@ -433,7 +433,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
-
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
       // setup AA provider for external wallets on EVM chains, no need for app wallet as it uses WS provider which already supports AA
@@ -472,6 +471,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           this.clearCache();
         }
       }
+
+      this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
+        chain: this.currentChain,
+        chains: this.coreOptions.chains,
+      });
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
       await Promise.all(
