@@ -8,6 +8,7 @@ import {
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMES,
+  CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
@@ -80,7 +81,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         connectorListener: this,
         web3authClientId: this.options.clientId,
         web3authNetwork: this.options.web3AuthNetwork,
-        chainNamespaces: [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])],
+        chainNamespaces: this.getChainNamespaces(),
         walletRegistry: filteredWalletRegistry,
       },
       {
@@ -422,38 +423,47 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     options: { externalWalletsInitialized: boolean; showExternalWalletsOnly?: boolean; externalWalletsVisibility?: boolean }
   ): Promise<void> {
     const connectorsConfig: Record<string, BaseConnectorConfig> = {};
+    const connectorChainNamespaceMap: Record<string, Set<ChainNamespaceType>> = {};
+
     // we do it like this because we don't want one slow connector to delay the load of the entire external wallet section.
     externalConnectors.forEach(async (connector) => {
       const connectorName = connector.name;
       log.debug("init external wallet", this.cachedConnector, connectorName, connector.status);
-      if (connector.status === CONNECTOR_STATUS.NOT_READY) {
-        // we are not initializing cached connector here as it is already being initialized in initModal before.
-        if (this.cachedConnector === connectorName) return;
+
+      // a wallet can support multiple chain namespaces e.g. Phantom has EvmInjected connector and WalletStandard connector.
+      if (!connectorChainNamespaceMap[connectorName]) connectorChainNamespaceMap[connectorName] = new Set();
+      if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) {
+        this.getChainNamespaces().forEach((x) => connectorChainNamespaceMap[connectorName].add(x));
+      } else {
+        connectorChainNamespaceMap[connectorName].add(connector.connectorNamespace as ChainNamespaceType);
+      }
+
+      // initialize connectors
+      // skip initializing cached connector here as it is already being initialized in initModal before.
+      if (connector.status === CONNECTOR_STATUS.NOT_READY && this.cachedConnector !== connectorName) {
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
           await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
-          const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected, icon: connector.icon };
-          this.loginModal.addWalletLogins(connectorsConfig, {
-            showExternalWalletsOnly: !!options.showExternalWalletsOnly,
-            externalWalletsVisibility: !!options.externalWalletsVisibility,
-            externalWalletsInitialized: !!options.externalWalletsInitialized,
-          });
         } catch (error) {
           log.error(error, "error while initializing connector", connectorName);
         }
-      } else {
-        if (connector.status === CONNECTOR_STATUS.READY || connector.status === CONNECTOR_STATUS.CONNECTING) {
-          // we use connecting status for wallet connect
-          const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
-          connectorsConfig[connectorName] = { ...connectorModalConfig, isInjected: connector.isInjected, icon: connector.icon };
-          this.loginModal.addWalletLogins(connectorsConfig, {
-            showExternalWalletsOnly: !!options.showExternalWalletsOnly,
-            externalWalletsVisibility: !!options.externalWalletsVisibility,
-            externalWalletsInitialized: !!options.externalWalletsInitialized,
-          });
-        }
+      }
+
+      // update connector config
+      if (([CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.READY, CONNECTOR_STATUS.CONNECTING] as string[]).includes(connector.status)) {
+        const connectorModalConfig = (this.modalConfig.connectors as Record<WALLET_CONNECTOR_TYPE, ModalConfig>)[connectorName];
+        connectorsConfig[connectorName] = {
+          ...connectorModalConfig,
+          isInjected: connector.isInjected,
+          icon: connector.icon,
+          chainNamespaces: Array.from(connectorChainNamespaceMap[connectorName]),
+        };
+        this.loginModal.addWalletLogins(connectorsConfig, {
+          showExternalWalletsOnly: !!options.showExternalWalletsOnly,
+          externalWalletsVisibility: !!options.externalWalletsVisibility,
+          externalWalletsInitialized: !!options.externalWalletsInitialized,
+        });
       }
     });
   }
@@ -513,5 +523,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         wcConnector.status = CONNECTOR_STATUS.READY;
       }
     }
+  };
+
+  private getChainNamespaces = (): ChainNamespaceType[] => {
+    return [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])];
   };
 }

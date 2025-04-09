@@ -61,7 +61,7 @@ function Widget(props: WidgetProps) {
       log.debug("state updated", newModalState);
 
       setModalState((prevState) => {
-        const mergedState = cloneDeep(deepmerge(prevState, newModalState));
+        const mergedState = cloneDeep(deepmerge(prevState, newModalState, { arrayMerge: (_prevState, newState) => newState }));
         return mergedState;
       });
     });

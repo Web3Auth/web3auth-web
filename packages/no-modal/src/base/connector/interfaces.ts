@@ -14,11 +14,11 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
+import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
-import { ProjectConfig } from "../interfaces";
-import { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
+import type { ProjectConfig } from "../interfaces";
+import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
 export type UserInfo = AuthUserInfo;
@@ -113,6 +113,7 @@ export interface BaseConnectorConfig {
   label: string;
   icon?: string;
   isInjected?: boolean;
+  chainNamespaces?: ChainNamespaceType[];
   showOnModal?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;

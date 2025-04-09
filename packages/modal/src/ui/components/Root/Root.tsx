@@ -256,20 +256,25 @@ function Root(props: RootProps) {
           href = universalLink || deepLink;
         }
 
+        // determine the chain namespaces supported by the wallet
+        const connectorConfig = config[wallet];
+        const connectorChainNamespaces = connectorConfig?.chainNamespaces || [];
         const registryNamespaces = new Set(walletRegistryItem.chains?.map((chain) => chain.split(":")[0]));
         const injectedChainNamespaces = new Set(walletRegistryItem.injected?.map((injected) => injected.namespace));
-        const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
-        const connector = config[wallet];
+        const availableChainNamespaces = chainNamespaces.filter(
+          (x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x) || connectorChainNamespaces.includes(x)
+        );
+
         const button: ExternalButton = {
           name: wallet,
           displayName: walletRegistryItem.name,
           href,
-          hasInjectedWallet: connector?.isInjected || false,
+          hasInjectedWallet: connectorConfig?.isInjected || false,
           hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
           hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
           walletRegistryItem,
           imgExtension: walletRegistryItem.imgExtension || "svg",
-          icon: connector?.icon,
+          icon: connectorConfig?.icon,
           chainNamespaces: availableChainNamespaces,
         };
 
@@ -286,29 +291,22 @@ function Root(props: RootProps) {
   const installedConnectorButtons = useMemo(() => {
     const installedConnectors = Object.keys(config).reduce((acc, connector) => {
       if ([WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) || !connectorVisibilityMap[connector]) return acc;
-
-      // determine chain namespaces based on wallet registry
-      const walletRegistryItem = walletRegistry.default[connector];
-      const registryNamespaces = new Set(walletRegistryItem?.chains?.map((chain) => chain.split(":")[0]));
-      const injectedChainNamespaces = new Set(walletRegistryItem?.injected?.map((injected) => injected.namespace));
-      const availableChainNamespaces = chainNamespaces.filter((x) => registryNamespaces.has(x) || injectedChainNamespaces.has(x));
-
+      const connectorConfig = config[connector];
       acc.push({
         name: connector,
-        displayName: config[connector].label || connector,
-        hasInjectedWallet: config[connector]?.isInjected || false,
+        displayName: connectorConfig?.label || connector,
+        hasInjectedWallet: connectorConfig?.isInjected || false,
         hasWalletConnect: false,
         hasInstallLinks: false,
-        walletRegistryItem,
-        icon: config[connector]?.icon,
-        chainNamespaces: availableChainNamespaces,
+        icon: connectorConfig?.icon,
+        chainNamespaces: connectorConfig?.chainNamespaces || [],
       });
       return acc;
     }, [] as ExternalButton[]);
 
     // make metamask the first button and limit the number of buttons
     return installedConnectors;
-  }, [config, connectorVisibilityMap, walletRegistry.default, chainNamespaces]);
+  }, [config, connectorVisibilityMap]);
 
   const customConnectorButtons = useMemo(() => {
     return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);

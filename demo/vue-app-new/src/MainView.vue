@@ -5,7 +5,6 @@ import {
   coinbaseConnector,
   type ConnectorFn,
   type CustomChainConfig,
-  getChainConfig,
   nftCheckoutPlugin,
   type PluginFn,
   storageAvailable,
@@ -27,6 +26,7 @@ import AppSettings from "./components/AppSettings.vue";
 import { clientIds, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { FormConfigSettings } from "./interfaces";
 import { formDataStore } from "./store/form";
+import { getChainConfig } from "./utils/chainconfig";
 
 const formData = formDataStore;
 
