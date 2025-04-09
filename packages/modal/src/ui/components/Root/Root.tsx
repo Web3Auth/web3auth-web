@@ -208,34 +208,16 @@ function Root(props: RootProps) {
   ]);
 
   // External Wallets
-
   const config = useMemo(() => modalState.externalWalletsConfig, [modalState.externalWalletsConfig]);
 
   const connectorVisibilityMap = useMemo(() => {
     const canShowMap: Record<string, boolean> = {};
 
     Object.keys(config).forEach((connector) => {
-      const connectorConfig = config[connector];
-
-      if (!connectorConfig.showOnModal) {
-        canShowMap[connector] = false;
-        return;
-      }
-
-      if (deviceDetails.platform === "desktop" && connectorConfig.showOnDesktop) {
-        canShowMap[connector] = true;
-        return;
-      }
-
-      if ((deviceDetails.platform === "mobile" || deviceDetails.platform === "tablet") && connectorConfig.showOnMobile) {
-        canShowMap[connector] = true;
-        return;
-      }
-
-      canShowMap[connector] = false;
+      canShowMap[connector] = Boolean(config[connector]?.showOnModal);
     });
     return canShowMap;
-  }, [deviceDetails, config]);
+  }, [config]);
 
   const isWalletConnectConnectorIncluded = useMemo(
     // WC is always included when enabling wallet discovery

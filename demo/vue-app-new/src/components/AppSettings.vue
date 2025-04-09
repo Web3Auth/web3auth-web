@@ -400,20 +400,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               :label-disabled="$t('app.loginMethod.showOnModal')"
               :label-enabled="$t('app.loginMethod.showOnModal')"
             />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnDesktop"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnDesktop')"
-              :label-enabled="$t('app.loginMethod.showOnDesktop')"
-            />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnMobile"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnMobile')"
-              :label-enabled="$t('app.loginMethod.showOnMobile')"
-            />
           </Card>
         </Card>
         <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
