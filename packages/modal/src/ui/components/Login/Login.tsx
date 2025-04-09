@@ -87,14 +87,42 @@ function Login(props: LoginProps) {
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
 
-    const loginOptions = Object.keys(socialLoginsConfig.loginMethods).filter((method) => {
-      return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
-    });
+    const loginMethodsOrder = (socialLoginsConfig.loginMethodsOrder || []).reduce(
+      (acc, method, index) => {
+        acc[method] = index;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const loginOptions = Object.keys(socialLoginsConfig.loginMethods)
+      .filter((method) => {
+        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+      })
+      .sort((a, b) => {
+        const maxOrder = (socialLoginsConfig.loginMethodsOrder || []).length;
+        const aOrder = loginMethodsOrder[a] ?? maxOrder;
+        const bOrder = loginMethodsOrder[b] ?? maxOrder;
+
+        const { mainOption: aMainOption } = socialLoginsConfig.loginMethods[a as AUTH_CONNECTION_TYPE] || {};
+        const { mainOption: bMainOption } = socialLoginsConfig.loginMethods[b as AUTH_CONNECTION_TYPE] || {};
+
+        // if both are main options, sort by order
+        if (aMainOption && bMainOption) {
+          return aOrder - bOrder;
+        }
+
+        // if one is main option, it should be first
+        if (aMainOption) return -1;
+        if (bMainOption) return 1;
+
+        // if none are main options, sort by order
+        return aOrder - bOrder;
+      });
 
     loginOptions.forEach((method, index) => {
       const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
       const name = capitalizeFirstLetter(connectorConfig.name || method);
-      // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
       const order = index + 1;
 
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;

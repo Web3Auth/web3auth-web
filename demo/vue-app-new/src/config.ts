@@ -74,7 +74,7 @@ export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings
       logoLight: "",
       logoDark: "",
       mainOption: false,
-      showOnModal: false,
+      showOnModal: true,
     },
   }),
   {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
