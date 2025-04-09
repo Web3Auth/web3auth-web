@@ -47,7 +47,7 @@
       "logoLight": "Logo Light",
       "logoDark": "Logo Dark",
       "mainOption": "Main Option",
-      "showOnModal": "Show on Modal?"
+      "showOnModal": "Show on Modal"
     },
     "adapter": {
       "sessionTime": "Session Time"

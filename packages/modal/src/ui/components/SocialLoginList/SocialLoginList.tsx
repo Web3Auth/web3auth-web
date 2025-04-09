@@ -39,29 +39,11 @@ function SocialLoginList(props: SocialLoginListProps) {
   };
 
   if (visibleRow.length !== 0 && otherRow?.length === 0) {
-    const isMainOption = visibleRow[0]?.isMainOption;
-    const rowsToShow = isMainOption ? visibleRow.filter((row) => !row.isMainOption) : visibleRow;
     return (
       <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
-        {isMainOption && (
-          <Button
-            type={BUTTON_TYPE.SOCIAL}
-            key={visibleRow[0].method}
-            props={{
-              showText: false,
-              method: visibleRow[0].method,
-              isDark,
-              isPrimaryBtn: false,
-              btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
-              children: <>{getProviderIcon(visibleRow[0].method, isDark, ".svg")}</>,
-              onClick: () => handleSocialLoginClick({ connector: visibleRow[0].connector, loginParams: visibleRow[0].loginParams }),
-              buttonRadius,
-            }}
-          />
-        )}
         <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
-          {rowsToShow
-            .filter((_, index) => (rowsToShow.length === 4 ? index <= 3 : index < 3))
+          {visibleRow
+            .filter((_, index) => (visibleRow.length === 4 ? index <= 3 : index < 3))
             .map((row) => (
               <LoginHint key={row.method} content={"Last Login"} isDark={isDark} hideHint={true}>
                 <Button
@@ -80,7 +62,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 />
               </LoginHint>
             ))}
-          {canShowMore && rowsToShow.length > 4 && (
+          {canShowMore && visibleRow.length > 4 && (
             <Button
               type={BUTTON_TYPE.SOCIAL}
               props={{

@@ -30,7 +30,6 @@ export interface LoginProps {
   totalExternalWallets: number;
   logoAlignment?: LogoAlignmentType;
   buttonRadius?: ButtonRadiusType;
-  enableMainSocialLoginButton?: boolean;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;

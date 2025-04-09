@@ -354,13 +354,20 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             class=""
           />
           <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-3">
-            <div class="font-bold leading-tight text-left sm:col-span-2">{{ p }}</div>
+            <div class="font-bold leading-tight text-left">{{ p }}</div>
             <Toggle
               v-model="formData.loginMethods[p].mainOption"
               :show-label="true"
               :size="'small'"
               :label-disabled="$t('app.loginMethod.mainOption')"
               :label-enabled="$t('app.loginMethod.mainOption')"
+            />
+            <Toggle
+              v-model="formData.loginMethods[p].showOnModal"
+              :show-label="true"
+              :size="'small'"
+              :label-disabled="$t('app.loginMethod.showOnModal')"
+              :label-enabled="$t('app.loginMethod.showOnModal')"
             />
             <TextField
               v-model="formData.loginMethods[p].name"
@@ -392,13 +399,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               :label="$t('app.loginMethod.logoDark')"
               :aria-label="$t('app.loginMethod.logoDark')"
               :placeholder="$t('app.loginMethod.logoDark')"
-            />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnModal"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnModal')"
-              :label-enabled="$t('app.loginMethod.showOnModal')"
             />
           </Card>
         </Card>

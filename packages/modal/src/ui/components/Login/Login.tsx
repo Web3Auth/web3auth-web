@@ -51,7 +51,6 @@ function Login(props: LoginProps) {
     showInstalledExternalWallets,
     logoAlignment = "center",
     buttonRadius = "pill",
-    enableMainSocialLoginButton = false,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -98,7 +97,6 @@ function Login(props: LoginProps) {
       // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
       const order = index + 1;
 
-      const isMainOption = order === 1 && enableMainSocialLoginButton;
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
       const loginOptionLength = loginOptions.length;
@@ -122,7 +120,6 @@ function Login(props: LoginProps) {
             login_hint: "",
           },
           order,
-          isMainOption,
         });
       }
 
@@ -141,14 +138,13 @@ function Login(props: LoginProps) {
           login_hint: "",
         },
         order,
-        isMainOption,
       });
     });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark, enableMainSocialLoginButton, buttonRadius]);
+  }, [socialLoginsConfig, isDark, buttonRadius]);
 
   const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
     try {
