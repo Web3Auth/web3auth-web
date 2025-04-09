@@ -119,6 +119,9 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       // we want events to propagate from Ethereum provider -> wrapper provider (e.g. CommonJRPC provider) -> SDK -> dapp
       // ensure that only one handler is added for each event
       const reEmitHandler = (event: string) => {
+        // skip newListener event
+        if (event === "newListener") return;
+
         // listen to the event from the Ethereum provider
         provider.on(event as keyof ProviderEvents, (...args) => {
           // handle chainChanged event: update chainId state

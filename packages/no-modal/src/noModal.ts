@@ -464,6 +464,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
+      // re-setup commonJRPCProvider
+      this.commonJRPCProvider.removeAllListeners();
+      this.setupCommonJRPCProvider();
+
       // get back to ready state for rehydrating.
       this.status = CONNECTOR_STATUS.READY;
       if (storageAvailable(this.storage)) {
