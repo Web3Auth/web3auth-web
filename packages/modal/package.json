@@ -43,9 +43,11 @@
     "@babel/runtime": "^7.x",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19",
-    "vue": "^3.x"
+    "vue": "^3.x",
+    "@coinbase/wallet-sdk": "^4.3.x"
   },
   "devDependencies": {
+    "@coinbase/wallet-sdk": "^4.3.x",
     "@babel/preset-react": "^7.26.3",
     "@mertasan/tailwindcss-variables": "^2.7.0",
     "@rollup/plugin-json": "^6.1.0",
