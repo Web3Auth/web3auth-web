@@ -503,6 +503,9 @@ function Root(props: RootProps) {
             {/* Wallet Install Links */}
             {bodyState.showWalletDetails && (
               <BottomSheet uiConfig={uiConfig} isShown={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
+                <p className="w3a--mb-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
+                  {t("modal.getWallet")}
+                </p>
                 <div className="w3a--my-4 w3a--flex w3a--justify-center">
                   <Image
                     imageId={`login-${bodyState.walletDetails.name}`}

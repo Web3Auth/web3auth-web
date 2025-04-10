@@ -1,6 +1,7 @@
 import { useContext, useMemo } from "react";
 
 import { ThemedContext } from "../../context/ThemeContext";
+import { cn } from "../../utils";
 import { ImageProps } from "./Image.type";
 
 /**
@@ -30,7 +31,16 @@ export default function Image(props: ImageProps) {
 
   if (isButton) {
     if (imageData) {
-      return <img id={id} src={imageData} height={height} width={width} alt={hoverImageId} className="w3a--object-contain" />;
+      return (
+        <img
+          id={id}
+          src={imageData}
+          height={height}
+          width={width}
+          alt={hoverImageId}
+          className={cn("w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
+        />
+      );
     }
     return (
       <img
@@ -39,7 +49,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={hoverImageId}
-        className="w3a--rounded w3a--object-contain"
+        className={cn("w3a--rounded w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
       />
     );
   }
@@ -52,7 +62,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={imageId}
-        className="w3a--object-contain"
+        className={cn("w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
         onError={({ currentTarget }) => {
           if (fallbackImageId) {
             const img = currentTarget;
@@ -71,7 +81,7 @@ export default function Image(props: ImageProps) {
       height={height}
       width={width}
       alt={imageId}
-      className="w3a--rounded w3a--object-contain"
+      className={cn("w3a--rounded w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
       onError={({ currentTarget }) => {
         if (fallbackImageId) {
           const img = currentTarget;

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
@@ -115,9 +116,20 @@ function ConnectWalletList(props: ConnectWalletListProps) {
     buttonRadius,
   } = props;
 
+  const [showMoreWallets, setShowMoreWallets] = useState(true);
+
+  const onShowMoreWalletsClick = () => {
+    setShowMoreWallets(false);
+    handleMoreWallets();
+  };
+
   return (
     <>
-      <ul className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px]")}>
+      <ul
+        className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px]", {
+          "w3a--h-[328px]": !showMoreWallets,
+        })}
+      >
         {externalButtons.length === 0 ? (
           <NoWalletsFound />
         ) : (
@@ -131,11 +143,11 @@ function ConnectWalletList(props: ConnectWalletListProps) {
           />
         )}
       </ul>
-      {totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
+      {showMoreWallets && totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
         <MoreWalletsButton
           totalExternalWalletsCount={totalExternalWalletsCount}
           initialWalletCount={initialWalletCount}
-          handleMoreWallets={handleMoreWallets}
+          handleMoreWallets={onShowMoreWalletsClick}
           isLoading={isLoading}
           isDark={isDark}
           buttonRadius={buttonRadius}
