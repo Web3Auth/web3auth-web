@@ -420,7 +420,7 @@ function Login(props: LoginProps) {
                     {t("modal.external.installed")}
                   </span>
                 )}
-                <figure className={wallet.icon ? "w3a--size-5" : "w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300"}>
+                <figure className="w3a--size-5">
                   <Image
                     imageData={wallet.icon}
                     imageId={`login-${wallet.name}`}
