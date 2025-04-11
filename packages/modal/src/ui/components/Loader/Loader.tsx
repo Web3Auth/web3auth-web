@@ -24,7 +24,7 @@ function ConnectingStatus(props: ConnectingStatusType) {
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-6">
-        <figure className="w3a--loader-logo-size w3a--flex w3a--items-center w3a--justify-center w3a--overflow-hidden">
+        <figure className="w3a--flex w3a--size-10 w3a--items-center w3a--justify-center w3a--overflow-hidden">
           <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
         </figure>
 

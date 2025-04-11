@@ -403,7 +403,7 @@ function Login(props: LoginProps) {
             <button
               key={wallet.name}
               type="button"
-              className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+              className={cn("w3a--btn !w3a--justify-between w3a--group w3a--relative w3a--overflow-hidden", {
                 "w3a--rounded-full": buttonRadius === "pill",
                 "w3a--rounded-lg": buttonRadius === "rounded",
                 "w3a--rounded-none": buttonRadius === "square",
@@ -413,7 +413,7 @@ function Login(props: LoginProps) {
               <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">
                 {wallet.displayName}
               </p>
-              <div className="w3a--flex w3a--items-center w3a--gap-x-2">
+              <div className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--flex w3a--w-auto -w3a--translate-y-1/2 w3a--items-center w3a--gap-x-2 w3a--transition-all w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0">
                 {wallet.hasInjectedWallet && (
                   <span
                     className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
@@ -435,6 +435,13 @@ function Login(props: LoginProps) {
                   />
                 </figure>
               </div>
+              <img
+                id="injected-wallet-arrow"
+                className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+                src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+                alt="arrow"
+              />
             </button>
           ))}
 
@@ -442,25 +449,26 @@ function Login(props: LoginProps) {
         {totalExternalWallets > 3 && (
           <button
             type="button"
-            className={cn("w3a--btn !w3a--justify-between w3a-external-wallet-btn", {
+            className={cn("w3a--btn !w3a--justify-between w3a--group w3a--relative w3a--overflow-hidden", {
               "w3a--rounded-full": buttonRadius === "pill",
               "w3a--rounded-lg": buttonRadius === "rounded",
               "w3a--rounded-none": buttonRadius === "square",
             })}
             onClick={handleConnectWallet}
           >
-            <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
+            <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
             {showExternalWalletCount && totalExternalWallets > 0 && (
               <div
                 id="external-wallet-count"
-                className="w3a--w-auto w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+                className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--w-auto -w3a--translate-y-1/2 w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 w3a--transition-all w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
               >
                 {totalExternalWallets - 1}
               </div>
             )}
             <img
               id="external-wallet-arrow"
-              className="w3a--icon-animation"
+              className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
               src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
               alt="arrow"
             />
