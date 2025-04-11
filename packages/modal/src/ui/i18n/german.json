@@ -65,7 +65,7 @@
     "social.email-new": "name@example.com",
     "social.passwordless-cta": "Weitermachen",
     "social.passwordless-login": "Anmeldung",
-    "social.passwordless-title": "E-Mail oder Telefon",
+    "social.passwordless-title": "E-Mail/Telefon",
     "social.phone": "Telefon",
     "social.policy": "Wir speichern keine Daten im Zusammenhang mit Ihren Social Logins.",
     "social.sms": "Mobiltelefon",
@@ -92,7 +92,8 @@
     "resendCode": "Code erneut senden",
     "resendTimer": " {{timer}} Sekunden später erneut senden",
     "connectYourWallet": "Ihre Wallet verbinden",
-    "allChains": "Alle Kettens"
+    "allChains": "Alle Kettens",
+    "getWallet": "Wallet holen"
   },
   "passwordless": {
     "error-invalid-params": "Fehlende oder ungültige Parameter",

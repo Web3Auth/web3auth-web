@@ -65,7 +65,7 @@
     "social.email-new": "naam@voorbeeld.com",
     "social.passwordless-cta": "Doorgaan",
     "social.passwordless-login": "Log in",
-    "social.passwordless-title": "E-mail of telefoon",
+    "social.passwordless-title": "E-mail/Telefoon",
     "social.phone": "Telefoon",
     "social.policy": "We slaan geen gegevens op die verband houden met uw sociale logins.",
     "social.sms": "Mobiel",
@@ -92,7 +92,8 @@
     "resendCode": "Code opnieuw verzenden",
     "resendTimer": " Opnieuw verzenden in {{timer}} seconden",
     "connectYourWallet": "Uw portemonnee verbinden",
-    "allChains": "Alle ketens"
+    "allChains": "Alle ketens",
+    "getWallet": "Portemonnee ophalen"
   },
   "passwordless": {
     "error-invalid-params": "Ontbrekende of ongeldige parameters",
