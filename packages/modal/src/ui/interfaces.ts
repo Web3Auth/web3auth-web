@@ -165,7 +165,6 @@ export type rowType = {
     extraLoginOptions?: ExtraLoginOptions;
   };
   order: number;
-  isMainOption: boolean;
 };
 
 export type PasswordlessHandlerParams = {

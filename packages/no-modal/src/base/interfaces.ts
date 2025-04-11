@@ -59,10 +59,7 @@ export interface LoginModalConfig {
   logoAlignment?: "left" | "center";
   borderRadiusType?: "small" | "medium" | "large";
   buttonRadiusType?: "pill" | "rounded" | "square";
-  tncLink?: string; // TODO: whitelabel also has this
-  privacyPolicy?: string; // TODO: whitelabel also has this
   // authentication
-  enableMainSocialLoginButton?: boolean;
   signInMethods?: ModalSignInMethodType[];
   addPreviousLoginHint?: boolean;
   // external wallets

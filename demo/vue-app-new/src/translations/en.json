@@ -8,7 +8,7 @@
     "chains": "Chains",
     "defaultChainId": "Default Chain ID",
     "loginProviders": "Login provider",
-    "adapters": "Adapters",
+    "connectors": "Connectors",
     "showWalletDiscovery": "Show Wallet Discovery",
     "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
     "greeting": "Let's configure Web3Auth!",
@@ -47,9 +47,7 @@
       "logoLight": "Logo Light",
       "logoDark": "Logo Dark",
       "mainOption": "Main Option",
-      "showOnModal": "on Modal?",
-      "showOnDesktop": "on Desktop?",
-      "showOnMobile": "on Mobile?"
+      "showOnModal": "Show on Modal"
     },
     "adapter": {
       "sessionTime": "Session Time"

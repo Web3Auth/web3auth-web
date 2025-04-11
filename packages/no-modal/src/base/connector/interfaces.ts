@@ -115,8 +115,6 @@ export interface BaseConnectorConfig {
   isInjected?: boolean;
   chainNamespaces?: ChainNamespaceType[];
   showOnModal?: boolean;
-  showOnMobile?: boolean;
-  showOnDesktop?: boolean;
 }
 
 export type LoginMethodConfig = Partial<
@@ -151,14 +149,6 @@ export type LoginMethodConfig = Partial<
        * Whether to show the login button on modal or not
        */
       showOnModal?: boolean;
-      /**
-       * Whether to show the login button on desktop
-       */
-      showOnDesktop?: boolean;
-      /**
-       * Whether to show the login button on mobile
-       */
-      showOnMobile?: boolean;
       /**
        * Auth connection id of the provider.
        */

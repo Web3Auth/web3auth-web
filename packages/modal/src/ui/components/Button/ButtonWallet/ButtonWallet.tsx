@@ -43,7 +43,7 @@ function ButtonWallet(props: ButtonWalletProps) {
       onClick={handleBtnClick}
     >
       <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-        <figure className={button.icon ? "w3a--size-5" : "w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300"}>
+        <figure className="w3a--size-5">
           <Image
             imageData={button.icon}
             imageId={`login-${button.name}`}
@@ -55,7 +55,7 @@ function ButtonWallet(props: ButtonWalletProps) {
             extension={button.imgExtension || "webp"}
           />
         </figure>
-        <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
+        <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
       </div>
       {button.hasInjectedWallet && (
         <span

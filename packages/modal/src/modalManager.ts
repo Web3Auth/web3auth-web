@@ -258,8 +258,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           extraLoginOptions: authConnectionConfig.jwtParameters,
           isDefault: true,
           showOnModal: true,
-          showOnDesktop: true,
-          showOnMobile: true,
         };
       }
       embedWalletConfigMap.set(groupedAuthConnectionId || authConnectionId, authConnectionConfig);
@@ -314,8 +312,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const defaultConnectorConfig = {
         label: CONNECTOR_NAMES[connectorName] || connectorName.split("-").map(capitalizeFirstLetter).join(" "),
         showOnModal: true,
-        showOnMobile: true,
-        showOnDesktop: true,
       };
 
       this.modalConfig.connectors[connectorName] = {

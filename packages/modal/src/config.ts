@@ -8,8 +8,6 @@ export const defaultConnectorsModalConfig: ConnectorsModalConfig = {
     [EVM_CONNECTORS.AUTH]: {
       label: "Auth",
       showOnModal: true,
-      showOnMobile: true,
-      showOnDesktop: true,
     },
   },
 };

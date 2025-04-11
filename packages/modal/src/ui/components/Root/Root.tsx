@@ -45,7 +45,6 @@ function Root(props: RootProps) {
   const {
     logoAlignment = "center",
     buttonRadiusType = "pill",
-    enableMainSocialLoginButton = false,
     privacyPolicy = "",
     tncLink = "",
     displayInstalledExternalWallets = true,
@@ -208,34 +207,16 @@ function Root(props: RootProps) {
   ]);
 
   // External Wallets
-
   const config = useMemo(() => modalState.externalWalletsConfig, [modalState.externalWalletsConfig]);
 
   const connectorVisibilityMap = useMemo(() => {
     const canShowMap: Record<string, boolean> = {};
 
     Object.keys(config).forEach((connector) => {
-      const connectorConfig = config[connector];
-
-      if (!connectorConfig.showOnModal) {
-        canShowMap[connector] = false;
-        return;
-      }
-
-      if (deviceDetails.platform === "desktop" && connectorConfig.showOnDesktop) {
-        canShowMap[connector] = true;
-        return;
-      }
-
-      if ((deviceDetails.platform === "mobile" || deviceDetails.platform === "tablet") && connectorConfig.showOnMobile) {
-        canShowMap[connector] = true;
-        return;
-      }
-
-      canShowMap[connector] = false;
+      canShowMap[connector] = Boolean(config[connector]?.showOnModal);
     });
     return canShowMap;
-  }, [deviceDetails, config]);
+  }, [config]);
 
   const isWalletConnectConnectorIncluded = useMemo(
     // WC is always included when enabling wallet discovery
@@ -344,7 +325,6 @@ function Root(props: RootProps) {
 
   const containerMaxHeight = useMemo(() => {
     const isPrivacyPolicyOrTncLink = privacyPolicy || tncLink;
-    const isEnableMainSocialLoginButton = enableMainSocialLoginButton;
 
     // Loader Screen
     if (modalState.status !== MODAL_STATUS.INITIALIZED) {
@@ -368,26 +348,22 @@ function Root(props: RootProps) {
 
     // Only MetaMask
     if (topInstalledConnectorButtons.length === 1) {
-      if (isPrivacyPolicyOrTncLink) {
-        return isEnableMainSocialLoginButton ? "600px" : "560px";
-      }
-      return isEnableMainSocialLoginButton ? "570px" : "530px";
+      return isPrivacyPolicyOrTncLink ? "560px" : "530px";
     }
 
     // More than 1 connector
     if (topInstalledConnectorButtons.length > 1) {
       const maxHeight = 500 + (topInstalledConnectorButtons.length - 1) * 58;
       if (isPrivacyPolicyOrTncLink) {
-        return `${maxHeight + (isEnableMainSocialLoginButton ? 120 : 60)}px`;
+        return `${maxHeight + 60}px`;
       }
-      return `${maxHeight + (isEnableMainSocialLoginButton ? 66 : 16)}px`;
+      return `${maxHeight + 16}px`;
     }
     // Default
     return "539px";
   }, [
     privacyPolicy,
     tncLink,
-    enableMainSocialLoginButton,
     modalState.status,
     modalState.currentPage,
     isWalletDetailsExpanded,
@@ -448,7 +424,6 @@ function Root(props: RootProps) {
                     totalExternalWallets={totalExternalWallets}
                     logoAlignment={logoAlignment}
                     buttonRadius={buttonRadiusType}
-                    enableMainSocialLoginButton={enableMainSocialLoginButton}
                     handleSocialLoginClick={handleSocialLoginClick}
                     handleExternalWalletBtnClick={onExternalWalletBtnClick}
                     handleSocialLoginHeight={handleSocialLoginHeight}
