@@ -124,8 +124,6 @@ function ConnectWallet(props: ConnectWalletProps) {
     if (walletDiscoverySupported && !walletSearch && !isShowAllWallets) {
       return defaultButtons;
     }
-    // eslint-disable-next-line no-console
-    console.log("filteredButtons", filteredButtons);
     return filteredButtons;
   }, [walletDiscoverySupported, walletSearch, filteredButtons, defaultButtons, isShowAllWallets]);
 
