@@ -30,7 +30,7 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   /**
    * order of how login methods are shown
    *
-   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "weibo", "wechat", "email_passwordless"]`
+   * @defaultValue `["google", "facebook", "twitter", "reddit", "discord", "twitch", "apple", "line", "github", "kakao", "linkedin", "wechat", "email_passwordless"]`
    */
   loginMethodsOrder?: string[];
 
