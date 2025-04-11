@@ -50,7 +50,7 @@ const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSel
           <li key={chainNamespace}>
             <button
               type="button"
-              className="w3a--btn w3a-external-wallet-btn w3a--h-12 w3a--w-full w3a--items-center !w3a--justify-between w3a--rounded-full"
+              className="w3a--btn w3a--group w3a--relative w3a--h-11 w3a--w-full w3a--items-center !w3a--justify-between w3a--overflow-hidden w3a--rounded-full"
               onClick={() => handleExternalWalletClick({ connector: wallet.name, chainNamespace })}
             >
               <div className="w3a--flex w3a--items-center">
@@ -58,8 +58,9 @@ const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSel
                 <p className="w3a--ml-2 w3a--text-left w3a--text-sm first-letter:w3a--capitalize">{displayName}</p>
               </div>
               <img
-                id="external-wallet-arrow"
-                className="w3a--icon-animation"
+                id="chain-namespace-arrow"
+                className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
                 src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                 alt="arrow"
               />

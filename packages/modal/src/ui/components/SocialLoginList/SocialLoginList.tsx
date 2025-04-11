@@ -6,7 +6,7 @@ import LoginHint from "../LoginHint";
 import { SocialLoginListProps } from "./SocialLoginList.type";
 
 function getProviderIcon(method: string, isDark: boolean, extension: string) {
-  const imageId = method === AUTH_CONNECTION.TWITTER ? `login-X${isDark ? "-dark" : "-light"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+  const imageId = method === AUTH_CONNECTION.TWITTER ? `login-X${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
   const hoverId =
     method === AUTH_CONNECTION.APPLE || method === AUTH_CONNECTION.GITHUB || method === AUTH_CONNECTION.TWITTER ? imageId : `login-${method}-active`;
   return (
@@ -15,9 +15,14 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
         id="active-login-img"
         src={`https://images.web3auth.io/${hoverId}${extension}`}
         alt="active-login-img"
-        className="w3a--size-5 w3a--object-contain"
+        className="w3a--hidden w3a--size-5 w3a--object-contain group-hover:w3a--block"
       />
-      <img id="login-img" src={`https://images.web3auth.io/${imageId}${extension}`} alt="login-img" className="w3a--size-5 w3a--object-contain" />
+      <img
+        id="login-img"
+        src={`https://images.web3auth.io/${imageId}${extension}`}
+        alt="login-img"
+        className="w3a--block w3a--size-5 w3a--object-contain group-hover:w3a--hidden"
+      />
     </>
   );
 }
@@ -53,7 +58,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                     method: row.method,
                     isDark,
                     isPrimaryBtn: false,
-                    btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+                    btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
                     children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
                     onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
                     buttonRadius,
@@ -67,6 +72,7 @@ function SocialLoginList(props: SocialLoginListProps) {
               props={{
                 showIcon: false,
                 onClick: handleExpandSocialLogins,
+                btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11",
                 children: (
                   <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="w3a--object-contain" />
                 ),
@@ -84,9 +90,9 @@ function SocialLoginList(props: SocialLoginListProps) {
       <button type="button" className="w3a--appearance-none" onClick={() => handleExpandSocialLogins()}>
         <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="w3a--object-contain" />
       </button>
-      <div className="w3a--grid w3a--h-[300px] w3a--w-full w3a--auto-rows-min w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--px-1">
+      <div className="w3a--social-container w3a--grid w3a--h-[300px] w3a--w-full w3a--auto-rows-min w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--pr-3">
         {otherRow.map((row) => (
-          <div className="w3a--h-[50px] w3a--w-full" key={row.method}>
+          <div className="w3a--h-11 w3a--w-full" key={row.method}>
             <Button
               type={BUTTON_TYPE.SOCIAL}
               props={{
@@ -94,7 +100,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 isDark,
                 isPrimaryBtn: false,
                 onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
-                btnStyle: "w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-full w3a-arrow w3a-img-login-group",
+                btnStyle: "w3a--group w3a--relative w3a--overflow-hidden w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-11",
                 buttonRadius,
                 children: (
                   <>
@@ -102,8 +108,9 @@ function SocialLoginList(props: SocialLoginListProps) {
                     <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
                     <img
                       id="login-arrow"
-                      className="w3a--icon-animation w3a--ml-auto"
-                      src={getIcons(props.isDark ? "chevron-right-dark" : "chevron-right-light")}
+                      className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+                      src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                       alt="arrow"
                     />
                   </>
