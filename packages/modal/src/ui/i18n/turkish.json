@@ -65,7 +65,7 @@
     "social.email-new": "isim@ornek.com",
     "social.passwordless-cta": "Devam et",
     "social.passwordless-login": "Giriş yapmak",
-    "social.passwordless-title": "E-posta veya Telefon",
+    "social.passwordless-title": "E-posta/Telefon",
     "social.phone": "Telefon",
     "social.policy": "Sosyal medya girişlerinizle ilgili hiçbir veriyi saklamıyoruz.",
     "social.sms": "Mobil Telefon",
@@ -92,7 +92,8 @@
     "resendCode": "Kodu tekrar gönder",
     "resendTimer": " {{timer}} saniye sonra tekrar gönder",
     "connectYourWallet": "Cüzdanınızı bağlayın",
-    "allChains": "Tüm zincirler"
+    "allChains": "Tüm zincirler",
+    "getWallet": "Cüzdanı al"
   },
   "passwordless": {
     "error-invalid-params": "Eksik ya da hatalı parametreler var.",

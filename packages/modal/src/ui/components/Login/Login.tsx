@@ -517,7 +517,7 @@ function Login(props: LoginProps) {
             logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0"
           )}
         >
-          <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--object-contain" />
+          <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />
         </figure>
         <p
           className={cn(

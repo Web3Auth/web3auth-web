@@ -21,7 +21,12 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
         className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
         onClick={handleBack}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--text-app-gray-900 dark:w3a--text-app-white">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 20 20"
+          className="w3a--text-app-gray-500 hover:w3a--text-app-gray-900 dark:w3a--text-app-gray-200 dark:hover:w3a--text-app-white"
+        >
           <path
             fill="currentColor"
             fillRule="evenodd"

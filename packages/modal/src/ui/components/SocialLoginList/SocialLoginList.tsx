@@ -6,8 +6,7 @@ import LoginHint from "../LoginHint";
 import { SocialLoginListProps } from "./SocialLoginList.type";
 
 function getProviderIcon(method: string, isDark: boolean, extension: string) {
-  const imageId =
-    method === AUTH_CONNECTION.TWITTER ? `login-twitter-x${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
+  const imageId = method === AUTH_CONNECTION.TWITTER ? `login-X${isDark ? "-dark" : "-light"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
   const hoverId =
     method === AUTH_CONNECTION.APPLE || method === AUTH_CONNECTION.GITHUB || method === AUTH_CONNECTION.TWITTER ? imageId : `login-${method}-active`;
   return (
