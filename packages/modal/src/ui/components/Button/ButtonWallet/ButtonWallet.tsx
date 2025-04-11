@@ -55,7 +55,7 @@ function ButtonWallet(props: ButtonWalletProps) {
             extension={button.imgExtension || "webp"}
           />
         </figure>
-        <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
+        <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
       </div>
       {button.hasInjectedWallet && (
         <span

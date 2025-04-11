@@ -410,7 +410,9 @@ function Login(props: LoginProps) {
               })}
               onClick={() => handleInstalledWalletClick(wallet)}
             >
-              <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
+              <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">
+                {wallet.displayName}
+              </p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
                 {wallet.hasInjectedWallet && (
                   <span
