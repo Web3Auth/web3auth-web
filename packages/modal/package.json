@@ -35,16 +35,28 @@
     "@coinbase/wallet-sdk": {
       "optional": true
     },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "viem": {
+      "optional": true
+    },
     "vue": {
+      "optional": true
+    },
+    "wagmi": {
       "optional": true
     }
   },
   "peerDependencies": {
     "@babel/runtime": "^7.x",
+    "@tanstack/react-query": "^5.72.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19",
-    "vue": "^3.x"
+    "viem": "^2.23.x",
+    "vue": "^3.x",
+    "wagmi": "^2.x"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.26.3",
@@ -54,6 +66,7 @@
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
+    "@tanstack/react-query": "^5.72.2",
     "@toruslabs/eslint-config-react": "^4.1.1",
     "@toruslabs/isomorphic-style-loader": "^5.4.0",
     "@toruslabs/vue-components": "^8.0.0",
@@ -65,13 +78,15 @@
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
     "postcss-prefix-selector": "^2.1.0",
-    "react": "^18 || ^19",
-    "react-dom": "^18 || ^19",
+    "react": "^18",
+    "react-dom": "^18",
     "rollup-plugin-postcss": "^4.0.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "url-loader": "^4.1.1",
-    "vue": "^3.5.13"
+    "viem": "^2.23.12",
+    "vue": "^3.5.13",
+    "wagmi": "^2.14.6"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.12.0",
@@ -99,6 +114,11 @@
       "require": "./dist/lib.cjs/packages/modal/src/react/index.js",
       "types": "./dist/lib.cjs/types/react/index.d.ts"
     },
+    "./react/wagmi": {
+      "import": "./dist/lib.esm/packages/modal/src/react/wagmi/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/react/wagmi/index.js",
+      "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
+    },
     "./vue": {
       "import": "./dist/lib.esm/packages/modal/src/vue/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/vue/index.js",
@@ -109,6 +129,9 @@
     "*": {
       "react": [
         "./dist/lib.cjs/types/react/index.d.ts"
+      ],
+      "react/wagmi": [
+        "./dist/lib.cjs/types/react/wagmi/index.d.ts"
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"

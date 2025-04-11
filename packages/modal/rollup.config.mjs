@@ -7,7 +7,7 @@ import postcss from "rollup-plugin-postcss";
 // TODO: use ssr module for cjs build
 
 export const baseConfig = {
-  input: ["./src/index.ts", "./src/react/index.ts", "./src/vue/index.ts"],
+  input: ["./src/index.ts", "./src/react/index.ts", "./src/vue/index.ts", "./src/react/wagmi/index.ts"],
   plugins: [
     postcss({
       config: {
