@@ -65,7 +65,7 @@
     "social.email-new": "name@example.com",
     "social.passwordless-cta": "계속",
     "social.passwordless-login": "로그인",
-    "social.passwordless-title": "이메일 또는 전화번호",
+    "social.passwordless-title": "이메일/전화번호",
     "social.phone": "전화번호",
     "social.policy": "저희는 소셜 로그인과 관련된 어떠한 데이터도 저장하지 않습니다.",
     "social.sms": "모바일",
@@ -92,7 +92,8 @@
     "resendCode": "코드 다시 보내기",
     "resendTimer": " {{timer}} 초 후 다시 보내기",
     "connectYourWallet": "지갑 연결",
-    "allChains": "모든 체인"
+    "allChains": "모든 체인",
+    "getWallet": "지갑 가져오기"
   },
   "passwordless": {
     "error-invalid-params": "누락되었거나 유효하지 않은 정보입니다.",

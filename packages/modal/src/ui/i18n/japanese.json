@@ -65,7 +65,7 @@
     "social.email-new": "name@example.com",
     "social.passwordless-cta": "続ける",
     "social.passwordless-login": "ログイン",
-    "social.passwordless-title": "メールまたは電話",
+    "social.passwordless-title": "メール/電話",
     "social.phone": "電話",
     "social.policy": "ソーシャルログインに関連するデータは保存されません。",
     "social.sms": "モバイル",
@@ -92,7 +92,8 @@
     "resendCode": "コードを再送信",
     "resendTimer": " {{timer}} 秒後に再送信",
     "connectYourWallet": "ウォレットを接続",
-    "allChains": "すべてのチェーン"
+    "allChains": "すべてのチェーン",
+    "getWallet": "ウォレットを取得"
   },
   "passwordless": {
     "error-invalid-params": "パラメーターの欠落または無効なパラメーター",

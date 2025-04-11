@@ -51,7 +51,6 @@ function Login(props: LoginProps) {
     showInstalledExternalWallets,
     logoAlignment = "center",
     buttonRadius = "pill",
-    enableMainSocialLoginButton = false,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -88,17 +87,44 @@ function Login(props: LoginProps) {
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
 
-    const loginOptions = Object.keys(socialLoginsConfig.loginMethods).filter((method) => {
-      return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
-    });
+    const loginMethodsOrder = (socialLoginsConfig.loginMethodsOrder || []).reduce(
+      (acc, method, index) => {
+        acc[method] = index;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const loginOptions = Object.keys(socialLoginsConfig.loginMethods)
+      .filter((method) => {
+        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+      })
+      .sort((a, b) => {
+        const maxOrder = (socialLoginsConfig.loginMethodsOrder || []).length;
+        const aOrder = loginMethodsOrder[a] ?? maxOrder;
+        const bOrder = loginMethodsOrder[b] ?? maxOrder;
+
+        const { mainOption: aMainOption } = socialLoginsConfig.loginMethods[a as AUTH_CONNECTION_TYPE] || {};
+        const { mainOption: bMainOption } = socialLoginsConfig.loginMethods[b as AUTH_CONNECTION_TYPE] || {};
+
+        // if both are main options, sort by order
+        if (aMainOption && bMainOption) {
+          return aOrder - bOrder;
+        }
+
+        // if one is main option, it should be first
+        if (aMainOption) return -1;
+        if (bMainOption) return 1;
+
+        // if none are main options, sort by order
+        return aOrder - bOrder;
+      });
 
     loginOptions.forEach((method, index) => {
       const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
       const name = capitalizeFirstLetter(connectorConfig.name || method);
-      // const orderIndex = socialLoginsConfig.loginMethodsOrder.indexOf(method) + 1;
       const order = index + 1;
 
-      const isMainOption = order === 1 && enableMainSocialLoginButton;
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
 
       const loginOptionLength = loginOptions.length;
@@ -122,7 +148,6 @@ function Login(props: LoginProps) {
             login_hint: "",
           },
           order,
-          isMainOption,
         });
       }
 
@@ -141,14 +166,13 @@ function Login(props: LoginProps) {
           login_hint: "",
         },
         order,
-        isMainOption,
       });
     });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark, enableMainSocialLoginButton, buttonRadius]);
+  }, [socialLoginsConfig, isDark, buttonRadius]);
 
   const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
     try {
@@ -386,7 +410,9 @@ function Login(props: LoginProps) {
               })}
               onClick={() => handleInstalledWalletClick(wallet)}
             >
-              <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{wallet.displayName}</p>
+              <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">
+                {wallet.displayName}
+              </p>
               <div className="w3a--flex w3a--items-center w3a--gap-x-2">
                 {wallet.hasInjectedWallet && (
                   <span
@@ -396,7 +422,7 @@ function Login(props: LoginProps) {
                     {t("modal.external.installed")}
                   </span>
                 )}
-                <figure className={wallet.icon ? "w3a--size-5" : "w3a--size-5 w3a--rounded-full w3a--bg-app-gray-300"}>
+                <figure className="w3a--size-5">
                   <Image
                     imageData={wallet.icon}
                     imageId={`login-${wallet.name}`}
@@ -517,7 +543,7 @@ function Login(props: LoginProps) {
             logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0"
           )}
         >
-          <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--object-contain" />
+          <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />
         </figure>
         <p
           className={cn(

@@ -65,7 +65,7 @@
     "social.email-new": "name@example.com",
     "social.passwordless-cta": "继续",
     "social.passwordless-login": "登录",
-    "social.passwordless-title": "邮件或电话",
+    "social.passwordless-title": "电子邮件/电话",
     "social.phone": "电话",
     "social.policy": "我们不存储与您的社交登录相关的任何数据。",
     "social.sms": "移动",
@@ -92,7 +92,8 @@
     "resendCode": "重新发送代码",
     "resendTimer": " {{timer}} 秒后重新发送",
     "connectYourWallet": "连接您的钱包",
-    "allChains": "所有链"
+    "allChains": "所有链",
+    "getWallet": "获取钱包"
   },
   "passwordless": {
     "error-invalid-params": "缺失或无效参数",

@@ -51,8 +51,8 @@ const aaSupportedChains = computed(() => {
     .map((chainConfig) => ({ name: `${chainConfig!.chainId} ${chainConfig!.displayName}`, value: chainConfig!.chainId }));
 });
 
-const adapterOptions = computed(() =>
-  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) ? [{ name: "coinbase-adapter", value: "coinbase" }] : []
+const connectorOptions = computed(() =>
+  formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) ? [{ name: "coinbase-connector", value: "coinbase" }] : []
 );
 
 const isDisplay = (_name: string): boolean => {
@@ -139,6 +139,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             data-testid="selectWidget"
             :aria-label="$t('app.widget.title')"
             :placeholder="$t('app.widget.title')"
+            matchParentsWidth
             :options="[
               { name: $t('app.widget.embed'), value: 'embed' },
               { name: $t('app.widget.modal'), value: 'modal' },
@@ -182,6 +183,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.network')"
             :placeholder="$t('app.network')"
             :options="networkOptions"
+            matchParentsWidth
           />
           <Select
             v-model="formData.chainNamespaces"
@@ -191,6 +193,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.chainNamespaces')"
             :options="chainNamespaceOptions"
             :multiple="true"
+            matchParentsWidth
             @update:model-value="onChainNamespaceChange"
           />
           <Select
@@ -200,6 +203,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.chains')"
             :placeholder="$t('app.chains')"
             :multiple="true"
+            matchParentsWidth
             :options="chainOptions"
             @update:model-value="onChainChange"
           />
@@ -209,16 +213,18 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label="$t('app.defaultChainId')"
             :aria-label="$t('app.defaultChainId')"
             :placeholder="$t('app.defaultChainId')"
+            matchParentsWidth
             :options="defaultChainOptions"
           />
           <Select
             v-model="formData.connectors"
-            data-testid="selectAdapters"
-            :label="$t('app.adapters')"
-            :aria-label="$t('app.adapters')"
-            :placeholder="$t('app.adapters')"
-            :options="adapterOptions"
+            data-testid="selectConnectors"
+            :label="$t('app.connectors')"
+            :aria-label="$t('app.connectors')"
+            :placeholder="$t('app.connectors')"
+            :options="connectorOptions"
             multiple
+            matchParentsWidth
             :show-check-box="true"
           />
           <Toggle
@@ -272,6 +278,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.whiteLabel.defaultLanguage')"
             :placeholder="$t('app.whiteLabel.defaultLanguage')"
             :options="languageOptions"
+            matchParentsWidth
             :disabled="isDisabled('whiteLabelSettings')"
           />
           <TextField
@@ -351,16 +358,24 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.loginProviders')"
             :options="loginProviderOptions"
             multiple
+            matchParentsWidth
             class=""
           />
           <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-3">
-            <div class="font-bold leading-tight text-left sm:col-span-2">{{ p }}</div>
+            <div class="font-bold leading-tight text-left">{{ p }}</div>
             <Toggle
               v-model="formData.loginMethods[p].mainOption"
               :show-label="true"
               :size="'small'"
               :label-disabled="$t('app.loginMethod.mainOption')"
               :label-enabled="$t('app.loginMethod.mainOption')"
+            />
+            <Toggle
+              v-model="formData.loginMethods[p].showOnModal"
+              :show-label="true"
+              :size="'small'"
+              :label-disabled="$t('app.loginMethod.showOnModal')"
+              :label-enabled="$t('app.loginMethod.showOnModal')"
             />
             <TextField
               v-model="formData.loginMethods[p].name"
@@ -393,27 +408,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               :aria-label="$t('app.loginMethod.logoDark')"
               :placeholder="$t('app.loginMethod.logoDark')"
             />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnModal"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnModal')"
-              :label-enabled="$t('app.loginMethod.showOnModal')"
-            />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnDesktop"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnDesktop')"
-              :label-enabled="$t('app.loginMethod.showOnDesktop')"
-            />
-            <Toggle
-              v-model="formData.loginMethods[p].showOnMobile"
-              :show-label="true"
-              :size="'small'"
-              :label-disabled="$t('app.loginMethod.showOnMobile')"
-              :label-enabled="$t('app.loginMethod.showOnMobile')"
-            />
           </Card>
         </Card>
         <Card v-if="isActiveTab(3)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
@@ -428,11 +422,11 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           />
           <Select
             v-model="formData.walletPlugin.confirmationStrategy"
-            data-testid="selectLoginProviders"
+            data-testid="selectConfirmationStrategy"
             :label="$t('app.walletPlugin.confirmationStrategy')"
             :aria-label="$t('app.walletPlugin.confirmationStrategy')"
             :placeholder="$t('app.walletPlugin.confirmationStrategy')"
-            :options="confirmationStrategyOptions"
+            matchParentsWidth
             class=""
           />
         </Card>
@@ -475,6 +469,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
             :options="SmartAccountOptions"
             :disabled="isDisabled('smartAccountType')"
+            matchParentsWidth
           />
           <Select
             v-model="formData.smartAccountChains"
@@ -484,6 +479,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.chains')"
             :options="aaSupportedChains"
             multiple
+            matchParentsWidth
             :disabled="isDisabled('smartAccountChains')"
             @update:model-value="onSmartAccountChainChange"
           />

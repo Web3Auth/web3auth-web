@@ -63,12 +63,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     super.checkInitRequirements();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
-    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
-    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
-    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
-    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig || {});
 
     // init config
+    this.initUIConfig(projectConfig);
     super.initAccountAbstractionConfig(projectConfig);
     super.initChainsConfig(projectConfig);
     super.initCachedConnectorAndChainId();
@@ -194,6 +191,25 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return { projectConfig, walletRegistry };
   }
 
+  private initUIConfig(projectConfig: ProjectConfig) {
+    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig);
+
+    // merge login methods order from project config and user config, with user config taking precedence
+    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
+    const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
+    const loginMethodsOrder = [];
+    const authConnectionSet = new Set();
+    for (const authConnection of mergedAuthConnections) {
+      if (authConnectionSet.has(authConnection)) continue;
+      authConnectionSet.add(authConnection);
+      loginMethodsOrder.push(authConnection);
+    }
+    this.options.uiConfig.loginMethodsOrder = loginMethodsOrder;
+  }
+
   private async initConnectors({
     connectors,
     projectConfig,
@@ -258,8 +274,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           extraLoginOptions: authConnectionConfig.jwtParameters,
           isDefault: true,
           showOnModal: true,
-          showOnDesktop: true,
-          showOnMobile: true,
         };
       }
       embedWalletConfigMap.set(groupedAuthConnectionId || authConnectionId, authConnectionConfig);
@@ -314,8 +328,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const defaultConnectorConfig = {
         label: CONNECTOR_NAMES[connectorName] || connectorName.split("-").map(capitalizeFirstLetter).join(" "),
         showOnModal: true,
-        showOnMobile: true,
-        showOnDesktop: true,
       };
 
       this.modalConfig.connectors[connectorName] = {

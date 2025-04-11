@@ -22,7 +22,7 @@ import { createRoot } from "react-dom/client";
 
 // import Modal from "./components/Modal";
 import Widget from "./components/Widget";
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "./constants";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   ExternalWalletEventType,
@@ -242,7 +242,9 @@ export class LoginModal {
         </ThemedContext.Provider>
       );
 
-      if (this.uiConfig?.theme) {
+      const isDefaultColors = this.uiConfig?.theme.primary === DEFAULT_PRIMARY_COLOR && this.uiConfig.theme.onPrimary === DEFAULT_ON_PRIMARY_COLOR;
+
+      if (this.uiConfig?.theme && !isDefaultColors) {
         const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;
         applyWhiteLabelTheme(rootElement, this.uiConfig.theme);
       }

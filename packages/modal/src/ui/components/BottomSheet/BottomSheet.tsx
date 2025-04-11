@@ -41,7 +41,7 @@ function BottomSheet({ isShown, onClose, children, uiConfig }: BottomSheetProps)
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             onClick={onClose}
-            className="w3a--text-app-gray-500 dark:w3a--text-app-gray-200"
+            className="w3a--text-app-gray-500 hover:w3a--text-app-gray-900 dark:w3a--text-app-gray-200 dark:hover:w3a--text-app-white"
           >
             <path
               fillRule="evenodd"

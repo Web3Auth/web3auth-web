@@ -6,6 +6,4 @@ export interface FormConfigSettings {
   logoDark: string;
   mainOption: boolean;
   showOnModal: boolean;
-  showOnDesktop: boolean;
-  showOnMobile: boolean;
 }

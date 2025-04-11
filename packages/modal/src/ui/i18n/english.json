@@ -65,7 +65,7 @@
     "social.email-new": "name@example.com",
     "social.passwordless-cta": "Continue",
     "social.passwordless-login": "Login",
-    "social.passwordless-title": "Email or Phone",
+    "social.passwordless-title": "Email/Phone",
     "social.phone": "Phone",
     "social.policy": "We do not store any data related to your social logins.",
     "social.sms": "Mobile",
@@ -92,7 +92,8 @@
     "resendCode": "Resend Code",
     "resendTimer": " Resend in {{timer}} seconds",
     "connectYourWallet": "Connect your wallet",
-    "allChains": "All Chains"
+    "allChains": "All Chains",
+    "getWallet": "Get Wallet"
   },
   "passwordless": {
     "error-invalid-params": "Missing or Invalid Parameters.",

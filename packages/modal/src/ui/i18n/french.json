@@ -63,7 +63,7 @@
     "social.email-new": "nom@exemple.com",
     "social.passwordless-cta": "Continuer",
     "social.passwordless-login": "Se connecter",
-    "social.passwordless-title": "Email ou téléphone",
+    "social.passwordless-title": "Email/Téléphone",
     "social.phone": "Téléphone",
     "social.policy": "Nous ne stockons aucune donnée liée à vos connexions sociales.",
     "social.sms": "Mobile",
@@ -90,7 +90,8 @@
     "resendCode": "Renvoyer le code",
     "resendTimer": " Renvoyer dans {{timer}} secondes",
     "connectYourWallet": "Connectez votre portefeuille",
-    "allChains": "Toutes les chaînes"
+    "allChains": "Toutes les chaînes",
+    "getWallet": "Obtenir le portefeuille"
   },
   "passwordless": {
     "error-invalid-params": "Paramètres manquants ou invalides.",
