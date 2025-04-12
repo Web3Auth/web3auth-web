@@ -7,6 +7,7 @@ export interface IWeb3AuthContext {
   web3Auth: Web3Auth | null;
   provider: IProvider | null;
   isLoading: boolean;
+  isReady: boolean;
   user: unknown;
   chain: string;
   login: () => Promise<void>;
@@ -29,6 +30,7 @@ export const Web3AuthContext = createContext<IWeb3AuthContext>({
   isLoading: false,
   user: null,
   chain: "",
+  isReady: false,
   login: async () => {},
   logout: async () => {},
   getUserInfo: async () => {},
@@ -66,6 +68,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
   const [wsPlugin, setWsPlugin] = useState<WalletServicesPluginType | null>(null);
   const [user, setUser] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3Auth) => {
@@ -87,6 +90,11 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
       web3auth.on(CONNECTOR_EVENTS.ERRORED, (error) => {
         console.error("some error or user has cancelled login request", error);
+      });
+
+      web3auth.on(CONNECTOR_EVENTS.READY, () => {
+        console.log("web3auth is ready");
+        setIsReady(true);
       });
     };
 
@@ -120,26 +128,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
           // get your client id from https://dashboard.web3auth.io
           clientId,
           web3AuthNetwork,
-          accountAbstractionConfig: {
-            smartAccountType: SMART_ACCOUNT.SAFE,
-            bundlerConfig: {
-              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
-            },
-            paymasterConfig: {
-              url: `https://api.pimlico.io/v2/11155111/rpc?apikey=${pimlicoAPIKey}`,
-            },
-          },
           chains: [currentChainConfig],
           uiConfig: {
-            uxMode: "redirect",
             appName: "W3A Heroes",
             appUrl: "https://web3auth.io/",
             theme: {
               primary: "#5f27cd",
               onPrimary: "white",
             },
-            logoLight: "https://web3auth.io/images/web3auth-logo.svg",
-            logoDark: "https://web3auth.io/images/web3auth-logo.svg",
             defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl, tr
             mode: "auto", // whether to enable dark mode. defaultValue: auto
             // useLogoLoader: true,
@@ -147,18 +143,14 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
             primaryButton: "socialLogin",
           },
           enableLogging: true,
-          plugins: [walletServicesPlugin()],
+          authBuildEnv: "testing"
         });
 
-        setWsPlugin(wsPlugin);
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
-        await web3AuthInstance.init();
+        await web3AuthInstance.initModal();
 
-        const plugin = web3AuthInstance.getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-        setWsPlugin(plugin);
-        subscribePluginEvents(plugin);
       } catch (error) {
         console.error(error);
       } finally {
@@ -304,6 +296,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
     provider,
     user,
     isLoading,
+    isReady,
     login,
     logout,
     getUserInfo,

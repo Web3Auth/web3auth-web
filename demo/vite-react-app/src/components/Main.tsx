@@ -1,4 +1,4 @@
-import { WALLET_CONNECTORS } from "@web3auth/modal";
+import { CONNECTOR_STATUS, WALLET_CONNECTORS } from "@web3auth/modal";
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
 
@@ -18,6 +18,7 @@ const Main = () => {
     showWalletConnectScanner,
     enableMFA,
     manageMFA,
+    isReady,
   } = useWeb3Auth();
 
   const loggedInView = (
@@ -68,9 +69,15 @@ const Main = () => {
   );
 
   const unloggedInView = (
-    <button onClick={login} className={styles.card}>
-      Login
-    </button>
+    <>
+      {isReady ? (
+        <button onClick={login} className={styles.card}>
+          Login
+        </button>
+      ) : (
+        <p>Loading Web3Auth...</p>
+      )}
+    </>
   );
 
   return <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>;
