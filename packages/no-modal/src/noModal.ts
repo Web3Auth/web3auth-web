@@ -533,6 +533,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.clearCache();
       }
     });
+
+    connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
+      log.debug("mfa enabled", isMFAEnabled);
+      this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
+    });
   }
 
   protected checkInitRequirements(): void {

@@ -1,15 +1,6 @@
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
-import type { AuthUserInfo, LoginParams } from "@/core/auth-connector";
-import {
-  CONNECTOR_EVENTS,
-  CONNECTOR_STATUS,
-  CONNECTOR_STATUS_TYPE,
-  IProvider,
-  WALLET_CONNECTOR_TYPE,
-  WalletInitializationError,
-  WalletLoginError,
-} from "@/core/base";
+import { CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "@/core/base";
 
 import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "./interfaces";
@@ -20,14 +11,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const { children, config } = params;
   const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
 
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
-  const [connectError, setConnectError] = useState<Error | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
-  const [userInfo, setUserInfo] = useState<Partial<AuthUserInfo> | null>(null);
-  const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
 
@@ -42,9 +29,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   useEffect(() => {
     const resetHookState = () => {
       setProvider(null);
-      setUserInfo(null);
-      setIsMFAEnabled(false);
-      setIsConnected(false);
+      setIsAuthenticated(false);
       setStatus(null);
     };
 
@@ -78,22 +63,17 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   useEffect(() => {
     const addState = async () => {
       setProvider(web3Auth.provider);
-      const userState = await web3Auth.getUserInfo();
-      setUserInfo(userState);
-      setIsMFAEnabled(userState?.isMfaEnabled || false);
     };
 
     const resetState = () => {
       setProvider(null);
-      setUserInfo(null);
-      setIsMFAEnabled(false);
     };
 
     if (web3Auth) {
-      if (isConnected) addState();
+      if (setIsAuthenticated) addState();
       else resetState();
     }
-  }, [web3Auth, isConnected]);
+  }, [web3Auth, setIsAuthenticated]);
 
   // TODO: don't throw error in init, connect in v9
 
@@ -108,13 +88,14 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
-        setIsConnected(true);
+        setIsAuthenticated(true);
       }
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
-      setIsConnected(false);
+      setIsAuthenticated(false);
     };
+
     const connectingListener = () => {
       setStatus(web3Auth.status);
     };
@@ -144,109 +125,18 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
   }, [web3Auth]);
 
-  const enableMFA = useCallback(
-    async (loginParams: Partial<LoginParams>) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      if (!isConnected) throw WalletLoginError.notConnectedError();
-      await web3Auth.enableMFA(loginParams);
-      const localUserInfo = await web3Auth.getUserInfo();
-      setUserInfo(localUserInfo);
-      setIsMFAEnabled(localUserInfo.isMfaEnabled || false);
-    },
-    [web3Auth, isConnected]
-  );
-
-  const manageMFA = useCallback(
-    async (loginParams: Partial<LoginParams>) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      if (!isConnected) throw WalletLoginError.notConnectedError();
-      await web3Auth.manageMFA(loginParams);
-    },
-    [web3Auth, isConnected]
-  );
-
-  const logout = useCallback(
-    async (logoutParams: { cleanup: boolean } = { cleanup: false }) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      if (!isConnected) throw WalletLoginError.notConnectedError();
-
-      await web3Auth.logout(logoutParams);
-    },
-    [web3Auth, isConnected]
-  );
-
-  const connectTo = useCallback(
-    async <T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      try {
-        setConnectError(null);
-        setIsConnecting(true);
-        const localProvider = await web3Auth.connectTo(walletName, loginParams);
-        return localProvider;
-      } catch (error) {
-        setConnectError(error as Error);
-        throw error;
-      } finally {
-        setIsConnecting(false);
-      }
-    },
-    [web3Auth]
-  );
-
-  const authenticateUser = useCallback(async () => {
-    if (!web3Auth) throw WalletInitializationError.notReady();
-    return web3Auth.authenticateUser();
-  }, [web3Auth]);
-
-  const switchChain = useCallback(
-    (chainParams: { chainId: string }) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      return web3Auth.switchChain(chainParams);
-    },
-    [web3Auth]
-  );
-
   const value = useMemo(() => {
     return {
       web3Auth,
-      isConnected,
+      isAuthenticated,
       isInitialized,
       provider,
-      userInfo,
-      isMFAEnabled,
       status,
       getPlugin,
-      connectTo,
-      enableMFA,
-      manageMFA,
-      logout,
-      authenticateUser,
-      switchChain,
       isInitializing,
-      isConnecting,
       initError,
-      connectError,
     };
-  }, [
-    web3Auth,
-    isConnected,
-    isInitialized,
-    provider,
-    userInfo,
-    isMFAEnabled,
-    status,
-    connectTo,
-    getPlugin,
-    enableMFA,
-    manageMFA,
-    logout,
-    authenticateUser,
-    switchChain,
-    isConnecting,
-    isInitializing,
-    initError,
-    connectError,
-  ]);
+  }, [web3Auth, isAuthenticated, isInitialized, provider, status, getPlugin, isInitializing, initError]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);
 }

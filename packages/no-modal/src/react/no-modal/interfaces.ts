@@ -1,4 +1,4 @@
-import type { ConnectorFn, IBaseWeb3AuthHookContext, IProvider, IWeb3AuthCoreOptions, PluginFn, WALLET_CONNECTOR_TYPE } from "@/core/base";
+import type { ConnectorFn, IBaseWeb3AuthHookContext, IWeb3AuthCoreOptions, PluginFn } from "@/core/base";
 
 import { Web3AuthNoModal } from "../../noModal";
 
@@ -14,7 +14,6 @@ export interface Web3AuthProviderProps {
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
   web3Auth: Web3AuthNoModal | null;
-  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
 }
 
 export type IWeb3AuthContext = IWeb3AuthInnerContext;

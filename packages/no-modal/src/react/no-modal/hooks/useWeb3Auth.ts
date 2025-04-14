@@ -1,14 +1,11 @@
-import { useContext } from "react";
+import { Web3AuthNoModal } from "../../../noModal";
+import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-import { WalletInitializationError } from "@/core/base";
+export interface IUseWeb3Auth {
+  web3Auth: Web3AuthNoModal;
+}
 
-import { IWeb3AuthInnerContext } from "../interfaces";
-import { Web3AuthInnerContext } from "../Web3AuthInnerContext";
-
-export const useWeb3Auth = (): IWeb3AuthInnerContext => {
-  const context = useContext(Web3AuthInnerContext);
-  if (!context) {
-    throw WalletInitializationError.fromCode(1000, "usage of useWeb3Auth not wrapped in `Web3AuthContextProvider`.");
-  }
+export const useWeb3Auth = (): IUseWeb3Auth => {
+  const context = useWeb3AuthInner();
   return context;
 };

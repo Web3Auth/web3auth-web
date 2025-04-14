@@ -217,7 +217,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
-      await this.authInstance.enableMFA(params);
+      const result = await this.authInstance.enableMFA(params);
+      // In redirect mode, the result is not available immediately, so we emit the event when the result is available.
+      if (result) this.emit(CONNECTOR_EVENTS.MFA_ENABLED, result);
     } catch (error: unknown) {
       log.error("Failed to enable MFA with auth provider", error);
       if (error instanceof Web3AuthError) {

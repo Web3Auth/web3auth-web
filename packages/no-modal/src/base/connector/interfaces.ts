@@ -108,6 +108,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED]: (data: IConnectorDataEvent) => void;
   [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
   [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
+  [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
 };
 
 export interface BaseConnectorConfig {
