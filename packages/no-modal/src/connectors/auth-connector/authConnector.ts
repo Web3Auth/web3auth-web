@@ -306,6 +306,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   public async cleanup(): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     await this.authInstance.cleanup();
+
+    if (this.wsEmbedInstance) {
+      this.wsEmbedInstance.clearInit();
+    }
   }
 
   private getChain(chainId: string) {
