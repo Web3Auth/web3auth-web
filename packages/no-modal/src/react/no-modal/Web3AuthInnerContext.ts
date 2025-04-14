@@ -55,11 +55,12 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [config]);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function init() {
       try {
         setInitError(null);
         setIsInitializing(true);
-        await web3Auth.init();
+        await web3Auth.init({ signal: controller.signal });
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -68,6 +69,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
 
     if (web3Auth) init();
+
+    return () => {
+      controller.abort();
+    };
   }, [web3Auth]);
 
   useEffect(() => {

@@ -33,6 +33,7 @@ import {
   WalletLoginError,
   Web3AuthError,
   Web3AuthNoModalEvents,
+  withAbort,
 } from "@/core/base";
 import { CommonJRPCProvider } from "@/core/base-provider";
 import { metaMaskConnector } from "@/core/metamask-connector";
@@ -93,7 +94,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     throw new Error("Not implemented");
   }
 
-  public async init(): Promise<void> {
+  public async init(options?: { signal?: AbortSignal }): Promise<void> {
+    const { signal } = options || {};
     // get project config
     let projectConfig: ProjectConfig;
     try {
@@ -114,11 +116,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.initCachedConnectorAndChainId();
 
     // setup common JRPC provider
-    await this.setupCommonJRPCProvider();
+    await withAbort(() => this.setupCommonJRPCProvider(), signal);
 
     // initialize connectors
     this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors: newConnectors }) => {
-      await Promise.all(newConnectors.map(this.setupConnector.bind(this)));
+      const onAbortHandler = () => {
+        if (this.connectors?.length > 0) {
+          this.cleanup();
+        }
+      };
+
+      await withAbort(() => Promise.all(newConnectors.map(this.setupConnector.bind(this))), signal, onAbortHandler);
 
       // emit connector ready event
       if (this.status === CONNECTOR_STATUS.NOT_READY) {
@@ -126,8 +134,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.emit(CONNECTOR_EVENTS.READY);
       }
     });
-    await this.loadConnectors({ projectConfig });
-    await this.initPlugins();
+
+    await withAbort(() => this.loadConnectors({ projectConfig }), signal);
+    await withAbort(() => this.initPlugins(), signal);
   }
 
   // we need to take into account the chainNamespace as for external connectors, same connector name can be used for multiple chain namespaces
@@ -149,6 +158,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     window[this.storage].removeItem(CONNECTOR_CACHE_KEY);
     window[this.storage].removeItem(CURRENT_CHAIN_CACHE_KEY);
     this.cachedConnector = null;
+  }
+
+  public async cleanup(): Promise<void> {
+    for (const connector of this.connectors) {
+      if (connector.cleanup) await connector.cleanup();
+    }
   }
 
   public async switchChain(params: { chainId: string }): Promise<void> {

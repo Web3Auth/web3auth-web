@@ -85,7 +85,7 @@ export const Web3AuthProvider = defineComponent({
 
     watch(
       () => props.config,
-      (newConfig) => {
+      (newConfig, _, onInvalidate) => {
         const resetHookState = () => {
           provider.value = null;
           userInfo.value = null;
@@ -93,6 +93,12 @@ export const Web3AuthProvider = defineComponent({
           isConnected.value = false;
           status.value = null;
         };
+
+        onInvalidate(() => {
+          if (web3Auth.value) {
+            web3Auth.value.cleanup();
+          }
+        });
 
         resetHookState();
         const { web3AuthOptions } = newConfig;
@@ -104,12 +110,19 @@ export const Web3AuthProvider = defineComponent({
 
     watch(
       web3Auth,
-      async (newWeb3Auth) => {
+      async (newWeb3Auth, _, onInvalidate) => {
+        const controller = new AbortController();
+
+        // Invalidate the controller here before calling any async methods.
+        onInvalidate(() => {
+          controller.abort();
+        });
+
         if (newWeb3Auth) {
           try {
             initError.value = null;
             isInitializing.value = true;
-            await newWeb3Auth.initModal();
+            await newWeb3Auth.initModal({ signal: controller.signal });
           } catch (error) {
             initError.value = error as Error;
           } finally {

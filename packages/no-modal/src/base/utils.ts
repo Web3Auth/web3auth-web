@@ -80,6 +80,28 @@ export const fromWagmiChain = (chain: Chain): CustomChainConfig => {
   };
 };
 
+export function withAbort<T>(fn: () => Promise<T>, signal?: AbortSignal, onAbort?: () => void): Promise<T> {
+  if (!signal) return fn();
+
+  if (signal.aborted) return Promise.reject(new DOMException("Aborted", "AbortError"));
+
+  return new Promise((resolve, reject) => {
+    const abort = () => {
+      onAbort?.();
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
+    signal.addEventListener("abort", abort);
+
+    return Promise.resolve()
+      .then(() => fn())
+      .then(resolve, reject)
+      .finally(() => {
+        signal.removeEventListener("abort", abort);
+      });
+  });
+}
+
 export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };
