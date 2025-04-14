@@ -151,7 +151,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
-  init(): Promise<void>;
+  init(options?: { signal?: AbortSignal }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
@@ -171,6 +171,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
+  cleanup(): Promise<void>;
 }
 
 export type Web3AuthNoModalEvents = ConnectorEvents & { [CONNECTOR_EVENTS.READY]: () => void; MODAL_VISIBILITY: (visibility: boolean) => void };

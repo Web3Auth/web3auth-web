@@ -23,6 +23,7 @@ import {
   WalletInitializationError,
   type WalletRegistry,
   Web3AuthNoModal,
+  withAbort,
 } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 
@@ -59,7 +60,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     log.info("modalConfig", this.modalConfig);
   }
 
-  public async initModal(): Promise<void> {
+  public async initModal(options?: { signal?: AbortSignal }): Promise<void> {
+    const { signal } = options || {};
+
     super.checkInitRequirements();
     // get project config and wallet registry
     const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
@@ -88,19 +91,26 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         onModalVisibility: this.onModalVisibility,
       }
     );
-    await this.loginModal.initModal();
+    await withAbort(() => this.loginModal.initModal(), signal);
 
     // setup common JRPC provider
-    await this.setupCommonJRPCProvider();
+    await withAbort(() => this.setupCommonJRPCProvider(), signal);
 
     // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) =>
-      this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets })
-    );
-    await this.loadConnectors({ projectConfig });
+    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
+      const onAbortHandler = () => {
+        log.debug("init aborted");
+        if (this.connectors?.length > 0) {
+          super.cleanup();
+        }
+      };
+      withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+    });
+
+    await withAbort(() => super.loadConnectors({ projectConfig }), signal);
 
     // initialize plugins
-    await this.initPlugins();
+    await withAbort(() => super.initPlugins(), signal);
   }
 
   public async connect(): Promise<IProvider | null> {

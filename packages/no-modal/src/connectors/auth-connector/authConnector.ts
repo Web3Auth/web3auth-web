@@ -303,6 +303,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
+  public async cleanup(): Promise<void> {
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    await this.authInstance.cleanup();
+  }
+
   private getChain(chainId: string) {
     return this.coreOptions.chains.find((x) => x.chainId === chainId);
   }

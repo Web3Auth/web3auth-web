@@ -104,17 +104,22 @@ export const Web3AuthProvider = defineComponent({
 
     watch(
       web3Auth,
-      async (newWeb3Auth) => {
+      async (newWeb3Auth, _, onInvalidate) => {
         if (newWeb3Auth) {
+          const controller = new AbortController();
           try {
             initError.value = null;
             isInitializing.value = true;
-            await newWeb3Auth.init();
+            await newWeb3Auth.init({ signal: controller.signal });
           } catch (error) {
             initError.value = error as Error;
           } finally {
             isInitializing.value = false;
           }
+
+          onInvalidate(() => {
+            controller.abort();
+          });
         }
       },
       { immediate: true }

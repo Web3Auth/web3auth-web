@@ -117,13 +117,13 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
         console.error("some error on plugin login", error);
       });
     };
+    const controller = new AbortController();
 
     async function init() {
       try {
         const currentChainConfig = CHAIN_CONFIG[chain];
         setIsLoading(true);
         const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
-
         const web3AuthInstance = new Web3Auth({
           // get your client id from https://dashboard.web3auth.io
           clientId,
@@ -149,7 +149,7 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
 
         subscribeAuthEvents(web3AuthInstance);
         setWeb3Auth(web3AuthInstance);
-        await web3AuthInstance.initModal();
+        await web3AuthInstance.initModal({ signal: controller.signal });
 
       } catch (error) {
         console.error(error);
@@ -158,6 +158,10 @@ export const Web3AuthProvider: FunctionComponent<IWeb3AuthState> = ({ children, 
       }
     }
     init();
+
+    return () => {
+      controller.abort();
+    };
   }, [chain, web3AuthNetwork]);
 
   const login = async () => {
