@@ -81,6 +81,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   authenticateUser(): Promise<UserAuthInfo>;
+  cleanup?(): Promise<void>;
 }
 
 export type ConnectorParams = {

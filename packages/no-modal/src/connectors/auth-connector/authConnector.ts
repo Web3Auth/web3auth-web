@@ -72,6 +72,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private authConnectionConfig: (AuthConnectionConfigItem & { isDefault?: boolean })[] = [];
 
+  private wsEmbedInstancePromise: Promise<void> | null = null;
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
@@ -120,7 +122,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     });
     log.debug("initializing auth connector init", this.authOptions);
 
-    await this.authInstance.init();
+    // making it async here to initialize provider.
+    const authInstancePromise = this.authInstance.init();
 
     // Use this for xrpl, mpc cases
     if (this.coreOptions.privateKeyProvider) {
@@ -139,15 +142,20 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           const wsSupportedChains = chains.filter(
             (x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA
           );
-          await this.wsEmbedInstance.init({
-            ...this.wsSettings,
-            chains: wsSupportedChains as ProviderConfig[],
-            chainId,
-            whiteLabel: {
-              ...this.authOptions.whiteLabel,
-              ...this.wsSettings.whiteLabel,
-            },
-          });
+          this.wsEmbedInstancePromise = this.wsEmbedInstance
+            .init({
+              ...this.wsSettings,
+              chains: wsSupportedChains as ProviderConfig[],
+              chainId,
+              whiteLabel: {
+                ...this.authOptions.whiteLabel,
+                ...this.wsSettings.whiteLabel,
+              },
+            })
+            .then(() => {
+              this.wsEmbedInstancePromise = null;
+              return;
+            });
           break;
         }
         case CHAIN_NAMESPACES.XRPL:
@@ -163,6 +171,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         }
       }
     }
+
+    // wait for auth instance to be ready.
+    await authInstancePromise;
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
@@ -292,6 +303,15 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
+  public async cleanup(): Promise<void> {
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    await this.authInstance.cleanup();
+
+    if (this.wsEmbedInstance) {
+      this.wsEmbedInstance.clearInit();
+    }
+  }
+
   private getChain(chainId: string) {
     return this.coreOptions.chains.find((x) => x.chainId === chainId);
   }
@@ -339,6 +359,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     // setup WS embed if chainNamespace is EIP155 or SOLANA
     if (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      // wait for ws embed instance to be ready.
+      if (this.wsEmbedInstancePromise) await this.wsEmbedInstancePromise;
+
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
         const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({

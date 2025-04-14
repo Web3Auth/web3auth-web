@@ -113,11 +113,12 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [config]);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function init() {
       try {
         setInitError(null);
         setIsInitializing(true);
-        await web3Auth.initModal();
+        await web3Auth.initModal({ signal: controller.signal });
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -126,6 +127,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     }
 
     if (web3Auth) init();
+
+    return () => {
+      controller.abort();
+    };
   }, [web3Auth, config]);
 
   useEffect(() => {
@@ -191,6 +196,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
+
+        web3Auth.cleanup();
       }
     };
   }, [web3Auth]);

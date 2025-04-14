@@ -9,6 +9,6 @@ export interface ConnectorsModalConfig {
   hideWalletDiscovery?: boolean;
 }
 export interface IWeb3AuthModal extends IWeb3Auth {
-  initModal(): Promise<void>;
+  initModal(options?: { signal?: AbortSignal }): Promise<void>;
   connect(): Promise<IProvider | null>;
 }
