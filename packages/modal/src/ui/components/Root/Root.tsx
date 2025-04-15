@@ -409,6 +409,7 @@ function Root(props: RootProps) {
                   <Login
                     web3authClientId={modalState.web3authClientId}
                     web3authNetwork={modalState.web3authNetwork}
+                    authBuildEnv={modalState.authBuildEnv}
                     isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
                     appLogo={appLogo}
