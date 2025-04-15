@@ -1,6 +1,5 @@
+import { Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useState } from "react";
-
-import { Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 

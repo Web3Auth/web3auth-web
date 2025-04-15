@@ -1,15 +1,13 @@
-export { useWeb3Auth } from "./useWeb3Auth";
-export { useWeb3AuthConnect } from "./useWeb3AuthConnect";
-export {
-  useCheckout,
-  useEnableMFA,
-  useManageMFA,
-  useSwap,
-  useSwitchChain,
-  useUserToken,
-  useWalletConnectScanner,
-  useWalletServicesPlugin,
-  useWalletUI,
-  useWeb3AuthAccount,
-  useWeb3AuthDisconnect,
-} from "@web3auth/no-modal/react";
+export * from "./useCheckout";
+export * from "./useEnableMFA";
+export * from "./useManageMFA";
+export * from "./useSwap";
+export * from "./useSwitchChain";
+export * from "./useUserToken";
+export * from "./useWalletConnectScanner";
+export * from "./useWalletServicesPlugin";
+export * from "./useWalletUI";
+export * from "./useWeb3Auth";
+export * from "./useWeb3AuthAccount";
+export * from "./useWeb3AuthConnect";
+export * from "./useWeb3AuthDisconnect";

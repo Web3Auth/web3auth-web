@@ -1,7 +1,5 @@
+import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginType } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
-
-import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS } from "@/core/base";
-import { WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
@@ -11,7 +9,7 @@ export interface IUseWalletServicesPlugin {
 }
 
 export const useWalletServicesPlugin = (): IUseWalletServicesPlugin => {
-  const { getPlugin, isAuthenticated, isInitialized } = useWeb3AuthInner();
+  const { isAuthenticated, isInitialized, getPlugin } = useWeb3AuthInner();
   const [isConnected, setIsConnected] = useState(false);
   const [plugin, setPlugin] = useState<WalletServicesPluginType | null>(null);
 
