@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { RootContext } from "../../context/RootContext";
-import { PasswordlessHandler } from "../../handlers/AbstractHandler";
+import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
 import type { ExternalButton, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
@@ -32,6 +32,7 @@ function Login(props: LoginProps) {
   const {
     web3authClientId,
     web3authNetwork,
+    authBuildEnv,
     appLogo,
     isModalVisible,
     handleSocialLoginHeight,
@@ -182,6 +183,7 @@ function Login(props: LoginProps) {
         network: web3authNetwork,
         uiConfig: socialLoginsConfig.uiConfig,
         authConnection,
+        authBuildEnv,
       });
 
       let token = "";

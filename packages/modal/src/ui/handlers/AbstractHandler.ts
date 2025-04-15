@@ -14,7 +14,7 @@ import {
 import { getErrorMessages } from "../utils";
 
 export abstract class PasswordlessHandler {
-  readonly authBaseApiUrl = `${PASSWORDLESS_BUILD_ENV_MAP[BUILD_ENV.TESTING]}/api/v3/auth`;
+  authBaseApiUrl: string;
 
   passwordlessParams: PasswordlessHandlerParams;
 
@@ -25,6 +25,8 @@ export abstract class PasswordlessHandler {
     if (!params.web3authClientId) throw WalletInitializationError.invalidParams("web3authClientId is required");
     if (!params.loginHint) throw WalletInitializationError.invalidParams("loginHint is required");
     if (!params.network) throw WalletInitializationError.invalidParams("network is required");
+    if (!params.authBuildEnv) params.authBuildEnv = BUILD_ENV.PRODUCTION;
+    this.authBaseApiUrl = `${PASSWORDLESS_BUILD_ENV_MAP[params.authBuildEnv]}/api/v3/auth`;
     this.passwordlessParams = params;
   }
 

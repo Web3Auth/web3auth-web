@@ -1,5 +1,6 @@
 import type {
   AUTH_CONNECTION_TYPE,
+  BUILD_ENV_TYPE,
   EMAIL_FLOW_TYPE,
   ExtraLoginOptions,
   LANGUAGES,
@@ -78,6 +79,7 @@ export interface LoginModalProps extends UIConfig {
   walletRegistry: WalletRegistry;
   web3authClientId: string;
   web3authNetwork: WEB3AUTH_NETWORK_TYPE;
+  authBuildEnv: BUILD_ENV_TYPE;
 }
 
 export interface LoginModalCallbacks {
@@ -122,6 +124,7 @@ export interface ModalState {
   currentPage?: string;
   web3authClientId: string;
   web3authNetwork: WEB3AUTH_NETWORK_TYPE;
+  authBuildEnv: BUILD_ENV_TYPE;
 }
 
 export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
@@ -172,6 +175,7 @@ export type PasswordlessHandlerParams = {
   web3authClientId: string;
   loginHint: string;
   network: string;
+  authBuildEnv?: BUILD_ENV_TYPE;
   uiConfig?: Omit<UIConfig, "connectorListener">;
 };
 
