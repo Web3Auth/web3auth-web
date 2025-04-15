@@ -4,13 +4,13 @@ import { Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseDisconnect {
+export interface IUseWeb3AuthDisconnect {
   disconnecting: boolean;
   disconnectingError: Web3AuthError | null;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
 }
 
-export const useDisconnect = (): IUseDisconnect => {
+export const useWeb3AuthDisconnect = (): IUseWeb3AuthDisconnect => {
   const context = useWeb3AuthInner();
   const { web3Auth } = context;
 

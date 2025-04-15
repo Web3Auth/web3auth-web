@@ -4,24 +4,24 @@ import { CONNECTOR_EVENTS, UserInfo, Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseAccount {
-  isLoading: boolean;
+export interface IUseWeb3AuthAccount {
+  loading: boolean;
   error: Web3AuthError | null;
   userInfo: Partial<UserInfo> | null;
   isMFAEnabled: boolean;
   getUserInfo: () => Promise<Partial<UserInfo> | null>;
 }
 
-export const useAccount = (): IUseAccount => {
-  const { web3Auth } = useWeb3AuthInner();
+export const useWeb3AuthAccount = (): IUseWeb3AuthAccount => {
+  const { web3Auth, isAuthenticated } = useWeb3AuthInner();
 
   const [isMFAEnabled, setIsMFAEnabled] = useState(false);
   const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
 
   const getUserInfo = useCallback(async () => {
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     try {
       const userInfo = await web3Auth.getUserInfo();
@@ -30,9 +30,22 @@ export const useAccount = (): IUseAccount => {
     } catch (error) {
       setError(error as Web3AuthError);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, [web3Auth]);
+
+  useEffect(() => {
+    const saveUserInfo = async () => {
+      const userInfo = await getUserInfo();
+      setUserInfo(userInfo);
+    };
+
+    if (isAuthenticated && !userInfo) saveUserInfo();
+
+    if (!isAuthenticated && userInfo) {
+      setUserInfo(null);
+    }
+  }, [isAuthenticated, userInfo, getUserInfo]);
 
   useEffect(() => {
     const mfaEnabledListener = async (isMFAEnabled: boolean) => {
@@ -50,5 +63,5 @@ export const useAccount = (): IUseAccount => {
     };
   }, [web3Auth]);
 
-  return { isLoading, error, userInfo, isMFAEnabled, getUserInfo };
+  return { loading, error, userInfo, isMFAEnabled, getUserInfo };
 };

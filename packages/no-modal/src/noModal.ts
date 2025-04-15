@@ -38,6 +38,8 @@ import {
 import { CommonJRPCProvider } from "@/core/base-provider";
 import { metaMaskConnector } from "@/core/metamask-connector";
 
+import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
+
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
 const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
@@ -419,7 +421,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected async initPlugins(): Promise<void> {
-    const pluginFns = this.coreOptions.plugins || [];
+    const { chains, plugins } = this.coreOptions;
+    const pluginFns = plugins || [];
+    const isWsSupportedChain = chains.some((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+    if (isWsSupportedChain) {
+      pluginFns.push(walletServicesPlugin());
+    }
     for (const pluginFn of pluginFns) {
       const plugin = pluginFn();
       if (!this.plugins[plugin.name]) this.plugins[plugin.name] = plugin;

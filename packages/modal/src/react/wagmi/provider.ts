@@ -15,7 +15,7 @@ import {
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
-import { useWeb3Auth } from "../hooks";
+import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
 import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
@@ -84,13 +84,14 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { status, provider, logout } = useWeb3Auth();
+  const { status, provider } = useWeb3Auth();
+  const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
 
   useAccountEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
-      await logout();
+      await disconnect();
     },
   });
 

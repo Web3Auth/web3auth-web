@@ -1,9 +1,9 @@
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
-import { CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "@/core/base";
+import { CONNECTED_EVENT_DATA, CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "@/core/base";
 
-import { Web3AuthNoModal } from "../../noModal";
-import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "./interfaces";
+import { Web3AuthNoModal } from "../../../noModal";
+import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 
 export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
 
@@ -60,21 +60,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
   }, [web3Auth]);
 
-  useEffect(() => {
-    const addState = async () => {
-      setProvider(web3Auth.provider);
-    };
-
-    const resetState = () => {
-      setProvider(null);
-    };
-
-    if (web3Auth) {
-      if (setIsAuthenticated) addState();
-      else resetState();
-    }
-  }, [web3Auth, setIsAuthenticated]);
-
   // TODO: don't throw error in init, connect in v9
 
   useEffect(() => {
@@ -83,17 +68,19 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
       setIsInitialized(true);
     };
-    const connectedListener = () => {
+    const connectedListener = (data: CONNECTED_EVENT_DATA) => {
       setStatus(web3Auth.status);
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
         setIsAuthenticated(true);
+        setProvider(data.provider);
       }
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsAuthenticated(false);
+      setProvider(null);
     };
 
     const connectingListener = () => {
@@ -132,9 +119,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       isInitialized,
       provider,
       status,
-      getPlugin,
       isInitializing,
       initError,
+      getPlugin,
     };
   }, [web3Auth, isAuthenticated, isInitialized, provider, status, getPlugin, isInitializing, initError]);
 

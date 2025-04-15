@@ -4,14 +4,14 @@ import { IProvider, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
-export interface IUseConnect {
+export interface IUseWeb3AuthConnect {
   connecting: boolean;
   connectingError: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
   connect<T>(connector: WALLET_CONNECTOR_TYPE, params?: T): Promise<IProvider | null>;
 }
 
-export const useConnect = (): IUseConnect => {
+export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
   const context = useWeb3AuthInner();
   const { web3Auth } = context;
 
