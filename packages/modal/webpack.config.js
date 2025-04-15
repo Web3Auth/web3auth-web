@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
+const { EnvironmentPlugin } = require("webpack");
 const generateWebpackConfig = require("../../webpack.config");
 
 const pkg = require("./package.json");
@@ -67,6 +67,7 @@ const config = generateWebpackConfig({
       },
     ],
   },
+  plugins: [new EnvironmentPlugin({ WEB3AUTH_VERSION: pkg.version })],
   ssrModule,
 });
 

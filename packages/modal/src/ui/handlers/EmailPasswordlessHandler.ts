@@ -24,7 +24,7 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
       login_hint: loginHint,
       tracking_id: this.trackingId,
       whitelabel: this.whiteLabelParams,
-      version: "",
+      version: this.version,
       network,
       flow_type: EMAIL_FLOW.code,
       captcha_token: captchaToken,
@@ -42,7 +42,7 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
       code,
       connection: "email",
       tracking_id: this.trackingId as string,
-      version: "",
+      version: this.version,
       network,
       flow_type: EMAIL_FLOW.code,
     };
