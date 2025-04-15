@@ -80,7 +80,7 @@ export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings
   {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
 );
 
-export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust";
+export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust" | "metamask";
 
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Biconomy", value: "biconomy" },
@@ -88,6 +88,7 @@ export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = 
   { name: "Nexus", value: "nexus" },
   { name: "Kernel", value: "kernel" },
   { name: "Trust", value: "trust" },
+  { name: "Metamask", value: "metamask" },
   // { name: "Light", value: "light" },
   // { name: "Simple", value: "simple" },
 ];
