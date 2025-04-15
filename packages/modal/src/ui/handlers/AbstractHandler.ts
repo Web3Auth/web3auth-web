@@ -120,7 +120,7 @@ export abstract class PasswordlessHandler {
     };
   }
 
-  abstract sendVerificationCode(params?: { captchaToken: string }): Promise<IStartResponse>;
+  abstract sendVerificationCode(params: { captchaToken: string }): Promise<IStartResponse>;
 
   abstract verifyCode(code: string): Promise<IVerifyResponse>;
 }
