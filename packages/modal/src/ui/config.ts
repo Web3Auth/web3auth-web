@@ -23,7 +23,8 @@ export const AUTH_PROVIDERS_NAMES = AUTH_PROVIDERS.reduce(
 );
 
 export const PASSWORDLESS_BUILD_ENV_MAP: Record<BUILD_ENV_TYPE, string> = {
-  [BUILD_ENV.DEVELOPMENT]: "http://localhost:3041/passwordless-service",
+  // [BUILD_ENV.DEVELOPMENT]: "http://localhost:3041/passwordless-service",
+  [BUILD_ENV.DEVELOPMENT]: "https://api-develop.web3auth.io/passwordless-service",
   [BUILD_ENV.STAGING]: "https://api.web3auth.io/passwordless-service",
   [BUILD_ENV.PRODUCTION]: "https://api.web3auth.io/passwordless-service",
   [BUILD_ENV.TESTING]: "https://api-develop.web3auth.io/passwordless-service",
