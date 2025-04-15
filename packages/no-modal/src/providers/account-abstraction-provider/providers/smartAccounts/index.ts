@@ -4,6 +4,8 @@ export {
   type ISmartAccount,
   KernelSmartAccount,
   type KernelSmartAccountConfig,
+  MetamaskSmartAccount,
+  type MetamaskSmartAccountConfig,
   NexusSmartAccount,
   type NexusSmartAccountConfig,
   SafeSmartAccount,

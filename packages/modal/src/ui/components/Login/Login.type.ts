@@ -1,4 +1,4 @@
-import { WEB3AUTH_NETWORK_TYPE } from "@web3auth/no-modal";
+import { BUILD_ENV_TYPE, WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 
 import type {
   ButtonRadiusType,
@@ -12,6 +12,7 @@ import type {
 export interface LoginProps {
   web3authClientId: string;
   web3authNetwork: WEB3AUTH_NETWORK_TYPE;
+  authBuildEnv: BUILD_ENV_TYPE;
   isModalVisible: boolean;
   isDark: boolean;
   appLogo?: string;

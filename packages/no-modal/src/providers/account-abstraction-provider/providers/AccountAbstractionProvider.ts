@@ -4,6 +4,8 @@ import {
   type BundlerConfig,
   type ISmartAccount,
   type KernelSmartAccountConfig,
+  type MetamaskSmartAccountConfig,
+  METHOD_TYPES,
   type NexusSmartAccountConfig,
   type PaymasterConfig,
   type SafeSmartAccountConfig,
@@ -11,7 +13,7 @@ import {
   type TrustSmartAccountConfig,
 } from "@toruslabs/ethereum-controllers";
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
-import { type Client, createPublicClient, defineChain, EIP1193Provider, http } from "viem";
+import { type Client, createPublicClient, createWalletClient, custom, defineChain, Hex, http } from "viem";
 import { type BundlerClient, createBundlerClient, createPaymasterClient, type PaymasterClient, type SmartAccount } from "viem/account-abstraction";
 
 import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "@/core/base";
@@ -112,8 +114,14 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       chain,
       transport: http(currentChain.rpcTarget),
     }) as Client;
+    const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS })) as [string];
+    const walletClient = createWalletClient({
+      account: eoaAddress as Hex,
+      chain,
+      transport: custom(eoaProvider),
+    });
     this._smartAccount = await this.config.smartAccountInit.getSmartAccount({
-      owner: eoaProvider as EIP1193Provider,
+      walletClient,
       client: this._publicClient,
     });
 
@@ -212,6 +220,11 @@ export const accountAbstractionProvider = async ({
     case SMART_ACCOUNT.TRUST: {
       const { TrustSmartAccount } = await import("@toruslabs/ethereum-controllers");
       smartAccountInit = new TrustSmartAccount(smartAccountConfig as TrustSmartAccountConfig);
+      break;
+    }
+    case SMART_ACCOUNT.METAMASK: {
+      const { MetamaskSmartAccount } = await import("@toruslabs/ethereum-controllers");
+      smartAccountInit = new MetamaskSmartAccount(smartAccountConfig as MetamaskSmartAccountConfig);
       break;
     }
     default:

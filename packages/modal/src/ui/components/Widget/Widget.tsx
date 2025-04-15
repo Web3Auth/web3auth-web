@@ -1,4 +1,4 @@
-import { AUTH_CONNECTION, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { AUTH_CONNECTION, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
@@ -50,6 +50,7 @@ function Widget(props: WidgetProps) {
     detailedLoaderConnectorName: "",
     web3authClientId: "",
     web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+    authBuildEnv: BUILD_ENV.PRODUCTION,
   });
 
   useEffect(() => {

@@ -204,6 +204,7 @@ export class LoginModal {
           status: MODAL_STATUS.INITIALIZED,
           web3authClientId: this.uiConfig.web3authClientId,
           web3authNetwork: this.uiConfig.web3authNetwork,
+          authBuildEnv: this.uiConfig.authBuildEnv,
         });
         return resolve();
       });

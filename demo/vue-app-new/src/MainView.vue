@@ -19,7 +19,7 @@ import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vu
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
+import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -27,6 +27,8 @@ import { clientIds, NFT_CHECKOUT_CLIENT_ID } from "./config";
 import { FormConfigSettings } from "./interfaces";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
+import { SmartAccountType } from "@toruslabs/ethereum-controllers";
+import { Implementation } from "@metamask/delegation-toolkit";
 
 const formData = formDataStore;
 
@@ -54,7 +56,7 @@ const options = computed((): Web3AuthOptions => {
       }
     });
     accountAbstractionConfig = {
-      smartAccountType: formData.smartAccountType as string,
+      smartAccountType: formData.smartAccountType as SmartAccountType,
       chains,
     };
   }

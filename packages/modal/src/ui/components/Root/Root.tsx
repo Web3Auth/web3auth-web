@@ -114,7 +114,7 @@ function Root(props: RootProps) {
             <button
               type="button"
               className={cn(
-                "w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+                "w3a--group w3a--relative w3a--overflow-hidden w3a--h-11 w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
                 {
                   "w3a--rounded-full": buttonRadiusType === "pill",
                   "w3a--rounded-lg": buttonRadiusType === "rounded",
@@ -135,8 +135,9 @@ function Root(props: RootProps) {
                 {t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}
               </span>
               <img
-                id="device-link-arrow"
-                className="w3a--icon-animation w3a--ml-auto"
+                id="install-links-arrow"
+                className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
                 src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                 alt="arrow"
               />
@@ -165,7 +166,7 @@ function Root(props: RootProps) {
           <button
             type="button"
             className={cn(
-              "w3a--link-arrow w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+              "w3a--group w3a--relative w3a--overflow-hidden w3a--h-11 w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
               {
                 "w3a--rounded-full": buttonRadiusType === "pill",
                 "w3a--rounded-lg": buttonRadiusType === "rounded",
@@ -186,8 +187,9 @@ function Root(props: RootProps) {
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}
             </span>
             <img
-              id="device-link-arrow"
-              className="w3a--icon-animation w3a--ml-auto"
+              id="install-links-arrow"
+              className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
               src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
               alt="arrow"
             />
@@ -407,6 +409,7 @@ function Root(props: RootProps) {
                   <Login
                     web3authClientId={modalState.web3authClientId}
                     web3authNetwork={modalState.web3authNetwork}
+                    authBuildEnv={modalState.authBuildEnv}
                     isModalVisible={modalState.modalVisibility}
                     isDark={isDark}
                     appLogo={appLogo}

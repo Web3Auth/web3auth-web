@@ -58,7 +58,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const allUniqueButtons = useMemo(() => {
     const uniqueButtonSet = new Set();
-    return allExternalButtons.concat(customConnectorButtons).filter((button) => {
+    return customConnectorButtons.concat(allExternalButtons).filter((button) => {
       if (uniqueButtonSet.has(button.name)) return false;
       uniqueButtonSet.add(button.name);
       return true;
@@ -113,7 +113,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
-      return allUniqueButtons
+      return [...allUniqueButtons.filter((button) => button.hasInjectedWallet), ...allUniqueButtons.filter((button) => !button.hasInjectedWallet)]
         .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
         .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }

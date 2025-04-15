@@ -61,7 +61,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     return (
       <button
         type="button"
-        className={cn("w3a--btn !w3a--justify-between", {
+        className={cn("w3a--btn !w3a--justify-between w3a--relative w3a--group w3a--overflow-hidden", {
           "w3a--rounded-full": buttonRadius === "pill",
           "w3a--rounded-lg": buttonRadius === "rounded",
           "w3a--rounded-none": buttonRadius === "square",
@@ -71,6 +71,13 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
         }}
       >
         <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.passwordless.title", { title })}</p>
+        <img
+          id="passwordless-arrow"
+          className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
+          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+          src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
+          alt="arrow"
+        />
       </button>
     );
   }
@@ -105,7 +112,7 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
         />
         {isPasswordLessLoading && <PulseLoader />}
         {inputValue && !isPasswordLessLoading && (
-          <button type="button" className="w3a--icon-animation w3a--appearance-none" onClick={onFormSubmit}>
+          <button type="button" className="w3a--appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}

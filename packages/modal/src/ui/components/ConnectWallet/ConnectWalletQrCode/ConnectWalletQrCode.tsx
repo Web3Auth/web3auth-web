@@ -70,7 +70,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
         </p>
         <button
           type="button"
-          className="w3a--appearance-none w3a--rounded-full w3a--border w3a--border-app-gray-400 w3a--px-3 w3a--py-2 w3a--text-sm w3a--font-medium w3a--text-app-gray-400 hover:w3a--bg-app-white hover:w3a--shadow-2xl dark:w3a--border-app-gray-300 dark:w3a--text-app-gray-300 dark:hover:w3a--bg-app-gray-700"
+          className="w3a--appearance-none w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-transparent w3a--px-5 w3a--py-2 w3a--text-base w3a--font-normal w3a--text-app-gray-700 w3a--transition-all w3a--duration-150 hover:w3a--border-transparent hover:w3a--shadow-light active:w3a--scale-95 dark:w3a--border-app-gray-700 dark:w3a--text-app-gray-300 dark:hover:w3a--border-transparent dark:hover:w3a--shadow-dark"
           onClick={() => {
             setBodyState({
               ...bodyState,
