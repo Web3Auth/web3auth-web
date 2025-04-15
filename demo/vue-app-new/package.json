@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
-    "@toruslabs/base-controllers": "^8.3.1",
+    "@toruslabs/base-controllers": "^8.3.3",
     "@toruslabs/bs58": "^1.0.0",
     "@toruslabs/ethereum-controllers": "^8.3.4",
-    "@toruslabs/solana-controllers": "^8.1.0",
+    "@toruslabs/solana-controllers": "^8.3.3",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@toruslabs/vue-components": "^8.0.6",
     "@toruslabs/vue-icons": "^8.0.2",
@@ -38,7 +38,7 @@
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.8.3",
-    "vite": "^6.2.5",
+    "vite": "^6.2.6",
     "vue-tsc": "^2.2.8"
   },
   "optionalDependencies": {
