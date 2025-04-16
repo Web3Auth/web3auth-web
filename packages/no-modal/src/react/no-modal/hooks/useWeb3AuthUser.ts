@@ -13,7 +13,7 @@ export interface IUseWeb3AuthUser {
 }
 
 export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
-  const { web3Auth, isConnected, isMFAEnabled } = useWeb3AuthInner();
+  const { web3Auth, isConnected, isMFAEnabled, setIsMFAEnabled } = useWeb3AuthInner();
 
   const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,14 +37,16 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
     const saveUserInfo = async () => {
       const userInfo = await getUserInfo();
       setUserInfo(userInfo);
+      setIsMFAEnabled(userInfo?.isMfaEnabled || false);
     };
 
     if (isConnected && !userInfo) saveUserInfo();
 
     if (!isConnected && userInfo) {
       setUserInfo(null);
+      setIsMFAEnabled(false);
     }
-  }, [isConnected, userInfo, getUserInfo]);
+  }, [isConnected, userInfo, getUserInfo, setIsMFAEnabled]);
 
   return { loading, error, userInfo, isMFAEnabled, getUserInfo };
 };

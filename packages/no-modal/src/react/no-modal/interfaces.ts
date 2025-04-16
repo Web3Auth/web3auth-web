@@ -1,4 +1,4 @@
-import type { ConnectorFn, IBaseWalletServicesHookContext, IBaseWeb3AuthHookContext, IWeb3AuthCoreOptions, PluginFn } from "@/core/base";
+import type { ConnectorFn, IBaseWeb3AuthHookContext, IWeb3AuthCoreOptions, PluginFn } from "@/core/base";
 import type { WalletServicesPluginType } from "@/core/wallet-services-plugin";
 
 import { Web3AuthNoModal } from "../../noModal";
@@ -17,7 +17,9 @@ export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
   web3Auth: Web3AuthNoModal | null;
 }
 
-export interface IWalletServicesContext extends IBaseWalletServicesHookContext {
+export interface IWalletServicesContext {
+  ready: boolean;
+  connecting: boolean;
   plugin: WalletServicesPluginType | null;
 }
 

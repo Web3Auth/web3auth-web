@@ -1,7 +1,6 @@
 export const MULTI_CHAIN_CONNECTORS = {
   AUTH: "auth",
   WALLET_CONNECT_V2: "wallet-connect-v2",
-  SFA: "sfa",
 } as const;
 
 export const SOLANA_CONNECTORS = {
@@ -27,7 +26,6 @@ export type MULTI_CHAIN_CONNECTOR_TYPE = (typeof MULTI_CHAIN_CONNECTORS)[keyof t
 export const CONNECTOR_NAMES = {
   [MULTI_CHAIN_CONNECTORS.AUTH]: "Auth",
   [MULTI_CHAIN_CONNECTORS.WALLET_CONNECT_V2]: "Wallet Connect v2",
-  [MULTI_CHAIN_CONNECTORS.SFA]: "SFA",
   [EVM_CONNECTORS.COINBASE]: "Coinbase Smart Wallet",
   [EVM_CONNECTORS.METAMASK]: "MetaMask",
 };

@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { IProvider, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@/core/base";
+import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {
   isConnected: boolean;
-  connecting: boolean;
-  connectingError: Web3AuthError | null;
+  loading: boolean;
+  error: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
-  connect<T>(connector: WALLET_CONNECTOR_TYPE, params?: T): Promise<IProvider | null>;
+  connect<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<IProvider | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
   const context = useWeb3AuthInner();
   const { web3Auth, isConnected } = context;
 
-  const [connecting, setConnecting] = useState(false);
-  const [connectingError, setConnectingError] = useState<Web3AuthError | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Web3AuthError | null>(null);
   const [connectorName, setConnectorName] = useState<WALLET_CONNECTOR_TYPE | null>(null);
 
   useEffect(() => {
@@ -27,17 +27,17 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
   }, [isConnected, connectorName]);
 
   const connect = useCallback(
-    async <T>(connector: WALLET_CONNECTOR_TYPE, params?: T) => {
-      setConnecting(true);
-      setConnectingError(null);
+    async <T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]) => {
+      setLoading(true);
+      setError(null);
       setConnectorName(connector);
       try {
-        const provider = await web3Auth.connectTo<T>(connector, params);
+        const provider = await web3Auth.connectTo(connector, params);
         return provider;
       } catch (error) {
-        setConnectingError(error as Web3AuthError);
+        setError(error as Web3AuthError);
       } finally {
-        setConnecting(false);
+        setLoading(false);
       }
     },
     [web3Auth]
@@ -45,9 +45,9 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
 
   return {
     isConnected,
-    connecting,
+    loading,
+    error,
     connectorName,
-    connectingError,
     connect,
   };
 };

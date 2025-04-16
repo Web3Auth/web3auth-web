@@ -36,6 +36,7 @@ import {
   IProvider,
   log,
   UserInfo,
+  WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
@@ -50,7 +51,7 @@ export type AuthLoginParams = LoginParams & {
 };
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
-  readonly name: string = WALLET_CONNECTORS.AUTH;
+  readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
 
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 

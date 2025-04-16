@@ -2,6 +2,7 @@ import { MetaMaskSDK, type MetaMaskSDKOptions } from "@metamask/sdk";
 import deepmerge from "deepmerge";
 
 import {
+  BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
@@ -19,6 +20,7 @@ import {
   type CustomChainConfig,
   type IProvider,
   type UserInfo,
+  WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
@@ -38,7 +40,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
-  readonly name: string = WALLET_CONNECTORS.METAMASK;
+  readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.METAMASK;
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
@@ -93,7 +95,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
+  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);

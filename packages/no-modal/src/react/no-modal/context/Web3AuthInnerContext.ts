@@ -129,8 +129,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       initError,
       isMFAEnabled,
       getPlugin,
+      setIsMFAEnabled,
     };
-  }, [web3Auth, isConnected, isInitialized, provider, status, getPlugin, isInitializing, initError, isMFAEnabled]);
+  }, [web3Auth, isConnected, isInitialized, provider, status, getPlugin, isInitializing, initError, isMFAEnabled, setIsMFAEnabled]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);
 }

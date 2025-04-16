@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
-import { authConnector, AuthLoginParams } from "@/core/auth-connector";
+import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -20,6 +20,7 @@ import {
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
+  LoginParamMap,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   ProjectConfig,
@@ -43,14 +44,6 @@ import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
 const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
-
-export type LoginParamMap = {
-  [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams>;
-  [WALLET_CONNECTORS.METAMASK]: Partial<UserInfo>;
-  [WALLET_CONNECTORS.COINBASE]: Partial<UserInfo>;
-  [WALLET_CONNECTORS.WALLET_CONNECT_V2]: Partial<UserInfo>;
-  [WALLET_CONNECTORS.SFA]: Partial<UserInfo>;
-};
 
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
@@ -221,7 +214,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.connectedConnector.disconnect(options);
-    this.connectTo(WALLET_CONNECTORS.METAMASK, {});
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -511,7 +503,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.debug("disconnected", this.status, this.connectedConnectorName);
       await Promise.all(
         Object.values(this.plugins).map(async (plugin) => {
-          if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(connector.name)) return;
+          if (!plugin.SUPPORTED_CONNECTORS.includes(connector.name as WALLET_CONNECTOR_TYPE)) return;
           if (plugin.status !== PLUGIN_STATUS.CONNECTED) return;
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if connector doesn't supports this plugin.
@@ -599,7 +591,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     Object.values(this.plugins).map(async (plugin) => {
       try {
         // skip if it's not compatible with the connector
-        if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
+        if (!plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
         // skip if it's not compatible with the current chain
         if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain?.chainNamespace) return;
         // skip if it's already connected

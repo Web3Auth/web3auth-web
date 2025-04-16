@@ -19,6 +19,7 @@ import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
 import type { ProjectConfig } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
+import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
 export type UserInfo = AuthUserInfo;
@@ -66,7 +67,7 @@ export interface IBaseProvider<T> extends IProvider {
 export interface IConnector<T> extends SafeEventEmitter {
   connectorNamespace: ConnectorNamespaceType;
   type: CONNECTOR_CATEGORY_TYPE;
-  name: string;
+  name: WALLET_CONNECTOR_TYPE | string;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   connectorData?: unknown;
@@ -89,9 +90,13 @@ export type ConnectorParams = {
   coreOptions: IWeb3AuthCoreOptions;
 };
 
+export type BaseConnectorLoginParams = {
+  chainId: string;
+};
+
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
-export type CONNECTED_EVENT_DATA = { connector: string; provider: IProvider; reconnected: boolean };
+export type CONNECTED_EVENT_DATA = { connector: WALLET_CONNECTOR_TYPE; provider: IProvider; reconnected: boolean };
 
 export interface IConnectorDataEvent {
   connectorName: string;

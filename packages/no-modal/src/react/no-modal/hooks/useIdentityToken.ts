@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Web3AuthError } from "@/core/base";
 
@@ -12,7 +12,7 @@ export interface IUseIdentityToken {
 }
 
 export const useIdentityToken = () => {
-  const { web3Auth } = useWeb3AuthInner();
+  const { web3Auth, isConnected } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
@@ -33,6 +33,12 @@ export const useIdentityToken = () => {
       setLoading(false);
     }
   }, [web3Auth]);
+
+  useEffect(() => {
+    if (!isConnected && token) {
+      setToken(null);
+    }
+  }, [isConnected, token]);
 
   return { loading, error, token, authenticateUser };
 };
