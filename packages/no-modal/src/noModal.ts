@@ -282,6 +282,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // if AA is enabled, filter out chains that are not AA-supported
     if (this.coreOptions.accountAbstractionConfig) {
       // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
+      if (this.coreOptions.accountAbstractionConfig.chains.length === 0) {
+        log.error("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
+        throw WalletInitializationError.invalidParams("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
+      }
       for (const chain of this.coreOptions.accountAbstractionConfig.chains) {
         if (!isHexStrict(chain.chainId)) {
           log.error(`Please provide a valid chainId in accountAbstractionConfig.chains for chain ${chain.chainId}`);
